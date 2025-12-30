@@ -7,6 +7,34 @@ Spring Boot application with Java 17, featuring Web, Validation, and Actuator ca
 - Java 17
 - Maven 3.6+
 
+## Quick Setup
+
+### Option 1: Set JAVA_HOME (Recommended)
+
+**Windows (PowerShell):**
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+mvn clean install
+```
+
+**Linux/Mac:**
+```bash
+export JAVA_HOME=/path/to/jdk-17
+mvn clean install
+```
+
+### Option 2: Use Helper Script (Windows Only)
+
+```cmd
+mvn-java17.cmd clean install
+```
+
+The `mvn-java17.cmd` script automatically sets JAVA_HOME to Java 17 before running Maven.
+
+### Option 3: Maven Toolchains
+
+Copy `toolchains.xml` to `~/.m2/toolchains.xml` (or `%USERPROFILE%\.m2\toolchains.xml` on Windows) and modify the Java path if needed. Note: You still need to set JAVA_HOME for Maven to run.
+
 ## Tech Stack
 
 - Spring Boot 3.2.1
