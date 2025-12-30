@@ -1,0 +1,27 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://test-db-host:5432/testdb
+    username: test_user
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+server:
+  port: 8080
+
+logging:
+  level:
+    root: INFO
+    com.example.backend: INFO
+
+management:
+  endpoint:
+    health:
+      show-details: when-authorized
