@@ -1,0 +1,63 @@
+# Auto detect text files and perform LF normalization
+* text=auto
+
+# Source code
+*.java text diff=java
+*.js text
+*.jsx text
+*.ts text
+*.tsx text
+*.json text
+*.xml text
+*.gradle text
+*.properties text
+*.yml text
+*.yaml text
+
+# Documentation
+*.md text
+*.txt text
+*.adoc text
+README text
+LICENSE text
+AUTHORS text
+CHANGELOG text
+
+# Scripts
+*.sh text eol=lf
+*.bash text eol=lf
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Configuration files
+.editorconfig text
+.gitignore text
+.gitattributes text
+
+# Graphics
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Archives
+*.jar binary
+*.war binary
+*.ear binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+*.rar binary
+
+# Fonts
+*.ttf binary
+*.eot binary
+*.woff binary
+*.woff2 binary
+
+# Other
+*.pdf binary
