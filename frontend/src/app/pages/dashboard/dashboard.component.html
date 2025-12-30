@@ -3,6 +3,29 @@
     <h2 class="page-title">Dashboard</h2>
   </div>
   <div class="page-content">
-    <p>Welcome to the Dashboard page. This is a placeholder that will be implemented later.</p>
+    <div class="api-status-container">
+      <h3>API Connection Status</h3>
+      <div class="status-card" [ngClass]="{
+        'status-checking': apiStatus === 'checking',
+        'status-connected': apiStatus === 'connected',
+        'status-disconnected': apiStatus === 'disconnected'
+      }">
+        <div class="status-indicator">
+          <span class="status-icon">{{apiStatus === 'connected' ? '✓' : apiStatus === 'disconnected' ? '✗' : '⟳'}}</span>
+          <span class="status-text">
+            {{apiStatus === 'connected' ? 'Connected' : apiStatus === 'disconnected' ? 'Disconnected' : 'Checking...'}}
+          </span>
+        </div>
+        <div class="status-details" *ngIf="lastChecked">
+          <p>Last checked: {{lastChecked | date:'short'}}</p>
+        </div>
+        <div class="status-error" *ngIf="errorMessage">
+          <p class="error-message">{{errorMessage}}</p>
+        </div>
+        <button class="refresh-button" (click)="checkApiConnection()" [disabled]="apiStatus === 'checking'">
+          Refresh
+        </button>
+      </div>
+    </div>
   </div>
 </div>
