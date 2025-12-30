@@ -31,6 +31,14 @@ mvn-java17.cmd clean install
 
 The `mvn-java17.cmd` script automatically sets JAVA_HOME to Java 17 before running Maven.
 
+**Note:** If you have proxy issues with your global Maven settings, use the local settings file:
+
+```cmd
+mvn-java17.cmd -s settings.xml clean install
+```
+
+This uses a minimal `settings.xml` that connects directly to Maven Central without proxies.
+
 ### Option 3: Maven Toolchains
 
 Copy `toolchains.xml` to `~/.m2/toolchains.xml` (or `%USERPROFILE%\.m2\toolchains.xml` on Windows) and modify the Java path if needed. Note: You still need to set JAVA_HOME for Maven to run.
