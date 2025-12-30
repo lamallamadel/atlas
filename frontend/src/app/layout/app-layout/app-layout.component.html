@@ -1,0 +1,39 @@
+<div class="app-layout">
+  <header class="header">
+    <div class="header-content">
+      <button class="menu-toggle" (click)="toggleMenu()">
+        <span class="menu-icon"></span>
+      </button>
+      <h1 class="app-title">Application</h1>
+    </div>
+  </header>
+
+  <div class="layout-container">
+    <nav class="sidebar" [class.open]="menuOpen">
+      <ul class="nav-menu">
+        <li class="nav-item">
+          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">📊</span>
+            <span class="nav-text">Dashboard</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/annonces" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">📢</span>
+            <span class="nav-text">Annonces</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a routerLink="/dossiers" routerLinkActive="active" class="nav-link">
+            <span class="nav-icon">📁</span>
+            <span class="nav-text">Dossiers</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

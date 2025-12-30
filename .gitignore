@@ -115,3 +115,7 @@ obj/
 .vuepress/dist
 .serverless/
 .fusebox/
+
+# Angular
+.angular/
+*.tsbuildinfo
