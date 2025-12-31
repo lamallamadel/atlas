@@ -80,6 +80,7 @@ Desktop.ini
 # Logs and databases
 *.log
 *.sql
+!**/db/migration/*.sql
 *.sqlite
 *.db
 
