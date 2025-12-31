@@ -9,9 +9,9 @@ import { PingService } from '../../services/ping.service';
 export class DashboardComponent implements OnInit {
   apiStatus: 'checking' | 'connected' | 'disconnected' = 'checking';
   lastChecked: Date | null = null;
-  errorMessage: string = '';
+  errorMessage = '';
 
-  constructor(private pingService: PingService) {}
+  constructor(private pingService: PingService) { }
 
   ngOnInit(): void {
     this.checkApiConnection();
@@ -20,7 +20,7 @@ export class DashboardComponent implements OnInit {
   checkApiConnection(): void {
     this.apiStatus = 'checking';
     this.errorMessage = '';
-    
+
     this.pingService.ping().subscribe({
       next: (response) => {
         this.apiStatus = 'connected';
@@ -29,8 +29,8 @@ export class DashboardComponent implements OnInit {
       error: (error) => {
         this.apiStatus = 'disconnected';
         this.lastChecked = new Date();
-        this.errorMessage = error.status ? 
-          `HTTP ${error.status}: ${error.statusText}` : 
+        this.errorMessage = error.status ?
+          `HTTP ${error.status}: ${error.statusText}` :
           'Unable to reach the API server';
       }
     });
