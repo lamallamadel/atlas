@@ -1,104 +1,157 @@
-# Initial Setup Complete
+# Initial Repository Setup - Complete
 
-## ✅ Successfully Completed
+## Setup Summary
 
-### Frontend (Angular)
-- **Status:** ✅ READY
-- **Command executed:** `npm install` in `frontend/` directory  
-- **Result:** 996 packages installed successfully
-- **You can now run:**
-  - `npm run build` - Build the frontend for production
-  - `npm test` - Run frontend tests
-  - `npm start` - Start development server (http://localhost:4200)
+This repository has been prepared for development. The frontend is fully set up and ready to use. The backend requires a one-time manual setup step due to Java version requirements.
 
-## ⚠️ Backend Requires Manual Setup
+---
 
-### Why Manual Setup is Needed
-The backend requires Java 17, but automated environment variable setting was blocked by security restrictions. The current environment has:
-- **Current JAVA_HOME:** `C:\Environement\Java\jdk1.8.0_202` (Java 8)
-- **Required JAVA_HOME:** `C:\Environement\Java\jdk-17.0.5.8-hotspot` (Java 17)
+## ✅ Completed Setup
 
-### Quick Setup Options
+### 1. Frontend (Angular) - READY ✓
 
-Choose ONE of these options to complete the backend setup:
+```
+Location: frontend/
+Status:   Fully configured
+Packages: 996 packages installed
+```
 
-#### Option 1: Run the Setup Script (Easiest)
-Open a new PowerShell window and run:
+The Angular frontend has been successfully set up with all dependencies installed.
+
+**You can immediately run:**
 ```powershell
-cd C:\Users\a891780\AppData\Roaming\Tonkotsu\tasks\Atlasia_oa6xzZyzT27EJC8K5kOM0\backend
+cd frontend
+npm start                 # Dev server at http://localhost:4200
+npm run build            # Production build
+npm test                 # Run tests
+```
+
+---
+
+## ⚠️ One-Time Manual Setup Required
+
+### 2. Backend (Spring Boot) - Requires Action
+
+**Why manual setup is needed:**  
+This project requires Java 17, but the current environment has Java 8 active. Automated environment variable changes are restricted for security reasons.
+
+**What you need to do:**  
+Run ONE of the following commands in a **NEW terminal window**:
+
+#### **Option A: PowerShell (Quickest)**
+```powershell
+cd "C:\Users\a891780\AppData\Roaming\Tonkotsu\tasks\Atlasia_1VItjydF1s-ENs7UpEI6t\backend"
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+mvn clean install -DskipTests
+```
+
+#### **Option B: Use Helper Script**
+```powershell
+cd "C:\Users\a891780\AppData\Roaming\Tonkotsu\tasks\Atlasia_1VItjydF1s-ENs7UpEI6t\backend"
 .\run-maven.ps1
 ```
 
-#### Option 2: Use Command Prompt
-Open a new Command Prompt window and run:
+#### **Option C: Command Prompt**
 ```cmd
-cd C:\Users\a891780\AppData\Roaming\Tonkotsu\tasks\Atlasia_oa6xzZyzT27EJC8K5kOM0\backend
+cd "C:\Users\a891780\AppData\Roaming\Tonkotsu\tasks\Atlasia_1VItjydF1s-ENs7UpEI6t\backend"
 setup.cmd
 ```
 
-#### Option 3: Manual Commands
-Open a new PowerShell window and run:
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-cd C:\Users\a891780\AppData\Roaming\Tonkotsu\tasks\Atlasia_oa6xzZyzT27EJC8K5kOM0\backend
-mvn clean install
-```
-
-### After Backend Setup
-Once you complete the backend setup, you'll be able to run:
-- `mvn clean package` - Build the backend
-- `mvn test` - Run backend tests  
-- `mvn spring-boot:run` - Start the dev server (http://localhost:8080)
-
-## Helper Scripts Created
-
-The following helper scripts are available in the `backend/` directory:
-- `run-maven.ps1` - PowerShell script to set Java 17 and run Maven
-- `setup.cmd` - Batch script to set Java 17 and run Maven install
-- `mvn-java17.cmd` - Wrapper to run any Maven command with Java 17
-  - Usage: `mvn-java17.cmd clean install`
-  - Usage: `mvn-java17.cmd test`
-  - Usage: `mvn-java17.cmd spring-boot:run`
-
-## Verification Commands
-
-### Check Frontend Setup
-```powershell
-cd frontend
-npm run build
-```
-
-### Check Backend Setup (after manual setup)
+**After setup completes:**
 ```powershell
 cd backend
-mvn --version  # Should show Java 17
-mvn test
+mvn test                 # Run tests
+mvn spring-boot:run     # Dev server at http://localhost:8080
 ```
 
-## Infrastructure (Optional)
+---
 
-To start the Docker infrastructure (PostgreSQL):
+## 📁 Project Structure
+
+```
+/
+├── frontend/          ✅ Ready - Angular app with all dependencies
+├── backend/           ⚠️  Needs manual Maven install
+├── infra/            ⏳ Optional - Docker infrastructure
+├── dev.ps1           🚀 Development stack manager
+└── Makefile          🛠️ Build commands (Linux/Mac)
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### After Backend Setup
+
+Once you complete the backend Maven install:
+
 ```powershell
-cd infra
-docker-compose up -d
+# Start the full development stack
+.\dev.ps1 up
+
+# Or start services individually:
+cd frontend && npm start          # Frontend: http://localhost:4200
+cd backend && mvn spring-boot:run # Backend:  http://localhost:8080
+cd infra && docker-compose up -d  # Database (PostgreSQL)
 ```
 
-## Summary
+---
 
-| Component | Status | Action Required |
-|-----------|--------|----------------|
-| Frontend | ✅ Complete | None - ready to use |
-| Backend | ⚠️ Needs Setup | Run one of the setup scripts above |
-| Infrastructure | ⏳ Optional | Start Docker when needed |
+## 🔧 Helper Scripts Available
 
-## Next Steps
+All these scripts are ready to use in the `backend/` directory:
 
-1. Complete backend setup using one of the options above
-2. Verify both frontend and backend work
-3. Start infrastructure if database access is needed
-4. Begin development!
+| Script | Purpose |
+|--------|---------|
+| `run-maven.ps1` | Run Maven with Java 17 (PowerShell) |
+| `setup.cmd` | Install backend (Command Prompt) |
+| `mvn-java17.cmd` | Run any Maven command with Java 17 |
+| `install-backend.js` | Node.js-based installer |
 
-For detailed documentation, see:
-- [AGENTS.md](./AGENTS.md) - Developer guide and commands
-- [SETUP.md](./SETUP.md) - Detailed setup instructions
-- [README.md](./README.md) - Project overview
+---
+
+## 📚 Additional Information
+
+### Build Commands
+
+```powershell
+# Backend (after setup)
+cd backend
+mvn clean package        # Build
+mvn test                 # Test
+mvn spring-boot:run      # Run
+
+# Frontend (ready now)
+cd frontend
+npm run build            # Build
+npm test                 # Test  
+npm start                # Run
+```
+
+### Documentation Files
+
+- **[AGENTS.md](./AGENTS.md)** - Complete developer guide
+- **[SETUP.md](./SETUP.md)** - Detailed setup instructions
+- **[SETUP_STATUS.md](./SETUP_STATUS.md)** - Detailed setup status
+- **[README.md](./README.md)** - Project overview
+
+---
+
+## ✓ What's Ready
+
+- ✅ Frontend dependencies installed and ready
+- ✅ Helper scripts created for backend setup
+- ✅ Development scripts (dev.ps1, Makefile) available
+- ✅ All configuration files in place
+- ✅ .gitignore properly configured
+
+## ⏭️ Next Step
+
+**Complete the backend setup** by running one of the commands in the "One-Time Manual Setup Required" section above.
+
+This only needs to be done once per environment. After that, all build, lint, and test commands will work normally.
+
+---
+
+*Setup completed on: 2025-12-31*  
+*Project: Spring Boot + Angular Full Stack Application*
