@@ -31,7 +31,7 @@ class OpenApiWiringTest {
 
     @Test
     void apiDocsReturnsValidJsonWithOpenApiSchema() {
-        String url = "http://localhost:" + port + "/v3/api-docs";
+        String url = "http://localhost:" + port + "/api-docs";
         ResponseEntity<Map> response = restTemplate.getForEntity(url, Map.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
