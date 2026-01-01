@@ -98,6 +98,10 @@ export class AnnoncesComponent implements OnInit {
     this.router.navigate(['/annonces/new']);
   }
 
+  editAnnonce(id: number): void {
+    this.router.navigate(['/annonces', id, 'edit']);
+  }
+
   getStatusBadgeClass(status: AnnonceStatus): string {
     switch (status) {
       case AnnonceStatus.PUBLISHED:

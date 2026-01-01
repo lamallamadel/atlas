@@ -1,0 +1,128 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2 class="page-title">{{ isEditMode ? 'Edit Annonce' : 'Create New Annonce' }}</h2>
+  </div>
+
+  <div class="page-content">
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading annonce...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-alert">
+      <span class="error-icon">⚠</span>
+      <span>{{ error }}</span>
+    </div>
+
+    <form *ngIf="!loading" [formGroup]="annonceForm" (ngSubmit)="onSubmit()" class="annonce-form">
+      <div class="form-group">
+        <label for="title" class="form-label">
+          Title <span class="required">*</span>
+        </label>
+        <input
+          id="title"
+          type="text"
+          class="form-input"
+          formControlName="title"
+          [class.invalid]="isFieldInvalid('title')"
+          placeholder="Enter annonce title"
+        />
+        <div *ngIf="getFieldError('title')" class="field-error">
+          {{ getFieldError('title') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="description" class="form-label">
+          Description
+        </label>
+        <textarea
+          id="description"
+          class="form-textarea"
+          formControlName="description"
+          [class.invalid]="isFieldInvalid('description')"
+          placeholder="Enter annonce description"
+          rows="5"
+        ></textarea>
+        <div *ngIf="getFieldError('description')" class="field-error">
+          {{ getFieldError('description') }}
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="city" class="form-label">
+            City
+          </label>
+          <input
+            id="city"
+            type="text"
+            class="form-input"
+            formControlName="city"
+            [class.invalid]="isFieldInvalid('city')"
+            placeholder="Enter city"
+          />
+          <div *ngIf="getFieldError('city')" class="field-error">
+            {{ getFieldError('city') }}
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="price" class="form-label">
+            Price (EUR)
+          </label>
+          <input
+            id="price"
+            type="number"
+            class="form-input"
+            formControlName="price"
+            [class.invalid]="isFieldInvalid('price')"
+            placeholder="0.00"
+            step="0.01"
+            min="0"
+          />
+          <div *ngIf="getFieldError('price')" class="field-error">
+            {{ getFieldError('price') }}
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" *ngIf="isEditMode">
+        <label for="status" class="form-label">
+          Status
+        </label>
+        <select
+          id="status"
+          class="form-select"
+          formControlName="status"
+        >
+          <option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button
+          type="button"
+          class="btn-cancel"
+          (click)="onCancel()"
+          [disabled]="submitting"
+        >
+          Cancel
+        </button>
+        <button
+          type="submit"
+          class="btn-submit"
+          [disabled]="submitting"
+        >
+          <span *ngIf="!submitting">{{ isEditMode ? 'Update' : 'Create' }}</span>
+          <span *ngIf="submitting" class="btn-loading">
+            <span class="btn-spinner"></span>
+            {{ isEditMode ? 'Updating...' : 'Creating...' }}
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

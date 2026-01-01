@@ -18,10 +18,11 @@ env.JAVA_HOME = JAVA_HOME;
 env.PATH = `${JAVA_HOME}\\bin;${env.PATH}`;
 
 // Run Maven
-const maven = spawn('mvn', ['clean', 'install', '-DskipTests'], {
+const maven = spawn('mvn', ['clean', 'install', '-DskipTests', '--settings', 'settings.xml'], {
     env: env,
     stdio: 'inherit',
-    shell: true
+    shell: true,
+    cwd: __dirname
 });
 
 maven.on('close', (code) => {

@@ -64,10 +64,11 @@
               <th>Status</th>
               <th>Created At</th>
               <th>Updated At</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let annonce of annonces" class="annonce-row">
+            <tr *ngFor="let annonce of annonces">
               <td>{{ annonce.id }}</td>
               <td class="title-cell">
                 <strong>{{ annonce.title }}</strong>
@@ -85,6 +86,11 @@
               </td>
               <td>{{ formatDate(annonce.createdAt) }}</td>
               <td>{{ formatDate(annonce.updatedAt) }}</td>
+              <td class="actions-cell">
+                <button class="btn-edit" (click)="editAnnonce(annonce.id)" title="Edit">
+                  ✏️
+                </button>
+              </td>
             </tr>
           </tbody>
         </table>

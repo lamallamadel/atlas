@@ -15,6 +15,7 @@ const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'annonces', component: AnnoncesComponent },
       { path: 'annonces/new', component: AnnonceCreateComponent },
+      { path: 'annonces/:id/edit', component: AnnonceCreateComponent },
       { path: 'dossiers', component: DossiersComponent }
     ]
   }

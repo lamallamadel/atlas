@@ -156,7 +156,7 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.QUALIFIED));
 
-        Specification<Dossier> spec = Specification.where(
+        Specification<Dossier> spec = Specification.<Dossier>where(
                 (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("leadPhone"), phone))
                 .and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), DossierStatus.NEW));
 

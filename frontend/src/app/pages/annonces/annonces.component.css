@@ -292,3 +292,21 @@
   background-color: white;
   color: inherit;
 }
+
+.actions-cell {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.btn-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0.25rem 0.5rem;
+  transition: transform 0.2s;
+}
+
+.btn-edit:hover {
+  transform: scale(1.2);
+}
