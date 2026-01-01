@@ -1,60 +1,28 @@
-package com.example.backend.entity;
+package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AnnonceStatus;
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "annonce")
-public class Annonce {
+public class AnnonceResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-
-    @Column(name = "org_id", nullable = false)
     private String orgId;
-
-    @Column(name = "title", nullable = false, length = 500)
     private String title;
-
-    @Column(name = "description", columnDefinition = "TEXT")
     private String description;
-
-    @Column(name = "category", length = 100)
     private String category;
-
-    @Column(name = "city", length = 255)
     private String city;
-
-    @Column(name = "price", precision = 15, scale = 2)
     private BigDecimal price;
-
-    @Column(name = "currency", length = 3)
     private String currency;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
     private AnnonceStatus status;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Column(name = "created_by", length = 255)
     private String createdBy;
-
-    @Column(name = "updated_by", length = 255)
     private String updatedBy;
+
+    public AnnonceResponse() {
+    }
 
     public Long getId() {
         return id;
