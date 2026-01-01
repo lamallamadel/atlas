@@ -1,38 +1,34 @@
 #!/usr/bin/env node
-/**
- * Backend installation script using Node.js
- * This script sets up Java 17 environment and runs Maven
- */
-
 const { spawn } = require('child_process');
 const path = require('path');
 
-const JAVA_HOME = 'C:\\Environement\\Java\\jdk-17.0.5.8-hotspot';
+const javaHome = 'C:\\Environement\\Java\\jdk-17.0.5.8-hotspot';
+const mavenCmd = 'mvn';
 
 console.log('Setting up backend with Java 17...');
-console.log(`JAVA_HOME: ${JAVA_HOME}`);
+console.log(`JAVA_HOME: ${javaHome}\n`);
 
-// Set up environment
-const env = { ...process.env };
-env.JAVA_HOME = JAVA_HOME;
-env.PATH = `${JAVA_HOME}\\bin;${env.PATH}`;
-
-// Run Maven
-const maven = spawn('mvn', ['clean', 'install', '-DskipTests', '--settings', 'settings.xml'], {
-    env: env,
-    stdio: 'inherit',
-    shell: true,
-    cwd: __dirname
+const mvn = spawn(mavenCmd, ['clean', 'install', '-DskipTests'], {
+  cwd: __dirname,
+  env: {
+    ...process.env,
+    JAVA_HOME: javaHome,
+    PATH: `${javaHome}\\bin;${process.env.PATH}`
+  },
+  stdio: 'inherit',
+  shell: true
 });
 
-maven.on('close', (code) => {
-    if (code === 0) {
-        console.log('\n✓ Backend setup complete!');
-        console.log('\nYou can now run:');
-        console.log('  - mvn test (run tests)');
-        console.log('  - mvn spring-boot:run (start dev server)');
-    } else {
-        console.error(`\n✗ Maven exited with code ${code}`);
-        process.exit(code);
-    }
+mvn.on('error', (error) => {
+  console.error(`Error: ${error.message}`);
+  process.exit(1);
+});
+
+mvn.on('close', (code) => {
+  if (code === 0) {
+    console.log('\n✓ Backend setup complete!');
+  } else {
+    console.error(`\n✗ Backend setup failed with code ${code}`);
+    process.exit(code);
+  }
 });

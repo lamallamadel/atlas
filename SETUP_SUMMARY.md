@@ -1,116 +1,144 @@
-# Initial Setup Summary
+# Repository Setup Summary
 
-## ✅ Completed Setup Tasks
+## Current Status
 
-### 1. Frontend Setup - COMPLETE
-- **Status**: ✅ Fully configured and ready to use
-- **Action Taken**: Installed all npm dependencies (1126 packages)
-- **Verification**: node_modules directory created and properly git-ignored
-- **Time**: ~51 seconds
+### ✅ Frontend - COMPLETE
+- **Dependencies**: Installed (1126 packages)
+- **Location**: `frontend/node_modules/`
+- **Status**: Ready for development
+- **Commands Available**:
+  ```powershell
+  cd frontend
+  npm start          # Dev server (http://localhost:4200)
+  npm run build      # Production build
+  npm test           # Run tests
+  npm run lint       # Run linter
+  ```
 
-The frontend can now be used immediately:
-```powershell
-cd frontend
-npm start              # Start dev server at http://localhost:4200
-npm run build          # Build for production
-npm test               # Run tests
-npm run lint           # Run linter
-```
+### ⚠️ Backend - REQUIRES MANUAL SETUP
+- **Status**: Awaiting one-time setup command
+- **Reason**: Environment variable restrictions prevent automated setup
+- **Solution**: Run one manual command (see below)
 
-### 2. Repository Configuration
-- **Status**: ✅ Verified
-- **.gitignore**: Confirmed working correctly
-  - `node_modules/` properly ignored
-  - `target/` properly ignored (for Maven builds)
-  - `.mvn/` properly ignored
-  - All standard build artifacts configured
+## Complete Backend Setup
 
-## ⚠️ Backend Setup - Manual Step Required
+Due to security restrictions that prevent automated scripts from modifying environment variables (specifically `JAVA_HOME`), the backend requires one manual command to be run in a terminal where you have full environment control.
 
-### Why Manual Setup is Needed
-The backend requires Java 17 to be active via the `JAVA_HOME` environment variable. Due to security restrictions in the automated environment, I cannot:
-- Set environment variables
-- Execute scripts that modify environment variables
-- Run batch files or wrapper scripts
-
-This is a security feature to prevent unauthorized system modifications.
-
-### How to Complete Backend Setup
-
-Open a **new PowerShell terminal** and run ONE of these commands:
-
-**Option 1 - Direct Command (Recommended)**
+### Option 1: PowerShell (Recommended)
+Open a new PowerShell terminal and run:
 ```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
 mvn clean install -DskipTests
 ```
 
-**Option 2 - Use Existing Helper Script**
+### Option 2: Use Helper Script
 ```powershell
 cd backend
 .\run-maven.ps1
 ```
 
-**Option 3 - Command Prompt**
-```cmd
+### Option 3: Use Wrapper Command
+```powershell
 cd backend
-setup.cmd
+.\mvn-java17.cmd clean install -DskipTests
+```
+
+### Option 4: Use Node.js Helper
+```powershell
+cd backend
+node install-backend.js
 ```
 
 This will:
-- Download all Maven dependencies from Maven Central
-- Compile the Spring Boot application with Java 17
-- Install the backend artifacts
-- Takes approximately 2-5 minutes
+- Download all Maven dependencies (~200+ packages)
+- Compile the Spring Boot application
+- Create the `backend/target/` directory
+- Take approximately 2-5 minutes
 
-### After Backend Setup
-Once the Maven install completes successfully, you can:
+## Verification
 
+After backend setup completes, verify:
 ```powershell
-# Build the application
+Test-Path backend/target    # Should return: True
 cd backend
-mvn clean package
-
-# Run tests
-mvn test
-
-# Start the backend server
-mvn spring-boot:run
+mvn test                     # Should run tests successfully
 ```
 
-Or use the convenience wrapper for Maven commands:
+## Development Commands
+
+### Backend (After Manual Setup)
 ```powershell
 cd backend
-mvn-java17.cmd clean package
-mvn-java17.cmd test
-mvn-java17.cmd spring-boot:run
+mvn clean package           # Build
+mvn test                    # Run tests
+mvn spring-boot:run         # Start server (port 8080)
 ```
 
-## 📋 Current Repository State
+### Frontend (Ready Now)
+```powershell
+cd frontend
+npm start                   # Dev server (port 4200)
+npm run build              # Production build
+npm test                   # Run tests
+npm run lint               # Lint code
+```
 
-| Component | Status | Details |
-|-----------|--------|---------|
-| Frontend | ✅ Ready | Dependencies installed, can run immediately |
-| Backend | ⏸️ Waiting | Requires one manual command (see above) |
-| Infrastructure | ⏳ Optional | PostgreSQL via Docker when needed |
-| Documentation | ✅ Present | AGENTS.md, SETUP.md, QUICKSTART.md available |
+### Infrastructure (Optional)
+```powershell
+cd infra
+docker-compose up -d       # Start PostgreSQL
+docker-compose down        # Stop services
+```
 
-## 🎯 Next Steps
+### Full Stack
+```powershell
+.\dev.ps1 up              # Start everything
+.\dev.ps1 down            # Stop everything
+.\dev.ps1 status          # Check status
+```
 
-1. **To use frontend immediately**: `cd frontend && npm start`
+## Why Manual Setup is Required
 
-2. **To complete backend setup**: Run the manual command in a new terminal (see "How to Complete Backend Setup" above)
+The automated setup process encountered security restrictions:
+- Cannot modify `JAVA_HOME` environment variable
+- Cannot execute scripts that spawn processes with modified environments
+- Cannot run batch/PowerShell scripts that set environment variables
 
-3. **After backend is ready**: Use `.\dev.ps1 up` to start the full stack (backend + frontend + database)
+This is a security feature to prevent unauthorized environment manipulation. The solution is simple: run the setup command in a terminal where you have full control.
 
-## 📚 Additional Documentation
+## Project Structure
 
-- **[AGENTS.md](./AGENTS.md)** - Complete developer guide with all commands
+```
+/
+├── backend/              # Spring Boot (Java 17 + Maven)
+│   ├── src/             # Source code
+│   ├── pom.xml          # Maven configuration
+│   ├── run-maven.ps1    # Helper script for setup
+│   ├── mvn-java17.cmd   # Maven wrapper with Java 17
+│   └── install-backend.js  # Node.js installer script
+│
+├── frontend/            # Angular 16 ✅ READY
+│   ├── src/            # Source code
+│   ├── node_modules/   # Dependencies (installed) ✅
+│   └── package.json    # npm configuration
+│
+├── infra/              # Infrastructure
+│   └── docker-compose.yml  # PostgreSQL setup
+│
+├── dev.ps1             # Development stack manager
+└── AGENTS.md           # Developer documentation
+```
+
+## Next Steps
+
+1. **Complete backend setup** using one of the manual options above
+2. **Start development**: Use `.\dev.ps1 up` or run backend/frontend separately
+3. **Run tests**: Verify everything works with `mvn test` and `npm test`
+
+## Documentation
+
+- **[AGENTS.md](./AGENTS.md)** - Complete developer guide with commands
 - **[SETUP.md](./SETUP.md)** - Detailed setup instructions
-- **[QUICKSTART.md](./QUICKSTART.md)** - Quick reference guide
-- **[SETUP_COMPLETE.md](./SETUP_COMPLETE.md)** - Comprehensive setup guide
-
-## ✨ Repository Ready For Development
-
-The repository is now configured for development. The frontend is immediately usable, and the backend requires only one manual command to complete the setup.
+- **[QUICKSTART.md](./QUICKSTART.md)** - Quick start guide
+- **[README.md](./README.md)** - Project overview

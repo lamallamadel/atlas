@@ -205,6 +205,7 @@ The backend supports multiple Spring profiles for different environments. **No d
 
 Available profiles:
 - **`local`** - Local development using H2 in-memory database (no external DB required)
+- **`dev`** - Development profile with seed data loader (automatically populates test data)
 - **`staging`** - Staging environment with PostgreSQL (requires environment variables)
 - **`prod`** - Production environment with PostgreSQL (requires environment variables)
 - **`test`** - Automated testing with H2 (used by JUnit tests automatically)
@@ -217,6 +218,14 @@ cd backend
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local
 # OR
 SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+```
+
+**Development with Seed Data (H2):**
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+# OR
+SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
 ```
 
 **Staging (PostgreSQL):**
@@ -257,9 +266,65 @@ java -jar target/backend.jar
 | Profile | Required Variables | Optional Variables |
 |---------|-------------------|-------------------|
 | `local` | None | `CORS_ALLOWED_ORIGINS` |
+| `dev` | None | `CORS_ALLOWED_ORIGINS` |
 | `staging` | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | `CORS_ALLOWED_ORIGINS` |
 | `prod` | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | `CORS_ALLOWED_ORIGINS` |
 | `test` | None (H2 in-memory) | None |
+
+### Seed Data Loader
+
+The `dev` profile includes an automatic seed data loader that populates the database with test data on startup. This is useful for development and testing purposes.
+
+**Activation:**
+- Automatically runs when the application starts with the `dev` profile
+- Only loads data if the database is empty (checks for existing annonces)
+- Logs all operations to the console
+
+**Data Loaded:**
+
+**3 Annonces:**
+1. **ACTIVE** - "Beautiful 3BR Apartment in Downtown" 
+   - With `rulesJson` (petsAllowed, smokingAllowed, minLeaseTerm, securityDeposit)
+   - With `photosJson` (3 photo URLs)
+   - Type: SALE, Price: €450,000, Surface: 120.5m², City: Paris
+
+2. **PAUSED** - "Luxury Villa with Pool"
+   - Type: RENT, Price: €3,500/month, Surface: 250m², City: Lyon
+
+3. **ARCHIVED** - "Commercial Space in Business District"
+   - Type: LEASE, Price: €2,800/month, Surface: 180m², City: Marseille
+
+**10 Dossiers:**
+- 3 with status NEW
+- 3 with status QUALIFIED
+- 1 with status APPOINTMENT
+- 1 with status WON
+- 1 with status LOST
+- 1 duplicate (dossier #1 and #10 share the same phone number: +33612345678)
+
+**6 Parties Prenantes:**
+- 2 parties on dossier #1 (BUYER, AGENT)
+- 2 parties on dossier #2 (TENANT, LANDLORD)
+- 2 parties on dossier #3 (SELLER, NOTARY)
+
+**Example Usage:**
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+The loader will output logs like:
+```
+Starting seed data loading for 'dev' profile...
+Loading annonces...
+Loaded 3 annonces
+Loading dossiers...
+Loaded 10 dossiers
+Loading parties prenantes...
+Loaded 6 parties prenantes on 3 dossiers
+Note: Duplicate phone entry exists - dossier #1 and #10 share phone +33612345678
+Seed data loading completed successfully.
+```
 
 
 ## 🐛 Troubleshooting
