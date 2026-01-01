@@ -1,11 +1,14 @@
 package com.example.backend.entity;
 
+import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "dossier")
@@ -34,6 +37,16 @@ public class Dossier {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private DossierStatus status;
+
+    @Column(name = "score")
+    private Integer score;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "source", length = 50)
+    private DossierSource source;
+
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PartiePrenanteEntity> parties = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -135,5 +148,39 @@ public class Dossier {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public DossierSource getSource() {
+        return source;
+    }
+
+    public void setSource(DossierSource source) {
+        this.source = source;
+    }
+
+    public List<PartiePrenanteEntity> getParties() {
+        return parties;
+    }
+
+    public void setParties(List<PartiePrenanteEntity> parties) {
+        this.parties = parties;
+    }
+
+    public void addParty(PartiePrenanteEntity party) {
+        parties.add(party);
+        party.setDossier(this);
+    }
+
+    public void removeParty(PartiePrenanteEntity party) {
+        parties.remove(party);
+        party.setDossier(null);
     }
 }

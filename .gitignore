@@ -144,7 +144,11 @@ install-backend.cmd
 setup-wrapper.js
 setup-temp-run.cmd
 setup-maven-only.ps1
-setup-backend-via-ps.ps1
+setup-backend-via-ps1.ps1
 install-backend-simple.cmd
 backend/run-mvn.cmd
 backend/setup-run.cmd
+backend/setup-maven.cmd
+run-maven-with-java17.cmd
+setup-backend-wrapper.ps1
+temp-setup-backend.ps1

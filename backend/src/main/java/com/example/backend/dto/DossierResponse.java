@@ -1,9 +1,12 @@
 package com.example.backend.dto;
 
+import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Schema(description = "Dossier response representation")
 public class DossierResponse {
@@ -28,6 +31,15 @@ public class DossierResponse {
 
     @Schema(description = "Current status of the dossier", example = "NEW")
     private DossierStatus status;
+
+    @Schema(description = "Dossier score (0-100)", example = "75", nullable = true)
+    private Integer score;
+
+    @Schema(description = "Dossier source", example = "WEB", nullable = true)
+    private DossierSource source;
+
+    @Schema(description = "List of parties associated with the dossier")
+    private List<PartiePrenanteResponse> parties = new ArrayList<>();
 
     @Schema(description = "Timestamp when the dossier was created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
@@ -130,5 +142,29 @@ public class DossierResponse {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public DossierSource getSource() {
+        return source;
+    }
+
+    public void setSource(DossierSource source) {
+        this.source = source;
+    }
+
+    public List<PartiePrenanteResponse> getParties() {
+        return parties;
+    }
+
+    public void setParties(List<PartiePrenanteResponse> parties) {
+        this.parties = parties;
     }
 }

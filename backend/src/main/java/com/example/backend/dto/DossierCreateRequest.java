@@ -1,6 +1,10 @@
 package com.example.backend.dto;
 
+import com.example.backend.entity.enums.DossierSource;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
@@ -26,6 +30,18 @@ public class DossierCreateRequest {
     @Schema(description = "Lead source", example = "Website", nullable = true)
     @Size(max = 100, message = "Lead source must not exceed 100 characters")
     private String leadSource;
+
+    @Schema(description = "Dossier score (0-100)", example = "75", nullable = true)
+    @Min(value = 0, message = "Score must be between 0 and 100")
+    @Max(value = 100, message = "Score must be between 0 and 100")
+    private Integer score;
+
+    @Schema(description = "Dossier source", example = "WEB", nullable = true)
+    private DossierSource source;
+
+    @Schema(description = "Initial party to create with the dossier", nullable = true)
+    @Valid
+    private PartiePrenanteRequest initialParty;
 
     public DossierCreateRequest() {
     }
@@ -68,5 +84,29 @@ public class DossierCreateRequest {
 
     public void setLeadSource(String leadSource) {
         this.leadSource = leadSource;
+    }
+
+    public Integer getScore() {
+        return score;
+    }
+
+    public void setScore(Integer score) {
+        this.score = score;
+    }
+
+    public DossierSource getSource() {
+        return source;
+    }
+
+    public void setSource(DossierSource source) {
+        this.source = source;
+    }
+
+    public PartiePrenanteRequest getInitialParty() {
+        return initialParty;
+    }
+
+    public void setInitialParty(PartiePrenanteRequest initialParty) {
+        this.initialParty = initialParty;
     }
 }
