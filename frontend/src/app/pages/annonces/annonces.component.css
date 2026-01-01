@@ -163,55 +163,17 @@
   background-color: #2980b9;
 }
 
-.table-container {
-  overflow-x: auto;
+::ng-deep app-generic-table .table-container {
   margin-bottom: 1.5rem;
 }
 
-.annonces-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.annonces-table thead {
-  background-color: #f8f9fa;
-}
-
-.annonces-table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.annonces-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.annonce-row:hover {
-  background-color: #f8f9fa;
-  cursor: pointer;
-}
-
-.title-cell {
-  max-width: 300px;
-}
-
-.title-cell strong {
-  display: block;
-  margin-bottom: 0.25rem;
-  color: #2c3e50;
-}
-
-.description-preview {
+::ng-deep .description-preview {
   font-size: 0.85rem;
   color: #6c757d;
+  margin-top: 0.25rem;
 }
 
-.status-badge {
+::ng-deep .status-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -220,17 +182,17 @@
   text-transform: uppercase;
 }
 
-.status-published {
+::ng-deep .status-published {
   background-color: #d4edda;
   color: #155724;
 }
 
-.status-draft {
+::ng-deep .status-draft {
   background-color: #fff3cd;
   color: #856404;
 }
 
-.status-archived {
+::ng-deep .status-archived {
   background-color: #f8d7da;
   color: #721c24;
 }
@@ -293,20 +255,4 @@
   color: inherit;
 }
 
-.actions-cell {
-  text-align: center;
-  white-space: nowrap;
-}
 
-.btn-edit {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.25rem 0.5rem;
-  transition: transform 0.2s;
-}
-
-.btn-edit:hover {
-  transform: scale(1.2);
-}

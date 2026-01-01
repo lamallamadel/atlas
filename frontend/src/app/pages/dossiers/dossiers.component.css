@@ -171,40 +171,11 @@
   background-color: #2980b9;
 }
 
-.table-container {
-  overflow-x: auto;
+::ng-deep app-generic-table .table-container {
   margin-bottom: 1.5rem;
 }
 
-.dossiers-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.9rem;
-}
-
-.dossiers-table thead {
-  background-color: #f8f9fa;
-}
-
-.dossiers-table th {
-  padding: 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: #2c3e50;
-  border-bottom: 2px solid #dee2e6;
-  white-space: nowrap;
-}
-
-.dossiers-table td {
-  padding: 1rem;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.dossiers-table tbody tr:hover {
-  background-color: #f8f9fa;
-}
-
-.status-badge {
+::ng-deep .status-badge {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -213,27 +184,27 @@
   text-transform: uppercase;
 }
 
-.status-new {
+::ng-deep .status-new {
   background-color: #d1ecf1;
   color: #0c5460;
 }
 
-.status-qualified {
+::ng-deep .status-qualified {
   background-color: #fff3cd;
   color: #856404;
 }
 
-.status-appointment {
+::ng-deep .status-appointment {
   background-color: #cce5ff;
   color: #004085;
 }
 
-.status-won {
+::ng-deep .status-won {
   background-color: #d4edda;
   color: #155724;
 }
 
-.status-lost {
+::ng-deep .status-lost {
   background-color: #f8d7da;
   color: #721c24;
 }
@@ -296,20 +267,4 @@
   color: inherit;
 }
 
-.actions-cell {
-  text-align: center;
-  white-space: nowrap;
-}
 
-.btn-view {
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 1.2rem;
-  padding: 0.25rem 0.5rem;
-  transition: transform 0.2s;
-}
-
-.btn-view:hover {
-  transform: scale(1.2);
-}

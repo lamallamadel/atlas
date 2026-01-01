@@ -74,18 +74,21 @@ describe('GenericTableComponent', () => {
 
   it('should format date values correctly', () => {
     const date = new Date('2024-01-01');
-    const formatted = component.formatValue(date, 'date');
+    const column: ColumnConfig = { key: 'date', header: 'Date', type: 'date' };
+    const formatted = component.formatValue(date, column, {});
     expect(formatted).toBe(date.toLocaleDateString());
   });
 
   it('should format boolean values correctly', () => {
-    expect(component.formatValue(true, 'boolean')).toBe('Yes');
-    expect(component.formatValue(false, 'boolean')).toBe('No');
+    const column: ColumnConfig = { key: 'active', header: 'Active', type: 'boolean' };
+    expect(component.formatValue(true, column, {})).toBe('Yes');
+    expect(component.formatValue(false, column, {})).toBe('No');
   });
 
   it('should handle null and undefined values', () => {
-    expect(component.formatValue(null)).toBe('');
-    expect(component.formatValue(undefined)).toBe('');
+    const column: ColumnConfig = { key: 'value', header: 'Value' };
+    expect(component.formatValue(null, column, {})).toBe('');
+    expect(component.formatValue(undefined, column, {})).toBe('');
   });
 
   it('should show action based on show function', () => {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
+import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 
 @Component({
   selector: 'app-dossiers',
@@ -20,6 +21,64 @@ export class DossiersComponent implements OnInit {
   pageSize = 10;
 
   DossierStatus = DossierStatus;
+
+  columns: ColumnConfig[] = [
+    { key: 'id', header: 'ID', sortable: true, type: 'number' },
+    { key: 'orgId', header: 'Org ID', sortable: true, type: 'number' },
+    { 
+      key: 'annonceId', 
+      header: 'Annonce ID', 
+      sortable: true,
+      format: (value: unknown) => value ? value.toString() : '-'
+    },
+    { 
+      key: 'leadName', 
+      header: 'Lead Name', 
+      sortable: true,
+      format: (value: unknown) => (value as string) || '-'
+    },
+    { 
+      key: 'leadPhone', 
+      header: 'Lead Phone', 
+      sortable: true,
+      format: (value: unknown) => (value as string) || '-'
+    },
+    { 
+      key: 'leadSource', 
+      header: 'Lead Source', 
+      sortable: true,
+      format: (value: unknown) => (value as string) || '-'
+    },
+    { 
+      key: 'status', 
+      header: 'Status', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => {
+        const status = value as DossierStatus;
+        const badgeClass = this.getStatusBadgeClass(status);
+        return `<span class="${badgeClass}">${status}</span>`;
+      }
+    },
+    { 
+      key: 'createdAt', 
+      header: 'Created At', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => this.formatDate(value as string)
+    },
+    { 
+      key: 'updatedAt', 
+      header: 'Updated At', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => this.formatDate(value as string)
+    }
+  ];
+
+  actions: RowAction[] = [
+    { icon: 'visibility', tooltip: 'View', action: 'view', color: 'primary' }
+  ];
 
   constructor(
     private dossierApiService: DossierApiService,
@@ -108,6 +167,13 @@ export class DossiersComponent implements OnInit {
 
   createDossier(): void {
     this.router.navigate(['/dossiers/new']);
+  }
+
+  onRowAction(event: { action: string; row: unknown }): void {
+    const dossier = event.row as DossierResponse;
+    if (event.action === 'view') {
+      this.viewDossier(dossier.id);
+    }
   }
 
   viewDossier(id: number): void {

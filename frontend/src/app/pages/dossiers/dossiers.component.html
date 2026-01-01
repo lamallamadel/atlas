@@ -70,46 +70,14 @@
     </div>
 
     <div *ngIf="!loading && !error && dossiers.length > 0">
-      <div class="table-container">
-        <table class="dossiers-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Org ID</th>
-              <th>Annonce ID</th>
-              <th>Lead Name</th>
-              <th>Lead Phone</th>
-              <th>Lead Source</th>
-              <th>Status</th>
-              <th>Created At</th>
-              <th>Updated At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let dossier of dossiers">
-              <td>{{ dossier.id }}</td>
-              <td>{{ dossier.orgId }}</td>
-              <td>{{ dossier.annonceId || '-' }}</td>
-              <td>{{ dossier.leadName || '-' }}</td>
-              <td>{{ dossier.leadPhone || '-' }}</td>
-              <td>{{ dossier.leadSource || '-' }}</td>
-              <td>
-                <span [ngClass]="getStatusBadgeClass(dossier.status)">
-                  {{ dossier.status }}
-                </span>
-              </td>
-              <td>{{ formatDate(dossier.createdAt) }}</td>
-              <td>{{ formatDate(dossier.updatedAt) }}</td>
-              <td class="actions-cell">
-                <button class="btn-view" (click)="viewDossier(dossier.id)" title="View">
-                  👁️
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <app-generic-table
+        [columns]="columns"
+        [data]="dossiers"
+        [actions]="actions"
+        [showPagination]="false"
+        [enableSort]="false"
+        (rowAction)="onRowAction($event)">
+      </app-generic-table>
 
       <div class="pagination-section" *ngIf="page">
         <div class="pagination-info">

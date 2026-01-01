@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
+import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 
 @Component({
   selector: 'app-annonces',
@@ -19,6 +20,77 @@ export class AnnoncesComponent implements OnInit {
   pageSize = 10;
 
   AnnonceStatus = AnnonceStatus;
+
+  columns: ColumnConfig[] = [
+    { key: 'id', header: 'ID', sortable: true, type: 'number' },
+    { 
+      key: 'title', 
+      header: 'Title', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown, row: unknown) => {
+        const annonce = row as AnnonceResponse;
+        const title = `<strong>${value}</strong>`;
+        const description = annonce.description 
+          ? `<div class="description-preview">${annonce.description.length > 50 ? annonce.description.substring(0, 50) + '...' : annonce.description}</div>`
+          : '';
+        return title + description;
+      }
+    },
+    { 
+      key: 'category', 
+      header: 'Category', 
+      sortable: true,
+      format: (value: unknown) => (value as string) || '-'
+    },
+    { 
+      key: 'city', 
+      header: 'City', 
+      sortable: true,
+      format: (value: unknown) => (value as string) || '-'
+    },
+    { 
+      key: 'price', 
+      header: 'Price', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown, row: unknown) => {
+        const annonce = row as AnnonceResponse;
+        if (annonce.price === undefined) return '-';
+        const curr = annonce.currency || 'EUR';
+        return `${annonce.price.toFixed(2)} ${curr}`;
+      }
+    },
+    { 
+      key: 'status', 
+      header: 'Status', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => {
+        const status = value as AnnonceStatus;
+        const badgeClass = this.getStatusBadgeClass(status);
+        return `<span class="${badgeClass}">${status}</span>`;
+      }
+    },
+    { 
+      key: 'createdAt', 
+      header: 'Created At', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => this.formatDate(value as string)
+    },
+    { 
+      key: 'updatedAt', 
+      header: 'Updated At', 
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => this.formatDate(value as string)
+    }
+  ];
+
+  actions: RowAction[] = [
+    { icon: 'edit', tooltip: 'Edit', action: 'edit', color: 'primary' }
+  ];
 
   constructor(
     private annonceApiService: AnnonceApiService,
@@ -98,6 +170,13 @@ export class AnnoncesComponent implements OnInit {
     this.router.navigate(['/annonces/new']);
   }
 
+  onRowAction(event: { action: string; row: unknown }): void {
+    const annonce = event.row as AnnonceResponse;
+    if (event.action === 'edit') {
+      this.editAnnonce(annonce.id);
+    }
+  }
+
   editAnnonce(id: number): void {
     this.router.navigate(['/annonces', id, 'edit']);
   }
@@ -118,12 +197,6 @@ export class AnnoncesComponent implements OnInit {
   formatDate(dateString: string): string {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  }
-
-  formatPrice(price: number | undefined, currency: string | undefined): string {
-    if (price === undefined) return '-';
-    const curr = currency || 'EUR';
-    return `${price.toFixed(2)} ${curr}`;
   }
 
   getPageNumbers(): number[] {

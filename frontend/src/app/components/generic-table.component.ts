@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnInit, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnInit, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -7,7 +7,8 @@ export interface ColumnConfig {
   key: string;
   header: string;
   sortable?: boolean;
-  type?: 'text' | 'number' | 'date' | 'boolean';
+  type?: 'text' | 'number' | 'date' | 'boolean' | 'custom';
+  format?: (value: unknown, row: unknown) => string;
 }
 
 export interface RowAction {
@@ -23,7 +24,7 @@ export interface RowAction {
   templateUrl: './generic-table.component.html',
   styleUrls: ['./generic-table.component.css']
 })
-export class GenericTableComponent implements OnInit, AfterViewInit {
+export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() columns: ColumnConfig[] = [];
   @Input() data: unknown[] = [];
   @Input() showActions = true;
@@ -48,6 +49,15 @@ export class GenericTableComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.dataSource.data = this.data;
     this.updateDisplayedColumns();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['data']) {
+      this.dataSource.data = this.data;
+    }
+    if (changes['columns']) {
+      this.updateDisplayedColumns();
+    }
   }
 
   ngAfterViewInit(): void {
@@ -77,12 +87,16 @@ export class GenericTableComponent implements OnInit, AfterViewInit {
     return true;
   }
 
-  formatValue(value: unknown, type?: string): string {
+  formatValue(value: unknown, column: ColumnConfig, row: unknown): string {
+    if (column.format) {
+      return column.format(value, row);
+    }
+
     if (value === null || value === undefined) {
       return '';
     }
 
-    switch (type) {
+    switch (column.type) {
       case 'date':
         return new Date(value as string | number | Date).toLocaleDateString();
       case 'boolean':
