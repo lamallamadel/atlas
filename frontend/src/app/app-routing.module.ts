@@ -6,6 +6,7 @@ import { AnnoncesComponent } from './pages/annonces/annonces.component';
 import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
 import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
+import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 
 const routes: Routes = [
   {
@@ -18,7 +19,8 @@ const routes: Routes = [
       { path: 'annonces/new', component: AnnonceCreateComponent },
       { path: 'annonces/:id', component: AnnonceDetailComponent },
       { path: 'annonces/:id/edit', component: AnnonceCreateComponent },
-      { path: 'dossiers', component: DossiersComponent }
+      { path: 'dossiers', component: DossiersComponent },
+      { path: 'dossiers/:id', component: DossierDetailComponent }
     ]
   }
 ];
