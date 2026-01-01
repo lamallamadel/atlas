@@ -135,3 +135,5 @@ temp-*.*
 setup-temp.*
 java17.cmd
 setup-temp.cmd
+setup-backend.ps1
+setup-backend.cmd
