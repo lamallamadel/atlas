@@ -1,8 +1,149 @@
 <div class="page-container">
   <div class="page-header">
     <h2 class="page-title">Dossiers</h2>
+    <button class="btn-create" (click)="createDossier()">
+      <span class="btn-icon">+</span>
+      Create Dossier
+    </button>
   </div>
+
+  <div class="filters-section">
+    <div class="filter-box">
+      <label for="status-filter" class="filter-label">Status:</label>
+      <select
+        id="status-filter"
+        class="filter-select"
+        [(ngModel)]="selectedStatus"
+        (change)="onFilterChange()"
+      >
+        <option value="">All</option>
+        <option [value]="DossierStatus.NEW">New</option>
+        <option [value]="DossierStatus.QUALIFIED">Qualified</option>
+        <option [value]="DossierStatus.APPOINTMENT">Appointment</option>
+        <option [value]="DossierStatus.WON">Won</option>
+        <option [value]="DossierStatus.LOST">Lost</option>
+      </select>
+    </div>
+
+    <div class="filter-box">
+      <label for="phone-filter" class="filter-label">Phone:</label>
+      <input
+        id="phone-filter"
+        type="text"
+        class="filter-input"
+        placeholder="Filter by phone..."
+        [(ngModel)]="phoneFilter"
+        (keyup.enter)="onFilterChange()"
+      />
+    </div>
+
+    <div class="filter-box">
+      <label for="annonce-filter" class="filter-label">Annonce ID:</label>
+      <input
+        id="annonce-filter"
+        type="text"
+        class="filter-input"
+        placeholder="Filter by annonce..."
+        [(ngModel)]="annonceIdFilter"
+        (keyup.enter)="onFilterChange()"
+      />
+    </div>
+
+    <button class="btn-filter" (click)="onFilterChange()">Apply Filters</button>
+    <button class="btn-clear" (click)="clearFilters()">Clear</button>
+  </div>
+
   <div class="page-content">
-    <p>Welcome to the Dossiers page. This is a placeholder that will be implemented later.</p>
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading dossiers...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-state">
+      <p class="error-message">{{ error }}</p>
+      <button class="btn-retry" (click)="loadDossiers()">Retry</button>
+    </div>
+
+    <div *ngIf="!loading && !error && dossiers.length === 0" class="empty-state">
+      <p>No dossiers found.</p>
+      <button class="btn-create-empty" (click)="createDossier()">Create your first dossier</button>
+    </div>
+
+    <div *ngIf="!loading && !error && dossiers.length > 0">
+      <div class="table-container">
+        <table class="dossiers-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Org ID</th>
+              <th>Annonce ID</th>
+              <th>Lead Name</th>
+              <th>Lead Phone</th>
+              <th>Lead Source</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Updated At</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let dossier of dossiers">
+              <td>{{ dossier.id }}</td>
+              <td>{{ dossier.orgId }}</td>
+              <td>{{ dossier.annonceId || '-' }}</td>
+              <td>{{ dossier.leadName || '-' }}</td>
+              <td>{{ dossier.leadPhone || '-' }}</td>
+              <td>{{ dossier.leadSource || '-' }}</td>
+              <td>
+                <span [ngClass]="getStatusBadgeClass(dossier.status)">
+                  {{ dossier.status }}
+                </span>
+              </td>
+              <td>{{ formatDate(dossier.createdAt) }}</td>
+              <td>{{ formatDate(dossier.updatedAt) }}</td>
+              <td class="actions-cell">
+                <button class="btn-view" (click)="viewDossier(dossier.id)" title="View">
+                  👁️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-section" *ngIf="page">
+        <div class="pagination-info">
+          Showing {{ page.numberOfElements }} of {{ page.totalElements }} dossiers
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="btn-page"
+            [disabled]="page.first"
+            (click)="previousPage()"
+          >
+            Previous
+          </button>
+
+          <button
+            *ngFor="let pageNum of getPageNumbers()"
+            class="btn-page-num"
+            [class.active]="pageNum === currentPage"
+            [class.ellipsis]="pageNum === -1"
+            [disabled]="pageNum === -1"
+            (click)="pageNum !== -1 && goToPage(pageNum)"
+          >
+            {{ pageNum === -1 ? '...' : pageNum + 1 }}
+          </button>
+
+          <button
+            class="btn-page"
+            [disabled]="page.last"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
