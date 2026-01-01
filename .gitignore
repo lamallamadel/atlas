@@ -128,3 +128,8 @@ obj/
 .frontend.pid
 backend/backend.log
 frontend/frontend.log
+
+# Temporary setup/build scripts
+*-temp.*
+temp-*.*
+setup-temp.*
