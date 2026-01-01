@@ -9,6 +9,9 @@
   border-bottom: 2px solid #e0e0e0;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .page-title {
@@ -18,7 +21,274 @@
   margin: 0;
 }
 
+.btn-create {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-create:hover {
+  background-color: #2980b9;
+}
+
+.btn-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.filters-section {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 300px;
+}
+
+.search-input {
+  flex: 1;
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.btn-search {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-search:hover {
+  background-color: #2980b9;
+}
+
+.filter-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.filter-label {
+  font-size: 0.95rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.filter-select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  background-color: white;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
 .page-content {
   color: #555;
   line-height: 1.6;
+}
+
+.loading-state,
+.error-state,
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.error-message {
+  color: #e74c3c;
+  margin-bottom: 1rem;
+  font-size: 1rem;
+}
+
+.btn-retry,
+.btn-create-empty {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-retry:hover,
+.btn-create-empty:hover {
+  background-color: #2980b9;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+}
+
+.annonces-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.annonces-table thead {
+  background-color: #f8f9fa;
+}
+
+.annonces-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  color: #2c3e50;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.annonces-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.annonce-row:hover {
+  background-color: #f8f9fa;
+  cursor: pointer;
+}
+
+.title-cell {
+  max-width: 300px;
+}
+
+.title-cell strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: #2c3e50;
+}
+
+.description-preview {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.status-published {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-draft {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-archived {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.pagination-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.pagination-info {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-page,
+.btn-page-num {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  background-color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+.btn-page:hover:not(:disabled),
+.btn-page-num:hover:not(:disabled):not(.ellipsis) {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.btn-page:disabled,
+.btn-page-num:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-page-num.active {
+  background-color: #3498db;
+  color: white;
+  border-color: #3498db;
+}
+
+.btn-page-num.ellipsis {
+  border: none;
+  cursor: default;
+}
+
+.btn-page-num.ellipsis:hover {
+  background-color: white;
+  color: inherit;
 }

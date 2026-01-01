@@ -1,8 +1,128 @@
 <div class="page-container">
   <div class="page-header">
     <h2 class="page-title">Annonces</h2>
+    <button class="btn-create" (click)="createAnnonce()">
+      <span class="btn-icon">+</span>
+      Create Annonce
+    </button>
   </div>
+
+  <div class="filters-section">
+    <div class="search-box">
+      <input
+        type="text"
+        class="search-input"
+        placeholder="Search annonces..."
+        [(ngModel)]="searchQuery"
+        (keyup.enter)="onSearch()"
+      />
+      <button class="btn-search" (click)="onSearch()">Search</button>
+    </div>
+
+    <div class="filter-box">
+      <label for="status-filter" class="filter-label">Status:</label>
+      <select
+        id="status-filter"
+        class="filter-select"
+        [(ngModel)]="selectedStatus"
+        (change)="onStatusChange()"
+      >
+        <option value="">All</option>
+        <option [value]="AnnonceStatus.DRAFT">Draft</option>
+        <option [value]="AnnonceStatus.PUBLISHED">Published</option>
+        <option [value]="AnnonceStatus.ARCHIVED">Archived</option>
+      </select>
+    </div>
+  </div>
+
   <div class="page-content">
-    <p>Welcome to the Annonces page. This is a placeholder that will be implemented later.</p>
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading annonces...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-state">
+      <p class="error-message">{{ error }}</p>
+      <button class="btn-retry" (click)="loadAnnonces()">Retry</button>
+    </div>
+
+    <div *ngIf="!loading && !error && annonces.length === 0" class="empty-state">
+      <p>No annonces found.</p>
+      <button class="btn-create-empty" (click)="createAnnonce()">Create your first annonce</button>
+    </div>
+
+    <div *ngIf="!loading && !error && annonces.length > 0">
+      <div class="table-container">
+        <table class="annonces-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>City</th>
+              <th>Price</th>
+              <th>Status</th>
+              <th>Created At</th>
+              <th>Updated At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let annonce of annonces" class="annonce-row">
+              <td>{{ annonce.id }}</td>
+              <td class="title-cell">
+                <strong>{{ annonce.title }}</strong>
+                <div class="description-preview" *ngIf="annonce.description">
+                  {{ annonce.description.length > 50 ? annonce.description.substring(0, 50) + '...' : annonce.description }}
+                </div>
+              </td>
+              <td>{{ annonce.category || '-' }}</td>
+              <td>{{ annonce.city || '-' }}</td>
+              <td>{{ formatPrice(annonce.price, annonce.currency) }}</td>
+              <td>
+                <span [ngClass]="getStatusBadgeClass(annonce.status)">
+                  {{ annonce.status }}
+                </span>
+              </td>
+              <td>{{ formatDate(annonce.createdAt) }}</td>
+              <td>{{ formatDate(annonce.updatedAt) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-section" *ngIf="page">
+        <div class="pagination-info">
+          Showing {{ page.numberOfElements }} of {{ page.totalElements }} annonces
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="btn-page"
+            [disabled]="page.first"
+            (click)="previousPage()"
+          >
+            Previous
+          </button>
+
+          <button
+            *ngFor="let pageNum of getPageNumbers()"
+            class="btn-page-num"
+            [class.active]="pageNum === currentPage"
+            [class.ellipsis]="pageNum === -1"
+            [disabled]="pageNum === -1"
+            (click)="pageNum !== -1 && goToPage(pageNum)"
+          >
+            {{ pageNum === -1 ? '...' : pageNum + 1 }}
+          </button>
+
+          <button
+            class="btn-page"
+            [disabled]="page.last"
+            (click)="nextPage()"
+          >
+            Next
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

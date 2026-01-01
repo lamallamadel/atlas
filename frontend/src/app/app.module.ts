@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AnnoncesComponent } from './pages/annonces/annonces.component';
+import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 
@@ -15,12 +17,14 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
     AppLayoutComponent,
     DashboardComponent,
     AnnoncesComponent,
+    AnnonceCreateComponent,
     DossiersComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   providers: [
     {

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AnnoncesComponent } from './pages/annonces/annonces.component';
+import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 
 const routes: Routes = [
@@ -13,6 +14,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'annonces', component: AnnoncesComponent },
+      { path: 'annonces/new', component: AnnonceCreateComponent },
       { path: 'dossiers', component: DossiersComponent }
     ]
   }
