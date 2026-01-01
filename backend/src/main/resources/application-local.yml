@@ -12,6 +12,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jakarta.persistence.validation.mode: auto
   flyway:
     enabled: false
 

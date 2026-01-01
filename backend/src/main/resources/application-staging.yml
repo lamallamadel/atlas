@@ -18,6 +18,7 @@ spring:
     properties:
       hibernate:
         format_sql: false
+        jakarta.persistence.validation.mode: auto
   flyway:
     enabled: true
     baseline-on-migrate: true
