@@ -4,8 +4,11 @@ import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierMapper;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
+import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -23,14 +26,23 @@ public class DossierService {
 
     private final DossierRepository dossierRepository;
     private final DossierMapper dossierMapper;
+    private final AnnonceRepository annonceRepository;
 
-    public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper) {
+    public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper, AnnonceRepository annonceRepository) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
+        this.annonceRepository = annonceRepository;
     }
 
     @Transactional
     public DossierResponse create(DossierCreateRequest request) {
+        if (request.getAnnonceId() != null) {
+            Annonce annonce = annonceRepository.findById(request.getAnnonceId())
+                    .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId()));
+            if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {
+                throw new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce");
+            }
+        }
         Dossier dossier = dossierMapper.toEntity(request);
         Dossier saved = dossierRepository.save(dossier);
         return dossierMapper.toResponse(saved);

@@ -144,6 +144,20 @@ class DossierControllerTest {
     }
 
     @Test
+    void create_ArchivedAnnonce_Returns400() throws Exception {
+        createRequest.setAnnonceId(1L);
+
+        when(dossierService.create(any(DossierCreateRequest.class)))
+                .thenThrow(new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce"));
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Cannot create dossier with ARCHIVED annonce"));
+    }
+
+    @Test
     void getById_ExistingId_Returns200WithEntity() throws Exception {
         when(dossierService.getById(1L)).thenReturn(dossierResponse);
 
