@@ -1,0 +1,118 @@
+<div class="page-container">
+  <div class="page-header">
+    <h2 class="page-title">Create New Dossier</h2>
+  </div>
+
+  <div class="page-content">
+    <div *ngIf="error" class="error-alert">
+      <span class="error-icon">⚠</span>
+      <span>{{ error }}</span>
+    </div>
+
+    <div *ngIf="duplicates.length > 0" class="warning-banner">
+      <div class="warning-content">
+        <span class="warning-icon">⚠</span>
+        <div class="warning-text">
+          <strong>Duplicate Found!</strong>
+          <p>A dossier with this phone number already exists.</p>
+        </div>
+      </div>
+      <div class="warning-actions">
+        <button
+          *ngFor="let duplicate of duplicates"
+          class="btn-open-existing"
+          (click)="openExistingDossier(duplicate.id)"
+          type="button"
+        >
+          Open Existing (ID: {{ duplicate.id }})
+        </button>
+      </div>
+    </div>
+
+    <form [formGroup]="dossierForm" (ngSubmit)="onSubmit()" class="dossier-form">
+      <div class="form-group">
+        <label for="leadName" class="form-label">
+          Lead Name
+        </label>
+        <input
+          id="leadName"
+          type="text"
+          class="form-input"
+          formControlName="leadName"
+          [class.invalid]="isFieldInvalid('leadName')"
+          placeholder="Enter lead name"
+        />
+        <div *ngIf="getFieldError('leadName')" class="field-error">
+          {{ getFieldError('leadName') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="leadPhone" class="form-label">
+          Lead Phone
+        </label>
+        <input
+          id="leadPhone"
+          type="text"
+          class="form-input"
+          formControlName="leadPhone"
+          [class.invalid]="isFieldInvalid('leadPhone')"
+          placeholder="Enter lead phone number"
+          (blur)="onPhoneBlur()"
+        />
+        <div *ngIf="checkingDuplicates" class="checking-duplicates">
+          <span class="checking-spinner"></span>
+          Checking for duplicates...
+        </div>
+        <div *ngIf="getFieldError('leadPhone')" class="field-error">
+          {{ getFieldError('leadPhone') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="leadSource" class="form-label">
+          Lead Source
+        </label>
+        <input
+          id="leadSource"
+          type="text"
+          class="form-input"
+          formControlName="leadSource"
+          [class.invalid]="isFieldInvalid('leadSource')"
+          placeholder="Enter lead source"
+        />
+        <div *ngIf="getFieldError('leadSource')" class="field-error">
+          {{ getFieldError('leadSource') }}
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="annonceId" class="form-label">
+          Annonce ID
+        </label>
+        <input
+          id="annonceId"
+          type="number"
+          class="form-input"
+          formControlName="annonceId"
+          [class.invalid]="isFieldInvalid('annonceId')"
+          placeholder="Enter annonce ID (optional)"
+        />
+        <div *ngIf="getFieldError('annonceId')" class="field-error">
+          {{ getFieldError('annonceId') }}
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+        <button type="submit" class="btn-submit" [disabled]="submitting">
+          <span *ngIf="!submitting">Create</span>
+          <span *ngIf="submitting" class="btn-loading">
+            <span class="btn-spinner"></span>
+            Creating...
+          </span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

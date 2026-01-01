@@ -120,4 +120,9 @@ export class DossierApiService {
     const request: DossierStatusPatchRequest = { status };
     return this.http.patch<DossierResponse>(`${this.apiUrl}/${id}/status`, request);
   }
+
+  checkDuplicates(phone: string): Observable<DossierResponse[]> {
+    const httpParams = new HttpParams().set('leadPhone', phone);
+    return this.http.get<DossierResponse[]>(`${this.apiUrl}/check-duplicates`, { params: httpParams });
+  }
 }
