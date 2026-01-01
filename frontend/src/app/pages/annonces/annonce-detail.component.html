@@ -1,0 +1,93 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="goBack()">
+        <span class="back-icon">←</span>
+        Back to Annonces
+      </button>
+      <h2 class="page-title">Annonce Details</h2>
+    </div>
+    <button *ngIf="annonce" class="btn-edit" (click)="editAnnonce()">
+      <span class="btn-icon">✏️</span>
+      Edit
+    </button>
+  </div>
+
+  <div class="page-content">
+    <div *ngIf="loading" class="loading-state">
+      <div class="spinner"></div>
+      <p>Loading annonce details...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-state">
+      <p class="error-message">{{ error }}</p>
+      <button class="btn-retry" (click)="loadAnnonce()">Retry</button>
+    </div>
+
+    <div *ngIf="!loading && !error && annonce" class="detail-content">
+      <div class="detail-section">
+        <div class="detail-row">
+          <span class="detail-label">ID:</span>
+          <span class="detail-value">{{ annonce.id }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Title:</span>
+          <span class="detail-value detail-title">{{ annonce.title }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Status:</span>
+          <span [ngClass]="getStatusBadgeClass(annonce.status)">
+            {{ annonce.status }}
+          </span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Organization ID:</span>
+          <span class="detail-value">{{ annonce.orgId }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="annonce.description">
+          <span class="detail-label">Description:</span>
+          <span class="detail-value detail-description">{{ annonce.description }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="annonce.category">
+          <span class="detail-label">Category:</span>
+          <span class="detail-value">{{ annonce.category }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="annonce.city">
+          <span class="detail-label">City:</span>
+          <span class="detail-value">{{ annonce.city }}</span>
+        </div>
+
+        <div class="detail-row" *ngIf="annonce.price !== undefined">
+          <span class="detail-label">Price:</span>
+          <span class="detail-value">{{ formatPrice(annonce.price, annonce.currency) }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Created At:</span>
+          <span class="detail-value">{{ formatDate(annonce.createdAt) }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Created By:</span>
+          <span class="detail-value">{{ annonce.createdBy }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Updated At:</span>
+          <span class="detail-value">{{ formatDate(annonce.updatedAt) }}</span>
+        </div>
+
+        <div class="detail-row">
+          <span class="detail-label">Updated By:</span>
+          <span class="detail-value">{{ annonce.updatedBy }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -8,6 +8,7 @@ import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AnnoncesComponent } from './pages/annonces/annonces.component';
 import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
+import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 
@@ -18,6 +19,7 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
     DashboardComponent,
     AnnoncesComponent,
     AnnonceCreateComponent,
+    AnnonceDetailComponent,
     DossiersComponent
   ],
   imports: [
