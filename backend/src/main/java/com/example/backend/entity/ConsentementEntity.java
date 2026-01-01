@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
-import com.example.backend.entity.enums.PartiePrenanteRole;
+import com.example.backend.entity.enums.ConsentementChannel;
+import com.example.backend.entity.enums.ConsentementStatus;
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -10,8 +11,8 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "partie_prenante")
-public class PartiePrenanteEntity {
+@Table(name = "consentement")
+public class ConsentementEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,23 +24,12 @@ public class PartiePrenanteEntity {
     private Dossier dossier;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 50)
-    private PartiePrenanteRole role;
+    @Column(name = "channel", nullable = false, length = 50)
+    private ConsentementChannel channel;
 
-    @Column(name = "first_name", length = 255)
-    private String firstName;
-
-    @Column(name = "last_name", length = 255)
-    private String lastName;
-
-    @Column(name = "email", length = 255)
-    private String email;
-
-    @Column(name = "phone", length = 50)
-    private String phone;
-
-    @Column(name = "address", length = 500)
-    private String address;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false, length = 50)
+    private ConsentementStatus status;
 
     @Type(JsonType.class)
     @Column(name = "meta_json", columnDefinition = "jsonb")
@@ -69,52 +59,28 @@ public class PartiePrenanteEntity {
         this.dossier = dossier;
     }
 
-    public PartiePrenanteRole getRole() {
-        return role;
+    public ConsentementChannel getChannel() {
+        return channel;
     }
 
-    public void setRole(PartiePrenanteRole role) {
-        this.role = role;
+    public void setChannel(ConsentementChannel channel) {
+        this.channel = channel;
     }
 
-    public String getFirstName() {
-        return firstName;
+    public ConsentementStatus getStatus() {
+        return status;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
+    public void setStatus(ConsentementStatus status) {
+        this.status = status;
     }
 
-    public String getLastName() {
-        return lastName;
+    public String getMetaJson() {
+        return metaJson;
     }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
+    public void setMetaJson(String metaJson) {
+        this.metaJson = metaJson;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -131,13 +97,5 @@ public class PartiePrenanteEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
-    }
-
-    public String getMetaJson() {
-        return metaJson;
-    }
-
-    public void setMetaJson(String metaJson) {
-        this.metaJson = metaJson;
     }
 }
