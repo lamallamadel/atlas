@@ -133,3 +133,5 @@ frontend/frontend.log
 *-temp.*
 temp-*.*
 setup-temp.*
+java17.cmd
+setup-temp.cmd
