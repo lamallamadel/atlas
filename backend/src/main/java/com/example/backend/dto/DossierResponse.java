@@ -1,21 +1,44 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DossierStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
 
+@Schema(description = "Dossier response representation")
 public class DossierResponse {
 
+    @Schema(description = "Unique identifier of the dossier", example = "1")
     private Long id;
+
+    @Schema(description = "Organization ID", example = "org-123")
     private String orgId;
+
+    @Schema(description = "Associated annonce ID", example = "1", nullable = true)
     private Long annonceId;
+
+    @Schema(description = "Lead phone number", example = "+33612345678", nullable = true)
     private String leadPhone;
+
+    @Schema(description = "Lead name", example = "John Doe", nullable = true)
     private String leadName;
+
+    @Schema(description = "Lead source", example = "Website", nullable = true)
     private String leadSource;
+
+    @Schema(description = "Current status of the dossier", example = "NEW")
     private DossierStatus status;
+
+    @Schema(description = "Timestamp when the dossier was created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
+
+    @Schema(description = "Timestamp when the dossier was last updated", example = "2024-01-01T12:00:00")
     private LocalDateTime updatedAt;
+
+    @Schema(description = "User who created the dossier", nullable = true)
     private String createdBy;
+
+    @Schema(description = "User who last updated the dossier", nullable = true)
     private String updatedBy;
 
     public DossierResponse() {
