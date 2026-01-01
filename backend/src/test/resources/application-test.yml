@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:localdb
+    url: jdbc:h2:mem:testdb
     username: sa
     password: 
     driver-class-name: org.h2.Driver
@@ -8,15 +8,12 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
   flyway:
     enabled: false
-
-server:
-  port: 8080
 
 logging:
   level:
@@ -27,7 +24,3 @@ management:
   endpoint:
     health:
       show-details: always
-
-cors:
-  allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:3000}
-

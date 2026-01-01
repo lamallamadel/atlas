@@ -5,11 +5,11 @@ WORKDIR /app
 # Copy pom.xml and download dependencies
 COPY pom.xml .
 COPY settings.xml .
-RUN mvn dependency:go-offline -s settings.xml
+RUN mvn -ntp dependency:go-offline -s settings.xml
 
 # Copy source and build
 COPY src ./src
-RUN mvn clean package -DskipTests -s settings.xml
+RUN mvn -ntp clean package -DskipTests -s settings.xml
 
 # Runtime stage
 FROM eclipse-temurin:17-jre-alpine
@@ -22,5 +22,4 @@ RUN apk add --no-cache curl
 COPY --from=build /app/target/backend.jar ./app.jar
 
 EXPOSE 8080
-
 ENTRYPOINT ["java", "-jar", "app.jar"]

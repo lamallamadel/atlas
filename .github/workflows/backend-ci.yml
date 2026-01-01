@@ -9,6 +9,10 @@ on:
       - 'backend/**'
       - '.github/workflows/backend-ci.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -25,5 +29,17 @@ jobs:
           cache: 'maven'
       
       - name: Run tests
-        run: mvn test
+        run: ./mvnw -B -ntp test
         working-directory: backend
+      
+      - name: Build package
+        run: ./mvnw -B -ntp clean package -DskipTests=false
+        working-directory: backend
+      
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+          retention-days: 7
+

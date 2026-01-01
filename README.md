@@ -50,15 +50,16 @@ make up
 
 This will:
 - Start PostgreSQL database
-- Build and start the backend (port 8080)
+- Build and start the backend with local profile (H2 database, port 8080)
 - Install dependencies and start the frontend (port 4200)
 
 #### 3. Access the Application
 
 - **Frontend:** http://localhost:4200
 - **Backend API:** http://localhost:8080
-- **API Documentation:** http://localhost:8080/swagger-ui.html
+- **API Documentation:** http://localhost:8080/swagger-ui
 - **Health Check:** http://localhost:8080/actuator/health
+- **Info Endpoint:** http://localhost:8080/actuator/info
 
 ## 📋 Available Commands
 
@@ -111,9 +112,10 @@ make help         # Show all available commands
 #### Backend
 ```bash
 cd backend
-mvn clean install    # Build
-mvn test            # Run tests
-mvn spring-boot:run # Start server (port 8080)
+./mvnw clean install         # Build
+./mvnw test                  # Run tests (uses test profile with H2)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local  # Start server (port 8080)
+./mvnw clean package         # Build JAR for production
 ```
 
 #### Frontend
@@ -199,15 +201,66 @@ Default credentials (configured in `infra/.env`):
 
 ### Application Profiles
 
-The backend supports multiple Spring profiles:
-- `local` (default) - Uses H2 in-memory database
-- `test` - Uses PostgreSQL for testing
-- `prod` - Production configuration
+The backend supports multiple Spring profiles for different environments. **No default profile is set**, so you must explicitly specify the profile when running the application.
 
-Set profile via environment variable:
+Available profiles:
+- **`local`** - Local development using H2 in-memory database (no external DB required)
+- **`staging`** - Staging environment with PostgreSQL (requires environment variables)
+- **`prod`** - Production environment with PostgreSQL (requires environment variables)
+- **`test`** - Automated testing with H2 (used by JUnit tests automatically)
+
+#### Running with Different Profiles
+
+**Local Development (H2):**
 ```bash
-SPRING_PROFILES_ACTIVE=test mvn spring-boot:run
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+# OR
+SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
 ```
+
+**Staging (PostgreSQL):**
+```bash
+export DB_URL=jdbc:postgresql://staging-host:5432/stagingdb
+export DB_USERNAME=staging_user
+export DB_PASSWORD=staging_password
+export SPRING_PROFILES_ACTIVE=staging
+
+cd backend
+./mvnw spring-boot:run
+```
+
+**Production (PostgreSQL):**
+```bash
+export DB_URL=jdbc:postgresql://prod-host:5432/proddb
+export DB_USERNAME=prod_user
+export DB_PASSWORD=prod_password
+export SPRING_PROFILES_ACTIVE=prod
+
+cd backend
+java -jar target/backend.jar
+```
+
+**Windows (PowerShell):**
+```powershell
+$env:DB_URL = "jdbc:postgresql://localhost:5432/atlasiadb"
+$env:DB_USERNAME = "postgres"
+$env:DB_PASSWORD = "postgres"
+$env:SPRING_PROFILES_ACTIVE = "prod"
+
+cd backend
+java -jar target/backend.jar
+```
+
+#### Required Environment Variables
+
+| Profile | Required Variables | Optional Variables |
+|---------|-------------------|-------------------|
+| `local` | None | `CORS_ALLOWED_ORIGINS` |
+| `staging` | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | `CORS_ALLOWED_ORIGINS` |
+| `prod` | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | `CORS_ALLOWED_ORIGINS` |
+| `test` | None (H2 in-memory) | None |
+
 
 ## 🐛 Troubleshooting
 
@@ -228,6 +281,13 @@ $env:JAVA_HOME = 'C:\Path\To\jdk-17'  # Windows PowerShell
 - Backend (8080): Check if another service is using the port
 - Frontend (4200): Stop other Angular dev servers
 - Database (5432): Stop other PostgreSQL instances
+
+**Backend won't start:**
+```bash
+# Make sure to specify a profile
+export SPRING_PROFILES_ACTIVE=local  # or staging, prod
+./mvnw spring-boot:run
+```
 
 **Docker issues:**
 ```bash

@@ -9,6 +9,10 @@ on:
       - 'frontend/**'
       - '.github/workflows/frontend-ci.yml'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -32,6 +36,18 @@ jobs:
         run: npm run lint
         working-directory: frontend
       
-      - name: Build
-        run: npm run build
+      - name: Run tests (headless)
+        run: npm test -- --watch=false --browsers=ChromeHeadless
         working-directory: frontend
+      
+      - name: Build production
+        run: npm run build -- --configuration production
+        working-directory: frontend
+      
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/**
+          retention-days: 7
+
