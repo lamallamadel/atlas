@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl, ValidationErrors } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AnnonceApiService, AnnonceCreateRequest, AnnonceUpdateRequest, AnnonceStatus, AnnonceResponse } from '../../services/annonce-api.service';
 
@@ -9,7 +9,11 @@ import { AnnonceApiService, AnnonceCreateRequest, AnnonceUpdateRequest, AnnonceS
   styleUrls: ['./annonce-create.component.css']
 })
 export class AnnonceCreateComponent implements OnInit {
-  annonceForm!: FormGroup;
+  step1FormGroup!: FormGroup;
+  step2FormGroup!: FormGroup;
+  step3FormGroup!: FormGroup;
+  step4FormGroup!: FormGroup;
+  
   isEditMode = false;
   annonceId: number | null = null;
   loading = false;
@@ -24,6 +28,13 @@ export class AnnonceCreateComponent implements OnInit {
     { value: AnnonceStatus.ARCHIVED, label: 'Archived' }
   ];
 
+  typeOptions = [
+    { value: 'APARTMENT', label: 'Apartment' },
+    { value: 'HOUSE', label: 'House' },
+    { value: 'STUDIO', label: 'Studio' },
+    { value: 'COMMERCIAL', label: 'Commercial' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private annonceApiService: AnnonceApiService,
@@ -32,18 +43,59 @@ export class AnnonceCreateComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.initForm();
+    this.initForms();
     this.checkEditMode();
   }
 
-  initForm(): void {
-    this.annonceForm = this.fb.group({
+  initForms(): void {
+    this.step1FormGroup = this.fb.group({
+      type: ['', Validators.required],
       title: ['', [Validators.required, Validators.maxLength(500)]],
-      description: ['', [Validators.maxLength(10000)]],
-      city: ['', [Validators.maxLength(255)]],
-      price: [null, [Validators.min(0)]],
-      status: [AnnonceStatus.DRAFT]
+      description: ['', Validators.maxLength(10000)]
     });
+
+    this.step2FormGroup = this.fb.group({
+      price: [null, [Validators.min(0)]],
+      city: ['', Validators.maxLength(255)],
+      address: ['', Validators.maxLength(500)],
+      surface: [null, [Validators.min(0)]]
+    });
+
+    this.step3FormGroup = this.fb.group({
+      photos: this.fb.array([])
+    });
+
+    this.step4FormGroup = this.fb.group({
+      rulesJson: ['{}', [Validators.required, this.jsonValidator]]
+    });
+  }
+
+  get photos(): FormArray {
+    return this.step3FormGroup.get('photos') as FormArray;
+  }
+
+  getPhotoControl(index: number): FormControl {
+    return this.photos.at(index) as FormControl;
+  }
+
+  addPhoto(): void {
+    this.photos.push(this.fb.control('', [Validators.required, Validators.maxLength(1000)]));
+  }
+
+  removePhoto(index: number): void {
+    this.photos.removeAt(index);
+  }
+
+  jsonValidator(control: AbstractControl): ValidationErrors | null {
+    try {
+      const value = control.value;
+      if (value) {
+        JSON.parse(value);
+      }
+      return null;
+    } catch (e) {
+      return { invalidJson: true };
+    }
   }
 
   checkEditMode(): void {
@@ -63,13 +115,23 @@ export class AnnonceCreateComponent implements OnInit {
 
     this.annonceApiService.getById(this.annonceId).subscribe({
       next: (annonce: AnnonceResponse) => {
-        this.annonceForm.patchValue({
+        this.step1FormGroup.patchValue({
+          type: annonce.category || '',
           title: annonce.title,
-          description: annonce.description || '',
-          city: annonce.city || '',
-          price: annonce.price,
-          status: annonce.status
+          description: annonce.description || ''
         });
+        
+        this.step2FormGroup.patchValue({
+          price: annonce.price,
+          city: annonce.city || '',
+          address: '',
+          surface: null
+        });
+
+        this.step4FormGroup.patchValue({
+          rulesJson: '{}'
+        });
+        
         this.loading = false;
       },
       error: (err) => {
@@ -81,8 +143,9 @@ export class AnnonceCreateComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.annonceForm.invalid) {
-      this.markFormGroupTouched(this.annonceForm);
+    if (this.step1FormGroup.invalid || this.step2FormGroup.invalid || 
+        this.step3FormGroup.invalid || this.step4FormGroup.invalid) {
+      this.markAllFormGroupsTouched();
       return;
     }
 
@@ -98,13 +161,16 @@ export class AnnonceCreateComponent implements OnInit {
   }
 
   createAnnonce(): void {
-    const formValue = this.annonceForm.value;
+    const step1Value = this.step1FormGroup.value;
+    const step2Value = this.step2FormGroup.value;
+    
     const request: AnnonceCreateRequest = {
       orgId: 'ORG-001',
-      title: formValue.title,
-      description: formValue.description || undefined,
-      city: formValue.city || undefined,
-      price: formValue.price !== null && formValue.price !== '' ? formValue.price : undefined
+      title: step1Value.title,
+      description: step1Value.description || undefined,
+      category: step1Value.type || undefined,
+      city: step2Value.city || undefined,
+      price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined
     };
 
     this.annonceApiService.create(request).subscribe({
@@ -122,13 +188,15 @@ export class AnnonceCreateComponent implements OnInit {
   updateAnnonce(): void {
     if (this.annonceId === null) return;
 
-    const formValue = this.annonceForm.value;
+    const step1Value = this.step1FormGroup.value;
+    const step2Value = this.step2FormGroup.value;
+    
     const request: AnnonceUpdateRequest = {
-      title: formValue.title,
-      description: formValue.description || undefined,
-      city: formValue.city || undefined,
-      price: formValue.price !== null && formValue.price !== '' ? formValue.price : undefined,
-      status: formValue.status
+      title: step1Value.title,
+      description: step1Value.description || undefined,
+      category: step1Value.type || undefined,
+      city: step2Value.city || undefined,
+      price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined
     };
 
     this.annonceApiService.update(this.annonceId, request).subscribe({
@@ -166,6 +234,13 @@ export class AnnonceCreateComponent implements OnInit {
     this.router.navigate(['/annonces']);
   }
 
+  markAllFormGroupsTouched(): void {
+    this.markFormGroupTouched(this.step1FormGroup);
+    this.markFormGroupTouched(this.step2FormGroup);
+    this.markFormGroupTouched(this.step3FormGroup);
+    this.markFormGroupTouched(this.step4FormGroup);
+  }
+
   markFormGroupTouched(formGroup: FormGroup): void {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.get(key);
@@ -173,12 +248,16 @@ export class AnnonceCreateComponent implements OnInit {
 
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
+      } else if (control instanceof FormArray) {
+        control.controls.forEach(c => {
+          c.markAsTouched();
+        });
       }
     });
   }
 
-  getFieldError(fieldName: string): string | null {
-    const control = this.annonceForm.get(fieldName);
+  getFieldError(formGroup: FormGroup, fieldName: string): string | null {
+    const control = formGroup.get(fieldName);
     
     if (this.validationErrors[fieldName]) {
       return this.validationErrors[fieldName];
@@ -195,6 +274,9 @@ export class AnnonceCreateComponent implements OnInit {
       if (control.errors?.['min']) {
         return `${this.getFieldLabel(fieldName)} must be greater than or equal to 0`;
       }
+      if (control.errors?.['invalidJson']) {
+        return `${this.getFieldLabel(fieldName)} must be valid JSON`;
+      }
     }
 
     return null;
@@ -202,17 +284,32 @@ export class AnnonceCreateComponent implements OnInit {
 
   getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
+      type: 'Type',
       title: 'Title',
       description: 'Description',
-      city: 'City',
       price: 'Price',
-      status: 'Status'
+      city: 'City',
+      address: 'Address',
+      surface: 'Surface',
+      rulesJson: 'Rules JSON'
     };
     return labels[fieldName] || fieldName;
   }
 
-  isFieldInvalid(fieldName: string): boolean {
-    const control = this.annonceForm.get(fieldName);
+  isFieldInvalid(formGroup: FormGroup, fieldName: string): boolean {
+    const control = formGroup.get(fieldName);
     return !!(control && control.touched && (control.invalid || this.validationErrors[fieldName]));
+  }
+
+  formatJson(): void {
+    try {
+      const control = this.step4FormGroup.get('rulesJson');
+      if (control) {
+        const parsed = JSON.parse(control.value);
+        control.setValue(JSON.stringify(parsed, null, 2));
+      }
+    } catch (e) {
+      // Invalid JSON, don't format
+    }
   }
 }

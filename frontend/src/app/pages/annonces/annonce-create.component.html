@@ -14,115 +14,257 @@
       <span>{{ error }}</span>
     </div>
 
-    <form *ngIf="!loading" [formGroup]="annonceForm" (ngSubmit)="onSubmit()" class="annonce-form">
-      <div class="form-group">
-        <label for="title" class="form-label">
-          Title <span class="required">*</span>
-        </label>
-        <input
-          id="title"
-          type="text"
-          class="form-input"
-          formControlName="title"
-          [class.invalid]="isFieldInvalid('title')"
-          placeholder="Enter annonce title"
-        />
-        <div *ngIf="getFieldError('title')" class="field-error">
-          {{ getFieldError('title') }}
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="description" class="form-label">
-          Description
-        </label>
-        <textarea
-          id="description"
-          class="form-textarea"
-          formControlName="description"
-          [class.invalid]="isFieldInvalid('description')"
-          placeholder="Enter annonce description"
-          rows="5"
-        ></textarea>
-        <div *ngIf="getFieldError('description')" class="field-error">
-          {{ getFieldError('description') }}
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="city" class="form-label">
-            City
-          </label>
-          <input
-            id="city"
-            type="text"
-            class="form-input"
-            formControlName="city"
-            [class.invalid]="isFieldInvalid('city')"
-            placeholder="Enter city"
-          />
-          <div *ngIf="getFieldError('city')" class="field-error">
-            {{ getFieldError('city') }}
+    <mat-stepper *ngIf="!loading" [linear]="true" #stepper class="annonce-stepper">
+      <!-- Step 1: Type, Title, Description -->
+      <mat-step [stepControl]="step1FormGroup" label="Basic Information">
+        <form [formGroup]="step1FormGroup" class="step-form">
+          <h3 class="step-title">Basic Information</h3>
+          
+          <div class="form-group">
+            <label for="type" class="form-label">
+              Type <span class="required">*</span>
+            </label>
+            <select
+              id="type"
+              class="form-select"
+              formControlName="type"
+              [class.invalid]="isFieldInvalid(step1FormGroup, 'type')"
+            >
+              <option value="">Select a type</option>
+              <option *ngFor="let option of typeOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <div *ngIf="getFieldError(step1FormGroup, 'type')" class="field-error">
+              {{ getFieldError(step1FormGroup, 'type') }}
+            </div>
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="price" class="form-label">
-            Price (EUR)
-          </label>
-          <input
-            id="price"
-            type="number"
-            class="form-input"
-            formControlName="price"
-            [class.invalid]="isFieldInvalid('price')"
-            placeholder="0.00"
-            step="0.01"
-            min="0"
-          />
-          <div *ngIf="getFieldError('price')" class="field-error">
-            {{ getFieldError('price') }}
+          <div class="form-group">
+            <label for="title" class="form-label">
+              Title <span class="required">*</span>
+            </label>
+            <input
+              id="title"
+              type="text"
+              class="form-input"
+              formControlName="title"
+              [class.invalid]="isFieldInvalid(step1FormGroup, 'title')"
+              placeholder="Enter annonce title"
+            />
+            <div *ngIf="getFieldError(step1FormGroup, 'title')" class="field-error">
+              {{ getFieldError(step1FormGroup, 'title') }}
+            </div>
           </div>
-        </div>
-      </div>
 
-      <div class="form-group" *ngIf="isEditMode">
-        <label for="status" class="form-label">
-          Status
-        </label>
-        <select
-          id="status"
-          class="form-select"
-          formControlName="status"
-        >
-          <option *ngFor="let option of statusOptions" [value]="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-      </div>
+          <div class="form-group">
+            <label for="description" class="form-label">
+              Description
+            </label>
+            <textarea
+              id="description"
+              class="form-textarea"
+              formControlName="description"
+              [class.invalid]="isFieldInvalid(step1FormGroup, 'description')"
+              placeholder="Enter annonce description"
+              rows="5"
+            ></textarea>
+            <div *ngIf="getFieldError(step1FormGroup, 'description')" class="field-error">
+              {{ getFieldError(step1FormGroup, 'description') }}
+            </div>
+          </div>
 
-      <div class="form-actions">
-        <button
-          type="button"
-          class="btn-cancel"
-          (click)="onCancel()"
-          [disabled]="submitting"
-        >
-          Cancel
-        </button>
-        <button
-          type="submit"
-          class="btn-submit"
-          [disabled]="submitting"
-        >
-          <span *ngIf="!submitting">{{ isEditMode ? 'Update' : 'Create' }}</span>
-          <span *ngIf="submitting" class="btn-loading">
-            <span class="btn-spinner"></span>
-            {{ isEditMode ? 'Updating...' : 'Creating...' }}
-          </span>
-        </button>
-      </div>
-    </form>
+          <div class="step-actions">
+            <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+            <button type="button" class="btn-next" matStepperNext>Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- Step 2: Price, City, Address, Surface -->
+      <mat-step [stepControl]="step2FormGroup" label="Location & Details">
+        <form [formGroup]="step2FormGroup" class="step-form">
+          <h3 class="step-title">Location & Details</h3>
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="price" class="form-label">
+                Price (EUR)
+              </label>
+              <input
+                id="price"
+                type="number"
+                class="form-input"
+                formControlName="price"
+                [class.invalid]="isFieldInvalid(step2FormGroup, 'price')"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+              />
+              <div *ngIf="getFieldError(step2FormGroup, 'price')" class="field-error">
+                {{ getFieldError(step2FormGroup, 'price') }}
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="surface" class="form-label">
+                Surface (m²)
+              </label>
+              <input
+                id="surface"
+                type="number"
+                class="form-input"
+                formControlName="surface"
+                [class.invalid]="isFieldInvalid(step2FormGroup, 'surface')"
+                placeholder="0"
+                step="1"
+                min="0"
+              />
+              <div *ngIf="getFieldError(step2FormGroup, 'surface')" class="field-error">
+                {{ getFieldError(step2FormGroup, 'surface') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="city" class="form-label">
+              City
+            </label>
+            <input
+              id="city"
+              type="text"
+              class="form-input"
+              formControlName="city"
+              [class.invalid]="isFieldInvalid(step2FormGroup, 'city')"
+              placeholder="Enter city"
+            />
+            <div *ngIf="getFieldError(step2FormGroup, 'city')" class="field-error">
+              {{ getFieldError(step2FormGroup, 'city') }}
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address" class="form-label">
+              Address
+            </label>
+            <input
+              id="address"
+              type="text"
+              class="form-input"
+              formControlName="address"
+              [class.invalid]="isFieldInvalid(step2FormGroup, 'address')"
+              placeholder="Enter address"
+            />
+            <div *ngIf="getFieldError(step2FormGroup, 'address')" class="field-error">
+              {{ getFieldError(step2FormGroup, 'address') }}
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button type="button" class="btn-back" matStepperPrevious>Back</button>
+            <button type="button" class="btn-next" matStepperNext>Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- Step 3: Photos -->
+      <mat-step [stepControl]="step3FormGroup" label="Photos">
+        <form [formGroup]="step3FormGroup" class="step-form">
+          <h3 class="step-title">Photos</h3>
+          
+          <div class="photos-section">
+            <div *ngIf="photos.length === 0" class="empty-photos">
+              <p>No photos added yet. Click "Add Photo" to add a photo URL.</p>
+            </div>
+
+            <div *ngFor="let photo of photos.controls; let i = index" class="photo-item">
+              <div class="photo-input-group">
+                <label [for]="'photo-' + i" class="form-label">
+                  Photo URL {{ i + 1 }}
+                </label>
+                <div class="photo-input-wrapper">
+                  <input
+                    [id]="'photo-' + i"
+                    type="text"
+                    class="form-input"
+                    [formControl]="getPhotoControl(i)"
+                    [class.invalid]="getPhotoControl(i).touched && getPhotoControl(i).invalid"
+                    placeholder="Enter photo URL"
+                  />
+                  <button
+                    type="button"
+                    class="btn-remove-photo"
+                    (click)="removePhoto(i)"
+                    title="Remove photo"
+                  >
+                    ✕
+                  </button>
+                </div>
+                <div *ngIf="getPhotoControl(i).touched && getPhotoControl(i).invalid" class="field-error">
+                  Photo URL is required and must not exceed 1000 characters
+                </div>
+              </div>
+            </div>
+
+            <button type="button" class="btn-add-photo" (click)="addPhoto()">
+              + Add Photo
+            </button>
+          </div>
+
+          <div class="step-actions">
+            <button type="button" class="btn-back" matStepperPrevious>Back</button>
+            <button type="button" class="btn-next" matStepperNext>Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <!-- Step 4: Rules JSON -->
+      <mat-step [stepControl]="step4FormGroup" label="Rules">
+        <form [formGroup]="step4FormGroup" class="step-form">
+          <h3 class="step-title">Rules (JSON)</h3>
+          
+          <div class="form-group">
+            <label for="rulesJson" class="form-label">
+              Rules JSON <span class="required">*</span>
+            </label>
+            <div class="json-editor-controls">
+              <button type="button" class="btn-format-json" (click)="formatJson()">
+                Format JSON
+              </button>
+            </div>
+            <textarea
+              id="rulesJson"
+              class="form-textarea json-editor"
+              formControlName="rulesJson"
+              [class.invalid]="isFieldInvalid(step4FormGroup, 'rulesJson')"
+              placeholder='Enter rules as JSON, e.g., {"allowPets": true, "smokingAllowed": false}'
+              rows="10"
+            ></textarea>
+            <div *ngIf="getFieldError(step4FormGroup, 'rulesJson')" class="field-error">
+              {{ getFieldError(step4FormGroup, 'rulesJson') }}
+            </div>
+            <div class="json-hint">
+              Enter valid JSON format. Use the "Format JSON" button to auto-format your JSON.
+            </div>
+          </div>
+
+          <div class="step-actions">
+            <button type="button" class="btn-back" matStepperPrevious>Back</button>
+            <button 
+              type="button" 
+              class="btn-submit" 
+              (click)="onSubmit()"
+              [disabled]="submitting"
+            >
+              <span *ngIf="!submitting">{{ isEditMode ? 'Update' : 'Create' }}</span>
+              <span *ngIf="submitting" class="btn-loading">
+                <span class="btn-spinner"></span>
+                {{ isEditMode ? 'Updating...' : 'Creating...' }}
+              </span>
+            </button>
+          </div>
+        </form>
+      </mat-step>
+    </mat-stepper>
   </div>
 </div>
