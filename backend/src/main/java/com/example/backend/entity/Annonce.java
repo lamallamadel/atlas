@@ -1,12 +1,17 @@
 package com.example.backend.entity;
 
 import com.example.backend.entity.enums.AnnonceStatus;
+import com.example.backend.entity.enums.AnnonceType;
+import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Entity
 @Table(name = "annonce")
@@ -29,6 +34,16 @@ public class Annonce {
     @Column(name = "category", length = 100)
     private String category;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", length = 50)
+    private AnnonceType type;
+
+    @Column(name = "address", length = 500)
+    private String address;
+
+    @Column(name = "surface")
+    private Double surface;
+
     @Column(name = "city", length = 255)
     private String city;
 
@@ -41,6 +56,14 @@ public class Annonce {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private AnnonceStatus status;
+
+    @Type(JsonBinaryType.class)
+    @Column(name = "photos_json", columnDefinition = "jsonb")
+    private List<String> photosJson;
+
+    @Type(JsonBinaryType.class)
+    @Column(name = "rules_json", columnDefinition = "jsonb")
+    private Map<String, Object> rulesJson;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -96,6 +119,30 @@ public class Annonce {
         this.category = category;
     }
 
+    public AnnonceType getType() {
+        return type;
+    }
+
+    public void setType(AnnonceType type) {
+        this.type = type;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Double getSurface() {
+        return surface;
+    }
+
+    public void setSurface(Double surface) {
+        this.surface = surface;
+    }
+
     public String getCity() {
         return city;
     }
@@ -126,6 +173,22 @@ public class Annonce {
 
     public void setStatus(AnnonceStatus status) {
         this.status = status;
+    }
+
+    public List<String> getPhotosJson() {
+        return photosJson;
+    }
+
+    public void setPhotosJson(List<String> photosJson) {
+        this.photosJson = photosJson;
+    }
+
+    public Map<String, Object> getRulesJson() {
+        return rulesJson;
+    }
+
+    public void setRulesJson(Map<String, Object> rulesJson) {
+        this.rulesJson = rulesJson;
     }
 
     public LocalDateTime getCreatedAt() {

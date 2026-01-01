@@ -13,9 +13,14 @@ public class AnnonceMapper {
         annonce.setTitle(request.getTitle());
         annonce.setDescription(request.getDescription());
         annonce.setCategory(request.getCategory());
+        annonce.setType(request.getType());
+        annonce.setAddress(request.getAddress());
+        annonce.setSurface(request.getSurface());
         annonce.setCity(request.getCity());
         annonce.setPrice(request.getPrice());
         annonce.setCurrency(request.getCurrency());
+        annonce.setPhotosJson(request.getPhotosJson());
+        annonce.setRulesJson(request.getRulesJson());
         annonce.setStatus(AnnonceStatus.DRAFT);
         return annonce;
     }
@@ -30,6 +35,15 @@ public class AnnonceMapper {
         if (request.getCategory() != null) {
             annonce.setCategory(request.getCategory());
         }
+        if (request.getType() != null) {
+            annonce.setType(request.getType());
+        }
+        if (request.getAddress() != null) {
+            annonce.setAddress(request.getAddress());
+        }
+        if (request.getSurface() != null) {
+            annonce.setSurface(request.getSurface());
+        }
         if (request.getCity() != null) {
             annonce.setCity(request.getCity());
         }
@@ -38,6 +52,12 @@ public class AnnonceMapper {
         }
         if (request.getCurrency() != null) {
             annonce.setCurrency(request.getCurrency());
+        }
+        if (request.getPhotosJson() != null) {
+            annonce.setPhotosJson(request.getPhotosJson());
+        }
+        if (request.getRulesJson() != null) {
+            annonce.setRulesJson(request.getRulesJson());
         }
         if (request.getStatus() != null) {
             annonce.setStatus(request.getStatus());
@@ -51,10 +71,15 @@ public class AnnonceMapper {
         response.setTitle(annonce.getTitle());
         response.setDescription(annonce.getDescription());
         response.setCategory(annonce.getCategory());
+        response.setType(annonce.getType());
+        response.setAddress(annonce.getAddress());
+        response.setSurface(annonce.getSurface());
         response.setCity(annonce.getCity());
         response.setPrice(annonce.getPrice());
         response.setCurrency(annonce.getCurrency());
         response.setStatus(annonce.getStatus());
+        response.setPhotosJson(annonce.getPhotosJson());
+        response.setRulesJson(annonce.getRulesJson());
         response.setCreatedAt(annonce.getCreatedAt());
         response.setUpdatedAt(annonce.getUpdatedAt());
         response.setCreatedBy(annonce.getCreatedBy());

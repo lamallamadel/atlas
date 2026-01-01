@@ -75,10 +75,10 @@ try {
     Write-Host "============================================================" -ForegroundColor Green
     Write-Host ""
     Write-Host "You can now:" -ForegroundColor Cyan
-    Write-Host "  - Run backend tests:  cd backend && mvn test" -ForegroundColor White
-    Write-Host "  - Run frontend tests: cd frontend && npm test" -ForegroundColor White
-    Write-Host "  - Build backend:      cd backend && mvn clean package" -ForegroundColor White
-    Write-Host "  - Build frontend:     cd frontend && npm run build" -ForegroundColor White
+    Write-Host "  - Run backend tests:  cd backend; mvn test" -ForegroundColor White
+    Write-Host "  - Run frontend tests: cd frontend; npm test" -ForegroundColor White
+    Write-Host "  - Build backend:      cd backend; mvn clean package" -ForegroundColor White
+    Write-Host "  - Build frontend:     cd frontend; npm run build" -ForegroundColor White
     Write-Host ""
     Write-Host "Note: For backend commands, use the mvn-java17.cmd wrapper or" -ForegroundColor Yellow
     Write-Host "set JAVA_HOME to Java 17 before running mvn commands." -ForegroundColor Yellow

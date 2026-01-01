@@ -1,10 +1,13 @@
 package com.example.backend.dto;
 
+import com.example.backend.entity.enums.AnnonceType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 
 public class AnnonceCreateRequest {
 
@@ -22,6 +25,14 @@ public class AnnonceCreateRequest {
     @Size(max = 100, message = "Category must not exceed 100 characters")
     private String category;
 
+    private AnnonceType type;
+
+    @Size(max = 500, message = "Address must not exceed 500 characters")
+    private String address;
+
+    @DecimalMin(value = "0.0", inclusive = true, message = "Surface must be greater than or equal to 0")
+    private Double surface;
+
     @Size(max = 255, message = "City must not exceed 255 characters")
     private String city;
 
@@ -30,6 +41,10 @@ public class AnnonceCreateRequest {
 
     @Size(max = 3, message = "Currency must not exceed 3 characters")
     private String currency;
+
+    private List<String> photosJson;
+
+    private Map<String, Object> rulesJson;
 
     public AnnonceCreateRequest() {
     }
@@ -66,6 +81,30 @@ public class AnnonceCreateRequest {
         this.category = category;
     }
 
+    public AnnonceType getType() {
+        return type;
+    }
+
+    public void setType(AnnonceType type) {
+        this.type = type;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Double getSurface() {
+        return surface;
+    }
+
+    public void setSurface(Double surface) {
+        this.surface = surface;
+    }
+
     public String getCity() {
         return city;
     }
@@ -88,5 +127,21 @@ public class AnnonceCreateRequest {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public List<String> getPhotosJson() {
+        return photosJson;
+    }
+
+    public void setPhotosJson(List<String> photosJson) {
+        this.photosJson = photosJson;
+    }
+
+    public Map<String, Object> getRulesJson() {
+        return rulesJson;
+    }
+
+    public void setRulesJson(Map<String, Object> rulesJson) {
+        this.rulesJson = rulesJson;
     }
 }

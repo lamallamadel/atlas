@@ -1,9 +1,12 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AnnonceStatus;
+import com.example.backend.entity.enums.AnnonceType;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 public class AnnonceResponse {
 
@@ -12,10 +15,15 @@ public class AnnonceResponse {
     private String title;
     private String description;
     private String category;
+    private AnnonceType type;
+    private String address;
+    private Double surface;
     private String city;
     private BigDecimal price;
     private String currency;
     private AnnonceStatus status;
+    private List<String> photosJson;
+    private Map<String, Object> rulesJson;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -64,6 +72,30 @@ public class AnnonceResponse {
         this.category = category;
     }
 
+    public AnnonceType getType() {
+        return type;
+    }
+
+    public void setType(AnnonceType type) {
+        this.type = type;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Double getSurface() {
+        return surface;
+    }
+
+    public void setSurface(Double surface) {
+        this.surface = surface;
+    }
+
     public String getCity() {
         return city;
     }
@@ -94,6 +126,22 @@ public class AnnonceResponse {
 
     public void setStatus(AnnonceStatus status) {
         this.status = status;
+    }
+
+    public List<String> getPhotosJson() {
+        return photosJson;
+    }
+
+    public void setPhotosJson(List<String> photosJson) {
+        this.photosJson = photosJson;
+    }
+
+    public Map<String, Object> getRulesJson() {
+        return rulesJson;
+    }
+
+    public void setRulesJson(Map<String, Object> rulesJson) {
+        this.rulesJson = rulesJson;
     }
 
     public LocalDateTime getCreatedAt() {
