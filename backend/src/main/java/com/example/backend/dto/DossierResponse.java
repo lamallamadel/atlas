@@ -1,53 +1,25 @@
-package com.example.backend.entity;
+package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DossierStatus;
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Table(name = "dossier")
-public class Dossier {
+public class DossierResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-
-    @Column(name = "org_id", nullable = false)
     private String orgId;
-
-    @Column(name = "annonce_id")
     private Long annonceId;
-
-    @Column(name = "lead_phone", length = 50)
     private String leadPhone;
-
-    @Column(name = "lead_name", length = 255)
     private String leadName;
-
-    @Column(name = "lead_source", length = 100)
     private String leadSource;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
     private DossierStatus status;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Column(name = "created_by", length = 255)
     private String createdBy;
-
-    @Column(name = "updated_by", length = 255)
     private String updatedBy;
+
+    public DossierResponse() {
+    }
 
     public Long getId() {
         return id;
