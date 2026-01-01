@@ -53,6 +53,9 @@ public class DossierResponse {
     @Schema(description = "User who last updated the dossier", nullable = true)
     private String updatedBy;
 
+    @Schema(description = "ID of existing open dossier if duplicate found", nullable = true)
+    private Long existingOpenDossierId;
+
     public DossierResponse() {
     }
 
@@ -166,5 +169,13 @@ public class DossierResponse {
 
     public void setParties(List<PartiePrenanteResponse> parties) {
         this.parties = parties;
+    }
+
+    public Long getExistingOpenDossierId() {
+        return existingOpenDossierId;
+    }
+
+    public void setExistingOpenDossierId(Long existingOpenDossierId) {
+        this.existingOpenDossierId = existingOpenDossierId;
     }
 }

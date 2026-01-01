@@ -14,6 +14,10 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 public class DossierService {
 
@@ -69,5 +73,19 @@ public class DossierService {
         dossier.setStatus(request.getStatus());
         Dossier updated = dossierRepository.save(dossier);
         return dossierMapper.toResponse(updated);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DossierResponse> checkForDuplicates(String phone) {
+        if (phone == null || phone.trim().isEmpty()) {
+            return List.of();
+        }
+        
+        List<DossierStatus> excludedStatuses = Arrays.asList(DossierStatus.WON, DossierStatus.LOST);
+        List<Dossier> duplicates = dossierRepository.findByPartiesPhoneAndStatusNotIn(phone, excludedStatuses);
+        
+        return duplicates.stream()
+                .map(dossierMapper::toResponse)
+                .collect(Collectors.toList());
     }
 }

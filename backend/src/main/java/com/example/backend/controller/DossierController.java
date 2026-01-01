@@ -45,6 +45,14 @@ public class DossierController {
     public ResponseEntity<DossierResponse> create(
             @Valid @RequestBody DossierCreateRequest request) {
         DossierResponse response = dossierService.create(request);
+        
+        if (request.getInitialParty() != null && request.getInitialParty().getPhone() != null) {
+            var duplicates = dossierService.checkForDuplicates(request.getInitialParty().getPhone());
+            if (!duplicates.isEmpty()) {
+                response.setExistingOpenDossierId(duplicates.get(0).getId());
+            }
+        }
+        
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
