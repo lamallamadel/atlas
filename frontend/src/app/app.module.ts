@@ -25,6 +25,7 @@ import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 import { GenericTableComponent } from './components/generic-table.component';
+import { EmptyStateComponent } from './components/empty-state.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 
 @NgModule({
@@ -38,7 +39,8 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
     DossiersComponent,
     DossierCreateComponent,
     DossierDetailComponent,
-    GenericTableComponent
+    GenericTableComponent,
+    EmptyStateComponent
   ],
   imports: [
     BrowserModule,

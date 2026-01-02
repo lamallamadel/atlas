@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
+import { ActionButtonConfig } from '../../components/empty-state.component';
 
 @Component({
   selector: 'app-dossiers',
@@ -78,6 +79,16 @@ export class DossiersComponent implements OnInit {
   actions: RowAction[] = [
     { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' }
   ];
+
+  emptyStatePrimaryAction: ActionButtonConfig = {
+    label: 'Créer un dossier',
+    handler: () => this.createDossier()
+  };
+
+  emptyStateSecondaryAction: ActionButtonConfig = {
+    label: 'Effacer les filtres',
+    handler: () => this.clearFilters()
+  };
 
   constructor(
     private dossierApiService: DossierApiService,

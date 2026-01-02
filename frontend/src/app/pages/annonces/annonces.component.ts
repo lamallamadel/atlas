@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
+import { ActionButtonConfig } from '../../components/empty-state.component';
 
 @Component({
   selector: 'app-annonces',
@@ -96,6 +97,16 @@ export class AnnoncesComponent implements OnInit {
   actions: RowAction[] = [
     { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'primary' }
   ];
+
+  emptyStatePrimaryAction: ActionButtonConfig = {
+    label: 'Créer une annonce',
+    handler: () => this.createAnnonce()
+  };
+
+  emptyStateSecondaryAction: ActionButtonConfig = {
+    label: 'Réinitialiser les filtres',
+    handler: () => this.resetFilters()
+  };
 
   constructor(
     private annonceApiService: AnnonceApiService,

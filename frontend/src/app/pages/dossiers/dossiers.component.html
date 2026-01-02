@@ -64,10 +64,13 @@
       <button class="btn-retry" (click)="loadDossiers()">Réessayer</button>
     </div>
 
-    <div *ngIf="!loading && !error && dossiers.length === 0" class="empty-state">
-      <p>Aucun dossier trouvé.</p>
-      <button class="btn-create-empty" (click)="createDossier()">Créer votre premier dossier</button>
-    </div>
+    <app-empty-state 
+      *ngIf="!loading && !error && dossiers.length === 0"
+      message="Aucun dossier trouvé"
+      subtext="Créez votre premier dossier pour commencer à gérer vos prospects ou effacez les filtres pour voir tous les dossiers."
+      [primaryAction]="emptyStatePrimaryAction"
+      [secondaryAction]="emptyStateSecondaryAction">
+    </app-empty-state>
 
     <div *ngIf="!loading && !error && dossiers.length > 0">
       <app-generic-table

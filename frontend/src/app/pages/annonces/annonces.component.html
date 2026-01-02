@@ -73,10 +73,13 @@
       <button class="btn-retry" (click)="loadAnnonces()">Réessayer</button>
     </div>
 
-    <div *ngIf="!loading && !error && annonces.length === 0" class="empty-state">
-      <p>Aucune annonce trouvée.</p>
-      <button class="btn-create-empty" (click)="createAnnonce()">Créer votre première annonce</button>
-    </div>
+    <app-empty-state 
+      *ngIf="!loading && !error && annonces.length === 0"
+      message="Aucune annonce trouvée"
+      subtext="Commencez par créer votre première annonce ou réinitialisez les filtres pour voir toutes les annonces disponibles."
+      [primaryAction]="emptyStatePrimaryAction"
+      [secondaryAction]="emptyStateSecondaryAction">
+    </app-empty-state>
 
     <div *ngIf="!loading && !error && annonces.length > 0">
       <app-generic-table
