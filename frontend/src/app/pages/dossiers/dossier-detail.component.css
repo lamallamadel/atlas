@@ -6,18 +6,8 @@
 }
 
 .page-header {
-  border-bottom: 2px solid #e0e0e0;
   padding-bottom: 1rem;
   margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
 }
 
 .btn-back {
@@ -31,7 +21,6 @@
   gap: 0.5rem;
   padding: 0;
   transition: color 0.2s;
-  align-self: flex-start;
 }
 
 .btn-back:hover {
@@ -40,13 +29,6 @@
 
 .back-icon {
   font-size: 1.2rem;
-}
-
-.page-title {
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0;
 }
 
 .page-content {
@@ -111,47 +93,50 @@
 }
 
 .detail-content {
-  max-width: 800px;
+  max-width: 1200px;
 }
 
-.detail-section {
+.dossier-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
   background-color: #f8f9fa;
   border-radius: 8px;
-  padding: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
 }
 
-.detail-row {
+.dossier-title-section {
   display: flex;
+  align-items: center;
   gap: 1rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid #e0e0e0;
+  flex: 1;
+  min-width: 0;
 }
 
-.detail-row:last-child {
-  border-bottom: none;
-}
-
-.detail-label {
+.dossier-title {
+  font-size: 1.5rem;
   font-weight: 600;
   color: #2c3e50;
-  min-width: 150px;
-  flex-shrink: 0;
-}
-
-.detail-value {
-  color: #555;
+  margin: 0;
   flex: 1;
-  word-break: break-word;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .status-badge {
   display: inline-block;
-  padding: 0.25rem 0.75rem;
+  padding: 0.35rem 0.85rem;
   border-radius: 12px;
   font-size: 0.85rem;
   font-weight: 500;
   text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status-new {
@@ -179,23 +164,37 @@
   color: #721c24;
 }
 
-.status-update-section {
+.btn-change-status {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.65rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-change-status:hover {
+  background-color: #2980b9;
+}
+
+.status-change-section {
   background-color: #f8f9fa;
   border-radius: 8px;
-  padding: 2rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  border: 2px solid #3498db;
 }
 
-.section-title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 1.5rem 0;
-}
-
-.status-update-form {
+.status-change-form {
   display: flex;
   gap: 1rem;
   align-items: flex-end;
+  flex-wrap: wrap;
 }
 
 .form-group {
@@ -203,6 +202,7 @@
   flex-direction: column;
   gap: 0.5rem;
   flex: 1;
+  min-width: 200px;
   max-width: 300px;
 }
 
@@ -252,4 +252,120 @@
 .btn-update-status:disabled {
   background-color: #95a5a6;
   cursor: not-allowed;
+}
+
+.btn-cancel {
+  background-color: #95a5a6;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background-color: #7f8c8d;
+}
+
+.btn-cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.two-column-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .two-column-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dossier-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .dossier-title-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .dossier-title {
+    white-space: normal;
+  }
+}
+
+.column-left,
+.column-right {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.column-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0 0 1.25rem 0;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.field-row {
+  display: flex;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+}
+
+.field-row:not(:last-child) {
+  border-bottom: 1px solid #e9ecef;
+}
+
+.field-label {
+  font-weight: 600;
+  color: #2c3e50;
+  min-width: 120px;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+
+.field-value {
+  color: #555;
+  flex: 1;
+  word-break: break-word;
+  font-size: 0.95rem;
+}
+
+.advanced-section {
+  margin-top: 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.advanced-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-top: 1rem;
+}
+
+.advanced-content .field-row {
+  padding: 0.5rem 0;
+}
+
+.advanced-content .field-row:not(:last-child) {
+  border-bottom: 1px solid #e9ecef;
 }

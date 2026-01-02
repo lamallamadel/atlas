@@ -1,12 +1,9 @@
 <div class="page-container">
   <div class="page-header">
-    <div class="header-left">
-      <button class="btn-back" (click)="goBack()">
-        <span class="back-icon">←</span>
-        Retour aux dossiers
-      </button>
-      <h2 class="page-title">Détails du dossier</h2>
-    </div>
+    <button class="btn-back" (click)="goBack()">
+      <span class="back-icon">←</span>
+      Retour aux dossiers
+    </button>
   </div>
 
   <div class="page-content">
@@ -21,76 +18,24 @@
     </div>
 
     <div *ngIf="!loading && !error && dossier" class="detail-content">
-      <div class="detail-section">
-        <div class="detail-row">
-          <span class="detail-label">Statut :</span>
+      <div class="dossier-header">
+        <div class="dossier-title-section">
+          <h2 class="dossier-title">
+            Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ dossier.leadPhone || 'Sans téléphone' }}
+          </h2>
           <span [ngClass]="getStatusBadgeClass(dossier.status)">
             {{ dossier.status }}
           </span>
         </div>
-
-        <div class="detail-row" *ngIf="dossier.leadName">
-          <span class="detail-label">Nom du prospect :</span>
-          <span class="detail-value">{{ dossier.leadName }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="dossier.leadPhone">
-          <span class="detail-label">Téléphone du prospect :</span>
-          <span class="detail-value">{{ dossier.leadPhone | phoneFormat }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="dossier.leadSource">
-          <span class="detail-label">Source du prospect :</span>
-          <span class="detail-value">{{ dossier.leadSource }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label">Créé le :</span>
-          <span class="detail-value">{{ dossier.createdAt | dateFormat }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="dossier.createdBy">
-          <span class="detail-label">Créé par :</span>
-          <span class="detail-value">{{ dossier.createdBy }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label">Modifié le :</span>
-          <span class="detail-value">{{ dossier.updatedAt | dateFormat }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="dossier.updatedBy">
-          <span class="detail-label">Modifié par :</span>
-          <span class="detail-value">{{ dossier.updatedBy }}</span>
-        </div>
-
-        <mat-expansion-panel>
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              Détails techniques
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          
-          <div class="detail-row">
-            <span class="detail-label">ID organisation :</span>
-            <span class="detail-value">{{ dossier.orgId }}</span>
-          </div>
-
-          <div class="detail-row">
-            <span class="detail-label">ID :</span>
-            <span class="detail-value">{{ dossier.id }}</span>
-          </div>
-
-          <div class="detail-row" *ngIf="dossier.annonceId">
-            <span class="detail-label">ID annonce :</span>
-            <span class="detail-value">{{ dossier.annonceId }}</span>
-          </div>
-        </mat-expansion-panel>
+        <button
+          class="btn-change-status"
+          (click)="toggleStatusChange()"
+        >
+          Changer statut
+        </button>
       </div>
 
-      <div class="status-update-section">
-        <h3 class="section-title">Mettre à jour le statut</h3>
-        
+      <div *ngIf="showStatusChange" class="status-change-section">
         <div *ngIf="successMessage" class="success-message">
           {{ successMessage }}
         </div>
@@ -99,7 +44,7 @@
           {{ statusError }}
         </div>
 
-        <div class="status-update-form">
+        <div class="status-change-form">
           <div class="form-group">
             <label for="status-select" class="form-label">Nouveau statut :</label>
             <select
@@ -121,11 +66,108 @@
             (click)="updateStatus()"
             [disabled]="updatingStatus || !selectedStatus"
           >
-            <span *ngIf="!updatingStatus">Mettre à jour le statut</span>
+            <span *ngIf="!updatingStatus">Mettre à jour</span>
             <span *ngIf="updatingStatus">Mise à jour...</span>
+          </button>
+
+          <button
+            class="btn-cancel"
+            (click)="toggleStatusChange()"
+            [disabled]="updatingStatus"
+          >
+            Annuler
           </button>
         </div>
       </div>
+
+      <div class="two-column-grid">
+        <div class="column-left">
+          <h3 class="column-title">Informations du prospect</h3>
+          
+          <div class="field-group">
+            <div class="field-row">
+              <span class="field-label">Nom :</span>
+              <span class="field-value">{{ dossier.leadName || '—' }}</span>
+            </div>
+
+            <div class="field-row">
+              <span class="field-label">Téléphone :</span>
+              <span class="field-value">{{ dossier.leadPhone || '—' }}</span>
+            </div>
+
+            <div class="field-row">
+              <span class="field-label">Source :</span>
+              <span class="field-value">{{ dossier.leadSource || '—' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="column-right">
+          <h3 class="column-title">Informations système</h3>
+          
+          <div class="field-group">
+            <div class="field-row" *ngIf="dossier.annonceId">
+              <span class="field-label">Annonce :</span>
+              <span class="field-value">{{ dossier.annonceId }}</span>
+            </div>
+
+            <div class="field-row">
+              <span class="field-label">Créé le :</span>
+              <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
+            </div>
+
+            <div class="field-row" *ngIf="dossier.createdBy">
+              <span class="field-label">Créé par :</span>
+              <span class="field-value">{{ dossier.createdBy }}</span>
+            </div>
+
+            <div class="field-row">
+              <span class="field-label">Modifié le :</span>
+              <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
+            </div>
+
+            <div class="field-row" *ngIf="dossier.updatedBy">
+              <span class="field-label">Modifié par :</span>
+              <span class="field-value">{{ dossier.updatedBy }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <mat-expansion-panel class="advanced-section">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Avancé
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        
+        <div class="advanced-content">
+          <div class="field-row">
+            <span class="field-label">ID Dossier :</span>
+            <span class="field-value">{{ dossier.id }}</span>
+          </div>
+
+          <div class="field-row">
+            <span class="field-label">ID Organisation :</span>
+            <span class="field-value">{{ dossier.orgId }}</span>
+          </div>
+
+          <div class="field-row" *ngIf="dossier.annonceId">
+            <span class="field-label">ID Annonce :</span>
+            <span class="field-value">{{ dossier.annonceId }}</span>
+          </div>
+
+          <div class="field-row">
+            <span class="field-label">Date de création (ISO) :</span>
+            <span class="field-value">{{ dossier.createdAt }}</span>
+          </div>
+
+          <div class="field-row">
+            <span class="field-label">Date de modification (ISO) :</span>
+            <span class="field-value">{{ dossier.updatedAt }}</span>
+          </div>
+        </div>
+      </mat-expansion-panel>
     </div>
   </div>
 </div>

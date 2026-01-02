@@ -16,6 +16,7 @@ export class DossierDetailComponent implements OnInit {
   updatingStatus = false;
   successMessage: string | null = null;
   statusError: string | null = null;
+  showStatusChange = false;
 
   DossierStatus = DossierStatus;
   statusOptions = [
@@ -70,6 +71,15 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
+  toggleStatusChange(): void {
+    this.showStatusChange = !this.showStatusChange;
+    this.statusError = null;
+    this.successMessage = null;
+    if (this.showStatusChange && this.dossier) {
+      this.selectedStatus = this.dossier.status;
+    }
+  }
+
   updateStatus(): void {
     if (!this.dossier || !this.selectedStatus) {
       return;
@@ -93,7 +103,8 @@ export class DossierDetailComponent implements OnInit {
         
         setTimeout(() => {
           this.successMessage = null;
-        }, 3000);
+          this.showStatusChange = false;
+        }, 2000);
       },
       error: (err) => {
         this.statusError = 'Échec de la mise à jour du statut. Veuillez réessayer.';
