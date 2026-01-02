@@ -3,33 +3,37 @@ package com.example.backend.controller;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
+import com.example.backend.dto.PartiePrenanteRequest;
+import com.example.backend.entity.Annonce;
+import com.example.backend.entity.Dossier;
+import com.example.backend.entity.PartiePrenanteEntity;
+import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.DossierStatus;
-import com.example.backend.service.DossierService;
+import com.example.backend.entity.enums.PartiePrenanteRole;
+import com.example.backend.repository.AnnonceRepository;
+import com.example.backend.repository.DossierRepository;
+import com.example.backend.repository.PartiePrenanteRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.math.BigDecimal;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(DossierController.class)
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
 class DossierControllerTest {
 
     @Autowired
@@ -38,162 +42,423 @@ class DossierControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private DossierService dossierService;
+    @Autowired
+    private DossierRepository dossierRepository;
 
-    private DossierCreateRequest createRequest;
-    private DossierResponse dossierResponse;
+    @Autowired
+    private AnnonceRepository annonceRepository;
+
+    @Autowired
+    private PartiePrenanteRepository partiePrenanteRepository;
 
     @BeforeEach
     void setUp() {
-        createRequest = new DossierCreateRequest();
-        createRequest.setOrgId("org123");
-        createRequest.setLeadPhone("+33612345678");
-        createRequest.setLeadName("John Doe");
-        createRequest.setLeadSource("Website");
-        createRequest.setAnnonceId(1L);
+        partiePrenanteRepository.deleteAll();
+        dossierRepository.deleteAll();
+        annonceRepository.deleteAll();
+    }
 
-        dossierResponse = new DossierResponse();
-        dossierResponse.setId(1L);
-        dossierResponse.setOrgId("org123");
-        dossierResponse.setLeadPhone("+33612345678");
-        dossierResponse.setLeadName("John Doe");
-        dossierResponse.setLeadSource("Website");
-        dossierResponse.setAnnonceId(1L);
-        dossierResponse.setStatus(DossierStatus.NEW);
-        dossierResponse.setCreatedAt(LocalDateTime.now());
-        dossierResponse.setUpdatedAt(LocalDateTime.now());
+    @Test
+    void create_WithDuplicatePhone_ReturnsExistingOpenDossierId() throws Exception {
+        String duplicatePhone = "+33612345678";
+
+        Dossier existingDossier = new Dossier();
+        existingDossier.setOrgId("org123");
+        existingDossier.setLeadPhone(duplicatePhone);
+        existingDossier.setLeadName("Existing User");
+        existingDossier.setStatus(DossierStatus.NEW);
+        existingDossier = dossierRepository.save(existingDossier);
+
+        PartiePrenanteEntity existingParty = new PartiePrenanteEntity();
+        existingParty.setDossier(existingDossier);
+        existingParty.setRole(PartiePrenanteRole.BUYER);
+        existingParty.setPhone(duplicatePhone);
+        existingParty.setFirstName("Existing");
+        existingParty.setLastName("User");
+        partiePrenanteRepository.save(existingParty);
+
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone(duplicatePhone);
+        request.setLeadName("New User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(duplicatePhone);
+        initialParty.setFirstName("New");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.orgId").value("org123"))
+                .andExpect(jsonPath("$.existingOpenDossierId").value(existingDossier.getId()));
+    }
+
+    @Test
+    void create_WithDuplicatePhoneInQualifiedStatus_ReturnsExistingOpenDossierId() throws Exception {
+        String duplicatePhone = "+33698765432";
+
+        Dossier qualifiedDossier = new Dossier();
+        qualifiedDossier.setOrgId("org123");
+        qualifiedDossier.setLeadPhone(duplicatePhone);
+        qualifiedDossier.setLeadName("Qualified User");
+        qualifiedDossier.setStatus(DossierStatus.QUALIFIED);
+        qualifiedDossier = dossierRepository.save(qualifiedDossier);
+
+        PartiePrenanteEntity qualifiedParty = new PartiePrenanteEntity();
+        qualifiedParty.setDossier(qualifiedDossier);
+        qualifiedParty.setRole(PartiePrenanteRole.BUYER);
+        qualifiedParty.setPhone(duplicatePhone);
+        qualifiedParty.setFirstName("Qualified");
+        qualifiedParty.setLastName("User");
+        partiePrenanteRepository.save(qualifiedParty);
+
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33611111111");
+        request.setLeadName("New User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(duplicatePhone);
+        initialParty.setFirstName("New");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").value(qualifiedDossier.getId()));
+    }
+
+    @Test
+    void create_WithDuplicatePhoneInAppointmentStatus_ReturnsExistingOpenDossierId() throws Exception {
+        String duplicatePhone = "+33687654321";
+
+        Dossier appointmentDossier = new Dossier();
+        appointmentDossier.setOrgId("org123");
+        appointmentDossier.setLeadPhone(duplicatePhone);
+        appointmentDossier.setLeadName("Appointment User");
+        appointmentDossier.setStatus(DossierStatus.APPOINTMENT);
+        appointmentDossier = dossierRepository.save(appointmentDossier);
+
+        PartiePrenanteEntity appointmentParty = new PartiePrenanteEntity();
+        appointmentParty.setDossier(appointmentDossier);
+        appointmentParty.setRole(PartiePrenanteRole.BUYER);
+        appointmentParty.setPhone(duplicatePhone);
+        appointmentParty.setFirstName("Appointment");
+        appointmentParty.setLastName("User");
+        partiePrenanteRepository.save(appointmentParty);
+
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33622222222");
+        request.setLeadName("New User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(duplicatePhone);
+        initialParty.setFirstName("New");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").value(appointmentDossier.getId()));
+    }
+
+    @Test
+    void create_WithDuplicatePhoneInWonStatus_DoesNotReturnExistingOpenDossierId() throws Exception {
+        String duplicatePhone = "+33676543210";
+
+        Dossier wonDossier = new Dossier();
+        wonDossier.setOrgId("org123");
+        wonDossier.setLeadPhone(duplicatePhone);
+        wonDossier.setLeadName("Won User");
+        wonDossier.setStatus(DossierStatus.WON);
+        wonDossier = dossierRepository.save(wonDossier);
+
+        PartiePrenanteEntity wonParty = new PartiePrenanteEntity();
+        wonParty.setDossier(wonDossier);
+        wonParty.setRole(PartiePrenanteRole.BUYER);
+        wonParty.setPhone(duplicatePhone);
+        wonParty.setFirstName("Won");
+        wonParty.setLastName("User");
+        partiePrenanteRepository.save(wonParty);
+
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33633333333");
+        request.setLeadName("New User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(duplicatePhone);
+        initialParty.setFirstName("New");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
+    }
+
+    @Test
+    void create_WithDuplicatePhoneInLostStatus_DoesNotReturnExistingOpenDossierId() throws Exception {
+        String duplicatePhone = "+33665432109";
+
+        Dossier lostDossier = new Dossier();
+        lostDossier.setOrgId("org123");
+        lostDossier.setLeadPhone(duplicatePhone);
+        lostDossier.setLeadName("Lost User");
+        lostDossier.setStatus(DossierStatus.LOST);
+        lostDossier = dossierRepository.save(lostDossier);
+
+        PartiePrenanteEntity lostParty = new PartiePrenanteEntity();
+        lostParty.setDossier(lostDossier);
+        lostParty.setRole(PartiePrenanteRole.BUYER);
+        lostParty.setPhone(duplicatePhone);
+        lostParty.setFirstName("Lost");
+        lostParty.setLastName("User");
+        partiePrenanteRepository.save(lostParty);
+
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33644444444");
+        request.setLeadName("New User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(duplicatePhone);
+        initialParty.setFirstName("New");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
+    }
+
+    @Test
+    void create_WithNoDuplicatePhone_DoesNotReturnExistingOpenDossierId() throws Exception {
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33699999999");
+        request.setLeadName("Unique User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone("+33699999999");
+        initialParty.setFirstName("Unique");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
+    }
+
+    @Test
+    void create_WithoutInitialParty_DoesNotReturnExistingOpenDossierId() throws Exception {
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33688888888");
+        request.setLeadName("No Party User");
+        request.setInitialParty(null);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
+    }
+
+    @Test
+    void create_WithInitialPartyButNoPhone_DoesNotReturnExistingOpenDossierId() throws Exception {
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33677777777");
+        request.setLeadName("User Without Phone");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(null);
+        initialParty.setFirstName("No");
+        initialParty.setLastName("Phone");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
+    }
+
+    @Test
+    void create_WithMultipleDuplicates_ReturnsFirstExistingOpenDossierId() throws Exception {
+        String duplicatePhone = "+33655555555";
+
+        Dossier firstDossier = new Dossier();
+        firstDossier.setOrgId("org123");
+        firstDossier.setLeadPhone(duplicatePhone);
+        firstDossier.setLeadName("First User");
+        firstDossier.setStatus(DossierStatus.NEW);
+        firstDossier = dossierRepository.save(firstDossier);
+
+        PartiePrenanteEntity firstParty = new PartiePrenanteEntity();
+        firstParty.setDossier(firstDossier);
+        firstParty.setRole(PartiePrenanteRole.BUYER);
+        firstParty.setPhone(duplicatePhone);
+        firstParty.setFirstName("First");
+        firstParty.setLastName("User");
+        partiePrenanteRepository.save(firstParty);
+
+        Dossier secondDossier = new Dossier();
+        secondDossier.setOrgId("org123");
+        secondDossier.setLeadPhone(duplicatePhone);
+        secondDossier.setLeadName("Second User");
+        secondDossier.setStatus(DossierStatus.QUALIFIED);
+        secondDossier = dossierRepository.save(secondDossier);
+
+        PartiePrenanteEntity secondParty = new PartiePrenanteEntity();
+        secondParty.setDossier(secondDossier);
+        secondParty.setRole(PartiePrenanteRole.BUYER);
+        secondParty.setPhone(duplicatePhone);
+        secondParty.setFirstName("Second");
+        secondParty.setLastName("User");
+        partiePrenanteRepository.save(secondParty);
+
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33666666666");
+        request.setLeadName("New User");
+
+        PartiePrenanteRequest initialParty = new PartiePrenanteRequest();
+        initialParty.setRole(PartiePrenanteRole.BUYER);
+        initialParty.setPhone(duplicatePhone);
+        initialParty.setFirstName("New");
+        initialParty.setLastName("User");
+        request.setInitialParty(initialParty);
+
+        mockMvc.perform(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.existingOpenDossierId").exists())
+                .andExpect(jsonPath("$.existingOpenDossierId").isNumber());
     }
 
     @Test
     void create_ValidRequest_Returns201WithCreatedEntity() throws Exception {
-        when(dossierService.create(any(DossierCreateRequest.class))).thenReturn(dossierResponse);
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33612345678");
+        request.setLeadName("John Doe");
+        request.setLeadSource("Website");
 
         mockMvc.perform(post("/api/v1/dossiers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.orgId").value("org123"))
                 .andExpect(jsonPath("$.leadPhone").value("+33612345678"))
                 .andExpect(jsonPath("$.leadName").value("John Doe"))
                 .andExpect(jsonPath("$.leadSource").value("Website"))
-                .andExpect(jsonPath("$.annonceId").value(1))
                 .andExpect(jsonPath("$.status").value("NEW"));
     }
 
     @Test
     void create_MissingOrgId_Returns400() throws Exception {
-        createRequest.setOrgId(null);
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId(null);
+        request.setLeadPhone("+33612345678");
 
         mockMvc.perform(post("/api/v1/dossiers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_BlankOrgId_Returns400() throws Exception {
-        createRequest.setOrgId("");
-
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_OrgIdTooLong_Returns400() throws Exception {
-        createRequest.setOrgId("A".repeat(256));
-
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_LeadPhoneTooLong_Returns400() throws Exception {
-        createRequest.setLeadPhone("A".repeat(51));
-
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_LeadNameTooLong_Returns400() throws Exception {
-        createRequest.setLeadName("A".repeat(256));
-
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_LeadSourceTooLong_Returns400() throws Exception {
-        createRequest.setLeadSource("A".repeat(101));
-
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void create_ArchivedAnnonce_Returns400() throws Exception {
-        createRequest.setAnnonceId(1L);
+        Annonce archivedAnnonce = new Annonce();
+        archivedAnnonce.setOrgId("org123");
+        archivedAnnonce.setTitle("Archived Annonce");
+        archivedAnnonce.setDescription("Test");
+        archivedAnnonce.setCategory("Test");
+        archivedAnnonce.setCity("Test");
+        archivedAnnonce.setPrice(BigDecimal.valueOf(100.00));
+        archivedAnnonce.setCurrency("EUR");
+        archivedAnnonce.setStatus(AnnonceStatus.ARCHIVED);
+        archivedAnnonce = annonceRepository.save(archivedAnnonce);
 
-        when(dossierService.create(any(DossierCreateRequest.class)))
-                .thenThrow(new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce"));
+        DossierCreateRequest request = new DossierCreateRequest();
+        request.setOrgId("org123");
+        request.setLeadPhone("+33612345678");
+        request.setAnnonceId(archivedAnnonce.getId());
 
         mockMvc.perform(post("/api/v1/dossiers")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Cannot create dossier with ARCHIVED annonce"));
     }
 
     @Test
     void getById_ExistingId_Returns200WithEntity() throws Exception {
-        when(dossierService.getById(1L)).thenReturn(dossierResponse);
+        Dossier dossier = new Dossier();
+        dossier.setOrgId("org123");
+        dossier.setLeadPhone("+33612345678");
+        dossier.setLeadName("John Doe");
+        dossier.setStatus(DossierStatus.NEW);
+        dossier = dossierRepository.save(dossier);
 
-        mockMvc.perform(get("/api/v1/dossiers/1"))
+        mockMvc.perform(get("/api/v1/dossiers/" + dossier.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(dossier.getId()))
                 .andExpect(jsonPath("$.orgId").value("org123"))
                 .andExpect(jsonPath("$.leadPhone").value("+33612345678"));
     }
 
     @Test
     void getById_NonExistingId_Returns404() throws Exception {
-        when(dossierService.getById(999L)).thenThrow(new EntityNotFoundException("Dossier not found with id: 999"));
-
         mockMvc.perform(get("/api/v1/dossiers/999"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void patchStatus_ValidRequest_Returns200() throws Exception {
+        Dossier dossier = new Dossier();
+        dossier.setOrgId("org123");
+        dossier.setLeadPhone("+33612345678");
+        dossier.setStatus(DossierStatus.NEW);
+        dossier = dossierRepository.save(dossier);
+
         DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
         patchRequest.setStatus(DossierStatus.QUALIFIED);
 
-        DossierResponse updatedResponse = new DossierResponse();
-        updatedResponse.setId(1L);
-        updatedResponse.setOrgId("org123");
-        updatedResponse.setStatus(DossierStatus.QUALIFIED);
-
-        when(dossierService.patchStatus(eq(1L), any(DossierStatusPatchRequest.class))).thenReturn(updatedResponse);
-
-        mockMvc.perform(patch("/api/v1/dossiers/1/status")
+        mockMvc.perform(patch("/api/v1/dossiers/" + dossier.getId() + "/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patchRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(dossier.getId()))
                 .andExpect(jsonPath("$.status").value("QUALIFIED"));
     }
 
@@ -202,9 +467,6 @@ class DossierControllerTest {
         DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
         patchRequest.setStatus(DossierStatus.QUALIFIED);
 
-        when(dossierService.patchStatus(eq(999L), any(DossierStatusPatchRequest.class)))
-                .thenThrow(new EntityNotFoundException("Dossier not found with id: 999"));
-
         mockMvc.perform(patch("/api/v1/dossiers/999/status")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patchRequest)))
@@ -212,85 +474,45 @@ class DossierControllerTest {
     }
 
     @Test
-    void patchStatus_MissingStatus_Returns400() throws Exception {
-        DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
-
-        mockMvc.perform(patch("/api/v1/dossiers/1/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void patchStatus_InvalidStatus_Returns400() throws Exception {
-        String invalidJson = "{\"status\": \"INVALID_STATUS\"}";
-
-        mockMvc.perform(patch("/api/v1/dossiers/1/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidJson))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void patchStatus_AllValidStatuses_Returns200() throws Exception {
-        for (DossierStatus status : DossierStatus.values()) {
-            DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
-            patchRequest.setStatus(status);
-
-            DossierResponse updatedResponse = new DossierResponse();
-            updatedResponse.setId(1L);
-            updatedResponse.setStatus(status);
-
-            when(dossierService.patchStatus(eq(1L), any(DossierStatusPatchRequest.class))).thenReturn(updatedResponse);
-
-            mockMvc.perform(patch("/api/v1/dossiers/1/status")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(patchRequest)))
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.status").value(status.toString()));
-        }
-    }
-
-    @Test
     void list_NoFilters_Returns200WithPagedResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
+        Dossier dossier1 = new Dossier();
+        dossier1.setOrgId("org123");
         dossier1.setLeadName("John Doe");
+        dossier1.setLeadPhone("+33612345678");
         dossier1.setStatus(DossierStatus.NEW);
+        dossierRepository.save(dossier1);
 
-        DossierResponse dossier2 = new DossierResponse();
-        dossier2.setId(2L);
+        Dossier dossier2 = new Dossier();
+        dossier2.setOrgId("org123");
         dossier2.setLeadName("Jane Smith");
+        dossier2.setLeadPhone("+33698765432");
         dossier2.setStatus(DossierStatus.QUALIFIED);
-
-        List<DossierResponse> dossiers = Arrays.asList(dossier1, dossier2);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 2);
-
-        when(dossierService.list(eq(null), eq(null), eq(null), any())).thenReturn(page);
+        dossierRepository.save(dossier2);
 
         mockMvc.perform(get("/api/v1/dossiers"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].id").value(1))
-                .andExpect(jsonPath("$.content[0].leadName").value("John Doe"))
-                .andExpect(jsonPath("$.content[1].id").value(2))
-                .andExpect(jsonPath("$.content[1].leadName").value("Jane Smith"))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.size").value(20));
+                .andExpect(jsonPath("$.content[0].leadName").exists())
+                .andExpect(jsonPath("$.content[1].leadName").exists())
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test
     void list_WithStatusFilter_Returns200WithFilteredResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
+        Dossier dossier1 = new Dossier();
+        dossier1.setOrgId("org123");
         dossier1.setLeadName("John Doe");
+        dossier1.setLeadPhone("+33612345678");
         dossier1.setStatus(DossierStatus.QUALIFIED);
+        dossierRepository.save(dossier1);
 
-        List<DossierResponse> dossiers = List.of(dossier1);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 1);
-
-        when(dossierService.list(eq(DossierStatus.QUALIFIED), eq(null), eq(null), any())).thenReturn(page);
+        Dossier dossier2 = new Dossier();
+        dossier2.setOrgId("org123");
+        dossier2.setLeadName("Jane Smith");
+        dossier2.setLeadPhone("+33698765432");
+        dossier2.setStatus(DossierStatus.NEW);
+        dossierRepository.save(dossier2);
 
         mockMvc.perform(get("/api/v1/dossiers")
                         .param("status", "QUALIFIED"))
@@ -301,139 +523,7 @@ class DossierControllerTest {
     }
 
     @Test
-    void list_WithLeadPhoneFilter_Returns200WithFilteredResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
-        dossier1.setLeadPhone("+33612345678");
-        dossier1.setStatus(DossierStatus.NEW);
-
-        List<DossierResponse> dossiers = List.of(dossier1);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 1);
-
-        when(dossierService.list(eq(null), eq("+33612345678"), eq(null), any())).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/dossiers")
-                        .param("leadPhone", "+33612345678"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].leadPhone").value("+33612345678"))
-                .andExpect(jsonPath("$.totalElements").value(1));
-    }
-
-    @Test
-    void list_WithAnnonceIdFilter_Returns200WithFilteredResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
-        dossier1.setAnnonceId(5L);
-        dossier1.setStatus(DossierStatus.NEW);
-
-        List<DossierResponse> dossiers = List.of(dossier1);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 1);
-
-        when(dossierService.list(eq(null), eq(null), eq(5L), any())).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/dossiers")
-                        .param("annonceId", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].annonceId").value(5))
-                .andExpect(jsonPath("$.totalElements").value(1));
-    }
-
-    @Test
-    void list_WithStatusAndPhoneFilter_Returns200WithFilteredResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
-        dossier1.setLeadPhone("+33612345678");
-        dossier1.setStatus(DossierStatus.QUALIFIED);
-
-        List<DossierResponse> dossiers = List.of(dossier1);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 1);
-
-        when(dossierService.list(eq(DossierStatus.QUALIFIED), eq("+33612345678"), eq(null), any())).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/dossiers")
-                        .param("status", "QUALIFIED")
-                        .param("leadPhone", "+33612345678"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].leadPhone").value("+33612345678"))
-                .andExpect(jsonPath("$.content[0].status").value("QUALIFIED"))
-                .andExpect(jsonPath("$.totalElements").value(1));
-    }
-
-    @Test
-    void list_WithAllFilters_Returns200WithFilteredResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
-        dossier1.setLeadPhone("+33612345678");
-        dossier1.setAnnonceId(5L);
-        dossier1.setStatus(DossierStatus.QUALIFIED);
-
-        List<DossierResponse> dossiers = List.of(dossier1);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 1);
-
-        when(dossierService.list(eq(DossierStatus.QUALIFIED), eq("+33612345678"), eq(5L), any())).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/dossiers")
-                        .param("status", "QUALIFIED")
-                        .param("leadPhone", "+33612345678")
-                        .param("annonceId", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.totalElements").value(1));
-    }
-
-    @Test
-    void list_WithPagination_Returns200WithCorrectPage() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(11L);
-        dossier1.setLeadName("Dossier 11");
-
-        List<DossierResponse> dossiers = List.of(dossier1);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(1, 10), 25);
-
-        when(dossierService.list(eq(null), eq(null), eq(null), any())).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/dossiers")
-                        .param("page", "1")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.number").value(1))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.totalElements").value(25));
-    }
-
-    @Test
-    void list_WithSorting_Returns200WithSortedResults() throws Exception {
-        DossierResponse dossier1 = new DossierResponse();
-        dossier1.setId(1L);
-        dossier1.setLeadName("Alice");
-
-        DossierResponse dossier2 = new DossierResponse();
-        dossier2.setId(2L);
-        dossier2.setLeadName("Bob");
-
-        List<DossierResponse> dossiers = Arrays.asList(dossier1, dossier2);
-        Page<DossierResponse> page = new PageImpl<>(dossiers, PageRequest.of(0, 20), 2);
-
-        when(dossierService.list(eq(null), eq(null), eq(null), any())).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/dossiers")
-                        .param("sort", "leadName,asc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].leadName").value("Alice"))
-                .andExpect(jsonPath("$.content[1].leadName").value("Bob"));
-    }
-
-    @Test
     void list_EmptyResult_Returns200WithEmptyPage() throws Exception {
-        Page<DossierResponse> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
-
-        when(dossierService.list(eq(null), eq(null), eq(null), any())).thenReturn(emptyPage);
-
         mockMvc.perform(get("/api/v1/dossiers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))

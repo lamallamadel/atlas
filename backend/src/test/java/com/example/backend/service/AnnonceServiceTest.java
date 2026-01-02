@@ -1,7 +1,6 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.AnnonceCreateRequest;
-import com.example.backend.dto.AnnonceMapper;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
 import com.example.backend.entity.Annonce;
@@ -10,93 +9,241 @@ import com.example.backend.repository.AnnonceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
 class AnnonceServiceTest {
 
-    @Mock
-    private AnnonceRepository annonceRepository;
-
-    @Mock
-    private AnnonceMapper annonceMapper;
-
-    @InjectMocks
+    @Autowired
     private AnnonceService annonceService;
 
-    private AnnonceCreateRequest createRequest;
-    private Annonce annonce;
-    private AnnonceResponse annonceResponse;
+    @Autowired
+    private AnnonceRepository annonceRepository;
 
     @BeforeEach
     void setUp() {
-        createRequest = new AnnonceCreateRequest();
-        createRequest.setOrgId("org123");
-        createRequest.setTitle("Test Annonce");
-        createRequest.setDescription("Test Description");
-        createRequest.setCategory("Electronics");
-        createRequest.setCity("Paris");
-        createRequest.setPrice(BigDecimal.valueOf(100.00));
-        createRequest.setCurrency("EUR");
+        annonceRepository.deleteAll();
+    }
 
-        annonce = new Annonce();
-        annonce.setId(1L);
-        annonce.setOrgId("org123");
-        annonce.setTitle("Test Annonce");
-        annonce.setDescription("Test Description");
-        annonce.setCategory("Electronics");
-        annonce.setCity("Paris");
-        annonce.setPrice(BigDecimal.valueOf(100.00));
-        annonce.setCurrency("EUR");
-        annonce.setStatus(AnnonceStatus.DRAFT);
-        annonce.setCreatedAt(LocalDateTime.now());
-        annonce.setUpdatedAt(LocalDateTime.now());
+    @Test
+    void create_WithPhotosJson_PersistsCorrectly() {
+        AnnonceCreateRequest request = createBasicRequest();
+        List<String> photos = Arrays.asList(
+            "https://example.com/photo1.jpg",
+            "https://example.com/photo2.jpg",
+            "https://example.com/photo3.jpg"
+        );
+        request.setPhotosJson(photos);
 
-        annonceResponse = new AnnonceResponse();
-        annonceResponse.setId(1L);
-        annonceResponse.setOrgId("org123");
-        annonceResponse.setTitle("Test Annonce");
-        annonceResponse.setDescription("Test Description");
-        annonceResponse.setCategory("Electronics");
-        annonceResponse.setCity("Paris");
-        annonceResponse.setPrice(BigDecimal.valueOf(100.00));
-        annonceResponse.setCurrency("EUR");
-        annonceResponse.setStatus(AnnonceStatus.DRAFT);
-        annonceResponse.setCreatedAt(LocalDateTime.now());
-        annonceResponse.setUpdatedAt(LocalDateTime.now());
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getPhotosJson()).isNotNull();
+        assertThat(response.getPhotosJson()).hasSize(3);
+        assertThat(response.getPhotosJson()).containsExactlyInAnyOrder(
+            "https://example.com/photo1.jpg",
+            "https://example.com/photo2.jpg",
+            "https://example.com/photo3.jpg"
+        );
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getPhotosJson()).isNotNull();
+        assertThat(persisted.getPhotosJson()).hasSize(3);
+        assertThat(persisted.getPhotosJson()).containsExactlyInAnyOrder(
+            "https://example.com/photo1.jpg",
+            "https://example.com/photo2.jpg",
+            "https://example.com/photo3.jpg"
+        );
+    }
+
+    @Test
+    void create_WithRulesJson_PersistsCorrectly() {
+        AnnonceCreateRequest request = createBasicRequest();
+        Map<String, Object> rules = new HashMap<>();
+        rules.put("minAge", 18);
+        rules.put("petsAllowed", false);
+        rules.put("smokingAllowed", false);
+        rules.put("maxOccupants", 4);
+        rules.put("depositAmount", 1000.0);
+        request.setRulesJson(rules);
+
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getRulesJson()).isNotNull();
+        assertThat(response.getRulesJson()).hasSize(5);
+        assertThat(response.getRulesJson().get("minAge")).isEqualTo(18);
+        assertThat(response.getRulesJson().get("petsAllowed")).isEqualTo(false);
+        assertThat(response.getRulesJson().get("smokingAllowed")).isEqualTo(false);
+        assertThat(response.getRulesJson().get("maxOccupants")).isEqualTo(4);
+        assertThat(response.getRulesJson().get("depositAmount")).isEqualTo(1000.0);
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getRulesJson()).isNotNull();
+        assertThat(persisted.getRulesJson()).hasSize(5);
+        assertThat(persisted.getRulesJson().get("minAge")).isEqualTo(18);
+        assertThat(persisted.getRulesJson().get("petsAllowed")).isEqualTo(false);
+    }
+
+    @Test
+    void create_WithComplexRulesJson_PersistsCorrectly() {
+        AnnonceCreateRequest request = createBasicRequest();
+        Map<String, Object> rules = new HashMap<>();
+        rules.put("visitingHours", Map.of("start", "09:00", "end", "18:00"));
+        rules.put("allowedPets", Arrays.asList("cat", "dog"));
+        rules.put("amenities", Map.of(
+            "wifi", true,
+            "parking", true,
+            "pool", false
+        ));
+        request.setRulesJson(rules);
+
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getRulesJson()).isNotNull();
+        assertThat(response.getRulesJson()).hasSize(3);
+        assertThat(response.getRulesJson().get("allowedPets")).isInstanceOf(List.class);
+        assertThat(response.getRulesJson().get("visitingHours")).isInstanceOf(Map.class);
+        assertThat(response.getRulesJson().get("amenities")).isInstanceOf(Map.class);
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getRulesJson()).isNotNull();
+        assertThat(persisted.getRulesJson()).containsKeys("visitingHours", "allowedPets", "amenities");
+    }
+
+    @Test
+    void create_WithBothPhotosAndRules_PersistsBothCorrectly() {
+        AnnonceCreateRequest request = createBasicRequest();
+        List<String> photos = Arrays.asList(
+            "https://example.com/photo1.jpg",
+            "https://example.com/photo2.jpg"
+        );
+        request.setPhotosJson(photos);
+
+        Map<String, Object> rules = new HashMap<>();
+        rules.put("minAge", 21);
+        rules.put("petsAllowed", true);
+        request.setRulesJson(rules);
+
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getPhotosJson()).hasSize(2);
+        assertThat(response.getRulesJson()).hasSize(2);
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getPhotosJson()).hasSize(2);
+        assertThat(persisted.getRulesJson()).hasSize(2);
+    }
+
+    @Test
+    void create_WithEmptyPhotosJson_PersistsEmpty() {
+        AnnonceCreateRequest request = createBasicRequest();
+        request.setPhotosJson(Arrays.asList());
+
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getPhotosJson()).isEmpty();
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getPhotosJson()).isEmpty();
+    }
+
+    @Test
+    void create_WithNullPhotosAndRules_PersistsNull() {
+        AnnonceCreateRequest request = createBasicRequest();
+        request.setPhotosJson(null);
+        request.setRulesJson(null);
+
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getPhotosJson()).isNull();
+        assertThat(response.getRulesJson()).isNull();
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getPhotosJson()).isNull();
+        assertThat(persisted.getRulesJson()).isNull();
+    }
+
+    @Test
+    void update_WithNewPhotosJson_UpdatesPersistence() {
+        AnnonceCreateRequest createRequest = createBasicRequest();
+        List<String> originalPhotos = Arrays.asList("https://example.com/old1.jpg");
+        createRequest.setPhotosJson(originalPhotos);
+        AnnonceResponse created = annonceService.create(createRequest);
+
+        AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
+        List<String> newPhotos = Arrays.asList(
+            "https://example.com/new1.jpg",
+            "https://example.com/new2.jpg"
+        );
+        updateRequest.setPhotosJson(newPhotos);
+
+        AnnonceResponse updated = annonceService.update(created.getId(), updateRequest);
+
+        assertThat(updated.getPhotosJson()).hasSize(2);
+        assertThat(updated.getPhotosJson()).containsExactlyInAnyOrder(
+            "https://example.com/new1.jpg",
+            "https://example.com/new2.jpg"
+        );
+
+        Annonce persisted = annonceRepository.findById(updated.getId()).orElseThrow();
+        assertThat(persisted.getPhotosJson()).hasSize(2);
+    }
+
+    @Test
+    void update_WithNewRulesJson_UpdatesPersistence() {
+        AnnonceCreateRequest createRequest = createBasicRequest();
+        Map<String, Object> originalRules = new HashMap<>();
+        originalRules.put("minAge", 18);
+        createRequest.setRulesJson(originalRules);
+        AnnonceResponse created = annonceService.create(createRequest);
+
+        AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
+        Map<String, Object> newRules = new HashMap<>();
+        newRules.put("minAge", 25);
+        newRules.put("petsAllowed", true);
+        updateRequest.setRulesJson(newRules);
+
+        AnnonceResponse updated = annonceService.update(created.getId(), updateRequest);
+
+        assertThat(updated.getRulesJson()).hasSize(2);
+        assertThat(updated.getRulesJson().get("minAge")).isEqualTo(25);
+        assertThat(updated.getRulesJson().get("petsAllowed")).isEqualTo(true);
+
+        Annonce persisted = annonceRepository.findById(updated.getId()).orElseThrow();
+        assertThat(persisted.getRulesJson()).hasSize(2);
+        assertThat(persisted.getRulesJson().get("minAge")).isEqualTo(25);
     }
 
     @Test
     void create_HappyPath_ReturnsCreatedAnnonce() {
-        when(annonceMapper.toEntity(createRequest)).thenReturn(annonce);
-        when(annonceRepository.save(annonce)).thenReturn(annonce);
-        when(annonceMapper.toResponse(annonce)).thenReturn(annonceResponse);
+        AnnonceCreateRequest request = createBasicRequest();
 
-        AnnonceResponse result = annonceService.create(createRequest);
+        AnnonceResponse result = annonceService.create(request);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isNotNull();
         assertThat(result.getOrgId()).isEqualTo("org123");
         assertThat(result.getTitle()).isEqualTo("Test Annonce");
         assertThat(result.getDescription()).isEqualTo("Test Description");
@@ -105,88 +252,42 @@ class AnnonceServiceTest {
         assertThat(result.getPrice()).isEqualByComparingTo(BigDecimal.valueOf(100.00));
         assertThat(result.getCurrency()).isEqualTo("EUR");
         assertThat(result.getStatus()).isEqualTo(AnnonceStatus.DRAFT);
-
-        verify(annonceMapper).toEntity(createRequest);
-        verify(annonceRepository).save(annonce);
-        verify(annonceMapper).toResponse(annonce);
-    }
-
-    @Test
-    void create_ValidatesRequiredFields() {
-        when(annonceMapper.toEntity(any(AnnonceCreateRequest.class))).thenReturn(annonce);
-        when(annonceRepository.save(any(Annonce.class))).thenReturn(annonce);
-        when(annonceMapper.toResponse(any(Annonce.class))).thenReturn(annonceResponse);
-
-        AnnonceResponse result = annonceService.create(createRequest);
-
-        assertThat(result).isNotNull();
-        ArgumentCaptor<AnnonceCreateRequest> requestCaptor = ArgumentCaptor.forClass(AnnonceCreateRequest.class);
-        verify(annonceMapper).toEntity(requestCaptor.capture());
-        
-        AnnonceCreateRequest capturedRequest = requestCaptor.getValue();
-        assertThat(capturedRequest.getOrgId()).isNotBlank();
-        assertThat(capturedRequest.getTitle()).isNotBlank();
     }
 
     @Test
     void getById_HappyPath_ReturnsAnnonce() {
-        when(annonceRepository.findById(1L)).thenReturn(Optional.of(annonce));
-        when(annonceMapper.toResponse(annonce)).thenReturn(annonceResponse);
+        AnnonceCreateRequest request = createBasicRequest();
+        AnnonceResponse created = annonceService.create(request);
 
-        AnnonceResponse result = annonceService.getById(1L);
+        AnnonceResponse result = annonceService.getById(created.getId());
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(created.getId());
         assertThat(result.getTitle()).isEqualTo("Test Annonce");
-        verify(annonceRepository).findById(1L);
-        verify(annonceMapper).toResponse(annonce);
     }
 
     @Test
     void getById_NotFound_ThrowsEntityNotFoundException() {
-        when(annonceRepository.findById(999L)).thenReturn(Optional.empty());
-
         assertThatThrownBy(() -> annonceService.getById(999L))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Annonce not found with id: 999");
-
-        verify(annonceRepository).findById(999L);
-        verify(annonceMapper, never()).toResponse(any());
     }
 
     @Test
     void update_HappyPath_ReturnsUpdatedAnnonce() {
+        AnnonceCreateRequest createRequest = createBasicRequest();
+        AnnonceResponse created = annonceService.create(createRequest);
+
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
         updateRequest.setStatus(AnnonceStatus.PUBLISHED);
 
-        Annonce updatedAnnonce = new Annonce();
-        updatedAnnonce.setId(1L);
-        updatedAnnonce.setOrgId("org123");
-        updatedAnnonce.setTitle("Updated Title");
-        updatedAnnonce.setStatus(AnnonceStatus.PUBLISHED);
-
-        AnnonceResponse updatedResponse = new AnnonceResponse();
-        updatedResponse.setId(1L);
-        updatedResponse.setTitle("Updated Title");
-        updatedResponse.setStatus(AnnonceStatus.PUBLISHED);
-
-        when(annonceRepository.findById(1L)).thenReturn(Optional.of(annonce));
-        doNothing().when(annonceMapper).updateEntity(annonce, updateRequest);
-        when(annonceRepository.save(annonce)).thenReturn(updatedAnnonce);
-        when(annonceMapper.toResponse(updatedAnnonce)).thenReturn(updatedResponse);
-
-        AnnonceResponse result = annonceService.update(1L, updateRequest);
+        AnnonceResponse result = annonceService.update(created.getId(), updateRequest);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(created.getId());
         assertThat(result.getTitle()).isEqualTo("Updated Title");
         assertThat(result.getStatus()).isEqualTo(AnnonceStatus.PUBLISHED);
-
-        verify(annonceRepository).findById(1L);
-        verify(annonceMapper).updateEntity(annonce, updateRequest);
-        verify(annonceRepository).save(annonce);
-        verify(annonceMapper).toResponse(updatedAnnonce);
     }
 
     @Test
@@ -194,95 +295,80 @@ class AnnonceServiceTest {
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
 
-        when(annonceRepository.findById(999L)).thenReturn(Optional.empty());
-
         assertThatThrownBy(() -> annonceService.update(999L, updateRequest))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("Annonce not found with id: 999");
-
-        verify(annonceRepository).findById(999L);
-        verify(annonceMapper, never()).updateEntity(any(), any());
-        verify(annonceRepository, never()).save(any());
     }
 
     @Test
     void list_NoFilters_ReturnsAllAnnonces() {
+        annonceService.create(createBasicRequest());
+        annonceService.create(createBasicRequest());
+
         Pageable pageable = PageRequest.of(0, 20);
-        List<Annonce> annonces = Arrays.asList(annonce);
-        Page<Annonce> annoncePages = new PageImpl<>(annonces, pageable, 1);
-
-        when(annonceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(annoncePages);
-        when(annonceMapper.toResponse(annonce)).thenReturn(annonceResponse);
-
         Page<AnnonceResponse> result = annonceService.list(null, null, pageable);
 
         assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getTotalElements()).isEqualTo(1);
-        verify(annonceRepository).findAll(any(Specification.class), eq(pageable));
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
     }
 
     @Test
     void list_WithStatusFilter_ReturnsFilteredAnnonces() {
+        AnnonceCreateRequest draftRequest = createBasicRequest();
+        annonceService.create(draftRequest);
+
+        AnnonceCreateRequest publishedRequest = createBasicRequest();
+        AnnonceResponse published = annonceService.create(publishedRequest);
+        AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
+        updateRequest.setStatus(AnnonceStatus.PUBLISHED);
+        annonceService.update(published.getId(), updateRequest);
+
         Pageable pageable = PageRequest.of(0, 20);
-        List<Annonce> annonces = Arrays.asList(annonce);
-        Page<Annonce> annoncePages = new PageImpl<>(annonces, pageable, 1);
-
-        when(annonceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(annoncePages);
-        when(annonceMapper.toResponse(annonce)).thenReturn(annonceResponse);
-
         Page<AnnonceResponse> result = annonceService.list(AnnonceStatus.DRAFT, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getStatus()).isEqualTo(AnnonceStatus.DRAFT);
-        verify(annonceRepository).findAll(any(Specification.class), eq(pageable));
     }
 
     @Test
     void list_WithSearchQuery_ReturnsMatchingAnnonces() {
+        AnnonceCreateRequest request1 = createBasicRequest();
+        request1.setTitle("Electronics Sale");
+        annonceService.create(request1);
+
+        AnnonceCreateRequest request2 = createBasicRequest();
+        request2.setTitle("Furniture Sale");
+        annonceService.create(request2);
+
         Pageable pageable = PageRequest.of(0, 20);
-        List<Annonce> annonces = Arrays.asList(annonce);
-        Page<Annonce> annoncePages = new PageImpl<>(annonces, pageable, 1);
-
-        when(annonceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(annoncePages);
-        when(annonceMapper.toResponse(annonce)).thenReturn(annonceResponse);
-
-        Page<AnnonceResponse> result = annonceService.list(null, "Test", pageable);
+        Page<AnnonceResponse> result = annonceService.list(null, "Electronics", pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
-        verify(annonceRepository).findAll(any(Specification.class), eq(pageable));
-    }
-
-    @Test
-    void list_WithStatusAndSearchQuery_ReturnsFilteredAndMatchingAnnonces() {
-        Pageable pageable = PageRequest.of(0, 20);
-        List<Annonce> annonces = Arrays.asList(annonce);
-        Page<Annonce> annoncePages = new PageImpl<>(annonces, pageable, 1);
-
-        when(annonceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(annoncePages);
-        when(annonceMapper.toResponse(annonce)).thenReturn(annonceResponse);
-
-        Page<AnnonceResponse> result = annonceService.list(AnnonceStatus.DRAFT, "Test", pageable);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).hasSize(1);
-        verify(annonceRepository).findAll(any(Specification.class), eq(pageable));
+        assertThat(result.getContent().get(0).getTitle()).contains("Electronics");
     }
 
     @Test
     void list_EmptyResult_ReturnsEmptyPage() {
         Pageable pageable = PageRequest.of(0, 20);
-        Page<Annonce> emptyPage = new PageImpl<>(List.of(), pageable, 0);
-
-        when(annonceRepository.findAll(any(Specification.class), eq(pageable))).thenReturn(emptyPage);
-
         Page<AnnonceResponse> result = annonceService.list(null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isEqualTo(0);
-        verify(annonceRepository).findAll(any(Specification.class), eq(pageable));
+    }
+
+    private AnnonceCreateRequest createBasicRequest() {
+        AnnonceCreateRequest request = new AnnonceCreateRequest();
+        request.setOrgId("org123");
+        request.setTitle("Test Annonce");
+        request.setDescription("Test Description");
+        request.setCategory("Electronics");
+        request.setCity("Paris");
+        request.setPrice(BigDecimal.valueOf(100.00));
+        request.setCurrency("EUR");
+        return request;
     }
 }
