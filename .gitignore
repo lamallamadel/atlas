@@ -152,6 +152,8 @@ backend/setup-maven.cmd
 run-maven-with-java17.cmd
 setup-backend-wrapper.ps1
 temp-setup-backend.ps1
+mvn-wrapper.ps1
+setup-maven-backend.cmd
 
 # Node.js
 package-lock.json

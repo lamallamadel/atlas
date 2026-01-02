@@ -23,25 +23,10 @@
     <div *ngIf="!loading && !error && dossier" class="detail-content">
       <div class="detail-section">
         <div class="detail-row">
-          <span class="detail-label">ID :</span>
-          <span class="detail-value">{{ dossier.id }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label">ID organisation :</span>
-          <span class="detail-value">{{ dossier.orgId }}</span>
-        </div>
-
-        <div class="detail-row">
           <span class="detail-label">Statut :</span>
           <span [ngClass]="getStatusBadgeClass(dossier.status)">
             {{ dossier.status }}
           </span>
-        </div>
-
-        <div class="detail-row" *ngIf="dossier.annonceId">
-          <span class="detail-label">ID annonce :</span>
-          <span class="detail-value">{{ dossier.annonceId }}</span>
         </div>
 
         <div class="detail-row" *ngIf="dossier.leadName">
@@ -78,6 +63,29 @@
           <span class="detail-label">Modifié par :</span>
           <span class="detail-value">{{ dossier.updatedBy }}</span>
         </div>
+
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Détails techniques
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          
+          <div class="detail-row">
+            <span class="detail-label">ID organisation :</span>
+            <span class="detail-value">{{ dossier.orgId }}</span>
+          </div>
+
+          <div class="detail-row">
+            <span class="detail-label">ID :</span>
+            <span class="detail-value">{{ dossier.id }}</span>
+          </div>
+
+          <div class="detail-row" *ngIf="dossier.annonceId">
+            <span class="detail-label">ID annonce :</span>
+            <span class="detail-value">{{ dossier.annonceId }}</span>
+          </div>
+        </mat-expansion-panel>
       </div>
 
       <div class="status-update-section">

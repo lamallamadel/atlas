@@ -24,7 +24,6 @@ export class DossiersComponent implements OnInit {
 
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
-    { key: 'orgId', header: 'ID organisation', sortable: true, type: 'number' },
     { 
       key: 'annonceId', 
       header: 'ID annonce', 

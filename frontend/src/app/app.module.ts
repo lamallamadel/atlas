@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatExpansionModule } from '@angular/material/expansion';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -53,7 +54,8 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
     MatButtonModule,
     MatTooltipModule,
     MatFormFieldModule,
-    MatInputModule
+    MatInputModule,
+    MatExpansionModule
   ],
   providers: [
     {
