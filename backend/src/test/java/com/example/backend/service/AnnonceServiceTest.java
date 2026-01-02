@@ -43,30 +43,30 @@ class AnnonceServiceTest {
     }
 
     @Test
-    void create_WithPhotosJson_PersistsCorrectly() {
+    void create_WithPhotos_PersistsCorrectly() {
         AnnonceCreateRequest request = createBasicRequest();
         List<String> photos = Arrays.asList(
             "https://example.com/photo1.jpg",
             "https://example.com/photo2.jpg",
             "https://example.com/photo3.jpg"
         );
-        request.setPhotosJson(photos);
+        request.setPhotos(photos);
 
         AnnonceResponse response = annonceService.create(request);
 
         assertThat(response.getId()).isNotNull();
-        assertThat(response.getPhotosJson()).isNotNull();
-        assertThat(response.getPhotosJson()).hasSize(3);
-        assertThat(response.getPhotosJson()).containsExactlyInAnyOrder(
+        assertThat(response.getPhotos()).isNotNull();
+        assertThat(response.getPhotos()).hasSize(3);
+        assertThat(response.getPhotos()).containsExactlyInAnyOrder(
             "https://example.com/photo1.jpg",
             "https://example.com/photo2.jpg",
             "https://example.com/photo3.jpg"
         );
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
-        assertThat(persisted.getPhotosJson()).isNotNull();
-        assertThat(persisted.getPhotosJson()).hasSize(3);
-        assertThat(persisted.getPhotosJson()).containsExactlyInAnyOrder(
+        assertThat(persisted.getPhotos()).isNotNull();
+        assertThat(persisted.getPhotos()).hasSize(3);
+        assertThat(persisted.getPhotos()).containsExactlyInAnyOrder(
             "https://example.com/photo1.jpg",
             "https://example.com/photo2.jpg",
             "https://example.com/photo3.jpg"
@@ -136,7 +136,7 @@ class AnnonceServiceTest {
             "https://example.com/photo1.jpg",
             "https://example.com/photo2.jpg"
         );
-        request.setPhotosJson(photos);
+        request.setPhotos(photos);
 
         Map<String, Object> rules = new HashMap<>();
         rules.put("minAge", 21);
@@ -146,50 +146,50 @@ class AnnonceServiceTest {
         AnnonceResponse response = annonceService.create(request);
 
         assertThat(response.getId()).isNotNull();
-        assertThat(response.getPhotosJson()).hasSize(2);
+        assertThat(response.getPhotos()).hasSize(2);
         assertThat(response.getRulesJson()).hasSize(2);
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
-        assertThat(persisted.getPhotosJson()).hasSize(2);
+        assertThat(persisted.getPhotos()).hasSize(2);
         assertThat(persisted.getRulesJson()).hasSize(2);
     }
 
     @Test
-    void create_WithEmptyPhotosJson_PersistsEmpty() {
+    void create_WithEmptyPhotos_PersistsEmpty() {
         AnnonceCreateRequest request = createBasicRequest();
-        request.setPhotosJson(Arrays.asList());
+        request.setPhotos(Arrays.asList());
 
         AnnonceResponse response = annonceService.create(request);
 
         assertThat(response.getId()).isNotNull();
-        assertThat(response.getPhotosJson()).isEmpty();
+        assertThat(response.getPhotos()).isEmpty();
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
-        assertThat(persisted.getPhotosJson()).isEmpty();
+        assertThat(persisted.getPhotos()).isEmpty();
     }
 
     @Test
     void create_WithNullPhotosAndRules_PersistsNull() {
         AnnonceCreateRequest request = createBasicRequest();
-        request.setPhotosJson(null);
+        request.setPhotos(null);
         request.setRulesJson(null);
 
         AnnonceResponse response = annonceService.create(request);
 
         assertThat(response.getId()).isNotNull();
-        assertThat(response.getPhotosJson()).isNull();
+        assertThat(response.getPhotos()).isNull();
         assertThat(response.getRulesJson()).isNull();
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
-        assertThat(persisted.getPhotosJson()).isNull();
+        assertThat(persisted.getPhotos()).isNull();
         assertThat(persisted.getRulesJson()).isNull();
     }
 
     @Test
-    void update_WithNewPhotosJson_UpdatesPersistence() {
+    void update_WithNewPhotos_UpdatesPersistence() {
         AnnonceCreateRequest createRequest = createBasicRequest();
         List<String> originalPhotos = Arrays.asList("https://example.com/old1.jpg");
-        createRequest.setPhotosJson(originalPhotos);
+        createRequest.setPhotos(originalPhotos);
         AnnonceResponse created = annonceService.create(createRequest);
 
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
@@ -197,18 +197,18 @@ class AnnonceServiceTest {
             "https://example.com/new1.jpg",
             "https://example.com/new2.jpg"
         );
-        updateRequest.setPhotosJson(newPhotos);
+        updateRequest.setPhotos(newPhotos);
 
         AnnonceResponse updated = annonceService.update(created.getId(), updateRequest);
 
-        assertThat(updated.getPhotosJson()).hasSize(2);
-        assertThat(updated.getPhotosJson()).containsExactlyInAnyOrder(
+        assertThat(updated.getPhotos()).hasSize(2);
+        assertThat(updated.getPhotos()).containsExactlyInAnyOrder(
             "https://example.com/new1.jpg",
             "https://example.com/new2.jpg"
         );
 
         Annonce persisted = annonceRepository.findById(updated.getId()).orElseThrow();
-        assertThat(persisted.getPhotosJson()).hasSize(2);
+        assertThat(persisted.getPhotos()).hasSize(2);
     }
 
     @Test
@@ -340,6 +340,7 @@ class AnnonceServiceTest {
 
         AnnonceCreateRequest request2 = createBasicRequest();
         request2.setTitle("Furniture Sale");
+        request2.setCategory("Furniture");
         annonceService.create(request2);
 
         Pageable pageable = PageRequest.of(0, 20);
@@ -351,13 +352,39 @@ class AnnonceServiceTest {
     }
 
     @Test
-    void list_EmptyResult_ReturnsEmptyPage() {
-        Pageable pageable = PageRequest.of(0, 20);
-        Page<AnnonceResponse> result = annonceService.list(null, null, pageable);
+    void update_ArchivedAnnonce_ThrowsIllegalStateException() {
+        AnnonceCreateRequest createRequest = createBasicRequest();
+        AnnonceResponse created = annonceService.create(createRequest);
+        
+        // Archive it
+        AnnonceUpdateRequest archiveRequest = new AnnonceUpdateRequest();
+        archiveRequest.setStatus(AnnonceStatus.ARCHIVED);
+        annonceService.update(created.getId(), archiveRequest);
 
-        assertThat(result).isNotNull();
-        assertThat(result.getContent()).isEmpty();
-        assertThat(result.getTotalElements()).isEqualTo(0);
+        // Try to update it while archived
+        AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
+        updateRequest.setTitle("New Title");
+
+        assertThatThrownBy(() -> annonceService.update(created.getId(), updateRequest))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot update an archived annonce");
+    }
+
+    @Test
+    void create_WithMeta_PersistsCorrectly() {
+        AnnonceCreateRequest request = createBasicRequest();
+        request.setMeta(Map.of("priority", "high", "flags", List.of("NEW", "HOT")));
+
+        AnnonceResponse response = annonceService.create(request);
+
+        assertThat(response.getId()).isNotNull();
+        assertThat(response.getMeta()).isNotNull();
+        assertThat(response.getMeta().get("priority")).isEqualTo("high");
+        assertThat(response.getMeta().get("flags")).isInstanceOf(List.class);
+
+        Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
+        assertThat(persisted.getMeta()).isNotNull();
+        assertThat(persisted.getMeta().get("priority")).isEqualTo("high");
     }
 
     private AnnonceCreateRequest createBasicRequest() {

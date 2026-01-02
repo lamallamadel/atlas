@@ -14,10 +14,16 @@ export interface AnnonceResponse {
   title: string;
   description?: string;
   category?: string;
+  type?: string;
+  address?: string;
+  surface?: number;
   city?: string;
   price?: number;
   currency?: string;
   status: AnnonceStatus;
+  photos?: string[];
+  rulesJson?: any;
+  meta?: any;
   createdAt: string;
   updatedAt: string;
   createdBy: string;
@@ -29,19 +35,31 @@ export interface AnnonceCreateRequest {
   title: string;
   description?: string;
   category?: string;
+  type?: string;
+  address?: string;
+  surface?: number;
   city?: string;
   price?: number;
   currency?: string;
+  photos?: string[];
+  rulesJson?: any;
+  meta?: any;
 }
 
 export interface AnnonceUpdateRequest {
   title?: string;
   description?: string;
   category?: string;
+  type?: string;
+  address?: string;
+  surface?: number;
   city?: string;
   price?: number;
   currency?: string;
   status?: AnnonceStatus;
+  photos?: string[];
+  rulesJson?: any;
+  meta?: any;
 }
 
 export interface Page<T> {
@@ -92,7 +110,7 @@ export class AnnonceApiService {
 
   list(params: AnnonceListParams = {}): Observable<Page<AnnonceResponse>> {
     let httpParams = new HttpParams();
-    
+
     if (params.status !== undefined) {
       httpParams = httpParams.set('status', params.status);
     }
@@ -108,7 +126,7 @@ export class AnnonceApiService {
     if (params.sort !== undefined) {
       httpParams = httpParams.set('sort', params.sort);
     }
-    
+
     return this.http.get<Page<AnnonceResponse>>(this.apiUrl, { params: httpParams });
   }
 

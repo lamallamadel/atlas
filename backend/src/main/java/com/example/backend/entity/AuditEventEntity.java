@@ -2,12 +2,13 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.AuditAction;
 import com.example.backend.entity.enums.AuditEntityType;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "audit_event")
@@ -32,9 +33,9 @@ public class AuditEventEntity {
     @Column(name = "user_id", length = 255)
     private String userId;
 
-    @Type(JsonType.class)
-    @Column(name = "diff_json", columnDefinition = "jsonb")
-    private String diffJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "diff_json")
+    private Map<String, Object> diff;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -80,12 +81,12 @@ public class AuditEventEntity {
         this.userId = userId;
     }
 
-    public String getDiffJson() {
-        return diffJson;
+    public Map<String, Object> getDiff() {
+        return diff;
     }
 
-    public void setDiffJson(String diffJson) {
-        this.diffJson = diffJson;
+    public void setDiff(Map<String, Object> diff) {
+        this.diff = diff;
     }
 
     public LocalDateTime getCreatedAt() {

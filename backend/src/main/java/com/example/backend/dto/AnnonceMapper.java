@@ -19,8 +19,9 @@ public class AnnonceMapper {
         annonce.setCity(request.getCity());
         annonce.setPrice(request.getPrice());
         annonce.setCurrency(request.getCurrency());
-        annonce.setPhotosJson(request.getPhotosJson());
+        annonce.setPhotos(request.getPhotos());
         annonce.setRulesJson(request.getRulesJson());
+        annonce.setMeta(request.getMeta());
         annonce.setStatus(AnnonceStatus.DRAFT);
         return annonce;
     }
@@ -53,11 +54,14 @@ public class AnnonceMapper {
         if (request.getCurrency() != null) {
             annonce.setCurrency(request.getCurrency());
         }
-        if (request.getPhotosJson() != null) {
-            annonce.setPhotosJson(request.getPhotosJson());
+        if (request.getPhotos() != null) {
+            annonce.setPhotos(request.getPhotos());
         }
         if (request.getRulesJson() != null) {
             annonce.setRulesJson(request.getRulesJson());
+        }
+        if (request.getMeta() != null) {
+            annonce.setMeta(request.getMeta());
         }
         if (request.getStatus() != null) {
             annonce.setStatus(request.getStatus());
@@ -78,8 +82,9 @@ public class AnnonceMapper {
         response.setPrice(annonce.getPrice());
         response.setCurrency(annonce.getCurrency());
         response.setStatus(annonce.getStatus());
-        response.setPhotosJson(annonce.getPhotosJson());
+        response.setPhotos(annonce.getPhotos());
         response.setRulesJson(annonce.getRulesJson());
+        response.setMeta(annonce.getMeta());
         response.setCreatedAt(annonce.getCreatedAt());
         response.setUpdatedAt(annonce.getUpdatedAt());
         response.setCreatedBy(annonce.getCreatedBy());

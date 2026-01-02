@@ -1,23 +1,35 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:localdb
-    username: sa
-    password: 
-    driver-class-name: org.h2.Driver
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: create-drop
-    show-sql: true
+      ddl-auto: update
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         jakarta.persistence.validation.mode: auto
   flyway:
-    enabled: false
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
 
 server:
   port: 8080
+  error:
+    include-message: on-param
+    include-stacktrace: on-param
 
 logging:
   level:
@@ -27,8 +39,7 @@ logging:
 management:
   endpoint:
     health:
-      show-details: always
+      show-details: when-authorized
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:4200,http://localhost:3000}
-

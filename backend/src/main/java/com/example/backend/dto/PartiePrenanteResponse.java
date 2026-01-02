@@ -4,6 +4,7 @@ import com.example.backend.entity.enums.PartiePrenanteRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Schema(description = "Partie prenante response representation")
 public class PartiePrenanteResponse {
@@ -31,6 +32,9 @@ public class PartiePrenanteResponse {
 
     @Schema(description = "Address", example = "123 Main St, Paris, 75001", nullable = true)
     private String address;
+
+    @Schema(description = "Metadata", example = "{\"key\": \"value\"}")
+    private Map<String, Object> meta;
 
     @Schema(description = "Timestamp when created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
@@ -103,6 +107,14 @@ public class PartiePrenanteResponse {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     public LocalDateTime getCreatedAt() {

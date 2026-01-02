@@ -22,8 +22,9 @@ public class AnnonceResponse {
     private BigDecimal price;
     private String currency;
     private AnnonceStatus status;
-    private List<String> photosJson;
+    private List<String> photos;
     private Map<String, Object> rulesJson;
+    private Map<String, Object> meta;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -128,12 +129,12 @@ public class AnnonceResponse {
         this.status = status;
     }
 
-    public List<String> getPhotosJson() {
-        return photosJson;
+    public List<String> getPhotos() {
+        return photos;
     }
 
-    public void setPhotosJson(List<String> photosJson) {
-        this.photosJson = photosJson;
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
     }
 
     public Map<String, Object> getRulesJson() {
@@ -142,6 +143,14 @@ public class AnnonceResponse {
 
     public void setRulesJson(Map<String, Object> rulesJson) {
         this.rulesJson = rulesJson;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     public LocalDateTime getCreatedAt() {

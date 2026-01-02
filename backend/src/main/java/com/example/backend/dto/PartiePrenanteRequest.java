@@ -6,6 +6,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import java.util.Map;
+
 @Schema(description = "Request body for creating or updating a partie prenante")
 public class PartiePrenanteRequest {
 
@@ -33,6 +35,9 @@ public class PartiePrenanteRequest {
     @Schema(description = "Address", example = "123 Main St, Paris, 75001", nullable = true)
     @Size(max = 500, message = "Address must not exceed 500 characters")
     private String address;
+
+    @Schema(description = "Metadata", example = "{\"key\": \"value\"}")
+    private Map<String, Object> meta;
 
     public PartiePrenanteRequest() {
     }
@@ -83,5 +88,13 @@ public class PartiePrenanteRequest {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 }

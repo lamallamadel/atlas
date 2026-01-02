@@ -42,9 +42,11 @@ public class AnnonceCreateRequest {
     @Size(max = 3, message = "Currency must not exceed 3 characters")
     private String currency;
 
-    private List<String> photosJson;
+    private List<String> photos;
 
     private Map<String, Object> rulesJson;
+
+    private Map<String, Object> meta;
 
     public AnnonceCreateRequest() {
     }
@@ -129,12 +131,20 @@ public class AnnonceCreateRequest {
         this.currency = currency;
     }
 
-    public List<String> getPhotosJson() {
-        return photosJson;
+    public List<String> getPhotos() {
+        return photos;
     }
 
-    public void setPhotosJson(List<String> photosJson) {
-        this.photosJson = photosJson;
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     public Map<String, Object> getRulesJson() {

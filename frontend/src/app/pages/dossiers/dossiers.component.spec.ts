@@ -3,7 +3,17 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { DossiersComponent } from './dossiers.component';
+import { GenericTableComponent } from '../../components/generic-table.component';
 import { DossierApiService, DossierStatus } from '../../services/dossier-api.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatChipsModule } from '@angular/material/chips';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 
 describe('DossiersComponent', () => {
@@ -15,17 +25,26 @@ describe('DossiersComponent', () => {
     const dossierApiServiceSpy = jasmine.createSpyObj('DossierApiService', ['list', 'getById', 'create', 'patchStatus']);
 
     await TestBed.configureTestingModule({
-      declarations: [ DossiersComponent ],
+      declarations: [DossiersComponent, GenericTableComponent],
       imports: [
         HttpClientTestingModule,
         RouterTestingModule,
-        FormsModule
+        FormsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        MatChipsModule,
+        NoopAnimationsModule
       ],
       providers: [
         { provide: DossierApiService, useValue: dossierApiServiceSpy }
       ]
     })
-    .compileComponents();
+      .compileComponents();
 
     dossierApiService = TestBed.inject(DossierApiService) as jasmine.SpyObj<DossierApiService>;
     fixture = TestBed.createComponent(DossiersComponent);

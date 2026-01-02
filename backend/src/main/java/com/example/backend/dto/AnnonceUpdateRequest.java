@@ -39,9 +39,11 @@ public class AnnonceUpdateRequest {
 
     private AnnonceStatus status;
 
-    private List<String> photosJson;
+    private List<String> photos;
 
     private Map<String, Object> rulesJson;
+
+    private Map<String, Object> meta;
 
     public AnnonceUpdateRequest() {
     }
@@ -126,12 +128,20 @@ public class AnnonceUpdateRequest {
         this.status = status;
     }
 
-    public List<String> getPhotosJson() {
-        return photosJson;
+    public List<String> getPhotos() {
+        return photos;
     }
 
-    public void setPhotosJson(List<String> photosJson) {
-        this.photosJson = photosJson;
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     public Map<String, Object> getRulesJson() {

@@ -2,13 +2,14 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "consentement")
@@ -31,9 +32,9 @@ public class ConsentementEntity {
     @Column(name = "status", nullable = false, length = 50)
     private ConsentementStatus status;
 
-    @Type(JsonType.class)
-    @Column(name = "meta_json", columnDefinition = "jsonb")
-    private String metaJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "meta_json")
+    private Map<String, Object> meta;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -75,12 +76,12 @@ public class ConsentementEntity {
         this.status = status;
     }
 
-    public String getMetaJson() {
-        return metaJson;
+    public Map<String, Object> getMeta() {
+        return meta;
     }
 
-    public void setMetaJson(String metaJson) {
-        this.metaJson = metaJson;
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     public LocalDateTime getCreatedAt() {

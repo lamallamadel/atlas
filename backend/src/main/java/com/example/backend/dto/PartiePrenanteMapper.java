@@ -14,6 +14,7 @@ public class PartiePrenanteMapper {
         entity.setEmail(request.getEmail());
         entity.setPhone(request.getPhone());
         entity.setAddress(request.getAddress());
+        entity.setMeta(request.getMeta());
         return entity;
     }
 
@@ -27,6 +28,7 @@ public class PartiePrenanteMapper {
         response.setEmail(entity.getEmail());
         response.setPhone(entity.getPhone());
         response.setAddress(entity.getAddress());
+        response.setMeta(entity.getMeta());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
         return response;

@@ -3,7 +3,16 @@ import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { AnnoncesComponent } from './annonces.component';
+import { GenericTableComponent } from '../../components/generic-table.component';
 import { AnnonceApiService, AnnonceStatus } from '../../services/annonce-api.service';
+import { MatCardModule } from '@angular/material/card';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
+import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatSortModule } from '@angular/material/sort';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 
 describe('AnnoncesComponent', () => {
@@ -15,17 +24,25 @@ describe('AnnoncesComponent', () => {
     const annonceApiServiceSpy = jasmine.createSpyObj('AnnonceApiService', ['list', 'getById', 'create', 'update']);
 
     await TestBed.configureTestingModule({
-      declarations: [ AnnoncesComponent ],
-      imports: [ 
+      declarations: [AnnoncesComponent, GenericTableComponent],
+      imports: [
         HttpClientTestingModule,
         RouterTestingModule,
-        FormsModule
+        FormsModule,
+        MatCardModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTableModule,
+        MatPaginatorModule,
+        MatSortModule,
+        MatTooltipModule,
+        NoopAnimationsModule
       ],
-      providers: [ 
+      providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy }
       ]
     })
-    .compileComponents();
+      .compileComponents();
 
     annonceApiService = TestBed.inject(AnnonceApiService) as jasmine.SpyObj<AnnonceApiService>;
     fixture = TestBed.createComponent(AnnoncesComponent);

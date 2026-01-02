@@ -64,17 +64,16 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce1.setPrice(new BigDecimal("450000.00"));
         annonce1.setCurrency("EUR");
         annonce1.setStatus(AnnonceStatus.ACTIVE);
-        annonce1.setPhotosJson(Arrays.asList(
-                "https://example.com/photos/apt1-1.jpg",
-                "https://example.com/photos/apt1-2.jpg",
-                "https://example.com/photos/apt1-3.jpg"
+        annonce1.setPhotos(Arrays.asList(
+                "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
+                "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=800&q=80"
         ));
         Map<String, Object> rules1 = new HashMap<>();
         rules1.put("petsAllowed", false);
         rules1.put("smokingAllowed", false);
         rules1.put("minLeaseTerm", 12);
-        rules1.put("securityDeposit", 2000);
         annonce1.setRulesJson(rules1);
+        annonce1.setMeta(Map.of("source", "seed", "priority", "high"));
         annonce1.setCreatedBy("system-seed");
         annonce1.setUpdatedBy("system-seed");
 
@@ -108,7 +107,40 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce3.setCreatedBy("system-seed");
         annonce3.setUpdatedBy("system-seed");
 
-        List<Annonce> annonces = annonceRepository.saveAll(Arrays.asList(annonce1, annonce2, annonce3));
+        Annonce annonce4 = new Annonce();
+        annonce4.setOrgId("org-001");
+        annonce4.setTitle("Modern Studio in Le Marais");
+        annonce4.setDescription("Charming studio in the heart of Le Marais.");
+        annonce4.setCategory("Residential");
+        annonce4.setType(AnnonceType.RENT);
+        annonce4.setAddress("10 Rue des Rosiers");
+        annonce4.setCity("Paris");
+        annonce4.setSurface(35.0);
+        annonce4.setPrice(new BigDecimal("1200.00"));
+        annonce4.setCurrency("EUR");
+        annonce4.setStatus(AnnonceStatus.ACTIVE);
+        annonce4.setMeta(Map.of("source", "seed-uat"));
+        annonce4.setCreatedBy("system-seed");
+        annonce4.setUpdatedBy("system-seed");
+
+        // Duplicate case
+        Annonce annonce5 = new Annonce();
+        annonce5.setOrgId("org-001");
+        annonce5.setTitle("Modern Studio in Le Marais");
+        annonce5.setDescription("This is a duplicate for UAT testing.");
+        annonce5.setCategory("Residential");
+        annonce5.setType(AnnonceType.RENT);
+        annonce5.setAddress("10 Rue des Rosiers");
+        annonce5.setCity("Paris");
+        annonce5.setSurface(35.0);
+        annonce5.setPrice(new BigDecimal("1250.00"));
+        annonce5.setCurrency("EUR");
+        annonce5.setStatus(AnnonceStatus.DRAFT);
+        annonce5.setMeta(Map.of("source", "seed-duplicate"));
+        annonce5.setCreatedBy("system-seed");
+        annonce5.setUpdatedBy("system-seed");
+
+        List<Annonce> annonces = annonceRepository.saveAll(Arrays.asList(annonce1, annonce2, annonce3, annonce4, annonce5));
         logger.info("Loaded {} annonces", annonces.size());
     }
 
@@ -203,7 +235,7 @@ public class SeedDataLoader implements CommandLineRunner {
         partie.setEmail(email);
         partie.setPhone(phone);
         partie.setAddress(address);
-        partie.setMetaJson("{\"source\":\"seed\"}");
+        partie.setMeta(Map.of("source", "seed"));
         return partie;
     }
 }

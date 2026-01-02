@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -10,7 +8,9 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-atlas}
       POSTGRES_DB: ${POSTGRES_DB:-atlas}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - target: 5432
+        published: "${POSTGRES_PORT:-5432}"
+        protocol: tcp
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -27,7 +27,9 @@ services:
     container_name: backend_app
     restart: unless-stopped
     ports:
-      - "${BACKEND_PORT:-8080}:8080"
+      - target: 8080
+        published: "${BACKEND_PORT:-8080}"
+        protocol: tcp
     depends_on:
       postgres:
         condition: service_healthy

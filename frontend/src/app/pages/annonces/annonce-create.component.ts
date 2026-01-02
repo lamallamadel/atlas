@@ -13,7 +13,7 @@ export class AnnonceCreateComponent implements OnInit {
   step2FormGroup!: FormGroup;
   step3FormGroup!: FormGroup;
   step4FormGroup!: FormGroup;
-  
+
   isEditMode = false;
   annonceId: number | null = null;
   loading = false;
@@ -40,7 +40,7 @@ export class AnnonceCreateComponent implements OnInit {
     private annonceApiService: AnnonceApiService,
     private router: Router,
     private route: ActivatedRoute
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForms();
@@ -120,18 +120,26 @@ export class AnnonceCreateComponent implements OnInit {
           title: annonce.title,
           description: annonce.description || ''
         });
-        
+
         this.step2FormGroup.patchValue({
           price: annonce.price,
           city: annonce.city || '',
-          address: '',
-          surface: null
+          address: annonce.address || '',
+          surface: annonce.surface
         });
 
+        if (annonce.photos && annonce.photos.length > 0) {
+          const photosArray = this.step3FormGroup.get('photos') as FormArray;
+          photosArray.clear();
+          annonce.photos.forEach(photo => {
+            photosArray.push(this.fb.control(photo, [Validators.required, Validators.maxLength(1000)]));
+          });
+        }
+
         this.step4FormGroup.patchValue({
-          rulesJson: '{}'
+          rulesJson: annonce.rulesJson ? JSON.stringify(annonce.rulesJson, null, 2) : '{}'
         });
-        
+
         this.loading = false;
       },
       error: (err) => {
@@ -143,8 +151,8 @@ export class AnnonceCreateComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.step1FormGroup.invalid || this.step2FormGroup.invalid || 
-        this.step3FormGroup.invalid || this.step4FormGroup.invalid) {
+    if (this.step1FormGroup.invalid || this.step2FormGroup.invalid ||
+      this.step3FormGroup.invalid || this.step4FormGroup.invalid) {
       this.markAllFormGroupsTouched();
       return;
     }
@@ -163,14 +171,21 @@ export class AnnonceCreateComponent implements OnInit {
   createAnnonce(): void {
     const step1Value = this.step1FormGroup.value;
     const step2Value = this.step2FormGroup.value;
-    
+
     const request: AnnonceCreateRequest = {
       orgId: 'ORG-001',
       title: step1Value.title,
       description: step1Value.description || undefined,
       category: step1Value.type || undefined,
+      type: step1Value.type || undefined,
       city: step2Value.city || undefined,
-      price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined
+      address: step2Value.address || undefined,
+      surface: step2Value.surface !== null && step2Value.surface !== '' ? step2Value.surface : undefined,
+      price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined,
+      currency: 'EUR',
+      photos: this.step3FormGroup.value.photos,
+      rulesJson: JSON.parse(this.step4FormGroup.value.rulesJson),
+      meta: { source: 'wizard' }
     };
 
     this.annonceApiService.create(request).subscribe({
@@ -190,13 +205,19 @@ export class AnnonceCreateComponent implements OnInit {
 
     const step1Value = this.step1FormGroup.value;
     const step2Value = this.step2FormGroup.value;
-    
+
     const request: AnnonceUpdateRequest = {
       title: step1Value.title,
       description: step1Value.description || undefined,
       category: step1Value.type || undefined,
+      type: step1Value.type || undefined,
       city: step2Value.city || undefined,
-      price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined
+      address: step2Value.address || undefined,
+      surface: step2Value.surface !== null && step2Value.surface !== '' ? step2Value.surface : undefined,
+      price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined,
+      photos: this.step3FormGroup.value.photos,
+      rulesJson: JSON.parse(this.step4FormGroup.value.rulesJson),
+      meta: { source: 'wizard-edit' }
     };
 
     this.annonceApiService.update(this.annonceId, request).subscribe({
@@ -213,7 +234,7 @@ export class AnnonceCreateComponent implements OnInit {
 
   handleError(err: { status?: number; error?: { errors?: { field?: string; message?: string; defaultMessage?: string }[]; message?: string } }): void {
     console.error('Error submitting annonce:', err);
-    
+
     if (err.status === 400 && err.error && err.error.errors) {
       this.validationErrors = {};
       err.error.errors.forEach((error: { field?: string; message?: string; defaultMessage?: string }) => {
@@ -258,7 +279,7 @@ export class AnnonceCreateComponent implements OnInit {
 
   getFieldError(formGroup: FormGroup, fieldName: string): string | null {
     const control = formGroup.get(fieldName);
-    
+
     if (this.validationErrors[fieldName]) {
       return this.validationErrors[fieldName];
     }

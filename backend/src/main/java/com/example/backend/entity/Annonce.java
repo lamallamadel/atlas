@@ -2,14 +2,15 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,13 +58,17 @@ public class Annonce {
     @Column(name = "status", nullable = false, length = 50)
     private AnnonceStatus status;
 
-    @Type(JsonBinaryType.class)
-    @Column(name = "photos_json", columnDefinition = "jsonb")
-    private List<String> photosJson;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "photos_json")
+    private List<String> photos;
 
-    @Type(JsonBinaryType.class)
-    @Column(name = "rules_json", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "rules_json")
     private Map<String, Object> rulesJson;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "meta_json")
+    private Map<String, Object> meta = new HashMap<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -175,12 +180,20 @@ public class Annonce {
         this.status = status;
     }
 
-    public List<String> getPhotosJson() {
-        return photosJson;
+    public List<String> getPhotos() {
+        return photos;
     }
 
-    public void setPhotosJson(List<String> photosJson) {
-        this.photosJson = photosJson;
+    public void setPhotos(List<String> photos) {
+        this.photos = photos;
+    }
+
+    public Map<String, Object> getMeta() {
+        return meta;
+    }
+
+    public void setMeta(Map<String, Object> meta) {
+        this.meta = meta;
     }
 
     public Map<String, Object> getRulesJson() {
