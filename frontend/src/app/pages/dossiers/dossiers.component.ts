@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
 @Component({
   selector: 'app-dossiers',
@@ -23,6 +25,9 @@ export class DossiersComponent implements OnInit {
 
   DossierStatus = DossierStatus;
 
+  private dateFormatPipe = new DateFormatPipe();
+  private phoneFormatPipe = new PhoneFormatPipe();
+
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
     { 
@@ -41,7 +46,7 @@ export class DossiersComponent implements OnInit {
       key: 'leadPhone', 
       header: 'Téléphone du prospect', 
       sortable: true,
-      format: (value: unknown) => (value as string) || '-'
+      format: (value: unknown) => this.phoneFormatPipe.transform(value as string) || '-'
     },
     { 
       key: 'leadSource', 
@@ -65,14 +70,14 @@ export class DossiersComponent implements OnInit {
       header: 'Créé le', 
       sortable: true,
       type: 'custom',
-      format: (value: unknown) => this.formatDate(value as string)
+      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
     },
     { 
       key: 'updatedAt', 
       header: 'Modifié le', 
       sortable: true,
       type: 'custom',
-      format: (value: unknown) => this.formatDate(value as string)
+      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
     }
   ];
 
@@ -210,11 +215,6 @@ export class DossiersComponent implements OnInit {
       default:
         return 'status-badge';
     }
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   }
 
   getPageNumbers(): number[] {

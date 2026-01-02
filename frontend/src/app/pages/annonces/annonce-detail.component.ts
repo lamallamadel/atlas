@@ -79,15 +79,4 @@ export class AnnonceDetailComponent implements OnInit {
         return 'status-badge';
     }
   }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  }
-
-  formatPrice(price: number | undefined, currency: string | undefined): string {
-    if (price === undefined) return 'N/A';
-    const curr = currency || 'EUR';
-    return `${price.toFixed(2)} ${curr}`;
-  }
 }

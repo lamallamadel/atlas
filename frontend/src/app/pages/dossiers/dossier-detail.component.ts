@@ -123,9 +123,4 @@ export class DossierDetailComponent implements OnInit {
         return 'status-badge';
     }
   }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-  }
 }

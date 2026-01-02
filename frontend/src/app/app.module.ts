@@ -27,6 +27,9 @@ import { DossierDetailComponent } from './pages/dossiers/dossier-detail.componen
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
+import { DateFormatPipe } from './pipes/date-format.pipe';
+import { PriceFormatPipe } from './pipes/price-format.pipe';
+import { PhoneFormatPipe } from './pipes/phone-format.pipe';
 
 @NgModule({
   declarations: [
@@ -40,7 +43,10 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
     DossierCreateComponent,
     DossierDetailComponent,
     GenericTableComponent,
-    EmptyStateComponent
+    EmptyStateComponent,
+    DateFormatPipe,
+    PriceFormatPipe,
+    PhoneFormatPipe
   ],
   imports: [
     BrowserModule,

@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 
 @Component({
   selector: 'app-annonces',
@@ -26,6 +28,9 @@ export class AnnoncesComponent implements OnInit {
   availableTypes = ['SALE', 'RENT', 'LEASE', 'EXCHANGE'];
 
   AnnonceStatus = AnnonceStatus;
+
+  private dateFormatPipe = new DateFormatPipe();
+  private priceFormatPipe = new PriceFormatPipe();
 
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
@@ -63,8 +68,7 @@ export class AnnoncesComponent implements OnInit {
       format: (value: unknown, row: unknown) => {
         const annonce = row as AnnonceResponse;
         if (annonce.price === undefined) return '-';
-        const curr = annonce.currency || 'EUR';
-        return `${annonce.price.toFixed(2)} ${curr}`;
+        return this.priceFormatPipe.transform(annonce.price, annonce.currency || 'EUR');
       }
     },
     { 
@@ -83,14 +87,14 @@ export class AnnoncesComponent implements OnInit {
       header: 'Créé le', 
       sortable: true,
       type: 'custom',
-      format: (value: unknown) => this.formatDate(value as string)
+      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
     },
     { 
       key: 'updatedAt', 
       header: 'Modifié le', 
       sortable: true,
       type: 'custom',
-      format: (value: unknown) => this.formatDate(value as string)
+      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
     }
   ];
 
@@ -244,11 +248,6 @@ export class AnnoncesComponent implements OnInit {
       default:
         return 'status-badge';
     }
-  }
-
-  formatDate(dateString: string): string {
-    const date = new Date(dateString);
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
   }
 
   getPageNumbers(): number[] {
