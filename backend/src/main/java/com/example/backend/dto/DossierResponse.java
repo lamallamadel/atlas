@@ -20,6 +20,9 @@ public class DossierResponse {
     @Schema(description = "Associated annonce ID", example = "1", nullable = true)
     private Long annonceId;
 
+    @Schema(description = "Associated annonce title", example = "Beautiful Apartment", nullable = true)
+    private String annonceTitle;
+
     @Schema(description = "Lead phone number", example = "+33612345678", nullable = true)
     private String leadPhone;
 
@@ -81,6 +84,14 @@ public class DossierResponse {
 
     public void setAnnonceId(Long annonceId) {
         this.annonceId = annonceId;
+    }
+
+    public String getAnnonceTitle() {
+        return annonceTitle;
+    }
+
+    public void setAnnonceTitle(String annonceTitle) {
+        this.annonceTitle = annonceTitle;
     }
 
     public String getLeadPhone() {

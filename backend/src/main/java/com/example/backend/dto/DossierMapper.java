@@ -1,8 +1,10 @@
 package com.example.backend.dto;
 
+import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.PartiePrenanteEntity;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.repository.AnnonceRepository;
 import org.springframework.stereotype.Component;
 
 import java.util.stream.Collectors;
@@ -11,9 +13,11 @@ import java.util.stream.Collectors;
 public class DossierMapper {
 
     private final PartiePrenanteMapper partiePrenanteMapper;
+    private final AnnonceRepository annonceRepository;
 
-    public DossierMapper(PartiePrenanteMapper partiePrenanteMapper) {
+    public DossierMapper(PartiePrenanteMapper partiePrenanteMapper, AnnonceRepository annonceRepository) {
         this.partiePrenanteMapper = partiePrenanteMapper;
+        this.annonceRepository = annonceRepository;
     }
 
     public Dossier toEntity(DossierCreateRequest request) {
@@ -40,6 +44,12 @@ public class DossierMapper {
         response.setId(dossier.getId());
         response.setOrgId(dossier.getOrgId());
         response.setAnnonceId(dossier.getAnnonceId());
+        
+        if (dossier.getAnnonceId() != null) {
+            annonceRepository.findById(dossier.getAnnonceId())
+                .ifPresent(annonce -> response.setAnnonceTitle(annonce.getTitle()));
+        }
+        
         response.setLeadPhone(dossier.getLeadPhone());
         response.setLeadName(dossier.getLeadName());
         response.setLeadSource(dossier.getLeadSource());

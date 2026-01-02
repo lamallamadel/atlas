@@ -76,7 +76,9 @@
         [actions]="actions"
         [showPagination]="false"
         [enableSort]="false"
-        (rowAction)="onRowAction($event)">
+        [rowClickable]="true"
+        (rowAction)="onRowAction($event)"
+        (rowClick)="onRowClick($event)">
       </app-generic-table>
 
       <div class="pagination-section" *ngIf="page">

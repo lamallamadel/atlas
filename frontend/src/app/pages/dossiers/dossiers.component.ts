@@ -25,10 +25,10 @@ export class DossiersComponent implements OnInit {
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
     { 
-      key: 'annonceId', 
-      header: 'ID annonce', 
+      key: 'annonceTitle', 
+      header: 'Annonce', 
       sortable: true,
-      format: (value: unknown) => value ? value.toString() : '-'
+      format: (value: unknown) => (value as string) || '—'
     },
     { 
       key: 'leadName', 
@@ -177,6 +177,11 @@ export class DossiersComponent implements OnInit {
 
   viewDossier(id: number): void {
     this.router.navigate(['/dossiers', id]);
+  }
+
+  onRowClick(row: unknown): void {
+    const dossier = row as DossierResponse;
+    this.viewDossier(dossier.id);
   }
 
   getStatusBadgeClass(status: DossierStatus): string {

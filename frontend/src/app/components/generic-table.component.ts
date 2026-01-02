@@ -37,8 +37,10 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() pageSizeOptions: number[] = [5, 10, 25, 50, 100];
   @Input() showPagination = true;
   @Input() enableSort = true;
+  @Input() rowClickable = false;
 
   @Output() rowAction = new EventEmitter<{ action: string; row: unknown }>();
+  @Output() rowClick = new EventEmitter<unknown>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -105,6 +107,12 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
         return value.toString();
       default:
         return value.toString();
+    }
+  }
+
+  onRowClick(row: unknown): void {
+    if (this.rowClickable) {
+      this.rowClick.emit(row);
     }
   }
 }

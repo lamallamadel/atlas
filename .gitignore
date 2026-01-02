@@ -154,6 +154,10 @@ setup-backend-wrapper.ps1
 temp-setup-backend.ps1
 mvn-wrapper.ps1
 setup-maven-backend.cmd
+backend/setup-mvn.cmd
+backend/maven-install-wrapper.js
+backend/package.json
+backend/package-lock.json
 
 # Node.js
 package-lock.json

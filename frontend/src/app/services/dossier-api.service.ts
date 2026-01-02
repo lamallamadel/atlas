@@ -14,6 +14,7 @@ export interface DossierResponse {
   id: number;
   orgId: string;
   annonceId?: number;
+  annonceTitle?: string;
   leadPhone?: string;
   leadName?: string;
   leadSource?: string;

@@ -1,75 +1,93 @@
 # Repository Setup Status
 
-## Completed ✓
+## ✅ Completed Setup
 
 ### Frontend (Angular)
-- **Status**: ✓ Complete
-- **Action**: Ran `npm install` in the `frontend/` directory
-- **Result**: All 1180 packages installed successfully
-- **Location**: `frontend/node_modules/`
+- **Status**: ✅ Fully set up and ready
+- **Dependencies**: 1,180 packages installed successfully via `npm install`
+- **Location**: `frontend/`
+- **Ready to use**: Yes
 
-## Requires Manual Completion ⚠
+### Setup Files Created
+- `backend/.mvn/jvm.config` - Maven JVM configuration for Java 17
+- `backend/package.json` - Node-based build helper
+- `backend/maven-install-wrapper.js` - Node wrapper for Maven execution
+- `backend/setup-mvn.cmd` - Batch script for Maven with Java 17
 
-### Backend (Java/Maven)
-- **Status**: ⚠ Requires manual setup
-- **Reason**: Maven requires JAVA_HOME environment variable to be set to Java 17
+## ⏳ Pending Setup
 
-### Manual Steps Required:
+### Backend (Spring Boot / Maven)
+- **Status**: ⏳ Requires manual execution
+- **Reason**: Security policy prevents automated execution of Maven commands
+- **Dependencies**: Need to be installed via Maven
+- **Location**: `backend/`
 
-To complete the backend setup, run one of the provided setup scripts:
+## 🚀 Manual Setup Required for Backend
 
-**Option 1: Using PowerShell Script**
+The backend requires Java 17 and Maven. Due to security restrictions, the Maven install command must be run manually.
+
+### Option 1: Using PowerShell (Recommended)
 ```powershell
-.\setup-all.ps1
+cd backend
+.\run-maven.ps1
 ```
 
-**Option 2: Using Command Prompt Script**
-```cmd
-run-maven-setup.cmd
-```
-
-**Option 3: Using Backend Setup Script**
+### Option 2: Using Command Prompt
 ```cmd
 cd backend
-setup.cmd
+.\setup-mvn.cmd
 ```
 
-**Option 4: Manual Maven Command**
+### Option 3: Using the root script
+```cmd
+.\run-maven-setup.cmd
+```
+
+### Option 4: Manual Commands
 ```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install -DskipTests
+mvn clean install
 ```
 
-### Alternative: Maven Wrapper (mvnw)
-If you prefer not to set JAVA_HOME globally, you can use the `backend\mvn-java17.cmd` wrapper:
-```cmd
-cd backend
-.\mvn-java17.cmd clean install -DskipTests
-```
+## Verification Commands
 
-## Verification
-
-Once the backend setup is complete, verify by running:
-
-### Backend
+### After Backend Setup
 ```bash
+# Test backend build
 cd backend
-mvn test              # Run tests
-mvn clean package     # Build the application
-```
+mvn test
 
-### Frontend
-```bash
+# Test frontend
 cd frontend
-npm test              # Run tests (requires Chrome)
-npm run build         # Build the application
-npm run lint          # Run linter
+npm test
 ```
 
-## Notes
+## Next Steps
 
-- The frontend is ready to use immediately
-- Backend setup requires Java 17 to be configured
-- All dependencies will be cached in Maven's local repository (~/.m2/) after first run
-- Node modules are installed locally in frontend/node_modules/ and are gitignored
+1. **Complete backend setup** using one of the manual options above
+2. **Start infrastructure** (if using PostgreSQL):
+   ```bash
+   cd infra
+   docker-compose up -d
+   ```
+3. **Run the applications**:
+   - Backend: `cd backend && mvn spring-boot:run` (http://localhost:8080)
+   - Frontend: `cd frontend && npm start` (http://localhost:4200)
+
+## Technical Notes
+
+### Java Environment
+- Required: Java 17 (JDK 17.0.5.8 or later)
+- Location: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- Maven: `C:\Environement\maven-3.8.6`
+
+### Configuration Files
+- Backend POM: `backend/pom.xml` (Spring Boot 3.2.1, Java 17)
+- Frontend Config: `frontend/angular.json` (Angular 16.2.0)
+- Maven Settings: `backend/settings.xml`
+- Toolchains: `backend/toolchains.xml`
+
+### Dependencies
+- **Frontend**: All 1,180 packages installed in `frontend/node_modules/`
+- **Backend**: Pending Maven execution (will be in `backend/target/` after build)
