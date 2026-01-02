@@ -66,7 +66,7 @@ export class AnnonceCreateComponent implements OnInit {
     });
 
     this.step4FormGroup = this.fb.group({
-      rulesJson: ['{}', [Validators.required, this.jsonValidator]]
+      rulesJson: ['', [this.jsonValidator]]
     });
   }
 
@@ -88,8 +88,8 @@ export class AnnonceCreateComponent implements OnInit {
 
   jsonValidator(control: AbstractControl): ValidationErrors | null {
     try {
-      const value = control.value;
-      if (value) {
+      const value = control.value?.trim();
+      if (value && value !== '') {
         JSON.parse(value);
       }
       return null;
@@ -137,7 +137,7 @@ export class AnnonceCreateComponent implements OnInit {
         }
 
         this.step4FormGroup.patchValue({
-          rulesJson: annonce.rulesJson ? JSON.stringify(annonce.rulesJson, null, 2) : '{}'
+          rulesJson: annonce.rulesJson && Object.keys(annonce.rulesJson).length > 0 ? JSON.stringify(annonce.rulesJson, null, 2) : ''
         });
 
         this.loading = false;
@@ -171,6 +171,18 @@ export class AnnonceCreateComponent implements OnInit {
   createAnnonce(): void {
     const step1Value = this.step1FormGroup.value;
     const step2Value = this.step2FormGroup.value;
+    const step4Value = this.step4FormGroup.value;
+
+    let rulesJsonParsed;
+    try {
+      const rulesJsonStr = step4Value.rulesJson?.trim();
+      rulesJsonParsed = rulesJsonStr && rulesJsonStr !== '' ? JSON.parse(rulesJsonStr) : undefined;
+      if (rulesJsonParsed && Object.keys(rulesJsonParsed).length === 0) {
+        rulesJsonParsed = undefined;
+      }
+    } catch (e) {
+      rulesJsonParsed = undefined;
+    }
 
     const request: AnnonceCreateRequest = {
       orgId: 'ORG-001',
@@ -184,7 +196,7 @@ export class AnnonceCreateComponent implements OnInit {
       price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined,
       currency: 'EUR',
       photos: this.step3FormGroup.value.photos,
-      rulesJson: JSON.parse(this.step4FormGroup.value.rulesJson),
+      rulesJson: rulesJsonParsed,
       meta: { source: 'wizard' }
     };
 
@@ -205,6 +217,18 @@ export class AnnonceCreateComponent implements OnInit {
 
     const step1Value = this.step1FormGroup.value;
     const step2Value = this.step2FormGroup.value;
+    const step4Value = this.step4FormGroup.value;
+
+    let rulesJsonParsed;
+    try {
+      const rulesJsonStr = step4Value.rulesJson?.trim();
+      rulesJsonParsed = rulesJsonStr && rulesJsonStr !== '' ? JSON.parse(rulesJsonStr) : undefined;
+      if (rulesJsonParsed && Object.keys(rulesJsonParsed).length === 0) {
+        rulesJsonParsed = undefined;
+      }
+    } catch (e) {
+      rulesJsonParsed = undefined;
+    }
 
     const request: AnnonceUpdateRequest = {
       title: step1Value.title,
@@ -216,7 +240,7 @@ export class AnnonceCreateComponent implements OnInit {
       surface: step2Value.surface !== null && step2Value.surface !== '' ? step2Value.surface : undefined,
       price: step2Value.price !== null && step2Value.price !== '' ? step2Value.price : undefined,
       photos: this.step3FormGroup.value.photos,
-      rulesJson: JSON.parse(this.step4FormGroup.value.rulesJson),
+      rulesJson: rulesJsonParsed,
       meta: { source: 'wizard-edit' }
     };
 
@@ -325,7 +349,7 @@ export class AnnonceCreateComponent implements OnInit {
   formatJson(): void {
     try {
       const control = this.step4FormGroup.get('rulesJson');
-      if (control) {
+      if (control && control.value?.trim()) {
         const parsed = JSON.parse(control.value);
         control.setValue(JSON.stringify(parsed, null, 2));
       }
