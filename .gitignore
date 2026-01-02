@@ -158,6 +158,8 @@ backend/setup-mvn.cmd
 backend/maven-install-wrapper.js
 backend/package.json
 backend/package-lock.json
+mvn17-with-settings.cmd
+mvn17-noproxy.cmd
 
 # Node.js
 package-lock.json

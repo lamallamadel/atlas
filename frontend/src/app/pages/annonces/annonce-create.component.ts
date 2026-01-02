@@ -109,7 +109,8 @@ export class AnnonceCreateComponent implements OnInit {
       }
       return null;
     } catch (e) {
-      return { invalidJson: true };
+      const error = e as Error;
+      return { invalidJson: true, jsonParseError: error.message };
     }
   }
 
@@ -166,9 +167,13 @@ export class AnnonceCreateComponent implements OnInit {
   }
 
   onSubmit(): void {
+    // Mark all forms as touched to trigger validation display
+    this.markAllFormGroupsTouched();
+
+    // Check if any form is invalid
     if (this.step1FormGroup.invalid || this.step2FormGroup.invalid ||
       this.step3FormGroup.invalid || this.step4FormGroup.invalid) {
-      this.markAllFormGroupsTouched();
+      // Don't set global error for client-side validation (including JSON validation)
       return;
     }
 
@@ -335,6 +340,10 @@ export class AnnonceCreateComponent implements OnInit {
         return `${this.getFieldLabel(fieldName)} doit être supérieur ou égal à 0`;
       }
       if (control.errors?.['invalidJson']) {
+        const parseError = control.errors['jsonParseError'];
+        if (parseError) {
+          return `JSON invalide: ${parseError}`;
+        }
         return `${this.getFieldLabel(fieldName)} doit être un JSON valide`;
       }
     }
