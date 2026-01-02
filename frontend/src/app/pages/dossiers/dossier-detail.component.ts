@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { DossierApiService, DossierResponse, DossierStatus } from '../../services/dossier-api.service';
 
 @Component({
@@ -30,7 +31,8 @@ export class DossierDetailComponent implements OnInit {
   constructor(
     private dossierApiService: DossierApiService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -95,11 +97,15 @@ export class DossierDetailComponent implements OnInit {
     this.successMessage = null;
 
     this.dossierApiService.patchStatus(this.dossier.id, this.selectedStatus).subscribe({
-      next: (response) => {
-        this.dossier = response;
-        this.selectedStatus = response.status;
-        this.successMessage = 'Statut mis à jour avec succès !';
+      next: () => {
         this.updatingStatus = false;
+        this.snackBar.open('Statut mis à jour avec succès !', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadDossier();
         
         setTimeout(() => {
           this.successMessage = null;
@@ -107,8 +113,14 @@ export class DossierDetailComponent implements OnInit {
         }, 2000);
       },
       error: (err) => {
-        this.statusError = 'Échec de la mise à jour du statut. Veuillez réessayer.';
         this.updatingStatus = false;
+        const errorMessage = err.error?.message || 'Échec de la mise à jour du statut. Veuillez réessayer.';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
         console.error('Error updating status:', err);
       }
     });

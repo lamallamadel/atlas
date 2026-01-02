@@ -254,6 +254,18 @@
   cursor: not-allowed;
 }
 
+.spinner-small {
+  display: inline-block;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  width: 14px;
+  height: 14px;
+  animation: spin 1s linear infinite;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
 .btn-cancel {
   background-color: #95a5a6;
   color: white;
