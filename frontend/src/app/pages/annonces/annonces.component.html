@@ -14,9 +14,8 @@
         class="search-input"
         placeholder="Rechercher des annonces..."
         [(ngModel)]="searchQuery"
-        (keyup.enter)="onSearch()"
+        (keyup.enter)="applyFilters()"
       />
-      <button class="btn-search" (click)="onSearch()">Rechercher</button>
     </div>
 
     <div class="filter-box">
@@ -25,7 +24,7 @@
         id="status-filter"
         class="filter-select"
         [(ngModel)]="selectedStatus"
-        (change)="onStatusChange()"
+        (change)="applyFilters()"
       >
         <option value="">Tous</option>
         <option [value]="AnnonceStatus.DRAFT">Brouillon</option>
@@ -33,6 +32,8 @@
         <option [value]="AnnonceStatus.ARCHIVED">Archivé</option>
       </select>
     </div>
+
+    <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
   </div>
 
   <div class="page-content">

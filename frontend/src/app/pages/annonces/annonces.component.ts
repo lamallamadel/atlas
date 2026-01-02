@@ -137,6 +137,18 @@ export class AnnoncesComponent implements OnInit {
     });
   }
 
+  applyFilters(): void {
+    this.currentPage = 0;
+    this.loadAnnonces();
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.selectedStatus = '';
+    this.currentPage = 0;
+    this.loadAnnonces();
+  }
+
   onSearch(): void {
     this.currentPage = 0;
     this.loadAnnonces();
