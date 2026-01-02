@@ -70,6 +70,9 @@ export class AnnonceCreateComponent implements OnInit {
     });
   }
 
+  newPhotoUrl = '';
+  photoErrors: { [key: number]: boolean } = {};
+
   get photos(): FormArray {
     return this.step3FormGroup.get('photos') as FormArray;
   }
@@ -79,11 +82,23 @@ export class AnnonceCreateComponent implements OnInit {
   }
 
   addPhoto(): void {
-    this.photos.push(this.fb.control('', [Validators.required, Validators.maxLength(1000)]));
+    if (this.newPhotoUrl.trim()) {
+      this.photos.push(this.fb.control(this.newPhotoUrl.trim(), [Validators.required, Validators.maxLength(1000)]));
+      this.newPhotoUrl = '';
+    }
   }
 
   removePhoto(index: number): void {
     this.photos.removeAt(index);
+    delete this.photoErrors[index];
+  }
+
+  onPhotoError(index: number): void {
+    this.photoErrors[index] = true;
+  }
+
+  onPhotoLoad(index: number): void {
+    this.photoErrors[index] = false;
   }
 
   jsonValidator(control: AbstractControl): ValidationErrors | null {

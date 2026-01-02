@@ -173,42 +173,68 @@
           <h3 class="step-title">Photos</h3>
           
           <div class="photos-section">
+            <!-- Photo List Display -->
             <div *ngIf="photos.length === 0" class="empty-photos">
-              <p>Aucune photo ajoutée pour le moment. Cliquez sur "Ajouter une photo" pour ajouter une URL de photo.</p>
+              <p class="empty-title">Aucune photo ajoutée</p>
+              <p class="empty-subtitle">Ajoutez une URL de photo ci-dessous</p>
             </div>
 
-            <div *ngFor="let photo of photos.controls; let i = index" class="photo-item">
-              <div class="photo-input-group">
-                <label [for]="'photo-' + i" class="form-label">
-                  URL de la photo {{ i + 1 }}
-                </label>
-                <div class="photo-input-wrapper">
-                  <input
-                    [id]="'photo-' + i"
-                    type="text"
-                    class="form-input"
-                    [formControl]="getPhotoControl(i)"
-                    [class.invalid]="getPhotoControl(i).touched && getPhotoControl(i).invalid"
-                    placeholder="Saisir l'URL de la photo"
+            <div *ngIf="photos.length > 0" class="photos-list">
+              <div *ngFor="let photo of photos.controls; let i = index" class="photo-row">
+                <div class="photo-thumbnail">
+                  <img 
+                    *ngIf="!photoErrors[i]"
+                    [src]="getPhotoControl(i).value" 
+                    [alt]="'Photo ' + (i + 1)"
+                    (error)="onPhotoError(i)"
+                    (load)="onPhotoLoad(i)"
+                    class="photo-preview"
                   />
-                  <button
-                    type="button"
-                    class="btn-remove-photo"
-                    (click)="removePhoto(i)"
-                    title="Supprimer la photo"
-                  >
-                    ✕
-                  </button>
+                  <div *ngIf="photoErrors[i]" class="photo-error-placeholder">
+                    <span>⚠</span>
+                  </div>
                 </div>
-                <div *ngIf="getPhotoControl(i).touched && getPhotoControl(i).invalid" class="field-error">
-                  L'URL de la photo est requise et ne doit pas dépasser 1000 caractères
+                <div class="photo-url">
+                  {{ getPhotoControl(i).value }}
                 </div>
+                <button
+                  type="button"
+                  class="btn-delete-photo"
+                  (click)="removePhoto(i)"
+                  title="Supprimer cette photo"
+                >
+                  Supprimer
+                </button>
               </div>
             </div>
 
-            <button type="button" class="btn-add-photo" (click)="addPhoto()">
-              + Ajouter une photo
-            </button>
+            <!-- Add Photo Input -->
+            <div class="add-photo-section">
+              <div class="add-photo-input-group">
+                <label for="newPhotoUrl" class="form-label">
+                  Ajouter une nouvelle photo
+                </label>
+                <div class="add-photo-wrapper">
+                  <input
+                    id="newPhotoUrl"
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="newPhotoUrl"
+                    [ngModelOptions]="{standalone: true}"
+                    placeholder="Saisir l'URL de la photo"
+                    (keyup.enter)="addPhoto()"
+                  />
+                  <button
+                    type="button"
+                    class="btn-add-photo"
+                    (click)="addPhoto()"
+                    [disabled]="!newPhotoUrl.trim()"
+                  >
+                    Ajouter
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="step-actions">
