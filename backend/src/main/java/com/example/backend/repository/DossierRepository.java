@@ -15,4 +15,6 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     
     @Query("SELECT DISTINCT d FROM Dossier d JOIN d.parties p WHERE p.phone = :phone AND d.status NOT IN :excludedStatuses")
     List<Dossier> findByPartiesPhoneAndStatusNotIn(@Param("phone") String phone, @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
+    
+    Long countByStatusIn(List<DossierStatus> statuses);
 }

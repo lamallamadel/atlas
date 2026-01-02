@@ -3,6 +3,86 @@
     <h2 class="page-title">Tableau de bord</h2>
   </div>
   <div class="page-content">
+    <div class="kpi-cards-container">
+      <div class="kpi-card">
+        <div class="kpi-card-header">
+          <h3 class="kpi-card-title">Annonces actives</h3>
+        </div>
+        <div class="kpi-card-body">
+          <div *ngIf="loadingAnnonces" class="kpi-loading">
+            <span class="loading-spinner">⟳</span>
+            <span>Chargement...</span>
+          </div>
+          <div *ngIf="!loadingAnnonces && errorAnnonces" class="kpi-error">
+            <span class="error-icon">✗</span>
+            <span>{{errorAnnonces}}</span>
+          </div>
+          <div *ngIf="!loadingAnnonces && !errorAnnonces" class="kpi-value">
+            {{annoncesActivesCount}}
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-card-header">
+          <h3 class="kpi-card-title">Dossiers à traiter</h3>
+        </div>
+        <div class="kpi-card-body">
+          <div *ngIf="loadingDossiers" class="kpi-loading">
+            <span class="loading-spinner">⟳</span>
+            <span>Chargement...</span>
+          </div>
+          <div *ngIf="!loadingDossiers && errorDossiers" class="kpi-error">
+            <span class="error-icon">✗</span>
+            <span>{{errorDossiers}}</span>
+          </div>
+          <div *ngIf="!loadingDossiers && !errorDossiers" class="kpi-value">
+            {{dossiersATraiterCount}}
+          </div>
+        </div>
+      </div>
+
+      <div class="kpi-card kpi-card-wide">
+        <div class="kpi-card-header">
+          <h3 class="kpi-card-title">Derniers dossiers</h3>
+        </div>
+        <div class="kpi-card-body">
+          <div *ngIf="loadingRecent" class="kpi-loading">
+            <span class="loading-spinner">⟳</span>
+            <span>Chargement...</span>
+          </div>
+          <div *ngIf="!loadingRecent && errorRecent" class="kpi-error">
+            <span class="error-icon">✗</span>
+            <span>{{errorRecent}}</span>
+          </div>
+          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0" class="kpi-empty">
+            Aucun dossier
+          </div>
+          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list">
+            <div *ngFor="let dossier of recentDossiers" class="dossier-item">
+              <div class="dossier-info">
+                <div class="dossier-id">
+                  <strong>ID:</strong> {{dossier.id}}
+                </div>
+                <div class="dossier-lead" *ngIf="dossier.leadName">
+                  <strong>Lead:</strong> {{dossier.leadName}}
+                </div>
+                <div class="dossier-phone" *ngIf="dossier.leadPhone">
+                  <strong>Téléphone:</strong> {{dossier.leadPhone}}
+                </div>
+                <div class="dossier-status">
+                  <strong>Statut:</strong> {{dossier.status}}
+                </div>
+                <div class="dossier-date">
+                  <strong>Créé le:</strong> {{dossier.createdAt | date:'short'}}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <div class="api-status-container">
       <h3>État de la connexion API</h3>
       <div class="status-card" [ngClass]="{
