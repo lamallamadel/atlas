@@ -6,6 +6,7 @@ import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
+import com.example.backend.entity.enums.AnnonceType;
 import com.example.backend.repository.AnnonceRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -70,7 +72,7 @@ public class AnnonceService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AnnonceResponse> list(AnnonceStatus status, String q, Pageable pageable) {
+    public Page<AnnonceResponse> list(AnnonceStatus status, String q, String city, String type, Pageable pageable) {
         Specification<Annonce> spec = Specification.where(null);
 
         if (status != null) {
@@ -89,7 +91,26 @@ public class AnnonceService {
                     ));
         }
 
+        if (city != null && !city.trim().isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("city"), city));
+        }
+
+        if (type != null && !type.trim().isEmpty()) {
+            try {
+                AnnonceType annonceType = AnnonceType.valueOf(type.toUpperCase());
+                spec = spec.and((root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("type"), annonceType));
+            } catch (IllegalArgumentException e) {
+            }
+        }
+
         Page<Annonce> annonces = annonceRepository.findAll(spec, pageable);
         return annonces.map(annonceMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public List<String> getDistinctCities() {
+        return annonceRepository.findDistinctCities();
     }
 }

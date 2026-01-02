@@ -33,6 +33,32 @@
       </select>
     </div>
 
+    <div class="filter-box">
+      <label for="city-filter" class="filter-label">Ville :</label>
+      <select
+        id="city-filter"
+        class="filter-select"
+        [(ngModel)]="selectedCity"
+        (change)="applyFilters()"
+      >
+        <option value="">Toutes</option>
+        <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
+      </select>
+    </div>
+
+    <div class="filter-box">
+      <label for="type-filter" class="filter-label">Type/Catégorie :</label>
+      <select
+        id="type-filter"
+        class="filter-select"
+        [(ngModel)]="selectedType"
+        (change)="applyFilters()"
+      >
+        <option value="">Tous</option>
+        <option *ngFor="let type of availableTypes" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+
     <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
   </div>
 

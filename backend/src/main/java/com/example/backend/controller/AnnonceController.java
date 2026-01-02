@@ -22,6 +22,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/annonces")
 @Tag(name = "Annonces", description = "API for managing annonces")
@@ -99,6 +101,10 @@ public class AnnonceController {
             @RequestParam(required = false) AnnonceStatus status,
             @Parameter(description = "Search query to filter annonces by title, description, category, or city")
             @RequestParam(required = false) String q,
+            @Parameter(description = "Filter by city")
+            @RequestParam(required = false) String city,
+            @Parameter(description = "Filter by type")
+            @RequestParam(required = false) String type,
             @Parameter(description = "Page number (0-indexed)")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size")
@@ -107,8 +113,18 @@ public class AnnonceController {
             @RequestParam(defaultValue = "id,asc") String sort) {
         
         Pageable pageable = createPageable(page, size, sort);
-        Page<AnnonceResponse> response = annonceService.list(status, q, pageable);
+        Page<AnnonceResponse> response = annonceService.list(status, q, city, type, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/cities")
+    @Operation(summary = "Get distinct cities", description = "Retrieves a list of distinct cities from all annonces")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Cities retrieved successfully")
+    })
+    public ResponseEntity<List<String>> getDistinctCities() {
+        List<String> cities = annonceService.getDistinctCities();
+        return ResponseEntity.ok(cities);
     }
 
     private Pageable createPageable(int page, int size, String sort) {

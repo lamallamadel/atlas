@@ -16,8 +16,13 @@ export class AnnoncesComponent implements OnInit {
 
   searchQuery = '';
   selectedStatus: AnnonceStatus | '' = '';
+  selectedCity = '';
+  selectedType = '';
   currentPage = 0;
   pageSize = 10;
+
+  availableCities: string[] = [];
+  availableTypes = ['SALE', 'RENT', 'LEASE', 'EXCHANGE'];
 
   AnnonceStatus = AnnonceStatus;
 
@@ -98,7 +103,19 @@ export class AnnoncesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.loadCities();
     this.loadAnnonces();
+  }
+
+  loadCities(): void {
+    this.annonceApiService.getDistinctCities().subscribe({
+      next: (cities) => {
+        this.availableCities = cities;
+      },
+      error: (err) => {
+        console.error('Error loading cities:', err);
+      }
+    });
   }
 
   loadAnnonces(): void {
@@ -110,6 +127,8 @@ export class AnnoncesComponent implements OnInit {
       size: number;
       q?: string;
       status?: AnnonceStatus;
+      city?: string;
+      type?: string;
     } = {
       page: this.currentPage,
       size: this.pageSize
@@ -121,6 +140,14 @@ export class AnnoncesComponent implements OnInit {
 
     if (this.selectedStatus) {
       params.status = this.selectedStatus;
+    }
+
+    if (this.selectedCity) {
+      params.city = this.selectedCity;
+    }
+
+    if (this.selectedType) {
+      params.type = this.selectedType;
     }
 
     this.annonceApiService.list(params).subscribe({
@@ -145,6 +172,8 @@ export class AnnoncesComponent implements OnInit {
   resetFilters(): void {
     this.searchQuery = '';
     this.selectedStatus = '';
+    this.selectedCity = '';
+    this.selectedType = '';
     this.currentPage = 0;
     this.loadAnnonces();
   }

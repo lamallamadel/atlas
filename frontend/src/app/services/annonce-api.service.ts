@@ -94,6 +94,8 @@ export interface Page<T> {
 export interface AnnonceListParams {
   status?: AnnonceStatus;
   q?: string;
+  city?: string;
+  type?: string;
   page?: number;
   size?: number;
   sort?: string;
@@ -117,6 +119,12 @@ export class AnnonceApiService {
     if (params.q !== undefined) {
       httpParams = httpParams.set('q', params.q);
     }
+    if (params.city !== undefined) {
+      httpParams = httpParams.set('city', params.city);
+    }
+    if (params.type !== undefined) {
+      httpParams = httpParams.set('type', params.type);
+    }
     if (params.page !== undefined) {
       httpParams = httpParams.set('page', params.page.toString());
     }
@@ -128,6 +136,10 @@ export class AnnonceApiService {
     }
 
     return this.http.get<Page<AnnonceResponse>>(this.apiUrl, { params: httpParams });
+  }
+
+  getDistinctCities(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/cities`);
   }
 
   getById(id: number): Observable<AnnonceResponse> {
