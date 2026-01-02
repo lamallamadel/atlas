@@ -87,17 +87,44 @@
       </div>
 
       <div class="form-group">
-        <label for="annonceId" class="form-label">
-          ID annonce
+        <label for="annonceSearch" class="form-label">
+          Annonce (optionnel)
         </label>
         <input
-          id="annonceId"
-          type="number"
+          id="annonceSearch"
+          type="text"
           class="form-input"
-          formControlName="annonceId"
-          [class.invalid]="isFieldInvalid('annonceId')"
-          placeholder="Saisir l'ID de l'annonce (optionnel)"
+          [formControl]="annonceSearchControl"
+          [matAutocomplete]="auto"
+          placeholder="Rechercher une annonce..."
         />
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
+          <mat-option *ngFor="let annonce of filteredAnnonces | async" [value]="annonce">
+            {{ displayAnnonceFn(annonce) }}
+          </mat-option>
+        </mat-autocomplete>
+        
+        <mat-expansion-panel class="advanced-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              Avancé
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <div class="advanced-content">
+            <label for="annonceIdDirect" class="form-label">
+              ID annonce (saisie directe)
+            </label>
+            <input
+              id="annonceIdDirect"
+              type="number"
+              class="form-input"
+              [value]="dossierForm.get('annonceId')?.value || ''"
+              (input)="onAnnonceIdDirectInput($event)"
+              placeholder="Saisir l'ID de l'annonce"
+            />
+          </div>
+        </mat-expansion-panel>
+        
         <div *ngIf="getFieldError('annonceId')" class="field-error">
           {{ getFieldError('annonceId') }}
         </div>

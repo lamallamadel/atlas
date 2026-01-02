@@ -2,6 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DossierApiService, DossierCreateRequest, DossierResponse } from '../../services/dossier-api.service';
+import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
+import { Observable } from 'rxjs';
+import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dossier-create',
@@ -15,15 +18,19 @@ export class DossierCreateComponent implements OnInit {
   validationErrors: { [key: string]: string } = {};
   duplicates: DossierResponse[] = [];
   checkingDuplicates = false;
+  filteredAnnonces!: Observable<AnnonceResponse[]>;
+  annonceSearchControl = this.fb.control('');
 
   constructor(
     private fb: FormBuilder,
     private dossierApiService: DossierApiService,
+    private annonceApiService: AnnonceApiService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.initForm();
+    this.setupAnnonceAutocomplete();
   }
 
   initForm(): void {
@@ -33,6 +40,45 @@ export class DossierCreateComponent implements OnInit {
       leadSource: ['', [Validators.maxLength(255)]],
       annonceId: [null]
     });
+  }
+
+  setupAnnonceAutocomplete(): void {
+    this.filteredAnnonces = this.annonceSearchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      switchMap(value => {
+        const searchTerm = typeof value === 'string' ? value : '';
+        if (!searchTerm || searchTerm.trim().length === 0) {
+          return this.annonceApiService.list({ size: 20 }).pipe(
+            map(page => page.content)
+          );
+        }
+        return this.annonceApiService.list({ q: searchTerm, size: 20 }).pipe(
+          map(page => page.content)
+        );
+      })
+    );
+  }
+
+  displayAnnonceFn(annonce: AnnonceResponse | null): string {
+    if (!annonce) return '';
+    const title = annonce.title || 'Sans titre';
+    const city = annonce.city || 'Ville inconnue';
+    const price = annonce.price ? `${annonce.price}` : 'Prix non défini';
+    const currency = annonce.currency || '';
+    const status = annonce.status || '';
+    return `${title} - ${city} - ${price} ${currency} (${status})`;
+  }
+
+  onAnnonceSelected(annonce: AnnonceResponse): void {
+    this.dossierForm.patchValue({ annonceId: annonce.id });
+  }
+
+  onAnnonceIdDirectInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value;
+    this.dossierForm.patchValue({ annonceId: value ? Number(value) : null });
+    this.annonceSearchControl.setValue('', { emitEvent: false });
   }
 
   onPhoneBlur(): void {
