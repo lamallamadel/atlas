@@ -1,6 +1,6 @@
 <div class="page-container">
   <div class="page-header">
-    <h2 class="page-title">Create New Dossier</h2>
+    <h2 class="page-title">Créer un nouveau dossier</h2>
   </div>
 
   <div class="page-content">
@@ -13,8 +13,8 @@
       <div class="warning-content">
         <span class="warning-icon">⚠</span>
         <div class="warning-text">
-          <strong>Duplicate Found!</strong>
-          <p>A dossier with this phone number already exists.</p>
+          <strong>Doublon trouvé !</strong>
+          <p>Un dossier avec ce numéro de téléphone existe déjà.</p>
         </div>
       </div>
       <div class="warning-actions">
@@ -24,7 +24,7 @@
           (click)="openExistingDossier(duplicate.id)"
           type="button"
         >
-          Open Existing (ID: {{ duplicate.id }})
+          Ouvrir l'existant (ID : {{ duplicate.id }})
         </button>
       </div>
     </div>
@@ -32,7 +32,7 @@
     <form [formGroup]="dossierForm" (ngSubmit)="onSubmit()" class="dossier-form">
       <div class="form-group">
         <label for="leadName" class="form-label">
-          Lead Name
+          Nom du prospect
         </label>
         <input
           id="leadName"
@@ -40,7 +40,7 @@
           class="form-input"
           formControlName="leadName"
           [class.invalid]="isFieldInvalid('leadName')"
-          placeholder="Enter lead name"
+          placeholder="Saisir le nom du prospect"
         />
         <div *ngIf="getFieldError('leadName')" class="field-error">
           {{ getFieldError('leadName') }}
@@ -49,7 +49,7 @@
 
       <div class="form-group">
         <label for="leadPhone" class="form-label">
-          Lead Phone
+          Téléphone du prospect
         </label>
         <input
           id="leadPhone"
@@ -57,12 +57,12 @@
           class="form-input"
           formControlName="leadPhone"
           [class.invalid]="isFieldInvalid('leadPhone')"
-          placeholder="Enter lead phone number"
+          placeholder="Saisir le numéro de téléphone du prospect"
           (blur)="onPhoneBlur()"
         />
         <div *ngIf="checkingDuplicates" class="checking-duplicates">
           <span class="checking-spinner"></span>
-          Checking for duplicates...
+          Vérification des doublons...
         </div>
         <div *ngIf="getFieldError('leadPhone')" class="field-error">
           {{ getFieldError('leadPhone') }}
@@ -71,7 +71,7 @@
 
       <div class="form-group">
         <label for="leadSource" class="form-label">
-          Lead Source
+          Source du prospect
         </label>
         <input
           id="leadSource"
@@ -79,7 +79,7 @@
           class="form-input"
           formControlName="leadSource"
           [class.invalid]="isFieldInvalid('leadSource')"
-          placeholder="Enter lead source"
+          placeholder="Saisir la source du prospect"
         />
         <div *ngIf="getFieldError('leadSource')" class="field-error">
           {{ getFieldError('leadSource') }}
@@ -88,7 +88,7 @@
 
       <div class="form-group">
         <label for="annonceId" class="form-label">
-          Annonce ID
+          ID annonce
         </label>
         <input
           id="annonceId"
@@ -96,7 +96,7 @@
           class="form-input"
           formControlName="annonceId"
           [class.invalid]="isFieldInvalid('annonceId')"
-          placeholder="Enter annonce ID (optional)"
+          placeholder="Saisir l'ID de l'annonce (optionnel)"
         />
         <div *ngIf="getFieldError('annonceId')" class="field-error">
           {{ getFieldError('annonceId') }}
@@ -104,12 +104,12 @@
       </div>
 
       <div class="form-actions">
-        <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
+        <button type="button" class="btn-cancel" (click)="onCancel()">Annuler</button>
         <button type="submit" class="btn-submit" [disabled]="submitting">
-          <span *ngIf="!submitting">Create</span>
+          <span *ngIf="!submitting">Créer</span>
           <span *ngIf="submitting" class="btn-loading">
             <span class="btn-spinner"></span>
-            Creating...
+            Création...
           </span>
         </button>
       </div>

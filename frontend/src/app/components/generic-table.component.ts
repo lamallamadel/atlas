@@ -29,9 +29,9 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() data: unknown[] = [];
   @Input() showActions = true;
   @Input() actions: RowAction[] = [
-    { icon: 'visibility', tooltip: 'View', action: 'view', color: 'primary' },
-    { icon: 'edit', tooltip: 'Edit', action: 'edit', color: 'accent' },
-    { icon: 'delete', tooltip: 'Delete', action: 'delete', color: 'warn' }
+    { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' },
+    { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'accent' },
+    { icon: 'delete', tooltip: 'Supprimer', action: 'delete', color: 'warn' }
   ];
   @Input() pageSize = 10;
   @Input() pageSizeOptions: number[] = [5, 10, 25, 50, 100];
@@ -100,7 +100,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
       case 'date':
         return new Date(value as string | number | Date).toLocaleDateString();
       case 'boolean':
-        return value ? 'Yes' : 'No';
+        return value ? 'Oui' : 'Non';
       case 'number':
         return value.toString();
       default:

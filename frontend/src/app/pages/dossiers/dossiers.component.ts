@@ -24,34 +24,34 @@ export class DossiersComponent implements OnInit {
 
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
-    { key: 'orgId', header: 'Org ID', sortable: true, type: 'number' },
+    { key: 'orgId', header: 'ID organisation', sortable: true, type: 'number' },
     { 
       key: 'annonceId', 
-      header: 'Annonce ID', 
+      header: 'ID annonce', 
       sortable: true,
       format: (value: unknown) => value ? value.toString() : '-'
     },
     { 
       key: 'leadName', 
-      header: 'Lead Name', 
+      header: 'Nom du prospect', 
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
     { 
       key: 'leadPhone', 
-      header: 'Lead Phone', 
+      header: 'Téléphone du prospect', 
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
     { 
       key: 'leadSource', 
-      header: 'Lead Source', 
+      header: 'Source du prospect', 
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
     { 
       key: 'status', 
-      header: 'Status', 
+      header: 'Statut', 
       sortable: true,
       type: 'custom',
       format: (value: unknown) => {
@@ -62,14 +62,14 @@ export class DossiersComponent implements OnInit {
     },
     { 
       key: 'createdAt', 
-      header: 'Created At', 
+      header: 'Créé le', 
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.formatDate(value as string)
     },
     { 
       key: 'updatedAt', 
-      header: 'Updated At', 
+      header: 'Modifié le', 
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.formatDate(value as string)
@@ -77,7 +77,7 @@ export class DossiersComponent implements OnInit {
   ];
 
   actions: RowAction[] = [
-    { icon: 'visibility', tooltip: 'View', action: 'view', color: 'primary' }
+    { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' }
   ];
 
   constructor(
@@ -126,7 +126,7 @@ export class DossiersComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load dossiers. Please try again.';
+        this.error = 'Échec du chargement des dossiers. Veuillez réessayer.';
         this.loading = false;
         console.error('Error loading dossiers:', err);
       }

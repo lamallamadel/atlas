@@ -25,7 +25,7 @@ export class AnnoncesComponent implements OnInit {
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
     { 
       key: 'title', 
-      header: 'Title', 
+      header: 'Titre', 
       sortable: true,
       type: 'custom',
       format: (value: unknown, row: unknown) => {
@@ -39,19 +39,19 @@ export class AnnoncesComponent implements OnInit {
     },
     { 
       key: 'category', 
-      header: 'Category', 
+      header: 'Catégorie', 
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
     { 
       key: 'city', 
-      header: 'City', 
+      header: 'Ville', 
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
     { 
       key: 'price', 
-      header: 'Price', 
+      header: 'Prix', 
       sortable: true,
       type: 'custom',
       format: (value: unknown, row: unknown) => {
@@ -63,7 +63,7 @@ export class AnnoncesComponent implements OnInit {
     },
     { 
       key: 'status', 
-      header: 'Status', 
+      header: 'Statut', 
       sortable: true,
       type: 'custom',
       format: (value: unknown) => {
@@ -74,14 +74,14 @@ export class AnnoncesComponent implements OnInit {
     },
     { 
       key: 'createdAt', 
-      header: 'Created At', 
+      header: 'Créé le', 
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.formatDate(value as string)
     },
     { 
       key: 'updatedAt', 
-      header: 'Updated At', 
+      header: 'Modifié le', 
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.formatDate(value as string)
@@ -89,7 +89,7 @@ export class AnnoncesComponent implements OnInit {
   ];
 
   actions: RowAction[] = [
-    { icon: 'edit', tooltip: 'Edit', action: 'edit', color: 'primary' }
+    { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'primary' }
   ];
 
   constructor(
@@ -130,7 +130,7 @@ export class AnnoncesComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load annonces. Please try again.';
+        this.error = 'Échec du chargement des annonces. Veuillez réessayer.';
         this.loading = false;
         console.error('Error loading annonces:', err);
       }

@@ -3,70 +3,70 @@
     <h2 class="page-title">Dossiers</h2>
     <button class="btn-create" (click)="createDossier()">
       <span class="btn-icon">+</span>
-      Create Dossier
+      Créer un dossier
     </button>
   </div>
 
   <div class="filters-section">
     <div class="filter-box">
-      <label for="status-filter" class="filter-label">Status:</label>
+      <label for="status-filter" class="filter-label">Statut :</label>
       <select
         id="status-filter"
         class="filter-select"
         [(ngModel)]="selectedStatus"
         (change)="onFilterChange()"
       >
-        <option value="">All</option>
-        <option [value]="DossierStatus.NEW">New</option>
-        <option [value]="DossierStatus.QUALIFIED">Qualified</option>
-        <option [value]="DossierStatus.APPOINTMENT">Appointment</option>
-        <option [value]="DossierStatus.WON">Won</option>
-        <option [value]="DossierStatus.LOST">Lost</option>
+        <option value="">Tous</option>
+        <option [value]="DossierStatus.NEW">Nouveau</option>
+        <option [value]="DossierStatus.QUALIFIED">Qualifié</option>
+        <option [value]="DossierStatus.APPOINTMENT">Rendez-vous</option>
+        <option [value]="DossierStatus.WON">Gagné</option>
+        <option [value]="DossierStatus.LOST">Perdu</option>
       </select>
     </div>
 
     <div class="filter-box">
-      <label for="phone-filter" class="filter-label">Phone:</label>
+      <label for="phone-filter" class="filter-label">Téléphone :</label>
       <input
         id="phone-filter"
         type="text"
         class="filter-input"
-        placeholder="Filter by phone..."
+        placeholder="Filtrer par téléphone..."
         [(ngModel)]="phoneFilter"
         (keyup.enter)="onFilterChange()"
       />
     </div>
 
     <div class="filter-box">
-      <label for="annonce-filter" class="filter-label">Annonce ID:</label>
+      <label for="annonce-filter" class="filter-label">ID annonce :</label>
       <input
         id="annonce-filter"
         type="text"
         class="filter-input"
-        placeholder="Filter by annonce..."
+        placeholder="Filtrer par annonce..."
         [(ngModel)]="annonceIdFilter"
         (keyup.enter)="onFilterChange()"
       />
     </div>
 
-    <button class="btn-filter" (click)="onFilterChange()">Apply Filters</button>
-    <button class="btn-clear" (click)="clearFilters()">Clear</button>
+    <button class="btn-filter" (click)="onFilterChange()">Appliquer les filtres</button>
+    <button class="btn-clear" (click)="clearFilters()">Effacer</button>
   </div>
 
   <div class="page-content">
     <div *ngIf="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>Loading dossiers...</p>
+      <p>Chargement des dossiers...</p>
     </div>
 
     <div *ngIf="error && !loading" class="error-state">
       <p class="error-message">{{ error }}</p>
-      <button class="btn-retry" (click)="loadDossiers()">Retry</button>
+      <button class="btn-retry" (click)="loadDossiers()">Réessayer</button>
     </div>
 
     <div *ngIf="!loading && !error && dossiers.length === 0" class="empty-state">
-      <p>No dossiers found.</p>
-      <button class="btn-create-empty" (click)="createDossier()">Create your first dossier</button>
+      <p>Aucun dossier trouvé.</p>
+      <button class="btn-create-empty" (click)="createDossier()">Créer votre premier dossier</button>
     </div>
 
     <div *ngIf="!loading && !error && dossiers.length > 0">
@@ -81,7 +81,7 @@
 
       <div class="pagination-section" *ngIf="page">
         <div class="pagination-info">
-          Showing {{ page.numberOfElements }} of {{ page.totalElements }} dossiers
+          Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} dossiers
         </div>
         <div class="pagination-controls">
           <button
@@ -89,7 +89,7 @@
             [disabled]="page.first"
             (click)="previousPage()"
           >
-            Previous
+            Précédent
           </button>
 
           <button
@@ -108,7 +108,7 @@
             [disabled]="page.last"
             (click)="nextPage()"
           >
-            Next
+            Suivant
           </button>
         </div>
       </div>

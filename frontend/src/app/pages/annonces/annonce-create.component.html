@@ -1,12 +1,12 @@
 <div class="page-container">
   <div class="page-header">
-    <h2 class="page-title">{{ isEditMode ? 'Edit Annonce' : 'Create New Annonce' }}</h2>
+    <h2 class="page-title">{{ isEditMode ? 'Modifier l\'annonce' : 'Créer une nouvelle annonce' }}</h2>
   </div>
 
   <div class="page-content">
     <div *ngIf="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>Loading annonce...</p>
+      <p>Chargement de l'annonce...</p>
     </div>
 
     <div *ngIf="error && !loading" class="error-alert">
@@ -16,9 +16,9 @@
 
     <mat-stepper *ngIf="!loading" [linear]="true" #stepper class="annonce-stepper">
       <!-- Step 1: Type, Title, Description -->
-      <mat-step [stepControl]="step1FormGroup" label="Basic Information">
+      <mat-step [stepControl]="step1FormGroup" label="Informations de base">
         <form [formGroup]="step1FormGroup" class="step-form">
-          <h3 class="step-title">Basic Information</h3>
+          <h3 class="step-title">Informations de base</h3>
           
           <div class="form-group">
             <label for="type" class="form-label">
@@ -30,7 +30,7 @@
               formControlName="type"
               [class.invalid]="isFieldInvalid(step1FormGroup, 'type')"
             >
-              <option value="">Select a type</option>
+              <option value="">Sélectionner un type</option>
               <option *ngFor="let option of typeOptions" [value]="option.value">
                 {{ option.label }}
               </option>
@@ -42,7 +42,7 @@
 
           <div class="form-group">
             <label for="title" class="form-label">
-              Title <span class="required">*</span>
+              Titre <span class="required">*</span>
             </label>
             <input
               id="title"
@@ -50,7 +50,7 @@
               class="form-input"
               formControlName="title"
               [class.invalid]="isFieldInvalid(step1FormGroup, 'title')"
-              placeholder="Enter annonce title"
+              placeholder="Saisir le titre de l'annonce"
             />
             <div *ngIf="getFieldError(step1FormGroup, 'title')" class="field-error">
               {{ getFieldError(step1FormGroup, 'title') }}
@@ -66,7 +66,7 @@
               class="form-textarea"
               formControlName="description"
               [class.invalid]="isFieldInvalid(step1FormGroup, 'description')"
-              placeholder="Enter annonce description"
+              placeholder="Saisir la description de l'annonce"
               rows="5"
             ></textarea>
             <div *ngIf="getFieldError(step1FormGroup, 'description')" class="field-error">
@@ -75,21 +75,21 @@
           </div>
 
           <div class="step-actions">
-            <button type="button" class="btn-cancel" (click)="onCancel()">Cancel</button>
-            <button type="button" class="btn-next" matStepperNext>Next</button>
+            <button type="button" class="btn-cancel" (click)="onCancel()">Annuler</button>
+            <button type="button" class="btn-next" matStepperNext>Suivant</button>
           </div>
         </form>
       </mat-step>
 
       <!-- Step 2: Price, City, Address, Surface -->
-      <mat-step [stepControl]="step2FormGroup" label="Location & Details">
+      <mat-step [stepControl]="step2FormGroup" label="Localisation et détails">
         <form [formGroup]="step2FormGroup" class="step-form">
-          <h3 class="step-title">Location & Details</h3>
+          <h3 class="step-title">Localisation et détails</h3>
           
           <div class="form-row">
             <div class="form-group">
               <label for="price" class="form-label">
-                Price (EUR)
+                Prix (EUR)
               </label>
               <input
                 id="price"
@@ -128,7 +128,7 @@
 
           <div class="form-group">
             <label for="city" class="form-label">
-              City
+              Ville
             </label>
             <input
               id="city"
@@ -136,7 +136,7 @@
               class="form-input"
               formControlName="city"
               [class.invalid]="isFieldInvalid(step2FormGroup, 'city')"
-              placeholder="Enter city"
+              placeholder="Saisir la ville"
             />
             <div *ngIf="getFieldError(step2FormGroup, 'city')" class="field-error">
               {{ getFieldError(step2FormGroup, 'city') }}
@@ -145,7 +145,7 @@
 
           <div class="form-group">
             <label for="address" class="form-label">
-              Address
+              Adresse
             </label>
             <input
               id="address"
@@ -153,7 +153,7 @@
               class="form-input"
               formControlName="address"
               [class.invalid]="isFieldInvalid(step2FormGroup, 'address')"
-              placeholder="Enter address"
+              placeholder="Saisir l'adresse"
             />
             <div *ngIf="getFieldError(step2FormGroup, 'address')" class="field-error">
               {{ getFieldError(step2FormGroup, 'address') }}
@@ -161,8 +161,8 @@
           </div>
 
           <div class="step-actions">
-            <button type="button" class="btn-back" matStepperPrevious>Back</button>
-            <button type="button" class="btn-next" matStepperNext>Next</button>
+            <button type="button" class="btn-back" matStepperPrevious>Retour</button>
+            <button type="button" class="btn-next" matStepperNext>Suivant</button>
           </div>
         </form>
       </mat-step>
@@ -174,13 +174,13 @@
           
           <div class="photos-section">
             <div *ngIf="photos.length === 0" class="empty-photos">
-              <p>No photos added yet. Click "Add Photo" to add a photo URL.</p>
+              <p>Aucune photo ajoutée pour le moment. Cliquez sur "Ajouter une photo" pour ajouter une URL de photo.</p>
             </div>
 
             <div *ngFor="let photo of photos.controls; let i = index" class="photo-item">
               <div class="photo-input-group">
                 <label [for]="'photo-' + i" class="form-label">
-                  Photo URL {{ i + 1 }}
+                  URL de la photo {{ i + 1 }}
                 </label>
                 <div class="photo-input-wrapper">
                   <input
@@ -189,47 +189,47 @@
                     class="form-input"
                     [formControl]="getPhotoControl(i)"
                     [class.invalid]="getPhotoControl(i).touched && getPhotoControl(i).invalid"
-                    placeholder="Enter photo URL"
+                    placeholder="Saisir l'URL de la photo"
                   />
                   <button
                     type="button"
                     class="btn-remove-photo"
                     (click)="removePhoto(i)"
-                    title="Remove photo"
+                    title="Supprimer la photo"
                   >
                     ✕
                   </button>
                 </div>
                 <div *ngIf="getPhotoControl(i).touched && getPhotoControl(i).invalid" class="field-error">
-                  Photo URL is required and must not exceed 1000 characters
+                  L'URL de la photo est requise et ne doit pas dépasser 1000 caractères
                 </div>
               </div>
             </div>
 
             <button type="button" class="btn-add-photo" (click)="addPhoto()">
-              + Add Photo
+              + Ajouter une photo
             </button>
           </div>
 
           <div class="step-actions">
-            <button type="button" class="btn-back" matStepperPrevious>Back</button>
-            <button type="button" class="btn-next" matStepperNext>Next</button>
+            <button type="button" class="btn-back" matStepperPrevious>Retour</button>
+            <button type="button" class="btn-next" matStepperNext>Suivant</button>
           </div>
         </form>
       </mat-step>
 
       <!-- Step 4: Rules JSON -->
-      <mat-step [stepControl]="step4FormGroup" label="Rules">
+      <mat-step [stepControl]="step4FormGroup" label="Règles">
         <form [formGroup]="step4FormGroup" class="step-form">
-          <h3 class="step-title">Rules (JSON)</h3>
+          <h3 class="step-title">Règles JSON</h3>
           
           <div class="form-group">
             <label for="rulesJson" class="form-label">
-              Rules JSON <span class="required">*</span>
+              Règles JSON <span class="required">*</span>
             </label>
             <div class="json-editor-controls">
               <button type="button" class="btn-format-json" (click)="formatJson()">
-                Format JSON
+                Formater le JSON
               </button>
             </div>
             <textarea
@@ -237,29 +237,29 @@
               class="form-textarea json-editor"
               formControlName="rulesJson"
               [class.invalid]="isFieldInvalid(step4FormGroup, 'rulesJson')"
-              placeholder='Enter rules as JSON, e.g., {"allowPets": true, "smokingAllowed": false}'
+              placeholder='Saisir les règles au format JSON, par ex. {"allowPets": true, "smokingAllowed": false}'
               rows="10"
             ></textarea>
             <div *ngIf="getFieldError(step4FormGroup, 'rulesJson')" class="field-error">
               {{ getFieldError(step4FormGroup, 'rulesJson') }}
             </div>
             <div class="json-hint">
-              Enter valid JSON format. Use the "Format JSON" button to auto-format your JSON.
+              Saisir un format JSON valide. Utilisez le bouton "Formater le JSON" pour auto-formater votre JSON.
             </div>
           </div>
 
           <div class="step-actions">
-            <button type="button" class="btn-back" matStepperPrevious>Back</button>
+            <button type="button" class="btn-back" matStepperPrevious>Retour</button>
             <button 
               type="button" 
               class="btn-submit" 
               (click)="onSubmit()"
               [disabled]="submitting"
             >
-              <span *ngIf="!submitting">{{ isEditMode ? 'Update' : 'Create' }}</span>
+              <span *ngIf="!submitting">{{ isEditMode ? 'Modifier' : 'Créer' }}</span>
               <span *ngIf="submitting" class="btn-loading">
                 <span class="btn-spinner"></span>
-                {{ isEditMode ? 'Updating...' : 'Creating...' }}
+                {{ isEditMode ? 'Modification...' : 'Création...' }}
               </span>
             </button>
           </div>

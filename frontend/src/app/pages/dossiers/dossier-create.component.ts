@@ -96,13 +96,13 @@ export class DossierCreateComponent implements OnInit {
       this.validationErrors = {};
       err.error.errors.forEach((error: { field?: string; message?: string; defaultMessage?: string }) => {
         const field = error.field || 'general';
-        this.validationErrors[field] = error.message || error.defaultMessage || 'Invalid value';
+        this.validationErrors[field] = error.message || error.defaultMessage || 'Valeur invalide';
       });
-      this.error = 'Please correct the validation errors below.';
+      this.error = 'Veuillez corriger les erreurs de validation ci-dessous.';
     } else if (err.error && err.error.message) {
       this.error = err.error.message;
     } else {
-      this.error = 'Failed to create dossier. Please try again.';
+      this.error = 'Échec de la création du dossier. Veuillez réessayer.';
     }
   }
 
@@ -130,11 +130,11 @@ export class DossierCreateComponent implements OnInit {
 
     if (control && control.touched && control.invalid) {
       if (control.errors?.['required']) {
-        return `${this.getFieldLabel(fieldName)} is required`;
+        return `${this.getFieldLabel(fieldName)} est requis`;
       }
       if (control.errors?.['maxlength']) {
         const maxLength = control.errors['maxlength'].requiredLength;
-        return `${this.getFieldLabel(fieldName)} must not exceed ${maxLength} characters`;
+        return `${this.getFieldLabel(fieldName)} ne doit pas dépasser ${maxLength} caractères`;
       }
     }
 
@@ -143,10 +143,10 @@ export class DossierCreateComponent implements OnInit {
 
   getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
-      leadName: 'Lead Name',
-      leadPhone: 'Lead Phone',
-      leadSource: 'Lead Source',
-      annonceId: 'Annonce ID'
+      leadName: 'Nom du prospect',
+      leadPhone: 'Téléphone du prospect',
+      leadSource: 'Source du prospect',
+      annonceId: 'ID annonce'
     };
     return labels[fieldName] || fieldName;
   }

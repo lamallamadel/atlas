@@ -23,14 +23,14 @@ export class AnnonceCreateComponent implements OnInit {
 
   AnnonceStatus = AnnonceStatus;
   statusOptions = [
-    { value: AnnonceStatus.DRAFT, label: 'Draft' },
-    { value: AnnonceStatus.PUBLISHED, label: 'Published' },
-    { value: AnnonceStatus.ARCHIVED, label: 'Archived' }
+    { value: AnnonceStatus.DRAFT, label: 'Brouillon' },
+    { value: AnnonceStatus.PUBLISHED, label: 'Publié' },
+    { value: AnnonceStatus.ARCHIVED, label: 'Archivé' }
   ];
 
   typeOptions = [
-    { value: 'APARTMENT', label: 'Apartment' },
-    { value: 'HOUSE', label: 'House' },
+    { value: 'APARTMENT', label: 'Appartement' },
+    { value: 'HOUSE', label: 'Maison' },
     { value: 'STUDIO', label: 'Studio' },
     { value: 'COMMERCIAL', label: 'Commercial' }
   ];
@@ -143,7 +143,7 @@ export class AnnonceCreateComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load annonce. Please try again.';
+        this.error = 'Échec du chargement de l\'annonce. Veuillez réessayer.';
         this.loading = false;
         console.error('Error loading annonce:', err);
       }
@@ -239,15 +239,15 @@ export class AnnonceCreateComponent implements OnInit {
       this.validationErrors = {};
       err.error.errors.forEach((error: { field?: string; message?: string; defaultMessage?: string }) => {
         const field = error.field || 'general';
-        this.validationErrors[field] = error.message || error.defaultMessage || 'Invalid value';
+        this.validationErrors[field] = error.message || error.defaultMessage || 'Valeur invalide';
       });
-      this.error = 'Please correct the validation errors below.';
+      this.error = 'Veuillez corriger les erreurs de validation ci-dessous.';
     } else if (err.status === 404) {
-      this.error = 'Annonce not found.';
+      this.error = 'Annonce introuvable.';
     } else if (err.error && err.error.message) {
       this.error = err.error.message;
     } else {
-      this.error = 'Failed to save annonce. Please try again.';
+      this.error = 'Échec de l\'enregistrement de l\'annonce. Veuillez réessayer.';
     }
   }
 
@@ -286,17 +286,17 @@ export class AnnonceCreateComponent implements OnInit {
 
     if (control && control.touched && control.invalid) {
       if (control.errors?.['required']) {
-        return `${this.getFieldLabel(fieldName)} is required`;
+        return `${this.getFieldLabel(fieldName)} est requis`;
       }
       if (control.errors?.['maxlength']) {
         const maxLength = control.errors['maxlength'].requiredLength;
-        return `${this.getFieldLabel(fieldName)} must not exceed ${maxLength} characters`;
+        return `${this.getFieldLabel(fieldName)} ne doit pas dépasser ${maxLength} caractères`;
       }
       if (control.errors?.['min']) {
-        return `${this.getFieldLabel(fieldName)} must be greater than or equal to 0`;
+        return `${this.getFieldLabel(fieldName)} doit être supérieur ou égal à 0`;
       }
       if (control.errors?.['invalidJson']) {
-        return `${this.getFieldLabel(fieldName)} must be valid JSON`;
+        return `${this.getFieldLabel(fieldName)} doit être un JSON valide`;
       }
     }
 
@@ -306,13 +306,13 @@ export class AnnonceCreateComponent implements OnInit {
   getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
       type: 'Type',
-      title: 'Title',
+      title: 'Titre',
       description: 'Description',
-      price: 'Price',
-      city: 'City',
-      address: 'Address',
+      price: 'Prix',
+      city: 'Ville',
+      address: 'Adresse',
       surface: 'Surface',
-      rulesJson: 'Rules JSON'
+      rulesJson: 'Règles JSON'
     };
     return labels[fieldName] || fieldName;
   }

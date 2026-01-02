@@ -1,10 +1,10 @@
 <div class="page-container">
   <div class="page-header">
-    <h2 class="page-title">Dashboard</h2>
+    <h2 class="page-title">Tableau de bord</h2>
   </div>
   <div class="page-content">
     <div class="api-status-container">
-      <h3>API Connection Status</h3>
+      <h3>État de la connexion API</h3>
       <div class="status-card" [ngClass]="{
         'status-checking': apiStatus === 'checking',
         'status-connected': apiStatus === 'connected',
@@ -13,17 +13,17 @@
         <div class="status-indicator">
           <span class="status-icon">{{apiStatus === 'connected' ? '✓' : apiStatus === 'disconnected' ? '✗' : '⟳'}}</span>
           <span class="status-text">
-            {{apiStatus === 'connected' ? 'Connected' : apiStatus === 'disconnected' ? 'Disconnected' : 'Checking...'}}
+            {{apiStatus === 'connected' ? 'Connecté' : apiStatus === 'disconnected' ? 'Déconnecté' : 'Vérification...'}}
           </span>
         </div>
         <div class="status-details" *ngIf="lastChecked">
-          <p>Last checked: {{lastChecked | date:'short'}}</p>
+          <p>Dernière vérification : {{lastChecked | date:'short'}}</p>
         </div>
         <div class="status-error" *ngIf="errorMessage">
           <p class="error-message">{{errorMessage}}</p>
         </div>
         <button class="refresh-button" (click)="checkApiConnection()" [disabled]="apiStatus === 'checking'">
-          Refresh
+          Actualiser
         </button>
       </div>
     </div>

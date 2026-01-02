@@ -27,13 +27,13 @@ export class AnnonceDetailComponent implements OnInit {
   loadAnnonce(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.error = 'Invalid annonce ID';
+      this.error = 'ID d\'annonce invalide';
       return;
     }
 
     const annonceId = parseInt(id, 10);
     if (isNaN(annonceId)) {
-      this.error = 'Invalid annonce ID';
+      this.error = 'ID d\'annonce invalide';
       return;
     }
 
@@ -47,9 +47,9 @@ export class AnnonceDetailComponent implements OnInit {
       },
       error: (err) => {
         if (err.status === 404) {
-          this.error = 'Annonce not found';
+          this.error = 'Annonce introuvable';
         } else {
-          this.error = 'Failed to load annonce. Please try again.';
+          this.error = 'Échec du chargement de l\'annonce. Veuillez réessayer.';
         }
         this.loading = false;
         console.error('Error loading annonce:', err);

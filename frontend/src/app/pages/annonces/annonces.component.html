@@ -3,7 +3,7 @@
     <h2 class="page-title">Annonces</h2>
     <button class="btn-create" (click)="createAnnonce()">
       <span class="btn-icon">+</span>
-      Create Annonce
+      Créer une annonce
     </button>
   </div>
 
@@ -12,25 +12,25 @@
       <input
         type="text"
         class="search-input"
-        placeholder="Search annonces..."
+        placeholder="Rechercher des annonces..."
         [(ngModel)]="searchQuery"
         (keyup.enter)="onSearch()"
       />
-      <button class="btn-search" (click)="onSearch()">Search</button>
+      <button class="btn-search" (click)="onSearch()">Rechercher</button>
     </div>
 
     <div class="filter-box">
-      <label for="status-filter" class="filter-label">Status:</label>
+      <label for="status-filter" class="filter-label">Statut :</label>
       <select
         id="status-filter"
         class="filter-select"
         [(ngModel)]="selectedStatus"
         (change)="onStatusChange()"
       >
-        <option value="">All</option>
-        <option [value]="AnnonceStatus.DRAFT">Draft</option>
-        <option [value]="AnnonceStatus.PUBLISHED">Published</option>
-        <option [value]="AnnonceStatus.ARCHIVED">Archived</option>
+        <option value="">Tous</option>
+        <option [value]="AnnonceStatus.DRAFT">Brouillon</option>
+        <option [value]="AnnonceStatus.PUBLISHED">Publié</option>
+        <option [value]="AnnonceStatus.ARCHIVED">Archivé</option>
       </select>
     </div>
   </div>
@@ -38,17 +38,17 @@
   <div class="page-content">
     <div *ngIf="loading" class="loading-state">
       <div class="spinner"></div>
-      <p>Loading annonces...</p>
+      <p>Chargement des annonces...</p>
     </div>
 
     <div *ngIf="error && !loading" class="error-state">
       <p class="error-message">{{ error }}</p>
-      <button class="btn-retry" (click)="loadAnnonces()">Retry</button>
+      <button class="btn-retry" (click)="loadAnnonces()">Réessayer</button>
     </div>
 
     <div *ngIf="!loading && !error && annonces.length === 0" class="empty-state">
-      <p>No annonces found.</p>
-      <button class="btn-create-empty" (click)="createAnnonce()">Create your first annonce</button>
+      <p>Aucune annonce trouvée.</p>
+      <button class="btn-create-empty" (click)="createAnnonce()">Créer votre première annonce</button>
     </div>
 
     <div *ngIf="!loading && !error && annonces.length > 0">
@@ -63,7 +63,7 @@
 
       <div class="pagination-section" *ngIf="page">
         <div class="pagination-info">
-          Showing {{ page.numberOfElements }} of {{ page.totalElements }} annonces
+          Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} annonces
         </div>
         <div class="pagination-controls">
           <button
@@ -71,7 +71,7 @@
             [disabled]="page.first"
             (click)="previousPage()"
           >
-            Previous
+            Précédent
           </button>
 
           <button
@@ -90,7 +90,7 @@
             [disabled]="page.last"
             (click)="nextPage()"
           >
-            Next
+            Suivant
           </button>
         </div>
       </div>

@@ -39,13 +39,13 @@ export class DossierDetailComponent implements OnInit {
   loadDossier(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (!id) {
-      this.error = 'Invalid dossier ID';
+      this.error = 'ID de dossier invalide';
       return;
     }
 
     const dossierId = parseInt(id, 10);
     if (isNaN(dossierId)) {
-      this.error = 'Invalid dossier ID';
+      this.error = 'ID de dossier invalide';
       return;
     }
 
@@ -60,9 +60,9 @@ export class DossierDetailComponent implements OnInit {
       },
       error: (err) => {
         if (err.status === 404) {
-          this.error = 'Dossier not found';
+          this.error = 'Dossier introuvable';
         } else {
-          this.error = 'Failed to load dossier. Please try again.';
+          this.error = 'Échec du chargement du dossier. Veuillez réessayer.';
         }
         this.loading = false;
         console.error('Error loading dossier:', err);
@@ -76,7 +76,7 @@ export class DossierDetailComponent implements OnInit {
     }
 
     if (this.selectedStatus === this.dossier.status) {
-      this.statusError = 'Status is already set to this value';
+      this.statusError = 'Le statut est déjà défini à cette valeur';
       return;
     }
 
@@ -88,7 +88,7 @@ export class DossierDetailComponent implements OnInit {
       next: (response) => {
         this.dossier = response;
         this.selectedStatus = response.status;
-        this.successMessage = 'Status updated successfully!';
+        this.successMessage = 'Statut mis à jour avec succès !';
         this.updatingStatus = false;
         
         setTimeout(() => {
@@ -96,7 +96,7 @@ export class DossierDetailComponent implements OnInit {
         }, 3000);
       },
       error: (err) => {
-        this.statusError = 'Failed to update status. Please try again.';
+        this.statusError = 'Échec de la mise à jour du statut. Veuillez réessayer.';
         this.updatingStatus = false;
         console.error('Error updating status:', err);
       }
