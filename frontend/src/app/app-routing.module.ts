@@ -8,11 +8,19 @@ import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.componen
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
+import { LoginComponent } from './pages/login/login.component';
+import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
+import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
+  { path: 'login', component: LoginComponent },
+  { path: 'access-denied', component: AccessDeniedComponent },
+  { path: 'session-expired', component: SessionExpiredComponent },
   {
     path: '',
     component: AppLayoutComponent,
+    canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },

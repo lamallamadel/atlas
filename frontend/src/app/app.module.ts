@@ -26,6 +26,9 @@ import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.componen
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
+import { LoginComponent } from './pages/login/login.component';
+import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
+import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
@@ -46,6 +49,9 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     DossiersComponent,
     DossierCreateComponent,
     DossierDetailComponent,
+    LoginComponent,
+    AccessDeniedComponent,
+    SessionExpiredComponent,
     GenericTableComponent,
     EmptyStateComponent,
     BadgeStatusComponent,
