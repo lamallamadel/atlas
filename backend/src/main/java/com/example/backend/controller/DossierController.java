@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.DossierCreateRequest;
+import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.enums.DossierStatus;
@@ -118,6 +119,28 @@ public class DossierController {
             @Valid @RequestBody DossierStatusPatchRequest request) {
         try {
             DossierResponse response = dossierService.patchStatus(id, request);
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PatchMapping("/{id}/lead")
+    @Operation(summary = "Update dossier lead information", description = "Updates the lead name and phone of an existing dossier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dossier lead information updated successfully",
+                    content = @Content(schema = @Schema(implementation = DossierResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Dossier not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<DossierResponse> patchLead(
+            @Parameter(description = "ID of the dossier to update", required = true)
+            @PathVariable Long id,
+            @Valid @RequestBody DossierLeadPatchRequest request) {
+        try {
+            DossierResponse response = dossierService.patchLead(id, request);
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();

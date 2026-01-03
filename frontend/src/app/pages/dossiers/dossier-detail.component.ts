@@ -19,6 +19,13 @@ export class DossierDetailComponent implements OnInit {
   statusError: string | null = null;
   showStatusChange = false;
 
+  showLeadForm = false;
+  updatingLead = false;
+  leadFormName = '';
+  leadFormPhone = '';
+  leadError: string | null = null;
+  leadSuccessMessage: string | null = null;
+
   DossierStatus = DossierStatus;
   statusOptions = [
     DossierStatus.NEW,
@@ -196,6 +203,74 @@ export class DossierDetailComponent implements OnInit {
       day: '2-digit',
       hour: '2-digit',
       minute: '2-digit'
+    });
+  }
+
+  isLeadEmpty(): boolean {
+    if (!this.dossier) {
+      return false;
+    }
+    const nameEmpty = !this.dossier.leadName || this.dossier.leadName.trim() === '';
+    const phoneEmpty = !this.dossier.leadPhone || this.dossier.leadPhone.trim() === '';
+    return nameEmpty && phoneEmpty;
+  }
+
+  toggleLeadForm(): void {
+    this.showLeadForm = !this.showLeadForm;
+    this.leadError = null;
+    this.leadSuccessMessage = null;
+    if (this.showLeadForm) {
+      this.leadFormName = '';
+      this.leadFormPhone = '';
+    }
+  }
+
+  updateLead(): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    if (!this.leadFormName || this.leadFormName.trim() === '') {
+      this.leadError = 'Le nom du lead est requis';
+      return;
+    }
+
+    if (!this.leadFormPhone || this.leadFormPhone.trim() === '') {
+      this.leadError = 'Le téléphone du lead est requis';
+      return;
+    }
+
+    this.updatingLead = true;
+    this.leadError = null;
+    this.leadSuccessMessage = null;
+
+    this.dossierApiService.patchLead(this.dossier.id, this.leadFormName, this.leadFormPhone).subscribe({
+      next: () => {
+        this.updatingLead = false;
+        this.snackBar.open('Informations du lead mises à jour avec succès !', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadDossier();
+        
+        setTimeout(() => {
+          this.leadSuccessMessage = null;
+          this.showLeadForm = false;
+        }, 2000);
+      },
+      error: (err) => {
+        this.updatingLead = false;
+        const errorMessage = err.error?.message || 'Échec de la mise à jour des informations du lead. Veuillez réessayer.';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating lead:', err);
+      }
     });
   }
 }

@@ -37,6 +37,11 @@ export interface DossierStatusPatchRequest {
   status: DossierStatus;
 }
 
+export interface DossierLeadPatchRequest {
+  leadName: string;
+  leadPhone: string;
+}
+
 export interface Page<T> {
   content: T[];
   pageable: {
@@ -120,6 +125,11 @@ export class DossierApiService {
   patchStatus(id: number, status: DossierStatus): Observable<DossierResponse> {
     const request: DossierStatusPatchRequest = { status };
     return this.http.patch<DossierResponse>(`${this.apiUrl}/${id}/status`, request);
+  }
+
+  patchLead(id: number, leadName: string, leadPhone: string): Observable<DossierResponse> {
+    const request: DossierLeadPatchRequest = { leadName, leadPhone };
+    return this.http.patch<DossierResponse>(`${this.apiUrl}/${id}/lead`, request);
   }
 
   checkDuplicates(phone: string): Observable<DossierResponse[]> {

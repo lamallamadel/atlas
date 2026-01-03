@@ -92,7 +92,74 @@
             <mat-card-title>Lead</mat-card-title>
           </mat-card-header>
           <mat-card-content>
-            <div class="field-group">
+            <div *ngIf="isLeadEmpty()" class="lead-empty-state">
+              <p class="lead-empty-message">Lead non renseigné</p>
+              <button
+                class="btn-add-lead"
+                (click)="toggleLeadForm()"
+                *ngIf="!showLeadForm"
+              >
+                Ajouter un contact
+              </button>
+
+              <div *ngIf="showLeadForm" class="lead-form-section">
+                <div *ngIf="leadSuccessMessage" class="success-message">
+                  {{ leadSuccessMessage }}
+                </div>
+
+                <div *ngIf="leadError" class="error-message">
+                  {{ leadError }}
+                </div>
+
+                <div class="lead-form">
+                  <div class="form-group">
+                    <label for="lead-name" class="form-label">Nom :</label>
+                    <input
+                      id="lead-name"
+                      type="text"
+                      class="form-input"
+                      [(ngModel)]="leadFormName"
+                      [disabled]="updatingLead"
+                      placeholder="Nom du contact"
+                    />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="lead-phone" class="form-label">Téléphone :</label>
+                    <input
+                      id="lead-phone"
+                      type="text"
+                      class="form-input"
+                      [(ngModel)]="leadFormPhone"
+                      [disabled]="updatingLead"
+                      placeholder="Numéro de téléphone"
+                    />
+                  </div>
+
+                  <div class="form-actions">
+                    <button
+                      class="btn-update-lead"
+                      (click)="updateLead()"
+                      [disabled]="updatingLead || !leadFormName || !leadFormPhone"
+                    >
+                      <span *ngIf="updatingLead" class="spinner-small"></span>
+                      <span *ngIf="!updatingLead">Enregistrer</span>
+                      <span *ngIf="updatingLead">Enregistrement...</span>
+                    </button>
+
+                    <button
+                      class="btn-cancel"
+                      (click)="toggleLeadForm()"
+                      [disabled]="updatingLead"
+                    >
+                      Annuler
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="!isLeadEmpty()" class="field-group">
               <div class="field-row">
                 <span class="field-label">Nom :</span>
                 <span class="field-value">{{ dossier.leadName || '—' }}</span>

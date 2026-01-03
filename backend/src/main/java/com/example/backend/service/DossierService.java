@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.DossierCreateRequest;
+import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierMapper;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
@@ -83,6 +84,16 @@ public class DossierService {
         Dossier dossier = dossierRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
         dossier.setStatus(request.getStatus());
+        Dossier updated = dossierRepository.save(dossier);
+        return dossierMapper.toResponse(updated);
+    }
+
+    @Transactional
+    public DossierResponse patchLead(Long id, DossierLeadPatchRequest request) {
+        Dossier dossier = dossierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
+        dossier.setLeadName(request.getLeadName());
+        dossier.setLeadPhone(request.getLeadPhone());
         Dossier updated = dossierRepository.save(dossier);
         return dossierMapper.toResponse(updated);
     }

@@ -354,3 +354,95 @@
 .advanced-content .field-row:not(:last-child) {
   border-bottom: 1px solid #e9ecef;
 }
+
+.lead-empty-state {
+  padding: 1.5rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 2px dashed #ddd;
+}
+
+.lead-empty-message {
+  color: #6c757d;
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  font-style: italic;
+}
+
+.btn-add-lead {
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-add-lead:hover {
+  background-color: #2980b9;
+}
+
+.lead-form-section {
+  margin-top: 1.5rem;
+}
+
+.lead-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  text-align: left;
+}
+
+.form-input {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  background-color: white;
+  transition: border-color 0.2s;
+  width: 100%;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.form-input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.btn-update-lead {
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  white-space: nowrap;
+}
+
+.btn-update-lead:hover:not(:disabled) {
+  background-color: #229954;
+}
+
+.btn-update-lead:disabled {
+  background-color: #95a5a6;
+  cursor: not-allowed;
+}
