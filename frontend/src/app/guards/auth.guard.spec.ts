@@ -46,4 +46,24 @@ describe('AuthGuard', () => {
     expect(result).toBe(false);
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
   });
+
+  describe('route protection', () => {
+    it('should block route without token', () => {
+      authService.isAuthenticated.and.returnValue(false);
+
+      const canActivate = guard.canActivate();
+
+      expect(canActivate).toBe(false);
+      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    });
+
+    it('should allow route with valid token', () => {
+      authService.isAuthenticated.and.returnValue(true);
+
+      const canActivate = guard.canActivate();
+
+      expect(canActivate).toBe(true);
+      expect(router.navigate).not.toHaveBeenCalled();
+    });
+  });
 });

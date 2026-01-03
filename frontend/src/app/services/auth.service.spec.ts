@@ -18,6 +18,22 @@ describe('AuthService', () => {
     expect(service).toBeTruthy();
   });
 
+  describe('smoke test: token storage and retrieval', () => {
+    it('should store and retrieve token correctly', () => {
+      const testToken = 'test.jwt.token';
+      
+      expect(service.getToken()).toBeNull();
+      
+      service.login(testToken);
+      expect(service.getToken()).toBe(testToken);
+      expect(localStorage.getItem('auth_token')).toBe(testToken);
+      
+      service.logout();
+      expect(service.getToken()).toBeNull();
+      expect(localStorage.getItem('auth_token')).toBeNull();
+    });
+  });
+
   describe('login', () => {
     it('should store token in localStorage', () => {
       const token = 'test.token.here';
