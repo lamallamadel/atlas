@@ -30,6 +30,7 @@ import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
+import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -74,6 +75,11 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     MatCardModule
   ],
   providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpAuthInterceptor,
+      multi: true
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: CorrelationIdInterceptor,
