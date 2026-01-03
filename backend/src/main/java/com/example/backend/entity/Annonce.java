@@ -4,7 +4,10 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
@@ -16,6 +19,8 @@ import java.util.Map;
 
 @Entity
 @Table(name = "annonce")
+@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
+@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class Annonce {
 
     @Id

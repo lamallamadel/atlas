@@ -4,6 +4,9 @@ import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,6 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "dossier")
+@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
+@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class Dossier {
 
     @Id

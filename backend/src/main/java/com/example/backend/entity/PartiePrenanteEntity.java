@@ -3,7 +3,10 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.PartiePrenanteRole;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
@@ -12,12 +15,17 @@ import java.util.Map;
 
 @Entity
 @Table(name = "partie_prenante")
+@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
+@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class PartiePrenanteEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
+
+    @Column(name = "org_id", nullable = false)
+    private String orgId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_id", nullable = false)
@@ -140,5 +148,13 @@ public class PartiePrenanteEntity {
 
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 }

@@ -9,7 +9,6 @@ public class AnnonceMapper {
 
     public Annonce toEntity(AnnonceCreateRequest request) {
         Annonce annonce = new Annonce();
-        annonce.setOrgId(request.getOrgId());
         annonce.setTitle(request.getTitle());
         annonce.setDescription(request.getDescription());
         annonce.setCategory(request.getCategory());

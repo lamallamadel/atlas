@@ -8,6 +8,7 @@ import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import com.example.backend.repository.AnnonceRepository;
+import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,11 @@ public class AnnonceService {
 
     @Transactional
     public AnnonceResponse create(AnnonceCreateRequest request) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
         // Soft duplicate detection
         Optional<Annonce> existing = annonceRepository.findByTitleAndCityAndAddress(
                 request.getTitle(), request.getCity(), request.getAddress());
@@ -44,21 +50,41 @@ public class AnnonceService {
         }
 
         Annonce annonce = annonceMapper.toEntity(request);
+        annonce.setOrgId(orgId);
         Annonce saved = annonceRepository.save(annonce);
         return annonceMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
     public AnnonceResponse getById(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + id));
+        
+        if (!orgId.equals(annonce.getOrgId())) {
+            throw new EntityNotFoundException("Annonce not found with id: " + id);
+        }
+        
         return annonceMapper.toResponse(annonce);
     }
 
     @Transactional
     public AnnonceResponse update(Long id, AnnonceUpdateRequest request) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
         Annonce annonce = annonceRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + id));
+        
+        if (!orgId.equals(annonce.getOrgId())) {
+            throw new EntityNotFoundException("Annonce not found with id: " + id);
+        }
         
         // Archived validation
         if (AnnonceStatus.ARCHIVED.equals(annonce.getStatus()) && 

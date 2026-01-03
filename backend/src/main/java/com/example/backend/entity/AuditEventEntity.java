@@ -4,7 +4,10 @@ import com.example.backend.entity.enums.AuditAction;
 import com.example.backend.entity.enums.AuditEntityType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
@@ -12,12 +15,17 @@ import java.util.Map;
 
 @Entity
 @Table(name = "audit_event")
+@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
+@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class AuditEventEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
+
+    @Column(name = "org_id", nullable = false)
+    private String orgId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "entity_type", nullable = false, length = 50)
@@ -95,5 +103,13 @@ public class AuditEventEntity {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 }

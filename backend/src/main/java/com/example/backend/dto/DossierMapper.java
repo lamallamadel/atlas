@@ -22,7 +22,6 @@ public class DossierMapper {
 
     public Dossier toEntity(DossierCreateRequest request) {
         Dossier dossier = new Dossier();
-        dossier.setOrgId(request.getOrgId());
         dossier.setAnnonceId(request.getAnnonceId());
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setLeadName(request.getLeadName());

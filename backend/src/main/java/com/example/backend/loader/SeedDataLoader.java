@@ -228,6 +228,7 @@ public class SeedDataLoader implements CommandLineRunner {
                                               String firstName, String lastName, String email,
                                               String phone, String address) {
         PartiePrenanteEntity partie = new PartiePrenanteEntity();
+        partie.setOrgId(dossier.getOrgId());
         partie.setDossier(dossier);
         partie.setRole(role);
         partie.setFirstName(firstName);

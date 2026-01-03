@@ -11,10 +11,6 @@ import java.util.Map;
 
 public class AnnonceCreateRequest {
 
-    @NotBlank(message = "Organization ID is required")
-    @Size(max = 255, message = "Organization ID must not exceed 255 characters")
-    private String orgId;
-
     @NotBlank(message = "Title is required")
     @Size(max = 500, message = "Title must not exceed 500 characters")
     private String title;
@@ -49,14 +45,6 @@ public class AnnonceCreateRequest {
     private Map<String, Object> meta;
 
     public AnnonceCreateRequest() {
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
     }
 
     public String getTitle() {
