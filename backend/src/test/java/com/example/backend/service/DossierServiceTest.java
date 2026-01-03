@@ -13,6 +13,7 @@ import com.example.backend.entity.enums.PartiePrenanteRole;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
+import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -440,6 +441,93 @@ class DossierServiceTest {
         assertThat(result).isNotNull();
         assertThat(result.getContent()).isEmpty();
         assertThat(result.getTotalElements()).isEqualTo(0);
+    }
+
+    @Test
+    void crossTenantIsolation_createInOrg1AndOrg2_org1CannotAccessOrg2() {
+        try {
+            TenantContext.setOrgId("ORG1");
+            DossierCreateRequest request1 = createBasicRequest();
+            request1.setOrgId("ORG1");
+            request1.setLeadName("ORG1 Lead");
+            DossierResponse org1Response = dossierService.create(request1);
+
+            TenantContext.setOrgId("ORG2");
+            DossierCreateRequest request2 = createBasicRequest();
+            request2.setOrgId("ORG2");
+            request2.setLeadName("ORG2 Lead");
+            DossierResponse org2Response = dossierService.create(request2);
+
+            TenantContext.setOrgId("ORG1");
+            assertThatThrownBy(() -> dossierService.getById(org2Response.getId()))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dossier not found with id: " + org2Response.getId());
+
+            DossierResponse org1Retrieved = dossierService.getById(org1Response.getId());
+            assertThat(org1Retrieved.getId()).isEqualTo(org1Response.getId());
+            assertThat(org1Retrieved.getLeadName()).isEqualTo("ORG1 Lead");
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Test
+    void crossTenantIsolation_org2CannotAccessOrg1Resources() {
+        try {
+            TenantContext.setOrgId("ORG1");
+            DossierCreateRequest request = createBasicRequest();
+            request.setOrgId("ORG1");
+            request.setLeadName("ORG1 Private Lead");
+            DossierResponse org1Response = dossierService.create(request);
+
+            TenantContext.setOrgId("ORG2");
+            assertThatThrownBy(() -> dossierService.getById(org1Response.getId()))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dossier not found with id: " + org1Response.getId());
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Test
+    void crossTenantIsolation_patchStatusFromWrongTenant_returns404() {
+        try {
+            TenantContext.setOrgId("ORG1");
+            DossierCreateRequest createRequest = createBasicRequest();
+            createRequest.setOrgId("ORG1");
+            DossierResponse org1Response = dossierService.create(createRequest);
+
+            TenantContext.setOrgId("ORG2");
+            DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
+            patchRequest.setStatus(DossierStatus.WON);
+
+            assertThatThrownBy(() -> dossierService.patchStatus(org1Response.getId(), patchRequest))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dossier not found with id: " + org1Response.getId());
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Test
+    void crossTenantIsolation_createWithOrg2AnnonceFromOrg1_returns404() {
+        try {
+            TenantContext.setOrgId("ORG2");
+            Annonce org2Annonce = createAnnonce("ORG2", "ORG2 Annonce", AnnonceStatus.PUBLISHED);
+            org2Annonce = annonceRepository.save(org2Annonce);
+
+            TenantContext.setOrgId("ORG1");
+            DossierCreateRequest request = createBasicRequest();
+            request.setOrgId("ORG1");
+            request.setAnnonceId(org2Annonce.getId());
+
+            Long finalAnnonceId = org2Annonce.getId();
+            assertThatThrownBy(() -> dossierService.create(request))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + finalAnnonceId);
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     private DossierCreateRequest createBasicRequest() {

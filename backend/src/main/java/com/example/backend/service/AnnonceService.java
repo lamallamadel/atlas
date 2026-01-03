@@ -139,4 +139,21 @@ public class AnnonceService {
     public List<String> getDistinctCities() {
         return annonceRepository.findDistinctCities();
     }
+
+    @Transactional
+    public void delete(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Annonce annonce = annonceRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + id));
+        
+        if (!orgId.equals(annonce.getOrgId())) {
+            throw new EntityNotFoundException("Annonce not found with id: " + id);
+        }
+        
+        annonceRepository.delete(annonce);
+    }
 }

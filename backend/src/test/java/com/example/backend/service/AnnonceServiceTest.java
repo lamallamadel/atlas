@@ -6,6 +6,7 @@ import com.example.backend.dto.AnnonceUpdateRequest;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.repository.AnnonceRepository;
+import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -385,6 +386,72 @@ class AnnonceServiceTest {
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
         assertThat(persisted.getMeta()).isNotNull();
         assertThat(persisted.getMeta().get("priority")).isEqualTo("high");
+    }
+
+    @Test
+    void crossTenantIsolation_createInOrg1AndOrg2_org1CannotAccessOrg2() {
+        try {
+            TenantContext.setOrgId("ORG1");
+            AnnonceCreateRequest request1 = createBasicRequest();
+            request1.setOrgId("ORG1");
+            request1.setTitle("ORG1 Annonce");
+            AnnonceResponse org1Response = annonceService.create(request1);
+
+            TenantContext.setOrgId("ORG2");
+            AnnonceCreateRequest request2 = createBasicRequest();
+            request2.setOrgId("ORG2");
+            request2.setTitle("ORG2 Annonce");
+            AnnonceResponse org2Response = annonceService.create(request2);
+
+            TenantContext.setOrgId("ORG1");
+            assertThatThrownBy(() -> annonceService.getById(org2Response.getId()))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + org2Response.getId());
+
+            AnnonceResponse org1Retrieved = annonceService.getById(org1Response.getId());
+            assertThat(org1Retrieved.getId()).isEqualTo(org1Response.getId());
+            assertThat(org1Retrieved.getTitle()).isEqualTo("ORG1 Annonce");
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Test
+    void crossTenantIsolation_org2CannotAccessOrg1Resources() {
+        try {
+            TenantContext.setOrgId("ORG1");
+            AnnonceCreateRequest request = createBasicRequest();
+            request.setOrgId("ORG1");
+            request.setTitle("ORG1 Private Annonce");
+            AnnonceResponse org1Response = annonceService.create(request);
+
+            TenantContext.setOrgId("ORG2");
+            assertThatThrownBy(() -> annonceService.getById(org1Response.getId()))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + org1Response.getId());
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    @Test
+    void crossTenantIsolation_updateAttemptFromWrongTenant_returns404() {
+        try {
+            TenantContext.setOrgId("ORG1");
+            AnnonceCreateRequest createRequest = createBasicRequest();
+            createRequest.setOrgId("ORG1");
+            AnnonceResponse org1Response = annonceService.create(createRequest);
+
+            TenantContext.setOrgId("ORG2");
+            AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
+            updateRequest.setTitle("Hacked Title");
+
+            assertThatThrownBy(() -> annonceService.update(org1Response.getId(), updateRequest))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + org1Response.getId());
+        } finally {
+            TenantContext.clear();
+        }
     }
 
     private AnnonceCreateRequest createBasicRequest() {

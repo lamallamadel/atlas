@@ -133,6 +133,28 @@ public class AnnonceController {
         return ResponseEntity.ok(cities);
     }
 
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete an annonce", description = "Deletes an annonce by its ID (Admin only)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Annonce deleted successfully",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Annonce not found",
+                    content = @Content),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required",
+                    content = @Content)
+    })
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "ID of the annonce to delete", required = true)
+            @PathVariable Long id) {
+        try {
+            annonceService.delete(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
