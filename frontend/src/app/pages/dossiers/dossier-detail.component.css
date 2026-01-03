@@ -288,18 +288,33 @@
   cursor: not-allowed;
 }
 
-.two-column-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.sections-container {
+  display: flex;
+  flex-direction: column;
   gap: 1.5rem;
   margin-bottom: 1.5rem;
 }
 
+.info-section {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+}
+
+.info-section mat-card-header {
+  margin-bottom: 1rem;
+}
+
+.info-section mat-card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+}
+
+.info-section mat-card-content {
+  padding-top: 0;
+}
+
 @media (max-width: 768px) {
-  .two-column-grid {
-    grid-template-columns: 1fr;
-  }
-  
   .dossier-header {
     flex-direction: column;
     align-items: stretch;
@@ -313,22 +328,6 @@
   .dossier-title {
     white-space: normal;
   }
-}
-
-.column-left,
-.column-right {
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  padding: 1.5rem;
-}
-
-.column-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #2c3e50;
-  margin: 0 0 1.25rem 0;
-  padding-bottom: 0.75rem;
-  border-bottom: 2px solid #e0e0e0;
 }
 
 .field-group {

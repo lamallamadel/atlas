@@ -81,58 +81,83 @@
         </div>
       </div>
 
-      <div class="two-column-grid">
-        <div class="column-left">
-          <h3 class="column-title">Informations du prospect</h3>
-          
-          <div class="field-group">
-            <div class="field-row">
-              <span class="field-label">Nom :</span>
-              <span class="field-value">{{ dossier.leadName || '—' }}</span>
-            </div>
+      <div class="sections-container">
+        <mat-card class="info-section">
+          <mat-card-header>
+            <mat-card-title>Lead</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="field-group">
+              <div class="field-row">
+                <span class="field-label">Nom :</span>
+                <span class="field-value">{{ dossier.leadName || '—' }}</span>
+              </div>
 
-            <div class="field-row">
-              <span class="field-label">Téléphone :</span>
-              <span class="field-value">{{ dossier.leadPhone || '—' }}</span>
-            </div>
+              <div class="field-row">
+                <span class="field-label">Téléphone :</span>
+                <span class="field-value">{{ dossier.leadPhone || '—' }}</span>
+              </div>
 
-            <div class="field-row">
-              <span class="field-label">Source :</span>
-              <span class="field-value">{{ dossier.leadSource || '—' }}</span>
-            </div>
-          </div>
-        </div>
+              <div class="field-row">
+                <span class="field-label">Source :</span>
+                <span class="field-value">{{ dossier.leadSource || '—' }}</span>
+              </div>
 
-        <div class="column-right">
-          <h3 class="column-title">Informations système</h3>
-          
-          <div class="field-group">
-            <div class="field-row" *ngIf="dossier.annonceId">
-              <span class="field-label">Annonce :</span>
-              <span class="field-value">{{ dossier.annonceId }}</span>
+              <div class="field-row">
+                <span class="field-label">Score :</span>
+                <span class="field-value">—</span>
+              </div>
             </div>
+          </mat-card-content>
+        </mat-card>
 
-            <div class="field-row">
-              <span class="field-label">Créé le :</span>
-              <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
+        <mat-card class="info-section">
+          <mat-card-header>
+            <mat-card-title>Annonce</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="field-group">
+              <div class="field-row">
+                <span class="field-label">Annonce ID :</span>
+                <span class="field-value">{{ dossier.annonceId || '—' }}</span>
+              </div>
             </div>
+          </mat-card-content>
+        </mat-card>
 
-            <div class="field-row" *ngIf="dossier.createdBy">
-              <span class="field-label">Créé par :</span>
-              <span class="field-value">{{ dossier.createdBy }}</span>
-            </div>
+        <mat-card class="info-section">
+          <mat-card-header>
+            <mat-card-title>Système</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="field-group">
+              <div class="field-row">
+                <span class="field-label">Créé le :</span>
+                <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
+              </div>
 
-            <div class="field-row">
-              <span class="field-label">Modifié le :</span>
-              <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
-            </div>
+              <div class="field-row">
+                <span class="field-label">Créé par :</span>
+                <span class="field-value">{{ dossier.createdBy || '—' }}</span>
+              </div>
 
-            <div class="field-row" *ngIf="dossier.updatedBy">
-              <span class="field-label">Modifié par :</span>
-              <span class="field-value">{{ dossier.updatedBy }}</span>
+              <div class="field-row">
+                <span class="field-label">Modifié le :</span>
+                <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">Modifié par :</span>
+                <span class="field-value">{{ dossier.updatedBy || '—' }}</span>
+              </div>
+
+              <div class="field-row">
+                <span class="field-label">ID Organisation :</span>
+                <span class="field-value">{{ dossier.orgId }}</span>
+              </div>
             </div>
-          </div>
-        </div>
+          </mat-card-content>
+        </mat-card>
       </div>
 
       <mat-expansion-panel class="advanced-section">
