@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
@@ -78,7 +78,8 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
       provide: HTTP_INTERCEPTORS,
       useClass: CorrelationIdInterceptor,
       multi: true
-    }
+    },
+    { provide: LOCALE_ID, useValue: 'fr-FR' }
   ],
   bootstrap: [AppComponent]
 })
