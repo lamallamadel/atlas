@@ -46,9 +46,9 @@ class AnnonceServiceTest {
     void create_WithPhotos_PersistsCorrectly() {
         AnnonceCreateRequest request = createBasicRequest();
         List<String> photos = Arrays.asList(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
+                "https://example.com/photo1.jpg",
+                "https://example.com/photo2.jpg",
+                "https://example.com/photo3.jpg"
         );
         request.setPhotos(photos);
 
@@ -58,18 +58,18 @@ class AnnonceServiceTest {
         assertThat(response.getPhotos()).isNotNull();
         assertThat(response.getPhotos()).hasSize(3);
         assertThat(response.getPhotos()).containsExactlyInAnyOrder(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
+                "https://example.com/photo1.jpg",
+                "https://example.com/photo2.jpg",
+                "https://example.com/photo3.jpg"
         );
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
         assertThat(persisted.getPhotos()).isNotNull();
         assertThat(persisted.getPhotos()).hasSize(3);
         assertThat(persisted.getPhotos()).containsExactlyInAnyOrder(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
+                "https://example.com/photo1.jpg",
+                "https://example.com/photo2.jpg",
+                "https://example.com/photo3.jpg"
         );
     }
 
@@ -109,9 +109,9 @@ class AnnonceServiceTest {
         rules.put("visitingHours", Map.of("start", "09:00", "end", "18:00"));
         rules.put("allowedPets", Arrays.asList("cat", "dog"));
         rules.put("amenities", Map.of(
-            "wifi", true,
-            "parking", true,
-            "pool", false
+                "wifi", true,
+                "parking", true,
+                "pool", false
         ));
         request.setRulesJson(rules);
 
@@ -133,8 +133,8 @@ class AnnonceServiceTest {
     void create_WithBothPhotosAndRules_PersistsBothCorrectly() {
         AnnonceCreateRequest request = createBasicRequest();
         List<String> photos = Arrays.asList(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg"
+                "https://example.com/photo1.jpg",
+                "https://example.com/photo2.jpg"
         );
         request.setPhotos(photos);
 
@@ -194,8 +194,8 @@ class AnnonceServiceTest {
 
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         List<String> newPhotos = Arrays.asList(
-            "https://example.com/new1.jpg",
-            "https://example.com/new2.jpg"
+                "https://example.com/new1.jpg",
+                "https://example.com/new2.jpg"
         );
         updateRequest.setPhotos(newPhotos);
 
@@ -203,8 +203,8 @@ class AnnonceServiceTest {
 
         assertThat(updated.getPhotos()).hasSize(2);
         assertThat(updated.getPhotos()).containsExactlyInAnyOrder(
-            "https://example.com/new1.jpg",
-            "https://example.com/new2.jpg"
+                "https://example.com/new1.jpg",
+                "https://example.com/new2.jpg"
         );
 
         Annonce persisted = annonceRepository.findById(updated.getId()).orElseThrow();
@@ -306,7 +306,7 @@ class AnnonceServiceTest {
         annonceService.create(createBasicRequest());
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<AnnonceResponse> result = annonceService.list(null, null, pageable);
+        Page<AnnonceResponse> result = annonceService.list(null, null, null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(2);
@@ -325,7 +325,7 @@ class AnnonceServiceTest {
         annonceService.update(published.getId(), updateRequest);
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<AnnonceResponse> result = annonceService.list(AnnonceStatus.DRAFT, null, pageable);
+        Page<AnnonceResponse> result = annonceService.list(AnnonceStatus.DRAFT, null, null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
@@ -344,7 +344,7 @@ class AnnonceServiceTest {
         annonceService.create(request2);
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<AnnonceResponse> result = annonceService.list(null, "Electronics", pageable);
+        Page<AnnonceResponse> result = annonceService.list(null, "Electronics", null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
@@ -355,7 +355,7 @@ class AnnonceServiceTest {
     void update_ArchivedAnnonce_ThrowsIllegalStateException() {
         AnnonceCreateRequest createRequest = createBasicRequest();
         AnnonceResponse created = annonceService.create(createRequest);
-        
+
         // Archive it
         AnnonceUpdateRequest archiveRequest = new AnnonceUpdateRequest();
         archiveRequest.setStatus(AnnonceStatus.ARCHIVED);

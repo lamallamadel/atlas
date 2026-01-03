@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+// import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +20,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @ActiveProfiles("test")
+// Si tu utilises une vraie DB (Testcontainers / Docker / Postgres externe) pour les tests JPA,
+// décommente ceci pour empêcher Spring de remplacer ta datasource par H2.
+// @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class AnnonceRepositoryTest {
 
     @Autowired
@@ -35,6 +39,7 @@ class AnnonceRepositoryTest {
             Annonce annonce = createAnnonce("org1", "Title " + i, AnnonceStatus.PUBLISHED);
             annonceRepository.save(annonce);
         }
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Pageable pageable = PageRequest.of(0, 10);
         Page<Annonce> result = annonceRepository.findAll(pageable);
@@ -53,6 +58,7 @@ class AnnonceRepositoryTest {
             Annonce annonce = createAnnonce("org1", "Title " + i, AnnonceStatus.PUBLISHED);
             annonceRepository.save(annonce);
         }
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Pageable pageable = PageRequest.of(1, 10);
         Page<Annonce> result = annonceRepository.findAll(pageable);
@@ -70,6 +76,7 @@ class AnnonceRepositoryTest {
             Annonce annonce = createAnnonce("org1", "Title " + i, AnnonceStatus.PUBLISHED);
             annonceRepository.save(annonce);
         }
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Pageable pageable = PageRequest.of(2, 10);
         Page<Annonce> result = annonceRepository.findAll(pageable);
@@ -97,6 +104,7 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Published 2", AnnonceStatus.PUBLISHED));
         annonceRepository.save(createAnnonce("org1", "Draft 1", AnnonceStatus.DRAFT));
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Specification<Annonce> spec = (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), AnnonceStatus.PUBLISHED);
@@ -113,6 +121,7 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Draft 1", AnnonceStatus.DRAFT));
         annonceRepository.save(createAnnonce("org1", "Draft 2", AnnonceStatus.DRAFT));
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Specification<Annonce> spec = (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), AnnonceStatus.DRAFT);
@@ -128,6 +137,7 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Published 1", AnnonceStatus.PUBLISHED));
         annonceRepository.save(createAnnonce("org1", "Draft 1", AnnonceStatus.DRAFT));
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Specification<Annonce> spec = (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), AnnonceStatus.ARCHIVED);
@@ -146,6 +156,7 @@ class AnnonceRepositoryTest {
         for (int i = 0; i < 10; i++) {
             annonceRepository.save(createAnnonce("org1", "Draft " + i, AnnonceStatus.DRAFT));
         }
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Specification<Annonce> spec = (root, query, criteriaBuilder) ->
                 criteriaBuilder.equal(root.get("status"), AnnonceStatus.PUBLISHED);
@@ -165,6 +176,7 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Draft 1", AnnonceStatus.DRAFT));
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
         annonceRepository.save(createAnnonce("org1", "Draft 2", AnnonceStatus.DRAFT));
+        // Optionnel (stabilité): annonceRepository.flush();
 
         Specification<Annonce> spec = (root, query, criteriaBuilder) ->
                 root.get("status").in(AnnonceStatus.DRAFT, AnnonceStatus.PUBLISHED);

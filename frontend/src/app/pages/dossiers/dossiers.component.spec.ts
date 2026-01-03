@@ -1,3 +1,4 @@
+// FE/src/app/pages/dossiers/dossiers.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -15,11 +16,22 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+
 
 describe('DossiersComponent', () => {
   let component: DossiersComponent;
   let fixture: ComponentFixture<DossiersComponent>;
   let dossierApiService: jasmine.SpyObj<DossierApiService>;
+
+  beforeAll(() => {
+    registerLocaleData(localeFr);
+  });
+
 
   beforeEach(async () => {
     const dossierApiServiceSpy = jasmine.createSpyObj('DossierApiService', ['list', 'getById', 'create', 'patchStatus']);
@@ -40,11 +52,9 @@ describe('DossiersComponent', () => {
         MatChipsModule,
         NoopAnimationsModule
       ],
-      providers: [
-        { provide: DossierApiService, useValue: dossierApiServiceSpy }
-      ]
-    })
-      .compileComponents();
+      providers: [{ provide: LOCALE_ID, useValue: 'fr-FR' }, { provide: DossierApiService, useValue: dossierApiServiceSpy }],
+      schemas: [NO_ERRORS_SCHEMA]
+    }).compileComponents();
 
     dossierApiService = TestBed.inject(DossierApiService) as jasmine.SpyObj<DossierApiService>;
     fixture = TestBed.createComponent(DossiersComponent);
@@ -78,7 +88,6 @@ describe('DossiersComponent', () => {
     };
 
     dossierApiService.list.and.returnValue(of(mockPage));
-
     fixture.detectChanges();
 
     expect(fixture.nativeElement).toBeTruthy();
@@ -121,7 +130,6 @@ describe('DossiersComponent', () => {
     };
 
     dossierApiService.list.and.returnValue(of(mockPage));
-
     fixture.detectChanges();
 
     expect(dossierApiService.list).toHaveBeenCalled();

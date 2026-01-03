@@ -25,7 +25,7 @@ describe('GenericTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ GenericTableComponent ],
+      declarations: [GenericTableComponent],
       imports: [
         BrowserAnimationsModule,
         MatTableModule,
@@ -36,7 +36,7 @@ describe('GenericTableComponent', () => {
         MatTooltipModule
       ]
     })
-    .compileComponents();
+      .compileComponents();
 
     fixture = TestBed.createComponent(GenericTableComponent);
     component = fixture.componentInstance;
@@ -81,8 +81,8 @@ describe('GenericTableComponent', () => {
 
   it('should format boolean values correctly', () => {
     const column: ColumnConfig = { key: 'active', header: 'Active', type: 'boolean' };
-    expect(component.formatValue(true, column, {})).toBe('Yes');
-    expect(component.formatValue(false, column, {})).toBe('No');
+    expect(component.formatValue(true, column, {})).toBe('Oui');
+    expect(component.formatValue(false, column, {})).toBe('Non');
   });
 
   it('should handle null and undefined values', () => {
@@ -98,7 +98,7 @@ describe('GenericTableComponent', () => {
       action: 'delete',
       show: (row: unknown) => (row as { id: number }).id > 1
     };
-    
+
     expect(component.shouldShowAction(action, { id: 1 })).toBe(false);
     expect(component.shouldShowAction(action, { id: 2 })).toBe(true);
   });
@@ -109,7 +109,7 @@ describe('GenericTableComponent', () => {
       tooltip: 'Edit',
       action: 'edit'
     };
-    
+
     expect(component.shouldShowAction(action, mockData[0])).toBe(true);
   });
 });

@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,12 +24,17 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AnnonceController.class)
 class AnnonceControllerTest {
@@ -154,7 +160,8 @@ class AnnonceControllerTest {
 
     @Test
     void getById_NonExistingId_Returns404() throws Exception {
-        when(annonceService.getById(999L)).thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
+        when(annonceService.getById(999L))
+                .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
 
         mockMvc.perform(get("/api/v1/annonces/999"))
                 .andExpect(status().isNotFound());
@@ -212,7 +219,13 @@ class AnnonceControllerTest {
         List<AnnonceResponse> annonces = Arrays.asList(annonce1, annonce2);
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 2);
 
-        when(annonceService.list(eq(null), eq(null), any())).thenReturn(page);
+        when(annonceService.list(
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces"))
                 .andExpect(status().isOk())
@@ -236,7 +249,13 @@ class AnnonceControllerTest {
         List<AnnonceResponse> annonces = List.of(annonce1);
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 1);
 
-        when(annonceService.list(eq(AnnonceStatus.PUBLISHED), eq(null), any())).thenReturn(page);
+        when(annonceService.list(
+                eq(AnnonceStatus.PUBLISHED),
+                isNull(),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
                         .param("status", "PUBLISHED"))
@@ -256,7 +275,13 @@ class AnnonceControllerTest {
         List<AnnonceResponse> annonces = List.of(annonce1);
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 1);
 
-        when(annonceService.list(eq(null), eq("Electronics"), any())).thenReturn(page);
+        when(annonceService.list(
+                isNull(),
+                eq("Electronics"),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
                         .param("q", "Electronics"))
@@ -276,7 +301,13 @@ class AnnonceControllerTest {
         List<AnnonceResponse> annonces = List.of(annonce1);
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 1);
 
-        when(annonceService.list(eq(AnnonceStatus.PUBLISHED), eq("Electronics"), any())).thenReturn(page);
+        when(annonceService.list(
+                eq(AnnonceStatus.PUBLISHED),
+                eq("Electronics"),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
                         .param("status", "PUBLISHED")
@@ -297,7 +328,13 @@ class AnnonceControllerTest {
         List<AnnonceResponse> annonces = List.of(annonce1);
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(1, 10), 25);
 
-        when(annonceService.list(eq(null), eq(null), any())).thenReturn(page);
+        when(annonceService.list(
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
                         .param("page", "1")
@@ -322,7 +359,13 @@ class AnnonceControllerTest {
         List<AnnonceResponse> annonces = Arrays.asList(annonce1, annonce2);
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 2);
 
-        when(annonceService.list(eq(null), eq(null), any())).thenReturn(page);
+        when(annonceService.list(
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
                         .param("sort", "title,asc"))
@@ -336,7 +379,13 @@ class AnnonceControllerTest {
     void list_EmptyResult_Returns200WithEmptyPage() throws Exception {
         Page<AnnonceResponse> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
 
-        when(annonceService.list(eq(null), eq(null), any())).thenReturn(emptyPage);
+        when(annonceService.list(
+                isNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+                any(Pageable.class)
+        )).thenReturn(emptyPage);
 
         mockMvc.perform(get("/api/v1/annonces"))
                 .andExpect(status().isOk())

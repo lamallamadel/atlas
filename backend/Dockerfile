@@ -1,25 +1,54 @@
+# syntax=docker/dockerfile:1.5
+
+# -------------------------
 # Build stage
+# -------------------------
 FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
-# Copy pom.xml and download dependencies
-COPY pom.xml .
-COPY settings.xml .
-RUN mvn -ntp dependency:go-offline -s settings.xml
+# Copy build descriptors first (best cache hit)
+COPY pom.xml /app/pom.xml
+COPY settings.xml /app/settings.xml
 
-# Copy source and build
-COPY src ./src
-RUN mvn -ntp clean package -DskipTests -s settings.xml
+# Create toolchains inside the image layer (Linux-safe)
+RUN mkdir -p /root/.m2 && \
+    cat > /root/.m2/toolchains.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>17</version>
+    </provides>
+    <configuration>
+      <jdkHome>${JAVA_HOME}</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+EOF
 
+# Download deps with cache mounted ONLY on repository
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -ntp -s /app/settings.xml dependency:go-offline
+
+# Copy sources and build
+COPY src /app/src
+
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
+
+
+# -------------------------
 # Runtime stage
+# -------------------------
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
 
-# Install curl for healthcheck
+# Keep curl only if you actually use an HTTP healthcheck
 RUN apk add --no-cache curl
 
-# Copy the built jar from build stage
-COPY --from=build /app/target/backend.jar ./app.jar
+# Copy the built jar (avoid hardcoded jar name when possible)
+COPY --from=build /app/target/*.jar /app/app.jar
 
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-jar", "/app/app.jar"]

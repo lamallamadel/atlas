@@ -24,6 +24,8 @@ spring:
     baseline-on-migrate: true
     baseline-version: 0
     locations: classpath:db/migration
+    placeholders:
+      json_type: JSONB
 
 server:
   port: 8080

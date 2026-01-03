@@ -1,8 +1,30 @@
+import { Component, Input, Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
+
 import { AnnonceDetailComponent } from './annonce-detail.component';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
+
+@Component({ selector: 'app-badge-status', template: '' })
+class BadgeStatusStubComponent {
+  @Input() status: any;
+  @Input() entityType: any;
+}
+
+@Pipe({ name: 'dateFormat' })
+class DateFormatPipeStub implements PipeTransform {
+  transform(value: any): any {
+    return value;
+  }
+}
+
+@Pipe({ name: 'priceFormat' })
+class PriceFormatPipeStub implements PipeTransform {
+  transform(value: any): any {
+    return value;
+  }
+}
 
 describe('AnnonceDetailComponent', () => {
   let component: AnnonceDetailComponent;
@@ -24,7 +46,7 @@ describe('AnnonceDetailComponent', () => {
     description: 'Test Description',
     category: 'Test Category',
     city: 'Test City',
-    price: 100.50,
+    price: 100.5,
     currency: 'EUR',
     status: AnnonceStatus.PUBLISHED,
     createdAt: '2024-01-01T10:00:00Z',
@@ -45,14 +67,18 @@ describe('AnnonceDetailComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      declarations: [ AnnonceDetailComponent ],
+      declarations: [
+        AnnonceDetailComponent,
+        BadgeStatusStubComponent,
+        DateFormatPipeStub,
+        PriceFormatPipeStub
+      ],
       providers: [
         { provide: AnnonceApiService, useValue: mockAnnonceApiService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute }
       ]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AnnonceDetailComponent);
     component = fixture.componentInstance;
@@ -73,14 +99,14 @@ describe('AnnonceDetailComponent', () => {
     expect(component.error).toBeNull();
   });
 
-  it('should handle error when loading annonce', () => {
+  it('should handle non-404 error when loading annonce', () => {
     mockAnnonceApiService.getById.and.returnValue(throwError(() => ({ status: 500 })));
 
     component.ngOnInit();
 
     expect(component.annonce).toBeNull();
     expect(component.loading).toBe(false);
-    expect(component.error).toBe('Failed to load annonce. Please try again.');
+    expect(component.error).toBe("Échec du chargement de l'annonce. Veuillez réessayer.");
   });
 
   it('should handle 404 error', () => {
@@ -88,7 +114,7 @@ describe('AnnonceDetailComponent', () => {
 
     component.ngOnInit();
 
-    expect(component.error).toBe('Annonce not found');
+    expect(component.error).toBe('Annonce introuvable');
   });
 
   it('should navigate to edit page', () => {
@@ -110,7 +136,7 @@ describe('AnnonceDetailComponent', () => {
 
     component.loadAnnonce();
 
-    expect(component.error).toBe('Invalid annonce ID');
+    expect(component.error).toBe("ID d'annonce invalide");
   });
 
   it('should handle missing annonce ID', () => {
@@ -118,6 +144,6 @@ describe('AnnonceDetailComponent', () => {
 
     component.loadAnnonce();
 
-    expect(component.error).toBe('Invalid annonce ID');
+    expect(component.error).toBe("ID d'annonce invalide");
   });
 });
