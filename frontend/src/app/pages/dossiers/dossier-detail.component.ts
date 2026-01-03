@@ -35,6 +35,61 @@ export class DossierDetailComponent implements OnInit {
     private snackBar: MatSnackBar
   ) {}
 
+  getAvailableStatusOptions(): DossierStatus[] {
+    if (!this.dossier) {
+      return this.statusOptions;
+    }
+
+    const currentStatus = this.dossier.status;
+
+    switch (currentStatus) {
+      case DossierStatus.WON:
+      case DossierStatus.LOST:
+        return [currentStatus];
+      
+      case DossierStatus.QUALIFIED:
+        return [
+          DossierStatus.QUALIFIED,
+          DossierStatus.APPOINTMENT,
+          DossierStatus.WON,
+          DossierStatus.LOST
+        ];
+      
+      case DossierStatus.NEW:
+      case DossierStatus.APPOINTMENT:
+      default:
+        return this.statusOptions;
+    }
+  }
+
+  isStatusChangeDisabled(): boolean {
+    if (!this.dossier) {
+      return false;
+    }
+    return this.dossier.status === DossierStatus.WON || 
+           this.dossier.status === DossierStatus.LOST;
+  }
+
+  getStatusChangeTooltip(): string {
+    if (!this.dossier) {
+      return '';
+    }
+
+    if (this.dossier.status === DossierStatus.WON) {
+      return 'Le statut GAGNÉ est terminal et ne peut pas être modifié';
+    }
+    
+    if (this.dossier.status === DossierStatus.LOST) {
+      return 'Le statut PERDU est terminal et ne peut pas être modifié';
+    }
+
+    if (this.dossier.status === DossierStatus.QUALIFIED) {
+      return 'Seules les transitions vers RENDEZ-VOUS, GAGNÉ ou PERDU sont autorisées';
+    }
+
+    return 'Sélectionnez un nouveau statut';
+  }
+
   ngOnInit(): void {
     this.loadDossier();
   }
@@ -147,16 +202,17 @@ export class DossierDetailComponent implements OnInit {
     }
   }
 
-  formatDate(date: string | undefined): string {
-    if (!date) {
+  formatDate(dateString: string): string {
+    if (!dateString) {
       return '—';
     }
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    return `${day}/${month}/${year} ${hours}:${minutes}`;
+    const date = new Date(dateString);
+    return date.toLocaleString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

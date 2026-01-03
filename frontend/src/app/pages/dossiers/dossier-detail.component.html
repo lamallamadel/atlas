@@ -44,6 +44,10 @@
           {{ statusError }}
         </div>
 
+        <div *ngIf="isStatusChangeDisabled()" class="warning-message">
+          <strong>⚠️ Statut terminal :</strong> {{ getStatusChangeTooltip() }}
+        </div>
+
         <div class="status-change-form">
           <div class="form-group">
             <label for="status-select" class="form-label">Nouveau statut :</label>
@@ -51,20 +55,23 @@
               id="status-select"
               class="form-select"
               [(ngModel)]="selectedStatus"
-              [disabled]="updatingStatus"
+              [disabled]="updatingStatus || isStatusChangeDisabled()"
+              [title]="getStatusChangeTooltip()"
             >
-              <option [value]="DossierStatus.NEW">Nouveau</option>
-              <option [value]="DossierStatus.QUALIFIED">Qualifié</option>
-              <option [value]="DossierStatus.APPOINTMENT">Rendez-vous</option>
-              <option [value]="DossierStatus.WON">Gagné</option>
-              <option [value]="DossierStatus.LOST">Perdu</option>
+              <option *ngFor="let status of getAvailableStatusOptions()" [value]="status">
+                {{ status === DossierStatus.NEW ? 'Nouveau' :
+                   status === DossierStatus.QUALIFIED ? 'Qualifié' :
+                   status === DossierStatus.APPOINTMENT ? 'Rendez-vous' :
+                   status === DossierStatus.WON ? 'Gagné' :
+                   status === DossierStatus.LOST ? 'Perdu' : status }}
+              </option>
             </select>
           </div>
 
           <button
             class="btn-update-status"
             (click)="updateStatus()"
-            [disabled]="updatingStatus || !selectedStatus"
+            [disabled]="updatingStatus || !selectedStatus || isStatusChangeDisabled()"
           >
             <span *ngIf="updatingStatus" class="spinner-small"></span>
             <span *ngIf="!updatingStatus">Mettre à jour le statut</span>
