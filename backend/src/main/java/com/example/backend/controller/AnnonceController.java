@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class AnnonceController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Create a new annonce", description = "Creates a new annonce with the provided details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Annonce created successfully",
@@ -50,6 +52,7 @@ public class AnnonceController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Get annonce by ID", description = "Retrieves a single annonce by its ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Annonce found",
@@ -69,6 +72,7 @@ public class AnnonceController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Update an annonce", description = "Updates an existing annonce with the provided details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Annonce updated successfully",
@@ -91,6 +95,7 @@ public class AnnonceController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "List annonces", description = "Retrieves a paginated list of annonces with optional filtering")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Annonces retrieved successfully",
@@ -118,6 +123,7 @@ public class AnnonceController {
     }
 
     @GetMapping("/cities")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Get distinct cities", description = "Retrieves a list of distinct cities from all annonces")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cities retrieved successfully")

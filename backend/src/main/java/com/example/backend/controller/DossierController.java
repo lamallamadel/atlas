@@ -22,6 +22,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -36,6 +37,7 @@ public class DossierController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Create a new dossier", description = "Creates a new dossier with the provided details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Dossier created successfully",
@@ -60,6 +62,7 @@ public class DossierController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Get dossier by ID", description = "Retrieves a single dossier by its ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier found",
@@ -79,6 +82,7 @@ public class DossierController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "List dossiers", description = "Retrieves a paginated list of dossiers with optional filtering")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossiers retrieved successfully",
@@ -104,6 +108,7 @@ public class DossierController {
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Update dossier status", description = "Updates the status of an existing dossier")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier status updated successfully",
@@ -126,6 +131,7 @@ public class DossierController {
     }
 
     @PatchMapping("/{id}/lead")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Update dossier lead information", description = "Updates the lead name and phone of an existing dossier")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier lead information updated successfully",
