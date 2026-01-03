@@ -38,9 +38,7 @@
 
         <div class="detail-row">
           <span class="detail-label">Statut :</span>
-          <span [ngClass]="getStatusBadgeClass(annonce.status)">
-            {{ annonce.status }}
-          </span>
+          <app-badge-status [status]="annonce.status" entityType="annonce"></app-badge-status>
         </div>
 
         <div class="detail-row">

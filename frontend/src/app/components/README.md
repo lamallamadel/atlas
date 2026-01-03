@@ -1,4 +1,42 @@
-# GenericTableComponent
+# Components
+
+This directory contains reusable Angular components.
+
+---
+
+## BadgeStatusComponent
+
+A shared component for displaying status badges with consistent styling across the application.
+
+### Usage
+
+```html
+<app-badge-status [status]="statusValue" entityType="annonce"></app-badge-status>
+<app-badge-status [status]="statusValue" entityType="dossier"></app-badge-status>
+```
+
+### Inputs
+
+- `status` (string, required): The status value (e.g., 'DRAFT', 'PUBLISHED', 'NEW', 'QUALIFIED', etc.)
+- `entityType` (EntityType, required): Either 'annonce' or 'dossier'
+
+### Status Colors
+
+**Annonce:**
+- DRAFT → Gray (#e9ecef)
+- PUBLISHED (displayed as "Actif") → Green (#d4edda)
+- ARCHIVED → Red (#f8d7da)
+
+**Dossier:**
+- NEW → Blue (#d1ecf1)
+- QUALIFIED → Green (#d4edda)
+- APPOINTMENT (displayed as "Rendez-vous") → Yellow (#fff3cd)
+- WON → Dark Green (#c3e6cb)
+- LOST → Red (#f8d7da)
+
+---
+
+## GenericTableComponent
 
 A reusable Angular Material table component with built-in pagination, sorting, and row actions.
 

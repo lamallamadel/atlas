@@ -66,17 +66,4 @@ export class AnnonceDetailComponent implements OnInit {
   goBack(): void {
     this.router.navigate(['/annonces']);
   }
-
-  getStatusBadgeClass(status: AnnonceStatus): string {
-    switch (status) {
-      case AnnonceStatus.PUBLISHED:
-        return 'status-badge status-published';
-      case AnnonceStatus.DRAFT:
-        return 'status-badge status-draft';
-      case AnnonceStatus.ARCHIVED:
-        return 'status-badge status-archived';
-      default:
-        return 'status-badge';
-    }
-  }
 }

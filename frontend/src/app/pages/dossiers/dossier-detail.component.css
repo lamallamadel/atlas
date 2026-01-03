@@ -138,42 +138,6 @@
   white-space: nowrap;
 }
 
-.status-badge {
-  display: inline-block;
-  padding: 0.35rem 0.85rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  text-transform: uppercase;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.status-new {
-  background-color: #d1ecf1;
-  color: #0c5460;
-}
-
-.status-qualified {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-.status-appointment {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-.status-won {
-  background-color: #d4edda;
-  color: #155724;
-}
-
-.status-lost {
-  background-color: #f8d7da;
-  color: #721c24;
-}
-
 .btn-change-status {
   background-color: #3498db;
   color: white;

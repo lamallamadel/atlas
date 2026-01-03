@@ -1,0 +1,48 @@
+.badge-status {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.badge-draft {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.badge-active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-archived {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.badge-new {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.badge-qualifying {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.badge-qualified {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.badge-won {
+  background-color: #c3e6cb;
+  color: #0d4c2a;
+}
+
+.badge-lost {
+  background-color: #f8d7da;
+  color: #721c24;
+}

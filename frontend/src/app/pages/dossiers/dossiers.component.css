@@ -175,7 +175,7 @@
   margin-bottom: 1.5rem;
 }
 
-::ng-deep .status-badge {
+::ng-deep .badge-status {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -184,27 +184,27 @@
   text-transform: uppercase;
 }
 
-::ng-deep .status-new {
+::ng-deep .badge-new {
   background-color: #d1ecf1;
   color: #0c5460;
 }
 
-::ng-deep .status-qualified {
+::ng-deep .badge-qualifying {
   background-color: #fff3cd;
   color: #856404;
 }
 
-::ng-deep .status-appointment {
-  background-color: #cce5ff;
-  color: #004085;
-}
-
-::ng-deep .status-won {
+::ng-deep .badge-qualified {
   background-color: #d4edda;
   color: #155724;
 }
 
-::ng-deep .status-lost {
+::ng-deep .badge-won {
+  background-color: #c3e6cb;
+  color: #0d4c2a;
+}
+
+::ng-deep .badge-lost {
   background-color: #f8d7da;
   color: #721c24;
 }

@@ -185,23 +185,6 @@ export class DossierDetailComponent implements OnInit {
     this.router.navigate(['/dossiers']);
   }
 
-  getStatusBadgeClass(status: DossierStatus): string {
-    switch (status) {
-      case DossierStatus.NEW:
-        return 'status-badge status-new';
-      case DossierStatus.QUALIFIED:
-        return 'status-badge status-qualified';
-      case DossierStatus.APPOINTMENT:
-        return 'status-badge status-appointment';
-      case DossierStatus.WON:
-        return 'status-badge status-won';
-      case DossierStatus.LOST:
-        return 'status-badge status-lost';
-      default:
-        return 'status-badge';
-    }
-  }
-
   formatDate(dateString: string): string {
     if (!dateString) {
       return '—';

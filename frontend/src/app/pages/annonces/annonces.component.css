@@ -173,7 +173,7 @@
   margin-top: 0.25rem;
 }
 
-::ng-deep .status-badge {
+::ng-deep .badge-status {
   display: inline-block;
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
@@ -182,17 +182,17 @@
   text-transform: uppercase;
 }
 
-::ng-deep .status-published {
+::ng-deep .badge-draft {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+::ng-deep .badge-active {
   background-color: #d4edda;
   color: #155724;
 }
 
-::ng-deep .status-draft {
-  background-color: #fff3cd;
-  color: #856404;
-}
-
-::ng-deep .status-archived {
+::ng-deep .badge-archived {
   background-color: #f8d7da;
   color: #721c24;
 }

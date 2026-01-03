@@ -23,9 +23,7 @@
           <h2 class="dossier-title">
             Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ dossier.leadPhone || 'Sans téléphone' }}
           </h2>
-          <span [ngClass]="getStatusBadgeClass(dossier.status)">
-            {{ dossier.status }}
-          </span>
+          <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
         </div>
         <button
           class="btn-change-status"

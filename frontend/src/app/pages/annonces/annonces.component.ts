@@ -79,7 +79,8 @@ export class AnnoncesComponent implements OnInit {
       format: (value: unknown) => {
         const status = value as AnnonceStatus;
         const badgeClass = this.getStatusBadgeClass(status);
-        return `<span class="${badgeClass}">${status}</span>`;
+        const label = this.getStatusLabel(status);
+        return `<span class="${badgeClass}">${label}</span>`;
       }
     },
     { 
@@ -240,13 +241,26 @@ export class AnnoncesComponent implements OnInit {
   getStatusBadgeClass(status: AnnonceStatus): string {
     switch (status) {
       case AnnonceStatus.PUBLISHED:
-        return 'status-badge status-published';
+        return 'badge-status badge-active';
       case AnnonceStatus.DRAFT:
-        return 'status-badge status-draft';
+        return 'badge-status badge-draft';
       case AnnonceStatus.ARCHIVED:
-        return 'status-badge status-archived';
+        return 'badge-status badge-archived';
       default:
-        return 'status-badge';
+        return 'badge-status';
+    }
+  }
+
+  getStatusLabel(status: AnnonceStatus): string {
+    switch (status) {
+      case AnnonceStatus.PUBLISHED:
+        return 'Actif';
+      case AnnonceStatus.DRAFT:
+        return 'Brouillon';
+      case AnnonceStatus.ARCHIVED:
+        return 'Archivé';
+      default:
+        return status;
     }
   }
 

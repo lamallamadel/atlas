@@ -28,6 +28,7 @@ import { DossierCreateComponent } from './pages/dossiers/dossier-create.componen
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
+import { BadgeStatusComponent } from './components/badge-status.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
@@ -46,6 +47,7 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     DossierDetailComponent,
     GenericTableComponent,
     EmptyStateComponent,
+    BadgeStatusComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe

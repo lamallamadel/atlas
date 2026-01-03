@@ -62,7 +62,8 @@ export class DossiersComponent implements OnInit {
       format: (value: unknown) => {
         const status = value as DossierStatus;
         const badgeClass = this.getStatusBadgeClass(status);
-        return `<span class="${badgeClass}">${status}</span>`;
+        const label = this.getStatusLabel(status);
+        return `<span class="${badgeClass}">${label}</span>`;
       }
     },
     { 
@@ -203,17 +204,34 @@ export class DossiersComponent implements OnInit {
   getStatusBadgeClass(status: DossierStatus): string {
     switch (status) {
       case DossierStatus.NEW:
-        return 'status-badge status-new';
+        return 'badge-status badge-new';
       case DossierStatus.QUALIFIED:
-        return 'status-badge status-qualified';
+        return 'badge-status badge-qualified';
       case DossierStatus.APPOINTMENT:
-        return 'status-badge status-appointment';
+        return 'badge-status badge-qualifying';
       case DossierStatus.WON:
-        return 'status-badge status-won';
+        return 'badge-status badge-won';
       case DossierStatus.LOST:
-        return 'status-badge status-lost';
+        return 'badge-status badge-lost';
       default:
-        return 'status-badge';
+        return 'badge-status';
+    }
+  }
+
+  getStatusLabel(status: DossierStatus): string {
+    switch (status) {
+      case DossierStatus.NEW:
+        return 'Nouveau';
+      case DossierStatus.QUALIFIED:
+        return 'Qualifié';
+      case DossierStatus.APPOINTMENT:
+        return 'Rendez-vous';
+      case DossierStatus.WON:
+        return 'Gagné';
+      case DossierStatus.LOST:
+        return 'Perdu';
+      default:
+        return status;
     }
   }
 
