@@ -110,7 +110,20 @@ export class AnnonceCreateComponent implements OnInit {
       return null;
     } catch (e) {
       const error = e as Error;
-      return { invalidJson: true, jsonParseError: error.message };
+      let position: number | null = null;
+      
+      // Extract position from SyntaxError message
+      // Common patterns: "position 42", "at position 42", "character 42", etc.
+      const positionMatch = error.message.match(/position\s+(\d+)|character\s+(\d+)|at\s+(\d+)/i);
+      if (positionMatch) {
+        position = parseInt(positionMatch[1] || positionMatch[2] || positionMatch[3], 10);
+      }
+      
+      return { 
+        invalidJson: true, 
+        jsonParseError: error.message,
+        jsonErrorPosition: position
+      };
     }
   }
 
@@ -340,11 +353,11 @@ export class AnnonceCreateComponent implements OnInit {
         return `${this.getFieldLabel(fieldName)} doit être supérieur ou égal à 0`;
       }
       if (control.errors?.['invalidJson']) {
-        const parseError = control.errors['jsonParseError'];
-        if (parseError) {
-          return `JSON invalide: ${parseError}`;
+        const position = control.errors['jsonErrorPosition'];
+        if (position !== null && position !== undefined) {
+          return `JSON invalide : vérifiez les virgules et guillemets (erreur près de la position ${position})`;
         }
-        return `${this.getFieldLabel(fieldName)} doit être un JSON valide`;
+        return `JSON invalide : vérifiez les virgules et guillemets`;
       }
     }
 
