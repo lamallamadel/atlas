@@ -160,6 +160,11 @@ backend/package.json
 backend/package-lock.json
 mvn17-with-settings.cmd
 mvn17-noproxy.cmd
+backend/do-package.ps1
+backend/install-direct.cmd
+backend/install-noproxy.cmd
+backend/install-override.ps1
+backend/setup-install.cmd
 
 # Setup helper scripts (generated)
 setup-toolchains.ps1
