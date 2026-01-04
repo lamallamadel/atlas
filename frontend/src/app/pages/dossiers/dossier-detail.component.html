@@ -92,209 +92,483 @@
         </div>
       </div>
 
-      <div class="sections-container">
-        <mat-card class="info-section">
-          <mat-card-header>
-            <mat-card-title>Lead</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div *ngIf="isLeadEmpty()" class="lead-empty-state">
-              <p class="lead-empty-message">Lead non renseigné</p>
-              <button
-                class="btn-add-lead"
-                (click)="toggleLeadForm()"
-                *ngIf="!showLeadForm"
-              >
-                Ajouter un contact
-              </button>
-
-              <div *ngIf="showLeadForm" class="lead-form-section">
-                <div *ngIf="leadSuccessMessage" class="success-message">
-                  {{ leadSuccessMessage }}
-                </div>
-
-                <div *ngIf="leadError" class="error-message">
-                  {{ leadError }}
-                </div>
-
-                <div class="lead-form">
-                  <div class="form-group">
-                    <label for="lead-name" class="form-label">Nom :</label>
-                    <input
-                      id="lead-name"
-                      type="text"
-                      class="form-input"
-                      [(ngModel)]="leadFormName"
-                      [disabled]="updatingLead"
-                      placeholder="Nom du contact"
-                    />
-                  </div>
-
-                  <div class="form-group">
-                    <label for="lead-phone" class="form-label">Téléphone :</label>
-                    <input
-                      id="lead-phone"
-                      type="text"
-                      class="form-input"
-                      [(ngModel)]="leadFormPhone"
-                      [disabled]="updatingLead"
-                      placeholder="Numéro de téléphone"
-                    />
-                  </div>
-
-                  <div class="form-actions">
+      <mat-tab-group class="tabs-container">
+        <mat-tab label="Informations">
+          <div class="tab-content">
+            <div class="sections-container">
+              <mat-card class="info-section">
+                <mat-card-header>
+                  <mat-card-title>Lead</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div *ngIf="isLeadEmpty()" class="lead-empty-state">
+                    <p class="lead-empty-message">Lead non renseigné</p>
                     <button
-                      class="btn-update-lead"
-                      (click)="updateLead()"
-                      [disabled]="updatingLead || !leadFormName || !leadFormPhone"
-                    >
-                      <span *ngIf="updatingLead" class="spinner-small"></span>
-                      <span *ngIf="!updatingLead">Enregistrer</span>
-                      <span *ngIf="updatingLead">Enregistrement...</span>
-                    </button>
-
-                    <button
-                      class="btn-cancel"
+                      class="btn-add-lead"
                       (click)="toggleLeadForm()"
-                      [disabled]="updatingLead"
+                      *ngIf="!showLeadForm"
                     >
-                      Annuler
+                      Ajouter un contact
                     </button>
+
+                    <div *ngIf="showLeadForm" class="lead-form-section">
+                      <div *ngIf="leadSuccessMessage" class="success-message">
+                        {{ leadSuccessMessage }}
+                      </div>
+
+                      <div *ngIf="leadError" class="error-message">
+                        {{ leadError }}
+                      </div>
+
+                      <div class="lead-form">
+                        <div class="form-group">
+                          <label for="lead-name" class="form-label">Nom :</label>
+                          <input
+                            id="lead-name"
+                            type="text"
+                            class="form-input"
+                            [(ngModel)]="leadFormName"
+                            [disabled]="updatingLead"
+                            placeholder="Nom du contact"
+                          />
+                        </div>
+
+                        <div class="form-group">
+                          <label for="lead-phone" class="form-label">Téléphone :</label>
+                          <input
+                            id="lead-phone"
+                            type="text"
+                            class="form-input"
+                            [(ngModel)]="leadFormPhone"
+                            [disabled]="updatingLead"
+                            placeholder="Numéro de téléphone"
+                          />
+                        </div>
+
+                        <div class="form-actions">
+                          <button
+                            class="btn-update-lead"
+                            (click)="updateLead()"
+                            [disabled]="updatingLead || !leadFormName || !leadFormPhone"
+                          >
+                            <span *ngIf="updatingLead" class="spinner-small"></span>
+                            <span *ngIf="!updatingLead">Enregistrer</span>
+                            <span *ngIf="updatingLead">Enregistrement...</span>
+                          </button>
+
+                          <button
+                            class="btn-cancel"
+                            (click)="toggleLeadForm()"
+                            [disabled]="updatingLead"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </div>
+                    </div>
                   </div>
+
+                  <div *ngIf="!isLeadEmpty()" class="field-group">
+                    <div class="field-row">
+                      <span class="field-label">Nom :</span>
+                      <span class="field-value">{{ dossier.leadName || '—' }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Téléphone :</span>
+                      <span class="field-value">{{ dossier.leadPhone || '—' }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Source :</span>
+                      <span class="field-value">{{ dossier.leadSource || '—' }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Origine dossier :</span>
+                      <span class="field-value">{{ dossier.source || '—' }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Score :</span>
+                      <span class="field-value">{{ (dossier.score !== undefined && dossier.score !== null) ? dossier.score : '—' }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="info-section">
+                <mat-card-header>
+                  <mat-card-title>Annonce</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="field-group">
+                    <div class="field-row">
+                      <span class="field-label">Annonce ID :</span>
+                      <span class="field-value">{{ dossier.annonceId || '—' }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+
+              <mat-card class="info-section">
+                <mat-card-header>
+                  <mat-card-title>Système</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="field-group">
+                    <div class="field-row">
+                      <span class="field-label">Créé le :</span>
+                      <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Créé par :</span>
+                      <span class="field-value">{{ dossier.createdBy || '—' }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Modifié le :</span>
+                      <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
+                    </div>
+
+                    <div class="field-row">
+                      <span class="field-label">Modifié par :</span>
+                      <span class="field-value">{{ dossier.updatedBy || '—' }}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <mat-expansion-panel class="advanced-section">
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  Avancé
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              
+              <div class="advanced-content">
+                <div class="field-row">
+                  <span class="field-label">ID Dossier :</span>
+                  <span class="field-value">{{ dossier.id }}</span>
+                </div>
+                <div class="field-row" *ngIf="dossier.annonceId">
+                  <span class="field-label">ID Annonce :</span>
+                  <span class="field-value">{{ dossier.annonceId }}</span>
+                </div>
+
+                <div class="field-row">
+                  <span class="field-label">Date de création (ISO) :</span>
+                  <span class="field-value">{{ dossier.createdAt }}</span>
+                </div>
+
+                <div class="field-row">
+                  <span class="field-label">Date de modification (ISO) :</span>
+                  <span class="field-value">{{ dossier.updatedAt }}</span>
+                </div>
+              </div>
+            </mat-expansion-panel>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Parties prenantes">
+          <div class="tab-content">
+            <div class="tab-header-actions">
+              <button class="btn-add" (click)="togglePartieForm()" *ngIf="!showPartieForm">
+                Ajouter une partie prenante
+              </button>
+            </div>
+
+            <div *ngIf="showPartieForm" class="add-form-section">
+              <h3>Ajouter une partie prenante</h3>
+              <div class="partie-form">
+                <div class="form-group">
+                  <label for="partie-role" class="form-label">Rôle :</label>
+                  <select id="partie-role" class="form-select" [(ngModel)]="partieFormRole">
+                    <option [value]="PartiePrenanteRole.BUYER">Acheteur</option>
+                    <option [value]="PartiePrenanteRole.SELLER">Vendeur</option>
+                    <option [value]="PartiePrenanteRole.AGENT">Agent</option>
+                    <option [value]="PartiePrenanteRole.LEAD">Lead</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="partie-firstname" class="form-label">Prénom :</label>
+                  <input
+                    id="partie-firstname"
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="partieFormFirstName"
+                    placeholder="Prénom"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="partie-lastname" class="form-label">Nom :</label>
+                  <input
+                    id="partie-lastname"
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="partieFormLastName"
+                    placeholder="Nom"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="partie-email" class="form-label">Email :</label>
+                  <input
+                    id="partie-email"
+                    type="email"
+                    class="form-input"
+                    [(ngModel)]="partieFormEmail"
+                    placeholder="email@example.com"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="partie-phone" class="form-label">Téléphone :</label>
+                  <input
+                    id="partie-phone"
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="partieFormPhone"
+                    placeholder="0612345678"
+                  />
+                </div>
+
+                <div class="form-actions">
+                  <button class="btn-update-lead" (click)="addPartie()">
+                    Enregistrer
+                  </button>
+                  <button class="btn-cancel" (click)="togglePartieForm()">
+                    Annuler
+                  </button>
                 </div>
               </div>
             </div>
 
-            <div *ngIf="!isLeadEmpty()" class="field-group">
-              <div class="field-row">
-                <span class="field-label">Nom :</span>
-                <span class="field-value">{{ dossier.leadName || '—' }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Téléphone :</span>
-                <span class="field-value">{{ dossier.leadPhone || '—' }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Source :</span>
-                <span class="field-value">{{ dossier.leadSource || '—' }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Origine dossier :</span>
-                <span class="field-value">{{ dossier.source || '—' }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Score :</span>
-                <span class="field-value">{{ (dossier.score !== undefined && dossier.score !== null) ? dossier.score : '—' }}</span>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="info-section">
-          <mat-card-header>
-            <mat-card-title>Parties prenantes</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <p *ngIf="!dossier.parties || dossier.parties.length === 0" class="muted">—</p>
-            <div *ngIf="dossier.parties && dossier.parties.length > 0" class="parties-table-wrapper">
-              <table class="parties-table">
+            <div class="data-table-wrapper">
+              <table class="data-table" *ngIf="dossier.parties && dossier.parties.length > 0">
                 <thead>
                   <tr>
                     <th>Rôle</th>
                     <th>Nom</th>
                     <th>Téléphone</th>
                     <th>Email</th>
+                    <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let p of dossier.parties">
-                    <td>{{ p.role }}</td>
-                    <td>{{ (p.firstName || '') + (p.lastName ? ' ' + p.lastName : '') || '—' }}</td>
-                    <td>{{ p.phone || '—' }}</td>
-                    <td>{{ p.email || '—' }}</td>
+                  <tr *ngFor="let partie of dossier.parties">
+                    <td>{{ getRoleLabel(partie.role) }}</td>
+                    <td>{{ (partie.firstName || '') + (partie.lastName ? ' ' + partie.lastName : '') || '—' }}</td>
+                    <td>{{ partie.phone || '—' }}</td>
+                    <td>{{ partie.email || '—' }}</td>
+                    <td>
+                      <button class="btn-edit" (click)="editPartie(partie)">Éditer</button>
+                    </td>
                   </tr>
                 </tbody>
               </table>
+              <p *ngIf="!dossier.parties || dossier.parties.length === 0" class="empty-message">
+                Aucune partie prenante enregistrée.
+              </p>
             </div>
-          </mat-card-content>
-        </mat-card>
+          </div>
+        </mat-tab>
 
-        <mat-card class="info-section">
-          <mat-card-header>
-            <mat-card-title>Annonce</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="field-group">
-              <div class="field-row">
-                <span class="field-label">Annonce ID :</span>
-                <span class="field-value">{{ dossier.annonceId || '—' }}</span>
+        <mat-tab label="Messages">
+          <div class="tab-content">
+            <div class="timeline-view">
+              <div *ngIf="getMessagesSorted().length === 0" class="empty-message">
+                Aucun message disponible.
               </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
-        <mat-card class="info-section">
-          <mat-card-header>
-            <mat-card-title>Système</mat-card-title>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="field-group">
-              <div class="field-row">
-                <span class="field-label">Créé le :</span>
-                <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Créé par :</span>
-                <span class="field-value">{{ dossier.createdBy || '—' }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Modifié le :</span>
-                <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
-              </div>
-
-              <div class="field-row">
-                <span class="field-label">Modifié par :</span>
-                <span class="field-value">{{ dossier.updatedBy || '—' }}</span>
+              <div *ngFor="let message of getMessagesSorted()" class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="timeline-timestamp">{{ formatDateTime(message.timestamp) }}</span>
+                    <div class="timeline-badges">
+                      <span [class]="getChannelBadgeClass(message.channel)">{{ message.channel }}</span>
+                      <span [class]="getDirectionBadgeClass(message.direction)">
+                        {{ message.direction === 'INBOUND' ? 'Entrant' : 'Sortant' }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="timeline-body">
+                    <p class="timeline-message">{{ message.content }}</p>
+                    <p class="timeline-author" *ngIf="message.author">Par: {{ message.author }}</p>
+                  </div>
+                </div>
               </div>
             </div>
-          </mat-card-content>
-        </mat-card>
-      </div>
+          </div>
+        </mat-tab>
 
-      <mat-expansion-panel class="advanced-section">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            Avancé
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        
-        <div class="advanced-content">
-          <div class="field-row">
-            <span class="field-label">ID Dossier :</span>
-            <span class="field-value">{{ dossier.id }}</span>
-          </div>
-          <div class="field-row" *ngIf="dossier.annonceId">
-            <span class="field-label">ID Annonce :</span>
-            <span class="field-value">{{ dossier.annonceId }}</span>
-          </div>
+        <mat-tab label="Rendez-vous">
+          <div class="tab-content">
+            <div class="tab-header-actions">
+              <button class="btn-add" (click)="toggleRendezVousForm()" *ngIf="!showRendezVousForm">
+                Ajouter un rendez-vous
+              </button>
+            </div>
 
-          <div class="field-row">
-            <span class="field-label">Date de création (ISO) :</span>
-            <span class="field-value">{{ dossier.createdAt }}</span>
-          </div>
+            <div *ngIf="showRendezVousForm" class="add-form-section">
+              <h3>Ajouter un rendez-vous</h3>
+              <div class="rdv-form">
+                <div class="form-group">
+                  <label for="rdv-date" class="form-label">Date :</label>
+                  <input
+                    id="rdv-date"
+                    type="date"
+                    class="form-input"
+                    [(ngModel)]="rdvFormDate"
+                  />
+                </div>
 
-          <div class="field-row">
-            <span class="field-label">Date de modification (ISO) :</span>
-            <span class="field-value">{{ dossier.updatedAt }}</span>
+                <div class="form-group">
+                  <label for="rdv-time" class="form-label">Heure :</label>
+                  <input
+                    id="rdv-time"
+                    type="time"
+                    class="form-input"
+                    [(ngModel)]="rdvFormTime"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="rdv-location" class="form-label">Lieu :</label>
+                  <input
+                    id="rdv-location"
+                    type="text"
+                    class="form-input"
+                    [(ngModel)]="rdvFormLocation"
+                    placeholder="Adresse du rendez-vous"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="rdv-status" class="form-label">Statut :</label>
+                  <select id="rdv-status" class="form-select" [(ngModel)]="rdvFormStatus">
+                    <option value="SCHEDULED">Planifié</option>
+                    <option value="CONFIRMED">Confirmé</option>
+                    <option value="COMPLETED">Terminé</option>
+                    <option value="CANCELLED">Annulé</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label for="rdv-notes" class="form-label">Notes :</label>
+                  <textarea
+                    id="rdv-notes"
+                    class="form-textarea"
+                    [(ngModel)]="rdvFormNotes"
+                    placeholder="Notes additionnelles"
+                    rows="3"
+                  ></textarea>
+                </div>
+
+                <div class="form-actions">
+                  <button class="btn-update-lead" (click)="addRendezVous()">
+                    Enregistrer
+                  </button>
+                  <button class="btn-cancel" (click)="toggleRendezVousForm()">
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="data-table-wrapper">
+              <table class="data-table" *ngIf="rendezVous.length > 0">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Heure</th>
+                    <th>Lieu</th>
+                    <th>Statut</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let rdv of rendezVous">
+                    <td>{{ formatDateOnly(rdv.date) }}</td>
+                    <td>{{ rdv.time }}</td>
+                    <td>{{ rdv.location }}</td>
+                    <td>
+                      <span [class]="getRdvStatusBadgeClass(rdv.status)">{{ getRdvStatusLabel(rdv.status) }}</span>
+                    </td>
+                    <td>{{ rdv.notes || '—' }}</td>
+                    <td>
+                      <button class="btn-edit" (click)="editRendezVous(rdv)">Éditer</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+              <p *ngIf="rendezVous.length === 0" class="empty-message">
+                Aucun rendez-vous planifié.
+              </p>
+            </div>
           </div>
-        </div>
-      </mat-expansion-panel>
+        </mat-tab>
+
+        <mat-tab label="Consentements">
+          <div class="tab-content">
+            <div class="consentements-list">
+              <div *ngIf="consentements.length === 0" class="empty-message">
+                Aucun consentement disponible.
+              </div>
+              <div *ngFor="let consentement of consentements" class="consentement-item">
+                <div class="consentement-info">
+                  <h4 class="consentement-title">{{ consentement.description }}</h4>
+                  <div class="consentement-meta">
+                    <span [class]="getChannelBadgeClass(consentement.channel)">{{ consentement.channel }}</span>
+                    <span class="consentement-date" *ngIf="consentement.grantedAt">
+                      Accordé le {{ formatDateTime(consentement.grantedAt) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="consentement-toggle">
+                  <label class="toggle-switch">
+                    <input
+                      type="checkbox"
+                      [checked]="consentement.status"
+                      (change)="toggleConsentement(consentement)"
+                    />
+                    <span class="toggle-slider"></span>
+                  </label>
+                  <span class="toggle-label">{{ consentement.status ? 'Activé' : 'Désactivé' }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <mat-tab label="Historique">
+          <div class="tab-content">
+            <div class="audit-list">
+              <div *ngIf="auditEvents.length === 0" class="empty-message">
+                Aucun événement d'audit disponible.
+              </div>
+              <div *ngFor="let event of auditEvents" class="audit-item">
+                <div class="audit-marker"></div>
+                <div class="audit-content">
+                  <div class="audit-header">
+                    <span class="audit-timestamp">{{ formatDateTime(event.timestamp) }}</span>
+                    <span class="audit-actor">{{ event.actor }}</span>
+                  </div>
+                  <div class="audit-body">
+                    <span class="audit-action">{{ event.action }}</span>
+                    <p class="audit-details">{{ event.details }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+      </mat-tab-group>
     </div>
   </div>
 </div>

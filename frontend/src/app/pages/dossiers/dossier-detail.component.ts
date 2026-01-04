@@ -1,7 +1,42 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DossierApiService, DossierResponse, DossierStatus } from '../../services/dossier-api.service';
+import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
+
+export interface Message {
+  id: number;
+  timestamp: Date;
+  content: string;
+  channel: 'EMAIL' | 'SMS' | 'PHONE' | 'WEB';
+  direction: 'INBOUND' | 'OUTBOUND';
+  author?: string;
+}
+
+export interface RendezVous {
+  id: number;
+  date: Date;
+  time: string;
+  location: string;
+  status: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  notes?: string;
+}
+
+export interface Consentement {
+  id: number;
+  type: string;
+  description: string;
+  channel: 'EMAIL' | 'SMS' | 'PHONE';
+  status: boolean;
+  grantedAt?: Date;
+}
+
+export interface AuditEvent {
+  id: number;
+  timestamp: Date;
+  action: string;
+  actor: string;
+  details: string;
+}
 
 @Component({
   selector: 'app-dossier-detail',
@@ -27,6 +62,7 @@ export class DossierDetailComponent implements OnInit {
   leadSuccessMessage: string | null = null;
 
   DossierStatus = DossierStatus;
+  PartiePrenanteRole = PartiePrenanteRole;
   statusOptions = [
     DossierStatus.NEW,
     DossierStatus.QUALIFIED,
@@ -34,6 +70,25 @@ export class DossierDetailComponent implements OnInit {
     DossierStatus.WON,
     DossierStatus.LOST
   ];
+
+  messages: Message[] = [];
+  rendezVous: RendezVous[] = [];
+  consentements: Consentement[] = [];
+  auditEvents: AuditEvent[] = [];
+
+  showPartieForm = false;
+  partieFormRole: PartiePrenanteRole = PartiePrenanteRole.BUYER;
+  partieFormFirstName = '';
+  partieFormLastName = '';
+  partieFormEmail = '';
+  partieFormPhone = '';
+
+  showRendezVousForm = false;
+  rdvFormDate = '';
+  rdvFormTime = '';
+  rdvFormLocation = '';
+  rdvFormStatus: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' = 'SCHEDULED';
+  rdvFormNotes = '';
 
   constructor(
     private dossierApiService: DossierApiService,
@@ -99,6 +154,7 @@ export class DossierDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDossier();
+    this.loadMockData();
   }
 
   loadDossier(): void {
@@ -133,6 +189,104 @@ export class DossierDetailComponent implements OnInit {
         console.error('Error loading dossier:', err);
       }
     });
+  }
+
+  loadMockData(): void {
+    this.messages = [
+      {
+        id: 1,
+        timestamp: new Date('2024-01-15T10:30:00'),
+        content: 'Bonjour, je suis intéressé par votre annonce.',
+        channel: 'EMAIL',
+        direction: 'INBOUND',
+        author: 'Client'
+      },
+      {
+        id: 2,
+        timestamp: new Date('2024-01-15T11:00:00'),
+        content: 'Merci pour votre message. Je vous recontacte rapidement.',
+        channel: 'EMAIL',
+        direction: 'OUTBOUND',
+        author: 'Agent'
+      },
+      {
+        id: 3,
+        timestamp: new Date('2024-01-16T14:20:00'),
+        content: 'Appel téléphonique pour fixer un rendez-vous.',
+        channel: 'PHONE',
+        direction: 'OUTBOUND',
+        author: 'Agent'
+      }
+    ];
+
+    this.rendezVous = [
+      {
+        id: 1,
+        date: new Date('2024-01-20T14:00:00'),
+        time: '14:00',
+        location: '123 Rue de la Paix, Paris',
+        status: 'CONFIRMED',
+        notes: 'Visite de l\'appartement'
+      },
+      {
+        id: 2,
+        date: new Date('2024-01-25T10:30:00'),
+        time: '10:30',
+        location: 'Bureau de l\'agence',
+        status: 'SCHEDULED',
+        notes: 'Signature du compromis'
+      }
+    ];
+
+    this.consentements = [
+      {
+        id: 1,
+        type: 'marketing',
+        description: 'Recevoir des offres commerciales',
+        channel: 'EMAIL',
+        status: true,
+        grantedAt: new Date('2024-01-15T10:30:00')
+      },
+      {
+        id: 2,
+        type: 'marketing',
+        description: 'Recevoir des offres commerciales',
+        channel: 'SMS',
+        status: false
+      },
+      {
+        id: 3,
+        type: 'contact',
+        description: 'Être contacté par téléphone',
+        channel: 'PHONE',
+        status: true,
+        grantedAt: new Date('2024-01-15T10:30:00')
+      }
+    ];
+
+    this.auditEvents = [
+      {
+        id: 1,
+        timestamp: new Date('2024-01-15T10:30:00'),
+        action: 'Création',
+        actor: 'system',
+        details: 'Dossier créé depuis le formulaire web'
+      },
+      {
+        id: 2,
+        timestamp: new Date('2024-01-16T09:15:00'),
+        action: 'Changement de statut',
+        actor: 'agent@example.com',
+        details: 'Statut modifié de NOUVEAU à QUALIFIÉ'
+      },
+      {
+        id: 3,
+        timestamp: new Date('2024-01-16T14:20:00'),
+        action: 'Ajout de partie prenante',
+        actor: 'agent@example.com',
+        details: 'Ajout d\'un acheteur: Jean Dupont'
+      }
+    ];
   }
 
   toggleStatusChange(): void {
@@ -206,6 +360,24 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
+  formatDateTime(date: Date): string {
+    return date.toLocaleString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatDateOnly(date: Date): string {
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+
   isLeadEmpty(): boolean {
     if (!this.dossier) {
       return false;
@@ -272,5 +444,133 @@ export class DossierDetailComponent implements OnInit {
         console.error('Error updating lead:', err);
       }
     });
+  }
+
+  togglePartieForm(): void {
+    this.showPartieForm = !this.showPartieForm;
+    if (!this.showPartieForm) {
+      this.resetPartieForm();
+    }
+  }
+
+  resetPartieForm(): void {
+    this.partieFormRole = PartiePrenanteRole.BUYER;
+    this.partieFormFirstName = '';
+    this.partieFormLastName = '';
+    this.partieFormEmail = '';
+    this.partieFormPhone = '';
+  }
+
+  addPartie(): void {
+    this.snackBar.open('Ajout de partie prenante non implémenté (mock data)', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+    this.showPartieForm = false;
+    this.resetPartieForm();
+  }
+
+  editPartie(_partie: PartiePrenanteResponse): void {
+    this.snackBar.open('Édition de partie prenante non implémentée (mock data)', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+
+  toggleRendezVousForm(): void {
+    this.showRendezVousForm = !this.showRendezVousForm;
+    if (!this.showRendezVousForm) {
+      this.resetRendezVousForm();
+    }
+  }
+
+  resetRendezVousForm(): void {
+    this.rdvFormDate = '';
+    this.rdvFormTime = '';
+    this.rdvFormLocation = '';
+    this.rdvFormStatus = 'SCHEDULED';
+    this.rdvFormNotes = '';
+  }
+
+  addRendezVous(): void {
+    this.snackBar.open('Ajout de rendez-vous non implémenté (mock data)', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+    this.showRendezVousForm = false;
+    this.resetRendezVousForm();
+  }
+
+  editRendezVous(_rdv: RendezVous): void {
+    this.snackBar.open('Édition de rendez-vous non implémentée (mock data)', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+
+  toggleConsentement(consentement: Consentement): void {
+    consentement.status = !consentement.status;
+    if (consentement.status) {
+      consentement.grantedAt = new Date();
+    } else {
+      consentement.grantedAt = undefined;
+    }
+    this.snackBar.open('Consentement mis à jour (mock data)', 'Fermer', {
+      duration: 2000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+
+  getMessagesSorted(): Message[] {
+    return this.messages.slice().sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }
+
+  getChannelBadgeClass(channel: string): string {
+    switch (channel) {
+      case 'EMAIL': return 'channel-badge channel-email';
+      case 'SMS': return 'channel-badge channel-sms';
+      case 'PHONE': return 'channel-badge channel-phone';
+      case 'WEB': return 'channel-badge channel-web';
+      default: return 'channel-badge';
+    }
+  }
+
+  getDirectionBadgeClass(direction: string): string {
+    return direction === 'INBOUND' ? 'direction-badge direction-inbound' : 'direction-badge direction-outbound';
+  }
+
+  getRdvStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'SCHEDULED': return 'status-badge status-scheduled';
+      case 'CONFIRMED': return 'status-badge status-confirmed';
+      case 'COMPLETED': return 'status-badge status-completed';
+      case 'CANCELLED': return 'status-badge status-cancelled';
+      default: return 'status-badge';
+    }
+  }
+
+  getRdvStatusLabel(status: string): string {
+    switch (status) {
+      case 'SCHEDULED': return 'Planifié';
+      case 'CONFIRMED': return 'Confirmé';
+      case 'COMPLETED': return 'Terminé';
+      case 'CANCELLED': return 'Annulé';
+      default: return status;
+    }
+  }
+
+  getRoleLabel(role: PartiePrenanteRole): string {
+    switch (role) {
+      case PartiePrenanteRole.LEAD: return 'Lead';
+      case PartiePrenanteRole.BUYER: return 'Acheteur';
+      case PartiePrenanteRole.SELLER: return 'Vendeur';
+      case PartiePrenanteRole.AGENT: return 'Agent';
+      default: return role;
+    }
   }
 }

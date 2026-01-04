@@ -17,6 +17,7 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -90,7 +91,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatExpansionModule,
     MatAutocompleteModule,
     MatSnackBarModule,
-    MatCardModule
+    MatCardModule,
+    MatTabsModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },
