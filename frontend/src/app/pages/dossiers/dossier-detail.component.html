@@ -415,32 +415,112 @@
 
         <mat-tab label="Consentements">
           <div class="tab-content">
-            <div class="consentements-list">
-              <div *ngIf="consentements.length === 0" class="empty-message">
-                Aucun consentement disponible.
-              </div>
-              <div *ngFor="let consentement of consentements" class="consentement-item">
-                <div class="consentement-info">
-                  <h4 class="consentement-title">{{ consentement.description }}</h4>
-                  <div class="consentement-meta">
-                    <span [class]="getChannelBadgeClass(consentement.channel)">{{ consentement.channel }}</span>
-                    <span class="consentement-date" *ngIf="consentement.grantedAt">
-                      Accordé le {{ formatDateTime(consentement.grantedAt) }}
+            <div *ngIf="consentementsLoading" class="loading-state">
+              <div class="spinner-small"></div>
+              <p>Chargement des consentements...</p>
+            </div>
+
+            <div *ngIf="!consentementsLoading">
+              <div class="consent-cards-grid">
+                <div *ngFor="let group of consentementGroups" class="consent-card">
+                  <div class="consent-card-header">
+                    <span class="consent-channel-icon">
+                      {{ group.channel === ConsentementChannel.EMAIL ? '📧' : '📱' }}
                     </span>
+                    <h3 class="consent-channel-title">{{ getChannelLabel(group.channel) }}</h3>
+                  </div>
+                  <div class="consent-card-body">
+                    <div *ngIf="group.current" class="consent-current-status">
+                      <div class="consent-status-row">
+                        <span class="consent-label">Statut actuel :</span>
+                        <span [class]="getConsentementStatusBadgeClass(group.current.status)">
+                          {{ getConsentementStatusLabel(group.current.status) }}
+                        </span>
+                      </div>
+                      <div class="consent-date-row">
+                        <span class="consent-date-label">
+                          {{ group.current.status === ConsentementStatus.GRANTED ? 'Accordé le' : 
+                             group.current.status === ConsentementStatus.REVOKED ? 'Révoqué le' : 
+                             'Modifié le' }} :
+                        </span>
+                        <span class="consent-date-value">{{ getConsentDate(group.current) }}</span>
+                      </div>
+                    </div>
+                    <div *ngIf="!group.current" class="consent-no-status">
+                      <span class="consent-no-status-text">Aucun consentement enregistré</span>
+                    </div>
+
+                    <div class="consent-actions">
+                      <button 
+                        class="consent-btn consent-btn-granted"
+                        [class.active]="group.current?.status === ConsentementStatus.GRANTED"
+                        (click)="toggleConsentement(group, ConsentementStatus.GRANTED)"
+                        [disabled]="group.current?.status === ConsentementStatus.GRANTED"
+                      >
+                        Accorder
+                      </button>
+                      <button 
+                        class="consent-btn consent-btn-denied"
+                        [class.active]="group.current?.status === ConsentementStatus.DENIED"
+                        (click)="toggleConsentement(group, ConsentementStatus.DENIED)"
+                        [disabled]="group.current?.status === ConsentementStatus.DENIED"
+                      >
+                        Refuser
+                      </button>
+                      <button 
+                        class="consent-btn consent-btn-revoked"
+                        [class.active]="group.current?.status === ConsentementStatus.REVOKED"
+                        (click)="toggleConsentement(group, ConsentementStatus.REVOKED)"
+                        [disabled]="group.current?.status === ConsentementStatus.REVOKED"
+                      >
+                        Révoquer
+                      </button>
+                    </div>
                   </div>
                 </div>
-                <div class="consentement-toggle">
-                  <label class="toggle-switch">
-                    <input
-                      type="checkbox"
-                      [checked]="consentement.status"
-                      (change)="toggleConsentement(consentement)"
-                    />
-                    <span class="toggle-slider"></span>
-                  </label>
-                  <span class="toggle-label">{{ consentement.status ? 'Activé' : 'Désactivé' }}</span>
-                </div>
               </div>
+
+              <mat-expansion-panel class="consent-history-section">
+                <mat-expansion-panel-header>
+                  <mat-panel-title>
+                    Historique des consentements
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                
+                <div class="consent-history-content">
+                  <div *ngIf="getConsentementsHistory().length === 0" class="empty-message">
+                    Aucun historique de consentement.
+                  </div>
+                  <div *ngIf="getConsentementsHistory().length > 0" class="data-table-wrapper">
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Canal</th>
+                          <th>Statut</th>
+                          <th>Date</th>
+                          <th>Utilisateur</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let consent of getConsentementsHistory()">
+                          <td>
+                            <span [class]="getChannelBadgeClass(consent.channel)">
+                              {{ getChannelLabel(consent.channel) }}
+                            </span>
+                          </td>
+                          <td>
+                            <span [class]="getConsentementStatusBadgeClass(consent.status)">
+                              {{ getConsentementStatusLabel(consent.status) }}
+                            </span>
+                          </td>
+                          <td>{{ formatDate(consent.updatedAt) }}</td>
+                          <td>{{ getUserFromMeta(consent) }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </mat-expansion-panel>
             </div>
           </div>
         </mat-tab>

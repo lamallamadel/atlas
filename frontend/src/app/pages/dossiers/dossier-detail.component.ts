@@ -6,6 +6,7 @@ import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteRespon
 import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
 import { MessageApiService, MessageResponse, MessageCreateRequest } from '../../services/message-api.service';
 import { AppointmentApiService, AppointmentResponse, AppointmentCreateRequest, AppointmentUpdateRequest, AppointmentStatus } from '../../services/appointment-api.service';
+import { ConsentementApiService, ConsentementResponse, ConsentementChannel, ConsentementStatus, ConsentementUpdateRequest, ConsentementCreateRequest } from '../../services/consentement-api.service';
 import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent, MessageFormData } from '../../components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
@@ -22,13 +23,9 @@ export interface RendezVous {
   notes?: string;
 }
 
-export interface Consentement {
-  id: number;
-  type: string;
-  description: string;
-  channel: 'EMAIL' | 'SMS' | 'PHONE';
-  status: boolean;
-  grantedAt?: Date;
+export interface ConsentementGroup {
+  channel: ConsentementChannel;
+  current: ConsentementResponse | null;
 }
 
 export interface AuditEvent {
@@ -77,8 +74,12 @@ export class DossierDetailComponent implements OnInit {
   appointments: AppointmentResponse[] = [];
   loadingAppointments = false;
   rendezVous: RendezVous[] = [];
-  consentements: Consentement[] = [];
+  consentements: ConsentementResponse[] = [];
+  consentementsLoading = false;
+  consentementGroups: ConsentementGroup[] = [];
   auditEvents: AuditEvent[] = [];
+  ConsentementChannel = ConsentementChannel;
+  ConsentementStatus = ConsentementStatus;
 
   showPartieForm = false;
   partieFormRole: PartiePrenanteRole = PartiePrenanteRole.BUYER;
@@ -99,6 +100,7 @@ export class DossierDetailComponent implements OnInit {
     private partiePrenanteApiService: PartiePrenanteApiService,
     private messageApiService: MessageApiService,
     private appointmentApiService: AppointmentApiService,
+    private consentementApiService: ConsentementApiService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
@@ -164,6 +166,7 @@ export class DossierDetailComponent implements OnInit {
     this.loadDossier();
     this.loadMessages();
     this.loadAppointments();
+    this.loadConsentements();
     this.loadMockData();
   }
 
@@ -249,6 +252,40 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
+  loadConsentements(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.consentementsLoading = true;
+    this.consentementApiService.list({ dossierId, size: 100, sort: 'updatedAt,desc' }).subscribe({
+      next: (response) => {
+        this.consentements = response.content;
+        this.buildConsentementGroups();
+        this.consentementsLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading consentements:', err);
+        this.consentementsLoading = false;
+      }
+    });
+  }
+
+  buildConsentementGroups(): void {
+    const channelsToShow = [ConsentementChannel.EMAIL, ConsentementChannel.SMS];
+    this.consentementGroups = channelsToShow.map(channel => {
+      const channelConsents = this.consentements.filter(c => c.channel === channel);
+      const current = channelConsents.length > 0 ? channelConsents[0] : null;
+      return { channel, current };
+    });
+  }
+
   loadMockData(): void {
     this.rendezVous = [
       {
@@ -269,31 +306,7 @@ export class DossierDetailComponent implements OnInit {
       }
     ];
 
-    this.consentements = [
-      {
-        id: 1,
-        type: 'marketing',
-        description: 'Recevoir des offres commerciales',
-        channel: 'EMAIL',
-        status: true,
-        grantedAt: new Date('2024-01-15T10:30:00')
-      },
-      {
-        id: 2,
-        type: 'marketing',
-        description: 'Recevoir des offres commerciales',
-        channel: 'SMS',
-        status: false
-      },
-      {
-        id: 3,
-        type: 'contact',
-        description: 'Être contacté par téléphone',
-        channel: 'PHONE',
-        status: true,
-        grantedAt: new Date('2024-01-15T10:30:00')
-      }
-    ];
+
 
     this.auditEvents = [
       {
@@ -860,17 +873,81 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
-  toggleConsentement(consentement: Consentement): void {
-    consentement.status = !consentement.status;
-    if (consentement.status) {
-      consentement.grantedAt = new Date();
-    } else {
-      consentement.grantedAt = undefined;
+  toggleConsentement(group: ConsentementGroup, newStatus: ConsentementStatus): void {
+    if (!this.dossier) {
+      return;
     }
-    this.snackBar.open('Consentement mis à jour (mock data)', 'Fermer', {
-      duration: 2000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
+
+    if (group.current) {
+      if (group.current.status === newStatus) {
+        return;
+      }
+      this.updateConsentement(group.current.id, group.channel, newStatus);
+    } else {
+      this.createConsentement(group.channel, newStatus);
+    }
+  }
+
+  createConsentement(channel: ConsentementChannel, status: ConsentementStatus): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const request: ConsentementCreateRequest = {
+      dossierId: this.dossier.id,
+      channel,
+      status
+    };
+
+    this.consentementApiService.create(request).subscribe({
+      next: () => {
+        this.snackBar.open('Consentement créé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadConsentements();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la création du consentement';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error creating consentement:', err);
+      }
+    });
+  }
+
+  updateConsentement(id: number, channel: ConsentementChannel, status: ConsentementStatus): void {
+    const request: ConsentementUpdateRequest = {
+      channel,
+      status
+    };
+
+    this.consentementApiService.update(id, request).subscribe({
+      next: () => {
+        this.snackBar.open('Consentement mis à jour avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadConsentements();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la mise à jour du consentement';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating consentement:', err);
+      }
     });
   }
 
@@ -1025,5 +1102,64 @@ export class DossierDetailComponent implements OnInit {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  getConsentementStatusLabel(status: ConsentementStatus): string {
+    switch (status) {
+      case ConsentementStatus.GRANTED: return 'Accordé';
+      case ConsentementStatus.DENIED: return 'Refusé';
+      case ConsentementStatus.REVOKED: return 'Révoqué';
+      case ConsentementStatus.PENDING: return 'En attente';
+      case ConsentementStatus.EXPIRED: return 'Expiré';
+      default: return status;
+    }
+  }
+
+  getConsentementStatusBadgeClass(status: ConsentementStatus): string {
+    switch (status) {
+      case ConsentementStatus.GRANTED: return 'consent-badge consent-granted';
+      case ConsentementStatus.DENIED: return 'consent-badge consent-denied';
+      case ConsentementStatus.REVOKED: return 'consent-badge consent-revoked';
+      case ConsentementStatus.PENDING: return 'consent-badge consent-pending';
+      case ConsentementStatus.EXPIRED: return 'consent-badge consent-expired';
+      default: return 'consent-badge';
+    }
+  }
+
+  getChannelLabel(channel: ConsentementChannel): string {
+    switch (channel) {
+      case ConsentementChannel.EMAIL: return 'Email';
+      case ConsentementChannel.SMS: return 'SMS';
+      case ConsentementChannel.PHONE: return 'Téléphone';
+      case ConsentementChannel.WHATSAPP: return 'WhatsApp';
+      case ConsentementChannel.POSTAL_MAIL: return 'Courrier postal';
+      case ConsentementChannel.IN_PERSON: return 'En personne';
+      default: return channel;
+    }
+  }
+
+  getConsentementsHistory(): ConsentementResponse[] {
+    return this.consentements.slice().sort((a, b) => {
+      const dateA = new Date(a.updatedAt).getTime();
+      const dateB = new Date(b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+  }
+
+  getUserFromMeta(consent: ConsentementResponse): string {
+    if (consent.meta && consent.meta['user']) {
+      return consent.meta['user'];
+    }
+    return '—';
+  }
+
+  getConsentDate(consent: ConsentementResponse): string {
+    if (consent.status === ConsentementStatus.GRANTED && consent.createdAt) {
+      return this.formatDate(consent.createdAt);
+    }
+    if (consent.status === ConsentementStatus.REVOKED && consent.updatedAt) {
+      return this.formatDate(consent.updatedAt);
+    }
+    return this.formatDate(consent.updatedAt);
   }
 }

@@ -751,102 +751,6 @@
   color: #721c24;
 }
 
-.consentements-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.consentement-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.25rem;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-  gap: 1rem;
-}
-
-.consentement-info {
-  flex: 1;
-}
-
-.consentement-title {
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-  font-size: 1rem;
-}
-
-.consentement-meta {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.consentement-date {
-  font-size: 0.85rem;
-  color: #6c757d;
-}
-
-.consentement-toggle {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.3s;
-  border-radius: 24px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: #27ae60;
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(26px);
-}
-
-.toggle-label {
-  font-size: 0.9rem;
-  color: #2c3e50;
-  font-weight: 500;
-}
-
 .audit-list {
   display: flex;
   flex-direction: column;
@@ -1014,4 +918,221 @@
 
 .btn-complete:hover {
   background-color: #229954;
+}
+
+.consent-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.consent-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #e9ecef;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+.consent-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-color: #3498db;
+}
+
+.consent-card-header {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.consent-channel-icon {
+  font-size: 1.8rem;
+}
+
+.consent-channel-title {
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.consent-card-body {
+  padding: 1.25rem;
+}
+
+.consent-current-status {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #3498db;
+}
+
+.consent-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.consent-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.consent-badge {
+  padding: 0.35rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.consent-badge.consent-granted {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.consent-badge.consent-denied {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.consent-badge.consent-revoked {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.consent-badge.consent-pending {
+  background-color: #d1ecf1;
+  color: #0c5460;
+}
+
+.consent-badge.consent-expired {
+  background-color: #e2e3e5;
+  color: #383d41;
+}
+
+.consent-date-row {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.consent-date-label {
+  font-weight: 500;
+}
+
+.consent-date-value {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.consent-no-status {
+  margin-bottom: 1.25rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  border: 2px dashed #ddd;
+  text-align: center;
+}
+
+.consent-no-status-text {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.consent-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.consent-btn {
+  flex: 1;
+  min-width: 90px;
+  padding: 0.6rem 1rem;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: #f8f9fa;
+  color: #495057;
+}
+
+.consent-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.consent-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.consent-btn-granted {
+  border-color: #27ae60;
+  color: #27ae60;
+}
+
+.consent-btn-granted:hover:not(:disabled) {
+  background-color: #27ae60;
+  color: white;
+}
+
+.consent-btn-granted.active {
+  background-color: #27ae60;
+  color: white;
+  border-color: #27ae60;
+}
+
+.consent-btn-denied {
+  border-color: #e74c3c;
+  color: #e74c3c;
+}
+
+.consent-btn-denied:hover:not(:disabled) {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.consent-btn-denied.active {
+  background-color: #e74c3c;
+  color: white;
+  border-color: #e74c3c;
+}
+
+.consent-btn-revoked {
+  border-color: #f39c12;
+  color: #f39c12;
+}
+
+.consent-btn-revoked:hover:not(:disabled) {
+  background-color: #f39c12;
+  color: white;
+}
+
+.consent-btn-revoked.active {
+  background-color: #f39c12;
+  color: white;
+  border-color: #f39c12;
+}
+
+.consent-history-section {
+  margin-top: 2rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.consent-history-content {
+  padding-top: 1rem;
 }
