@@ -132,4 +132,30 @@ public class ConsentementService {
                 .map(consentementMapper::toResponse)
                 .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public List<ConsentementResponse> listByDossierAndChannel(Long dossierId, com.example.backend.entity.enums.ConsentementChannel channel) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(dossierId)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
+        }
+
+        List<ConsentementEntity> consentements;
+        if (channel != null) {
+            consentements = consentementRepository.findByDossierIdAndChannelOrderByUpdatedAtDesc(dossierId, channel);
+        } else {
+            consentements = consentementRepository.findByDossierIdOrderByUpdatedAtDesc(dossierId);
+        }
+
+        return consentements.stream()
+                .map(consentementMapper::toResponse)
+                .collect(Collectors.toList());
+    }
 }
