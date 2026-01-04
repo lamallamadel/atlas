@@ -127,4 +127,12 @@ export class AuditEventApiService {
   create(request: AuditEventCreateRequest): Observable<AuditEventResponse> {
     return this.http.post<AuditEventResponse>(this.apiUrl, request);
   }
+
+  listByDossier(dossierId: number, params: Partial<AuditEventListParams> = {}): Observable<Page<AuditEventResponse>> {
+    return this.list({
+      ...params,
+      entityType: params.entityType,
+      entityId: dossierId
+    });
+  }
 }

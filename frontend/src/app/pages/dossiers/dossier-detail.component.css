@@ -1136,3 +1136,117 @@
 .consent-history-content {
   padding-top: 1rem;
 }
+
+.audit-filters {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 6px;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 200px;
+}
+
+.filter-label {
+  font-size: 0.9rem;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.filter-select {
+  padding: 0.6rem 1rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  background-color: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3498db;
+}
+
+.audit-table {
+  font-size: 0.85rem;
+}
+
+.audit-table th {
+  white-space: nowrap;
+}
+
+.audit-table td {
+  vertical-align: top;
+}
+
+.audit-date {
+  font-size: 0.85rem;
+  color: #6c757d;
+  white-space: nowrap;
+}
+
+.audit-action-badge {
+  display: inline-block;
+  padding: 0.3rem 0.65rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background-color: #d1ecf1;
+  color: #0c5460;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.audit-changes {
+  max-width: 400px;
+}
+
+.no-changes {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.85rem;
+}
+
+.changes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.change-item {
+  padding: 0.5rem;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.change-field {
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.change-old {
+  color: #e74c3c;
+  text-decoration: line-through;
+  font-family: monospace;
+}
+
+.change-arrow {
+  color: #6c757d;
+  margin: 0 0.5rem;
+}
+
+.change-new {
+  color: #27ae60;
+  font-weight: 500;
+  font-family: monospace;
+}

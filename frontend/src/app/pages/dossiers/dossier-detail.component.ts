@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
 import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
 import { MessageApiService, MessageResponse, MessageCreateRequest } from '../../services/message-api.service';
 import { AppointmentApiService, AppointmentResponse, AppointmentCreateRequest, AppointmentUpdateRequest, AppointmentStatus } from '../../services/appointment-api.service';
 import { ConsentementApiService, ConsentementResponse, ConsentementChannel, ConsentementStatus, ConsentementUpdateRequest, ConsentementCreateRequest } from '../../services/consentement-api.service';
+import { AuditEventApiService, AuditEventResponse, AuditEntityType, AuditAction, Page } from '../../services/audit-event-api.service';
 import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent, MessageFormData } from '../../components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
@@ -28,12 +30,10 @@ export interface ConsentementGroup {
   current: ConsentementResponse | null;
 }
 
-export interface AuditEvent {
-  id: number;
-  timestamp: Date;
-  action: string;
-  actor: string;
-  details: string;
+export interface DiffChange {
+  field: string;
+  oldValue: any;
+  newValue: any;
 }
 
 @Component({
@@ -77,9 +77,19 @@ export class DossierDetailComponent implements OnInit {
   consentements: ConsentementResponse[] = [];
   consentementsLoading = false;
   consentementGroups: ConsentementGroup[] = [];
-  auditEvents: AuditEvent[] = [];
+  auditEvents: AuditEventResponse[] = [];
+  auditEventsLoading = false;
+  auditTotalElements = 0;
+  auditPageSize = 10;
+  auditPageIndex = 0;
+  auditFilterEntityType: AuditEntityType | '' = '';
+  auditFilterAction: AuditAction | '' = '';
   ConsentementChannel = ConsentementChannel;
   ConsentementStatus = ConsentementStatus;
+  AuditEntityType = AuditEntityType;
+  AuditAction = AuditAction;
+
+  @ViewChild('auditPaginator') auditPaginator: MatPaginator | undefined;
 
   showPartieForm = false;
   partieFormRole: PartiePrenanteRole = PartiePrenanteRole.BUYER;
@@ -101,6 +111,7 @@ export class DossierDetailComponent implements OnInit {
     private messageApiService: MessageApiService,
     private appointmentApiService: AppointmentApiService,
     private consentementApiService: ConsentementApiService,
+    private auditEventApiService: AuditEventApiService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
@@ -167,6 +178,7 @@ export class DossierDetailComponent implements OnInit {
     this.loadMessages();
     this.loadAppointments();
     this.loadConsentements();
+    this.loadAuditEvents();
     this.loadMockData();
   }
 
@@ -305,32 +317,137 @@ export class DossierDetailComponent implements OnInit {
         notes: 'Signature du compromis'
       }
     ];
+  }
 
+  loadAuditEvents(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
 
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
 
-    this.auditEvents = [
-      {
-        id: 1,
-        timestamp: new Date('2024-01-15T10:30:00'),
-        action: 'Création',
-        actor: 'system',
-        details: 'Dossier créé depuis le formulaire web'
-      },
-      {
-        id: 2,
-        timestamp: new Date('2024-01-16T09:15:00'),
-        action: 'Changement de statut',
-        actor: 'agent@example.com',
-        details: 'Statut modifié de NOUVEAU à QUALIFIÉ'
-      },
-      {
-        id: 3,
-        timestamp: new Date('2024-01-16T14:20:00'),
-        action: 'Ajout de partie prenante',
-        actor: 'agent@example.com',
-        details: 'Ajout d\'un acheteur: Jean Dupont'
+    this.auditEventsLoading = true;
+
+    const params: any = {
+      page: this.auditPageIndex,
+      size: this.auditPageSize,
+      sort: 'createdAt,desc'
+    };
+
+    if (this.auditFilterAction) {
+      params.action = this.auditFilterAction;
+    }
+
+    if (this.auditFilterEntityType) {
+      params.entityType = this.auditFilterEntityType;
+      if (this.auditFilterEntityType === AuditEntityType.DOSSIER) {
+        params.entityId = dossierId;
       }
-    ];
+      this.auditEventApiService.list(params).subscribe({
+        next: (response: Page<AuditEventResponse>) => {
+          this.auditEvents = response.content;
+          this.auditTotalElements = response.totalElements;
+          this.auditEventsLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading audit events:', err);
+          this.auditEventsLoading = false;
+        }
+      });
+    } else {
+      this.auditEventApiService.listByDossier(dossierId, params).subscribe({
+        next: (response: Page<AuditEventResponse>) => {
+          this.auditEvents = response.content;
+          this.auditTotalElements = response.totalElements;
+          this.auditEventsLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading audit events:', err);
+          this.auditEventsLoading = false;
+        }
+      });
+    }
+  }
+
+  onAuditPageChange(event: PageEvent): void {
+    this.auditPageIndex = event.pageIndex;
+    this.auditPageSize = event.pageSize;
+    this.loadAuditEvents();
+  }
+
+  onAuditFilterChange(): void {
+    this.auditPageIndex = 0;
+    if (this.auditPaginator) {
+      this.auditPaginator.firstPage();
+    }
+    this.loadAuditEvents();
+  }
+
+  getAuditActionLabel(action: AuditAction): string {
+    switch (action) {
+      case AuditAction.CREATED: return 'Création';
+      case AuditAction.UPDATED: return 'Modification';
+      case AuditAction.DELETED: return 'Suppression';
+      case AuditAction.VIEWED: return 'Consultation';
+      case AuditAction.EXPORTED: return 'Export';
+      case AuditAction.IMPORTED: return 'Import';
+      case AuditAction.APPROVED: return 'Approbation';
+      case AuditAction.REJECTED: return 'Rejet';
+      case AuditAction.ARCHIVED: return 'Archivage';
+      case AuditAction.RESTORED: return 'Restauration';
+      default: return action;
+    }
+  }
+
+  getAuditEntityTypeLabel(entityType: AuditEntityType): string {
+    switch (entityType) {
+      case AuditEntityType.ANNONCE: return 'Annonce';
+      case AuditEntityType.DOSSIER: return 'Dossier';
+      case AuditEntityType.PARTIE_PRENANTE: return 'PartiePrenante';
+      case AuditEntityType.CONSENTEMENT: return 'Consentement';
+      case AuditEntityType.MESSAGE: return 'Message';
+      case AuditEntityType.USER: return 'Utilisateur';
+      case AuditEntityType.ORGANIZATION: return 'Organisation';
+      default: return entityType;
+    }
+  }
+
+  parseDiffChanges(diff: Record<string, any> | undefined): DiffChange[] {
+    if (!diff) {
+      return [];
+    }
+
+    const changes: DiffChange[] = [];
+    for (const [field, value] of Object.entries(diff)) {
+      if (typeof value === 'object' && value !== null && 'old' in value && 'new' in value) {
+        changes.push({
+          field,
+          oldValue: value.old,
+          newValue: value.new
+        });
+      } else {
+        changes.push({
+          field,
+          oldValue: null,
+          newValue: value
+        });
+      }
+    }
+    return changes;
+  }
+
+  formatDiffValue(value: any): string {
+    if (value === null || value === undefined) {
+      return '—';
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return String(value);
   }
 
   toggleStatusChange(): void {

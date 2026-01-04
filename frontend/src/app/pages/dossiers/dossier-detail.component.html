@@ -527,22 +527,98 @@
 
         <mat-tab label="Historique">
           <div class="tab-content">
-            <div class="audit-list">
+            <div class="audit-filters">
+              <div class="filter-group">
+                <label for="entity-type-filter" class="filter-label">Type d'entité :</label>
+                <select
+                  id="entity-type-filter"
+                  class="filter-select"
+                  [(ngModel)]="auditFilterEntityType"
+                  (change)="onAuditFilterChange()"
+                >
+                  <option value="">Tous</option>
+                  <option [value]="AuditEntityType.ANNONCE">Annonce</option>
+                  <option [value]="AuditEntityType.DOSSIER">Dossier</option>
+                  <option [value]="AuditEntityType.MESSAGE">Message</option>
+                  <option [value]="AuditEntityType.PARTIE_PRENANTE">PartiePrenante</option>
+                  <option [value]="AuditEntityType.CONSENTEMENT">Consentement</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label for="action-filter" class="filter-label">Action :</label>
+                <select
+                  id="action-filter"
+                  class="filter-select"
+                  [(ngModel)]="auditFilterAction"
+                  (change)="onAuditFilterChange()"
+                >
+                  <option value="">Toutes</option>
+                  <option [value]="AuditAction.CREATED">Création</option>
+                  <option [value]="AuditAction.UPDATED">Modification</option>
+                  <option [value]="AuditAction.DELETED">Suppression</option>
+                </select>
+              </div>
+            </div>
+
+            <div *ngIf="auditEventsLoading" class="loading-state">
+              <div class="spinner-small"></div>
+              <p>Chargement de l'historique...</p>
+            </div>
+
+            <div *ngIf="!auditEventsLoading">
+              <div class="data-table-wrapper" *ngIf="auditEvents.length > 0">
+                <table class="data-table audit-table">
+                  <thead>
+                    <tr>
+                      <th>Date/Heure</th>
+                      <th>Action</th>
+                      <th>Type d'entité</th>
+                      <th>ID entité</th>
+                      <th>Utilisateur</th>
+                      <th>Changements</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let event of auditEvents">
+                      <td class="audit-date">{{ formatDate(event.createdAt) }}</td>
+                      <td>
+                        <span class="audit-action-badge">{{ getAuditActionLabel(event.action) }}</span>
+                      </td>
+                      <td>{{ getAuditEntityTypeLabel(event.entityType) }}</td>
+                      <td>{{ event.entityId }}</td>
+                      <td>{{ event.userId || '—' }}</td>
+                      <td class="audit-changes">
+                        <div *ngIf="parseDiffChanges(event.diff).length === 0" class="no-changes">
+                          Aucun changement
+                        </div>
+                        <div *ngIf="parseDiffChanges(event.diff).length > 0" class="changes-list">
+                          <div *ngFor="let change of parseDiffChanges(event.diff)" class="change-item">
+                            <span class="change-field">{{ change.field }}</span>:
+                            <span class="change-old" *ngIf="change.oldValue !== null">{{ formatDiffValue(change.oldValue) }}</span>
+                            <span class="change-arrow" *ngIf="change.oldValue !== null">→</span>
+                            <span class="change-new">{{ formatDiffValue(change.newValue) }}</span>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <mat-paginator
+                  #auditPaginator
+                  [length]="auditTotalElements"
+                  [pageSize]="auditPageSize"
+                  [pageIndex]="auditPageIndex"
+                  [pageSizeOptions]="[5, 10, 25, 50]"
+                  (page)="onAuditPageChange($event)"
+                  showFirstLastButtons
+                >
+                </mat-paginator>
+              </div>
+
               <div *ngIf="auditEvents.length === 0" class="empty-message">
                 Aucun événement d'audit disponible.
-              </div>
-              <div *ngFor="let event of auditEvents" class="audit-item">
-                <div class="audit-marker"></div>
-                <div class="audit-content">
-                  <div class="audit-header">
-                    <span class="audit-timestamp">{{ formatDateTime(event.timestamp) }}</span>
-                    <span class="audit-actor">{{ event.actor }}</span>
-                  </div>
-                  <div class="audit-body">
-                    <span class="audit-action">{{ event.action }}</span>
-                    <p class="audit-details">{{ event.details }}</p>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
