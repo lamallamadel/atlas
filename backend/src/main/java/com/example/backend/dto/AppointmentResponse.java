@@ -1,62 +1,29 @@
-package com.example.backend.entity;
+package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AppointmentStatus;
-import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
-@Entity
-@Table(name = "appointment")
-@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
-public class AppointmentEntity extends BaseEntity {
+public class AppointmentResponse {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-
-    @Column(name = "org_id", nullable = false)
     private String orgId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "dossier_id", nullable = false)
-    private Dossier dossier;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 20)
-    private AppointmentStatus status;
-
-    @Column(name = "start_time", nullable = false)
+    private Long dossierId;
     private LocalDateTime startTime;
-
-    @Column(name = "end_time", nullable = false)
     private LocalDateTime endTime;
-
-    @Column(name = "location", length = 500)
     private String location;
-
-    @Column(name = "assigned_to", length = 255)
     private String assignedTo;
-
-    @Column(name = "notes", columnDefinition = "text")
     private String notes;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
+    private AppointmentStatus status;
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Column(name = "created_by", length = 255)
     private String createdBy;
-
-    @Column(name = "updated_by", length = 255)
     private String updatedBy;
+    private List<String> warnings;
+
+    public AppointmentResponse() {
+    }
 
     public Long getId() {
         return id;
@@ -74,20 +41,12 @@ public class AppointmentEntity extends BaseEntity {
         this.orgId = orgId;
     }
 
-    public Dossier getDossier() {
-        return dossier;
+    public Long getDossierId() {
+        return dossierId;
     }
 
-    public void setDossier(Dossier dossier) {
-        this.dossier = dossier;
-    }
-
-    public AppointmentStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AppointmentStatus status) {
-        this.status = status;
+    public void setDossierId(Long dossierId) {
+        this.dossierId = dossierId;
     }
 
     public LocalDateTime getStartTime() {
@@ -130,6 +89,14 @@ public class AppointmentEntity extends BaseEntity {
         this.notes = notes;
     }
 
+    public AppointmentStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AppointmentStatus status) {
+        this.status = status;
+    }
+
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
@@ -160,5 +127,13 @@ public class AppointmentEntity extends BaseEntity {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public List<String> getWarnings() {
+        return warnings;
+    }
+
+    public void setWarnings(List<String> warnings) {
+        this.warnings = warnings;
     }
 }

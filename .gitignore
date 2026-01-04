@@ -176,3 +176,9 @@ backend/temp-toolchains.xml
 # Node.js
 package-lock.json
 .npmrc
+
+# Setup artifacts (generated during setup)
+setup-repo.cmd
+backend/mvn-output.txt
+backend/mvn-error.txt
+backend/.mavenrc
