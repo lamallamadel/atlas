@@ -185,3 +185,9 @@ backend/mvn-error.txt
 backend/.mavenrc
 backend/mavenrc_pre.bat
 run-backend-maven-install.cmd
+
+# Nested frontend directory (duplicate)
+frontend/frontend/
+
+# Additional temporary setup scripts
+run-backend-install.cmd
