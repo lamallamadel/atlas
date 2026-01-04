@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -10,21 +11,23 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    private final HibernateFilterInterceptor hibernateFilterInterceptor;
+    private final ObjectProvider<HibernateFilterInterceptor> interceptorProvider;
 
-    public WebConfig(HibernateFilterInterceptor hibernateFilterInterceptor) {
-        this.hibernateFilterInterceptor = hibernateFilterInterceptor;
+    public WebConfig(ObjectProvider<HibernateFilterInterceptor> interceptorProvider) {
+        this.interceptorProvider = interceptorProvider;
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(hibernateFilterInterceptor);
+        HibernateFilterInterceptor interceptor = interceptorProvider.getIfAvailable();
+        if (interceptor != null) {
+            registry.addInterceptor(interceptor);
+        }
     }
 
     @Configuration
     @Profile("local")
     public static class LocalCorsConfig implements WebMvcConfigurer {
-        
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")
@@ -37,10 +40,10 @@ public class WebConfig implements WebMvcConfigurer {
     @Configuration
     @Profile("prod")
     public static class ProdCorsConfig implements WebMvcConfigurer {
-        
+
         @Value("${cors.allowed-origins}")
         private String[] allowedOrigins;
-        
+
         @Override
         public void addCorsMappings(CorsRegistry registry) {
             registry.addMapping("/**")

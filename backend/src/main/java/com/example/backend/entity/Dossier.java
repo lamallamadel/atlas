@@ -15,9 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "dossier")
-@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
-public class Dossier {
+public class Dossier extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

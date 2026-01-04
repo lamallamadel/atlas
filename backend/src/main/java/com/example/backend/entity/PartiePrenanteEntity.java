@@ -15,9 +15,8 @@ import java.util.Map;
 
 @Entity
 @Table(name = "partie_prenante")
-@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
-public class PartiePrenanteEntity {
+public class PartiePrenanteEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

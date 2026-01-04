@@ -1,6 +1,12 @@
-# Project Name
+# Atlas Immobilier — CRM (Monorepo)
 
-A full-stack application with Spring Boot backend, Angular frontend, and PostgreSQL database.
+Full-stack application with a Spring Boot backend, an Angular frontend, and a PostgreSQL database.
+
+## Project Docs
+
+- **Current delivery status**: [docs/PROJECT_STATUS.md](./docs/PROJECT_STATUS.md)
+- **MVP roadmap (S1→S13)**: [docs/MVP_ROADMAP.md](./docs/MVP_ROADMAP.md)
+- **UAT scenarios**: [docs/UAT_SCENARIOS.md](./docs/UAT_SCENARIOS.md)
 
 ## 🚀 Quick Start (< 10 minutes)
 

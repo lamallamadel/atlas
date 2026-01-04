@@ -12,6 +12,45 @@
       </div>
 
       <div class="login-section">
+        <h3 class="section-title">Organisation (Tenant)</h3>
+        <p class="section-description">ID d'organisation envoyé dans l'en-tête <strong>X-Org-Id</strong></p>
+
+        <div class="form-group">
+          <label for="orgId">Org Id</label>
+          <input
+            id="orgId"
+            [(ngModel)]="orgId"
+            name="orgId"
+            class="token-input"
+            placeholder="ORG-001"
+            [disabled]="isLoading"
+          />
+        </div>
+      </div>
+
+      <div class="divider">
+        <span>OU</span>
+      </div>
+
+      <div class="login-section">
+        <h3 class="section-title">Keycloak (OIDC)</h3>
+        <p class="section-description">Connexion via Keycloak (Authorization Code + PKCE)</p>
+
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="loginWithKeycloak()"
+          [disabled]="isLoading"
+        >
+          <span>Se connecter avec Keycloak</span>
+        </button>
+      </div>
+
+      <div class="divider">
+        <span>OU</span>
+      </div>
+
+      <div class="login-section">
         <h3 class="section-title">Token manuel (Développement)</h3>
         <p class="section-description">Entrez un token JWT valide pour vous connecter</p>
         

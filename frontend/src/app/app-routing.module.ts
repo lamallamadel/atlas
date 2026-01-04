@@ -15,6 +15,8 @@ import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   { path: 'login', component: LoginComponent },
+  // OAuth2/OIDC redirect target
+  { path: 'auth/callback', component: LoginComponent },
   { path: 'access-denied', component: AccessDeniedComponent },
   { path: 'session-expired', component: SessionExpiredComponent },
   {

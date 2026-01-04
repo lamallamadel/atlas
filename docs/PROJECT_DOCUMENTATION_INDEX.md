@@ -13,6 +13,11 @@ This document provides an overview of all documentation available in this projec
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contributing guidelines, code standards, and workflow
 - **[DEV_TOOLS.md](./DEV_TOOLS.md)** - Complete guide to dev scripts and Makefile
 
+### Project Management
+- **[PROJECT_STATUS.md](./PROJECT_STATUS.md)** - Current delivery status (what is done / what is next)
+- **[MVP_ROADMAP.md](./MVP_ROADMAP.md)** - MVP plan per week (with completion status)
+- **[PRODUCT_SPECS_SUMMARY.md](./PRODUCT_SPECS_SUMMARY.md)** - Product scope summary (functional perimeter)
+
 ### Component-Specific
 - **[backend/README.md](../backend/README.md)** - Backend (Spring Boot) documentation
 - **[frontend/README.md](../frontend/README.md)** - Frontend (Angular) documentation
@@ -45,6 +50,18 @@ Guide for AI agents and developers covering:
 - Architecture overview
 
 ### docs/ Directory
+
+#### PROJECT_STATUS.md
+Current delivery status:
+- What is done (S1–S3)
+- What remains to close Week 3
+- What's next (Week 4)
+
+#### MVP_ROADMAP.md
+MVP plan by week (S1–S13):
+- Scope per week
+- Completion status (done vs planned)
+- Recommended adjustments from ChatGPT discussions
 
 #### CONTRIBUTING.md
 Comprehensive contributing guide with:

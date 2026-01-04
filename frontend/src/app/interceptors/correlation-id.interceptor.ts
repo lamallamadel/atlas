@@ -23,6 +23,15 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
   ) {}
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    // IMPORTANT:
+    // - Only add correlation headers to backend API calls.
+    // - Do NOT add custom headers to Keycloak/OIDC discovery requests, otherwise the browser
+    //   will perform a CORS preflight that typically fails (Keycloak won't allow X-Correlation-Id
+    //   unless explicitly configured).
+    if (!req.url.includes('/api/')) {
+      return next.handle(req);
+    }
+
     const correlationId = this.generateCorrelationId();
     
     const modifiedReq = req.clone({
@@ -52,7 +61,7 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
     
     switch (error.status) {
       case 401:
-        this.snackBar.open('Session expired. Please login again.', 'Close', {
+        this.snackBar.open('Session expirée. Veuillez vous reconnecter.', 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top',
@@ -62,7 +71,7 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
         break;
 
       case 403:
-        this.snackBar.open('Access denied. You do not have permission to perform this action.', 'Close', {
+        this.snackBar.open("Accès refusé. Vous n'avez pas les droits nécessaires.", 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top',
@@ -71,8 +80,8 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
         break;
 
       case 400: {
-        const badRequestMessage = problemDetail?.detail || 'Invalid request. Please check your input.';
-        this.snackBar.open(badRequestMessage, 'Close', {
+        const badRequestMessage = problemDetail?.detail || 'Requête invalide. Veuillez vérifier votre saisie.';
+        this.snackBar.open(badRequestMessage, 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top',
@@ -82,8 +91,8 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       }
 
       case 404: {
-        const notFoundMessage = problemDetail?.detail || 'The requested resource was not found.';
-        this.snackBar.open(notFoundMessage, 'Close', {
+        const notFoundMessage = problemDetail?.detail || 'La ressource demandée est introuvable.';
+        this.snackBar.open(notFoundMessage, 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top',
@@ -93,8 +102,8 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       }
 
       case 409: {
-        const conflictMessage = problemDetail?.detail || 'A conflict occurred. Please try again.';
-        this.snackBar.open(conflictMessage, 'Close', {
+        const conflictMessage = problemDetail?.detail || 'Un conflit est survenu. Veuillez réessayer.';
+        this.snackBar.open(conflictMessage, 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top',
@@ -104,8 +113,8 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       }
 
       case 500: {
-        const serverErrorMessage = problemDetail?.detail || 'An internal server error occurred. Please try again later.';
-        this.snackBar.open(serverErrorMessage, 'Close', {
+        const serverErrorMessage = problemDetail?.detail || 'Une erreur interne est survenue. Veuillez réessayer plus tard.';
+        this.snackBar.open(serverErrorMessage, 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
           verticalPosition: 'top',

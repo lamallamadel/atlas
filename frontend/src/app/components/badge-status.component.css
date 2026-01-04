@@ -17,6 +17,11 @@
   color: #155724;
 }
 
+.badge-paused {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
 .badge-archived {
   background-color: #f8d7da;
   color: #721c24;

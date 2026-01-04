@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -146,6 +147,28 @@ public class GlobalExceptionHandler {
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
+
+
+    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
+        public ResponseEntity<ProblemDetail> handleTypeMismatch(
+                org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,
+                HttpServletRequest request
+        ) {
+                ProblemDetail pd = new ProblemDetail(
+                        "about:blank",
+        "Bad Request",
+        400,
+        "Invalid parameter value",
+        request.getRequestURI()
+        );
+        // Optionnel : exposer plus de contexte
+        pd.addProperty("parameter", ex.getName());
+        pd.addProperty("value", String.valueOf(ex.getValue()));
+        return ResponseEntity.badRequest()
+        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
+        .body(pd);
+        }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(

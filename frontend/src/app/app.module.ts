@@ -1,7 +1,8 @@
-import { NgModule } from '@angular/core';
+import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { APP_INITIALIZER } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
@@ -37,6 +38,16 @@ import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import { AuthService } from './services/auth.service';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+
+registerLocaleData(localeFr);
+
+export function initAuth(authService: AuthService): () => Promise<void> {
+  return () => authService.init();
+}
 
 @NgModule({
   declarations: [
@@ -64,6 +75,7 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
+    OAuthModule.forRoot(),
     FormsModule,
     ReactiveFormsModule,
     MatStepperModule,
@@ -81,6 +93,14 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     MatCardModule
   ],
   providers: [
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
+
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initAuth,
+      deps: [AuthService],
+      multi: true
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: HttpAuthInterceptor,

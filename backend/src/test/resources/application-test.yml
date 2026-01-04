@@ -19,6 +19,13 @@ spring:
     locations: classpath:db/migration
     placeholders:
       json_type: JSON
+    
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: mock
+
 
 logging:
   level:

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
@@ -7,8 +7,9 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   token = '';
+  orgId = 'ORG-001';
   errorMessage = '';
   isLoading = false;
 
@@ -16,6 +17,27 @@ export class LoginComponent {
     private authService: AuthService,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    // If we land here after a successful OIDC redirect (or we still have a valid token),
+    // go straight to the dashboard.
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+
+  loginWithKeycloak(): void {
+    this.errorMessage = '';
+    this.isLoading = true;
+
+    try {
+      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
+      this.authService.loginWithKeycloak();
+    } catch {
+      this.isLoading = false;
+      this.errorMessage = 'Erreur lors de la redirection vers Keycloak';
+    }
+  }
 
   login(): void {
     this.errorMessage = '';
@@ -28,6 +50,7 @@ export class LoginComponent {
     this.isLoading = true;
 
     try {
+      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
       this.authService.login(this.token);
       this.router.navigate(['/dashboard']);
     } catch (error) {
@@ -43,6 +66,7 @@ export class LoginComponent {
     const mockToken = this.generateMockToken();
     
     try {
+      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
       this.authService.login(mockToken);
       this.router.navigate(['/dashboard']);
     } catch (error) {
@@ -58,6 +82,7 @@ export class LoginComponent {
     const mockAdminToken = this.generateMockToken(['ADMIN', 'USER']);
     
     try {
+      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
       this.authService.login(mockAdminToken);
       this.router.navigate(['/dashboard']);
     } catch (error) {

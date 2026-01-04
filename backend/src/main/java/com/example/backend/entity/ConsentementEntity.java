@@ -16,9 +16,8 @@ import java.util.Map;
 
 @Entity
 @Table(name = "consentement")
-@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
-public class ConsentementEntity {
+public class ConsentementEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

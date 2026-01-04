@@ -5,8 +5,8 @@ import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.enums.DossierStatus;
-import com.example.backend.service.DossierService;
 import com.example.backend.exception.ErrorResponse;
+import com.example.backend.service.DossierService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -43,25 +43,27 @@ public class DossierController {
             @ApiResponse(responseCode = "201", description = "Dossier created successfully",
                     content = @Content(schema = @Schema(implementation = DossierResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Related resource not found",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<DossierResponse> create(
-            @Valid @RequestBody DossierCreateRequest request) {
+    public ResponseEntity<DossierResponse> create(@Valid @RequestBody DossierCreateRequest request) {
         Long existingOpenDossierId = null;
-        if (request.getInitialParty() != null && request.getInitialParty().getPhone() != null) {
+       if (request.getInitialParty() != null && request.getInitialParty().getPhone() != null) {
             var duplicates = dossierService.checkForDuplicates(request.getInitialParty().getPhone());
             if (!duplicates.isEmpty()) {
                 existingOpenDossierId = duplicates.get(0).getId();
             }
         }
 
+        // Let GlobalExceptionHandler standardize all error responses as RFC 7807 ProblemDetail.
         DossierResponse response = dossierService.create(request);
         response.setExistingOpenDossierId(existingOpenDossierId);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Get dossier by ID", description = "Retrieves a single dossier by its ID")
     @ApiResponses(value = {
@@ -80,6 +82,19 @@ public class DossierController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    // 2) NOUVEL ENDPOINT: /api/v1/dossiers/check-duplicates?leadPhone=...
+    // Sans nouveau DTO: on renvoie directement une List<DossierResponse>
+    @GetMapping("/check-duplicates")
+    public ResponseEntity<DossierResponse> checkDuplicates(@RequestParam("leadPhone") String leadPhone) {
+        var duplicates = dossierService.checkForDuplicates(leadPhone);
+        if (duplicates == null || duplicates.isEmpty() || duplicates.get(0) == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(duplicates.get(0)); // 200
+    }
+
+
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
@@ -101,7 +116,7 @@ public class DossierController {
             @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.")
             @RequestParam(defaultValue = "id,asc") String sort) {
-        
+
         Pageable pageable = createPageable(page, size, sort);
         Page<DossierResponse> response = dossierService.list(status, leadPhone, annonceId, pageable);
         return ResponseEntity.ok(response);
@@ -127,6 +142,8 @@ public class DossierController {
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
@@ -150,6 +167,8 @@ public class DossierController {
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 

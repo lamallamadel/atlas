@@ -91,7 +91,7 @@ class SecurityConfigTest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void whenProRoleOnPost_returns201() throws Exception {
-        AnnonceCreateRequest request = createAnnonceRequest("ORG1");
+        AnnonceCreateRequest request = createAnnonceRequest();
 
         mockMvc.perform(post("/api/v1/annonces")
                         .header("X-Org-Id", "ORG1")
@@ -103,7 +103,7 @@ class SecurityConfigTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void whenAdminRoleOnPost_returns201() throws Exception {
-        AnnonceCreateRequest request = createAnnonceRequest("ORG1");
+        AnnonceCreateRequest request = createAnnonceRequest();
 
         mockMvc.perform(post("/api/v1/annonces")
                         .header("X-Org-Id", "ORG1")
@@ -125,9 +125,8 @@ class SecurityConfigTest {
         return annonce;
     }
 
-    private AnnonceCreateRequest createAnnonceRequest(String orgId) {
+    private AnnonceCreateRequest createAnnonceRequest() {
         AnnonceCreateRequest request = new AnnonceCreateRequest();
-        request.setOrgId(orgId);
         request.setTitle("Test Annonce");
         request.setDescription("Test Description");
         request.setCategory("Test Category");

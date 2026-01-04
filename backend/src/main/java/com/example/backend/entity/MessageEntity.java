@@ -12,9 +12,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "message")
-@FilterDef(name = "orgIdFilter", parameters = @ParamDef(name = "orgId", type = String.class))
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
-public class MessageEntity {
+public class MessageEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

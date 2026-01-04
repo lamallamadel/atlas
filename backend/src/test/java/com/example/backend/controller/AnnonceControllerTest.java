@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.config.SecurityConfig;
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
@@ -11,12 +12,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
@@ -25,19 +29,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AnnonceController.class)
+@Import(SecurityConfig.class) // ensure security filter chain is present in slice test
+@WithMockUser(roles = "ADMIN")
 class AnnonceControllerTest {
+
+    private static final String ORG_ID = "org123";
 
     @Autowired
     private MockMvc mockMvc;
@@ -54,7 +56,7 @@ class AnnonceControllerTest {
     @BeforeEach
     void setUp() {
         createRequest = new AnnonceCreateRequest();
-        createRequest.setOrgId("org123");
+        // orgId comes from tenant header (X-Org-Id) => DO NOT set in request
         createRequest.setTitle("Test Annonce");
         createRequest.setDescription("Test Description");
         createRequest.setCategory("Electronics");
@@ -64,7 +66,7 @@ class AnnonceControllerTest {
 
         annonceResponse = new AnnonceResponse();
         annonceResponse.setId(1L);
-        annonceResponse.setOrgId("org123");
+        annonceResponse.setOrgId(ORG_ID);
         annonceResponse.setTitle("Test Annonce");
         annonceResponse.setDescription("Test Description");
         annonceResponse.setCategory("Electronics");
@@ -76,24 +78,29 @@ class AnnonceControllerTest {
         annonceResponse.setUpdatedAt(LocalDateTime.now());
     }
 
+    // -------------------------------------------------------------------------
+    // CREATE
+    // -------------------------------------------------------------------------
+
     @Test
     void create_ValidRequest_Returns201WithCreatedEntity() throws Exception {
         when(annonceService.create(any(AnnonceCreateRequest.class))).thenReturn(annonceResponse);
 
         mockMvc.perform(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.orgId").value("org123"))
-                .andExpect(jsonPath("$.title").value("Test Annonce"))
-                .andExpect(jsonPath("$.description").value("Test Description"))
-                .andExpect(jsonPath("$.category").value("Electronics"))
-                .andExpect(jsonPath("$.city").value("Paris"))
-                .andExpect(jsonPath("$.price").value(100.00))
-                .andExpect(jsonPath("$.currency").value("EUR"))
-                .andExpect(jsonPath("$.status").value("DRAFT"));
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isCreated())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.orgId").value(ORG_ID))
+            .andExpect(jsonPath("$.title").value("Test Annonce"))
+            .andExpect(jsonPath("$.description").value("Test Description"))
+            .andExpect(jsonPath("$.category").value("Electronics"))
+            .andExpect(jsonPath("$.city").value("Paris"))
+            .andExpect(jsonPath("$.price").value(100.00))
+            .andExpect(jsonPath("$.currency").value("EUR"))
+            .andExpect(jsonPath("$.status").value("DRAFT"));
     }
 
     @Test
@@ -101,9 +108,10 @@ class AnnonceControllerTest {
         createRequest.setTitle(null);
 
         mockMvc.perform(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -111,9 +119,10 @@ class AnnonceControllerTest {
         createRequest.setTitle("");
 
         mockMvc.perform(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -121,19 +130,10 @@ class AnnonceControllerTest {
         createRequest.setTitle("A".repeat(501));
 
         mockMvc.perform(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void create_MissingOrgId_Returns400() throws Exception {
-        createRequest.setOrgId(null);
-
-        mockMvc.perform(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -141,31 +141,46 @@ class AnnonceControllerTest {
         createRequest.setPrice(BigDecimal.valueOf(-10.00));
 
         mockMvc.perform(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isBadRequest());
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isBadRequest());
     }
+
+    // NOTE: "MissingOrgId" is now a tenant-header concern, not a body validation concern.
+    // If you want a dedicated test, do it on TenantFilterTest (recommended).
+    // This controller slice test cannot reliably assert tenant filter behavior unless the filter is part of the slice.
+
+    // -------------------------------------------------------------------------
+    // GET
+    // -------------------------------------------------------------------------
 
     @Test
     void getById_ExistingId_Returns200WithEntity() throws Exception {
         when(annonceService.getById(1L)).thenReturn(annonceResponse);
 
-        mockMvc.perform(get("/api/v1/annonces/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.title").value("Test Annonce"))
-                .andExpect(jsonPath("$.orgId").value("org123"));
+        mockMvc.perform(get("/api/v1/annonces/1")
+                .header("X-Org-Id", ORG_ID))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.title").value("Test Annonce"))
+            .andExpect(jsonPath("$.orgId").value(ORG_ID));
     }
 
     @Test
     void getById_NonExistingId_Returns404() throws Exception {
         when(annonceService.getById(999L))
-                .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
+            .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
 
-        mockMvc.perform(get("/api/v1/annonces/999"))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/annonces/999")
+                .header("X-Org-Id", ORG_ID))
+            .andExpect(status().isNotFound());
     }
+
+    // -------------------------------------------------------------------------
+    // UPDATE
+    // -------------------------------------------------------------------------
 
     @Test
     void update_ValidRequest_Returns200() throws Exception {
@@ -175,19 +190,20 @@ class AnnonceControllerTest {
 
         AnnonceResponse updatedResponse = new AnnonceResponse();
         updatedResponse.setId(1L);
-        updatedResponse.setOrgId("org123");
+        updatedResponse.setOrgId(ORG_ID);
         updatedResponse.setTitle("Updated Title");
         updatedResponse.setStatus(AnnonceStatus.PUBLISHED);
 
         when(annonceService.update(eq(1L), any(AnnonceUpdateRequest.class))).thenReturn(updatedResponse);
 
         mockMvc.perform(put("/api/v1/annonces/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.title").value("Updated Title"))
-                .andExpect(jsonPath("$.status").value("PUBLISHED"));
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.title").value("Updated Title"))
+            .andExpect(jsonPath("$.status").value("PUBLISHED"));
     }
 
     @Test
@@ -196,13 +212,18 @@ class AnnonceControllerTest {
         updateRequest.setTitle("Updated Title");
 
         when(annonceService.update(eq(999L), any(AnnonceUpdateRequest.class)))
-                .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
+            .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
 
         mockMvc.perform(put("/api/v1/annonces/999")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isNotFound());
+                .header("X-Org-Id", ORG_ID)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateRequest)))
+            .andExpect(status().isNotFound());
     }
+
+    // -------------------------------------------------------------------------
+    // LIST
+    // -------------------------------------------------------------------------
 
     @Test
     void list_NoFilters_Returns200WithPagedResults() throws Exception {
@@ -220,23 +241,24 @@ class AnnonceControllerTest {
         Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 2);
 
         when(annonceService.list(
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(page);
 
-        mockMvc.perform(get("/api/v1/annonces"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].id").value(1))
-                .andExpect(jsonPath("$.content[0].title").value("Annonce 1"))
-                .andExpect(jsonPath("$.content[1].id").value(2))
-                .andExpect(jsonPath("$.content[1].title").value("Annonce 2"))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.size").value(20));
+        mockMvc.perform(get("/api/v1/annonces")
+                .header("X-Org-Id", ORG_ID))
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpect(jsonPath("$.content", hasSize(2)))
+            .andExpect(jsonPath("$.content[0].id").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Annonce 1"))
+            .andExpect(jsonPath("$.content[1].id").value(2))
+            .andExpect(jsonPath("$.content[1].title").value("Annonce 2"))
+            .andExpect(jsonPath("$.totalElements").value(2))
+            .andExpect(jsonPath("$.size").value(20));
     }
 
     @Test
@@ -246,23 +268,23 @@ class AnnonceControllerTest {
         annonce1.setTitle("Published Annonce");
         annonce1.setStatus(AnnonceStatus.PUBLISHED);
 
-        List<AnnonceResponse> annonces = List.of(annonce1);
-        Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 1);
+        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(0, 20), 1);
 
         when(annonceService.list(
-                eq(AnnonceStatus.PUBLISHED),
-                isNull(),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            eq(AnnonceStatus.PUBLISHED),
+            isNull(),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
-                        .param("status", "PUBLISHED"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .header("X-Org-Id", ORG_ID)
+                .param("status", "PUBLISHED"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -272,23 +294,23 @@ class AnnonceControllerTest {
         annonce1.setTitle("Electronics in Paris");
         annonce1.setStatus(AnnonceStatus.PUBLISHED);
 
-        List<AnnonceResponse> annonces = List.of(annonce1);
-        Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 1);
+        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(0, 20), 1);
 
         when(annonceService.list(
-                isNull(),
-                eq("Electronics"),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            isNull(),
+            eq("Electronics"),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
-                        .param("q", "Electronics"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].title").value("Electronics in Paris"))
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .header("X-Org-Id", ORG_ID)
+                .param("q", "Electronics"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.content[0].title").value("Electronics in Paris"))
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -298,25 +320,25 @@ class AnnonceControllerTest {
         annonce1.setTitle("Electronics in Paris");
         annonce1.setStatus(AnnonceStatus.PUBLISHED);
 
-        List<AnnonceResponse> annonces = List.of(annonce1);
-        Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 1);
+        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(0, 20), 1);
 
         when(annonceService.list(
-                eq(AnnonceStatus.PUBLISHED),
-                eq("Electronics"),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            eq(AnnonceStatus.PUBLISHED),
+            eq("Electronics"),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
-                        .param("status", "PUBLISHED")
-                        .param("q", "Electronics"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].title").value("Electronics in Paris"))
-                .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
-                .andExpect(jsonPath("$.totalElements").value(1));
+                .header("X-Org-Id", ORG_ID)
+                .param("status", "PUBLISHED")
+                .param("q", "Electronics"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.content[0].title").value("Electronics in Paris"))
+            .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
+            .andExpect(jsonPath("$.totalElements").value(1));
     }
 
     @Test
@@ -325,25 +347,25 @@ class AnnonceControllerTest {
         annonce1.setId(11L);
         annonce1.setTitle("Annonce 11");
 
-        List<AnnonceResponse> annonces = List.of(annonce1);
-        Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(1, 10), 25);
+        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(1, 10), 25);
 
         when(annonceService.list(
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
-                        .param("page", "1")
-                        .param("size", "10"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.number").value(1))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.totalElements").value(25));
+                .header("X-Org-Id", ORG_ID)
+                .param("page", "1")
+                .param("size", "10"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.number").value(1))
+            .andExpect(jsonPath("$.size").value(10))
+            .andExpect(jsonPath("$.totalElements").value(25));
     }
 
     @Test
@@ -356,23 +378,23 @@ class AnnonceControllerTest {
         annonce2.setId(2L);
         annonce2.setTitle("Annonce B");
 
-        List<AnnonceResponse> annonces = Arrays.asList(annonce1, annonce2);
-        Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 2);
+        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1, annonce2), PageRequest.of(0, 20), 2);
 
         when(annonceService.list(
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(page);
 
         mockMvc.perform(get("/api/v1/annonces")
-                        .param("sort", "title,asc"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[0].title").value("Annonce A"))
-                .andExpect(jsonPath("$.content[1].title").value("Annonce B"));
+                .header("X-Org-Id", ORG_ID)
+                .param("sort", "title,asc"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(2)))
+            .andExpect(jsonPath("$.content[0].title").value("Annonce A"))
+            .andExpect(jsonPath("$.content[1].title").value("Annonce B"));
     }
 
     @Test
@@ -380,16 +402,17 @@ class AnnonceControllerTest {
         Page<AnnonceResponse> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
 
         when(annonceService.list(
-                isNull(),
-                isNull(),
-                isNull(),
-                isNull(),
-                any(Pageable.class)
+            isNull(),
+            isNull(),
+            isNull(),
+            isNull(),
+            any(Pageable.class)
         )).thenReturn(emptyPage);
 
-        mockMvc.perform(get("/api/v1/annonces"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(0)))
-                .andExpect(jsonPath("$.totalElements").value(0));
+        mockMvc.perform(get("/api/v1/annonces")
+                .header("X-Org-Id", ORG_ID))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(0)))
+            .andExpect(jsonPath("$.totalElements").value(0));
     }
 }

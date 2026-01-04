@@ -2,6 +2,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+### Fixed
+- FE: Remove `orgId` from create DTOs (`AnnonceCreateRequest`, `DossierCreateRequest`) to rely exclusively on `X-Org-Id`.
+- FE: Align `AnnonceStatus` with backend values (`DRAFT`, `PUBLISHED`, `ACTIVE`, `PAUSED`, `ARCHIVED`) and update UI badges.
+- FE: Complete `DossierResponse` with `score`, `source`, `parties`, `existingOpenDossierId` and expose them in dossier detail UI.
+- FE: Hide `orgId` from “Système” section; keep it only in “Avancé”.
+- FE: Translate remaining system/interceptor messages to FR.
+- FE: Replace raw “ID annonce” filter in dossiers list with a select/autocomplete based on annonce titles.
+
+## [0.3.0] - 2026-01-04
+
+### Week 3 — Auth/RBAC + Multi-tenant + API hardening
+
+#### Added
+- JWT/OIDC security (resource server) and Angular auth guard foundation.
+- RBAC roles (`ADMIN`, `PRO`) enforced on protected endpoints.
+- Tenant isolation via `X-Org-Id` header and Hibernate `orgIdFilter`.
+- ProblemDetails-style error responses and stronger validation patterns.
+
+#### Changed
+- API security posture: endpoints under `/api/**` require tenant header and appropriate authorization.
+
+## [0.2.0] - 2026-01-03
+
+### Week 2 — DB schema + CRUD core (Annonce/Dossier) + UI
+
+#### Added
+- Flyway migrations for core CRM tables (`annonce`, `dossier`, `partie_prenante`, `consentement`, `message`, `appointment`, `audit_event`).
+- CRUD APIs for Annonce and Dossier with filtering and pagination.
+- Angular UI for annonces and dossiers (lists, forms, details) + API services.
+- Backend/frontend integration testing baseline.
+
 ## [0.1.0] - 2026-01-01
 
 ### Week 1 baseline - Production-Ready Configuration

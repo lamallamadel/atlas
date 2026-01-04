@@ -1,18 +1,19 @@
 package com.example.backend.util;
 
-public class TenantContext {
+public final class TenantContext {
+    private static final ThreadLocal<String> ORG_ID = new ThreadLocal<>();
 
-    private static final ThreadLocal<String> orgIdHolder = new ThreadLocal<>();
+    private TenantContext() {}
 
     public static void setOrgId(String orgId) {
-        orgIdHolder.set(orgId);
+        ORG_ID.set(orgId);
     }
 
     public static String getOrgId() {
-        return orgIdHolder.get();
+        return ORG_ID.get();
     }
 
     public static void clear() {
-        orgIdHolder.remove();
+        ORG_ID.remove();
     }
 }

@@ -153,7 +153,7 @@ public class DossierService {
         }
         
         List<DossierStatus> excludedStatuses = Arrays.asList(DossierStatus.WON, DossierStatus.LOST);
-        List<Dossier> duplicates = dossierRepository.findByPartiesPhoneAndStatusNotIn(phone, excludedStatuses);
+        List<Dossier> duplicates = dossierRepository.findByLeadPhoneAndStatusNotIn(phone, excludedStatuses);
         
         return duplicates.stream()
                 .map(dossierMapper::toResponse)

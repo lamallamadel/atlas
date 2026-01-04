@@ -3,6 +3,13 @@ import { Router, ActivatedRouteSnapshot } from '@angular/router';
 import { RoleGuard } from './role.guard';
 import { AuthService } from '../services/auth.service';
 
+function createRouteSnapshot(data: any): ActivatedRouteSnapshot {
+  // ActivatedRouteSnapshot has many required fields; for unit tests we only need `data`.
+  const route = new ActivatedRouteSnapshot();
+  (route as any).data = data;
+  return route;
+}
+
 describe('RoleGuard', () => {
   let guard: RoleGuard;
   let authService: jasmine.SpyObj<AuthService>;
@@ -30,7 +37,7 @@ describe('RoleGuard', () => {
   });
 
   it('should allow access if no roles are required', () => {
-    const route = { data: {} } as ActivatedRouteSnapshot;
+    const route = createRouteSnapshot({});
 
     const result = guard.canActivate(route);
 
@@ -39,7 +46,7 @@ describe('RoleGuard', () => {
   });
 
   it('should allow access if user has one of the required roles', () => {
-    const route = { data: { roles: ['ADMIN', 'MANAGER'] } } as ActivatedRouteSnapshot;
+    const route = createRouteSnapshot({ roles: ['ADMIN', 'MANAGER'] });
     authService.hasRole.and.callFake((role: string) => role === 'ADMIN');
 
     const result = guard.canActivate(route);
@@ -49,7 +56,7 @@ describe('RoleGuard', () => {
   });
 
   it('should deny access and redirect to /access-denied if user does not have required roles', () => {
-    const route = { data: { roles: ['ADMIN', 'MANAGER'] } } as ActivatedRouteSnapshot;
+    const route = createRouteSnapshot({ roles: ['ADMIN', 'MANAGER'] });
     authService.hasRole.and.returnValue(false);
 
     const result = guard.canActivate(route);
@@ -59,7 +66,7 @@ describe('RoleGuard', () => {
   });
 
   it('should check all required roles', () => {
-    const route = { data: { roles: ['ADMIN', 'MANAGER'] } } as ActivatedRouteSnapshot;
+    const route = createRouteSnapshot({ roles: ['ADMIN', 'MANAGER'] });
     authService.hasRole.and.callFake((role: string) => role === 'MANAGER');
 
     const result = guard.canActivate(route);

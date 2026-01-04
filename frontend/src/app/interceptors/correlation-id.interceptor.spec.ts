@@ -61,8 +61,8 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(router.navigate).toHaveBeenCalledWith(['/login']);
       expect(snackBar.open).toHaveBeenCalledWith(
-        'Session expired. Please login again.',
-        'Close',
+        'Session expirée. Veuillez vous reconnecter.',
+        'Fermer',
         jasmine.objectContaining({
           duration: 5000,
           horizontalPosition: 'center',
@@ -83,8 +83,8 @@ describe('CorrelationIdInterceptor', () => {
       req.flush({ detail: 'Token expired' }, { status: 401, statusText: 'Unauthorized' });
 
       expect(snackBar.open).toHaveBeenCalledWith(
-        'Session expired. Please login again.',
-        'Close',
+        'Session expirée. Veuillez vous reconnecter.',
+        'Fermer',
         jasmine.objectContaining({
           duration: 5000
         })
@@ -103,8 +103,8 @@ describe('CorrelationIdInterceptor', () => {
       req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
 
       expect(snackBar.open).toHaveBeenCalledWith(
-        'Access denied. You do not have permission to perform this action.',
-        'Close',
+        "Accès refusé. Vous n'avez pas les droits nécessaires.",
+        'Fermer',
         jasmine.any(Object)
       );
       expect(router.navigate).not.toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Invalid data',
-        'Close',
+        'Fermer',
         jasmine.any(Object)
       );
     });
@@ -141,7 +141,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Resource not found',
-        'Close',
+        'Fermer',
         jasmine.any(Object)
       );
     });
@@ -159,7 +159,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Resource already exists',
-        'Close',
+        'Fermer',
         jasmine.any(Object)
       );
     });
@@ -177,7 +177,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Internal error occurred',
-        'Close',
+        'Fermer',
         jasmine.any(Object)
       );
     });
@@ -194,8 +194,8 @@ describe('CorrelationIdInterceptor', () => {
       req.flush('Bad Request', { status: 400, statusText: 'Bad Request' });
 
       expect(snackBar.open).toHaveBeenCalledWith(
-        'Invalid request. Please check your input.',
-        'Close',
+        'Requête invalide. Veuillez vérifier votre saisie.',
+        'Fermer',
         jasmine.any(Object)
       );
     });

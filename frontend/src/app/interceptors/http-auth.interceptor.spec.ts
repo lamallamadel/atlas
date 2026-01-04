@@ -84,14 +84,14 @@ describe('HttpAuthInterceptor', () => {
     req.flush({});
   });
 
-  it('should not attach X-Org-Id header when org_id does not exist', () => {
+  it('should attach default X-Org-Id header when token exists but org_id is missing', () => {
     const testToken = 'test-jwt-token';
     authService.getToken.and.returnValue(testToken);
 
     httpClient.get('/api/test').subscribe();
 
     const req = httpMock.expectOne('/api/test');
-    expect(req.request.headers.has('X-Org-Id')).toBe(false);
+    expect(req.request.headers.get('X-Org-Id')).toBe('ORG-001');
     req.flush({});
   });
 

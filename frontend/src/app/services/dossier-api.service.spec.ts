@@ -118,7 +118,6 @@ describe('DossierApiService', () => {
 
   it('should call POST for create endpoint', () => {
     const createRequest: DossierCreateRequest = {
-      orgId: 'org1',
       annonceId: 1,
       leadPhone: '123456789',
       leadName: 'John Doe',
@@ -127,6 +126,7 @@ describe('DossierApiService', () => {
 
     const mockResponse = {
       id: 1,
+      orgId: 'org1',
       ...createRequest,
       status: DossierStatus.NEW,
       createdAt: '2024-01-01T00:00:00Z',

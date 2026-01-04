@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 export enum AnnonceStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
   ARCHIVED = 'ARCHIVED'
 }
 
@@ -13,8 +15,8 @@ export interface AnnonceResponse {
   orgId: string;
   title: string;
   description?: string;
-  category?: string;
-  type?: string;
+  category?: string; // APARTMENT/HOUSE/STUDIO/COMMERCIAL
+  type?: string;     // SALE/RENT/LEASE/EXCHANGE
   address?: string;
   surface?: number;
   city?: string;
@@ -31,7 +33,6 @@ export interface AnnonceResponse {
 }
 
 export interface AnnonceCreateRequest {
-  orgId: string;
   title: string;
   description?: string;
   category?: string;
@@ -105,7 +106,6 @@ export interface AnnonceListParams {
   providedIn: 'root'
 })
 export class AnnonceApiService {
-
   private readonly apiUrl = '/api/v1/annonces';
 
   constructor(private http: HttpClient) { }
