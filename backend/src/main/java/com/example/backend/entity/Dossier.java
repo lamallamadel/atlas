@@ -52,6 +52,9 @@ public class Dossier extends BaseEntity {
     @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartiePrenanteEntity> parties = new ArrayList<>();
 
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AppointmentEntity> appointments = new ArrayList<>();
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -186,5 +189,23 @@ public class Dossier extends BaseEntity {
     public void removeParty(PartiePrenanteEntity party) {
         parties.remove(party);
         party.setDossier(null);
+    }
+
+    public List<AppointmentEntity> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<AppointmentEntity> appointments) {
+        this.appointments = appointments;
+    }
+
+    public void addAppointment(AppointmentEntity appointment) {
+        appointments.add(appointment);
+        appointment.setDossier(this);
+    }
+
+    public void removeAppointment(AppointmentEntity appointment) {
+        appointments.remove(appointment);
+        appointment.setDossier(null);
     }
 }
