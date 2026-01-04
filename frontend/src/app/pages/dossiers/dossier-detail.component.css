@@ -690,6 +690,21 @@
   color: #f57c00;
 }
 
+.channel-badge.channel-whatsapp {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.channel-badge.channel-chat {
+  background-color: #fce4ec;
+  color: #c2185b;
+}
+
+.channel-badge.channel-inapp {
+  background-color: #f3e5f5;
+  color: #6a1b9a;
+}
+
 .direction-badge.direction-inbound {
   background-color: #c8e6c9;
   color: #2e7d32;
@@ -905,4 +920,61 @@
   font-size: 0.9rem;
   color: #555;
   line-height: 1.5;
+}
+
+.message-card {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid #3498db;
+  margin-bottom: 1rem;
+  transition: box-shadow 0.2s;
+}
+
+.message-card:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.message-timestamp {
+  font-size: 0.85rem;
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.message-badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.message-card-body {
+  color: #2c3e50;
+}
+
+.message-content {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 0.95rem;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.voir-plus {
+  color: #3498db;
+  cursor: pointer;
+  font-weight: 500;
+  margin-left: 0.25rem;
+  text-decoration: underline;
+}
+
+.voir-plus:hover {
+  color: #2980b9;
 }

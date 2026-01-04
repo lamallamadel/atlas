@@ -1,0 +1,61 @@
+<h2 mat-dialog-title>Nouveau message</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="messageForm" class="message-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Canal</mat-label>
+      <mat-select formControlName="channel">
+        <mat-option *ngFor="let option of channelOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="messageForm.get('channel')?.hasError('required')">
+        {{ getErrorMessage('channel') }}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Direction</mat-label>
+      <mat-select formControlName="direction">
+        <mat-option *ngFor="let option of directionOptions" [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="messageForm.get('direction')?.hasError('required')">
+        {{ getErrorMessage('direction') }}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Contenu</mat-label>
+      <textarea 
+        matInput 
+        formControlName="content" 
+        placeholder="Contenu du message"
+        rows="5"
+      ></textarea>
+      <mat-error *ngIf="messageForm.get('content')?.hasError('required')">
+        {{ getErrorMessage('content') }}
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date et heure</mat-label>
+      <input 
+        matInput 
+        type="datetime-local" 
+        formControlName="timestamp"
+      >
+      <mat-error *ngIf="messageForm.get('timestamp')?.hasError('required')">
+        {{ getErrorMessage('timestamp') }}
+      </mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Annuler</button>
+  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!messageForm.valid">
+    Créer
+  </button>
+</mat-dialog-actions>

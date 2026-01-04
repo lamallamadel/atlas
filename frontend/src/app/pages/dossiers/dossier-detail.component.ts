@@ -4,17 +4,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
 import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
+import { MessageApiService, MessageResponse, MessageCreateRequest } from '../../services/message-api.service';
 import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
+import { MessageFormDialogComponent, MessageFormData } from '../../components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 
-export interface Message {
-  id: number;
-  timestamp: Date;
-  content: string;
-  channel: 'EMAIL' | 'SMS' | 'PHONE' | 'WEB';
-  direction: 'INBOUND' | 'OUTBOUND';
-  author?: string;
-}
+
 
 export interface RendezVous {
   id: number;
@@ -75,7 +70,8 @@ export class DossierDetailComponent implements OnInit {
     DossierStatus.LOST
   ];
 
-  messages: Message[] = [];
+  messages: MessageResponse[] = [];
+  loadingMessages = false;
   rendezVous: RendezVous[] = [];
   consentements: Consentement[] = [];
   auditEvents: AuditEvent[] = [];
@@ -97,6 +93,7 @@ export class DossierDetailComponent implements OnInit {
   constructor(
     private dossierApiService: DossierApiService,
     private partiePrenanteApiService: PartiePrenanteApiService,
+    private messageApiService: MessageApiService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
@@ -160,6 +157,7 @@ export class DossierDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDossier();
+    this.loadMessages();
     this.loadMockData();
   }
 
@@ -197,34 +195,31 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
-  loadMockData(): void {
-    this.messages = [
-      {
-        id: 1,
-        timestamp: new Date('2024-01-15T10:30:00'),
-        content: 'Bonjour, je suis intéressé par votre annonce.',
-        channel: 'EMAIL',
-        direction: 'INBOUND',
-        author: 'Client'
-      },
-      {
-        id: 2,
-        timestamp: new Date('2024-01-15T11:00:00'),
-        content: 'Merci pour votre message. Je vous recontacte rapidement.',
-        channel: 'EMAIL',
-        direction: 'OUTBOUND',
-        author: 'Agent'
-      },
-      {
-        id: 3,
-        timestamp: new Date('2024-01-16T14:20:00'),
-        content: 'Appel téléphonique pour fixer un rendez-vous.',
-        channel: 'PHONE',
-        direction: 'OUTBOUND',
-        author: 'Agent'
-      }
-    ];
+  loadMessages(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
 
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.loadingMessages = true;
+    this.messageApiService.list({ dossierId, size: 100, sort: 'timestamp,desc' }).subscribe({
+      next: (response) => {
+        this.messages = response.content;
+        this.loadingMessages = false;
+      },
+      error: (err) => {
+        console.error('Error loading messages:', err);
+        this.loadingMessages = false;
+      }
+    });
+  }
+
+  loadMockData(): void {
     this.rendezVous = [
       {
         id: 1,
@@ -646,8 +641,78 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
-  getMessagesSorted(): Message[] {
-    return this.messages.slice().sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  getMessagesSorted(): MessageResponse[] {
+    return this.messages.slice().sort((a, b) => {
+      const dateA = new Date(a.timestamp).getTime();
+      const dateB = new Date(b.timestamp).getTime();
+      return dateB - dateA;
+    });
+  }
+
+  openMessageDialog(): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const dialogData: MessageFormData = {
+      dossierId: this.dossier.id
+    };
+
+    const dialogRef = this.dialog.open(MessageFormDialogComponent, {
+      width: '500px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: MessageCreateRequest) => {
+      if (result) {
+        this.createMessage(result);
+      }
+    });
+  }
+
+  createMessage(request: MessageCreateRequest): void {
+    this.messageApiService.create(request).subscribe({
+      next: (newMessage) => {
+        this.snackBar.open('Message créé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.messages = [newMessage, ...this.messages];
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la création du message';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error creating message:', err);
+      }
+    });
+  }
+
+  formatMessageTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  }
+
+  truncateContent(content: string, maxLength = 200): string {
+    if (content.length <= maxLength) {
+      return content;
+    }
+    return content.substring(0, maxLength) + '...';
+  }
+
+  shouldShowVoirPlus(content: string, maxLength = 200): boolean {
+    return content.length > maxLength;
   }
 
   getChannelBadgeClass(channel: string): string {
@@ -655,6 +720,9 @@ export class DossierDetailComponent implements OnInit {
       case 'EMAIL': return 'channel-badge channel-email';
       case 'SMS': return 'channel-badge channel-sms';
       case 'PHONE': return 'channel-badge channel-phone';
+      case 'WHATSAPP': return 'channel-badge channel-whatsapp';
+      case 'CHAT': return 'channel-badge channel-chat';
+      case 'IN_APP': return 'channel-badge channel-inapp';
       case 'WEB': return 'channel-badge channel-web';
       default: return 'channel-badge';
     }

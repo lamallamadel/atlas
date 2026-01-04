@@ -37,6 +37,7 @@ import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
 import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
+import { MessageFormDialogComponent } from './components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
@@ -72,6 +73,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     EmptyStateComponent,
     BadgeStatusComponent,
     PartiePrenanteFormDialogComponent,
+    MessageFormDialogComponent,
     ConfirmDeleteDialogComponent,
     DateFormatPipe,
     PriceFormatPipe,

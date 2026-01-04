@@ -59,6 +59,14 @@ mvn test             # Run tests
 mvn spring-boot:run  # Start dev server
 ```
 
+## Infrastructure
+
+The `infra` directory contains Docker Compose configuration for services like PostgreSQL:
+```cmd
+cd infra
+docker-compose up -d
+```
+
 ## Summary
 
 - ✅ Frontend: Ready to use

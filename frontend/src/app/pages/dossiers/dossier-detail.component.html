@@ -313,26 +313,36 @@
 
         <mat-tab label="Messages">
           <div class="tab-content">
-            <div class="timeline-view">
+            <div class="tab-header-actions">
+              <button class="btn-add" (click)="openMessageDialog()">
+                Nouveau message
+              </button>
+            </div>
+
+            <div *ngIf="loadingMessages" class="loading-state">
+              <div class="spinner-small"></div>
+              <p>Chargement des messages...</p>
+            </div>
+
+            <div *ngIf="!loadingMessages" class="timeline-view">
               <div *ngIf="getMessagesSorted().length === 0" class="empty-message">
                 Aucun message disponible.
               </div>
-              <div *ngFor="let message of getMessagesSorted()" class="timeline-item">
-                <div class="timeline-marker"></div>
-                <div class="timeline-content">
-                  <div class="timeline-header">
-                    <span class="timeline-timestamp">{{ formatDateTime(message.timestamp) }}</span>
-                    <div class="timeline-badges">
-                      <span [class]="getChannelBadgeClass(message.channel)">{{ message.channel }}</span>
-                      <span [class]="getDirectionBadgeClass(message.direction)">
-                        {{ message.direction === 'INBOUND' ? 'Entrant' : 'Sortant' }}
-                      </span>
-                    </div>
+              <div *ngFor="let message of getMessagesSorted()" class="message-card">
+                <div class="message-card-header">
+                  <span class="message-timestamp">{{ formatMessageTimestamp(message.timestamp) }}</span>
+                  <div class="message-badges">
+                    <span [class]="getChannelBadgeClass(message.channel)">{{ message.channel }}</span>
+                    <span [class]="getDirectionBadgeClass(message.direction)">
+                      {{ message.direction === 'INBOUND' ? 'Entrant' : 'Sortant' }}
+                    </span>
                   </div>
-                  <div class="timeline-body">
-                    <p class="timeline-message">{{ message.content }}</p>
-                    <p class="timeline-author" *ngIf="message.author">Par: {{ message.author }}</p>
-                  </div>
+                </div>
+                <div class="message-card-body">
+                  <p class="message-content">
+                    {{ truncateContent(message.content) }}
+                    <span *ngIf="shouldShowVoirPlus(message.content)" class="voir-plus">Voir plus</span>
+                  </p>
                 </div>
               </div>
             </div>
