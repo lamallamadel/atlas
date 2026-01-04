@@ -352,105 +352,61 @@
         <mat-tab label="Rendez-vous">
           <div class="tab-content">
             <div class="tab-header-actions">
-              <button class="btn-add" (click)="toggleRendezVousForm()" *ngIf="!showRendezVousForm">
-                Ajouter un rendez-vous
+              <button class="btn-add" (click)="openAppointmentDialog()">
+                Planifier
               </button>
             </div>
 
-            <div *ngIf="showRendezVousForm" class="add-form-section">
-              <h3>Ajouter un rendez-vous</h3>
-              <div class="rdv-form">
-                <div class="form-group">
-                  <label for="rdv-date" class="form-label">Date :</label>
-                  <input
-                    id="rdv-date"
-                    type="date"
-                    class="form-input"
-                    [(ngModel)]="rdvFormDate"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label for="rdv-time" class="form-label">Heure :</label>
-                  <input
-                    id="rdv-time"
-                    type="time"
-                    class="form-input"
-                    [(ngModel)]="rdvFormTime"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label for="rdv-location" class="form-label">Lieu :</label>
-                  <input
-                    id="rdv-location"
-                    type="text"
-                    class="form-input"
-                    [(ngModel)]="rdvFormLocation"
-                    placeholder="Adresse du rendez-vous"
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label for="rdv-status" class="form-label">Statut :</label>
-                  <select id="rdv-status" class="form-select" [(ngModel)]="rdvFormStatus">
-                    <option value="SCHEDULED">Planifié</option>
-                    <option value="CONFIRMED">Confirmé</option>
-                    <option value="COMPLETED">Terminé</option>
-                    <option value="CANCELLED">Annulé</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label for="rdv-notes" class="form-label">Notes :</label>
-                  <textarea
-                    id="rdv-notes"
-                    class="form-textarea"
-                    [(ngModel)]="rdvFormNotes"
-                    placeholder="Notes additionnelles"
-                    rows="3"
-                  ></textarea>
-                </div>
-
-                <div class="form-actions">
-                  <button class="btn-update-lead" (click)="addRendezVous()">
-                    Enregistrer
-                  </button>
-                  <button class="btn-cancel" (click)="toggleRendezVousForm()">
-                    Annuler
-                  </button>
-                </div>
-              </div>
+            <div *ngIf="loadingAppointments" class="loading-state">
+              <div class="spinner-small"></div>
+              <p>Chargement des rendez-vous...</p>
             </div>
 
-            <div class="data-table-wrapper">
-              <table class="data-table" *ngIf="rendezVous.length > 0">
+            <div *ngIf="!loadingAppointments" class="data-table-wrapper">
+              <table class="data-table" *ngIf="appointments.length > 0">
                 <thead>
                   <tr>
-                    <th>Date</th>
-                    <th>Heure</th>
+                    <th>Date/Heure</th>
                     <th>Lieu</th>
+                    <th>Assigné à</th>
                     <th>Statut</th>
                     <th>Notes</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngFor="let rdv of rendezVous">
-                    <td>{{ formatDateOnly(rdv.date) }}</td>
-                    <td>{{ rdv.time }}</td>
-                    <td>{{ rdv.location }}</td>
+                  <tr *ngFor="let appointment of appointments">
                     <td>
-                      <span [class]="getRdvStatusBadgeClass(rdv.status)">{{ getRdvStatusLabel(rdv.status) }}</span>
+                      <div class="appointment-datetime">
+                        <div class="datetime-start">{{ formatAppointmentDateTime(appointment.startTime) }}</div>
+                        <div class="datetime-end">→ {{ formatAppointmentDateTime(appointment.endTime) }}</div>
+                      </div>
                     </td>
-                    <td>{{ rdv.notes || '—' }}</td>
+                    <td>{{ appointment.location || '—' }}</td>
+                    <td>{{ appointment.assignedTo || '—' }}</td>
                     <td>
-                      <button class="btn-edit" (click)="editRendezVous(rdv)">Éditer</button>
+                      <span [class]="getAppointmentStatusBadgeClass(appointment.status)">
+                        {{ getAppointmentStatusLabel(appointment.status) }}
+                      </span>
+                    </td>
+                    <td>{{ appointment.notes || '—' }}</td>
+                    <td>
+                      <div class="action-buttons">
+                        <button class="btn-edit" (click)="editAppointment(appointment)">Éditer</button>
+                        <button 
+                          class="btn-complete" 
+                          (click)="completeAppointment(appointment)"
+                          *ngIf="appointment.status === 'SCHEDULED'"
+                        >
+                          Terminer
+                        </button>
+                        <button class="btn-delete" (click)="deleteAppointment(appointment)">Supprimer</button>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
               </table>
-              <p *ngIf="rendezVous.length === 0" class="empty-message">
+              <p *ngIf="appointments.length === 0" class="empty-message">
                 Aucun rendez-vous planifié.
               </p>
             </div>

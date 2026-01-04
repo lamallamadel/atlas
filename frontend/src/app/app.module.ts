@@ -39,6 +39,7 @@ import { BadgeStatusComponent } from './components/badge-status.component';
 import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent } from './components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
+import { AppointmentFormDialogComponent } from './components/appointment-form-dialog.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
@@ -75,6 +76,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     PartiePrenanteFormDialogComponent,
     MessageFormDialogComponent,
     ConfirmDeleteDialogComponent,
+    AppointmentFormDialogComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe

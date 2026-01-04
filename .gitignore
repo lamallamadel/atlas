@@ -183,3 +183,5 @@ setup-repo.cmd
 backend/mvn-output.txt
 backend/mvn-error.txt
 backend/.mavenrc
+backend/mavenrc_pre.bat
+run-backend-maven-install.cmd

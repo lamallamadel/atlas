@@ -10,28 +10,38 @@ export enum AppointmentStatus {
 
 export interface AppointmentCreateRequest {
   dossierId: number;
-  status: AppointmentStatus;
-  scheduledAt: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  assignedTo?: string;
   notes?: string;
+  status?: AppointmentStatus;
 }
 
 export interface AppointmentUpdateRequest {
-  status: AppointmentStatus;
-  scheduledAt: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  assignedTo?: string;
   notes?: string;
+  status?: AppointmentStatus;
 }
 
 export interface AppointmentResponse {
   id: number;
   orgId: string;
   dossierId: number;
-  status: AppointmentStatus;
-  scheduledAt: string;
+  startTime: string;
+  endTime: string;
+  location?: string;
+  assignedTo?: string;
   notes?: string;
+  status: AppointmentStatus;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
   updatedBy?: string;
+  warnings?: string[];
 }
 
 export interface Page<T> {

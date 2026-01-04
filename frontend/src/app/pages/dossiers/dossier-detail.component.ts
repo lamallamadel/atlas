@@ -5,9 +5,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
 import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
 import { MessageApiService, MessageResponse, MessageCreateRequest } from '../../services/message-api.service';
+import { AppointmentApiService, AppointmentResponse, AppointmentCreateRequest, AppointmentUpdateRequest, AppointmentStatus } from '../../services/appointment-api.service';
 import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent, MessageFormData } from '../../components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
+import { AppointmentFormDialogComponent, AppointmentFormData } from '../../components/appointment-form-dialog.component';
 
 
 
@@ -72,6 +74,8 @@ export class DossierDetailComponent implements OnInit {
 
   messages: MessageResponse[] = [];
   loadingMessages = false;
+  appointments: AppointmentResponse[] = [];
+  loadingAppointments = false;
   rendezVous: RendezVous[] = [];
   consentements: Consentement[] = [];
   auditEvents: AuditEvent[] = [];
@@ -94,6 +98,7 @@ export class DossierDetailComponent implements OnInit {
     private dossierApiService: DossierApiService,
     private partiePrenanteApiService: PartiePrenanteApiService,
     private messageApiService: MessageApiService,
+    private appointmentApiService: AppointmentApiService,
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
@@ -158,6 +163,7 @@ export class DossierDetailComponent implements OnInit {
   ngOnInit(): void {
     this.loadDossier();
     this.loadMessages();
+    this.loadAppointments();
     this.loadMockData();
   }
 
@@ -215,6 +221,30 @@ export class DossierDetailComponent implements OnInit {
       error: (err) => {
         console.error('Error loading messages:', err);
         this.loadingMessages = false;
+      }
+    });
+  }
+
+  loadAppointments(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.loadingAppointments = true;
+    this.appointmentApiService.list({ dossierId, size: 100, sort: 'startTime,desc' }).subscribe({
+      next: (response) => {
+        this.appointments = response.content;
+        this.loadingAppointments = false;
+      },
+      error: (err) => {
+        console.error('Error loading appointments:', err);
+        this.loadingAppointments = false;
       }
     });
   }
@@ -619,11 +649,214 @@ export class DossierDetailComponent implements OnInit {
     this.resetRendezVousForm();
   }
 
-  editRendezVous(_rdv: RendezVous): void {
+  editRendezVous(rdv: RendezVous): void {
+    console.log('Mock rendez-vous edit:', rdv);
     this.snackBar.open('Édition de rendez-vous non implémentée (mock data)', 'Fermer', {
       duration: 3000,
       horizontalPosition: 'center',
       verticalPosition: 'top'
+    });
+  }
+
+  openAppointmentDialog(appointment?: AppointmentResponse): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const dialogData: AppointmentFormData = appointment ? {
+      id: appointment.id,
+      dossierId: this.dossier.id,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      location: appointment.location,
+      assignedTo: appointment.assignedTo,
+      notes: appointment.notes,
+      status: appointment.status
+    } : {
+      dossierId: this.dossier.id
+    };
+
+    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
+      width: '600px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: AppointmentFormData) => {
+      if (result) {
+        if (result.id) {
+          this.updateAppointment(result.id, result);
+        } else {
+          this.createAppointment(result);
+        }
+      }
+    });
+  }
+
+  createAppointment(data: AppointmentFormData): void {
+    if (!data.startTime || !data.endTime) {
+      return;
+    }
+
+    const request: AppointmentCreateRequest = {
+      dossierId: data.dossierId,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      location: data.location,
+      assignedTo: data.assignedTo,
+      notes: data.notes,
+      status: data.status
+    };
+
+    this.appointmentApiService.create(request).subscribe({
+      next: (response) => {
+        if (response.warnings && response.warnings.length > 0) {
+          response.warnings.forEach(warning => {
+            this.snackBar.open(`⚠️ ${warning}`, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['warning-snackbar']
+            });
+          });
+        }
+        this.snackBar.open('Rendez-vous créé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadAppointments();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la création du rendez-vous';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error creating appointment:', err);
+      }
+    });
+  }
+
+  updateAppointment(id: number, data: AppointmentFormData): void {
+    if (!data.startTime || !data.endTime) {
+      return;
+    }
+
+    const request: AppointmentUpdateRequest = {
+      startTime: data.startTime,
+      endTime: data.endTime,
+      location: data.location,
+      assignedTo: data.assignedTo,
+      notes: data.notes,
+      status: data.status
+    };
+
+    this.appointmentApiService.update(id, request).subscribe({
+      next: (response) => {
+        if (response.warnings && response.warnings.length > 0) {
+          response.warnings.forEach(warning => {
+            this.snackBar.open(`⚠️ ${warning}`, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['warning-snackbar']
+            });
+          });
+        }
+        this.snackBar.open('Rendez-vous modifié avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadAppointments();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la modification du rendez-vous';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating appointment:', err);
+      }
+    });
+  }
+
+  editAppointment(appointment: AppointmentResponse): void {
+    this.openAppointmentDialog(appointment);
+  }
+
+  deleteAppointment(appointment: AppointmentResponse): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Supprimer le rendez-vous',
+        message: `Êtes-vous sûr de vouloir supprimer ce rendez-vous ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.appointmentApiService.delete(appointment.id).subscribe({
+          next: () => {
+            this.snackBar.open('Rendez-vous supprimé avec succès', 'Fermer', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar']
+            });
+            this.loadAppointments();
+          },
+          error: (err) => {
+            const errorMessage = err.error?.message || 'Échec de la suppression du rendez-vous';
+            this.snackBar.open(errorMessage, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
+            console.error('Error deleting appointment:', err);
+          }
+        });
+      }
+    });
+  }
+
+  completeAppointment(appointment: AppointmentResponse): void {
+    const request: AppointmentUpdateRequest = {
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      location: appointment.location,
+      assignedTo: appointment.assignedTo,
+      notes: appointment.notes,
+      status: AppointmentStatus.COMPLETED
+    };
+
+    this.appointmentApiService.update(appointment.id, request).subscribe({
+      next: () => {
+        this.snackBar.open('Rendez-vous marqué comme terminé', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadAppointments();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la mise à jour du rendez-vous';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error completing appointment:', err);
+      }
     });
   }
 
@@ -760,5 +993,37 @@ export class DossierDetailComponent implements OnInit {
       case PartiePrenanteRole.AGENT: return 'Agent';
       default: return role;
     }
+  }
+
+  getAppointmentStatusBadgeClass(status: AppointmentStatus): string {
+    switch (status) {
+      case AppointmentStatus.SCHEDULED: return 'status-badge status-scheduled';
+      case AppointmentStatus.COMPLETED: return 'status-badge status-completed';
+      case AppointmentStatus.CANCELLED: return 'status-badge status-cancelled';
+      default: return 'status-badge';
+    }
+  }
+
+  getAppointmentStatusLabel(status: AppointmentStatus): string {
+    switch (status) {
+      case AppointmentStatus.SCHEDULED: return 'Planifié';
+      case AppointmentStatus.COMPLETED: return 'Terminé';
+      case AppointmentStatus.CANCELLED: return 'Annulé';
+      default: return status;
+    }
+  }
+
+  formatAppointmentDateTime(dateTime: string): string {
+    if (!dateTime) {
+      return '—';
+    }
+    const date = new Date(dateTime);
+    return date.toLocaleString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

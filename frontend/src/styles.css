@@ -36,3 +36,12 @@ a {
 .error-snackbar .mat-simple-snackbar-action {
   color: white !important;
 }
+
+.warning-snackbar {
+  background-color: #f39c12 !important;
+  color: white !important;
+}
+
+.warning-snackbar .mat-simple-snackbar-action {
+  color: white !important;
+}

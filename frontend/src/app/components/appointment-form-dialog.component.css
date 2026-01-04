@@ -1,0 +1,31 @@
+.appointment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 500px;
+  padding: 20px 0;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-error-message {
+  padding: 12px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+mat-dialog-content {
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0 -24px -24px -24px;
+  border-top: 1px solid #e0e0e0;
+}
