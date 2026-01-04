@@ -18,6 +18,8 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -34,6 +36,8 @@ import { SessionExpiredComponent } from './pages/session-expired/session-expired
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
+import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
+import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
@@ -67,6 +71,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     GenericTableComponent,
     EmptyStateComponent,
     BadgeStatusComponent,
+    PartiePrenanteFormDialogComponent,
+    ConfirmDeleteDialogComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
@@ -92,7 +98,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatAutocompleteModule,
     MatSnackBarModule,
     MatCardModule,
-    MatTabsModule
+    MatTabsModule,
+    MatDialogModule,
+    MatSelectModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },

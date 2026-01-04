@@ -1,7 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatDialog } from '@angular/material/dialog';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
+import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
+import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
+import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 
 export interface Message {
   id: number;
@@ -92,9 +96,11 @@ export class DossierDetailComponent implements OnInit {
 
   constructor(
     private dossierApiService: DossierApiService,
+    private partiePrenanteApiService: PartiePrenanteApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   getAvailableStatusOptions(): DossierStatus[] {
@@ -447,10 +453,7 @@ export class DossierDetailComponent implements OnInit {
   }
 
   togglePartieForm(): void {
-    this.showPartieForm = !this.showPartieForm;
-    if (!this.showPartieForm) {
-      this.resetPartieForm();
-    }
+    this.openPartiePrenanteDialog();
   }
 
   resetPartieForm(): void {
@@ -461,21 +464,138 @@ export class DossierDetailComponent implements OnInit {
     this.partieFormPhone = '';
   }
 
-  addPartie(): void {
-    this.snackBar.open('Ajout de partie prenante non implémenté (mock data)', 'Fermer', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
+  openPartiePrenanteDialog(partie?: PartiePrenanteResponse): void {
+    const dialogData: PartiePrenanteFormData | null = partie ? {
+      id: partie.id,
+      role: partie.role,
+      firstName: partie.firstName || '',
+      lastName: partie.lastName || '',
+      phone: partie.phone || '',
+      email: partie.email || ''
+    } : null;
+
+    const dialogRef = this.dialog.open(PartiePrenanteFormDialogComponent, {
+      width: '500px',
+      data: dialogData
     });
-    this.showPartieForm = false;
-    this.resetPartieForm();
+
+    dialogRef.afterClosed().subscribe((result: PartiePrenanteFormData) => {
+      if (result) {
+        if (result.id) {
+          this.updatePartie(result.id, result);
+        } else {
+          this.addPartie(result);
+        }
+      }
+    });
   }
 
-  editPartie(_partie: PartiePrenanteResponse): void {
-    this.snackBar.open('Édition de partie prenante non implémentée (mock data)', 'Fermer', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top'
+  addPartie(data: PartiePrenanteFormData): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const request: PartiePrenanteCreateRequest = {
+      dossierId: this.dossier.id,
+      role: data.role,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      email: data.email
+    };
+
+    this.partiePrenanteApiService.create(request).subscribe({
+      next: () => {
+        this.snackBar.open('Partie prenante ajoutée avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadDossier();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de l\'ajout de la partie prenante';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error adding partie prenante:', err);
+      }
+    });
+  }
+
+  updatePartie(id: number, data: PartiePrenanteFormData): void {
+    const request: PartiePrenanteUpdateRequest = {
+      role: data.role,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      email: data.email
+    };
+
+    this.partiePrenanteApiService.update(id, request).subscribe({
+      next: () => {
+        this.snackBar.open('Partie prenante modifiée avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadDossier();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la modification de la partie prenante';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating partie prenante:', err);
+      }
+    });
+  }
+
+  editPartie(partie: PartiePrenanteResponse): void {
+    this.openPartiePrenanteDialog(partie);
+  }
+
+  deletePartie(partie: PartiePrenanteResponse): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Supprimer la partie prenante',
+        message: `Êtes-vous sûr de vouloir supprimer ${partie.firstName} ${partie.lastName} ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.partiePrenanteApiService.delete(partie.id).subscribe({
+          next: () => {
+            this.snackBar.open('Partie prenante supprimée avec succès', 'Fermer', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar']
+            });
+            this.loadDossier();
+          },
+          error: (err) => {
+            const errorMessage = err.error?.message || 'Échec de la suppression de la partie prenante';
+            this.snackBar.open(errorMessage, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
+            console.error('Error deleting partie prenante:', err);
+          }
+        });
+      }
     });
   }
 
