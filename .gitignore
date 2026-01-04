@@ -191,3 +191,5 @@ frontend/frontend/
 
 # Additional temporary setup scripts
 run-backend-install.cmd
+backend-setup-wrapper.ps1
+setup-backend-mvn.cmd
