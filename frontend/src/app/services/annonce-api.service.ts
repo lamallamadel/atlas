@@ -5,6 +5,8 @@ import { Observable } from 'rxjs';
 export enum AnnonceStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
+  ACTIVE = 'ACTIVE',
+  PAUSED = 'PAUSED',
   ARCHIVED = 'ARCHIVED'
 }
 
@@ -13,8 +15,8 @@ export interface AnnonceResponse {
   orgId: string;
   title: string;
   description?: string;
-  category?: string;
-  type?: string;
+  category?: string; // APARTMENT/HOUSE/STUDIO/COMMERCIAL
+  type?: string;     // SALE/RENT/LEASE/EXCHANGE
   address?: string;
   surface?: number;
   city?: string;
@@ -31,7 +33,6 @@ export interface AnnonceResponse {
 }
 
 export interface AnnonceCreateRequest {
-  orgId: string;
   title: string;
   description?: string;
   category?: string;
@@ -101,11 +102,29 @@ export interface AnnonceListParams {
   sort?: string;
 }
 
+export interface AnnonceBulkUpdateRequest {
+  ids: number[];
+  updates: {
+    status?: AnnonceStatus;
+    city?: string;
+  };
+}
+
+export interface BulkOperationResponse {
+  successCount: number;
+  failureCount: number;
+  errors: BulkOperationError[];
+}
+
+export interface BulkOperationError {
+  id: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AnnonceApiService {
-
   private readonly apiUrl = '/api/v1/annonces';
 
   constructor(private http: HttpClient) { }
@@ -152,5 +171,9 @@ export class AnnonceApiService {
 
   update(id: number, request: AnnonceUpdateRequest): Observable<AnnonceResponse> {
     return this.http.put<AnnonceResponse>(`${this.apiUrl}/${id}`, request);
+  }
+
+  bulkUpdate(request: AnnonceBulkUpdateRequest): Observable<BulkOperationResponse> {
+    return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-update`, request);
   }
 }

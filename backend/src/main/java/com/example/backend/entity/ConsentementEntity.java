@@ -4,7 +4,10 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
 
@@ -13,12 +16,16 @@ import java.util.Map;
 
 @Entity
 @Table(name = "consentement")
-public class ConsentementEntity {
+@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+public class ConsentementEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
+
+    @Column(name = "org_id", nullable = false)
+    private String orgId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_id", nullable = false)
@@ -98,5 +105,13 @@ public class ConsentementEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 }

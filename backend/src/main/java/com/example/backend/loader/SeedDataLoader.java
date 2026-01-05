@@ -21,6 +21,8 @@ import java.util.*;
 public class SeedDataLoader implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(SeedDataLoader.class);
+    private static final String ORG_001 = "ORG-001";
+    private static final String ORG_002 = "ORG-002";
 
     private final AnnonceRepository annonceRepository;
     private final DossierRepository dossierRepository;
@@ -50,10 +52,13 @@ public class SeedDataLoader implements CommandLineRunner {
     }
 
     private void loadAnnonces() {
-        logger.info("Loading annonces...");
+        logger.info("Loading annonces for ORG-001 and ORG-002...");
 
+        List<Annonce> annonces = new ArrayList<>();
+
+        // ORG-001 Annonces
         Annonce annonce1 = new Annonce();
-        annonce1.setOrgId("org-001");
+        annonce1.setOrgId(ORG_001);
         annonce1.setTitle("Beautiful 3BR Apartment in Downtown");
         annonce1.setDescription("Spacious apartment with modern amenities, great views, and convenient location.");
         annonce1.setCategory("Residential");
@@ -73,12 +78,13 @@ public class SeedDataLoader implements CommandLineRunner {
         rules1.put("smokingAllowed", false);
         rules1.put("minLeaseTerm", 12);
         annonce1.setRulesJson(rules1);
-        annonce1.setMeta(Map.of("source", "seed", "priority", "high"));
+        annonce1.setMeta(Map.of("source", "seed", "priority", "high", "org", ORG_001));
         annonce1.setCreatedBy("system-seed");
         annonce1.setUpdatedBy("system-seed");
+        annonces.add(annonce1);
 
         Annonce annonce2 = new Annonce();
-        annonce2.setOrgId("org-001");
+        annonce2.setOrgId(ORG_001);
         annonce2.setTitle("Luxury Villa with Pool");
         annonce2.setDescription("Stunning villa with private pool, garden, and mountain views.");
         annonce2.setCategory("Residential");
@@ -89,11 +95,13 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce2.setPrice(new BigDecimal("3500.00"));
         annonce2.setCurrency("EUR");
         annonce2.setStatus(AnnonceStatus.PAUSED);
+        annonce2.setMeta(Map.of("source", "seed", "org", ORG_001));
         annonce2.setCreatedBy("system-seed");
         annonce2.setUpdatedBy("system-seed");
+        annonces.add(annonce2);
 
         Annonce annonce3 = new Annonce();
-        annonce3.setOrgId("org-001");
+        annonce3.setOrgId(ORG_001);
         annonce3.setTitle("Commercial Space in Business District");
         annonce3.setDescription("Prime commercial location perfect for retail or office space.");
         annonce3.setCategory("Commercial");
@@ -104,11 +112,13 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce3.setPrice(new BigDecimal("2800.00"));
         annonce3.setCurrency("EUR");
         annonce3.setStatus(AnnonceStatus.ARCHIVED);
+        annonce3.setMeta(Map.of("source", "seed", "org", ORG_001));
         annonce3.setCreatedBy("system-seed");
         annonce3.setUpdatedBy("system-seed");
+        annonces.add(annonce3);
 
         Annonce annonce4 = new Annonce();
-        annonce4.setOrgId("org-001");
+        annonce4.setOrgId(ORG_001);
         annonce4.setTitle("Modern Studio in Le Marais");
         annonce4.setDescription("Charming studio in the heart of Le Marais.");
         annonce4.setCategory("Residential");
@@ -119,13 +129,13 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce4.setPrice(new BigDecimal("1200.00"));
         annonce4.setCurrency("EUR");
         annonce4.setStatus(AnnonceStatus.ACTIVE);
-        annonce4.setMeta(Map.of("source", "seed-uat"));
+        annonce4.setMeta(Map.of("source", "seed-uat", "org", ORG_001));
         annonce4.setCreatedBy("system-seed");
         annonce4.setUpdatedBy("system-seed");
+        annonces.add(annonce4);
 
-        // Duplicate case
         Annonce annonce5 = new Annonce();
-        annonce5.setOrgId("org-001");
+        annonce5.setOrgId(ORG_001);
         annonce5.setTitle("Modern Studio in Le Marais");
         annonce5.setDescription("This is a duplicate for UAT testing.");
         annonce5.setCategory("Residential");
@@ -136,35 +146,153 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce5.setPrice(new BigDecimal("1250.00"));
         annonce5.setCurrency("EUR");
         annonce5.setStatus(AnnonceStatus.DRAFT);
-        annonce5.setMeta(Map.of("source", "seed-duplicate"));
+        annonce5.setMeta(Map.of("source", "seed-duplicate", "org", ORG_001));
         annonce5.setCreatedBy("system-seed");
         annonce5.setUpdatedBy("system-seed");
+        annonces.add(annonce5);
 
-        List<Annonce> annonces = annonceRepository.saveAll(Arrays.asList(annonce1, annonce2, annonce3, annonce4, annonce5));
-        logger.info("Loaded {} annonces", annonces.size());
+        // ORG-002 Annonces
+        Annonce annonce6 = new Annonce();
+        annonce6.setOrgId(ORG_002);
+        annonce6.setTitle("Elegant 2BR Condo with Terrace");
+        annonce6.setDescription("Bright and spacious condo with a large terrace overlooking the city.");
+        annonce6.setCategory("Residential");
+        annonce6.setType(AnnonceType.SALE);
+        annonce6.setAddress("45 Avenue Montaigne");
+        annonce6.setCity("Paris");
+        annonce6.setSurface(95.0);
+        annonce6.setPrice(new BigDecimal("650000.00"));
+        annonce6.setCurrency("EUR");
+        annonce6.setStatus(AnnonceStatus.ACTIVE);
+        annonce6.setPhotos(Arrays.asList(
+                "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"
+        ));
+        annonce6.setMeta(Map.of("source", "seed", "priority", "medium", "org", ORG_002));
+        annonce6.setCreatedBy("system-seed");
+        annonce6.setUpdatedBy("system-seed");
+        annonces.add(annonce6);
+
+        Annonce annonce7 = new Annonce();
+        annonce7.setOrgId(ORG_002);
+        annonce7.setTitle("Cozy 1BR Apartment in Montmartre");
+        annonce7.setDescription("Perfect starter home in the charming Montmartre district.");
+        annonce7.setCategory("Residential");
+        annonce7.setType(AnnonceType.RENT);
+        annonce7.setAddress("22 Rue Lepic");
+        annonce7.setCity("Paris");
+        annonce7.setSurface(48.0);
+        annonce7.setPrice(new BigDecimal("1350.00"));
+        annonce7.setCurrency("EUR");
+        annonce7.setStatus(AnnonceStatus.ACTIVE);
+        annonce7.setMeta(Map.of("source", "seed", "org", ORG_002));
+        annonce7.setCreatedBy("system-seed");
+        annonce7.setUpdatedBy("system-seed");
+        annonces.add(annonce7);
+
+        Annonce annonce8 = new Annonce();
+        annonce8.setOrgId(ORG_002);
+        annonce8.setTitle("Office Space in Tech Hub");
+        annonce8.setDescription("Modern office space in the heart of the tech district with excellent connectivity.");
+        annonce8.setCategory("Commercial");
+        annonce8.setType(AnnonceType.LEASE);
+        annonce8.setAddress("101 Innovation Drive");
+        annonce8.setCity("Lyon");
+        annonce8.setSurface(220.0);
+        annonce8.setPrice(new BigDecimal("4200.00"));
+        annonce8.setCurrency("EUR");
+        annonce8.setStatus(AnnonceStatus.ACTIVE);
+        annonce8.setMeta(Map.of("source", "seed", "priority", "high", "org", ORG_002));
+        annonce8.setCreatedBy("system-seed");
+        annonce8.setUpdatedBy("system-seed");
+        annonces.add(annonce8);
+
+        Annonce annonce9 = new Annonce();
+        annonce9.setOrgId(ORG_002);
+        annonce9.setTitle("Penthouse with Panoramic Views");
+        annonce9.setDescription("Luxurious penthouse with 360-degree views of the city skyline.");
+        annonce9.setCategory("Residential");
+        annonce9.setType(AnnonceType.SALE);
+        annonce9.setAddress("88 Grande Rue");
+        annonce9.setCity("Marseille");
+        annonce9.setSurface(310.0);
+        annonce9.setPrice(new BigDecimal("1250000.00"));
+        annonce9.setCurrency("EUR");
+        annonce9.setStatus(AnnonceStatus.ACTIVE);
+        annonce9.setMeta(Map.of("source", "seed", "priority", "high", "org", ORG_002));
+        annonce9.setCreatedBy("system-seed");
+        annonce9.setUpdatedBy("system-seed");
+        annonces.add(annonce9);
+
+        Annonce annonce10 = new Annonce();
+        annonce10.setOrgId(ORG_002);
+        annonce10.setTitle("Retail Space in Shopping District");
+        annonce10.setDescription("High-traffic retail location ideal for boutique or restaurant.");
+        annonce10.setCategory("Commercial");
+        annonce10.setType(AnnonceType.LEASE);
+        annonce10.setAddress("15 Rue de Commerce");
+        annonce10.setCity("Lyon");
+        annonce10.setSurface(85.0);
+        annonce10.setPrice(new BigDecimal("2200.00"));
+        annonce10.setCurrency("EUR");
+        annonce10.setStatus(AnnonceStatus.PAUSED);
+        annonce10.setMeta(Map.of("source", "seed", "org", ORG_002));
+        annonce10.setCreatedBy("system-seed");
+        annonce10.setUpdatedBy("system-seed");
+        annonces.add(annonce10);
+
+        List<Annonce> savedAnnonces = annonceRepository.saveAll(annonces);
+        logger.info("Loaded {} annonces ({} for ORG-001, {} for ORG-002)", 
+                savedAnnonces.size(), 5, 5);
     }
 
     private void loadDossiers() {
-        logger.info("Loading dossiers...");
+        logger.info("Loading dossiers for ORG-001 and ORG-002...");
 
-        List<Annonce> annonces = annonceRepository.findAll();
-        Long annonceId = annonces.isEmpty() ? null : annonces.get(0).getId();
+        List<Annonce> allAnnonces = annonceRepository.findAll();
+        
+        List<Annonce> org001Annonces = allAnnonces.stream()
+                .filter(a -> ORG_001.equals(a.getOrgId()))
+                .toList();
+        
+        List<Annonce> org002Annonces = allAnnonces.stream()
+                .filter(a -> ORG_002.equals(a.getOrgId()))
+                .toList();
 
         List<Dossier> dossiers = new ArrayList<>();
 
-        dossiers.add(createDossier("org-001", annonceId, "+33612345678", "Jean Dupont", "Website", DossierStatus.NEW, 85, DossierSource.WEB));
-        dossiers.add(createDossier("org-001", annonceId, "+33698765432", "Marie Martin", "Mobile App", DossierStatus.NEW, 75, DossierSource.MOBILE));
-        dossiers.add(createDossier("org-001", annonceId, "+33623456789", "Pierre Durand", "Phone Call", DossierStatus.NEW, 90, DossierSource.PHONE));
-        dossiers.add(createDossier("org-001", annonceId, "+33645678901", "Sophie Bernard", "Email", DossierStatus.QUALIFIED, 88, DossierSource.EMAIL));
-        dossiers.add(createDossier("org-001", annonceId, "+33656789012", "Luc Petit", "Referral", DossierStatus.QUALIFIED, 92, DossierSource.REFERRAL));
-        dossiers.add(createDossier("org-001", annonceId, "+33667890123", "Emma Robert", "Walk-in", DossierStatus.QUALIFIED, 78, DossierSource.WALK_IN));
-        dossiers.add(createDossier("org-001", annonceId, "+33678901234", "Thomas Richard", "Social Media", DossierStatus.APPOINTMENT, 95, DossierSource.SOCIAL_MEDIA));
-        dossiers.add(createDossier("org-001", annonceId, "+33689012345", "Julie Dubois", "Website", DossierStatus.WON, 98, DossierSource.WEB));
-        dossiers.add(createDossier("org-001", annonceId, "+33690123456", "Antoine Moreau", "Mobile App", DossierStatus.LOST, 65, DossierSource.MOBILE));
-        dossiers.add(createDossier("org-001", annonceId, "+33612345678", "Jean Dupont", "Phone Call", DossierStatus.NEW, 80, DossierSource.PHONE));
+        if (!org001Annonces.isEmpty()) {
+            Long org001AnnonceId = org001Annonces.get(0).getId();
+            
+            // ORG-001 Dossiers
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33612345678", "Jean Dupont", "Website", DossierStatus.NEW, 85, DossierSource.WEB));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33698765432", "Marie Martin", "Mobile App", DossierStatus.NEW, 75, DossierSource.MOBILE));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33623456789", "Pierre Durand", "Phone Call", DossierStatus.NEW, 90, DossierSource.PHONE));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33645678901", "Sophie Bernard", "Email", DossierStatus.QUALIFIED, 88, DossierSource.EMAIL));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33656789012", "Luc Petit", "Referral", DossierStatus.QUALIFIED, 92, DossierSource.REFERRAL));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33667890123", "Emma Robert", "Walk-in", DossierStatus.QUALIFIED, 78, DossierSource.WALK_IN));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33678901234", "Thomas Richard", "Social Media", DossierStatus.APPOINTMENT, 95, DossierSource.SOCIAL_MEDIA));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33689012345", "Julie Dubois", "Website", DossierStatus.WON, 98, DossierSource.WEB));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33690123456", "Antoine Moreau", "Mobile App", DossierStatus.LOST, 65, DossierSource.MOBILE));
+            dossiers.add(createDossier(ORG_001, org001AnnonceId, "+33612345678", "Jean Dupont", "Phone Call", DossierStatus.NEW, 80, DossierSource.PHONE));
+        }
+
+        if (!org002Annonces.isEmpty()) {
+            Long org002AnnonceId = org002Annonces.get(0).getId();
+            
+            // ORG-002 Dossiers
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33711223344", "Alice Rousseau", "Website", DossierStatus.NEW, 82, DossierSource.WEB));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33722334455", "Bob Lefebvre", "Mobile App", DossierStatus.QUALIFIED, 87, DossierSource.MOBILE));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33733445566", "Catherine Blanc", "Email", DossierStatus.QUALIFIED, 91, DossierSource.EMAIL));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33744556677", "Daniel Leroy", "Referral", DossierStatus.APPOINTMENT, 94, DossierSource.REFERRAL));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33755667788", "Élise Bonnet", "Phone Call", DossierStatus.WON, 96, DossierSource.PHONE));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33766778899", "François Gauthier", "Walk-in", DossierStatus.NEW, 73, DossierSource.WALK_IN));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33777889900", "Gérard Fournier", "Social Media", DossierStatus.QUALIFIED, 85, DossierSource.SOCIAL_MEDIA));
+            dossiers.add(createDossier(ORG_002, org002AnnonceId, "+33788990011", "Hélène Lambert", "Website", DossierStatus.LOST, 68, DossierSource.WEB));
+        }
 
         List<Dossier> savedDossiers = dossierRepository.saveAll(dossiers);
-        logger.info("Loaded {} dossiers", savedDossiers.size());
+        logger.info("Loaded {} dossiers ({} for ORG-001, {} for ORG-002)", 
+                savedDossiers.size(), 10, 8);
 
         loadPartiesPrenantes(savedDossiers);
     }
@@ -188,46 +316,69 @@ public class SeedDataLoader implements CommandLineRunner {
     private void loadPartiesPrenantes(List<Dossier> dossiers) {
         logger.info("Loading parties prenantes...");
 
-        if (dossiers.size() < 3) {
+        if (dossiers.size() < 6) {
             logger.warn("Not enough dossiers to create parties prenantes");
             return;
         }
 
         List<PartiePrenanteEntity> parties = new ArrayList<>();
 
-        PartiePrenanteEntity party1 = createPartie(dossiers.get(0), PartiePrenanteRole.BUYER, 
-                "Jean", "Dupont", "jean.dupont@email.com", "+33612345678", "123 Rue de la Paix, Paris");
-        parties.add(party1);
+        // Get dossiers by org
+        List<Dossier> org001Dossiers = dossiers.stream()
+                .filter(d -> ORG_001.equals(d.getOrgId()))
+                .toList();
+        
+        List<Dossier> org002Dossiers = dossiers.stream()
+                .filter(d -> ORG_002.equals(d.getOrgId()))
+                .toList();
 
-        PartiePrenanteEntity party2 = createPartie(dossiers.get(0), PartiePrenanteRole.AGENT,
-                "Claude", "Leroy", "claude.leroy@agency.com", "+33601020304", "Agency Address, Paris");
-        parties.add(party2);
+        // ORG-001 Parties prenantes
+        if (org001Dossiers.size() >= 3) {
+            parties.add(createPartie(org001Dossiers.get(0), PartiePrenanteRole.BUYER, 
+                    "Jean", "Dupont", "jean.dupont@email.com", "+33612345678", "123 Rue de la Paix, Paris"));
+            
+            parties.add(createPartie(org001Dossiers.get(0), PartiePrenanteRole.AGENT,
+                    "Claude", "Leroy", "claude.leroy@agency.com", "+33601020304", "Agency Address, Paris"));
+            
+            parties.add(createPartie(org001Dossiers.get(1), PartiePrenanteRole.TENANT,
+                    "Marie", "Martin", "marie.martin@email.com", "+33698765432", "456 Avenue Victor Hugo, Lyon"));
+            
+            parties.add(createPartie(org001Dossiers.get(1), PartiePrenanteRole.LANDLORD,
+                    "François", "Girard", "francois.girard@email.com", "+33602030405", "789 Boulevard Haussmann, Paris"));
+            
+            parties.add(createPartie(org001Dossiers.get(2), PartiePrenanteRole.SELLER,
+                    "Pierre", "Durand", "pierre.durand@email.com", "+33623456789", "321 Rue du Commerce, Marseille"));
+            
+            parties.add(createPartie(org001Dossiers.get(2), PartiePrenanteRole.NOTARY,
+                    "Isabelle", "Laurent", "isabelle.laurent@notaire.fr", "+33603040506", "Notary Office, Marseille"));
+        }
 
-        PartiePrenanteEntity party3 = createPartie(dossiers.get(1), PartiePrenanteRole.TENANT,
-                "Marie", "Martin", "marie.martin@email.com", "+33698765432", "456 Avenue Victor Hugo, Lyon");
-        parties.add(party3);
-
-        PartiePrenanteEntity party4 = createPartie(dossiers.get(1), PartiePrenanteRole.LANDLORD,
-                "François", "Girard", "francois.girard@email.com", "+33602030405", "789 Boulevard Haussmann, Paris");
-        parties.add(party4);
-
-        PartiePrenanteEntity party5 = createPartie(dossiers.get(2), PartiePrenanteRole.SELLER,
-                "Pierre", "Durand", "pierre.durand@email.com", "+33623456789", "321 Rue du Commerce, Marseille");
-        parties.add(party5);
-
-        PartiePrenanteEntity party6 = createPartie(dossiers.get(2), PartiePrenanteRole.NOTARY,
-                "Isabelle", "Laurent", "isabelle.laurent@notaire.fr", "+33603040506", "Notary Office, Marseille");
-        parties.add(party6);
+        // ORG-002 Parties prenantes
+        if (org002Dossiers.size() >= 3) {
+            parties.add(createPartie(org002Dossiers.get(0), PartiePrenanteRole.BUYER,
+                    "Alice", "Rousseau", "alice.rousseau@email.com", "+33711223344", "22 Rue de Rivoli, Paris"));
+            
+            parties.add(createPartie(org002Dossiers.get(0), PartiePrenanteRole.AGENT,
+                    "Marc", "Dubois", "marc.dubois@realestate.com", "+33701112233", "Real Estate Office, Paris"));
+            
+            parties.add(createPartie(org002Dossiers.get(1), PartiePrenanteRole.TENANT,
+                    "Bob", "Lefebvre", "bob.lefebvre@email.com", "+33722334455", "88 Avenue des Champs, Lyon"));
+            
+            parties.add(createPartie(org002Dossiers.get(2), PartiePrenanteRole.LANDLORD,
+                    "Catherine", "Blanc", "catherine.blanc@email.com", "+33733445566", "45 Rue de la République, Marseille"));
+        }
 
         List<PartiePrenanteEntity> savedParties = partiePrenanteRepository.saveAll(parties);
-        logger.info("Loaded {} parties prenantes on 3 dossiers", savedParties.size());
-        logger.info("Note: Duplicate phone entry exists - dossier #1 and #10 share phone +33612345678");
+        logger.info("Loaded {} parties prenantes ({} for ORG-001, {} for ORG-002)",
+                savedParties.size(), 6, 4);
+        logger.info("Note: Duplicate phone entry exists - dossier #1 and #10 share phone +33612345678 (ORG-001)");
     }
 
     private PartiePrenanteEntity createPartie(Dossier dossier, PartiePrenanteRole role,
                                               String firstName, String lastName, String email,
                                               String phone, String address) {
         PartiePrenanteEntity partie = new PartiePrenanteEntity();
+        partie.setOrgId(dossier.getOrgId());
         partie.setDossier(dossier);
         partie.setRole(role);
         partie.setFirstName(firstName);
@@ -235,7 +386,7 @@ public class SeedDataLoader implements CommandLineRunner {
         partie.setEmail(email);
         partie.setPhone(phone);
         partie.setAddress(address);
-        partie.setMeta(Map.of("source", "seed"));
+        partie.setMeta(Map.of("source", "seed", "org", dossier.getOrgId()));
         return partie;
     }
 }

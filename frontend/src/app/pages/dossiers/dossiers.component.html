@@ -38,15 +38,21 @@
     </div>
 
     <div class="filter-box">
-      <label for="annonce-filter" class="filter-label">ID annonce :</label>
+      <label for="annonce-filter" class="filter-label">Annonce :</label>
       <input
         id="annonce-filter"
         type="text"
         class="filter-input"
-        placeholder="Filtrer par annonce..."
-        [(ngModel)]="annonceIdFilter"
+        placeholder="Rechercher une annonce (titre ou ID)..."
+        [formControl]="annonceSearchControl"
+        [matAutocomplete]="annonceAuto"
         (keyup.enter)="onFilterChange()"
       />
+      <mat-autocomplete #annonceAuto="matAutocomplete" [displayWith]="displayAnnonceFn" (optionSelected)="onAnnonceSelected($event.option.value)">
+        <mat-option *ngFor="let a of filteredAnnonces | async" [value]="a">
+          {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
+        </mat-option>
+      </mat-autocomplete>
     </div>
 
     <button class="btn-filter" (click)="onFilterChange()">Appliquer les filtres</button>

@@ -22,11 +22,11 @@ public class DossierMapper {
 
     public Dossier toEntity(DossierCreateRequest request) {
         Dossier dossier = new Dossier();
-        dossier.setOrgId(request.getOrgId());
         dossier.setAnnonceId(request.getAnnonceId());
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setLeadName(request.getLeadName());
         dossier.setLeadSource(request.getLeadSource());
+        dossier.setNotes(request.getNotes());
         dossier.setStatus(DossierStatus.NEW);
         dossier.setScore(request.getScore());
         dossier.setSource(request.getSource());
@@ -53,6 +53,7 @@ public class DossierMapper {
         response.setLeadPhone(dossier.getLeadPhone());
         response.setLeadName(dossier.getLeadName());
         response.setLeadSource(dossier.getLeadSource());
+        response.setNotes(dossier.getNotes());
         response.setStatus(dossier.getStatus());
         response.setScore(dossier.getScore());
         response.setSource(dossier.getSource());

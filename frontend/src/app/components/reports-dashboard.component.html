@@ -1,0 +1,200 @@
+<div class="reports-dashboard-container">
+  <div class="header">
+    <h1>KPI & Reporting Dashboard</h1>
+    
+    <div class="date-filter">
+      <mat-form-field appearance="outline">
+        <mat-label>From Date</mat-label>
+        <input matInput type="date" [(ngModel)]="dateFrom">
+      </mat-form-field>
+      
+      <mat-form-field appearance="outline">
+        <mat-label>To Date</mat-label>
+        <input matInput type="date" [(ngModel)]="dateTo">
+      </mat-form-field>
+      
+      <button mat-raised-button color="primary" (click)="applyDateFilter()">
+        Apply Filter
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="loading-spinner">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="error" class="error-message">
+    <mat-card>
+      <mat-card-content>
+        <p>{{ error }}</p>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="!loading && !error" class="dashboard-content">
+    <div class="kpi-cards">
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <mat-card-title>Avg Response Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="kpi-value">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
+          <div class="kpi-unit">hours</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <mat-card-title>Appointment Show Rate</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="kpi-value">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
+          <div class="kpi-unit">completed</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <mat-card-title>Pipeline Velocity</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="kpi-value">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
+          <div class="kpi-unit">days to close</div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="kpi-card">
+        <mat-card-header>
+          <mat-card-title>Overall Conversion</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="kpi-value">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
+          <div class="kpi-unit">win rate</div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="charts-grid">
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Conversion Rate by Source</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas baseChart
+              [data]="conversionBySourceChartData"
+              [options]="conversionBySourceChartOptions"
+              [type]="conversionBySourceChartType">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card">
+        <mat-card-header>
+          <mat-card-title>Pipeline Funnel</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas baseChart
+              [data]="pipelineFunnelChartData"
+              [options]="pipelineFunnelChartOptions"
+              [type]="pipelineFunnelChartType">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card chart-card-wide">
+        <mat-card-header>
+          <mat-card-title>Dossier Creation Over Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas baseChart
+              [data]="dossierTimeSeriesChartData"
+              [options]="dossierTimeSeriesChartOptions"
+              [type]="dossierTimeSeriesChartType">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="chart-card chart-card-wide">
+        <mat-card-header>
+          <mat-card-title>Conversions Over Time</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="chart-container">
+            <canvas baseChart
+              [data]="conversionTimeSeriesChartData"
+              [options]="conversionTimeSeriesChartOptions"
+              [type]="conversionTimeSeriesChartType">
+            </canvas>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <div class="detailed-metrics">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Conversion Details by Source</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="kpiReport?.conversionRateBySource || []" class="metrics-table">
+            <ng-container matColumnDef="source">
+              <th mat-header-cell *matHeaderCellDef>Source</th>
+              <td mat-cell *matCellDef="let element">{{ element.source }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="totalDossiers">
+              <th mat-header-cell *matHeaderCellDef>Total Dossiers</th>
+              <td mat-cell *matCellDef="let element">{{ element.totalDossiers }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="wonDossiers">
+              <th mat-header-cell *matHeaderCellDef>Won Dossiers</th>
+              <td mat-cell *matCellDef="let element">{{ element.wonDossiers }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="conversionRate">
+              <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
+              <td mat-cell *matCellDef="let element">{{ element.conversionRate.toFixed(2) }}%</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['source', 'totalDossiers', 'wonDossiers', 'conversionRate']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['source', 'totalDossiers', 'wonDossiers', 'conversionRate'];"></tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>Pipeline Stage Distribution</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <table mat-table [dataSource]="pipelineSummary?.stageMetrics || []" class="metrics-table">
+            <ng-container matColumnDef="stage">
+              <th mat-header-cell *matHeaderCellDef>Stage</th>
+              <td mat-cell *matCellDef="let element">{{ element.stage }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="count">
+              <th mat-header-cell *matHeaderCellDef>Count</th>
+              <td mat-cell *matCellDef="let element">{{ element.count }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="percentage">
+              <th mat-header-cell *matHeaderCellDef>Percentage</th>
+              <td mat-cell *matCellDef="let element">{{ element.percentage.toFixed(2) }}%</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['stage', 'count', 'percentage']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['stage', 'count', 'percentage'];"></tr>
+          </table>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>

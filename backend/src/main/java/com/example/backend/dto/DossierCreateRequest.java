@@ -11,11 +11,6 @@ import jakarta.validation.constraints.Size;
 @Schema(description = "Request body for creating a new dossier")
 public class DossierCreateRequest {
 
-    @Schema(description = "Organization ID", example = "org-123", required = true)
-    @NotBlank(message = "Organization ID is required")
-    @Size(max = 255, message = "Organization ID must not exceed 255 characters")
-    private String orgId;
-
     @Schema(description = "Associated annonce ID", example = "1", nullable = true)
     private Long annonceId;
 
@@ -31,6 +26,9 @@ public class DossierCreateRequest {
     @Size(max = 100, message = "Lead source must not exceed 100 characters")
     private String leadSource;
 
+    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    private String notes;
+
     @Schema(description = "Dossier score (0-100)", example = "75", nullable = true)
     @Min(value = 0, message = "Score must be between 0 and 100")
     @Max(value = 100, message = "Score must be between 0 and 100")
@@ -44,14 +42,6 @@ public class DossierCreateRequest {
     private PartiePrenanteRequest initialParty;
 
     public DossierCreateRequest() {
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
     }
 
     public Long getAnnonceId() {
@@ -108,5 +98,13 @@ public class DossierCreateRequest {
 
     public void setInitialParty(PartiePrenanteRequest initialParty) {
         this.initialParty = initialParty;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

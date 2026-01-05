@@ -1,12 +1,16 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.BulkOperationResponse;
+import com.example.backend.dto.DossierBulkAssignRequest;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
+import com.example.backend.dto.DossierStatusHistoryResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.enums.DossierStatus;
-import com.example.backend.service.DossierService;
 import com.example.backend.exception.ErrorResponse;
+import com.example.backend.service.DossierService;
+import com.example.backend.service.DossierStatusHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,6 +26,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,36 +35,42 @@ import org.springframework.web.bind.annotation.*;
 public class DossierController {
 
     private final DossierService dossierService;
+    private final DossierStatusHistoryService statusHistoryService;
 
-    public DossierController(DossierService dossierService) {
+    public DossierController(DossierService dossierService, DossierStatusHistoryService statusHistoryService) {
         this.dossierService = dossierService;
+        this.statusHistoryService = statusHistoryService;
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Create a new dossier", description = "Creates a new dossier with the provided details")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Dossier created successfully",
                     content = @Content(schema = @Schema(implementation = DossierResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Related resource not found",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<DossierResponse> create(
-            @Valid @RequestBody DossierCreateRequest request) {
+    public ResponseEntity<DossierResponse> create(@Valid @RequestBody DossierCreateRequest request) {
         Long existingOpenDossierId = null;
-        if (request.getInitialParty() != null && request.getInitialParty().getPhone() != null) {
+       if (request.getInitialParty() != null && request.getInitialParty().getPhone() != null) {
             var duplicates = dossierService.checkForDuplicates(request.getInitialParty().getPhone());
             if (!duplicates.isEmpty()) {
                 existingOpenDossierId = duplicates.get(0).getId();
             }
         }
 
+        // Let GlobalExceptionHandler standardize all error responses as RFC 7807 ProblemDetail.
         DossierResponse response = dossierService.create(request);
         response.setExistingOpenDossierId(existingOpenDossierId);
-        
+
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Get dossier by ID", description = "Retrieves a single dossier by its ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier found",
@@ -78,7 +89,21 @@ public class DossierController {
         }
     }
 
+    // 2) NOUVEL ENDPOINT: /api/v1/dossiers/check-duplicates?leadPhone=...
+    // Sans nouveau DTO: on renvoie directement une List<DossierResponse>
+    @GetMapping("/check-duplicates")
+    public ResponseEntity<DossierResponse> checkDuplicates(@RequestParam("leadPhone") String leadPhone) {
+        var duplicates = dossierService.checkForDuplicates(leadPhone);
+        if (duplicates == null || duplicates.isEmpty() || duplicates.get(0) == null) {
+            return ResponseEntity.noContent().build(); // 204
+        }
+        return ResponseEntity.ok(duplicates.get(0)); // 200
+    }
+
+
+
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "List dossiers", description = "Retrieves a paginated list of dossiers with optional filtering")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossiers retrieved successfully",
@@ -97,13 +122,14 @@ public class DossierController {
             @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.")
             @RequestParam(defaultValue = "id,asc") String sort) {
-        
+
         Pageable pageable = createPageable(page, size, sort);
         Page<DossierResponse> response = dossierService.list(status, leadPhone, annonceId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Update dossier status", description = "Updates the status of an existing dossier")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier status updated successfully",
@@ -122,10 +148,13 @@ public class DossierController {
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
     }
 
     @PatchMapping("/{id}/lead")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Update dossier lead information", description = "Updates the lead name and phone of an existing dossier")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossier lead information updated successfully",
@@ -144,7 +173,51 @@ public class DossierController {
             return ResponseEntity.ok(response);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
         }
+    }
+
+    @GetMapping("/{id}/status-history")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get dossier status history", description = "Retrieves the status transition history for a specific dossier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status history retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "404", description = "Dossier not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<Page<DossierStatusHistoryResponse>> getStatusHistory(
+            @Parameter(description = "ID of the dossier", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Page number (0-indexed)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size")
+            @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is descending by transitionedAt.")
+            @RequestParam(defaultValue = "transitionedAt,desc") String sort) {
+        try {
+            Pageable pageable = createPageable(page, size, sort);
+            Page<DossierStatusHistoryResponse> history = statusHistoryService.getStatusHistory(id, pageable);
+            return ResponseEntity.ok(history);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping("/bulk-assign")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Bulk assign dossier status", description = "Updates the status of multiple dossiers with validation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bulk assign completed",
+                    content = @Content(schema = @Schema(implementation = BulkOperationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<BulkOperationResponse> bulkAssign(
+            @Valid @RequestBody DossierBulkAssignRequest request) {
+        BulkOperationResponse response = dossierService.bulkAssign(request);
+        return ResponseEntity.ok(response);
     }
 
     private Pageable createPageable(int page, int size, String sort) {

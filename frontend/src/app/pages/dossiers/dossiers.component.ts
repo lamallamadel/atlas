@@ -1,10 +1,14 @@
 import { Component, OnInit } from '@angular/core';
+import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
+import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
+import { Observable } from 'rxjs';
+import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-dossiers',
@@ -20,6 +24,9 @@ export class DossiersComponent implements OnInit {
   selectedStatus: DossierStatus | '' = '';
   phoneFilter = '';
   annonceIdFilter = '';
+  annonceSearchControl = new FormControl<string | AnnonceResponse>('');
+  filteredAnnonces!: Observable<AnnonceResponse[]>;
+  selectedAnnonceId: number | null = null;
   currentPage = 0;
   pageSize = 10;
 
@@ -98,11 +105,61 @@ export class DossiersComponent implements OnInit {
 
   constructor(
     private dossierApiService: DossierApiService,
+    private annonceApiService: AnnonceApiService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.setupAnnonceAutocomplete();
     this.loadDossiers();
+  }
+
+  setupAnnonceAutocomplete(): void {
+    this.filteredAnnonces = this.annonceSearchControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      switchMap(value => {
+        const term = typeof value === 'string' ? value : (value?.title || '');
+        if (!term || term.trim().length === 0) {
+          return this.annonceApiService.list({ size: 20 }).pipe(map(page => page.content));
+        }
+        return this.annonceApiService.list({ q: term, size: 20 }).pipe(map(page => page.content));
+      })
+    );
+  }
+
+  displayAnnonceFn(annonce: AnnonceResponse | null): string {
+    if (!annonce) return '';
+    return `${annonce.title || 'Sans titre'} (#${annonce.id})`;
+  }
+
+  onAnnonceSelected(annonce: AnnonceResponse): void {
+    this.selectedAnnonceId = annonce.id;
+    this.annonceIdFilter = String(annonce.id);
+  }
+
+  clearAnnonceSelection(): void {
+    this.selectedAnnonceId = null;
+    this.annonceIdFilter = '';
+    this.annonceSearchControl.setValue('', { emitEvent: false });
+  }
+
+  private syncAnnonceFilterFromControl(): void {
+    const v = this.annonceSearchControl.value;
+    if (typeof v === 'string') {
+      const trimmed = v.trim();
+      if (!trimmed) {
+        // No text -> clear selection
+        this.selectedAnnonceId = null;
+        this.annonceIdFilter = '';
+        return;
+      }
+      const parsed = parseInt(trimmed, 10);
+      if (!isNaN(parsed)) {
+        this.selectedAnnonceId = null;
+        this.annonceIdFilter = String(parsed);
+      }
+    }
   }
 
   loadDossiers(): void {
@@ -128,7 +185,9 @@ export class DossiersComponent implements OnInit {
       params.leadPhone = this.phoneFilter.trim();
     }
 
-    if (this.annonceIdFilter.trim()) {
+    if (this.selectedAnnonceId !== null) {
+      params.annonceId = this.selectedAnnonceId;
+    } else if (this.annonceIdFilter.trim()) {
       const annonceId = parseInt(this.annonceIdFilter.trim(), 10);
       if (!isNaN(annonceId)) {
         params.annonceId = annonceId;
@@ -150,6 +209,7 @@ export class DossiersComponent implements OnInit {
   }
 
   onFilterChange(): void {
+    this.syncAnnonceFilterFromControl();
     this.currentPage = 0;
     this.loadDossiers();
   }
@@ -157,7 +217,7 @@ export class DossiersComponent implements OnInit {
   clearFilters(): void {
     this.selectedStatus = '';
     this.phoneFilter = '';
-    this.annonceIdFilter = '';
+    this.clearAnnonceSelection();
     this.currentPage = 0;
     this.loadDossiers();
   }

@@ -2,6 +2,7 @@ import { LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { APP_INITIALIZER } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTableModule } from '@angular/material/table';
@@ -16,6 +17,11 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatCardModule } from '@angular/material/card';
+import { MatTabsModule } from '@angular/material/tabs';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSelectModule } from '@angular/material/select';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -26,13 +32,37 @@ import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.componen
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
+import { LoginComponent } from './pages/login/login.component';
+import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
+import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
+import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
+import { MessageFormDialogComponent } from './components/message-form-dialog.component';
+import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
+import { AppointmentFormDialogComponent } from './components/appointment-form-dialog.component';
+import { BulkOperationDialogComponent } from './components/bulk-operation-dialog.component';
+import { ReportsDashboardComponent } from './components/reports-dashboard.component';
+import { GlobalSearchBarComponent } from './components/global-search-bar.component';
+import { SearchComponent } from './pages/search/search.component';
+import { ActivityTimelineComponent } from './components/activity-timeline.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
+import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
+import { OAuthModule } from 'angular-oauth2-oidc';
+import { AuthService } from './services/auth.service';
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
+import { NgChartsModule } from 'ng2-charts';
+
+registerLocaleData(localeFr);
+
+export function initAuth(authService: AuthService): () => Promise<void> {
+  return () => authService.init();
+}
 
 @NgModule({
   declarations: [
@@ -45,9 +75,21 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     DossiersComponent,
     DossierCreateComponent,
     DossierDetailComponent,
+    LoginComponent,
+    AccessDeniedComponent,
+    SessionExpiredComponent,
     GenericTableComponent,
     EmptyStateComponent,
     BadgeStatusComponent,
+    PartiePrenanteFormDialogComponent,
+    MessageFormDialogComponent,
+    ConfirmDeleteDialogComponent,
+    AppointmentFormDialogComponent,
+    BulkOperationDialogComponent,
+    ReportsDashboardComponent,
+    GlobalSearchBarComponent,
+    SearchComponent,
+    ActivityTimelineComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
@@ -57,6 +99,7 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
+    OAuthModule.forRoot(),
     FormsModule,
     ReactiveFormsModule,
     MatStepperModule,
@@ -71,9 +114,28 @@ import { PhoneFormatPipe } from './pipes/phone-format.pipe';
     MatExpansionModule,
     MatAutocompleteModule,
     MatSnackBarModule,
-    MatCardModule
+    MatCardModule,
+    MatTabsModule,
+    MatDialogModule,
+    MatSelectModule,
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    NgChartsModule
   ],
   providers: [
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
+
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initAuth,
+      deps: [AuthService],
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpAuthInterceptor,
+      multi: true
+    },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: CorrelationIdInterceptor,

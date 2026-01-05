@@ -1,6 +1,16 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { map, Observable } from 'rxjs';
+
+export enum DossierSource {
+  WEB = 'WEB',
+  MOBILE = 'MOBILE',
+  PHONE = 'PHONE',
+  EMAIL = 'EMAIL',
+  REFERRAL = 'REFERRAL',
+  WALK_IN = 'WALK_IN',
+  SOCIAL_MEDIA = 'SOCIAL_MEDIA'
+}
 
 export enum DossierStatus {
   NEW = 'NEW',
@@ -8,6 +18,27 @@ export enum DossierStatus {
   APPOINTMENT = 'APPOINTMENT',
   WON = 'WON',
   LOST = 'LOST'
+}
+
+export enum PartiePrenanteRole {
+  LEAD = 'LEAD',
+  BUYER = 'BUYER',
+  SELLER = 'SELLER',
+  AGENT = 'AGENT'
+}
+
+export interface PartiePrenanteResponse {
+  id: number;
+  dossierId: number;
+  role: PartiePrenanteRole;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  meta?: any;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface DossierResponse {
@@ -19,6 +50,10 @@ export interface DossierResponse {
   leadName?: string;
   leadSource?: string;
   status: DossierStatus;
+  score?: number;
+  source?: DossierSource;
+  parties?: PartiePrenanteResponse[];
+  existingOpenDossierId?: number;
   createdAt: string;
   updatedAt: string;
   createdBy?: string;
@@ -26,7 +61,6 @@ export interface DossierResponse {
 }
 
 export interface DossierCreateRequest {
-  orgId: string;
   annonceId?: number;
   leadPhone?: string;
   leadName?: string;
@@ -80,6 +114,24 @@ export interface DossierListParams {
   sort?: string;
 }
 
+export interface DossierBulkAssignRequest {
+  ids: number[];
+  status: DossierStatus;
+  reason?: string;
+  userId?: string;
+}
+
+export interface BulkOperationResponse {
+  successCount: number;
+  failureCount: number;
+  errors: BulkOperationError[];
+}
+
+export interface BulkOperationError {
+  id: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -91,7 +143,7 @@ export class DossierApiService {
 
   list(params: DossierListParams = {}): Observable<Page<DossierResponse>> {
     let httpParams = new HttpParams();
-    
+
     if (params.status !== undefined) {
       httpParams = httpParams.set('status', params.status);
     }
@@ -110,7 +162,7 @@ export class DossierApiService {
     if (params.sort !== undefined) {
       httpParams = httpParams.set('sort', params.sort);
     }
-    
+
     return this.http.get<Page<DossierResponse>>(this.apiUrl, { params: httpParams });
   }
 
@@ -133,7 +185,22 @@ export class DossierApiService {
   }
 
   checkDuplicates(phone: string): Observable<DossierResponse[]> {
-    const httpParams = new HttpParams().set('leadPhone', phone);
-    return this.http.get<DossierResponse[]>(`${this.apiUrl}/check-duplicates`, { params: httpParams });
+    const params = new HttpParams().set('leadPhone', phone);
+
+    return this.http
+      .get<DossierResponse[]>(`${this.apiUrl}/check-duplicates`, {
+        params,
+        observe: 'response'
+      })
+      .pipe(
+        map((res: HttpResponse<DossierResponse[]>) => {
+          // 204 => body = null => []
+          return res.body ?? [];
+        })
+      );
+  }
+
+  bulkAssign(request: DossierBulkAssignRequest): Observable<BulkOperationResponse> {
+    return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-assign`, request);
   }
 }

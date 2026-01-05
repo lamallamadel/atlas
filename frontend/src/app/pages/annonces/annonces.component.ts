@@ -242,6 +242,10 @@ export class AnnoncesComponent implements OnInit {
     switch (status) {
       case AnnonceStatus.PUBLISHED:
         return 'badge-status badge-active';
+      case AnnonceStatus.ACTIVE:
+        return 'badge-status badge-active';
+      case AnnonceStatus.PAUSED:
+        return 'badge-status badge-paused';
       case AnnonceStatus.DRAFT:
         return 'badge-status badge-draft';
       case AnnonceStatus.ARCHIVED:

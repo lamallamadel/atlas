@@ -1,0 +1,85 @@
+package com.example.backend.service;
+
+import com.example.backend.dto.MessageCreateRequest;
+import com.example.backend.dto.MessageMapper;
+import com.example.backend.dto.MessageResponse;
+import com.example.backend.entity.Dossier;
+import com.example.backend.entity.MessageEntity;
+import com.example.backend.entity.enums.MessageChannel;
+import com.example.backend.entity.enums.MessageDirection;
+import com.example.backend.repository.DossierRepository;
+import com.example.backend.repository.MessageRepository;
+import com.example.backend.util.TenantContext;
+import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class MessageService {
+
+    private final MessageRepository messageRepository;
+    private final DossierRepository dossierRepository;
+    private final MessageMapper messageMapper;
+
+    public MessageService(MessageRepository messageRepository, DossierRepository dossierRepository, MessageMapper messageMapper) {
+        this.messageRepository = messageRepository;
+        this.dossierRepository = dossierRepository;
+        this.messageMapper = messageMapper;
+    }
+
+    @Transactional
+    public MessageResponse create(MessageCreateRequest request) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(request.getDossierId())
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + request.getDossierId());
+        }
+
+        MessageEntity message = messageMapper.toEntity(request, dossier, orgId);
+        MessageEntity saved = messageRepository.save(message);
+        return messageMapper.toResponse(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public MessageResponse getById(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        MessageEntity message = messageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Message not found with id: " + id));
+
+        if (!orgId.equals(message.getOrgId())) {
+            throw new EntityNotFoundException("Message not found with id: " + id);
+        }
+
+        return messageMapper.toResponse(message);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<MessageResponse> listByDossier(Long dossierId, MessageChannel channel, MessageDirection direction, Pageable pageable) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(dossierId)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
+        }
+
+        Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, pageable);
+        return messages.map(messageMapper::toResponse);
+    }
+}

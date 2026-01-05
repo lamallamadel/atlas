@@ -1,0 +1,24 @@
+# Architecture — décisions clés
+
+## Décision A — Audit automatique via listeners JPA
+**Choix** : `@EntityListeners` + callbacks JPA pour capturer CREATE/UPDATE/DELETE.
+- Avantages : couverture exhaustive quel que soit le point d’entrée (REST, batch, import).
+- Contraintes : gérer la sérialisation avant/après, et les cas de lazy-loading.
+
+## Décision B — Multi-tenancy row-level via `org_id`
+**Choix** : isolation applicative via `org_id` avec :
+- header tenant `X-Org-Id` → `TenantContext` (ThreadLocal)
+- **Hibernate Filter** (`@Filter`) activé à chaque requête (filtrage row-level côté ORM)
+- Avantages : déploiement simple (une DB), analytics cross-tenant possible (sous contrôle admin).
+- Contraintes : discipline stricte (toutes les queries doivent filtrer) + tests d’isolation.
+
+## Décision D — AuthN/AuthZ via Keycloak (OIDC)
+**Choix** : Keycloak en local (Docker Compose) + backend en **OAuth2 Resource Server (JWT)**.
+- Avantages : standard OIDC, rôles centralisés, trajectoire vers SSO.
+- Contraintes : gestion des environnements (issuer URI), et intégration front (actuellement par collage de token).
+
+## Décision C — Workflow sous forme de machine à états
+**Choix** : service dédié `DossierWorkflowService` (transition validation) plutôt que patch arbitraire.
+- Avantages : cohérence, automatisations (notifications, scoring), UI dynamique.
+- Contraintes : maintenir une matrice de transitions + règles contextuelles.
+

@@ -35,7 +35,7 @@ server:
 
 logging:
   level:
-    root: INFO
+    root: DEBUG
     com.example.backend: DEBUG
 
 management:

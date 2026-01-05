@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DossiersComponent } from './dossiers.component';
 import { GenericTableComponent } from '../../components/generic-table.component';
 import { DossierApiService, DossierStatus } from '../../services/dossier-api.service';
@@ -14,6 +14,9 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -42,6 +45,7 @@ describe('DossiersComponent', () => {
         HttpClientTestingModule,
         RouterTestingModule,
         FormsModule,
+        ReactiveFormsModule,
         MatCardModule,
         MatButtonModule,
         MatIconModule,
@@ -50,6 +54,9 @@ describe('DossiersComponent', () => {
         MatSortModule,
         MatTooltipModule,
         MatChipsModule,
+        MatAutocompleteModule,
+        MatFormFieldModule,
+        MatInputModule,
         NoopAnimationsModule
       ],
       providers: [{ provide: LOCALE_ID, useValue: 'fr-FR' }, { provide: DossierApiService, useValue: dossierApiServiceSpy }],

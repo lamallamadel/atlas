@@ -1,112 +1,90 @@
 # Repository Setup Status
 
-## Summary
+## Completed Setup
 
-✅ **Frontend**: Fully set up and ready  
-⚠️ **Backend**: Requires manual environment configuration
-
-## What Was Completed
-
-### 1. Frontend (Angular) - COMPLETE ✅
-
-- **Dependencies**: Installed (668 packages in node_modules)
+### ✓ Frontend (Angular)
+- **Status**: Successfully installed
 - **Location**: `frontend/`
-- **Ready to run**:
-  - Build: `cd frontend && npm run build`
-  - Test: `cd frontend && npm test`
-  - Lint: `cd frontend && npm run lint`
-  - Dev server: `cd frontend && npm start`
+- **Dependencies**: 671 packages installed via `npm install`
+- **Ready for**: build, lint, test, and dev server
 
-### 2. Repository Structure - VERIFIED ✅
-
-- Backend (Spring Boot/Maven) structure confirmed
-- Frontend (Angular/npm) structure confirmed
-- Infrastructure (Docker Compose) configuration present
-- All project files in place
-
-## Manual Step Required
-
-### Backend (Spring Boot/Maven) Setup
-
-The backend requires Java 17 to build. Maven needs the JAVA_HOME environment variable set before it can run.
-
-**Current situation**:
-- Java 17 is available at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- Maven is available at: `C:\Environement\maven-3.8.6`
-- Maven toolchains.xml is configured at: `C:\Users\a891780\.m2\toolchains.xml`
-- Current JAVA_HOME points to invalid path: `C:\Environement\Java\jdk1.8.0_202` (does not exist)
-
-**To complete backend setup**, run ONE of these options:
-
-#### Option 1: Using provided helper script (Recommended)
-```cmd
-mvn17.cmd clean install -DskipTests
-```
-The `mvn17.cmd` wrapper in the root directory automatically sets JAVA_HOME to Java 17.
-
-#### Option 2: Using backend setup script
-```cmd
-cd backend
-.\setup.cmd
+**Verification**:
+```powershell
+cd frontend
+npm run build    # Build the frontend
+npm run lint     # Run linting
+npm run test     # Run tests
+npm start        # Start dev server on http://localhost:4200
 ```
 
-#### Option 3: Manual PowerShell
+## Pending Setup
+
+### ⚠ Backend (Spring Boot + Maven)
+- **Status**: Requires manual setup due to JAVA_HOME requirement
+- **Location**: `backend/`
+- **Issue**: System security restrictions prevent automated environment variable modification
+
+**Manual Setup Required**:
+
+The backend requires Java 17, which is available at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+
+**Option 1 - Using existing wrapper script**:
+```powershell
+.\mvn17.cmd clean install -DskipTests
+```
+
+**Option 2 - Set JAVA_HOME manually in your terminal**:
 ```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 cd backend
 mvn clean install -DskipTests
 ```
 
-#### Option 4: Manual Command Prompt
-```cmd
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-cd backend
-mvn clean install -DskipTests
+**Option 3 - Use Make (if available)**:
+```bash
+# Set JAVA_HOME first
+export JAVA_HOME=C:/Environement/Java/jdk-17.0.5.8-hotspot
+make install
 ```
 
-## After Backend Setup
+**After Backend Setup, Verify**:
+```powershell
+cd backend
+mvn clean package    # Build
+mvn test             # Run tests
+mvn spring-boot:run  # Start dev server on http://localhost:8080
+```
 
-Once the backend Maven install completes, you'll be able to run:
+## Available Helper Scripts
 
-- **Backend Build**: `cd backend && mvn clean package`
-- **Backend Test**: `cd backend && mvn test`
-- **Backend Run**: `cd backend && mvn spring-boot:run`
-- **Frontend Build**: `cd frontend && npm run build`
-- **Frontend Test**: `cd frontend && npm test`
-- **Frontend Lint**: `cd frontend && npm run lint`
+The repository includes several helper scripts for backend setup:
+- `mvn17.cmd` - Maven wrapper with Java 17 configuration
+- `backend/do-install.ps1` - PowerShell install script
+- `setup-backend-temp.cmd` - Batch file for setup
 
-## Why Manual Step is Required
+These scripts all set JAVA_HOME to the correct Java 17 path.
 
-The automated setup encountered security restrictions that prevent:
-- Modification of environment variables (`$env:JAVA_HOME = ...`)
-- Execution of batch/PowerShell scripts that set environment variables
-- Running installation commands with modified environment
+## Infrastructure Setup
 
-These security restrictions are intentional to prevent potential security issues in the automation environment.
+The infrastructure (Docker services) can be started after backend is set up:
 
-## Technical Details
+```powershell
+cd infra
+docker-compose up -d
+```
 
-### Installed
-- **Frontend packages**: 668 modules in `frontend/node_modules/`
-- **Key packages**: Angular 16.2.0, Angular Material, RxJS, TypeScript, ESLint
+## Summary
 
-### Pending Installation
-- **Backend dependencies**: Will be downloaded to `~/.m2/repository/` and built to `backend/target/`
-- **Dependencies to install**: Spring Boot 3.2.1, Spring Data JPA, Flyway, PostgreSQL driver, H2, etc.
-
-### Prerequisites Verified
-- ✅ Java 17 installed at specified location
-- ✅ Maven 3.8.6 available
-- ✅ Maven toolchains.xml configured
-- ✅ Node.js/npm available (frontend dependencies installed)
-- ⚠️ JAVA_HOME needs to be set to Java 17
+- ✅ **Frontend**: Ready to use
+- ⚠️  **Backend**: Needs manual Java 17 environment setup
+- ⏸️  **Infrastructure**: Can be started after backend setup
 
 ## Next Steps
 
-1. Run one of the backend setup options above
-2. Verify with: `cd backend && mvn test`
-3. Start developing!
+1. Run one of the manual backend setup commands above
+2. Verify backend builds successfully
+3. Start infrastructure services if needed
+4. Run the full development stack
 
----
-
-**Note**: The frontend is fully operational and can be used immediately. Only the backend requires the manual setup step.
+For detailed instructions, see `AGENTS.md` and `SETUP.md`.

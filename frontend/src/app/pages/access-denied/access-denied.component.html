@@ -1,0 +1,27 @@
+<div class="error-container">
+  <div class="error-card">
+    <div class="error-icon-wrapper">
+      <div class="error-icon">🚫</div>
+    </div>
+    
+    <h1 class="error-title">Accès refusé</h1>
+    
+    <p class="error-message">
+      Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    
+    <p class="error-details">
+      Cette page nécessite des autorisations spécifiques que votre compte ne possède pas actuellement.
+      Veuillez contacter votre administrateur si vous pensez que c'est une erreur.
+    </p>
+    
+    <div class="error-actions">
+      <button class="btn btn-primary" (click)="goToDashboard()">
+        Retour au tableau de bord
+      </button>
+      <button class="btn btn-secondary" (click)="logout()">
+        Se déconnecter
+      </button>
+    </div>
+  </div>
+</div>

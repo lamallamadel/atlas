@@ -116,8 +116,7 @@ export class DossierCreateComponent implements OnInit {
 
     const formValue = this.dossierForm.value;
     const request: DossierCreateRequest = {
-      orgId: 'ORG-001',
-      leadName: formValue.leadName || undefined,
+            leadName: formValue.leadName || undefined,
       leadPhone: formValue.leadPhone || undefined,
       leadSource: formValue.leadSource || undefined,
       annonceId: formValue.annonceId !== null && formValue.annonceId !== '' ? formValue.annonceId : undefined

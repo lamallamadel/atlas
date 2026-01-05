@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core';
 
 export type EntityType = 'annonce' | 'dossier';
 
-export type AnnonceStatusType = 'DRAFT' | 'PUBLISHED' | 'ARCHIVED';
+export type AnnonceStatusType = 'DRAFT' | 'PUBLISHED' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
 export type DossierStatusType = 'NEW' | 'QUALIFIED' | 'APPOINTMENT' | 'WON' | 'LOST';
 
 @Component({
@@ -38,6 +38,10 @@ export class BadgeStatusComponent {
         return 'badge-status badge-draft';
       case 'PUBLISHED':
         return 'badge-status badge-active';
+      case 'ACTIVE':
+        return 'badge-status badge-active';
+      case 'PAUSED':
+        return 'badge-status badge-paused';
       case 'ARCHIVED':
         return 'badge-status badge-archived';
       default:
@@ -67,7 +71,11 @@ export class BadgeStatusComponent {
       case 'DRAFT':
         return 'Brouillon';
       case 'PUBLISHED':
+        return 'Publié';
+      case 'ACTIVE':
         return 'Actif';
+      case 'PAUSED':
+        return 'En pause';
       case 'ARCHIVED':
         return 'Archivé';
       default:

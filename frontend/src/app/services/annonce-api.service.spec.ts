@@ -114,7 +114,6 @@ describe('AnnonceApiService', () => {
 
   it('should call POST for create endpoint', () => {
     const createRequest: AnnonceCreateRequest = {
-      orgId: 'org1',
       title: 'New Annonce',
       description: 'Description',
       category: 'Category',
@@ -125,6 +124,7 @@ describe('AnnonceApiService', () => {
 
     const mockResponse = {
       id: 1,
+      orgId: 'org1',
       ...createRequest,
       status: AnnonceStatus.DRAFT,
       createdAt: '2024-01-01T00:00:00Z',

@@ -4,6 +4,9 @@ import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -12,7 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "dossier")
-public class Dossier {
+@Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+public class Dossier extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,6 +38,9 @@ public class Dossier {
     @Column(name = "lead_source", length = 100)
     private String leadSource;
 
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private DossierStatus status;
@@ -47,6 +54,9 @@ public class Dossier {
 
     @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartiePrenanteEntity> parties = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AppointmentEntity> appointments = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -182,5 +192,31 @@ public class Dossier {
     public void removeParty(PartiePrenanteEntity party) {
         parties.remove(party);
         party.setDossier(null);
+    }
+
+    public List<AppointmentEntity> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<AppointmentEntity> appointments) {
+        this.appointments = appointments;
+    }
+
+    public void addAppointment(AppointmentEntity appointment) {
+        appointments.add(appointment);
+        appointment.setDossier(this);
+    }
+
+    public void removeAppointment(AppointmentEntity appointment) {
+        appointments.remove(appointment);
+        appointment.setDossier(null);
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

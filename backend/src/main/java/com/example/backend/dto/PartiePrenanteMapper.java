@@ -1,14 +1,15 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.PartiePrenanteEntity;
+import com.example.backend.entity.enums.PartiePrenanteRole;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PartiePrenanteMapper {
 
-    public PartiePrenanteEntity toEntity(PartiePrenanteRequest request) {
+    public PartiePrenanteEntity toEntity(PartiePrenanteCreateRequest request) {
         PartiePrenanteEntity entity = new PartiePrenanteEntity();
-        entity.setRole(request.getRole());
+        entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
         entity.setEmail(request.getEmail());
@@ -16,6 +17,16 @@ public class PartiePrenanteMapper {
         entity.setAddress(request.getAddress());
         entity.setMeta(request.getMeta());
         return entity;
+    }
+
+    public void updateEntity(PartiePrenanteEntity entity, PartiePrenanteUpdateRequest request) {
+        entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
+        entity.setFirstName(request.getFirstName());
+        entity.setLastName(request.getLastName());
+        entity.setEmail(request.getEmail());
+        entity.setPhone(request.getPhone());
+        entity.setAddress(request.getAddress());
+        entity.setMeta(request.getMeta());
     }
 
     public PartiePrenanteResponse toResponse(PartiePrenanteEntity entity) {

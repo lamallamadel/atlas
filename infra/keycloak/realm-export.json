@@ -1,0 +1,57 @@
+{
+  "realm": "myrealm",
+  "enabled": true,
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "ADMIN"
+      },
+      {
+        "name": "MANAGER"
+      },
+      {
+        "name": "PRO"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "atlas-frontend",
+      "enabled": true,
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "http://localhost:4200"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "demo",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "demo",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "PRO"
+      ],
+      "requiredActions": [],
+      "email": "demo@local",
+      "firstName": "demo",
+      "lastName": "User"
+    }
+  ]
+}

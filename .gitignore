@@ -137,6 +137,7 @@ java17.cmd
 setup-temp.cmd
 setup-backend.ps1
 setup-backend.cmd
+setup-backend-now.ps1
 setup-init.ps1
 setup-backend.js
 backend/setup-backend-deps.cmd
@@ -160,7 +161,42 @@ backend/package.json
 backend/package-lock.json
 mvn17-with-settings.cmd
 mvn17-noproxy.cmd
+backend/do-package.ps1
+backend/install-direct.cmd
+backend/install-noproxy.cmd
+backend/install-override.ps1
+backend/setup-install.cmd
+
+# Setup helper scripts (generated)
+setup-toolchains.ps1
+run-maven-install.ps1
+backend-install.cmd
+copy-toolchains.js
+backend/temp-toolchains.xml
 
 # Node.js
 package-lock.json
 .npmrc
+
+# Setup artifacts (generated during setup)
+setup-repo.cmd
+backend/mvn-output.txt
+backend/mvn-error.txt
+backend/.mavenrc
+backend/mavenrc_pre.bat
+run-backend-maven-install.cmd
+
+# Nested frontend directory (duplicate)
+frontend/frontend/
+
+# Additional temporary setup scripts
+run-backend-install.cmd
+backend-setup-wrapper.ps1
+setup-backend-mvn.cmd
+
+# Agent-created setup files
+setup-backend-node.js
+temp-setup.cmd
+package.json
+package-lock.json
+SETUP_STATUS_AGENT.md

@@ -1,7 +1,40 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { DossierApiService, DossierResponse, DossierStatus } from '../../services/dossier-api.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MatPaginator, PageEvent } from '@angular/material/paginator';
+import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
+import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
+import { MessageApiService, MessageResponse, MessageCreateRequest } from '../../services/message-api.service';
+import { AppointmentApiService, AppointmentResponse, AppointmentCreateRequest, AppointmentUpdateRequest, AppointmentStatus } from '../../services/appointment-api.service';
+import { ConsentementApiService, ConsentementResponse, ConsentementChannel, ConsentementStatus, ConsentementUpdateRequest, ConsentementCreateRequest } from '../../services/consentement-api.service';
+import { AuditEventApiService, AuditEventResponse, AuditEntityType, AuditAction, Page } from '../../services/audit-event-api.service';
+import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../../components/partie-prenante-form-dialog.component';
+import { MessageFormDialogComponent, MessageFormData } from '../../components/message-form-dialog.component';
+import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
+import { AppointmentFormDialogComponent, AppointmentFormData } from '../../components/appointment-form-dialog.component';
+
+
+
+export interface RendezVous {
+  id: number;
+  date: Date;
+  time: string;
+  location: string;
+  status: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
+  notes?: string;
+}
+
+export interface ConsentementGroup {
+  channel: ConsentementChannel;
+  current: ConsentementResponse | null;
+}
+
+export interface DiffChange {
+  field: string;
+  oldValue: any;
+  newValue: any;
+}
 
 @Component({
   selector: 'app-dossier-detail',
@@ -27,6 +60,7 @@ export class DossierDetailComponent implements OnInit {
   leadSuccessMessage: string | null = null;
 
   DossierStatus = DossierStatus;
+  PartiePrenanteRole = PartiePrenanteRole;
   statusOptions = [
     DossierStatus.NEW,
     DossierStatus.QUALIFIED,
@@ -35,11 +69,53 @@ export class DossierDetailComponent implements OnInit {
     DossierStatus.LOST
   ];
 
+  messages: MessageResponse[] = [];
+  loadingMessages = false;
+  appointments: AppointmentResponse[] = [];
+  loadingAppointments = false;
+  rendezVous: RendezVous[] = [];
+  consentements: ConsentementResponse[] = [];
+  consentementsLoading = false;
+  consentementGroups: ConsentementGroup[] = [];
+  auditEvents: AuditEventResponse[] = [];
+  auditEventsLoading = false;
+  auditTotalElements = 0;
+  auditPageSize = 10;
+  auditPageIndex = 0;
+  auditFilterEntityType: AuditEntityType | '' = '';
+  auditFilterAction: AuditAction | '' = '';
+  ConsentementChannel = ConsentementChannel;
+  ConsentementStatus = ConsentementStatus;
+  AuditEntityType = AuditEntityType;
+  AuditAction = AuditAction;
+
+  @ViewChild('auditPaginator') auditPaginator: MatPaginator | undefined;
+
+  showPartieForm = false;
+  partieFormRole: PartiePrenanteRole = PartiePrenanteRole.BUYER;
+  partieFormFirstName = '';
+  partieFormLastName = '';
+  partieFormEmail = '';
+  partieFormPhone = '';
+
+  showRendezVousForm = false;
+  rdvFormDate = '';
+  rdvFormTime = '';
+  rdvFormLocation = '';
+  rdvFormStatus: 'SCHEDULED' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' = 'SCHEDULED';
+  rdvFormNotes = '';
+
   constructor(
     private dossierApiService: DossierApiService,
+    private partiePrenanteApiService: PartiePrenanteApiService,
+    private messageApiService: MessageApiService,
+    private appointmentApiService: AppointmentApiService,
+    private consentementApiService: ConsentementApiService,
+    private auditEventApiService: AuditEventApiService,
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
 
   getAvailableStatusOptions(): DossierStatus[] {
@@ -99,6 +175,11 @@ export class DossierDetailComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadDossier();
+    this.loadMessages();
+    this.loadAppointments();
+    this.loadConsentements();
+    this.loadAuditEvents();
+    this.loadMockData();
   }
 
   loadDossier(): void {
@@ -133,6 +214,240 @@ export class DossierDetailComponent implements OnInit {
         console.error('Error loading dossier:', err);
       }
     });
+  }
+
+  loadMessages(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.loadingMessages = true;
+    this.messageApiService.list({ dossierId, size: 100, sort: 'timestamp,desc' }).subscribe({
+      next: (response) => {
+        this.messages = response.content;
+        this.loadingMessages = false;
+      },
+      error: (err) => {
+        console.error('Error loading messages:', err);
+        this.loadingMessages = false;
+      }
+    });
+  }
+
+  loadAppointments(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.loadingAppointments = true;
+    this.appointmentApiService.list({ dossierId, size: 100, sort: 'startTime,desc' }).subscribe({
+      next: (response) => {
+        this.appointments = response.content;
+        this.loadingAppointments = false;
+      },
+      error: (err) => {
+        console.error('Error loading appointments:', err);
+        this.loadingAppointments = false;
+      }
+    });
+  }
+
+  loadConsentements(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.consentementsLoading = true;
+    this.consentementApiService.list({ dossierId, size: 100, sort: 'updatedAt,desc' }).subscribe({
+      next: (response) => {
+        this.consentements = response.content;
+        this.buildConsentementGroups();
+        this.consentementsLoading = false;
+      },
+      error: (err) => {
+        console.error('Error loading consentements:', err);
+        this.consentementsLoading = false;
+      }
+    });
+  }
+
+  buildConsentementGroups(): void {
+    const channelsToShow = [ConsentementChannel.EMAIL, ConsentementChannel.SMS];
+    this.consentementGroups = channelsToShow.map(channel => {
+      const channelConsents = this.consentements.filter(c => c.channel === channel);
+      const current = channelConsents.length > 0 ? channelConsents[0] : null;
+      return { channel, current };
+    });
+  }
+
+  loadMockData(): void {
+    this.rendezVous = [
+      {
+        id: 1,
+        date: new Date('2024-01-20T14:00:00'),
+        time: '14:00',
+        location: '123 Rue de la Paix, Paris',
+        status: 'CONFIRMED',
+        notes: 'Visite de l\'appartement'
+      },
+      {
+        id: 2,
+        date: new Date('2024-01-25T10:30:00'),
+        time: '10:30',
+        location: 'Bureau de l\'agence',
+        status: 'SCHEDULED',
+        notes: 'Signature du compromis'
+      }
+    ];
+  }
+
+  loadAuditEvents(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.auditEventsLoading = true;
+
+    const params: any = {
+      page: this.auditPageIndex,
+      size: this.auditPageSize,
+      sort: 'createdAt,desc'
+    };
+
+    if (this.auditFilterAction) {
+      params.action = this.auditFilterAction;
+    }
+
+    if (this.auditFilterEntityType) {
+      params.entityType = this.auditFilterEntityType;
+      if (this.auditFilterEntityType === AuditEntityType.DOSSIER) {
+        params.entityId = dossierId;
+      }
+      this.auditEventApiService.list(params).subscribe({
+        next: (response: Page<AuditEventResponse>) => {
+          this.auditEvents = response.content;
+          this.auditTotalElements = response.totalElements;
+          this.auditEventsLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading audit events:', err);
+          this.auditEventsLoading = false;
+        }
+      });
+    } else {
+      this.auditEventApiService.listByDossier(dossierId, params).subscribe({
+        next: (response: Page<AuditEventResponse>) => {
+          this.auditEvents = response.content;
+          this.auditTotalElements = response.totalElements;
+          this.auditEventsLoading = false;
+        },
+        error: (err) => {
+          console.error('Error loading audit events:', err);
+          this.auditEventsLoading = false;
+        }
+      });
+    }
+  }
+
+  onAuditPageChange(event: PageEvent): void {
+    this.auditPageIndex = event.pageIndex;
+    this.auditPageSize = event.pageSize;
+    this.loadAuditEvents();
+  }
+
+  onAuditFilterChange(): void {
+    this.auditPageIndex = 0;
+    if (this.auditPaginator) {
+      this.auditPaginator.firstPage();
+    }
+    this.loadAuditEvents();
+  }
+
+  getAuditActionLabel(action: AuditAction): string {
+    switch (action) {
+      case AuditAction.CREATED: return 'Création';
+      case AuditAction.UPDATED: return 'Modification';
+      case AuditAction.DELETED: return 'Suppression';
+      case AuditAction.VIEWED: return 'Consultation';
+      case AuditAction.EXPORTED: return 'Export';
+      case AuditAction.IMPORTED: return 'Import';
+      case AuditAction.APPROVED: return 'Approbation';
+      case AuditAction.REJECTED: return 'Rejet';
+      case AuditAction.ARCHIVED: return 'Archivage';
+      case AuditAction.RESTORED: return 'Restauration';
+      default: return action;
+    }
+  }
+
+  getAuditEntityTypeLabel(entityType: AuditEntityType): string {
+    switch (entityType) {
+      case AuditEntityType.ANNONCE: return 'Annonce';
+      case AuditEntityType.DOSSIER: return 'Dossier';
+      case AuditEntityType.PARTIE_PRENANTE: return 'PartiePrenante';
+      case AuditEntityType.CONSENTEMENT: return 'Consentement';
+      case AuditEntityType.MESSAGE: return 'Message';
+      case AuditEntityType.USER: return 'Utilisateur';
+      case AuditEntityType.ORGANIZATION: return 'Organisation';
+      default: return entityType;
+    }
+  }
+
+  parseDiffChanges(diff: Record<string, any> | undefined): DiffChange[] {
+    if (!diff) {
+      return [];
+    }
+
+    const changes: DiffChange[] = [];
+    for (const [field, value] of Object.entries(diff)) {
+      if (typeof value === 'object' && value !== null && 'old' in value && 'new' in value) {
+        changes.push({
+          field,
+          oldValue: value.old,
+          newValue: value.new
+        });
+      } else {
+        changes.push({
+          field,
+          oldValue: null,
+          newValue: value
+        });
+      }
+    }
+    return changes;
+  }
+
+  formatDiffValue(value: any): string {
+    if (value === null || value === undefined) {
+      return '—';
+    }
+    if (typeof value === 'object') {
+      return JSON.stringify(value);
+    }
+    return String(value);
   }
 
   toggleStatusChange(): void {
@@ -206,6 +521,24 @@ export class DossierDetailComponent implements OnInit {
     });
   }
 
+  formatDateTime(date: Date): string {
+    return date.toLocaleString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  formatDateOnly(date: Date): string {
+    return date.toLocaleDateString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    });
+  }
+
   isLeadEmpty(): boolean {
     if (!this.dossier) {
       return false;
@@ -272,5 +605,678 @@ export class DossierDetailComponent implements OnInit {
         console.error('Error updating lead:', err);
       }
     });
+  }
+
+  togglePartieForm(): void {
+    this.openPartiePrenanteDialog();
+  }
+
+  resetPartieForm(): void {
+    this.partieFormRole = PartiePrenanteRole.BUYER;
+    this.partieFormFirstName = '';
+    this.partieFormLastName = '';
+    this.partieFormEmail = '';
+    this.partieFormPhone = '';
+  }
+
+  openPartiePrenanteDialog(partie?: PartiePrenanteResponse): void {
+    const dialogData: PartiePrenanteFormData | null = partie ? {
+      id: partie.id,
+      role: partie.role,
+      firstName: partie.firstName || '',
+      lastName: partie.lastName || '',
+      phone: partie.phone || '',
+      email: partie.email || ''
+    } : null;
+
+    const dialogRef = this.dialog.open(PartiePrenanteFormDialogComponent, {
+      width: '500px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: PartiePrenanteFormData) => {
+      if (result) {
+        if (result.id) {
+          this.updatePartie(result.id, result);
+        } else {
+          this.addPartie(result);
+        }
+      }
+    });
+  }
+
+  addPartie(data: PartiePrenanteFormData): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const request: PartiePrenanteCreateRequest = {
+      dossierId: this.dossier.id,
+      role: data.role,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      email: data.email
+    };
+
+    this.partiePrenanteApiService.create(request).subscribe({
+      next: () => {
+        this.snackBar.open('Partie prenante ajoutée avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadDossier();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de l\'ajout de la partie prenante';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error adding partie prenante:', err);
+      }
+    });
+  }
+
+  updatePartie(id: number, data: PartiePrenanteFormData): void {
+    const request: PartiePrenanteUpdateRequest = {
+      role: data.role,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      phone: data.phone,
+      email: data.email
+    };
+
+    this.partiePrenanteApiService.update(id, request).subscribe({
+      next: () => {
+        this.snackBar.open('Partie prenante modifiée avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadDossier();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la modification de la partie prenante';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating partie prenante:', err);
+      }
+    });
+  }
+
+  editPartie(partie: PartiePrenanteResponse): void {
+    this.openPartiePrenanteDialog(partie);
+  }
+
+  deletePartie(partie: PartiePrenanteResponse): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Supprimer la partie prenante',
+        message: `Êtes-vous sûr de vouloir supprimer ${partie.firstName} ${partie.lastName} ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.partiePrenanteApiService.delete(partie.id).subscribe({
+          next: () => {
+            this.snackBar.open('Partie prenante supprimée avec succès', 'Fermer', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar']
+            });
+            this.loadDossier();
+          },
+          error: (err) => {
+            const errorMessage = err.error?.message || 'Échec de la suppression de la partie prenante';
+            this.snackBar.open(errorMessage, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
+            console.error('Error deleting partie prenante:', err);
+          }
+        });
+      }
+    });
+  }
+
+  toggleRendezVousForm(): void {
+    this.showRendezVousForm = !this.showRendezVousForm;
+    if (!this.showRendezVousForm) {
+      this.resetRendezVousForm();
+    }
+  }
+
+  resetRendezVousForm(): void {
+    this.rdvFormDate = '';
+    this.rdvFormTime = '';
+    this.rdvFormLocation = '';
+    this.rdvFormStatus = 'SCHEDULED';
+    this.rdvFormNotes = '';
+  }
+
+  addRendezVous(): void {
+    this.snackBar.open('Ajout de rendez-vous non implémenté (mock data)', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+    this.showRendezVousForm = false;
+    this.resetRendezVousForm();
+  }
+
+  editRendezVous(rdv: RendezVous): void {
+    console.log('Mock rendez-vous edit:', rdv);
+    this.snackBar.open('Édition de rendez-vous non implémentée (mock data)', 'Fermer', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'top'
+    });
+  }
+
+  openAppointmentDialog(appointment?: AppointmentResponse): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const dialogData: AppointmentFormData = appointment ? {
+      id: appointment.id,
+      dossierId: this.dossier.id,
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      location: appointment.location,
+      assignedTo: appointment.assignedTo,
+      notes: appointment.notes,
+      status: appointment.status
+    } : {
+      dossierId: this.dossier.id
+    };
+
+    const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
+      width: '600px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: AppointmentFormData) => {
+      if (result) {
+        if (result.id) {
+          this.updateAppointment(result.id, result);
+        } else {
+          this.createAppointment(result);
+        }
+      }
+    });
+  }
+
+  createAppointment(data: AppointmentFormData): void {
+    if (!data.startTime || !data.endTime) {
+      return;
+    }
+
+    const request: AppointmentCreateRequest = {
+      dossierId: data.dossierId,
+      startTime: data.startTime,
+      endTime: data.endTime,
+      location: data.location,
+      assignedTo: data.assignedTo,
+      notes: data.notes,
+      status: data.status
+    };
+
+    this.appointmentApiService.create(request).subscribe({
+      next: (response) => {
+        if (response.warnings && response.warnings.length > 0) {
+          response.warnings.forEach(warning => {
+            this.snackBar.open(`⚠️ ${warning}`, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['warning-snackbar']
+            });
+          });
+        }
+        this.snackBar.open('Rendez-vous créé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadAppointments();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la création du rendez-vous';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error creating appointment:', err);
+      }
+    });
+  }
+
+  updateAppointment(id: number, data: AppointmentFormData): void {
+    if (!data.startTime || !data.endTime) {
+      return;
+    }
+
+    const request: AppointmentUpdateRequest = {
+      startTime: data.startTime,
+      endTime: data.endTime,
+      location: data.location,
+      assignedTo: data.assignedTo,
+      notes: data.notes,
+      status: data.status
+    };
+
+    this.appointmentApiService.update(id, request).subscribe({
+      next: (response) => {
+        if (response.warnings && response.warnings.length > 0) {
+          response.warnings.forEach(warning => {
+            this.snackBar.open(`⚠️ ${warning}`, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['warning-snackbar']
+            });
+          });
+        }
+        this.snackBar.open('Rendez-vous modifié avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadAppointments();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la modification du rendez-vous';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating appointment:', err);
+      }
+    });
+  }
+
+  editAppointment(appointment: AppointmentResponse): void {
+    this.openAppointmentDialog(appointment);
+  }
+
+  deleteAppointment(appointment: AppointmentResponse): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      data: {
+        title: 'Supprimer le rendez-vous',
+        message: `Êtes-vous sûr de vouloir supprimer ce rendez-vous ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.appointmentApiService.delete(appointment.id).subscribe({
+          next: () => {
+            this.snackBar.open('Rendez-vous supprimé avec succès', 'Fermer', {
+              duration: 3000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['success-snackbar']
+            });
+            this.loadAppointments();
+          },
+          error: (err) => {
+            const errorMessage = err.error?.message || 'Échec de la suppression du rendez-vous';
+            this.snackBar.open(errorMessage, 'Fermer', {
+              duration: 5000,
+              horizontalPosition: 'center',
+              verticalPosition: 'top',
+              panelClass: ['error-snackbar']
+            });
+            console.error('Error deleting appointment:', err);
+          }
+        });
+      }
+    });
+  }
+
+  completeAppointment(appointment: AppointmentResponse): void {
+    const request: AppointmentUpdateRequest = {
+      startTime: appointment.startTime,
+      endTime: appointment.endTime,
+      location: appointment.location,
+      assignedTo: appointment.assignedTo,
+      notes: appointment.notes,
+      status: AppointmentStatus.COMPLETED
+    };
+
+    this.appointmentApiService.update(appointment.id, request).subscribe({
+      next: () => {
+        this.snackBar.open('Rendez-vous marqué comme terminé', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadAppointments();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la mise à jour du rendez-vous';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error completing appointment:', err);
+      }
+    });
+  }
+
+  toggleConsentement(group: ConsentementGroup, newStatus: ConsentementStatus): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    if (group.current) {
+      if (group.current.status === newStatus) {
+        return;
+      }
+      this.updateConsentement(group.current.id, group.channel, newStatus);
+    } else {
+      this.createConsentement(group.channel, newStatus);
+    }
+  }
+
+  createConsentement(channel: ConsentementChannel, status: ConsentementStatus): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const request: ConsentementCreateRequest = {
+      dossierId: this.dossier.id,
+      channel,
+      status
+    };
+
+    this.consentementApiService.create(request).subscribe({
+      next: () => {
+        this.snackBar.open('Consentement créé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadConsentements();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la création du consentement';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error creating consentement:', err);
+      }
+    });
+  }
+
+  updateConsentement(id: number, channel: ConsentementChannel, status: ConsentementStatus): void {
+    const request: ConsentementUpdateRequest = {
+      channel,
+      status
+    };
+
+    this.consentementApiService.update(id, request).subscribe({
+      next: () => {
+        this.snackBar.open('Consentement mis à jour avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.loadConsentements();
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la mise à jour du consentement';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error updating consentement:', err);
+      }
+    });
+  }
+
+  getMessagesSorted(): MessageResponse[] {
+    return this.messages.slice().sort((a, b) => {
+      const dateA = new Date(a.timestamp).getTime();
+      const dateB = new Date(b.timestamp).getTime();
+      return dateB - dateA;
+    });
+  }
+
+  openMessageDialog(): void {
+    if (!this.dossier) {
+      return;
+    }
+
+    const dialogData: MessageFormData = {
+      dossierId: this.dossier.id
+    };
+
+    const dialogRef = this.dialog.open(MessageFormDialogComponent, {
+      width: '500px',
+      data: dialogData
+    });
+
+    dialogRef.afterClosed().subscribe((result: MessageCreateRequest) => {
+      if (result) {
+        this.createMessage(result);
+      }
+    });
+  }
+
+  createMessage(request: MessageCreateRequest): void {
+    this.messageApiService.create(request).subscribe({
+      next: (newMessage) => {
+        this.snackBar.open('Message créé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.messages = [newMessage, ...this.messages];
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de la création du message';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error creating message:', err);
+      }
+    });
+  }
+
+  formatMessageTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  }
+
+  truncateContent(content: string, maxLength = 200): string {
+    if (content.length <= maxLength) {
+      return content;
+    }
+    return content.substring(0, maxLength) + '...';
+  }
+
+  shouldShowVoirPlus(content: string, maxLength = 200): boolean {
+    return content.length > maxLength;
+  }
+
+  getChannelBadgeClass(channel: string): string {
+    switch (channel) {
+      case 'EMAIL': return 'channel-badge channel-email';
+      case 'SMS': return 'channel-badge channel-sms';
+      case 'PHONE': return 'channel-badge channel-phone';
+      case 'WHATSAPP': return 'channel-badge channel-whatsapp';
+      case 'CHAT': return 'channel-badge channel-chat';
+      case 'IN_APP': return 'channel-badge channel-inapp';
+      case 'WEB': return 'channel-badge channel-web';
+      default: return 'channel-badge';
+    }
+  }
+
+  getDirectionBadgeClass(direction: string): string {
+    return direction === 'INBOUND' ? 'direction-badge direction-inbound' : 'direction-badge direction-outbound';
+  }
+
+  getRdvStatusBadgeClass(status: string): string {
+    switch (status) {
+      case 'SCHEDULED': return 'status-badge status-scheduled';
+      case 'CONFIRMED': return 'status-badge status-confirmed';
+      case 'COMPLETED': return 'status-badge status-completed';
+      case 'CANCELLED': return 'status-badge status-cancelled';
+      default: return 'status-badge';
+    }
+  }
+
+  getRdvStatusLabel(status: string): string {
+    switch (status) {
+      case 'SCHEDULED': return 'Planifié';
+      case 'CONFIRMED': return 'Confirmé';
+      case 'COMPLETED': return 'Terminé';
+      case 'CANCELLED': return 'Annulé';
+      default: return status;
+    }
+  }
+
+  getRoleLabel(role: PartiePrenanteRole): string {
+    switch (role) {
+      case PartiePrenanteRole.LEAD: return 'Lead';
+      case PartiePrenanteRole.BUYER: return 'Acheteur';
+      case PartiePrenanteRole.SELLER: return 'Vendeur';
+      case PartiePrenanteRole.AGENT: return 'Agent';
+      default: return role;
+    }
+  }
+
+  getAppointmentStatusBadgeClass(status: AppointmentStatus): string {
+    switch (status) {
+      case AppointmentStatus.SCHEDULED: return 'status-badge status-scheduled';
+      case AppointmentStatus.COMPLETED: return 'status-badge status-completed';
+      case AppointmentStatus.CANCELLED: return 'status-badge status-cancelled';
+      default: return 'status-badge';
+    }
+  }
+
+  getAppointmentStatusLabel(status: AppointmentStatus): string {
+    switch (status) {
+      case AppointmentStatus.SCHEDULED: return 'Planifié';
+      case AppointmentStatus.COMPLETED: return 'Terminé';
+      case AppointmentStatus.CANCELLED: return 'Annulé';
+      default: return status;
+    }
+  }
+
+  formatAppointmentDateTime(dateTime: string): string {
+    if (!dateTime) {
+      return '—';
+    }
+    const date = new Date(dateTime);
+    return date.toLocaleString('fr-FR', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  getConsentementStatusLabel(status: ConsentementStatus): string {
+    switch (status) {
+      case ConsentementStatus.GRANTED: return 'Accordé';
+      case ConsentementStatus.DENIED: return 'Refusé';
+      case ConsentementStatus.REVOKED: return 'Révoqué';
+      case ConsentementStatus.PENDING: return 'En attente';
+      case ConsentementStatus.EXPIRED: return 'Expiré';
+      default: return status;
+    }
+  }
+
+  getConsentementStatusBadgeClass(status: ConsentementStatus): string {
+    switch (status) {
+      case ConsentementStatus.GRANTED: return 'consent-badge consent-granted';
+      case ConsentementStatus.DENIED: return 'consent-badge consent-denied';
+      case ConsentementStatus.REVOKED: return 'consent-badge consent-revoked';
+      case ConsentementStatus.PENDING: return 'consent-badge consent-pending';
+      case ConsentementStatus.EXPIRED: return 'consent-badge consent-expired';
+      default: return 'consent-badge';
+    }
+  }
+
+  getChannelLabel(channel: ConsentementChannel): string {
+    switch (channel) {
+      case ConsentementChannel.EMAIL: return 'Email';
+      case ConsentementChannel.SMS: return 'SMS';
+      case ConsentementChannel.PHONE: return 'Téléphone';
+      case ConsentementChannel.WHATSAPP: return 'WhatsApp';
+      case ConsentementChannel.POSTAL_MAIL: return 'Courrier postal';
+      case ConsentementChannel.IN_PERSON: return 'En personne';
+      default: return channel;
+    }
+  }
+
+  getConsentementsHistory(): ConsentementResponse[] {
+    return this.consentements.slice().sort((a, b) => {
+      const dateA = new Date(a.updatedAt).getTime();
+      const dateB = new Date(b.updatedAt).getTime();
+      return dateB - dateA;
+    });
+  }
+
+  getUserFromMeta(consent: ConsentementResponse): string {
+    if (consent.meta && consent.meta['user']) {
+      return consent.meta['user'];
+    }
+    return '—';
+  }
+
+  getConsentDate(consent: ConsentementResponse): string {
+    if (consent.status === ConsentementStatus.GRANTED && consent.createdAt) {
+      return this.formatDate(consent.createdAt);
+    }
+    if (consent.status === ConsentementStatus.REVOKED && consent.updatedAt) {
+      return this.formatDate(consent.updatedAt);
+    }
+    return this.formatDate(consent.updatedAt);
   }
 }

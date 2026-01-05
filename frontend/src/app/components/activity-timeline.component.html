@@ -1,0 +1,121 @@
+<div class="activity-timeline-container">
+  <div class="timeline-header">
+    <h3>Chronologie d'activité</h3>
+    <button mat-raised-button color="primary" (click)="toggleNoteForm()">
+      <mat-icon>add</mat-icon>
+      Ajouter une note
+    </button>
+  </div>
+
+  <div *ngIf="showNoteForm" class="note-form">
+    <mat-card>
+      <mat-card-content>
+        <h4>Nouvelle note</h4>
+        
+        <div class="rich-text-editor">
+          <div class="editor-toolbar">
+            <button type="button" mat-icon-button (click)="formatText('bold')" [disabled]="savingNote" matTooltip="Gras">
+              <mat-icon>format_bold</mat-icon>
+            </button>
+            <button type="button" mat-icon-button (click)="formatText('italic')" [disabled]="savingNote" matTooltip="Italique">
+              <mat-icon>format_italic</mat-icon>
+            </button>
+            <button type="button" mat-icon-button (click)="formatText('underline')" [disabled]="savingNote" matTooltip="Souligné">
+              <mat-icon>format_underlined</mat-icon>
+            </button>
+            <span class="toolbar-divider"></span>
+            <button type="button" mat-icon-button (click)="formatText('insertUnorderedList')" [disabled]="savingNote" matTooltip="Liste à puces">
+              <mat-icon>format_list_bulleted</mat-icon>
+            </button>
+            <button type="button" mat-icon-button (click)="formatText('insertOrderedList')" [disabled]="savingNote" matTooltip="Liste numérotée">
+              <mat-icon>format_list_numbered</mat-icon>
+            </button>
+          </div>
+          <div 
+            #editorContent
+            class="editor-content"
+            contenteditable="true"
+            [attr.data-placeholder]="'Entrez le contenu de la note...'"
+            (input)="onEditorInput($event)"
+            [class.disabled]="savingNote">
+          </div>
+        </div>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Visibilité</mat-label>
+          <mat-select [(ngModel)]="noteVisibility" [disabled]="savingNote">
+            <mat-option [value]="ActivityVisibility.INTERNAL">Interne</mat-option>
+            <mat-option [value]="ActivityVisibility.CLIENT_VISIBLE">Visible par le client</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button mat-button (click)="toggleNoteForm()" [disabled]="savingNote">Annuler</button>
+          <button mat-raised-button color="primary" (click)="saveNote()" [disabled]="savingNote">
+            <mat-spinner *ngIf="savingNote" diameter="20"></mat-spinner>
+            <span *ngIf="!savingNote">Enregistrer</span>
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner></mat-spinner>
+    <p>Chargement des activités...</p>
+  </div>
+
+  <div *ngIf="!loading && activities.length === 0" class="no-activities">
+    <mat-icon>timeline</mat-icon>
+    <p>Aucune activité pour le moment</p>
+  </div>
+
+  <div *ngIf="!loading && activities.length > 0" class="timeline">
+    <div *ngFor="let activity of activities" class="timeline-item">
+      <div class="timeline-marker">
+        <mat-icon [class]="getActivityTypeBadgeClass(activity.type)">
+          {{ getActivityTypeIcon(activity.type) }}
+        </mat-icon>
+      </div>
+      
+      <mat-card class="activity-card">
+        <mat-card-header>
+          <div class="activity-header">
+            <div class="activity-info">
+              <span class="activity-type">{{ getActivityTypeLabel(activity.type) }}</span>
+              <span [class]="getVisibilityBadgeClass(activity.visibility)">
+                {{ getVisibilityLabel(activity.visibility) }}
+              </span>
+            </div>
+            <div class="activity-meta">
+              <span class="activity-time">{{ formatDateTime(activity.createdAt) }}</span>
+              <span class="activity-author" *ngIf="activity.createdBy">par {{ activity.createdBy }}</span>
+            </div>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <div class="activity-content" *ngIf="activity.content">
+            <div *ngIf="!isExpanded(activity.id) && shouldShowExpand(activity.content)" 
+                 [innerHTML]="truncateContent(activity.content)"></div>
+            <div *ngIf="isExpanded(activity.id) || !shouldShowExpand(activity.content)" 
+                 [innerHTML]="activity.content"></div>
+            
+            <button *ngIf="shouldShowExpand(activity.content)" 
+                    mat-button 
+                    color="primary" 
+                    (click)="toggleExpanded(activity.id)">
+              {{ isExpanded(activity.id) ? 'Voir moins' : 'Voir plus' }}
+            </button>
+          </div>
+        </mat-card-content>
+
+        <mat-card-actions *ngIf="activity.type === ActivityType.NOTE">
+          <button mat-icon-button color="warn" (click)="deleteActivity(activity)" matTooltip="Supprimer">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</div>
