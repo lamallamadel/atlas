@@ -11,6 +11,7 @@ import { DossierDetailComponent } from './pages/dossiers/dossier-detail.componen
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
+import { ReportsDashboardComponent } from './components/reports-dashboard.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -26,6 +27,7 @@ const routes: Routes = [
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
+      { path: 'reports', component: ReportsDashboardComponent },
       { path: 'annonces', component: AnnoncesComponent },
       { path: 'annonces/new', component: AnnonceCreateComponent },
       { path: 'annonces/:id', component: AnnonceDetailComponent },

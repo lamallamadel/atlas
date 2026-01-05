@@ -21,6 +21,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -42,6 +43,7 @@ import { MessageFormDialogComponent } from './components/message-form-dialog.com
 import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
 import { AppointmentFormDialogComponent } from './components/appointment-form-dialog.component';
 import { BulkOperationDialogComponent } from './components/bulk-operation-dialog.component';
+import { ReportsDashboardComponent } from './components/reports-dashboard.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
@@ -51,6 +53,7 @@ import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { NgChartsModule } from 'ng2-charts';
 
 registerLocaleData(localeFr);
 
@@ -80,6 +83,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ConfirmDeleteDialogComponent,
     AppointmentFormDialogComponent,
     BulkOperationDialogComponent,
+    ReportsDashboardComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
@@ -108,7 +112,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatTabsModule,
     MatDialogModule,
     MatSelectModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatProgressSpinnerModule,
+    NgChartsModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },
