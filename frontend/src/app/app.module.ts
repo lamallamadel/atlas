@@ -20,6 +20,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSelectModule } from '@angular/material/select';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -40,6 +41,7 @@ import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-
 import { MessageFormDialogComponent } from './components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
 import { AppointmentFormDialogComponent } from './components/appointment-form-dialog.component';
+import { BulkOperationDialogComponent } from './components/bulk-operation-dialog.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
@@ -77,6 +79,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MessageFormDialogComponent,
     ConfirmDeleteDialogComponent,
     AppointmentFormDialogComponent,
+    BulkOperationDialogComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
@@ -104,7 +107,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatCardModule,
     MatTabsModule,
     MatDialogModule,
-    MatSelectModule
+    MatSelectModule,
+    MatProgressBarModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },

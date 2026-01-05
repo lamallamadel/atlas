@@ -102,6 +102,25 @@ export interface AnnonceListParams {
   sort?: string;
 }
 
+export interface AnnonceBulkUpdateRequest {
+  ids: number[];
+  updates: {
+    status?: AnnonceStatus;
+    city?: string;
+  };
+}
+
+export interface BulkOperationResponse {
+  successCount: number;
+  failureCount: number;
+  errors: BulkOperationError[];
+}
+
+export interface BulkOperationError {
+  id: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -152,5 +171,9 @@ export class AnnonceApiService {
 
   update(id: number, request: AnnonceUpdateRequest): Observable<AnnonceResponse> {
     return this.http.put<AnnonceResponse>(`${this.apiUrl}/${id}`, request);
+  }
+
+  bulkUpdate(request: AnnonceBulkUpdateRequest): Observable<BulkOperationResponse> {
+    return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-update`, request);
   }
 }

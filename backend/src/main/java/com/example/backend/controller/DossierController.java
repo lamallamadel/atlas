@@ -1,5 +1,7 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.BulkOperationResponse;
+import com.example.backend.dto.DossierBulkAssignRequest;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
@@ -201,6 +203,21 @@ public class DossierController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/bulk-assign")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Bulk assign dossier status", description = "Updates the status of multiple dossiers with validation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bulk assign completed",
+                    content = @Content(schema = @Schema(implementation = BulkOperationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<BulkOperationResponse> bulkAssign(
+            @Valid @RequestBody DossierBulkAssignRequest request) {
+        BulkOperationResponse response = dossierService.bulkAssign(request);
+        return ResponseEntity.ok(response);
     }
 
     private Pageable createPageable(int page, int size, String sort) {

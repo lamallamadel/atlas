@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.BulkOperationResponse;
+import com.example.backend.dto.DossierBulkAssignRequest;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierMapper;
@@ -19,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -172,5 +175,46 @@ public class DossierService {
         return duplicates.stream()
                 .map(dossierMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public BulkOperationResponse bulkAssign(DossierBulkAssignRequest request) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        int successCount = 0;
+        int failureCount = 0;
+        List<BulkOperationResponse.BulkOperationError> errors = new ArrayList<>();
+
+        for (Long id : request.getIds()) {
+            try {
+                Dossier dossier = dossierRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
+
+                if (!orgId.equals(dossier.getOrgId())) {
+                    throw new EntityNotFoundException("Dossier not found with id: " + id);
+                }
+
+                DossierStatus currentStatus = dossier.getStatus();
+                DossierStatus newStatus = request.getStatus();
+
+                transitionService.validateTransition(currentStatus, newStatus);
+
+                dossier.setStatus(newStatus);
+                dossierRepository.save(dossier);
+
+                transitionService.recordTransition(dossier, currentStatus, newStatus, 
+                        request.getUserId(), request.getReason());
+
+                successCount++;
+            } catch (Exception e) {
+                failureCount++;
+                errors.add(new BulkOperationResponse.BulkOperationError(id, e.getMessage()));
+            }
+        }
+
+        return new BulkOperationResponse(successCount, failureCount, errors);
     }
 }

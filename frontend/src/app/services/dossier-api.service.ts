@@ -114,6 +114,24 @@ export interface DossierListParams {
   sort?: string;
 }
 
+export interface DossierBulkAssignRequest {
+  ids: number[];
+  status: DossierStatus;
+  reason?: string;
+  userId?: string;
+}
+
+export interface BulkOperationResponse {
+  successCount: number;
+  failureCount: number;
+  errors: BulkOperationError[];
+}
+
+export interface BulkOperationError {
+  id: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -180,5 +198,9 @@ export class DossierApiService {
           return res.body ?? [];
         })
       );
+  }
+
+  bulkAssign(request: DossierBulkAssignRequest): Observable<BulkOperationResponse> {
+    return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-assign`, request);
   }
 }

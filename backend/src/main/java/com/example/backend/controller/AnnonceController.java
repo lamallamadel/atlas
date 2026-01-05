@@ -1,8 +1,10 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.AnnonceBulkUpdateRequest;
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
+import com.example.backend.dto.BulkOperationResponse;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.service.AnnonceService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -153,6 +155,21 @@ public class AnnonceController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @PostMapping("/bulk-update")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Bulk update annonces", description = "Updates multiple annonces with the provided changes")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Bulk update completed",
+                    content = @Content(schema = @Schema(implementation = BulkOperationResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content)
+    })
+    public ResponseEntity<BulkOperationResponse> bulkUpdate(
+            @Valid @RequestBody AnnonceBulkUpdateRequest request) {
+        BulkOperationResponse response = annonceService.bulkUpdate(request);
+        return ResponseEntity.ok(response);
     }
 
     private Pageable createPageable(int page, int size, String sort) {

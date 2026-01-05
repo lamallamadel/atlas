@@ -1,9 +1,11 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.AnnonceBulkUpdateRequest;
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceMapper;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
+import com.example.backend.dto.BulkOperationResponse;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
@@ -16,6 +18,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -155,5 +158,49 @@ public class AnnonceService {
         }
         
         annonceRepository.delete(annonce);
+    }
+
+    @Transactional
+    public BulkOperationResponse bulkUpdate(AnnonceBulkUpdateRequest request) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        int successCount = 0;
+        int failureCount = 0;
+        List<BulkOperationResponse.BulkOperationError> errors = new ArrayList<>();
+
+        for (Long id : request.getIds()) {
+            try {
+                Annonce annonce = annonceRepository.findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + id));
+
+                if (!orgId.equals(annonce.getOrgId())) {
+                    throw new EntityNotFoundException("Annonce not found with id: " + id);
+                }
+
+                if (AnnonceStatus.ARCHIVED.equals(annonce.getStatus())) {
+                    throw new IllegalStateException("Cannot update an archived annonce");
+                }
+
+                if (request.getUpdates() != null) {
+                    if (request.getUpdates().getStatus() != null) {
+                        annonce.setStatus(request.getUpdates().getStatus());
+                    }
+                    if (request.getUpdates().getCity() != null) {
+                        annonce.setCity(request.getUpdates().getCity());
+                    }
+                }
+
+                annonceRepository.save(annonce);
+                successCount++;
+            } catch (Exception e) {
+                failureCount++;
+                errors.add(new BulkOperationResponse.BulkOperationError(id, e.getMessage()));
+            }
+        }
+
+        return new BulkOperationResponse(successCount, failureCount, errors);
     }
 }
