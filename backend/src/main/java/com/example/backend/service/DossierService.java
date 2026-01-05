@@ -33,13 +33,16 @@ public class DossierService {
     private final DossierMapper dossierMapper;
     private final AnnonceRepository annonceRepository;
     private final DossierStatusTransitionService transitionService;
+    private final SearchService searchService;
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper, 
-                         AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService) {
+                         AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
+                         SearchService searchService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
         this.transitionService = transitionService;
+        this.searchService = searchService;
     }
 
     @Transactional
@@ -72,6 +75,8 @@ public class DossierService {
         Dossier saved = dossierRepository.save(dossier);
         
         transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
+        
+        searchService.indexDossier(saved);
         
         return dossierMapper.toResponse(saved);
     }
@@ -140,6 +145,8 @@ public class DossierService {
         
         transitionService.recordTransition(dossier, currentStatus, newStatus, request.getUserId(), request.getReason());
         
+        searchService.indexDossier(updated);
+        
         return dossierMapper.toResponse(updated);
     }
 
@@ -160,6 +167,7 @@ public class DossierService {
         dossier.setLeadName(request.getLeadName());
         dossier.setLeadPhone(request.getLeadPhone());
         Dossier updated = dossierRepository.save(dossier);
+        searchService.indexDossier(updated);
         return dossierMapper.toResponse(updated);
     }
 

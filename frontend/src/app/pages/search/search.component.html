@@ -1,0 +1,87 @@
+<div class="search-page">
+  <div class="search-header">
+    <h1>Search Results</h1>
+    <div class="search-controls">
+      <div class="search-input-group">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Search..."
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearchQueryChange()"
+        />
+        <button class="btn btn-primary" (click)="onSearchQueryChange()">
+          Search
+        </button>
+      </div>
+      <div class="filter-group">
+        <select [(ngModel)]="selectedType" (change)="onTypeChange()" class="type-select">
+          <option value="">All Types</option>
+          <option value="annonce">Annonces</option>
+          <option value="dossier">Dossiers</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-info" *ngIf="!isLoading && searchResults.length > 0">
+    <p>Found {{ totalHits }} result(s)</p>
+    <span class="es-badge" *ngIf="!elasticsearchAvailable" title="Using PostgreSQL search">
+      PostgreSQL Fallback
+    </span>
+    <span class="es-badge success" *ngIf="elasticsearchAvailable" title="Using Elasticsearch">
+      Elasticsearch
+    </span>
+  </div>
+
+  <div class="loading-spinner" *ngIf="isLoading">
+    <p>Searching...</p>
+  </div>
+
+  <div class="error-message" *ngIf="error">
+    <p>{{ error }}</p>
+  </div>
+
+  <div class="search-results" *ngIf="!isLoading && !error">
+    <div class="result-card" *ngFor="let result of searchResults" (click)="navigateToResult(result)">
+      <div class="result-header">
+        <span class="result-type" [class.annonce]="result.type === 'annonce'" [class.dossier]="result.type === 'dossier'">
+          {{ result.type }}
+        </span>
+        <span class="result-score" *ngIf="elasticsearchAvailable">
+          Score: {{ result.relevanceScore | number:'1.2-2' }}
+        </span>
+      </div>
+      <h3 class="result-title">{{ result.title }}</h3>
+      <p class="result-description" *ngIf="result.description">
+        {{ truncate(result.description, 200) }}
+      </p>
+      <div class="result-meta">
+        <span>Updated: {{ result.updatedAt | date:'short' }}</span>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="searchResults.length === 0 && searchQuery">
+      <p>No results found for "{{ searchQuery }}"</p>
+      <p class="hint">Try adjusting your search terms or filters</p>
+    </div>
+  </div>
+
+  <div class="pagination" *ngIf="!isLoading && searchResults.length > 0">
+    <button 
+      class="btn btn-secondary" 
+      (click)="previousPage()" 
+      [disabled]="!hasPreviousPage"
+    >
+      Previous
+    </button>
+    <span class="page-info">Page {{ page + 1 }}</span>
+    <button 
+      class="btn btn-secondary" 
+      (click)="nextPage()" 
+      [disabled]="!hasNextPage"
+    >
+      Next
+    </button>
+  </div>
+</div>

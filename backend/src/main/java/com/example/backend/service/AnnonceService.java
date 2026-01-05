@@ -27,10 +27,12 @@ public class AnnonceService {
 
     private final AnnonceRepository annonceRepository;
     private final AnnonceMapper annonceMapper;
+    private final SearchService searchService;
 
-    public AnnonceService(AnnonceRepository annonceRepository, AnnonceMapper annonceMapper) {
+    public AnnonceService(AnnonceRepository annonceRepository, AnnonceMapper annonceMapper, SearchService searchService) {
         this.annonceRepository = annonceRepository;
         this.annonceMapper = annonceMapper;
+        this.searchService = searchService;
     }
 
     @Transactional
@@ -55,6 +57,7 @@ public class AnnonceService {
         Annonce annonce = annonceMapper.toEntity(request);
         annonce.setOrgId(orgId);
         Annonce saved = annonceRepository.save(annonce);
+        searchService.indexAnnonce(saved);
         return annonceMapper.toResponse(saved);
     }
 
@@ -97,6 +100,7 @@ public class AnnonceService {
 
         annonceMapper.updateEntity(annonce, request);
         Annonce updated = annonceRepository.save(annonce);
+        searchService.indexAnnonce(updated);
         return annonceMapper.toResponse(updated);
     }
 

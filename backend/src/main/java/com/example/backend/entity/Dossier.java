@@ -38,6 +38,9 @@ public class Dossier extends BaseEntity {
     @Column(name = "lead_source", length = 100)
     private String leadSource;
 
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private DossierStatus status;
@@ -207,5 +210,13 @@ public class Dossier extends BaseEntity {
     public void removeAppointment(AppointmentEntity appointment) {
         appointments.remove(appointment);
         appointment.setDossier(null);
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

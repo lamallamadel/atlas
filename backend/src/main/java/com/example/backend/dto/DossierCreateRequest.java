@@ -26,6 +26,9 @@ public class DossierCreateRequest {
     @Size(max = 100, message = "Lead source must not exceed 100 characters")
     private String leadSource;
 
+    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    private String notes;
+
     @Schema(description = "Dossier score (0-100)", example = "75", nullable = true)
     @Min(value = 0, message = "Score must be between 0 and 100")
     @Max(value = 100, message = "Score must be between 0 and 100")
@@ -95,5 +98,13 @@ public class DossierCreateRequest {
 
     public void setInitialParty(PartiePrenanteRequest initialParty) {
         this.initialParty = initialParty;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }

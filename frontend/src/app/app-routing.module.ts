@@ -12,6 +12,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
 import { ReportsDashboardComponent } from './components/reports-dashboard.component';
+import { SearchComponent } from './pages/search/search.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -28,6 +29,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent },
       { path: 'reports', component: ReportsDashboardComponent },
+      { path: 'search', component: SearchComponent },
       { path: 'annonces', component: AnnoncesComponent },
       { path: 'annonces/new', component: AnnonceCreateComponent },
       { path: 'annonces/:id', component: AnnonceDetailComponent },

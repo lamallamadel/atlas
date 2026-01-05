@@ -32,6 +32,9 @@ public class DossierResponse {
     @Schema(description = "Lead source", example = "Website", nullable = true)
     private String leadSource;
 
+    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    private String notes;
+
     @Schema(description = "Current status of the dossier", example = "NEW")
     private DossierStatus status;
 
@@ -188,5 +191,13 @@ public class DossierResponse {
 
     public void setExistingOpenDossierId(Long existingOpenDossierId) {
         this.existingOpenDossierId = existingOpenDossierId;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }
