@@ -193,3 +193,10 @@ frontend/frontend/
 run-backend-install.cmd
 backend-setup-wrapper.ps1
 setup-backend-mvn.cmd
+
+# Agent-created setup files
+setup-backend-node.js
+temp-setup.cmd
+package.json
+package-lock.json
+SETUP_STATUS_AGENT.md

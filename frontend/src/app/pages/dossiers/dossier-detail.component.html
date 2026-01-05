@@ -525,6 +525,12 @@
           </div>
         </mat-tab>
 
+        <mat-tab label="Chronologie">
+          <div class="tab-content">
+            <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
+          </div>
+        </mat-tab>
+
         <mat-tab label="Historique">
           <div class="tab-content">
             <div class="audit-filters">

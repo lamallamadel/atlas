@@ -23,11 +23,11 @@ export interface SearchResponse {
   providedIn: 'root'
 })
 export class SearchApiService {
-  private apiUrl = `${environment.apiUrl}/api/v1/search`;
+  private apiUrl = `${environment.apiBaseUrl}/v1/search`;
 
   constructor(private http: HttpClient) {}
 
-  search(query?: string, type?: string, filters?: any, page: number = 0, size: number = 10): Observable<SearchResponse> {
+  search(query?: string, type?: string, filters?: any, page = 0, size = 10): Observable<SearchResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());

@@ -46,6 +46,7 @@ import { BulkOperationDialogComponent } from './components/bulk-operation-dialog
 import { ReportsDashboardComponent } from './components/reports-dashboard.component';
 import { GlobalSearchBarComponent } from './components/global-search-bar.component';
 import { SearchComponent } from './pages/search/search.component';
+import { ActivityTimelineComponent } from './components/activity-timeline.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
@@ -88,6 +89,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ReportsDashboardComponent,
     GlobalSearchBarComponent,
     SearchComponent,
+    ActivityTimelineComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
