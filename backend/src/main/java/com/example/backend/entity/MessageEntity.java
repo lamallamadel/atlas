@@ -41,6 +41,9 @@ public class MessageEntity extends BaseEntity {
     @Column(name = "timestamp", nullable = false)
     private LocalDateTime timestamp;
 
+    @Column(name = "provider_message_id", unique = true, length = 255)
+    private String providerMessageId;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -107,5 +110,13 @@ public class MessageEntity extends BaseEntity {
 
     public void setOrgId(String orgId) {
         this.orgId = orgId;
+    }
+
+    public String getProviderMessageId() {
+        return providerMessageId;
+    }
+
+    public void setProviderMessageId(String providerMessageId) {
+        this.providerMessageId = providerMessageId;
     }
 }

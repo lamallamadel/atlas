@@ -21,4 +21,6 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long> {
             @Param("channel") MessageChannel channel,
             @Param("direction") MessageDirection direction,
             Pageable pageable);
+
+    boolean existsByProviderMessageId(String providerMessageId);
 }
