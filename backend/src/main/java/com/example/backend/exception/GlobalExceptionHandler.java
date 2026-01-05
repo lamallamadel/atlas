@@ -114,6 +114,23 @@ public class GlobalExceptionHandler {
                 .body(problemDetail);
     }
 
+    @ExceptionHandler(InvalidStatusTransitionException.class)
+    public ResponseEntity<ProblemDetail> handleInvalidStatusTransitionException(
+            InvalidStatusTransitionException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "about:blank",
+                "Unprocessable Entity",
+                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(problemDetail);
+    }
+
     @ExceptionHandler(TenantHeaderMissingException.class)
     public ResponseEntity<ProblemDetail> handleTenantHeaderMissingException(
             TenantHeaderMissingException ex, HttpServletRequest request) {

@@ -29,11 +29,14 @@ public class DossierService {
     private final DossierRepository dossierRepository;
     private final DossierMapper dossierMapper;
     private final AnnonceRepository annonceRepository;
+    private final DossierStatusTransitionService transitionService;
 
-    public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper, AnnonceRepository annonceRepository) {
+    public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper, 
+                         AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
+        this.transitionService = transitionService;
     }
 
     @Transactional
@@ -64,6 +67,9 @@ public class DossierService {
         }
         
         Dossier saved = dossierRepository.save(dossier);
+        
+        transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
+        
         return dossierMapper.toResponse(saved);
     }
 
@@ -121,8 +127,16 @@ public class DossierService {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
         
-        dossier.setStatus(request.getStatus());
+        DossierStatus currentStatus = dossier.getStatus();
+        DossierStatus newStatus = request.getStatus();
+        
+        transitionService.validateTransition(currentStatus, newStatus);
+        
+        dossier.setStatus(newStatus);
         Dossier updated = dossierRepository.save(dossier);
+        
+        transitionService.recordTransition(dossier, currentStatus, newStatus, request.getUserId(), request.getReason());
+        
         return dossierMapper.toResponse(updated);
     }
 

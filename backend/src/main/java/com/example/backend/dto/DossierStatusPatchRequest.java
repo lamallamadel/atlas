@@ -11,6 +11,12 @@ public class DossierStatusPatchRequest {
     @NotNull(message = "Status is required")
     private DossierStatus status;
 
+    @Schema(description = "User ID performing the status change", example = "user123")
+    private String userId;
+
+    @Schema(description = "Reason for the status change", example = "Client qualified after initial call")
+    private String reason;
+
     public DossierStatusPatchRequest() {
     }
 
@@ -20,5 +26,21 @@ public class DossierStatusPatchRequest {
 
     public void setStatus(DossierStatus status) {
         this.status = status;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getReason() {
+        return reason;
+    }
+
+    public void setReason(String reason) {
+        this.reason = reason;
     }
 }

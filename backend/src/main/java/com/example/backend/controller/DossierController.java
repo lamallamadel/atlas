@@ -3,10 +3,12 @@ package com.example.backend.controller;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
+import com.example.backend.dto.DossierStatusHistoryResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.ErrorResponse;
 import com.example.backend.service.DossierService;
+import com.example.backend.service.DossierStatusHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -31,9 +33,11 @@ import org.springframework.web.bind.annotation.*;
 public class DossierController {
 
     private final DossierService dossierService;
+    private final DossierStatusHistoryService statusHistoryService;
 
-    public DossierController(DossierService dossierService) {
+    public DossierController(DossierService dossierService, DossierStatusHistoryService statusHistoryService) {
         this.dossierService = dossierService;
+        this.statusHistoryService = statusHistoryService;
     }
 
     @PostMapping
@@ -169,6 +173,33 @@ public class DossierController {
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @GetMapping("/{id}/status-history")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get dossier status history", description = "Retrieves the status transition history for a specific dossier")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status history retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = Page.class))),
+            @ApiResponse(responseCode = "404", description = "Dossier not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<Page<DossierStatusHistoryResponse>> getStatusHistory(
+            @Parameter(description = "ID of the dossier", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Page number (0-indexed)")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size")
+            @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is descending by transitionedAt.")
+            @RequestParam(defaultValue = "transitionedAt,desc") String sort) {
+        try {
+            Pageable pageable = createPageable(page, size, sort);
+            Page<DossierStatusHistoryResponse> history = statusHistoryService.getStatusHistory(id, pageable);
+            return ResponseEntity.ok(history);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 
