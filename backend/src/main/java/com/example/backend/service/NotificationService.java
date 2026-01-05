@@ -1,0 +1,122 @@
+package com.example.backend.service;
+
+import com.example.backend.entity.NotificationEntity;
+import com.example.backend.entity.enums.NotificationStatus;
+import com.example.backend.entity.enums.NotificationType;
+import com.example.backend.repository.NotificationRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class NotificationService {
+
+    private static final Logger log = LoggerFactory.getLogger(NotificationService.class);
+
+    private final NotificationRepository notificationRepository;
+    private final EmailProvider emailProvider;
+    private final Map<NotificationType, NotificationProvider> providerMap;
+
+    public NotificationService(
+            NotificationRepository notificationRepository,
+            EmailProvider emailProvider) {
+        this.notificationRepository = notificationRepository;
+        this.emailProvider = emailProvider;
+        this.providerMap = Map.of(
+                NotificationType.EMAIL, emailProvider
+        );
+    }
+
+    @Transactional
+    public NotificationEntity createNotification(
+            String orgId,
+            NotificationType type,
+            String recipient,
+            String subject,
+            String templateId,
+            Map<String, Object> variables) {
+        
+        NotificationEntity notification = new NotificationEntity();
+        notification.setOrgId(orgId);
+        notification.setType(type);
+        notification.setRecipient(recipient);
+        notification.setSubject(subject);
+        notification.setTemplateId(templateId);
+        notification.setVariables(variables);
+        notification.setStatus(NotificationStatus.PENDING);
+        notification.setRetryCount(0);
+        notification.setMaxRetries(3);
+
+        return notificationRepository.save(notification);
+    }
+
+    @Async
+    @Scheduled(fixedDelayString = "${notification.processor.interval:10000}")
+    @Transactional
+    public void processPendingNotifications() {
+        log.debug("Processing pending notifications");
+
+        List<NotificationEntity> pendingNotifications = 
+            notificationRepository.findPendingNotifications(NotificationStatus.PENDING);
+
+        for (NotificationEntity notification : pendingNotifications) {
+            processNotification(notification);
+        }
+
+        log.debug("Processed {} pending notifications", pendingNotifications.size());
+    }
+
+    private void processNotification(NotificationEntity notification) {
+        try {
+            NotificationProvider provider = providerMap.get(notification.getType());
+            
+            if (provider == null) {
+                log.error("No provider found for notification type: {}", notification.getType());
+                notification.setStatus(NotificationStatus.FAILED);
+                notification.setErrorMessage("No provider found for type: " + notification.getType());
+                notificationRepository.save(notification);
+                return;
+            }
+
+            provider.send(notification);
+            
+            notification.setStatus(NotificationStatus.SENT);
+            notification.setSentAt(LocalDateTime.now());
+            notification.setErrorMessage(null);
+            notificationRepository.save(notification);
+            
+            log.info("Successfully sent notification ID: {}", notification.getId());
+            
+        } catch (Exception e) {
+            log.error("Failed to send notification ID: {}", notification.getId(), e);
+            
+            notification.setRetryCount(notification.getRetryCount() + 1);
+            notification.setErrorMessage(e.getMessage());
+            
+            if (notification.getRetryCount() >= notification.getMaxRetries()) {
+                notification.setStatus(NotificationStatus.FAILED);
+                log.error("Notification ID {} failed after {} retries", 
+                    notification.getId(), notification.getRetryCount());
+            }
+            
+            notificationRepository.save(notification);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public NotificationEntity getNotificationById(Long id) {
+        return notificationRepository.findById(id).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<NotificationEntity> getAllNotifications() {
+        return notificationRepository.findAll();
+    }
+}
