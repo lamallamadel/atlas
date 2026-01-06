@@ -20,6 +20,11 @@ export class AuthService {
   private readonly AUTH_MODE_KEY = 'auth_mode'; // 'manual' | 'oidc'
   private readonly DEFAULT_ORG_ID = 'ORG-001';
 
+  /**
+   * Prevents navigation ping-pong when multiple concurrent API calls return 401.
+   */
+  private handlingSessionExpired = false;
+
   private readonly authConfig: AuthConfig = {
     issuer: environment.oidc.issuer,
     redirectUri: environment.oidc.redirectUri,
@@ -102,16 +107,43 @@ export class AuthService {
    * - Clears OIDC tokens
    */
   logout(): void {
+    this.logoutLocal();
+    this.router.navigate(['/login'], { replaceUrl: true });
+  }
+
+  /**
+   * Local logout only (no redirect to Keycloak).
+   * This is the safest option to break infinite redirect loops on 401.
+   */
+  logoutLocal(): void {
     localStorage.removeItem(this.TOKEN_KEY);
     localStorage.removeItem(this.AUTH_MODE_KEY);
 
     try {
-      this.oauthService.logOut();
+      // "true" = noRedirectToLogoutUrl (avoids Keycloak end_session redirect issues)
+      this.oauthService.logOut(true);
     } catch {
       // ignore
     }
+  }
 
-    this.router.navigate(['/login']);
+  /**
+   * Called by HTTP interceptor on 401.
+   * Clears tokens and performs a single navigation to /login.
+   */
+  handleSessionExpired(): void {
+    if (this.handlingSessionExpired) {
+      return;
+    }
+    this.handlingSessionExpired = true;
+
+    this.logoutLocal();
+
+    // replaceUrl prevents the browser history from replaying protected routes.
+    this.router.navigate(['/login'], { replaceUrl: true }).finally(() => {
+      // Release lock after navigation tick.
+      setTimeout(() => (this.handlingSessionExpired = false), 0);
+    });
   }
 
   /**

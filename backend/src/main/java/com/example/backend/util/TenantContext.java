@@ -9,8 +9,25 @@ public final class TenantContext {
         ORG_ID.set(orgId);
     }
 
+    /**
+     * Backward-compatible alias.
+     * <p>
+     * The domain model uses the term {@code orgId}. Some code paths (notably reporting)
+     * were initially authored with a {@code tenantId} naming convention.
+     */
+    public static void setTenantId(String tenantId) {
+        setOrgId(tenantId);
+    }
+
     public static String getOrgId() {
         return ORG_ID.get();
+    }
+
+    /**
+     * Backward-compatible alias for {@link #getOrgId()}.
+     */
+    public static String getTenantId() {
+        return getOrgId();
     }
 
     public static void clear() {

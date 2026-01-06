@@ -4,6 +4,7 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 interface ProblemDetail {
   type?: string;
@@ -19,8 +20,9 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
 
   constructor(
     private snackBar: MatSnackBar,
-    private router: Router
-  ) {}
+    private router: Router,
+    private authService: AuthService
+  ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     // IMPORTANT:
@@ -33,7 +35,7 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
     }
 
     const correlationId = this.generateCorrelationId();
-    
+
     const modifiedReq = req.clone({
       setHeaders: {
         'X-Correlation-Id': correlationId
@@ -58,7 +60,7 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
 
   private handleError(error: HttpErrorResponse): void {
     const problemDetail = this.parseProblemDetail(error);
-    
+
     switch (error.status) {
       case 401:
         this.snackBar.open('Session expirée. Veuillez vous reconnecter.', 'Fermer', {
@@ -67,7 +69,9 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
           verticalPosition: 'top',
           panelClass: ['error-snackbar']
         });
-        this.router.navigate(['/login']);
+        // IMPORTANT: clear tokens first to avoid a redirect ping-pong
+        // (login auto-redirects to dashboard if a stale token is still present).
+        this.authService.handleSessionExpired();
         break;
 
       case 403:
@@ -130,8 +134,8 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       return null;
     }
 
-    if (typeof error.error === 'object' && 
-        ('detail' in error.error || 'title' in error.error || 'type' in error.error)) {
+    if (typeof error.error === 'object' &&
+      ('detail' in error.error || 'title' in error.error || 'type' in error.error)) {
       return error.error as ProblemDetail;
     }
 

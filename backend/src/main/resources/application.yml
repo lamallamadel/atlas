@@ -24,11 +24,19 @@ spring:
     mode: HTML
     encoding: UTF-8
     cache: false
+  spring:
   elasticsearch:
     enabled: ${ELASTICSEARCH_ENABLED:false}
     uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
     username: ${ELASTICSEARCH_USERNAME:}
     password: ${ELASTICSEARCH_PASSWORD:}
+
+  # Disable Spring Data Elasticsearch repositories unless explicitly enabled.
+  data:
+    elasticsearch:
+      repositories:
+        enabled: ${ELASTICSEARCH_ENABLED:false}
+
 
 springdoc:
   api-docs:

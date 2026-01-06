@@ -122,45 +122,53 @@ public class AppointmentService {
         appointmentRepository.delete(appointment);
     }
 
-    @Transactional(readOnly = true)
-    public Page<AppointmentResponse> listByDossier(
-            Long dossierId,
-            LocalDateTime fromDate,
-            LocalDateTime toDate,
-            String assignedTo,
-            AppointmentStatus status,
-            Pageable pageable
-    ) {
-        Specification<AppointmentEntity> spec = Specification.where(null);
-
-        if (dossierId != null) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("dossier").get("id"), dossierId));
-        }
-
-        if (fromDate != null) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.greaterThanOrEqualTo(root.get("startTime"), fromDate));
-        }
-
-        if (toDate != null) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.lessThanOrEqualTo(root.get("endTime"), toDate));
-        }
-
-        if (assignedTo != null && !assignedTo.trim().isEmpty()) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("assignedTo"), assignedTo));
-        }
-
-        if (status != null) {
-            spec = spec.and((root, query, criteriaBuilder) ->
-                    criteriaBuilder.equal(root.get("status"), status));
-        }
-
-        Page<AppointmentEntity> appointments = appointmentRepository.findAll(spec, pageable);
-        return appointments.map(appointmentMapper::toResponse);
+   @Transactional(readOnly = true)
+public Page<AppointmentResponse> listByDossier(
+        Long dossierId,
+        LocalDateTime fromDate,
+        LocalDateTime toDate,
+        String assignedTo,
+        AppointmentStatus status,
+        Pageable pageable
+) {
+    String orgId = TenantContext.getOrgId();
+    if (orgId == null) {
+        throw new IllegalStateException("Organization ID not found in context");
     }
+
+    Specification<AppointmentEntity> spec = Specification.where(
+            (root, query, cb) -> cb.equal(root.get("orgId"), orgId)
+    );
+
+    if (dossierId != null) {
+        spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("dossier").get("id"), dossierId));
+    }
+
+    if (fromDate != null) {
+        spec = spec.and((root, query, cb) ->
+                cb.greaterThanOrEqualTo(root.get("startTime"), fromDate));
+    }
+
+    if (toDate != null) {
+        spec = spec.and((root, query, cb) ->
+                cb.lessThanOrEqualTo(root.get("endTime"), toDate));
+    }
+
+    if (assignedTo != null && !assignedTo.trim().isEmpty()) {
+        spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("assignedTo"), assignedTo));
+    }
+
+    if (status != null) {
+        spec = spec.and((root, query, cb) ->
+                cb.equal(root.get("status"), status));
+    }
+
+    Page<AppointmentEntity> appointments = appointmentRepository.findAll(spec, pageable);
+    return appointments.map(appointmentMapper::toResponse);
+}
+
 
     private List<String> checkOverlappingAppointments(
             String assignedTo,

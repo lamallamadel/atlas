@@ -19,6 +19,23 @@ public class PartiePrenanteMapper {
         return entity;
     }
 
+    /**
+     * Convenience mapper used when a partie prenante is embedded in other requests
+     * (e.g., dossier creation). In that case, the dossier association is handled by
+     * the caller and no dossierId field is available/needed.
+     */
+    public PartiePrenanteEntity toEntity(PartiePrenanteRequest request) {
+        PartiePrenanteEntity entity = new PartiePrenanteEntity();
+        entity.setRole(request.getRole());
+        entity.setFirstName(request.getFirstName());
+        entity.setLastName(request.getLastName());
+        entity.setEmail(request.getEmail());
+        entity.setPhone(request.getPhone());
+        entity.setAddress(request.getAddress());
+        entity.setMeta(request.getMeta());
+        return entity;
+    }
+
     public void updateEntity(PartiePrenanteEntity entity, PartiePrenanteUpdateRequest request) {
         entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
         entity.setFirstName(request.getFirstName());

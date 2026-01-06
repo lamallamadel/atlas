@@ -30,33 +30,41 @@ public class TenantFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
-        String requestPath = request.getRequestURI();
-        
-        if (requestPath.startsWith("/api/")) {
+
+        String path = request.getRequestURI();
+
+        // Never require tenant header on webhooks
+        if (path.startsWith("/api/v1/webhooks")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        if (path.startsWith("/api/")) {
             String orgId = request.getHeader(ORG_ID_HEADER);
-            
+
             if (orgId == null || orgId.trim().isEmpty()) {
                 ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
                         HttpStatus.BAD_REQUEST,
                         "Missing required header: " + ORG_ID_HEADER
                 );
                 problemDetail.setTitle("Bad Request");
-                
+
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
                 response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
                 response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
                 return;
             }
-            
+
             try {
                 TenantContext.setOrgId(orgId);
                 filterChain.doFilter(request, response);
             } finally {
                 TenantContext.clear();
             }
-        } else {
-            filterChain.doFilter(request, response);
+            return;
         }
+
+        filterChain.doFilter(request, response);
     }
+
 }

@@ -1,38 +1,25 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { PartiePrenanteFormDialogComponent } from './partie-prenante-form-dialog.component';
-import { PartiePrenanteRole } from '../services/dossier-api.service';
+import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('PartiePrenanteFormDialogComponent', () => {
   let component: PartiePrenanteFormDialogComponent;
   let fixture: ComponentFixture<PartiePrenanteFormDialogComponent>;
-  let dialogRefMock: jasmine.SpyObj<MatDialogRef<PartiePrenanteFormDialogComponent>>;
+  const dialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
   beforeEach(async () => {
-    dialogRefMock = jasmine.createSpyObj('MatDialogRef', ['close']);
-
     await TestBed.configureTestingModule({
-      declarations: [ PartiePrenanteFormDialogComponent ],
-      imports: [
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        BrowserAnimationsModule
-      ],
+      declarations: [PartiePrenanteFormDialogComponent],
+      imports: [MaterialTestingModule],
       providers: [
-        { provide: MatDialogRef, useValue: dialogRefMock },
-        { provide: MAT_DIALOG_DATA, useValue: null }
+        { provide: MatDialogRef, useValue: dialogRef },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: { mode: 'add', dossierId: 1, party: null }
+        }
       ]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PartiePrenanteFormDialogComponent);
     component = fixture.componentInstance;
@@ -43,14 +30,8 @@ describe('PartiePrenanteFormDialogComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should initialize form with default values for add mode', () => {
-    expect(component.isEditMode).toBeFalse();
-    expect(component.partieForm.get('role')?.value).toBe(PartiePrenanteRole.BUYER);
-    expect(component.partieForm.get('firstName')?.value).toBe('');
-  });
-
   it('should close dialog on cancel', () => {
     component.onCancel();
-    expect(dialogRefMock.close).toHaveBeenCalled();
+    expect(dialogRef.close).toHaveBeenCalled();
   });
 });

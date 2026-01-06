@@ -99,9 +99,12 @@ public class SearchService {
 
         if (query != null && !query.isBlank()) {
             Criteria queryCriteria = new Criteria()
-                    .or("title").fuzzy(query, 0.7f)
-                    .or("description").fuzzy(query, 0.7f)
-                    .or("address").fuzzy(query, 0.7f);
+                    // Spring Data Elasticsearch Criteria.fuzzy(..) takes a single term.
+                    // Earlier versions accepted an additional float parameter; keep compatibility
+                    // with current dependency versions by using the supported signature.
+                    .or("title").fuzzy(query)
+                    .or("description").fuzzy(query)
+                    .or("address").fuzzy(query);
             criteria = criteria.and(queryCriteria);
         }
 
@@ -126,8 +129,8 @@ public class SearchService {
 
         if (query != null && !query.isBlank()) {
             Criteria queryCriteria = new Criteria()
-                    .or("leadName").fuzzy(query, 0.7f)
-                    .or("notes").fuzzy(query, 0.7f);
+                    .or("leadName").fuzzy(query)
+                    .or("notes").fuzzy(query);
             criteria = criteria.and(queryCriteria);
         }
 

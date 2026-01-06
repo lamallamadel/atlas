@@ -1,34 +1,32 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { BulkOperationDialogComponent } from './bulk-operation-dialog.component';
+import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('BulkOperationDialogComponent', () => {
   let component: BulkOperationDialogComponent;
   let fixture: ComponentFixture<BulkOperationDialogComponent>;
 
-  const mockDialogRef = {
-    close: jasmine.createSpy('close')
-  };
-
-  const mockDialogData = {
-    title: 'Test Bulk Operation',
-    message: 'Processing items...',
-    successCount: 0,
-    failureCount: 0,
-    totalCount: 10,
-    errors: [],
-    inProgress: true
-  };
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ BulkOperationDialogComponent ],
+      declarations: [BulkOperationDialogComponent],
+      imports: [MaterialTestingModule],
       providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: mockDialogData }
+        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {
+            title: 'Test',
+            message: 'Test',
+            successCount: 0,
+            failureCount: 0,
+            totalCount: 1,
+            errors: [],
+            inProgress: true
+          }
+        }
       ]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(BulkOperationDialogComponent);
     component = fixture.componentInstance;

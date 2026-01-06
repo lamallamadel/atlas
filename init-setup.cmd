@@ -4,7 +4,7 @@ set PATH=%JAVA_HOME%\bin;%PATH%
 
 echo Setting up backend...
 cd backend
-call mvn clean package -DskipTests
+call mvn clean package -DskipTests -s settings.xml -t toolchains.xml
 cd ..
 
 echo.

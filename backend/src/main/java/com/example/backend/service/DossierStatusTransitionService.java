@@ -26,32 +26,35 @@ public class DossierStatusTransitionService {
 
     private Map<DossierStatus, Set<DossierStatus>> initializeTransitions() {
         Map<DossierStatus, Set<DossierStatus>> transitions = new HashMap<>();
-        
+
         transitions.put(DossierStatus.NEW, Set.of(
             DossierStatus.QUALIFYING,
+            DossierStatus.QUALIFIED,
+            DossierStatus.APPOINTMENT,
             DossierStatus.LOST
         ));
-        
+
         transitions.put(DossierStatus.QUALIFYING, Set.of(
             DossierStatus.QUALIFIED,
             DossierStatus.LOST
         ));
-        
+
         transitions.put(DossierStatus.QUALIFIED, Set.of(
             DossierStatus.APPOINTMENT,
             DossierStatus.LOST
         ));
-        
+
         transitions.put(DossierStatus.APPOINTMENT, Set.of(
             DossierStatus.WON,
             DossierStatus.LOST
         ));
-        
+
         transitions.put(DossierStatus.WON, Set.of());
         transitions.put(DossierStatus.LOST, Set.of());
-        
+
         return transitions;
     }
+
 
     public boolean isTransitionAllowed(DossierStatus fromStatus, DossierStatus toStatus) {
         if (fromStatus == null || toStatus == null) {

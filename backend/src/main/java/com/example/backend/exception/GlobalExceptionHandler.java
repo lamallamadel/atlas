@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 @RestControllerAdvice
@@ -22,28 +23,59 @@ public class GlobalExceptionHandler {
     private static final String PROBLEM_JSON_MEDIA_TYPE = "application/problem+json";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ProblemDetail> handleValidationExceptions(
-            MethodArgumentNotValidException ex, HttpServletRequest request) {
-        Map<String, Object> errors = new HashMap<>();
-        ex.getBindingResult().getAllErrors().forEach((error) -> {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-        });
+    public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
 
-        ProblemDetail problemDetail = new ProblemDetail(
+        // Keep stable ordering + first message per field
+        Map<String, String> errors = new LinkedHashMap<>();
+        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
+            errors.putIfAbsent(fe.getField(), fe.getDefaultMessage());
+        }
+
+        // Tests expect detail to contain the single message when only 1 error exists
+        String detail = "Validation failed";
+        if (errors.size() == 1) {
+            detail = errors.values().iterator().next();
+        }
+
+        ProblemDetail pd = new ProblemDetail(
                 "about:blank",
                 "Bad Request",
                 HttpStatus.BAD_REQUEST.value(),
-                "Validation failed",
+                detail,
                 request.getRequestURI()
         );
-        problemDetail.addProperty("errors", errors);
+
+        // Preserve your existing payload shape:
+        // { ..., "properties": { "errors": { field: message } } }
+        pd.addProperty("errors", errors);
 
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
-                .body(problemDetail);
+                .body(pd);
+    }
+
+    /**
+     * Covers Jackson deserialization errors (e.g. invalid enum value in JSON).
+     * Without this, it falls into the generic handler and returns 500.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
+            HttpMessageNotReadableException ex,
+            HttpServletRequest request
+    ) {
+        ProblemDetail pd = new ProblemDetail(
+                "about:blank",
+                "Bad Request",
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid request body",
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(pd);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
@@ -138,7 +170,7 @@ public class GlobalExceptionHandler {
                 "about:blank",
                 "Bad Request",
                 HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
+                "Missing organization context",
                 request.getRequestURI()
         );
 
@@ -165,27 +197,26 @@ public class GlobalExceptionHandler {
                 .body(problemDetail);
     }
 
-
-    @ExceptionHandler(org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class)
-        public ResponseEntity<ProblemDetail> handleTypeMismatch(
-                org.springframework.web.method.annotation.MethodArgumentTypeMismatchException ex,
-                HttpServletRequest request
-        ) {
-                ProblemDetail pd = new ProblemDetail(
-                        "about:blank",
-        "Bad Request",
-        400,
-        "Invalid parameter value",
-        request.getRequestURI()
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(
+            MethodArgumentTypeMismatchException ex,
+            HttpServletRequest request
+    ) {
+        ProblemDetail pd = new ProblemDetail(
+                "about:blank",
+                "Bad Request",
+                HttpStatus.BAD_REQUEST.value(),
+                "Invalid parameter value",
+                request.getRequestURI()
         );
-        // Optionnel : exposer plus de contexte
         pd.addProperty("parameter", ex.getName());
         pd.addProperty("value", String.valueOf(ex.getValue()));
-        return ResponseEntity.badRequest()
-        .contentType(org.springframework.http.MediaType.APPLICATION_PROBLEM_JSON)
-        .body(pd);
-        }
 
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(pd);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(

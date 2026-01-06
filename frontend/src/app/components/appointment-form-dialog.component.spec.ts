@@ -1,12 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
 import { AppointmentFormDialogComponent } from './appointment-form-dialog.component';
 import { AppointmentStatus } from '../services/appointment-api.service';
+import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('AppointmentFormDialogComponent', () => {
   let component: AppointmentFormDialogComponent;
@@ -17,20 +14,13 @@ describe('AppointmentFormDialogComponent', () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
-      declarations: [ AppointmentFormDialogComponent ],
-      imports: [
-        ReactiveFormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        BrowserAnimationsModule
-      ],
+      declarations: [AppointmentFormDialogComponent],
+      imports: [MaterialTestingModule],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } }
       ]
-    })
-    .compileComponents();
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AppointmentFormDialogComponent);
     component = fixture.componentInstance;

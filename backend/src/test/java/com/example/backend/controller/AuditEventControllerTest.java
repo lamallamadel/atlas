@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -358,7 +360,9 @@ class AuditEventControllerTest {
 
     @Test
     void list_WithoutAuthentication_Returns401() throws Exception {
-        mockMvc.perform(get("/api/v1/audit-events")
+        // The class is annotated with @WithMockUser; force an anonymous request for this test.
+        SecurityContextHolder.clearContext();
+        mockMvc.perform(get("/api/v1/audit-events").with(anonymous())
                         .header(ORG_ID_HEADER, ORG_ID)
                         .header(CORRELATION_ID_HEADER, CORRELATION_ID)
                         .param("dossierId", "123"))

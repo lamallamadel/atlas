@@ -8,6 +8,7 @@ export const environment = {
     clientId: 'atlas-frontend',
     scope: 'openid profile email',
     requireHttps: false,
-    redirectUri: window.location.origin + '/auth/callback'
+    redirectUri: window.location.origin + '/auth/callback',
+    logoutRedirectUri: window.location.origin + '/login'
   }
 };

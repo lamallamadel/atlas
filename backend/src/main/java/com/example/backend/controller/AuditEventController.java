@@ -71,10 +71,22 @@ public class AuditEventController {
 
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
-        String property = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
-        return PageRequest.of(page, size, Sort.by(direction, property));
+        String property = sortParams[0].trim();
+
+        Sort.Direction direction =
+                sortParams.length > 1 && sortParams[1].trim().equalsIgnoreCase("desc")
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
+
+        Sort primary = Sort.by(direction, property);
+
+        // Deterministic ordering for tests and consistent pagination:
+        // if two rows share same createdAt, order by id as tie-breaker.
+        if (!"id".equalsIgnoreCase(property)) {
+            primary = primary.and(Sort.by(direction, "id"));
+        }
+
+        return PageRequest.of(page, size, primary);
     }
+
 }

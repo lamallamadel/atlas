@@ -8,7 +8,7 @@ export class HttpAuthInterceptor implements HttpInterceptor {
   private readonly ORG_ID_KEY = 'org_id';
   private readonly DEFAULT_ORG_ID = 'ORG-001';
 
-  constructor(private authService: AuthService) {}
+  constructor(private authService: AuthService) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
     if (!req.url.includes('/api/')) {

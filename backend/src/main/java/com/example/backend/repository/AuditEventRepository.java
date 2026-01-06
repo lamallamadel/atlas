@@ -11,15 +11,33 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AuditEventRepository extends JpaRepository<AuditEventEntity, Long> {
-    
-    @Query("SELECT a FROM AuditEventEntity a WHERE a.entityType = :entityType AND a.entityId = :entityId ORDER BY a.createdAt DESC")
-    Page<AuditEventEntity> findByEntityTypeAndEntityId(
+
+    // No ORDER BY: let Pageable sorting apply
+    @Query("""
+        SELECT a
+        FROM AuditEventEntity a
+        WHERE a.orgId = :orgId
+          AND a.entityType = :entityType
+          AND a.entityId = :entityId
+    """)
+    Page<AuditEventEntity> findByOrgIdAndEntityTypeAndEntityId(
+            @Param("orgId") String orgId,
             @Param("entityType") AuditEntityType entityType,
             @Param("entityId") Long entityId,
-            Pageable pageable);
-    
-    @Query("SELECT a FROM AuditEventEntity a WHERE a.entityType = 'DOSSIER' AND a.entityId = :dossierId ORDER BY a.createdAt DESC")
-    Page<AuditEventEntity> findByDossierId(
+            Pageable pageable
+    );
+
+    // No ORDER BY: let Pageable sorting apply
+    @Query("""
+        SELECT a
+        FROM AuditEventEntity a
+        WHERE a.orgId = :orgId
+          AND a.entityType = 'DOSSIER'
+          AND a.entityId = :dossierId
+    """)
+    Page<AuditEventEntity> findByOrgIdAndDossierId(
+            @Param("orgId") String orgId,
             @Param("dossierId") Long dossierId,
-            Pageable pageable);
+            Pageable pageable
+    );
 }

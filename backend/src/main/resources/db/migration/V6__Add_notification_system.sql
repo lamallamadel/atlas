@@ -5,7 +5,7 @@ CREATE TABLE notification (
     type VARCHAR(50) NOT NULL,
     status VARCHAR(50) NOT NULL,
     template_id VARCHAR(255) NOT NULL,
-    variables JSONB,
+    variables ${json_type},
     recipient VARCHAR(500) NOT NULL,
     subject VARCHAR(500),
     error_message TEXT,

@@ -1,9 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivityTimelineComponent } from './activity-timeline.component';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDialogModule } from '@angular/material/dialog';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('ActivityTimelineComponent', () => {
   let component: ActivityTimelineComponent;
@@ -11,19 +8,12 @@ describe('ActivityTimelineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ActivityTimelineComponent ],
-      imports: [
-        HttpClientTestingModule,
-        MatSnackBarModule,
-        MatDialogModule,
-        BrowserAnimationsModule
-      ]
-    })
-    .compileComponents();
+      declarations: [ActivityTimelineComponent],
+      imports: [MaterialTestingModule]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ActivityTimelineComponent);
     component = fixture.componentInstance;
-    component.dossierId = 1;
     fixture.detectChanges();
   });
 

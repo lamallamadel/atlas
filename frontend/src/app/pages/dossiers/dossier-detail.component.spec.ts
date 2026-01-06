@@ -1,13 +1,8 @@
+import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 
 import { DossierDetailComponent } from './dossier-detail.component';
@@ -17,6 +12,12 @@ import { MessageApiService } from '../../services/message-api.service';
 import { AppointmentApiService } from '../../services/appointment-api.service';
 import { ConsentementApiService } from '../../services/consentement-api.service';
 import { AuditEventApiService } from '../../services/audit-event-api.service';
+import { MaterialTestingModule } from '../../testing/material-testing.module';
+
+@Component({ selector: 'app-badge-status', template: '' })
+class BadgeStatusStubComponent {
+  @Input() status: any;
+}
 
 describe('DossierDetailComponent', () => {
   let component: DossierDetailComponent;
@@ -155,14 +156,9 @@ describe('DossierDetailComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      declarations: [DossierDetailComponent],
+      declarations: [DossierDetailComponent, BadgeStatusStubComponent],
       imports: [
-        BrowserAnimationsModule,
-        FormsModule,
-        MatTabsModule,
-        MatCardModule,
-        MatExpansionModule,
-        MatPaginatorModule
+        MaterialTestingModule // centralized: animations + forms + material + http testing
       ],
       providers: [
         { provide: DossierApiService, useValue: dossierApiService },
@@ -175,9 +171,10 @@ describe('DossierDetailComponent', () => {
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: MatSnackBar, useValue: snackBar },
         { provide: MatDialog, useValue: dialog }
-      ]
-    })
-      .compileComponents();
+      ],
+      // If more unknown components appear in template, this prevents NG0304 noise.
+      schemas: [NO_ERRORS_SCHEMA]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DossierDetailComponent);
     component = fixture.componentInstance;
@@ -289,10 +286,10 @@ describe('DossierDetailComponent', () => {
 
     fixture.detectChanges();
 
-    const compiled = fixture.nativeElement;
-    const tabLabels = compiled.querySelectorAll('.mat-mdc-tab');
-
-    expect(tabLabels.length).toBeGreaterThan(0);
+    const compiled = fixture.nativeElement as HTMLElement;
+    // Angular Material MDC tabs render labels with role="tab"
+    const tabs = compiled.querySelectorAll('[role="tab"]');
+    expect(tabs.length).toBeGreaterThan(0);
   });
 
   it('should call MessageApiService.list on component initialization', () => {

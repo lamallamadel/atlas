@@ -151,8 +151,9 @@ class AuditAspectIntegrationTest {
         List<?> photos = (List<?>) afterData.get("photos");
         assertThat(photos).hasSize(3);
         
-        Map<?, ?> rulesJson = (Map<?, ?>) afterData.get("rulesJson");
-        assertThat(rulesJson).containsKeys("minAge", "petsAllowed", "smokingAllowed");
+	        @SuppressWarnings("unchecked")
+	        Map<String, Object> rulesJson = (Map<String, Object>) afterData.get("rulesJson");
+	        assertThat(rulesJson).containsKeys("minAge", "petsAllowed", "smokingAllowed");
     }
 
     @Test

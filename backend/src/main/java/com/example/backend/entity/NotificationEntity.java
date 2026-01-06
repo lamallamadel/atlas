@@ -2,13 +2,13 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
-import io.hypersistence.utils.hibernate.type.json.JsonBinaryType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.UpdateTimestamp;
-
+import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -36,8 +36,8 @@ public class NotificationEntity extends BaseEntity {
     @Column(name = "template_id", nullable = false, length = 255)
     private String templateId;
 
-    @Type(JsonBinaryType.class)
-    @Column(name = "variables", columnDefinition = "jsonb")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "variables")
     private Map<String, Object> variables;
 
     @Column(name = "recipient", nullable = false, length = 500)
