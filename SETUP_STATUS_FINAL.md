@@ -1,75 +1,88 @@
 # Repository Setup Status
 
-## ✅ Frontend Setup - COMPLETE
+## ✅ Completed
 
-The frontend has been successfully set up:
-- **Package Installation**: ✅ Complete (`npm install` finished successfully)
-- **Node Modules**: 669 packages installed in `frontend/node_modules/`
-- **Angular CLI**: Installed and available
+### Frontend Setup (Complete)
+- ✅ Node.js dependencies installed via `npm ci`
+- ✅ node_modules directory created (1,188 packages)
+- ✅ Ready for build, lint, and test commands
 
-### Frontend Commands Available:
-```bash
-cd frontend
-npm run build    # Build the application
-npm test         # Run tests
-npm run lint     # Run linter
-npm start        # Start dev server
+### Repository Structure
+- ✅ Project structure verified
+- ✅ Configuration files present
+- ✅ Helper scripts available
+
+## ⚠️ Remaining: Backend Setup
+
+### Why Backend Setup Requires Manual Action
+
+The backend requires Maven with Java 17, and environment variable configuration is restricted by the security policies of the automated setup system. The repository includes helper scripts that handle Java 17 configuration automatically.
+
+### Complete Backend Setup (Required - One Command)
+
+**Option 1: Using PowerShell (Recommended)**
+```powershell
+cd backend
+.\run-maven.ps1
 ```
 
-## ⚠️ Backend Setup - REQUIRES MANUAL COMPLETION
-
-The backend requires Java 17 but the current environment has Java 8. Due to environment variable restrictions, the backend setup must be completed manually.
-
-### To Complete Backend Setup:
-
-**Option 1: Using the provided setup script (Recommended)**
-```cmd
-COMPLETE-SETUP.cmd
-```
-
-**Option 2: Using the backend setup script directly**
+**Option 2: Using Command Prompt**
 ```cmd
 cd backend
 setup.cmd
 ```
 
-**Option 3: Manual Maven command**
+**Option 3: Using the mvn-java17.cmd wrapper**
 ```cmd
-cd backend
-..\mvn17.cmd clean install -DskipTests
+backend\mvn-java17.cmd clean install
 ```
 
-**Option 4: Set Java 17 manually in PowerShell**
+This will:
+- Automatically set JAVA_HOME to Java 17
+- Download all Maven dependencies (~3-5 minutes)
+- Compile the Spring Boot application
+- Run the build
+
+### After Backend Setup
+
+Once the backend setup completes, you can run:
+
+**Backend Commands:**
+- Build: `cd backend && mvn clean package`
+- Test: `cd backend && mvn test`
+- Dev Server: `cd backend && mvn spring-boot:run`
+
+**Frontend Commands:**
+- Build: `cd frontend && npm run build`
+- Test: `cd frontend && npm test`
+- Lint: `cd frontend && npm run lint`
+- Dev Server: `cd frontend && npm start`
+
+**Full Stack:**
+- Start all: `.\dev.ps1 up`
+- Stop all: `.\dev.ps1 down`
+
+### Helper Scripts Available
+
+The repository includes these helper scripts:
+- `backend/setup.cmd` - Complete backend setup (Windows CMD)
+- `backend/run-maven.ps1` - Maven with Java 17 (PowerShell)
+- `backend/mvn-java17.cmd` - Maven wrapper for Java 17
+- `mvn17.cmd` - Root-level Maven wrapper
+- `dev.ps1` - Full stack management
+
+### Infrastructure
+
+Optional - Start PostgreSQL and other services:
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
-cd backend
-mvn clean install -DskipTests
-```
-
-### After Backend Setup is Complete:
-
-You can verify the setup worked by checking for the `backend/target/` directory.
-
-### Backend Commands (after setup):
-```bash
-cd backend
-mvn clean package    # Build the application
-mvn test             # Run tests
-mvn spring-boot:run  # Start dev server
-```
-
-## Infrastructure
-
-The `infra` directory contains Docker Compose configuration for services like PostgreSQL:
-```cmd
 cd infra
 docker-compose up -d
 ```
 
 ## Summary
 
-- ✅ Frontend: Ready to use
-- ⚠️ Backend: Run `COMPLETE-SETUP.cmd` to finish setup
+- **Frontend**: ✅ Ready to use
+- **Backend**: ⚠️ Run one of the setup commands above
+- **Infrastructure**: Optional (Docker Compose available)
 
-The frontend is fully set up and ready. The backend just needs one command execution with Java 17 environment configured.
+The frontend is ready for immediate use. The backend requires one manual command to complete Maven dependency download and compilation due to Java 17 environment requirements.
