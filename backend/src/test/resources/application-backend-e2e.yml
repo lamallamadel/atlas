@@ -1,0 +1,33 @@
+spring:
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    placeholders:
+      json_type: JSON
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: mock
+
+  task:
+    scheduling:
+      enabled: false
+
+management:
+  endpoint:
+    health:
+      show-details: always
+  health:
+    elasticsearch:
+      enabled: false
+    mail:
+      enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.example.backend: DEBUG
