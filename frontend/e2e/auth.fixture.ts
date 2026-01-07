@@ -46,10 +46,10 @@ async function ensureAuthenticated(page: Page) {
   await page.reload({ waitUntil: 'domcontentloaded' });
 
   // 3) Fallback optionnel : si vous avez encore un écran "Mock Login" dans certains runs
-  const orgInput = page.locator('input[placeholder*="ID Organisation"]');
+  const orgInput = page.locator('input[placeholder*="ORG-001"]');
   if (await orgInput.isVisible({ timeout: 1500 }).catch(() => false)) {
     await orgInput.fill(orgId);
-    await page.locator('button:has-text("Mock Login")').click();
+    await page.locator('button:has-text("Mock Admin Login")').click();
   }
 
   // Optionnel: une assertion légère pour stabiliser

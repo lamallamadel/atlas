@@ -26,7 +26,7 @@ public class WebConfig implements WebMvcConfigurer {
     }
 
     @Configuration
-    @Profile("local")
+    @Profile({"local", "e2e"})
     public static class LocalCorsConfig implements WebMvcConfigurer {
         @Override
         public void addCorsMappings(CorsRegistry registry) {

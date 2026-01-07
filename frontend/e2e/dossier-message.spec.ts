@@ -1,4 +1,5 @@
 import { test, expect } from './auth.fixture';
+import { ensureDossierExists } from './helpers';
 
 test.describe('Dossier Message E2E Tests', () => {
   test('Scenario 1: Login → Navigate to dossiers list → Open dossier detail → Add message in Messages tab → Verify message appears in timeline', async ({ page }) => {
@@ -12,35 +13,13 @@ test.describe('Dossier Message E2E Tests', () => {
     await page.waitForURL(/.*dossiers/, { timeout: 10000 });
 
     // Wait for dossiers to load
-    await page.waitForSelector('table.data-table, .dossier-card, .empty-message', { timeout: 15000 });
+    await page.waitForSelector('table.data-table, .dossier-card, .empty-message, .empty-state-message', { timeout: 15000 });
 
-    // Step 3: Open the first dossier detail
-    // Try to find a dossier link or row
-    const dossierLink = page.locator('table.data-table tbody tr').first();
-    const hasDossiers = await dossierLink.count() > 0;
-
-    if (!hasDossiers) {
-      // If no dossiers exist, create one first
-      const createButton = page.locator('button:has-text("Créer"), button:has-text("Nouveau")');
-      await createButton.first().click();
-      
-      // Fill in required fields for dossier creation
-      await page.locator('input#leadName, input[name="leadName"]').fill('Test Lead E2E');
-      await page.locator('input#leadPhone, input[name="leadPhone"]').fill('+33612345678');
-      
-      // Submit the form
-      const submitButton = page.locator('button[type="submit"], button:has-text("Créer")');
-      await submitButton.click();
-      
-      // Wait for redirect to dossier detail or list
-      await page.waitForTimeout(2000);
-    } else {
-      // Click on the first dossier
-      await dossierLink.click();
-    }
+    // Open the first dossier detail (create if needed)
+    await ensureDossierExists(page, 'Test Lead Message E2E', '+33612345679');
 
     // Wait for dossier detail page to load
-    await page.waitForURL(/.*dossiers\/\d+/, { timeout: 10000 });
+    await page.waitForURL(/.*dossiers\/\d+/, { timeout: 30000 });
 
     // Step 4: Navigate to Messages tab
     const messagesTab = page.locator('div.mat-mdc-tab-label-content:has-text("Messages"), .mat-tab-label:has-text("Messages")');

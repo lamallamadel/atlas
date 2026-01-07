@@ -7,7 +7,7 @@ export async function navigateToDossiers(page: Page): Promise<void> {
   const dossiersLink = page.locator('a[href="/dossiers"], button:has-text("Dossiers")');
   await dossiersLink.first().click();
   await page.waitForURL(/.*dossiers/, { timeout: 10000 });
-  await page.waitForSelector('table.data-table, .dossier-card, .empty-message', { timeout: 15000 });
+  await page.waitForSelector('app-generic-table, app-empty-state, table.data-table, .dossier-card, .empty-message, .empty-state-message', { timeout: 30000 });
 }
 
 /**
@@ -20,14 +20,29 @@ export async function ensureDossierExists(page: Page, leadName: string, leadPhon
   if (!hasDossiers) {
     const createButton = page.locator('button:has-text("Créer"), button:has-text("Nouveau")');
     await createButton.first().click();
-    
+
     await page.locator('input#leadName, input[name="leadName"]').fill(leadName);
     await page.locator('input#leadPhone, input[name="leadPhone"]').fill(leadPhone);
-    
+
     const submitButton = page.locator('button[type="submit"], button:has-text("Créer")');
+    await submitButton.waitFor({ state: 'visible' });
     await submitButton.click();
-    
-    await page.waitForTimeout(2000);
+
+    try {
+      await page.waitForURL(/.*dossiers\/\d+/, { timeout: 30000 });
+    } catch (e) {
+      console.log('Timeout waiting for redirect in ensureDossierExists. Checking for validation errors...');
+      const errorMsg = page.locator('.error-message, mat-error');
+      if (await errorMsg.count() > 0) {
+        console.error('Validation error found:', await errorMsg.first().textContent());
+      }
+      throw e;
+    }
+    // Go back to list if needed, or rely on calling code to navigate
+    // Based on usage, existing code just expects a dossier to exist or be created.
+    // However, if we are redirected to detail, we might want to go back to list if the test expects to be on list.
+    // But `ensureDossierExists` usually just wants *a* dossier.
+    // Let's stick to waiting for successful creation signal (URL change).
   } else {
     await dossierLink.click();
   }
@@ -70,11 +85,11 @@ export async function waitForDialog(page: Page): Promise<void> {
 export async function closeSnackbar(page: Page): Promise<void> {
   const snackbar = page.locator('.mat-mdc-snack-bar-container, .snackbar');
   const isVisible = await snackbar.isVisible().catch(() => false);
-  
+
   if (isVisible) {
     const closeButton = snackbar.locator('button');
     const hasCloseButton = await closeButton.count() > 0;
-    
+
     if (hasCloseButton) {
       await closeButton.click();
     } else {

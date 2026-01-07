@@ -1,4 +1,5 @@
 import { test, expect } from './auth.fixture';
+import { navigateToDossiers, switchToTab, formatDateTimeLocal, extractDossierId, waitForDialog, closeSnackbar, ensureDossierExists } from './helpers';
 
 test.describe('Dossier Appointment E2E Tests', () => {
   test('Scenario 2: Open dossier → Add appointment in Rendez-vous tab → Verify appointment appears → Navigate to Historique tab → Verify audit event', async ({ page }) => {
@@ -11,30 +12,13 @@ test.describe('Dossier Appointment E2E Tests', () => {
     await page.waitForURL(/.*dossiers/, { timeout: 10000 });
 
     // Wait for dossiers to load
-    await page.waitForSelector('table.data-table, .dossier-card, .empty-message', { timeout: 15000 });
+    await page.waitForSelector('table.data-table, .dossier-card, .empty-message, .empty-state-message', { timeout: 15000 });
 
-    // Step 3: Open a dossier
-    const dossierLink = page.locator('table.data-table tbody tr').first();
-    const hasDossiers = await dossierLink.count() > 0;
+    // Open a dossier (create if needed)
+    await ensureDossierExists(page, 'Test Lead Appointment E2E', '+33612345679');
 
-    if (!hasDossiers) {
-      // Create a new dossier if none exist
-      const createButton = page.locator('button:has-text("Créer"), button:has-text("Nouveau")');
-      await createButton.first().click();
-      
-      await page.locator('input#leadName, input[name="leadName"]').fill('Test Lead Appointment E2E');
-      await page.locator('input#leadPhone, input[name="leadPhone"]').fill('+33612345679');
-      
-      const submitButton = page.locator('button[type="submit"], button:has-text("Créer")');
-      await submitButton.click();
-      
-      await page.waitForTimeout(2000);
-    } else {
-      await dossierLink.click();
-    }
-
-    // Wait for dossier detail page
-    await page.waitForURL(/.*dossiers\/\d+/, { timeout: 10000 });
+    // Wait for dossier detail page (ensureDossierExists handles creation wait, but we double check)
+    await page.waitForURL(/.*dossiers\/\d+/, { timeout: 30000 });
 
     // Extract dossier ID from URL for later verification
     const url = page.url();
@@ -96,12 +80,12 @@ test.describe('Dossier Appointment E2E Tests', () => {
     // Step 8: Filter audit events to show only APPOINTMENT entity type
     const entityTypeFilter = page.locator('select#entity-type-filter, select[id*="entity"]');
     const hasEntityFilter = await entityTypeFilter.count() > 0;
-    
+
     if (hasEntityFilter) {
       // If there's an APPOINTMENT option, select it
       const appointmentOption = entityTypeFilter.locator('option:has-text("Appointment"), option[value="APPOINTMENT"]');
       const hasAppointmentOption = await appointmentOption.count() > 0;
-      
+
       if (hasAppointmentOption) {
         await entityTypeFilter.selectOption({ label: 'Appointment' });
         await page.waitForTimeout(1000);
@@ -111,18 +95,18 @@ test.describe('Dossier Appointment E2E Tests', () => {
     // Step 9: Verify audit event for appointment creation
     // Look for audit event with action=CREATED (or CREATE)
     const auditTable = page.locator('table.audit-table, table.data-table');
-    
+
     // Find the row that corresponds to appointment creation
-    const creationAuditRow = auditTable.locator('tbody tr').filter({ 
-      hasText: /Création|CREATE|CREATED/i 
+    const creationAuditRow = auditTable.locator('tbody tr').filter({
+      hasText: /Création|CREATE|CREATED/i
     });
 
     // Verify at least one creation audit event exists
     await expect(creationAuditRow.first()).toBeVisible({ timeout: 10000 });
 
     // Verify the audit event contains the expected action
-    const actionCell = creationAuditRow.first().locator('td .audit-action-badge, td').filter({ 
-      hasText: /Création|CREATE|CREATED/i 
+    const actionCell = creationAuditRow.first().locator('td .audit-action-badge, td').filter({
+      hasText: /Création|CREATE|CREATED/i
     });
     await expect(actionCell).toBeVisible();
 
@@ -130,7 +114,7 @@ test.describe('Dossier Appointment E2E Tests', () => {
     // Note: The exact entity type might vary based on backend implementation
     const entityTypeCell = creationAuditRow.first().locator('td').nth(2);
     const entityTypeText = await entityTypeCell.textContent();
-    
+
     // The entity type could be APPOINTMENT, Appointment, or a related value
     // We check if it's present in the audit log
     expect(entityTypeText).toBeTruthy();
@@ -189,19 +173,19 @@ test.describe('Dossier Appointment E2E Tests', () => {
     if (hasAuditData) {
       // Verify audit event structure
       const firstAuditRow = auditTable.locator('tbody tr').first();
-      
+
       // Verify date/time column
       const dateCell = firstAuditRow.locator('td').first();
       await expect(dateCell).toBeVisible();
-      
+
       // Verify action column
       const actionCell = firstAuditRow.locator('td').nth(1);
       await expect(actionCell).toBeVisible();
-      
+
       // Verify entity type column
       const entityTypeCell = firstAuditRow.locator('td').nth(2);
       await expect(entityTypeCell).toBeVisible();
-      
+
       // Verify entity ID column
       const entityIdCell = firstAuditRow.locator('td').nth(3);
       await expect(entityIdCell).toBeVisible();
