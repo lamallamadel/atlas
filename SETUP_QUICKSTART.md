@@ -1,52 +1,61 @@
-# Quick Start Guide
+# Quick Start - Complete Backend Setup
 
-## Current Status
-✅ **Frontend**: Ready (dependencies installed)  
-⏳ **Backend**: Needs one manual command
+## ✅ Frontend is Ready!
+The frontend dependencies are already installed. No action needed.
 
-## Complete Backend Setup Now
+## ⚠️ Complete Backend Setup (Required)
 
-Choose ONE option:
+Run **ONE** of these commands:
 
-### Windows PowerShell
-```powershell
-cd backend
-.\run-maven.ps1
-```
-
-### Windows CMD
+### Option 1: Simple (Recommended)
 ```cmd
-.\run-maven-setup.cmd
+mvn17.cmd clean install -DskipTests -f backend\pom.xml
 ```
 
-### Manual (Any Shell)
+### Option 2: PowerShell
 ```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install
-```
-
-## After Backend Setup
-
-### Run Tests
-```bash
-cd backend && mvn test
-cd frontend && npm test
-```
-
-### Start Applications
-```bash
-# Backend (port 8080)
-cd backend && mvn spring-boot:run
-
-# Frontend (port 4200)
-cd frontend && npm start
-```
-
-## Infrastructure (Optional)
-```bash
-cd infra && docker-compose up -d
+mvn clean install -DskipTests --toolchains toolchains.xml
 ```
 
 ---
-See `INITIAL_SETUP_COMPLETE.md` for detailed information.
+
+## After Setup: Build & Test Commands
+
+### Backend
+```powershell
+cd backend
+
+# Build
+mvn clean package
+
+# Test
+mvn test
+
+# Run (don't run yet - just note for later)
+mvn spring-boot:run
+```
+
+### Frontend
+```powershell
+cd frontend
+
+# Build
+npm run build
+
+# Test
+npm test
+
+# Lint
+npm run lint
+
+# Run (don't run yet - just note for later)
+npm start
+```
+
+---
+
+## That's It!
+After running the Maven command, the repository will be fully set up.
+See **INITIAL_SETUP_STATUS.md** for complete details.

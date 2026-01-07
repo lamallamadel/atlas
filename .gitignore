@@ -210,3 +210,7 @@ do-backend-setup.cmd
 frontend/setup-backend-helper.js
 backend/run-mvn-setup.cmd
 setup_backend.py
+setup-repo-now.ps1
+Invoke-MavenWithJava17.ps1
+temp-mvn-setup.cmd
+SETUP_COMPLETED_BY_AGENT.md

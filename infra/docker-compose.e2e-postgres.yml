@@ -1,0 +1,72 @@
+# Docker Compose override for frontend E2E tests with Postgres backend
+#
+# Usage:
+#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml up -d
+#
+# This configuration:
+# - Starts only postgres and backend services (no keycloak, adminer, elasticsearch)
+# - Runs backend with SPRING_PROFILES_ACTIVE=e2e-postgres-mock profile
+# - Exposes backend on port 8081 (avoids conflict with dev backend on 8080)
+# - Configures health checks for service readiness
+# - Suitable for running full-stack Playwright E2E tests locally
+#
+# To stop:
+#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml down
+#
+# To view logs:
+#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml logs -f
+#
+# To check service health:
+#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml ps
+
+services:
+  postgres:
+    # Extends base postgres service from docker-compose.yml
+    # Inherits all configuration including health checks
+    container_name: postgres_e2e
+
+  backend:
+    # Extends base backend service from docker-compose.yml
+    container_name: backend_e2e
+    ports:
+      - "8081:8080"  # Expose on 8081 to avoid conflict with dev backend on 8080
+    environment:
+      SPRING_PROFILES_ACTIVE: e2e-postgres-mock
+      
+      # Database connection (uses postgres service from base config)
+      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-atlas}
+      DB_USERNAME: ${POSTGRES_USER:-atlas}
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-atlas}
+      
+      # CORS for frontend E2E tests (allow common frontend dev ports)
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200,http://localhost:3000}
+      
+      # Mock JWT configuration (no keycloak required for e2e-postgres-mock profile)
+      # The e2e-postgres-mock Spring profile should handle authentication mocking
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q '\"status\":\"UP\"'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+
+  # Disable keycloak - not needed for E2E tests with mocked auth
+  keycloak:
+    deploy:
+      replicas: 0
+    restart: "no"
+
+  # Disable adminer - not needed for E2E tests
+  adminer:
+    deploy:
+      replicas: 0
+    restart: "no"
+
+  # Disable elasticsearch - not needed for E2E tests
+  elasticsearch:
+    deploy:
+      replicas: 0
+    restart: "no"
