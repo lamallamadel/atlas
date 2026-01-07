@@ -202,3 +202,11 @@ package-lock.json
 SETUP_STATUS_AGENT.md
 setup-repo-init.ps1
 mvn-java17.cmd
+setup-maven.js
+setup-backend-isolated.ps1
+mvn-build.cmd
+install-deps.cmd
+do-backend-setup.cmd
+frontend/setup-backend-helper.js
+backend/run-mvn-setup.cmd
+setup_backend.py
