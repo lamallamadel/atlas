@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.ConsentementCreateRequest;
 import com.example.backend.dto.ConsentementResponse;
+import com.example.backend.dto.ConsentementUpdateRequest;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.exception.ErrorResponse;
 import com.example.backend.service.ConsentementService;
@@ -14,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,19 +70,53 @@ public class ConsentementController {
         }
     }
 
+    @PutMapping("/{id:\\d+}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Update consent", description = "Updates an existing consent record. Stores previousStatus, changedBy, and changedAt in meta JSONB field.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Consent updated successfully",
+                    content = @Content(schema = @Schema(implementation = ConsentementResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request data",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Consent not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<ConsentementResponse> update(
+            @Parameter(description = "ID of the consent to update", required = true)
+            @PathVariable Long id,
+            @Valid @RequestBody ConsentementUpdateRequest request) {
+        try {
+            ConsentementResponse response = consentementService.update(id, request);
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "List consents", description = "Retrieves a list of consent records filtered by dossier ID and optionally by channel. Results are sorted by updatedAt in descending order (most recent first).")
+    @Operation(summary = "List consents", description = "Retrieves a list of consent records filtered by dossier ID and optionally by channel. Results are sorted by updatedAt in descending order (most recent first). Supports pagination via page and size query parameters.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Consents retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = List.class)))
+            @ApiResponse(responseCode = "200", description = "Consents retrieved successfully")
     })
-    public ResponseEntity<List<ConsentementResponse>> list(
+    public ResponseEntity<?> list(
             @Parameter(description = "Filter by dossier ID", required = true)
             @RequestParam Long dossierId,
             @Parameter(description = "Filter by consent channel (optional)")
-            @RequestParam(required = false) ConsentementChannel channel) {
-        List<ConsentementResponse> response = consentementService.listByDossierAndChannel(dossierId, channel);
-        return ResponseEntity.ok(response);
+            @RequestParam(required = false) ConsentementChannel channel,
+            @Parameter(description = "Page number (0-indexed, optional)")
+            @RequestParam(required = false) Integer page,
+            @Parameter(description = "Page size (optional)")
+            @RequestParam(required = false) Integer size) {
+        if (page != null || size != null) {
+            int pageNumber = page != null ? page : 0;
+            int pageSize = size != null ? size : 20;
+            Page<ConsentementResponse> response = 
+                consentementService.listByDossierAndChannelPaginated(dossierId, channel, pageNumber, pageSize);
+            return ResponseEntity.ok(response);
+        } else {
+            List<ConsentementResponse> response = consentementService.listByDossierAndChannel(dossierId, channel);
+            return ResponseEntity.ok(response);
+        }
     }
 }

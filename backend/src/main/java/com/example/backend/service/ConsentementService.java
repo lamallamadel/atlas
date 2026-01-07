@@ -11,6 +11,10 @@ import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -157,5 +161,32 @@ public class ConsentementService {
         return consentements.stream()
                 .map(consentementMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ConsentementResponse> listByDossierAndChannelPaginated(Long dossierId, 
+            com.example.backend.entity.enums.ConsentementChannel channel, int page, int size) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(dossierId)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        
+        Page<ConsentementEntity> consentements;
+        if (channel != null) {
+            consentements = consentementRepository.findByDossierIdAndChannel(dossierId, channel, pageable);
+        } else {
+            consentements = consentementRepository.findByDossierId(dossierId, pageable);
+        }
+
+        return consentements.map(consentementMapper::toResponse);
     }
 }
