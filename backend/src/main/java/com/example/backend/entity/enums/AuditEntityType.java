@@ -7,7 +7,8 @@ public enum AuditEntityType {
     CONSENTEMENT("consentement"),
     MESSAGE("message"),
     USER("user"),
-    ORGANIZATION("organization");
+    ORGANIZATION("organization"),
+    APPOINTMENT("appointment");
 
     private final String value;
 

@@ -108,6 +108,7 @@ public class AuditAspect {
         if (entityName.contains("partieprenante")) return AuditEntityType.PARTIE_PRENANTE;
         if (entityName.contains("consentement")) return AuditEntityType.CONSENTEMENT;
         if (entityName.contains("message")) return AuditEntityType.MESSAGE;
+        if (entityName.contains("appointment")) return AuditEntityType.APPOINTMENT;
         if (entityName.contains("user")) return AuditEntityType.USER;
         if (entityName.contains("organization")) return AuditEntityType.ORGANIZATION;
 

@@ -98,8 +98,8 @@ public class AppointmentController {
     }
 
     @DeleteMapping("/{id:\\d+}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Delete an appointment", description = "Deletes an appointment by its ID")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete an appointment", description = "Deletes an appointment by its ID (ADMIN only)")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Appointment deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Appointment not found",
