@@ -139,7 +139,7 @@ public class AnnonceController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete an annonce", description = "Deletes an annonce by its ID (Admin only)")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Annonce deleted successfully",
+            @ApiResponse(responseCode = "204", description = "Annonce deleted successfully",
                     content = @Content),
             @ApiResponse(responseCode = "404", description = "Annonce not found",
                     content = @Content),
@@ -151,7 +151,7 @@ public class AnnonceController {
             @PathVariable Long id) {
         try {
             annonceService.delete(id);
-            return ResponseEntity.ok().build();
+            return ResponseEntity.noContent().build();
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         }
