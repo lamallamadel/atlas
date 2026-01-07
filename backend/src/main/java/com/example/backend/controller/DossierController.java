@@ -20,6 +20,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -88,12 +89,12 @@ public class DossierController {
     // 2) NOUVEL ENDPOINT: /api/v1/dossiers/check-duplicates?leadPhone=...
     // Sans nouveau DTO: on renvoie directement une List<DossierResponse>
     @GetMapping("/check-duplicates")
-    public ResponseEntity<DossierResponse> checkDuplicates(@RequestParam("leadPhone") String leadPhone) {
+    public ResponseEntity<List<DossierResponse>> checkDuplicates(@RequestParam("leadPhone") String leadPhone) {
         var duplicates = dossierService.checkForDuplicates(leadPhone);
-        if (duplicates == null || duplicates.isEmpty() || duplicates.get(0) == null) {
+        if (duplicates == null || duplicates.isEmpty()) {
             return ResponseEntity.noContent().build(); // 204
         }
-        return ResponseEntity.ok(duplicates.get(0)); // 200
+        return ResponseEntity.ok(duplicates); // 200
     }
 
 
