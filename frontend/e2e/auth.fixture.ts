@@ -8,7 +8,7 @@ function base64UrlEncode(obj: any): string {
     .replace(/\//g, '_');
 }
 
-function buildFakeJwt(orgId = 'ORG-001'): string {
+export function buildFakeJwt(orgId = 'ORG-001'): string {
   const header = { alg: 'none', typ: 'JWT' };
   const now = Math.floor(Date.now() / 1000);
   const payload = {
@@ -23,6 +23,26 @@ function buildFakeJwt(orgId = 'ORG-001'): string {
   };
   // 3 segments requis; signature vide ok pour votre backend (issuer=mock)
   return `${base64UrlEncode(header)}.${base64UrlEncode(payload)}.`;
+}
+
+export async function loginWithMockToken(page: Page, orgId: string): Promise<void> {
+  const token = buildFakeJwt(orgId);
+
+  await page.evaluate(({ orgId, token }) => {
+    window.localStorage.setItem('org_id', orgId);
+    window.localStorage.setItem('auth_mode', 'manual');
+    window.localStorage.setItem('auth_token', token);
+  }, { orgId, token });
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+}
+
+export async function logout(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    window.localStorage.removeItem('org_id');
+    window.localStorage.removeItem('auth_mode');
+    window.localStorage.removeItem('auth_token');
+  });
 }
 
 async function ensureAuthenticated(page: Page) {

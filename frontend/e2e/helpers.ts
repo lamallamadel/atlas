@@ -97,3 +97,21 @@ export async function closeSnackbar(page: Page): Promise<void> {
     }
   }
 }
+
+/**
+ * Navigate to annonces list page
+ */
+export async function navigateToAnnonces(page: Page): Promise<void> {
+  const annoncesLink = page.locator('a[href="/annonces"], button:has-text("Annonces")');
+  await annoncesLink.first().click();
+  await page.waitForURL(/.*annonces/, { timeout: 10000 });
+  await page.waitForSelector('app-generic-table, app-empty-state, table.data-table, .empty-message, .empty-state-message', { timeout: 30000 });
+}
+
+/**
+ * Get annonce ID from current URL
+ */
+export function extractAnnonceId(url: string): string | null {
+  const match = url.match(/annonces\/(\d+)/);
+  return match ? match[1] : null;
+}
