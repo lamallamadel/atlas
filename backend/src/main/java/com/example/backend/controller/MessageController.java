@@ -73,7 +73,7 @@ public class MessageController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "List messages", description = "Retrieves a paginated list of messages with optional filtering by dossier, channel, and direction. Results are sorted by timestamp in descending order by default.")
+    @Operation(summary = "List messages", description = "Retrieves a paginated list of messages with optional filtering by dossier, channel, direction, and date range. Results are sorted by timestamp in descending order by default.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Messages retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class)))
@@ -85,6 +85,10 @@ public class MessageController {
             @RequestParam(required = false) MessageChannel channel,
             @Parameter(description = "Filter by message direction")
             @RequestParam(required = false) MessageDirection direction,
+            @Parameter(description = "Filter by start date (ISO format)")
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
+            @Parameter(description = "Filter by end date (ISO format)")
+            @RequestParam(required = false) @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate,
             @Parameter(description = "Page number (0-indexed)")
             @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Page size")
@@ -93,7 +97,7 @@ public class MessageController {
             @RequestParam(defaultValue = "timestamp,desc") String sort) {
 
         Pageable pageable = createPageable(page, size, sort);
-        Page<MessageResponse> response = messageService.listByDossier(dossierId, channel, direction, pageable);
+        Page<MessageResponse> response = messageService.listByDossier(dossierId, channel, direction, startDate, endDate, pageable);
         return ResponseEntity.ok(response);
     }
 

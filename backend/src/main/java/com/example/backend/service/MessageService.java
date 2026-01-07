@@ -66,7 +66,7 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MessageResponse> listByDossier(Long dossierId, MessageChannel channel, MessageDirection direction, Pageable pageable) {
+    public Page<MessageResponse> listByDossier(Long dossierId, MessageChannel channel, MessageDirection direction, java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, Pageable pageable) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
@@ -79,7 +79,7 @@ public class MessageService {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
         }
 
-        Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, pageable);
+        Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
         return messages.map(messageMapper::toResponse);
     }
 }

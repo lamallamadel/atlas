@@ -16,11 +16,15 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>, J
     
     @Query("SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
            "AND (:channel IS NULL OR m.channel = :channel) " +
-           "AND (:direction IS NULL OR m.direction = :direction)")
+           "AND (:direction IS NULL OR m.direction = :direction) " +
+           "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
+           "AND (:endDate IS NULL OR m.timestamp <= :endDate)")
     Page<MessageEntity> findByDossierIdWithFilters(
             @Param("dossierId") Long dossierId,
             @Param("channel") MessageChannel channel,
             @Param("direction") MessageDirection direction,
+            @Param("startDate") java.time.LocalDateTime startDate,
+            @Param("endDate") java.time.LocalDateTime endDate,
             Pageable pageable);
 
     boolean existsByProviderMessageId(String providerMessageId);
