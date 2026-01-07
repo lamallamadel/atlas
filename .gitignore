@@ -214,3 +214,14 @@ setup-repo-now.ps1
 Invoke-MavenWithJava17.ps1
 temp-mvn-setup.cmd
 SETUP_COMPLETED_BY_AGENT.md
+setup-env.ps1
+run-initial-setup.cmd
+setup-repo-simple.cmd
+setup-backend-now.ps1
+setup.js
+Install-Dependencies.ps1
+install-repo.cmd
+INSTALL_REPO.cmd
+SETUP_NOW.md
+SETUP_COMPLETE_AGENT_INSTRUCTIONS.md
+SETUP_INSTRUCTIONS_INITIAL.md
