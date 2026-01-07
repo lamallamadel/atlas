@@ -1,0 +1,38 @@
+spring:
+  datasource:
+    # E2E profile with PostgreSQL (via Docker Compose) and mock JWT authentication.
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/atlas}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:atlas}
+    password: ${DB_PASSWORD:atlas}
+
+  jpa:
+    hibernate:
+      # Keep consistent with the existing test profile.
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  flyway:
+    enabled: true
+    # Standard migrations + optional E2E seed data (kept isolated to this profile).
+    locations: classpath:db/migration,classpath:db/e2e
+    placeholders:
+      json_type: JSONB
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Triggers the project's permissive JwtDecoder for tests/E2E.
+          issuer-uri: mock
+
+server:
+  port: ${SERVER_PORT:8084}
+
+logging:
+  level:
+    root: INFO
+    com.example.backend: INFO
