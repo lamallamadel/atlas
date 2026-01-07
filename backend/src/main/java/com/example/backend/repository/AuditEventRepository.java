@@ -27,13 +27,23 @@ public interface AuditEventRepository extends JpaRepository<AuditEventEntity, Lo
             Pageable pageable
     );
 
-    // No ORDER BY: let Pageable sorting apply
+    // Aggregate all audit events for a dossier including related entities (parties, messages, appointments)
     @Query("""
         SELECT a
         FROM AuditEventEntity a
         WHERE a.orgId = :orgId
-          AND a.entityType = 'DOSSIER'
-          AND a.entityId = :dossierId
+          AND (
+            (a.entityType = 'DOSSIER' AND a.entityId = :dossierId)
+            OR (a.entityType = 'PARTIE_PRENANTE' AND a.entityId IN (
+                SELECT p.id FROM PartiePrenanteEntity p WHERE p.dossier.id = :dossierId
+            ))
+            OR (a.entityType = 'MESSAGE' AND a.entityId IN (
+                SELECT m.id FROM MessageEntity m WHERE m.dossier.id = :dossierId
+            ))
+            OR (a.entityType = 'APPOINTMENT' AND a.entityId IN (
+                SELECT ap.id FROM AppointmentEntity ap WHERE ap.dossier.id = :dossierId
+            ))
+          )
     """)
     Page<AuditEventEntity> findByOrgIdAndDossierId(
             @Param("orgId") String orgId,

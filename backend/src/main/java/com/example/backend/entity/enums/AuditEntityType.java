@@ -6,6 +6,7 @@ public enum AuditEntityType {
     PARTIE_PRENANTE("partie_prenante"),
     CONSENTEMENT("consentement"),
     MESSAGE("message"),
+    APPOINTMENT("appointment"),
     USER("user"),
     ORGANIZATION("organization"),
     APPOINTMENT("appointment");
