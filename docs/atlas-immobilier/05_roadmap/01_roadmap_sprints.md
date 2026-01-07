@@ -1,5 +1,11 @@
 # Roadmap (proposition) — MVP+ vers CRM complet
 
+> **Statut**: Stable  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+
 ## État d’avancement (référence)
 - **Week 1** : foundations monorepo + infra PostgreSQL
 - **Week 2** : CRUD Annonces/Dossiers + Dashboard + stabilisation UI
@@ -43,4 +49,3 @@ Les sprints ci-dessous décrivent la suite logique (Advanced CRM).
 - Page reporting (charts)
 - NotificationService + templates + async
 - Observabilité + monitoring endpoints
-

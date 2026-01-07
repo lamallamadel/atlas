@@ -1,28 +1,49 @@
 # Atlas Immobilier — Périmètre produit (résumé)
 
-Ce document résume le **périmètre fonctionnel** visé par Atlas Immobilier à moyen terme (au-delà du CRUD initial), tel que consolidé dans les échanges ChatGPT.
+> **Statut**: À jour (résumé produit)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
+- `docs/atlas-immobilier/03_technique/09_notifications.md`
 
 ## Vision
 
-Atlas Immobilier est un CRM immobilier multi-tenant (par organisation) destiné à gérer :
+Atlas Immobilier est un CRM immobilier conçu pour être **modulable** selon les métiers (agence location, transaction vente, mandats, promotion/construction), tout en restant **robuste** (traçabilité, conformité, multi-tenancy).
 
-- Les **annonces** (catalogue, règles, publication)
-- Les **dossiers** (pipeline, qualification, conversion)
-- Les **contacts/parties prenantes** (lead, buyer, seller, agent)
-- Les **consentements** (RGPD par canal) et la communication omnicanale (WhatsApp en priorité)
+Le concept central est le **Dossier (Case)** : un dossier représente une affaire/processus (lead, transaction, mandat, projet) qui évolue dans un **workflow**.
 
-## Fonctions majeures attendues
+## Concepts clés
 
-- **Messagerie & timeline d’activité** (entrant/sortant, EMAIL/SMS/PHONE/WHATSAPP)
-- **Audit trail** (journal des changements) avec diffs JSON et consultation par entité
-- **Consentements** : preuves, horodatage, métadonnées et règles bloquantes avant envoi
-- **Workflow dossier** : transitions autorisées et règles métier centrales
-- **RDV (appointments)** : planification, statuts, anti-conflit, rappels
-- **Qualification** : règles (JSON) + extraction heuristique + score + raisons + historisation
-- **Import/Export** : CSV + mapping + rapports d’erreurs
-- **Reporting** : KPIs (taux qualif, taux RDV, no-show, conversion, temps de réponse)
+### Dossier = Case universel
+Un dossier a :
+- un **type** (`caseType`) représentant le métier (lead, vente, location, mandat, projet…)
+- un **statut** (`statusCode`) appartenant au workflow de ce type
+- une **timeline** (notes, tâches, événements automatiques)
+- des **rendez-vous**, **messages**, **consentements**, **parties prenantes**
+- une traçabilité **audit + historique de statuts**
 
-## Où trouver la planification
+### Référentiels + workflows configurables (multi-métiers)
+Les types/statuts/raisons/sources/etc. sont traités comme des **référentiels tenant-scopés** (data-driven), afin d’offrir :
+- un maximum de cheminements possibles,
+- une adaptation par organisation, sans redéploiement.
 
-- Roadmap MVP (S1–S13) : `docs/MVP_ROADMAP.md`
-- État d’avancement : `docs/PROJECT_STATUS.md`
+Référence : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
+
+## MVP market-ready (cible)
+
+### P0 (non négociable)
+- Pipeline dossier (workflow) + historique
+- Timeline lisible (notes + événements auto)
+- Consentement strict (bloquant) pour outbound
+- Audit trail sur les actions core
+- Search/listing + dashboard minimal
+- WhatsApp inbound + **WhatsApp outbound réel (Choix B)**
+
+### P1
+- Qualification (scoring simple)
+- Rappels RDV (scheduler)
+- Exports basiques (audit, dossiers)
+
+## Hors périmètre immédiat (peut venir après)
+- BI avancée, connecteurs multiples, automatisations complexes

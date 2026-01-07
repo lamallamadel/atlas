@@ -1,74 +1,109 @@
-# API contracts (REST) — état Week 3 + cible Advanced CRM
+# API contracts (REST) — AS-IS + extensions market-ready
 
-## Pré-requis communs
-- Authentification : `Authorization: Bearer <JWT>` requis pour `/api/**`.
-- Multi-tenancy : `X-Org-Id: <ORG_ID>` requis pour `/api/**`.
+> **Statut**: Partiellement implémenté (AS-IS) + extensions TO-BE  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Oui  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/04_security_multi_tenancy.md`  
+- `docs/atlas-immobilier/02_fonctionnel/02_regles_metier.md`  
+- `docs/atlas-immobilier/03_technique/09_notifications.md`
 
----
+Ce document liste les contrats REST. Il distingue :
+- **AS-IS** : endpoints présents dans le repo.
+- **TO-BE** : endpoints à ajouter pour la cible market-ready (référentiels/workflow, outbound provider, monitoring).
 
-## 0) Implémenté (Week 2 → Week 3)
+## Conventions
 
-### Health / tooling
-- `GET /actuator/health` (public)
-- `GET /swagger-ui/index.html` (public)
-- `GET /v3/api-docs` (public)
+- Base path : `/api/v1`
+- Multi-tenant : header `X-Org-Id` requis (voir doc sécurité)
+- Pagination : `page`, `size` (ou équivalent, selon implémentation)
+- Erreurs : format normalisé (voir doc standardisation erreurs, si présent)
 
-### Ping
-- `GET /ping` (public)
+## AS-IS — Endpoints core
 
 ### Annonces
-Base path : `/api/v1/annonces`
-- `POST /api/v1/annonces` (roles : `ADMIN`, `PRO`)
-- `GET /api/v1/annonces/{id}` (roles : `ADMIN`, `PRO`)
-- `GET /api/v1/annonces` (list + filtres/tri/pagination)
+- `GET /api/v1/annonces`
+- `POST /api/v1/annonces`
+- `GET /api/v1/annonces/{id}`
 - `PUT /api/v1/annonces/{id}`
 - `DELETE /api/v1/annonces/{id}`
 
 ### Dossiers
-Base path : `/api/v1/dossiers`
-- `POST /api/v1/dossiers` (création + règles métier/déduplication)
+- `GET /api/v1/dossiers`
+- `POST /api/v1/dossiers`
 - `GET /api/v1/dossiers/{id}`
-- `GET /api/v1/dossiers` (list + filtres/tri/pagination)
-- `PATCH /api/v1/dossiers/{id}/status` (changement de statut)
-- `DELETE /api/v1/dossiers/{id}`
+- `PUT /api/v1/dossiers/{id}`
+- `PATCH /api/v1/dossiers/{id}/status`
+- `GET /api/v1/dossiers/{id}/status-history`
 
-### Dashboard (KPIs)
-Base path : `/api/v1/dashboard`
-- `GET /api/v1/dashboard/kpis/annonces-actives`
-- `GET /api/v1/dashboard/kpis/dossiers-a-traiter`
-- `GET /api/v1/dashboard/dossiers/recent`
-
----
-
-## 1) En conception (Sprints suivants — Advanced CRM)
-
-> Les sections ci-dessous restent la cible fonctionnelle/technique (documents présents), mais les endpoints ne sont pas encore exposés.
+### Parties prenantes
+- `GET /api/v1/parties-prenantes?dossierId=...`
+- `POST /api/v1/parties-prenantes`
+- `PUT /api/v1/parties-prenantes/{id}`
+- `DELETE /api/v1/parties-prenantes/{id}`
 
 ### Messages
-- `POST /api/dossiers/{dossierId}/messages`
-  - body : `{ channel, direction, content, timestamp? }`
-  - règle : si `direction=OUTBOUND` → vérifier consentement canal
-- `GET /api/dossiers/{dossierId}/messages?channel=&direction=&from=&to=&page=&size=`
-  - tri par `timestamp/createdAt` desc
+- `GET /api/v1/messages?dossierId=...`
+- `POST /api/v1/messages`
+- `GET /api/v1/messages/{id}` (si présent)
+- (option) `DELETE /api/v1/messages/{id}`
 
-### Audit (read-only)
-- `GET /api/audit?entityType=...&entityId=...&from=&to=&page=&size=`
-- `GET /api/dossiers/{dossierId}/audit`
-- `GET /api/annonces/{annonceId}/audit`
+### Rendez-vous
+- `GET /api/v1/appointments?dossierId=...`
+- `POST /api/v1/appointments`
+- `PUT /api/v1/appointments/{id}`
+- `DELETE /api/v1/appointments/{id}`
+
+### Activities (timeline)
+- `GET /api/v1/activities?dossierId=...`
+- `POST /api/v1/activities`
+- `PUT /api/v1/activities/{id}`
+- `DELETE /api/v1/activities/{id}`
 
 ### Consentements
-- `GET /api/dossiers/{dossierId}/consentements`
-- `PUT /api/dossiers/{dossierId}/consentements/{channel}`
-  - body : `{ status, meta? }`
+- `GET /api/v1/consentements?dossierId=...`
+- `POST /api/v1/consentements`
+- `PUT /api/v1/consentements/{id}`
 
-### Workflow Dossier
-- `GET /api/dossiers/{id}/transitions`
-  - retourne : `{ currentStatus, allowed: [ ... ] }`
-- `POST /api/dossiers/{id}/transition`
-  - body : `{ toStatus, reason?, payload? }`
+### Audit events
+- `GET /api/v1/audit-events` (filtres: entityType/entityId/date range)
 
-### Reporting
-- `GET /api/dashboard/kpis?from=&to=`
-- `GET /api/dashboard/funnel?from=&to=`
-- `GET /api/dashboard/sources?from=&to=`
-- `GET /api/search/dossiers?q=&status=&page=&size=`
+### Search & reporting / dashboard
+- `GET /api/v1/search` (ou endpoints spécialisés)
+- `GET /api/v1/reports/...`
+- `GET /api/v1/dashboard/...`
+
+### Webhooks
+- `POST /api/v1/webhooks/whatsapp` (inbound, signature HMAC)
+
+## TO-BE — Extensions “market-ready”
+
+### Référentiels & workflows (admin)
+Objectif : rendre les enums métier configurables par tenant.
+
+- `GET /api/v1/admin/reference-data/{type}` (liste)  
+- `POST /api/v1/admin/reference-data/{type}` (create)  
+- `PUT /api/v1/admin/reference-data/{type}/{code}` (update)  
+- `DELETE /api/v1/admin/reference-data/{type}/{code}` (disable/delete)
+
+Workflows :
+- `GET /api/v1/admin/workflows?caseType=...`
+- `PUT /api/v1/admin/workflows/{caseType}` (states + transitions)
+- `GET /api/v1/dossiers/{id}/available-transitions` (UI helper)
+
+Référence : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
+
+### Outbound (WhatsApp/SMS/Email)
+Objectif : exposer un envoi réel, traçable et résilient.
+
+Option API (recommandée) :
+- `POST /api/v1/outbound/messages` (création d’une demande d’envoi → outbox)
+- `GET /api/v1/outbound/messages/{id}` (statut)
+- `GET /api/v1/outbound/messages?dossierId=...` (listing)
+- (admin/ops) `POST /api/v1/outbound/messages/{id}/retry`
+
+Monitoring :
+- `GET /api/v1/ops/outbound/metrics`
+- `GET /api/v1/ops/outbound/health`
+
+Référence : `docs/atlas-immobilier/03_technique/09_notifications.md`

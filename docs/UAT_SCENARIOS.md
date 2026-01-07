@@ -1,5 +1,24 @@
 # UAT Scenarios Documentation
 
+> **Statut**: AS-IS + UAT cible (market-ready)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/01_product/03_user_journeys.md` (si/when introduit)  
+- `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+
+## UAT gating (market-ready)
+
+Les scénarios ci-dessous peuvent être utilisés comme UAT complet. Pour une release “market-ready”, les scénarios **P0** doivent passer sans ambiguïté :
+
+- Parcours dossier : création → traitement → clôture (CLOSED_WON / CLOSED_LOST)
+- Transitions de statuts : transitions autorisées + historique
+- Timeline : notes + événements auto (statut / rdv / message)
+- Consentement : outbound bloqué si non GRANTED
+- WhatsApp : inbound + outbound (Choix B) traçables (audit + activity)
+- Recherche : retrouver un dossier/annonce rapidement
+- Multi-tenant : isolement org (aucune fuite de données)
+
 This document describes the User Acceptance Testing (UAT) scenarios for the application's core features.
 
 ## Table of Contents

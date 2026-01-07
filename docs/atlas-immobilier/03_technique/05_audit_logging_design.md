@@ -1,5 +1,11 @@
 # Audit logging — design détaillé
 
+> **Statut**: Implémenté (AS-IS)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Oui  
+> **Dépendances**:  
+- `docs/atlas-immobilier/02_fonctionnel/02_regles_metier.md`
+
 ## Objectif
 Capturer automatiquement les opérations CREATE/UPDATE/DELETE sur les entités métiers (Annonce, Dossier, Message, Consentement, etc.).
 
@@ -24,4 +30,3 @@ Recommandation : `jsonb` PostgreSQL + diff JSON (RFC6902 / jsonpatch) si besoin.
 
 ## API
 Audit en lecture seule, filtré tenant.
-

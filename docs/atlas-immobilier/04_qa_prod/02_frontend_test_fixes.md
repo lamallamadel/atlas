@@ -1,5 +1,11 @@
 # Correctifs tests Front (FE.zip) — notes de stabilisation
 
+> **Statut**: Partiel (AS-IS)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/UAT_SCENARIOS.md`
+
 ## 1) Provider HttpClient manquant (DashboardKpiService)
 Symptôme :
 - `NullInjectorError: No provider for HttpClient!`
@@ -25,4 +31,3 @@ Correctif :
 - Ajouter `NoopAnimationsModule` dans les tests de composants Material.
 - Utiliser `NO_ERRORS_SCHEMA` pour ignorer les composants enfants hors périmètre du test unitaire.
 - Privilégier `overrideTemplate(Component, '')` si le rendu HTML déclenche des pipes/child components non requis.
-

@@ -1,5 +1,11 @@
 # Messagerie & timeline — backend + frontend
 
+> **Statut**: Partiel (AS-IS) + extension TO-BE  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/09_notifications.md`
+
 ## Backend
 ### Endpoints
 - `POST /api/dossiers/{id}/messages`
@@ -31,3 +37,13 @@
 - Entrée rapide : bouton “Ajouter un message”.
 - Templates courts (appels téléphoniques) : “compte-rendu” (textarea).
 
+
+## TO-BE — Outbound réel (WhatsApp/SMS/Email)
+
+- L’action “envoyer” doit créer une demande d’envoi dans l’outbox (voir notifications).
+- La timeline doit refléter :
+  - `MESSAGE_LOG` à la création de la demande
+  - mises à jour de statut d’envoi (SENT/DELIVERED/FAILED) selon provider
+- Le consentement est **bloquant** avant toute création d’outbound.
+
+Référence : `docs/atlas-immobilier/03_technique/09_notifications.md`

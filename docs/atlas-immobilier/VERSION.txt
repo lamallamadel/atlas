@@ -1,2 +1,1 @@
-v0.4-week3
-2026-01-04
+v0.6-docs-market-ready

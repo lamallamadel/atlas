@@ -1,5 +1,11 @@
 # Atlas Immobilier — Documentation Produit & Spécifications (v0.4-week3-2026-01-04)
 
+> **Statut**: Stable  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+
 Ce dossier regroupe le **cahier des charges**, les **spécifications fonctionnelles**, les **spécifications techniques**, ainsi que la **roadmap** d’Atlas Immobilier (CRM immobilier).
 
 ## Périmètre couvert par cette mise à jour
@@ -36,4 +42,3 @@ Cette version consolide le **MVP Week 1 → Week 3** (fondations + CRUD + sécur
 3) Définir l'org dans le navigateur : `localStorage.setItem('org_id','ORG1')` (ou `ORG2`).
 
 Les détails (headers, rôles, obtention du token, isolation tenant) sont décrits dans `03_technique/04_security_multi_tenancy.md`.
-

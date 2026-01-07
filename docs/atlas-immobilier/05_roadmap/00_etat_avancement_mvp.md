@@ -1,81 +1,54 @@
-# État d’avancement — MVP (Week 1 → Week 3) + reste à faire
+# État d’avancement — MVP (AS-IS) + cible market-ready
 
-Ce document sert de **photo instantanée** pour aligner l’équipe (ou un agent AI) sur :
-- ce qui est **déjà livré** (Week 1 à Week 3)
-- ce qui reste à faire pour atteindre un **MVP CRM** cohérent et utilisable
+> **Statut**: Source de vérité (AS-IS)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Oui  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/03_api_contracts.md`  
+- `docs/atlas-immobilier/03_technique/06_workflow_dossier_state_machine.md`
 
----
+Ce document décrit **uniquement** l’état réel du projet (ce qui est présent). Les éléments “à faire” sont listés comme **écarts** vers la cible market-ready.
 
-## Livré
+## AS-IS — Livré / présent
 
-### Week 1 — Foundations
-- Monorepo : `backend/`, `frontend/`, `infra/`, `docs/`
-- Infrastructure locale Docker Compose : PostgreSQL, volumes persistants, healthchecks
-- Convention de profils Spring (local/test/prod) + configuration dev ergonomique
-- Base de qualité : hygiène repo, scripts de lancement, conventions de logs
+### S1 — Baseline / monorepo
+- Structure monorepo (backend/frontend/infra)
+- Docker Compose local (PostgreSQL)
+- Scripts et docs setup
 
-### Week 2 — MVP métier (CRUD + UI)
-- Backend :
-  - CRUD **Annonces** (`/api/v1/annonces`)
-  - CRUD **Dossiers** (`/api/v1/dossiers`) + règles métier de déduplication
-  - Endpoint **Dashboard** KPIs (`/api/v1/dashboard/...`)
-  - Normalisation des erreurs HTTP (400/404/409) dans les tests
-- Frontend :
-  - Pages dashboard / annonces / dossiers en FR
-  - Stabilisation de tests unitaires FE (HttpClientTestingModule, locale FR, attentes booléennes)
+### S2 — Core CRM (annonces + dossiers)
+- CRUD annonces
+- CRUD dossiers + logique de déduplication
+- UI listes et détails (annonces/dossiers)
 
-### Week 3 — Sécurité + multi-tenancy
-- Infra :
-  - Ajout de **Keycloak** au Docker Compose (import realm `myrealm`)
-- Backend :
-  - **OAuth2 Resource Server (JWT)** (issuer configurable)
-  - Rôles : `ADMIN`, `MANAGER`, `PRO` (mapping en autorités Spring)
-  - Multi-tenancy : `X-Org-Id` obligatoire + `TenantContext` + filtre Hibernate `orgIdFilter`
-  - Tests : `TenantFilter` (400 si header manquant) + tests d’isolation cross-tenant (ORG1/ORG2)
-- Frontend :
-  - Interceptor HTTP injectant `Authorization` + `X-Org-Id` pour les URLs `/api/`
-  - Écran de login par collage de token (dev) + tokens mock (dev)
+### S3 — Sécurité & multi-tenancy
+- Auth JWT
+- Isolation tenant via `X-Org-Id`
+- Rôles / protections endpoints (niveau MVP)
 
----
+### S4+ — Fonctionnel “CRM interne” (parties, messages, rdv, audit, timeline)
+- Workflow dossier (transitions) + historique (status history)
+- Audit via AOP + endpoints de lecture
+- Timeline / activities (notes + événements)
+- Parties prenantes (CRUD v1)
+- Messages (journalisation + timeline conversation)
+- Rendez-vous (CRUD v1)
+- Search & reporting (endpoints + dashboard)
 
-## Reste à faire (priorisé)
+### S5+ — Consentements
+- CRUD consentements (stockage/consultation)
 
-### P1 — Compléter le « CRM » minimal (fonctionnel)
-1) **Workflow Dossier**
-   - matrice de transitions (NEW → QUALIFIED → WON/LOST, etc.)
-   - endpoint `GET /api/dossiers/{id}/transitions` + `POST /api/dossiers/{id}/transition`
-   - UI : proposer uniquement les transitions autorisées
+### S6+ — WhatsApp inbound
+- Webhook inbound : validation HMAC + idempotence + association dossier
 
-2) **Parties prenantes (CRUD)**
-   - endpoints dédiés (ou enrichissement Dossier) pour gérer acheteur/vendeur/contacts
-   - validation (téléphone/email) + règles de déduplication contact (option MVP)
+## Écarts vers “market-ready” (TO-BE)
 
-3) **Messagerie / Timeline**
-   - endpoints messages (create/list) liés au dossier
-   - UI timeline dans le détail dossier (tri, filtres)
+- Consentement : enforcement strict sur outbound (WhatsApp/SMS/Email) + preuve de consentement
+- WhatsApp outbound : provider + templates + outbox/retry + monitoring (Choix B)
+- E2E Playwright : stabiliser le login et réduire le flakiness
+- Timeline : garantir les événements automatiques pour statut/rdv/message
+- NFR : rate limiting, alerting, dashboards, politiques de rétention (selon besoin)
 
-4) **Consentements (RGPD)**
-   - endpoints consentements liés au dossier (ou party) + UI (badges)
-   - règle bloquante : pas d’OUTBOUND si OPT_OUT
-
-5) **Audit (read-only)**
-   - capture automatique (listener/AOP) + endpoint de consultation
-   - UI : historique dans le dossier
-
-### P2 — Qualité / exploitation
-- **Testcontainers PostgreSQL** (migrations Flyway + jsonb + contraintes)
-- **E2E Playwright** sur les parcours : création annonce, création dossier, changement statut, timeline
-- CI : lint + tests + rapports coverage
-
-### P3 — Reporting & notifications
-- reporting (funnel, sources, délais)
-- notifications (email/sms) + templates + async
-
----
-
-## Notes d’exécution (dev)
-- Démarrer l’infra : `cd infra && docker compose up -d --build`
-- Récupérer un token Keycloak (user `demo`) et le coller dans le login du front
-- Définir le tenant dans le navigateur : `localStorage.setItem('org_id','ORG1')`
-
-Voir `03_technique/04_security_multi_tenancy.md` pour le détail.
+## Références
+- Contrat API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+- Workflow dossier : `docs/atlas-immobilier/03_technique/06_workflow_dossier_state_machine.md`

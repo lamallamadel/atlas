@@ -1,5 +1,11 @@
 # Stratégie de tests & production readiness — état Week 3
 
+> **Statut**: Partiel (AS-IS)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Oui  
+> **Dépendances**:  
+- `docs/UAT_SCENARIOS.md`
+
 ## Backend
 ### Types de tests en place
 - **Unit/Service tests** (H2 ou profil test) couvrant :

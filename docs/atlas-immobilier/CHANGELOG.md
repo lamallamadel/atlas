@@ -1,5 +1,11 @@
 # Changelog — v0.4-week3-2026-01-04
 
+> **Statut**: Historique  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+
 ## Week 3 — Sécurité + multi-tenancy (implémenté)
 - Ajout **Keycloak** dans `infra/docker-compose.yml` + import automatique du realm (`myrealm`) et utilisateur de démonstration.
 - Backend : **OAuth2 Resource Server (JWT)** + mapping de rôles depuis `realm_access.roles` (Keycloak) ou `roles`.
@@ -31,3 +37,8 @@
 - `GenericTableComponent` : alignement des attentes booléennes sur la locale FR (`Oui/Non` au lieu de `Yes/No`).
 - `DossiersComponent` : enregistrement de la locale `fr` (`registerLocaleData(localeFr)`) + `LOCALE_ID=fr-FR` pour éviter l’erreur `Missing locale data "fr-FR"`.
 
+## v0.6-docs-market-ready — 2026-01-07
+
+- Harmonisation documentation selon 4 règles de cohérence (source of truth, encart statut, AS-IS vs TO-BE, enums → référentiels).
+- Ajout des spécifications “référentiels + workflows modulables” (multi-métiers immobilier).
+- Mise à jour notifications/outbound selon **Choix B** : WhatsApp Outbound réel (provider, templates, outbox, retry, monitoring) + consentement strict.

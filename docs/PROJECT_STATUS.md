@@ -1,35 +1,62 @@
 # Atlas Immobilier — État du projet
 
-## Situation actuelle (au 2026-01-04)
+> **Statut**: AS-IS consolidé + trajectoire “market-ready” définie  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/03_api_contracts.md`  
+- `docs/atlas-immobilier/05_roadmap/00_etat_avancement_mvp.md`  
+- `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
 
-Le projet **Atlas Immobilier** (CRM immobilier) a complété les **Semaines 1 à 3** sur le plan fonctionnel.
+## Synthèse (langage produit)
 
-- **S1 (Baseline prod-ready)** : terminée
-- **S2 (DB + CRUD core Annonce/Dossier + UI)** : terminée
-- **S3 (Auth/RBAC + Multi-tenant + durcissement API)** : terminée fonctionnellement
+Atlas Immobilier est un CRM immobilier centré sur la gestion de **dossiers** (cases) et d’**annonces / biens**, avec :
+- un **pipeline de traitement** (statuts, transitions, historique),
+- une **timeline** d’activités (notes, événements),
+- des **rendez-vous** et des **messages** rattachés aux dossiers,
+- un **audit trail** (traçabilité),
+- une base de **search & reporting**,
+- une intégration **WhatsApp inbound** (webhook) déjà posée.
 
-Pour considérer la S3 **clôturée**, il reste des correctifs de cohérence Frontend / contrat API.
+## AS-IS (réel implémenté)
 
-## Correctifs de fermeture — Semaine 3 (priorité haute)
+### Fonctionnel
+- Annonces : CRUD + statuts (draft/published/active/paused/archived)
+- Dossiers : création + déduplication (logique existant ouvert), mise à jour + transitions de statuts, historique de statuts
+- Parties prenantes : CRUD v1
+- Messages : enregistrement / lecture (timeline conversation), rattachement dossier
+- Rendez-vous : CRUD v1, affichage dans le dossier
+- Timeline (activities) : notes + chronologie
+- Consentements : CRUD v1 (stockage/consultation)
+- Audit : AOP + lecture via API
+- Search & reporting : endpoints + dashboard de base
+- WhatsApp : webhook inbound (validation HMAC, idempotence, association dossier)
 
-1. **DTO create** : retirer `orgId` de `AnnonceCreateRequest` et `DossierCreateRequest` (source unique = header `X-Org-Id`).
-2. **AnnonceStatus** : aligner FE avec BE (`DRAFT`, `PUBLISHED`, `ACTIVE`, `PAUSED`, `ARCHIVED`) + badges/libellés FR.
-3. **DossierResponse** : compléter FE avec `score`, `source`, `parties`, `existingOpenDossierId` + afficher dans l’UI (score/source, bandeau doublon, liste parties).
-4. **UI Dossier** : `orgId` uniquement dans la section “Avancé” (pas dans “Système”).
-5. **Internationalisation FR** : uniformiser les messages système (interceptors/guards) actuellement en anglais.
-6. **Filtre Annonce sur liste dossiers** : remplacer le champ “ID annonce” par un select/autocomplete (basé titre) pour cohérence UX.
+### Tech / Ops
+- Monorepo (backend Spring Boot + frontend Angular + infra Docker)
+- Sécurité : JWT + multi-tenancy via header `X-Org-Id` (voir doc sécurité)
+- Tests : couverture BE solide, FE unit tests, Playwright E2E (présents mais à stabiliser)
 
-## Prochaine étape — Semaine 4
+## TO-BE (MVP market-ready — cible)
 
-Objectif : renforcer l’usage CRM autour du **pipeline dossier**.
+### Axes produit (sans réduire le scope)
+1) **CRM modulable multi-métiers** : statuts/types/règles gérés comme **référentiels tenant-scopés** + workflows par type de dossier  
+   → Voir : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
 
-- Transitions de statut + règles MVP
-- AuditEvent systématique + consultation (viewer minimal)
-- Notes / tâches internes sur dossier (API + UI)
-- Ajustements recommandés : **PartiePrenante CRUD v1** (contacts/roles) + **E2E smoke** (Playwright)
+2) **Choix B : WhatsApp Outbound réel** (market-ready)  
+   - envoi provider + templates + retries/outbox + observabilité  
+   → Voir : `docs/atlas-immobilier/03_technique/09_notifications.md`
 
-## Documentation associée
+3) **Consentement strict** (bloquant) pour tout outbound WhatsApp/SMS/Email
 
+4) **Stabilisation QA** (anti-flaky E2E, critères release)
+
+## Risques actuels (à traiter avant “marché”)
+- E2E Playwright : fragilité de login/sélecteurs (timeouts) → fiabilisation P0
+- Consentement : stocké mais pas encore systématiquement “bloquant” sur l’outbound
+- Outbound provider : architecture à finaliser (outbox, retry, idempotence, monitoring)
+
+## Références
+- Contrats API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
 - Roadmap : `docs/MVP_ROADMAP.md`
-- Scénarios UAT : `docs/UAT_SCENARIOS.md`
-- Changelog : `CHANGELOG.md`
+- État d’avancement : `docs/atlas-immobilier/05_roadmap/00_etat_avancement_mvp.md`

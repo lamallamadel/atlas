@@ -1,5 +1,11 @@
 # User stories — Advanced CRM
 
+> **Statut**: Stable (catalogue)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/UAT_SCENARIOS.md`
+
 ## Messagerie / activité
 1. En tant qu’agent, je peux enregistrer un **message entrant/sortant** associé à un Dossier (canal EMAIL/SMS/PHONE/WHATSAPP) pour conserver l’historique.
 2. En tant qu’agent, je vois une **timeline** dans le détail Dossier avec filtres (canal, direction, auteur, période).
@@ -26,4 +32,3 @@
 ## Reporting & notifications
 14. En tant que manager, je visualise un **funnel** (NEW→QUALIFIED→WON/LOST), délais moyens, et attribution des sources.
 15. En tant qu’agent, je reçois des notifications (email/sms) lors d’événements clés (nouveau lead, RDV, changement de statut).
-

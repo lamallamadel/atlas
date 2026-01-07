@@ -1,5 +1,11 @@
 # Development Tools Documentation
 
+> **Statut**: Stable  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+
 This document describes the development tools and scripts available in this project.
 
 ## Overview

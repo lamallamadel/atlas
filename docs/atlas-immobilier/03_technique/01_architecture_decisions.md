@@ -1,5 +1,11 @@
 # Architecture — décisions clés
 
+> **Statut**: Stable (décisions)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/04_security_multi_tenancy.md`
+
 ## Décision A — Audit automatique via listeners JPA
 **Choix** : `@EntityListeners` + callbacks JPA pour capturer CREATE/UPDATE/DELETE.
 - Avantages : couverture exhaustive quel que soit le point d’entrée (REST, batch, import).
@@ -21,4 +27,3 @@
 **Choix** : service dédié `DossierWorkflowService` (transition validation) plutôt que patch arbitraire.
 - Avantages : cohérence, automatisations (notifications, scoring), UI dynamique.
 - Contraintes : maintenir une matrice de transitions + règles contextuelles.
-

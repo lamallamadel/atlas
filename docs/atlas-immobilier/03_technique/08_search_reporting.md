@@ -1,5 +1,11 @@
 # Recherche & reporting
 
+> **Statut**: Partiel (AS-IS)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+
 ## Full-text search PostgreSQL
 - Colonnes : `annonce.title`, `annonce.description`, `dossier.leadName`, `dossier.leadPhone`, notes/messages.
 - `tsvector` + index GIN.
@@ -23,4 +29,3 @@
 - Page “Reporting”
 - Charts (bar/line/pie) + filtres date range + statut.
 - Export CSV (option).
-

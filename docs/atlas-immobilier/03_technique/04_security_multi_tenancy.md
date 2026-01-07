@@ -1,5 +1,11 @@
 # Sécurité & Multi-tenancy (`org_id`) — implémentation Week 3
 
+> **Statut**: Implémenté (AS-IS)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Oui  
+> **Dépendances**:  
+- `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+
 ## Objectif
 Garantir :
 1) **Authentification** des appels API via JWT (Keycloak).

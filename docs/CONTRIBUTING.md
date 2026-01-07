@@ -1,5 +1,11 @@
 # Contributing Guide
 
+> **Statut**: Stable  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PROJECT_DOCUMENTATION_INDEX.md`
+
 Thank you for your interest in contributing to this project! This guide will help you get started.
 
 ## 📋 Table of Contents

@@ -1,5 +1,12 @@
 # Vision & objectifs
 
+> **Statut**: Stable (cadrage)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PRODUCT_SPECS_SUMMARY.md`
+- `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
+
 ## Problème
 Les plateformes d’annonces génèrent des contacts, mais n’adressent pas les irritants opérationnels :
 - qualification insuffisante et non traçable,
@@ -19,4 +26,3 @@ Transformer une annonce en **processus CRM** complet, mesurable et pilotable, av
 - Facturation, gestion comptable.
 - Signature électronique avancée.
 - Multi-DB ou multi-schémas : non retenu pour le MVP+ (voir multi-tenancy org_id).
-

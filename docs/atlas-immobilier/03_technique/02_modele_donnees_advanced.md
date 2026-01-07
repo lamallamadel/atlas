@@ -1,5 +1,11 @@
 # Modèle de données — Advanced CRM (schéma présent + extensions prévues)
 
+> **Statut**: Partiel (AS-IS) + extension TO-BE  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Oui  
+> **Dépendances**:  
+- `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
+
 ## Principe
 Le schéma PostgreSQL contient déjà les tables « Advanced CRM » afin de permettre une montée en charge progressive.
 À date (Week 3), seules les APIs Annonces/Dossiers/Dashboard sont exposées, mais les entités suivantes existent en base et côté JPA.
@@ -75,3 +81,43 @@ Statut : table présente (entité JPA) ; endpoints/UI à implémenter.
 - rattachement au Dossier
 - rôle (BUYER/SELLER/AGENT/...) + informations de contact (schéma aligné via migrations)
 
+
+## TO-BE — Référentiels & workflows configurables (multi-tenant)
+
+Cette section décrit les tables à introduire pour basculer des enums codés vers des référentiels tenant-scopés.
+
+### Tables proposées (minimum viable)
+
+- `ref_dictionary`  
+  - `org_id` (nullable si global)  
+  - `dict_type` (ex: CASE_TYPE, CASE_STATUS, LOSS_REASON…)  
+  - `code` (clé stable)  
+  - `label` / `label_fr` / `label_ar` (selon besoin)  
+  - `sort_order`  
+  - `is_active`  
+  - `metadata_json` (optionnel)
+
+- `workflow_definition`  
+  - `org_id`  
+  - `case_type_code`  
+  - `version`  
+  - `is_active`  
+  - `updated_at`
+
+- `workflow_state`  
+  - `workflow_id`  
+  - `status_code`  
+  - `is_terminal`  
+  - `requires_reason_type` (NONE / LOSS / WON)
+
+- `workflow_transition`  
+  - `workflow_id`  
+  - `from_status_code`  
+  - `to_status_code`  
+  - `required_role` (optionnel)  
+  - `guard_json` (pré-conditions, optionnel)
+
+### Migration des dossiers existants
+- Introduire `case_type_code` sur `dossier` (default)
+- Remplacer le statut enum par `status_code` (string)
+- Backfill sur les valeurs existantes

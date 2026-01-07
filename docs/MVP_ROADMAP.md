@@ -1,140 +1,98 @@
 # Atlas Immobilier — Roadmap MVP (S1 → S13)
 
-Ce document décrit la **roadmap MVP par semaines**, avec l’**état d’avancement réel** (ce qui est fait / reste à faire) et les **ajustements** issus des échanges ChatGPT.
+> **Statut**: À jour (AS-IS + cible market-ready)  
+> **Dernière vérification**: 2026-01-07  
+> **Source of truth**: Non  
+> **Dépendances**:  
+- `docs/PROJECT_STATUS.md`  
+- `docs/atlas-immobilier/05_roadmap/00_etat_avancement_mvp.md`  
+- `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
+- `docs/atlas-immobilier/03_technique/09_notifications.md`
 
-## Statut global (au 2026-01-04)
+Ce document décrit la roadmap MVP par semaines (S1 → S13). Il distingue :
+- **AS-IS** : livré/présent dans le repo.
+- **TO-BE** : cible “market-ready” pour attaquer le marché.
 
-- **Semaine 1 : Terminée** (baseline prod-ready)
-- **Semaine 2 : Terminée** (schéma DB + CRUD core + UI)
-- **Semaine 3 : Terminée fonctionnellement** (Auth/RBAC + Multi-tenant + durcissement), avec **correctifs de fermeture FE/contrat** listés ci-dessous
-- **Semaines 4 → 13 : Planifiées** (reste du MVP)
+## Statut global (au 2026-01-07)
 
-### Correctifs de fermeture — Semaine 3 (à traiter avant d’enchaîner)
+- **S1 → S3** : terminées (socle monorepo + CRUD core + auth/multi-tenant).
+- **S4** : très avancée (workflow dossier + audit + timeline + modules core), à **clore proprement** (QA + cohérence).
+- **S5 → S7** : partiellement engagées ; décision produit : **Choix B = WhatsApp Outbound réel** (provider + outbox + retry + consentement strict).
+- **S8+** : à planifier après stabilisation (qualification, rappels, import/export, hardening).
 
-1. **FE — DTO create** : `AnnonceCreateRequest` et `DossierCreateRequest` contiennent encore `orgId`. En Week 3, l’org vient du header `X-Org-Id` ⇒ **retirer `orgId` des DTO** et des payloads.
-2. **FE — AnnonceStatus** : le FE n’expose que `DRAFT/PUBLISHED/ARCHIVED` alors que le BE expose aussi `ACTIVE/PAUSED` ⇒ **aligner enum + badges** (et fallback valeur inconnue).
-3. **FE — DossierResponse** : il manque `score`, `source`, `parties`, `existingOpenDossierId` alors que le backend les expose ⇒ **compléter modèles + UI**.
-4. **FE — Dossier details** : `orgId` affiché en “Système” et “Avancé” ⇒ **masquer technique** et ne le laisser qu’en “Avancé”.
-5. **FE — i18n FR** : certains messages systèmes restent en EN (“Session expired…”, “Access denied…”) ⇒ **uniformiser FR**.
-6. **FE — filtre liste dossiers** : colonne remplacée par “Annonce (titre)” mais filtre reste “ID annonce” brut ⇒ **select/autocomplete** (au minimum côté liste).
+### Correctifs de fermeture — avant “marché” (gating)
 
----
+- E2E Playwright : rendre le login et les sélecteurs **stables** (anti-flaky)
+- Consentement : rendre **bloquant** l’outbound (WhatsApp/SMS/Email)
+- Outbound : outbox + retry + idempotence + monitoring (Choix B)
+- Normalisation erreurs (API) + observabilité (correlation-id / logs)
 
 ## Plan MVP — par semaines (version projet)
 
 ### Semaine 1 — Baseline “prod-ready” (TERMINÉE)
-
-- Repo + monorepo + hygiene
-- Docker compose Postgres + backend + healthchecks
-- Backend : Actuator/Swagger/ping/correlation-id/tests/build jar
-- Frontend : lint/tests/build prod/proxy/ping UI
-- Profils Spring (local/test/staging/prod) + CI workflows
-
-**Livrables clés (repo)** : CI FE/BE, profils Spring, dev scripts, Docker compose, documentation de setup.
+- Monorepo, Docker Compose, profils, scripts, hygiene repo, CI de base.
 
 ### Semaine 2 — Schéma DB + CRUD core (Annonce/Dossier) + UI (TERMINÉE)
+- Migrations + CRUD annonces/dossiers + UI de base.
 
-- Flyway V1/V2/V3 : annonce, dossier, partie_prenante, consentement, message, appointment, audit_event
-- Backend CRUD Annonce (create/get/update/list + filtres/pagination)
-- Backend CRUD Dossier (create/get/list + patch status + filtres)
-- Frontend : pages Annonce (liste + form), Dossier (liste + détail) + services API
-- Tests API + intégration FE↔BE
+### Semaine 3 — Auth/RBAC + Multi-tenant + durcissement API (TERMINÉE)
+- JWT + tenant via `X-Org-Id` + protections endpoints + garde-fous.
 
-### Semaine 3 — Auth/RBAC + Multi-tenant + durcissement API (TERMINÉE + fermeture en cours)
+### Semaine 4 — Pipeline Dossier + Audit + Notes/Tasks (EN COURS — à clore)
+**AS-IS**
+- Machine à états dossier + historique
+- Audit AOP + lecture
+- Activity timeline (notes) + modules messages/rdv/parties
+- Search + dashboard/reporting de base
 
-- Auth (JWT/OIDC) + guards Angular
-- RBAC (ADMIN, PRO) sur endpoints
-- Multi-tenant `orgId` sur entités core + filtre automatique
-- Normalisation erreurs API (ProblemDetails) + validation renforcée
-- Seed/demo contrôlé + scripts migration
+**TO-BE (clôture S4)**
+- Timeline “journal” : événements auto (STATUS_CHANGE, APPOINTMENT_LOG, MESSAGE_LOG)
+- Tasks v1 (OPEN/DONE + dueAt) intégrées à timeline
+- UAT/E2E : 5 parcours stables (zéro flaky)
 
-**À finaliser (fermeture S3)** : voir section “Correctifs de fermeture — Semaine 3”.
+### Semaine 5 — Consentements & conformité (PARTIEL → À RENDRE BLOQUANT)
+**AS-IS**
+- CRUD consentements + affichage
 
----
+**TO-BE**
+- Preuve de consentement (meta standardisée)
+- Politique strict : pas d’outbound sans GRANTED
+- Audit + activity log sur changement consentement
 
-### Semaine 4 — Pipeline Dossier + Audit + Notes/Tasks (MVP CRM interne)
+### Semaine 6 — WhatsApp Inbound (PARTIEL → CONSOLIDER)
+**AS-IS**
+- Webhook inbound avec validation HMAC, idempotence, rattachement dossier
 
-- Statuts Dossier + transitions + règles MVP (ex : pas de retour sur WON/LOST)
-- AuditEvent systématique sur changements
-- Notes + tâches internes sur dossier (API + UI)
-- Vue Kanban (option MVP) ou liste par statut optimisée
+**TO-BE**
+- Observabilité (latence, erreurs, retries inbound si applicable)
+- Règles d’association (téléphone, org, stratégie de fallback)
 
-**Ajustements recommandés (alignement suggestions AI)**
-- Ajouter explicitement **PartiePrenante CRUD v1** (gestion contacts/roles) sur le dossier.
-- Ajouter une première suite **E2E (Playwright) smoke** (2–3 parcours critiques) + artifacts CI.
-- Préciser l’implémentation audit : **AOP ou listeners + diff JSON** + viewer minimal.
+### Semaine 7 — WhatsApp Outbound (CHOIX B — À IMPLÉMENTER MARKET-READY)
+- Providers (Cloud API / Business API selon choix)
+- Templates + session rules
+- Outbox pattern + retry/backoff + DLQ
+- Idempotence et traçabilité (audit/activity)
+- Monitoring + métriques
 
-### Semaine 5 — Consentements & conformité (WhatsApp-ready)
+### Semaine 8 — Qualification (rules + extraction MVP) (PLANIFIÉE)
+- Règles de scoring / qualification (simple et explicable)
+- Champs et tags métier
 
-- Modèle Consentement + preuves (texte, timestamp, metadata)
-- Enforcement : interdiction d’envoi sans consentement (API + UI)
-- UI gestion consentements + historique
-- Paramétrage politique de conservation (basique)
+### Semaine 9 — RDV (Appointment) + rappels (PLANIFIÉE)
+- Rappels (scheduler) + intégration optionnelle calendrier
 
-### Semaine 6 — WhatsApp Inbound (réception)
+### Semaine 10 — Import/Export + connecteur CRM minimal (PLANIFIÉE)
 
-- Webhook inbound + validation payload + idempotence (providerMsgId)
-- Création/attachement Dossier par téléphone + routage basique
-- Stockage Messages (in) + UI conversation read-only
-- Tests d’intégration webhook
+### Semaine 11 — Reporting & KPI (AS-IS PARTIEL → AMÉLIORER)
+- KPIs, filtres, exports simples
 
-### Semaine 7 — WhatsApp Outbound (envoi)
+### Semaine 12 — Hardening + perf + observabilité (PLANIFIÉE)
+- Rate limiting, anti-abus, perf, backups, alerting
 
-- Client provider + envoi messages
-- Templates + variables + multi-langue (MVP)
-- UI composer + quick replies (option)
-- Logs/erreurs provider + retries
-
-### Semaine 8 — Qualification (rules + extraction MVP)
-
-- Moteur rules v1 (json rules par org/annonce)
-- Extraction champs (budget/zone/timing) heuristique MVP
-- Calcul score + reasons + snapshot historisé
-- UI panneau qualification + trigger manuel
-
-### Semaine 9 — RDV (Appointment) + rappels
-
-- CRUD Appointment lié au Dossier
-- UI création/édition RDV + liste
-- Scheduler rappels (J-1 / H-2) via WhatsApp (avec consentement)
-- Statuts RDV (planned/confirmed/cancelled/done/no-show)
-- Validation : **anti double-booking** + dates futures only
-
-### Semaine 10 — Import/Export + connecteur CRM minimal
-
-- Export CSV (annonces/dossiers/rdv/messages) + filtres
-- Import CSV (annonces/dossiers) + mapping + rapport erreurs
-- Connector outbound (webhook events) vers CRM externe (MVP)
-- UI settings intégrations
-
-### Semaine 11 — Reporting & KPI
-
-- KPIs : temps réponse, taux qualif, taux RDV, no-show, conversion pipeline
-- Endpoints reports + agrégations
-- Dashboard Angular (cards + tables)
-
-### Semaine 12 — Hardening + perf + observabilité
-
-- Rate limiting endpoints sensibles
-- Renforcer idempotence/retries + anti-replay
-- Metrics (Prometheus) / logs structurés / alerting minimal
-- Tests supplémentaires (parcours critiques)
-
-### Semaine 13 — UAT pilote + Go-live
-
-- Scénarios UAT + dataset de test
-- Bugfix P0/P1 + re-tests
-- Runbook + checklist release
-- Tag/release MVP v0.2.0 (ou équivalent) + déploiement pilote
-
----
+### Semaine 13 — UAT pilote + Go-live (PLANIFIÉE)
+- Pilotage agence(s), boucle feedback, packaging, go-live
 
 ## Convention de version (suggestion)
-
-Le projet suit actuellement une numérotation simple alignée sur les jalons déjà livrés :
-
-- `0.1.0` : Semaine 1 (baseline)
-- `0.2.0` : Semaine 2 (CRUD core)
-- `0.3.0` : Semaine 3 (auth + multi-tenant)
-
-Pour le **go-live MVP**, utiliser un tag dédié (par ex. `0.4.0` ou `0.9.0`) afin d’éviter la collision avec les tags déjà utilisés.
+- `v0.4-week3` : socle sécurisé
+- `v0.5-week4plus` : CRM interne complet
+- `v0.6-market-ready` : consentement strict + WhatsApp outbound + QA stable
