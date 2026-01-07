@@ -200,3 +200,5 @@ temp-setup.cmd
 package.json
 package-lock.json
 SETUP_STATUS_AGENT.md
+setup-repo-init.ps1
+mvn-java17.cmd
