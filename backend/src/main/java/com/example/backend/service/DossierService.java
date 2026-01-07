@@ -178,9 +178,19 @@ public class DossierService {
         }
         
         List<DossierStatus> excludedStatuses = Arrays.asList(DossierStatus.WON, DossierStatus.LOST);
-        List<Dossier> duplicates = dossierRepository.findByLeadPhoneAndStatusNotIn(phone, excludedStatuses);
+        List<Dossier> leadPhoneDuplicates = dossierRepository.findByLeadPhoneAndStatusNotIn(phone, excludedStatuses);
+        List<Dossier> partyPhoneDuplicates = dossierRepository.findByPartiesPhoneAndStatusNotIn(phone, excludedStatuses);
         
-        return duplicates.stream()
+        List<Dossier> allDuplicates = new ArrayList<>();
+        allDuplicates.addAll(leadPhoneDuplicates);
+        
+        for (Dossier partyDuplicate : partyPhoneDuplicates) {
+            if (!allDuplicates.stream().anyMatch(d -> d.getId().equals(partyDuplicate.getId()))) {
+                allDuplicates.add(partyDuplicate);
+            }
+        }
+        
+        return allDuplicates.stream()
                 .map(dossierMapper::toResponse)
                 .collect(Collectors.toList());
     }

@@ -151,14 +151,14 @@ public class GlobalExceptionHandler {
             InvalidStatusTransitionException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "about:blank",
-                "Unprocessable Entity",
-                HttpStatus.UNPROCESSABLE_ENTITY.value(),
+                "Bad Request",
+                HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
                 request.getRequestURI()
         );
 
         return ResponseEntity
-                .status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }

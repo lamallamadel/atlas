@@ -3,6 +3,7 @@ package com.example.backend.entity.enums;
 public enum AnnonceType {
     SALE("sale"),
     RENT("rent"),
+    RENTAL("rental"),
     LEASE("lease"),
     EXCHANGE("exchange");
 

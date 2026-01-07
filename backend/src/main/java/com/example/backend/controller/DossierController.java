@@ -81,12 +81,8 @@ public class DossierController {
     public ResponseEntity<DossierResponse> getById(
             @Parameter(description = "ID of the dossier to retrieve", required = true)
             @PathVariable Long id) {
-        try {
-            DossierResponse response = dossierService.getById(id);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        DossierResponse response = dossierService.getById(id);
+        return ResponseEntity.ok(response);
     }
 
     // 2) NOUVEL ENDPOINT: /api/v1/dossiers/check-duplicates?leadPhone=...
@@ -143,14 +139,8 @@ public class DossierController {
             @Parameter(description = "ID of the dossier to update", required = true)
             @PathVariable Long id,
             @Valid @RequestBody DossierStatusPatchRequest request) {
-        try {
-            DossierResponse response = dossierService.patchStatus(id, request);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        DossierResponse response = dossierService.patchStatus(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/{id}/lead")
@@ -168,14 +158,8 @@ public class DossierController {
             @Parameter(description = "ID of the dossier to update", required = true)
             @PathVariable Long id,
             @Valid @RequestBody DossierLeadPatchRequest request) {
-        try {
-            DossierResponse response = dossierService.patchLead(id, request);
-            return ResponseEntity.ok(response);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
-        }
+        DossierResponse response = dossierService.patchLead(id, request);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/status-history")
@@ -196,13 +180,9 @@ public class DossierController {
             @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is descending by transitionedAt.")
             @RequestParam(defaultValue = "transitionedAt,desc") String sort) {
-        try {
-            Pageable pageable = createPageable(page, size, sort);
-            Page<DossierStatusHistoryResponse> history = statusHistoryService.getStatusHistory(id, pageable);
-            return ResponseEntity.ok(history);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        Pageable pageable = createPageable(page, size, sort);
+        Page<DossierStatusHistoryResponse> history = statusHistoryService.getStatusHistory(id, pageable);
+        return ResponseEntity.ok(history);
     }
 
     @PostMapping("/bulk-assign")
