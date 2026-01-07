@@ -64,6 +64,7 @@
             >
               <option *ngFor="let status of getAvailableStatusOptions()" [value]="status">
                 {{ status === DossierStatus.NEW ? 'Nouveau' :
+                   status === DossierStatus.QUALIFYING ? 'Qualification' :
                    status === DossierStatus.QUALIFIED ? 'Qualifié' :
                    status === DossierStatus.APPOINTMENT ? 'Rendez-vous' :
                    status === DossierStatus.WON ? 'Gagné' :

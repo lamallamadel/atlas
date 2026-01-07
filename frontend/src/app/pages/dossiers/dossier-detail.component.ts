@@ -63,6 +63,7 @@ export class DossierDetailComponent implements OnInit {
   PartiePrenanteRole = PartiePrenanteRole;
   statusOptions = [
     DossierStatus.NEW,
+    DossierStatus.QUALIFYING,
     DossierStatus.QUALIFIED,
     DossierStatus.APPOINTMENT,
     DossierStatus.WON,
@@ -130,16 +131,34 @@ export class DossierDetailComponent implements OnInit {
       case DossierStatus.LOST:
         return [currentStatus];
       
+      case DossierStatus.NEW:
+        return [
+          DossierStatus.NEW,
+          DossierStatus.QUALIFYING,
+          DossierStatus.LOST
+        ];
+      
+      case DossierStatus.QUALIFYING:
+        return [
+          DossierStatus.QUALIFYING,
+          DossierStatus.QUALIFIED,
+          DossierStatus.LOST
+        ];
+      
       case DossierStatus.QUALIFIED:
         return [
           DossierStatus.QUALIFIED,
+          DossierStatus.APPOINTMENT,
+          DossierStatus.LOST
+        ];
+      
+      case DossierStatus.APPOINTMENT:
+        return [
           DossierStatus.APPOINTMENT,
           DossierStatus.WON,
           DossierStatus.LOST
         ];
       
-      case DossierStatus.NEW:
-      case DossierStatus.APPOINTMENT:
       default:
         return this.statusOptions;
     }
@@ -166,8 +185,20 @@ export class DossierDetailComponent implements OnInit {
       return 'Le statut PERDU est terminal et ne peut pas être modifié';
     }
 
+    if (this.dossier.status === DossierStatus.NEW) {
+      return 'Transitions autorisées: QUALIFICATION ou PERDU';
+    }
+
+    if (this.dossier.status === DossierStatus.QUALIFYING) {
+      return 'Transitions autorisées: QUALIFIÉ ou PERDU';
+    }
+
     if (this.dossier.status === DossierStatus.QUALIFIED) {
-      return 'Seules les transitions vers RENDEZ-VOUS, GAGNÉ ou PERDU sont autorisées';
+      return 'Transitions autorisées: RENDEZ-VOUS ou PERDU';
+    }
+
+    if (this.dossier.status === DossierStatus.APPOINTMENT) {
+      return 'Transitions autorisées: GAGNÉ ou PERDU';
     }
 
     return 'Sélectionnez un nouveau statut';

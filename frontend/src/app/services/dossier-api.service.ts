@@ -14,6 +14,7 @@ export enum DossierSource {
 
 export enum DossierStatus {
   NEW = 'NEW',
+  QUALIFYING = 'QUALIFYING',
   QUALIFIED = 'QUALIFIED',
   APPOINTMENT = 'APPOINTMENT',
   WON = 'WON',

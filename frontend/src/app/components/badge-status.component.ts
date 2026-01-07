@@ -3,7 +3,7 @@ import { Component, Input } from '@angular/core';
 export type EntityType = 'annonce' | 'dossier';
 
 export type AnnonceStatusType = 'DRAFT' | 'PUBLISHED' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
-export type DossierStatusType = 'NEW' | 'QUALIFIED' | 'APPOINTMENT' | 'WON' | 'LOST';
+export type DossierStatusType = 'NEW' | 'QUALIFYING' | 'QUALIFIED' | 'APPOINTMENT' | 'WON' | 'LOST';
 
 @Component({
   selector: 'app-badge-status',
@@ -53,10 +53,12 @@ export class BadgeStatusComponent {
     switch (status) {
       case 'NEW':
         return 'badge-status badge-new';
+      case 'QUALIFYING':
+        return 'badge-status badge-qualifying';
       case 'QUALIFIED':
         return 'badge-status badge-qualified';
       case 'APPOINTMENT':
-        return 'badge-status badge-qualifying';
+        return 'badge-status badge-appointment';
       case 'WON':
         return 'badge-status badge-won';
       case 'LOST':
@@ -87,6 +89,8 @@ export class BadgeStatusComponent {
     switch (status) {
       case 'NEW':
         return 'Nouveau';
+      case 'QUALIFYING':
+        return 'Qualification';
       case 'QUALIFIED':
         return 'Qualifié';
       case 'APPOINTMENT':

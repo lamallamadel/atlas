@@ -265,10 +265,12 @@ export class DossiersComponent implements OnInit {
     switch (status) {
       case DossierStatus.NEW:
         return 'badge-status badge-new';
+      case DossierStatus.QUALIFYING:
+        return 'badge-status badge-qualifying';
       case DossierStatus.QUALIFIED:
         return 'badge-status badge-qualified';
       case DossierStatus.APPOINTMENT:
-        return 'badge-status badge-qualifying';
+        return 'badge-status badge-appointment';
       case DossierStatus.WON:
         return 'badge-status badge-won';
       case DossierStatus.LOST:
