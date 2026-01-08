@@ -2,6 +2,7 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
@@ -34,6 +35,10 @@ public class ConsentementEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "channel", nullable = false, length = 50)
     private ConsentementChannel channel;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "consent_type", nullable = false, length = 50)
+    private ConsentementType consentType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
@@ -75,6 +80,14 @@ public class ConsentementEntity extends BaseEntity {
         this.channel = channel;
     }
 
+    public ConsentementType getConsentType() {
+        return consentType;
+    }
+
+    public void setConsentType(ConsentementType consentType) {
+        this.consentType = consentType;
+    }
+    
     public ConsentementStatus getStatus() {
         return status;
     }

@@ -11,6 +11,7 @@ import com.example.backend.entity.enums.AuditAction;
 import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.ConsentementRepository;
@@ -521,6 +522,7 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
         consent.setDossier(dossier);
         consent.setChannel(channel);
         consent.setStatus(status);
+        consent.setConsentType(ConsentementType.MARKETING);
         if (meta != null) {
             consent.setMeta(new HashMap<>(meta));
         }

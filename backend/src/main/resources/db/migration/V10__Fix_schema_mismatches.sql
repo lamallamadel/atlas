@@ -27,3 +27,7 @@ END WHERE status IS NULL;
 
 -- Make status NOT NULL after setting defaults
 ALTER TABLE consentement ALTER COLUMN status SET NOT NULL;
+
+ALTER TABLE annonce ALTER COLUMN surface DOUBLE;
+
+
