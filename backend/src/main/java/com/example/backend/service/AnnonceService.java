@@ -56,6 +56,9 @@ public class AnnonceService {
 
         Annonce annonce = annonceMapper.toEntity(request);
         annonce.setOrgId(orgId);
+        
+        validateActiveAnnonce(annonce);
+        
         Annonce saved = annonceRepository.save(annonce);
         searchService.indexAnnonce(saved);
         return annonceMapper.toResponse(saved);
@@ -99,6 +102,9 @@ public class AnnonceService {
         }
 
         annonceMapper.updateEntity(annonce, request);
+        
+        validateActiveAnnonce(annonce);
+        
         Annonce updated = annonceRepository.save(annonce);
         searchService.indexAnnonce(updated);
         return annonceMapper.toResponse(updated);
@@ -197,6 +203,8 @@ public class AnnonceService {
                     }
                 }
 
+                validateActiveAnnonce(annonce);
+
                 annonceRepository.save(annonce);
                 successCount++;
             } catch (Exception e) {
@@ -206,5 +214,19 @@ public class AnnonceService {
         }
 
         return new BulkOperationResponse(successCount, failureCount, errors);
+    }
+
+    private void validateActiveAnnonce(Annonce annonce) {
+        if (AnnonceStatus.ACTIVE.equals(annonce.getStatus())) {
+            if (annonce.getTitle() == null || annonce.getTitle().trim().isEmpty()) {
+                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without a title");
+            }
+            if (annonce.getPrice() == null) {
+                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without a price");
+            }
+            if (annonce.getCity() == null || annonce.getCity().trim().isEmpty()) {
+                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without a city");
+            }
+        }
     }
 }
