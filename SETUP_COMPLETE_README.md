@@ -1,39 +1,71 @@
-# Setup Status: Partially Complete
+# Repository Setup - Quick Reference
 
-## ✅ Frontend Setup: COMPLETE
-```bash
-cd frontend
-npm start  # Ready to run!
-```
+## ✅ What's Been Done
 
-## ⏳ Backend Setup: ONE COMMAND AWAY
+### Frontend - READY TO USE ✅
+- ✅ Installed 1,187 npm packages
+- ✅ Installed Playwright browsers (Chromium, Firefox, WebKit)
+- ✅ Ready for development, testing, and building
 
-**Run this to complete setup:**
+### Backend - ACTION NEEDED ⚠️
+- ⚠️ Maven dependencies NOT installed (proxy configuration issue)
+- ✅ Helper scripts created for installation
+- ✅ All configuration files in place
+
+## 🚀 Complete Backend Setup (1 Command)
+
+Open PowerShell in the project root and run:
+
 ```powershell
-.\backend\run-maven.ps1
-```
-
-**Or use the batch file:**
-```cmd
-.\run-maven-setup.cmd
-```
-
-**Or manually:**
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install -DskipTests
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+mvn clean install -s settings.xml -DskipTests
 ```
 
-## Why Manual Step Is Needed
+**That's it!** The `-s settings.xml` uses the project's settings that avoid proxy issues.
 
-- System JAVA_HOME points to Java 8
-- Backend requires Java 17
-- Security restrictions prevented automatic environment modification
-- Helper scripts are already created and ready to use
+## 📝 Alternative Methods
 
-## See Also
+If the above doesn't work, try these batch files in the `backend/` directory:
 
-- `INITIAL_SETUP_REPORT.md` - Complete setup documentation
-- `SETUP_STATUS_CURRENT.md` - Detailed status and instructions
-- `AGENTS.md` - Development commands and conventions
+```cmd
+cd backend
+install-simple.cmd
+```
+
+Or:
+
+```cmd
+cd backend
+mvn-java17.cmd clean install -s settings.xml -DskipTests
+```
+
+## 🎯 Verify Setup
+
+### Test Frontend (Already Working)
+```powershell
+cd frontend
+npm test
+```
+
+### Test Backend (After Maven Install)
+```powershell
+cd backend
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+mvn test
+```
+
+## 📖 Full Documentation
+
+- **INITIAL_SETUP_COMPLETE.md** - Detailed setup status and troubleshooting
+- **AGENTS.md** - Complete development workflow guide
+- **SETUP.md** - Original setup instructions
+
+## ⏱️ Expected Time
+
+- Backend installation: ~5-10 minutes
+- Downloads ~150-200MB of Maven dependencies
+
+---
+
+**TL;DR**: Frontend is ready. For backend, run the Maven command above. See INITIAL_SETUP_COMPLETE.md for details.

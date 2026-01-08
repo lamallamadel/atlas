@@ -237,3 +237,10 @@ run-backend-setup-now.cmd
 backend-setup.cmd
 run-backend-mvn-install.ps1
 setup-backend-temp.cmd
+setup-repo-final.ps1
+backend/setup-install-noproxy.cmd
+backend/install-simple.cmd
+backend/install-via-node.js
+install-backend-via-npm.js
+SETUP_STATUS_FINAL.md
+INITIAL_SETUP_COMPLETE.md
