@@ -122,6 +122,8 @@ cd backend
 ./mvnw test                  # Run tests (uses test profile with H2)
 ./mvnw spring-boot:run -Dspring-boot.run.profiles=local  # Start server (port 8080)
 ./mvnw clean package         # Build JAR for production
+./mvnw verify -Pbackend-e2e-h2         # Run E2E tests with H2
+./mvnw verify -Pbackend-e2e-postgres   # Run E2E tests with PostgreSQL
 ```
 
 #### Frontend
@@ -131,6 +133,9 @@ npm install         # Install dependencies
 npm start          # Start dev server (port 4200)
 npm test           # Run tests
 npm run build      # Build for production
+npm run e2e        # Run E2E tests (H2 + mock auth)
+npm run e2e:postgres   # Run E2E tests (PostgreSQL + mock auth)
+npm run e2e:full       # Run E2E tests (all configurations)
 ```
 
 #### Infrastructure
@@ -332,6 +337,296 @@ Note: Duplicate phone entry exists - dossier #1 and #10 share phone +33612345678
 Seed data loading completed successfully.
 ```
 
+
+## 🧪 End-to-End Testing
+
+### Overview
+
+The project includes comprehensive end-to-end testing for both backend and frontend with multiple database and authentication configurations.
+
+### Backend E2E Tests
+
+Backend E2E tests validate the full REST API stack with real database operations.
+
+**Run with H2 (In-Memory Database):**
+```bash
+cd backend
+mvn verify -Pbackend-e2e-h2
+```
+
+**Run with PostgreSQL (Testcontainers):**
+```bash
+cd backend
+mvn verify -Pbackend-e2e-postgres
+```
+
+**Prerequisites:**
+- Java 17
+- Docker (for PostgreSQL profile only)
+
+### Frontend E2E Tests
+
+Frontend E2E tests use Playwright to validate the entire application flow.
+
+**Run with H2 + Mock Auth (Default - Fastest):**
+```bash
+cd frontend
+npm run e2e
+```
+
+**Run with PostgreSQL + Mock Auth:**
+```bash
+cd frontend
+npm run e2e:postgres
+```
+
+**Run All Configurations:**
+```bash
+cd frontend
+npm run e2e:full
+```
+
+**Interactive UI Mode:**
+```bash
+cd frontend
+npm run e2e:ui
+```
+
+**Prerequisites:**
+- Node.js 18+
+- Playwright browsers: `npx playwright install`
+- Docker (for PostgreSQL configurations)
+
+### Test Data Builder
+
+Backend tests use `BackendE2ETestDataBuilder` for fluent test data creation:
+
+```java
+@Autowired
+private BackendE2ETestDataBuilder testDataBuilder;
+
+@Test
+void testPropertyListing() {
+    // Create a property with photos and rules
+    Annonce annonce = testDataBuilder.annonceBuilder()
+        .withTitle("Luxury Apartment")
+        .withType(AnnonceType.SALE)
+        .withPrice(new BigDecimal("500000"))
+        .withCity("Paris")
+        .withPhotos()      // Auto-generates photo URLs
+        .withRulesJson()   // Auto-generates rules
+        .persist();
+    
+    // Create a lead linked to the property
+    Dossier dossier = testDataBuilder.dossierBuilder()
+        .withAnnonceId(annonce.getId())
+        .withLeadName("Jane Smith")
+        .withStatus(DossierStatus.NEW)
+        .withInitialParty(PartiePrenanteRole.BUYER)
+        .persist();
+    
+    // Add a message
+    MessageEntity message = testDataBuilder.messageBuilder()
+        .withDossier(dossier)
+        .withChannel(MessageChannel.EMAIL)
+        .withContent("I'm interested in viewing")
+        .persist();
+    
+    // Test data is automatically cleaned up
+}
+```
+
+**Available Builders:**
+- `annonceBuilder()` - Properties/listings
+- `dossierBuilder()` - Leads/deals
+- `partiePrenanteBuilder()` - Stakeholders
+- `messageBuilder()` - Messages
+- `appointmentBuilder()` - Appointments
+- `consentementBuilder()` - Consent records
+- `notificationBuilder()` - Notifications
+
+### Configuration Files
+
+Frontend E2E tests use different Playwright configurations:
+
+| Configuration | Database | Auth | Use Case |
+|--------------|----------|------|----------|
+| `playwright.config.ts` | H2 | Mock | Default, fastest |
+| `playwright-postgres-mock.config.ts` | PostgreSQL | Mock | PostgreSQL testing |
+| `playwright-h2-keycloak.config.ts` | H2 | Keycloak | Auth integration |
+| `playwright-postgres-keycloak.config.ts` | PostgreSQL | Keycloak | Full integration |
+| `playwright.fast.config.ts` | H2 | Mock | Fast single-browser |
+
+### E2E Testing Troubleshooting
+
+#### Docker Not Running
+
+**Symptom:** Testcontainers fails to start PostgreSQL container
+
+**Solution:**
+```bash
+# Check Docker is running
+docker ps
+
+# Start Docker Desktop (Windows/Mac)
+# Or start Docker daemon (Linux)
+sudo systemctl start docker
+```
+
+#### Port 5432 Already in Use
+
+**Symptom:** PostgreSQL tests fail with port binding error
+
+**Solution (Windows):**
+```powershell
+# Find process using port 5432
+Get-NetTCPConnection -LocalPort 5432
+
+# Stop the process
+Stop-Process -Id <PID>
+
+# Or stop PostgreSQL service
+Stop-Service postgresql-x64-16
+```
+
+**Solution (Linux/Mac):**
+```bash
+# Find process using port 5432
+lsof -i :5432
+
+# Kill the process
+kill <PID>
+
+# Or stop PostgreSQL service
+sudo systemctl stop postgresql
+```
+
+#### Container Cleanup
+
+If containers aren't cleaned up after tests:
+
+```bash
+# Remove Testcontainers orphans
+docker rm $(docker ps -a -q --filter "label=org.testcontainers=true")
+
+# Remove all stopped containers
+docker container prune -f
+
+# Remove unused volumes
+docker volume prune -f
+```
+
+#### Playwright Browser Installation
+
+**Symptom:** E2E tests fail with "Executable doesn't exist"
+
+**Solution:**
+```bash
+cd frontend
+
+# Install Playwright browsers
+npx playwright install
+
+# Install system dependencies (Linux)
+npx playwright install-deps
+
+# Clear cache and reinstall
+npx playwright uninstall --all
+npx playwright install
+```
+
+#### Flyway Version Conflicts
+
+**Symptom:**
+```
+Flyway Community Edition X.X.X does not support PostgreSQL Y.Y
+```
+
+**Solution:**
+
+Update Flyway in `backend/pom.xml`:
+```xml
+<dependency>
+    <groupId>org.flywaydb</groupId>
+    <artifactId>flyway-core</artifactId>
+    <version>10.0.0</version>
+</dependency>
+```
+
+Or specify PostgreSQL version in Testcontainers:
+```java
+@Container
+static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:15-alpine");
+```
+
+#### JSONB vs JSON Type Mismatch
+
+**Symptom:**
+```
+ERROR: column "rules_json" is of type jsonb but expression is of type json
+```
+
+**Solution:**
+
+Use correct Hibernate annotation in entity:
+```java
+@JdbcTypeCode(SqlTypes.JSON)
+@Column(name = "rules_json", columnDefinition = "jsonb")
+private Map<String, Object> rulesJson;
+```
+
+For H2 compatibility, configure in `application-test.yml`:
+```yaml
+spring:
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+```
+
+#### JWT Mock Decoder Not Working
+
+**Symptom:** Authentication fails in E2E tests with 401 Unauthorized
+
+**Solution:**
+
+Configure mock JWT decoder in test configuration:
+
+```java
+@TestConfiguration
+public class TestSecurityConfig {
+    
+    @Bean
+    @Primary
+    public JwtDecoder jwtDecoder() {
+        return token -> {
+            Map<String, Object> claims = new HashMap<>();
+            claims.put("sub", "test-user");
+            claims.put("org_id", "test-org-123");
+            claims.put("scope", "read write");
+            return new Jwt(
+                token,
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                Map.of("alg", "none"),
+                claims
+            );
+        };
+    }
+}
+```
+
+And in `application-test.yml`:
+```yaml
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/mock
+```
+
+For frontend tests, ensure `e2e/global-setup.ts` creates the mock token storage state.
 
 ## 🐛 Troubleshooting
 
