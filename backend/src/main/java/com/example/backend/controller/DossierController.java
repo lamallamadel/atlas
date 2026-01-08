@@ -201,6 +201,24 @@ public class DossierController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{id:\\d+}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Delete a dossier", description = "Deletes a dossier by its ID (Admin only)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Dossier deleted successfully",
+                    content = @Content),
+            @ApiResponse(responseCode = "404", description = "Dossier not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Forbidden - Admin role required",
+                    content = @Content)
+    })
+    public ResponseEntity<Void> delete(
+            @Parameter(description = "ID of the dossier to delete", required = true)
+            @PathVariable Long id) {
+        dossierService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
