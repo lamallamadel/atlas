@@ -92,6 +92,14 @@ coverage/
 .pytest_cache/
 junit.xml
 test-results/
+test-reports/
+test_output*.txt
+test-results*.txt
+
+# Playwright
+playwright-report/
+playwright/.cache/
+*.zip
 
 # Environment variables
 .env

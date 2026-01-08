@@ -12,7 +12,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: 1,
-  reporter: process.env.CI ? [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]] : 'html',
+  reporter: process.env.CI ? [['html'], ['junit', { outputFile: 'test-results/junit-h2-keycloak.xml' }], ['json', { outputFile: 'test-results/results-h2-keycloak.json' }]] : 'html',
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200',
     trace: 'on-first-retry',

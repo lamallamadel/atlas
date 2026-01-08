@@ -13,7 +13,11 @@
     "e2e:fast:headed": "playwright test -c playwright.fast.config.ts --headed",
     "e2e:fast:ui": "playwright test -c playwright.fast.config.ts --ui",
     "e2e:headed": "playwright test --headed",
-    "e2e:ui": "playwright test --ui"
+    "e2e:ui": "playwright test --ui",
+    "e2e:postgres": "playwright test -c playwright-postgres-mock.config.ts",
+    "e2e:h2-keycloak": "playwright test -c playwright-h2-keycloak.config.ts",
+    "e2e:postgres-keycloak": "playwright test -c playwright-postgres-keycloak.config.ts",
+    "e2e:full": "npm run e2e && npm run e2e:postgres && npm run e2e:h2-keycloak && npm run e2e:postgres-keycloak"
   },
   "private": true,
   "dependencies": {

@@ -2,6 +2,35 @@
 
 Full-stack application with a Spring Boot backend, an Angular frontend, and a PostgreSQL database.
 
+## 🧪 Test Validation Suite
+
+This project includes a comprehensive test validation suite with multiple database and authentication configurations:
+
+**Quick Start:**
+```bash
+# Run all tests
+./scripts/run-full-test-suite.sh          # Linux/Mac
+.\scripts\run-full-test-suite.ps1         # Windows
+
+# Backend only
+./scripts/run-full-test-suite.sh --backend-only
+
+# Frontend only  
+./scripts/run-full-test-suite.sh --frontend-only
+```
+
+**Documentation:**
+- 📖 [Complete Test Suite Guide](TEST_VALIDATION_SUITE.md)
+- ⚡ [Quick Test Reference](QUICK_TEST_GUIDE.md)
+
+**Features:**
+- ✅ Backend E2E tests (H2 + PostgreSQL with Testcontainers)
+- ✅ Frontend E2E tests (4 configurations: H2/Postgres × Mock/Keycloak)
+- ✅ Database compatibility verification (JSONB, UUID, timestamps, sequences)
+- ✅ 80%+ coverage validation on critical workflows
+- ✅ Performance tracking (<5min H2, <15min PostgreSQL)
+- ✅ Automated test reports with metrics
+
 ## Project Docs
 
 - **Current delivery status**: [docs/PROJECT_STATUS.md](./docs/PROJECT_STATUS.md)
