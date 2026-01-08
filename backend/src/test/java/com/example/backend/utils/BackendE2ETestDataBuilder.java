@@ -3,6 +3,7 @@ package com.example.backend.utils;
 import com.example.backend.entity.*;
 import com.example.backend.entity.enums.*;
 import com.example.backend.repository.*;
+import com.example.backend.util.TenantContext;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -99,6 +100,57 @@ public class BackendE2ETestDataBuilder {
         createdAnnonceIds.clear();
     }
 
+    public void cleanupByOrgId(String orgId) {
+        // Delete notifications for the specific orgId
+        List<NotificationEntity> notifications = notificationRepository.findAll().stream()
+                .filter(n -> orgId.equals(n.getOrgId()))
+                .toList();
+        notificationRepository.deleteAll(notifications);
+        notifications.forEach(n -> createdNotificationIds.remove(n.getId()));
+
+        // Delete consentements for the specific orgId
+        List<ConsentementEntity> consentements = consentementRepository.findAll().stream()
+                .filter(c -> orgId.equals(c.getOrgId()))
+                .toList();
+        consentementRepository.deleteAll(consentements);
+        consentements.forEach(c -> createdConsentementIds.remove(c.getId()));
+
+        // Delete appointments for the specific orgId
+        List<AppointmentEntity> appointments = appointmentRepository.findAll().stream()
+                .filter(a -> orgId.equals(a.getOrgId()))
+                .toList();
+        appointmentRepository.deleteAll(appointments);
+        appointments.forEach(a -> createdAppointmentIds.remove(a.getId()));
+
+        // Delete messages for the specific orgId
+        List<MessageEntity> messages = messageRepository.findAll().stream()
+                .filter(m -> orgId.equals(m.getOrgId()))
+                .toList();
+        messageRepository.deleteAll(messages);
+        messages.forEach(m -> createdMessageIds.remove(m.getId()));
+
+        // Delete parties prenantes for the specific orgId
+        List<PartiePrenanteEntity> parties = partiePrenanteRepository.findAll().stream()
+                .filter(p -> orgId.equals(p.getOrgId()))
+                .toList();
+        partiePrenanteRepository.deleteAll(parties);
+        parties.forEach(p -> createdPartiePrenanteIds.remove(p.getId()));
+
+        // Delete dossiers for the specific orgId
+        List<Dossier> dossiers = dossierRepository.findAll().stream()
+                .filter(d -> orgId.equals(d.getOrgId()))
+                .toList();
+        dossierRepository.deleteAll(dossiers);
+        dossiers.forEach(d -> createdDossierIds.remove(d.getId()));
+
+        // Delete annonces for the specific orgId
+        List<Annonce> annonces = annonceRepository.findAll().stream()
+                .filter(a -> orgId.equals(a.getOrgId()))
+                .toList();
+        annonceRepository.deleteAll(annonces);
+        annonces.forEach(a -> createdAnnonceIds.remove(a.getId()));
+    }
+
     private String randomString(String prefix) {
         return prefix + "-" + UUID.randomUUID().toString().substring(0, 8);
     }
@@ -116,13 +168,24 @@ public class BackendE2ETestDataBuilder {
         return values[random.nextInt(values.length)];
     }
 
+    private String resolveOrgId(String explicitOrgId) {
+        if (explicitOrgId != null) {
+            return explicitOrgId;
+        }
+        String contextOrgId = TenantContext.getOrgId();
+        if (contextOrgId != null) {
+            return contextOrgId;
+        }
+        return defaultOrgId;
+    }
+
     public class AnnonceBuilder {
         private Annonce annonce = new Annonce();
         private boolean withPhotos = false;
         private boolean withRulesJson = false;
+        private String explicitOrgId = null;
 
         public AnnonceBuilder() {
-            annonce.setOrgId(defaultOrgId);
             annonce.setTitle(randomString("Property"));
             annonce.setDescription("Beautiful property with great features");
             annonce.setCategory("Apartment");
@@ -138,7 +201,7 @@ public class BackendE2ETestDataBuilder {
         }
 
         public AnnonceBuilder withOrgId(String orgId) {
-            annonce.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
@@ -244,6 +307,7 @@ public class BackendE2ETestDataBuilder {
         }
 
         public Annonce persist() {
+            annonce.setOrgId(resolveOrgId(explicitOrgId));
             Annonce saved = annonceRepository.save(build());
             createdAnnonceIds.add(saved.getId());
             return saved;
@@ -254,9 +318,9 @@ public class BackendE2ETestDataBuilder {
         private Dossier dossier = new Dossier();
         private boolean withInitialParty = false;
         private PartiePrenanteRole initialPartyRole = PartiePrenanteRole.BUYER;
+        private String explicitOrgId = null;
 
         public DossierBuilder() {
-            dossier.setOrgId(defaultOrgId);
             dossier.setLeadPhone(randomPhone());
             dossier.setLeadName(randomString("Lead"));
             dossier.setLeadSource("web");
@@ -269,7 +333,7 @@ public class BackendE2ETestDataBuilder {
         }
 
         public DossierBuilder withOrgId(String orgId) {
-            dossier.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
@@ -329,6 +393,7 @@ public class BackendE2ETestDataBuilder {
         }
 
         public Dossier persist() {
+            dossier.setOrgId(resolveOrgId(explicitOrgId));
             Dossier saved = dossierRepository.save(build());
             createdDossierIds.add(saved.getId());
 
@@ -346,9 +411,9 @@ public class BackendE2ETestDataBuilder {
     public class PartiePrenanteBuilder {
         private PartiePrenanteEntity partiePrenante = new PartiePrenanteEntity();
         private Dossier dossier;
+        private String explicitOrgId = null;
 
         public PartiePrenanteBuilder() {
-            partiePrenante.setOrgId(defaultOrgId);
             partiePrenante.setRole(randomEnum(PartiePrenanteRole.class));
             partiePrenante.setFirstName(randomString("FirstName"));
             partiePrenante.setLastName(randomString("LastName"));
@@ -358,14 +423,16 @@ public class BackendE2ETestDataBuilder {
         }
 
         public PartiePrenanteBuilder withOrgId(String orgId) {
-            partiePrenante.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
         public PartiePrenanteBuilder withDossier(Dossier dossier) {
             this.dossier = dossier;
             partiePrenante.setDossier(dossier);
-            partiePrenante.setOrgId(dossier.getOrgId());
+            if (explicitOrgId == null && dossier != null) {
+                this.explicitOrgId = dossier.getOrgId();
+            }
             return this;
         }
 
@@ -412,6 +479,7 @@ public class BackendE2ETestDataBuilder {
             if (partiePrenante.getDossier() == null) {
                 throw new IllegalStateException("PartiePrenanteEntity must have a Dossier set before persisting");
             }
+            partiePrenante.setOrgId(resolveOrgId(explicitOrgId));
             PartiePrenanteEntity saved = partiePrenanteRepository.save(build());
             createdPartiePrenanteIds.add(saved.getId());
             return saved;
@@ -421,9 +489,9 @@ public class BackendE2ETestDataBuilder {
     public class MessageBuilder {
         private MessageEntity message = new MessageEntity();
         private Dossier dossier;
+        private String explicitOrgId = null;
 
         public MessageBuilder() {
-            message.setOrgId(defaultOrgId);
             message.setDirection(randomEnum(MessageDirection.class));
             message.setChannel(randomEnum(MessageChannel.class));
             message.setContent("Test message content - " + UUID.randomUUID().toString());
@@ -432,14 +500,16 @@ public class BackendE2ETestDataBuilder {
         }
 
         public MessageBuilder withOrgId(String orgId) {
-            message.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
         public MessageBuilder withDossier(Dossier dossier) {
             this.dossier = dossier;
             message.setDossier(dossier);
-            message.setOrgId(dossier.getOrgId());
+            if (explicitOrgId == null && dossier != null) {
+                this.explicitOrgId = dossier.getOrgId();
+            }
             return this;
         }
 
@@ -476,6 +546,7 @@ public class BackendE2ETestDataBuilder {
             if (message.getDossier() == null) {
                 throw new IllegalStateException("MessageEntity must have a Dossier set before persisting");
             }
+            message.setOrgId(resolveOrgId(explicitOrgId));
             MessageEntity saved = messageRepository.save(build());
             createdMessageIds.add(saved.getId());
             return saved;
@@ -485,13 +556,13 @@ public class BackendE2ETestDataBuilder {
     public class AppointmentBuilder {
         private AppointmentEntity appointment = new AppointmentEntity();
         private Dossier dossier;
+        private String explicitOrgId = null;
 
         public AppointmentBuilder() {
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime startTime = now.plusDays(1 + random.nextInt(7)).withHour(9 + random.nextInt(8)).withMinute(0).withSecond(0);
             LocalDateTime endTime = startTime.plusHours(1);
 
-            appointment.setOrgId(defaultOrgId);
             appointment.setStatus(AppointmentStatus.SCHEDULED);
             appointment.setStartTime(startTime);
             appointment.setEndTime(endTime);
@@ -503,14 +574,16 @@ public class BackendE2ETestDataBuilder {
         }
 
         public AppointmentBuilder withOrgId(String orgId) {
-            appointment.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
         public AppointmentBuilder withDossier(Dossier dossier) {
             this.dossier = dossier;
             appointment.setDossier(dossier);
-            appointment.setOrgId(dossier.getOrgId());
+            if (explicitOrgId == null && dossier != null) {
+                this.explicitOrgId = dossier.getOrgId();
+            }
             return this;
         }
 
@@ -563,6 +636,7 @@ public class BackendE2ETestDataBuilder {
             if (appointment.getDossier() == null) {
                 throw new IllegalStateException("AppointmentEntity must have a Dossier set before persisting");
             }
+            appointment.setOrgId(resolveOrgId(explicitOrgId));
             AppointmentEntity saved = appointmentRepository.save(build());
             createdAppointmentIds.add(saved.getId());
             return saved;
@@ -572,22 +646,24 @@ public class BackendE2ETestDataBuilder {
     public class ConsentementBuilder {
         private ConsentementEntity consentement = new ConsentementEntity();
         private Dossier dossier;
+        private String explicitOrgId = null;
 
         public ConsentementBuilder() {
-            consentement.setOrgId(defaultOrgId);
             consentement.setChannel(randomEnum(ConsentementChannel.class));
             consentement.setStatus(randomEnum(ConsentementStatus.class));
         }
 
         public ConsentementBuilder withOrgId(String orgId) {
-            consentement.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
         public ConsentementBuilder withDossier(Dossier dossier) {
             this.dossier = dossier;
             consentement.setDossier(dossier);
-            consentement.setOrgId(dossier.getOrgId());
+            if (explicitOrgId == null && dossier != null) {
+                this.explicitOrgId = dossier.getOrgId();
+            }
             return this;
         }
 
@@ -614,6 +690,7 @@ public class BackendE2ETestDataBuilder {
             if (consentement.getDossier() == null) {
                 throw new IllegalStateException("ConsentementEntity must have a Dossier set before persisting");
             }
+            consentement.setOrgId(resolveOrgId(explicitOrgId));
             ConsentementEntity saved = consentementRepository.save(build());
             createdConsentementIds.add(saved.getId());
             return saved;
@@ -623,9 +700,9 @@ public class BackendE2ETestDataBuilder {
     public class NotificationBuilder {
         private NotificationEntity notification = new NotificationEntity();
         private Dossier dossier;
+        private String explicitOrgId = null;
 
         public NotificationBuilder() {
-            notification.setOrgId(defaultOrgId);
             notification.setType(randomEnum(NotificationType.class));
             notification.setStatus(NotificationStatus.PENDING);
             notification.setTemplateId("template-" + random.nextInt(10));
@@ -642,14 +719,16 @@ public class BackendE2ETestDataBuilder {
         }
 
         public NotificationBuilder withOrgId(String orgId) {
-            notification.setOrgId(orgId);
+            this.explicitOrgId = orgId;
             return this;
         }
 
         public NotificationBuilder withDossier(Dossier dossier) {
             this.dossier = dossier;
             notification.setDossierId(dossier.getId());
-            notification.setOrgId(dossier.getOrgId());
+            if (explicitOrgId == null && dossier != null) {
+                this.explicitOrgId = dossier.getOrgId();
+            }
             return this;
         }
 
@@ -713,6 +792,7 @@ public class BackendE2ETestDataBuilder {
         }
 
         public NotificationEntity persist() {
+            notification.setOrgId(resolveOrgId(explicitOrgId));
             NotificationEntity saved = notificationRepository.save(build());
             createdNotificationIds.add(saved.getId());
             return saved;
