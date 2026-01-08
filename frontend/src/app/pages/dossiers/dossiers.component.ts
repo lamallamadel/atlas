@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
@@ -106,12 +106,20 @@ export class DossiersComponent implements OnInit {
   constructor(
     private dossierApiService: DossierApiService,
     private annonceApiService: AnnonceApiService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
-    this.loadDossiers();
+    
+    // Check for query parameters and apply filters
+    this.route.queryParams.subscribe(params => {
+      if (params['status']) {
+        this.selectedStatus = params['status'] as DossierStatus;
+      }
+      this.loadDossiers();
+    });
   }
 
   setupAnnonceAutocomplete(): void {

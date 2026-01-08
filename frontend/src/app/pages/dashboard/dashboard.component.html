@@ -21,6 +21,9 @@
             {{annoncesActivesCount}}
           </div>
         </div>
+        <div class="kpi-card-footer" *ngIf="!loadingAnnonces && !errorAnnonces">
+          <button class="kpi-view-all-button" (click)="navigateToAnnoncesActives()">Voir tous</button>
+        </div>
       </div>
 
       <div class="kpi-card">
@@ -39,6 +42,9 @@
           <div *ngIf="!loadingDossiers && !errorDossiers" class="kpi-value">
             {{dossiersATraiterCount}}
           </div>
+        </div>
+        <div class="kpi-card-footer" *ngIf="!loadingDossiers && !errorDossiers">
+          <button class="kpi-view-all-button" (click)="navigateToDossiersATraiter()">Voir tous</button>
         </div>
       </div>
 

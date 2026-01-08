@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
@@ -115,12 +115,20 @@ export class AnnoncesComponent implements OnInit {
 
   constructor(
     private annonceApiService: AnnonceApiService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.loadCities();
-    this.loadAnnonces();
+    
+    // Check for query parameters and apply filters
+    this.route.queryParams.subscribe(params => {
+      if (params['status']) {
+        this.selectedStatus = params['status'] as AnnonceStatus;
+      }
+      this.loadAnnonces();
+    });
   }
 
   loadCities(): void {

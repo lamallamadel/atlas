@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { PingService } from '../../services/ping.service';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
@@ -27,7 +28,8 @@ export class DashboardComponent implements OnInit {
 
   constructor(
     private pingService: PingService,
-    private dashboardKpiService: DashboardKpiService
+    private dashboardKpiService: DashboardKpiService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -105,6 +107,21 @@ export class DashboardComponent implements OnInit {
         this.loadingRecent = false;
         this.errorRecent = 'Erreur lors du chargement des derniers dossiers';
       }
+    });
+  }
+
+  navigateToAnnoncesActives(): void {
+    // Navigate to annonces list with ACTIVE status filter
+    this.router.navigate(['/annonces'], { 
+      queryParams: { status: 'ACTIVE' }
+    });
+  }
+
+  navigateToDossiersATraiter(): void {
+    // Navigate to dossiers list with status filter for dossiers to process
+    // Typically NEW, QUALIFYING, or QUALIFIED status
+    this.router.navigate(['/dossiers'], { 
+      queryParams: { status: 'NEW' }
     });
   }
 }
