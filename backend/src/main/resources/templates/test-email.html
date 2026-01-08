@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Email</title>
+</head>
+<body>
+    <h1>Hello, <span th:text="${userName}">User</span>!</h1>
+    <p th:text="${message}">This is a test message.</p>
+    <div th:if="${dossierId}">
+        <p>Dossier ID: <strong th:text="${dossierId}">N/A</strong></p>
+    </div>
+</body>
+</html>

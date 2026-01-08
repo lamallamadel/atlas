@@ -42,9 +42,22 @@ public class NotificationService {
             String subject,
             String templateId,
             Map<String, Object> variables) {
+        return createNotification(orgId, null, type, recipient, subject, templateId, variables);
+    }
+
+    @Transactional
+    public NotificationEntity createNotification(
+            String orgId,
+            Long dossierId,
+            NotificationType type,
+            String recipient,
+            String subject,
+            String templateId,
+            Map<String, Object> variables) {
         
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(orgId);
+        notification.setDossierId(dossierId);
         notification.setType(type);
         notification.setRecipient(recipient);
         notification.setSubject(subject);
@@ -118,5 +131,14 @@ public class NotificationService {
     @Transactional(readOnly = true)
     public List<NotificationEntity> getAllNotifications() {
         return notificationRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<NotificationEntity> listNotifications(
+            Long dossierId,
+            NotificationType type,
+            NotificationStatus status,
+            org.springframework.data.domain.Pageable pageable) {
+        return notificationRepository.findByFilters(dossierId, type, status, pageable);
     }
 }
