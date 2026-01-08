@@ -205,7 +205,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Starting qualification process");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -227,7 +227,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(DossierStatus.QUALIFIED);
         request.setReason("Client is qualified");
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -246,7 +246,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(DossierStatus.APPOINTMENT);
         request.setReason("Appointment scheduled");
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -265,7 +265,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(DossierStatus.WON);
         request.setReason("Deal closed successfully");
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -296,7 +296,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Trying to change won status");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -323,7 +323,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Trying to reopen lost dossier");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -350,7 +350,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Skipping intermediate steps");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -664,7 +664,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Client not interested");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -697,7 +697,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Did not meet criteria");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -725,7 +725,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Found another property");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -753,7 +753,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Client no-showed");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -781,7 +781,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Pre-qualified client");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -809,7 +809,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Direct appointment scheduling");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "PRO")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
