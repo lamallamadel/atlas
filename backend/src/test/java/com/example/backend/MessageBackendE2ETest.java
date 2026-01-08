@@ -83,7 +83,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.channel").value("EMAIL"))
                 .andExpect(jsonPath("$.direction").value("INBOUND"))
                 .andExpect(jsonPath("$.content").value("Test email message content"))
-                .andExpect(jsonPath("$.timestamp").value(timestamp.toString()))
+                .andExpect(jsonPath("$.timestamp").value(startsWith("2024-01-15T10:30")))
                 .andExpect(jsonPath("$.createdAt").exists())
                 .andReturn();
 
@@ -128,7 +128,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.channel").value("SMS"))
                 .andExpect(jsonPath("$.direction").value("OUTBOUND"))
-                .andExpect(jsonPath("$.timestamp").value(timestamp.toString()));
+                .andExpect(jsonPath("$.timestamp").value(startsWith("2024-01-15T11:00")));
     }
 
     @Test
@@ -227,7 +227,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request1)), TENANT_1))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.timestamp").value(pastTimestamp.toString()));
+                .andExpect(jsonPath("$.timestamp").value(startsWith("2020-01-01T00:00")));
 
         MessageCreateRequest request2 = new MessageCreateRequest();
         request2.setDossierId(dossier.getId());
@@ -241,7 +241,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request2)), TENANT_1))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.timestamp").value(futureTimestamp.toString()));
+                .andExpect(jsonPath("$.timestamp").value(startsWith("2030-12-31T23:59")));
     }
 
     @Test

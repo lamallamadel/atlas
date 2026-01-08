@@ -1,8 +1,10 @@
 package com.example.backend.annotation;
 
+import com.example.backend.config.TestSecurityConfig;
 import org.junit.jupiter.api.Tag;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -17,5 +19,6 @@ import java.lang.annotation.Target;
 @AutoConfigureMockMvc
 @Transactional
 @Tag("backend-e2e")
+@Import(TestSecurityConfig.class)
 public @interface BackendE2ETest {
 }
