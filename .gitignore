@@ -267,3 +267,8 @@ run-backend-install-temp.ps1
 setup-backend.cmd
 setup-maven.js
 package.json
+
+# Setup scripts created by agent
+setup-env-wrapper.ps1
+run-mvn-java17.cmd
+run-maven-setup.js

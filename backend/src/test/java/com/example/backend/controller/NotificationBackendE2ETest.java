@@ -5,11 +5,13 @@ import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.config.TestMailConfiguration;
 import com.example.backend.dto.NotificationCreateRequest;
 import com.example.backend.dto.NotificationResponse;
+import com.example.backend.entity.Dossier;
 import com.example.backend.entity.NotificationEntity;
 import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
 import com.example.backend.repository.NotificationRepository;
 import com.example.backend.service.NotificationService;
+import com.example.backend.utils.BackendE2ETestDataBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
@@ -49,6 +51,9 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private BackendE2ETestDataBuilder testDataBuilder;
 
     @BeforeEach
     void setUp() {
@@ -538,16 +543,28 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     private NotificationEntity createTestNotification(String orgId, Long dossierId, 
                                                       NotificationType type, NotificationStatus status) {
-        NotificationEntity notification = new NotificationEntity();
-        notification.setOrgId(orgId);
-        notification.setDossierId(dossierId);
-        notification.setType(type);
-        notification.setStatus(status);
-        notification.setRecipient("test@example.com");
-        notification.setSubject("Test Subject");
-        notification.setTemplateId("test-template");
-        notification.setRetryCount(0);
-        notification.setMaxRetries(3);
-        return notificationRepository.save(notification);
+        if (dossierId != null) {
+            Dossier dossier = testDataBuilder.dossierBuilder()
+                    .withOrgId(orgId)
+                    .persist();
+            return testDataBuilder.notificationBuilder()
+                    .withOrgId(orgId)
+                    .withDossier(dossier)
+                    .withType(type)
+                    .withStatus(status)
+                    .withRecipient("test@example.com")
+                    .withSubject("Test Subject")
+                    .withTemplateId("test-template")
+                    .persist();
+        } else {
+            return testDataBuilder.notificationBuilder()
+                    .withOrgId(orgId)
+                    .withType(type)
+                    .withStatus(status)
+                    .withRecipient("test@example.com")
+                    .withSubject("Test Subject")
+                    .withTemplateId("test-template")
+                    .persist();
+        }
     }
 }
