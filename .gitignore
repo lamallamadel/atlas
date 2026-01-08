@@ -234,3 +234,6 @@ SETUP_NOW.md
 SETUP_COMPLETE_AGENT_INSTRUCTIONS.md
 SETUP_INSTRUCTIONS_INITIAL.md
 run-backend-setup-now.cmd
+backend-setup.cmd
+run-backend-mvn-install.ps1
+setup-backend-temp.cmd
