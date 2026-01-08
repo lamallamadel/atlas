@@ -16,7 +16,6 @@ import java.lang.annotation.Target;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @Transactional
-@ActiveProfiles("backend-e2e")
 @Tag("backend-e2e")
 public @interface BackendE2ETest {
 }

@@ -18,7 +18,7 @@ spring:
   flyway:
     enabled: true
     # Standard migrations + optional E2E seed data (kept isolated to this profile).
-    locations: classpath:db/migration,classpath:db/e2e
+    locations: classpath:db/migration,classpath:db/migration-postgres,classpath:db/e2e
     placeholders:
       json_type: JSONB
 
