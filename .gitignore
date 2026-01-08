@@ -241,6 +241,7 @@ setup-repo-final.ps1
 backend/setup-install-noproxy.cmd
 backend/install-simple.cmd
 backend/install-via-node.js
+backend/install-with-custom-settings.cmd
 install-backend-via-npm.js
 SETUP_STATUS_FINAL.md
 INITIAL_SETUP_COMPLETE.md

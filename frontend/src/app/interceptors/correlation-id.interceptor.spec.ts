@@ -4,22 +4,26 @@ import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CorrelationIdInterceptor } from './correlation-id.interceptor';
+import { AuthService } from '../services/auth.service';
 
 describe('CorrelationIdInterceptor', () => {
   let httpMock: HttpTestingController;
   let httpClient: HttpClient;
   let router: jasmine.SpyObj<Router>;
   let snackBar: jasmine.SpyObj<MatSnackBar>;
+  let authServiceSpy: jasmine.SpyObj<AuthService>;
 
   beforeEach(() => {
     const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     const snackBarSpy = jasmine.createSpyObj('MatSnackBar', ['open']);
+    const authSpy = jasmine.createSpyObj('AuthService', ['handleSessionExpired']);
 
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
       providers: [
         { provide: Router, useValue: routerSpy },
         { provide: MatSnackBar, useValue: snackBarSpy },
+        { provide: AuthService, useValue: authSpy },
         {
           provide: HTTP_INTERCEPTORS,
           useClass: CorrelationIdInterceptor,
@@ -32,6 +36,7 @@ describe('CorrelationIdInterceptor', () => {
     httpClient = TestBed.inject(HttpClient);
     router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
     snackBar = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+    authServiceSpy = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
   });
 
   afterEach(() => {
@@ -59,7 +64,7 @@ describe('CorrelationIdInterceptor', () => {
       const req = httpMock.expectOne('/api/test');
       req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
 
-      expect(router.navigate).toHaveBeenCalledWith(['/login']);
+      expect(authServiceSpy.handleSessionExpired).toHaveBeenCalled();
       expect(snackBar.open).toHaveBeenCalledWith(
         'Session expirée. Veuillez vous reconnecter.',
         'Fermer',
