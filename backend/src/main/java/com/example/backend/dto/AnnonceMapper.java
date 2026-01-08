@@ -21,7 +21,7 @@ public class AnnonceMapper {
         annonce.setPhotos(request.getPhotos());
         annonce.setRulesJson(request.getRulesJson());
         annonce.setMeta(request.getMeta());
-        annonce.setStatus(AnnonceStatus.DRAFT);
+        annonce.setStatus(AnnonceStatus.ACTIVE);
         return annonce;
     }
 

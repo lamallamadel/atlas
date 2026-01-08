@@ -399,4 +399,60 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
     }
+
+    @Test
+    void businessRuleValidation_CreateDossierWithDraftAnnonce_Returns400() throws Exception {
+        AnnonceCreateRequest annonceRequest = new AnnonceCreateRequest();
+        annonceRequest.setTitle("Draft Property");
+        annonceRequest.setDescription("This property is still being prepared");
+        annonceRequest.setCategory("Apartment");
+        annonceRequest.setType(AnnonceType.RENT);
+        annonceRequest.setCity("Marseille");
+        annonceRequest.setPrice(BigDecimal.valueOf(1200));
+        annonceRequest.setCurrency("EUR");
+
+        MvcResult annonceResult = mockMvc.perform(
+                withTenantHeaders(post("/api/v1/annonces")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(annonceRequest)), TENANT_ID))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andReturn();
+
+        AnnonceResponse annonceResponse = objectMapper.readValue(
+                annonceResult.getResponse().getContentAsString(),
+                AnnonceResponse.class);
+        Long annonceId = annonceResponse.getId();
+
+        AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
+        updateRequest.setTitle("Draft Property");
+        updateRequest.setDescription("This property is still being prepared");
+        updateRequest.setCategory("Apartment");
+        updateRequest.setType(AnnonceType.RENT);
+        updateRequest.setCity("Marseille");
+        updateRequest.setPrice(BigDecimal.valueOf(1200));
+        updateRequest.setCurrency("EUR");
+        updateRequest.setStatus(AnnonceStatus.DRAFT);
+
+        mockMvc.perform(
+                withTenantHeaders(put("/api/v1/annonces/" + annonceId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)), TENANT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("DRAFT"));
+
+        DossierCreateRequest dossierRequest = new DossierCreateRequest();
+        dossierRequest.setAnnonceId(annonceId);
+        dossierRequest.setLeadPhone("+33688990011");
+        dossierRequest.setLeadName("Another Test User");
+        dossierRequest.setSource(DossierSource.PHONE);
+
+        mockMvc.perform(
+                withTenantHeaders(post("/api/v1/dossiers")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dossierRequest)), TENANT_ID))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.detail").value("Cannot create dossier with DRAFT annonce"));
+    }
 }
