@@ -1,9 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!--
-Maven Toolchains Configuration for Java 17
-Copy this file to ~/.m2/toolchains.xml (or %USERPROFILE%\.m2\toolchains.xml on Windows)
-Modify the jdkHome path to match your Java 17 installation
--->
 <toolchains>
     <toolchain>
         <type>jdk</type>
