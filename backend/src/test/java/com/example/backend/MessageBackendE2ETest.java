@@ -14,6 +14,7 @@ import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +54,16 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         messageRepository.deleteAll();
         auditEventRepository.deleteAll();
         dossierRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

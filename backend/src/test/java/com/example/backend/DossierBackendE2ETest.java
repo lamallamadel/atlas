@@ -18,6 +18,7 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.DossierStatusHistoryRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +54,17 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         dossierRepository.deleteAll();
         statusHistoryRepository.deleteAll();
         partiePrenanteRepository.deleteAll();
         annonceRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

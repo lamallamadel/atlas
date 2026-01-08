@@ -15,6 +15,7 @@ import com.example.backend.utils.BackendE2ETestDataBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,15 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         notificationRepository.deleteAll();
         reset(mailSender);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

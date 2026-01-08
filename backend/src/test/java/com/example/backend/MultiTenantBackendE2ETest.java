@@ -51,8 +51,15 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     public void setUp() {
+        // Delete all seed data and test data for fresh state
         auditEventRepository.deleteAll();
         dossierRepository.deleteAll();
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    public void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

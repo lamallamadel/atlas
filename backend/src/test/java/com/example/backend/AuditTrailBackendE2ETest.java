@@ -83,6 +83,7 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         auditEventRepository.deleteAll();
         activityRepository.deleteAll();
         consentementRepository.deleteAll();
@@ -95,6 +96,7 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
 
     @AfterEach
     void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
         TenantContext.clear();
     }
 

@@ -279,3 +279,5 @@ backend/setup-maven-install.cmd
 setup-repo-initial.cmd
 setup-initial.js
 run-maven.js
+mvn-java17-wrapper.cmd
+setup-maven-install.cmd

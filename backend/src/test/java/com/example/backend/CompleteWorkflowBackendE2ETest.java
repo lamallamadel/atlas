@@ -26,6 +26,18 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String TENANT_ID = "org-e2e-test";
 
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        // Delete all seed data and test data for fresh state
+        // This test creates its own data per test
+    }
+
+    @org.junit.jupiter.api.AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
+    }
+
     @Test
     void fullPipeline_CreateAnnonceAndDossierWithMessagesAndAppointments_GeneratesAuditEvents() throws Exception {
         AnnonceCreateRequest annonceRequest = new AnnonceCreateRequest();

@@ -16,6 +16,7 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +51,16 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         auditEventRepository.deleteAll();
         consentementRepository.deleteAll();
         dossierRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

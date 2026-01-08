@@ -14,6 +14,7 @@ import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.AuditEventRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,15 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         auditEventRepository.deleteAll();
         annonceRepository.deleteAll();
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     // ========== POST /api/v1/annonces Tests ==========

@@ -11,6 +11,7 @@ import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +48,12 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         messageRepository.deleteAll();
         dossierRepository.deleteAll();
         configRepository.deleteAll();
 
+        // Create fresh known test data
         WhatsAppProviderConfig config1 = new WhatsAppProviderConfig();
         config1.setOrgId(ORG_ID_1);
         config1.setApiKeyEncrypted("encrypted-api-key-1");
@@ -70,6 +73,12 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         config2.setBusinessAccountId("business-account-id-2");
         config2.setEnabled(true);
         configRepository.save(config2);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

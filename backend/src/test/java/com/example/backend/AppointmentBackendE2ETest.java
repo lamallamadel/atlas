@@ -53,12 +53,14 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         appointmentRepository.deleteAll();
         auditEventRepository.deleteAll();
         dossierRepository.deleteAll();
 
         testDataBuilder.withOrgId(ORG_ID);
 
+        // Create fresh known test data
         testDossier = testDataBuilder.dossierBuilder()
                 .withOrgId(ORG_ID)
                 .withLeadPhone("+33612345678")
@@ -70,6 +72,8 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @AfterEach
     void tearDown() {
         testDataBuilder.deleteAllTestData();
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     // ========== POST /api/v1/appointments - Create Tests ==========

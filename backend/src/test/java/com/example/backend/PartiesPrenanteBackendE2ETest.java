@@ -50,14 +50,17 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         partiePrenanteRepository.deleteAll();
         dossierRepository.deleteAll();
         auditEventRepository.deleteAll();
+        // Set tenant context for tests
         TenantContext.setOrgId(TENANT_ID);
     }
 
     @AfterEach
     void tearDown() {
+        // Clear tenant context to prevent tenant ID leakage between tests
         TenantContext.clear();
     }
 

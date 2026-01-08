@@ -42,6 +42,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
+        // Delete all seed data and test data for fresh state
         annonceRepository.deleteAll();
         
         logger = (Logger) LoggerFactory.getLogger("com.example.backend");
@@ -55,6 +56,8 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
         if (logger != null && listAppender != null) {
             logger.detachAppender(listAppender);
         }
+        // Clear tenant context to prevent tenant ID leakage between tests
+        com.example.backend.util.TenantContext.clear();
     }
 
     @Test

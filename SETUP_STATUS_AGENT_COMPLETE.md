@@ -1,82 +1,124 @@
-# Setup Status
+# Repository Setup Status
 
-## Completed ✓
+## Completed Steps
 
-### Frontend
-- **npm install**: ✓ Successfully installed all dependencies (1,188 packages)
-- Location: `frontend/`
-- Ready to run:
-  - `npm start` - Start dev server
-  - `npm run build` - Build for production
-  - `npm test` - Run tests
-  - `npm run lint` - Lint code
+### 1. Frontend Setup ✓
+- **Status**: COMPLETE
+- **Action Taken**: Installed npm dependencies in `frontend/` directory
+- **Result**: 1188 packages installed successfully
+- **Location**: `frontend/node_modules/`
+- **Notes**: Some warnings about deprecated packages (non-critical)
 
-## Manual Setup Required
+### 2. Created Maven Wrapper Script ✓
+- **Status**: COMPLETE  
+- **File Created**: `mvn-java17-wrapper.cmd`
+- **Purpose**: Wrapper script that sets JAVA_HOME to Java 17 before running Maven commands
+- **Usage**: Can be used instead of `mvn` command
 
-### Backend
-The backend requires Java 17, which necessitates setting the JAVA_HOME environment variable. Due to security restrictions, automated environment variable modification is not permitted.
+## Incomplete Steps (Security Restrictions)
 
-**To complete backend setup, run ONE of the following:**
+### 3. Backend Maven Setup ⚠️
+- **Status**: NOT COMPLETED (blocked by security policy)
+- **Issue**: Cannot modify environment variables or execute scripts due to security restrictions
+- **Required**: JAVA_HOME must be set to `C:\Environement\Java\jdk-17.0.5.8-hotspot`
 
-#### Option 1: Using the setup script (Recommended)
+### 4. Playwright Browser Installation ⚠️
+- **Status**: NOT COMPLETED (blocked by security policy)
+- **Required for**: Frontend E2E tests
+
+## Manual Steps Required
+
+### Backend Setup
+
+You need to run Maven with Java 17. Choose one of these options:
+
+**Option 1: Use the created wrapper script**
 ```cmd
-cd backend
-setup.cmd
+mvn-java17-wrapper.cmd clean install -f backend\pom.xml -t backend\toolchains.xml
 ```
 
-#### Option 2: Using PowerShell wrapper
+**Option 2: Set JAVA_HOME in your session (PowerShell)**
 ```powershell
-cd backend
-.\run-maven.ps1
-```
-
-#### Option 3: Using the mvn17 wrapper from root
-```cmd
-.\mvn17.cmd -f backend\pom.xml clean install
-```
-
-#### Option 4: Manual command
-```powershell
-cd backend
-# Set Java 17 temporarily for this session
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-mvn clean install -gs settings.xml
+mvn clean install -f backend\pom.xml -t backend\toolchains.xml
 ```
 
-Any of these commands will:
-- Set Java 17 as the Java version
-- Download all Maven dependencies
-- Build the Spring Boot application
-- Takes approximately 3-5 minutes on first run
+**Option 3: Set JAVA_HOME in your session (Command Prompt)**
+```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+cd backend
+mvn clean install
+```
+
+**Option 4: Use existing helper script**
+```powershell
+.\install-backend-helper.ps1
+```
+
+### Playwright Browsers
+
+After backend setup, install Playwright browsers for E2E tests:
+
+```powershell
+cd frontend
+npx playwright install
+```
+
+Or:
+```cmd
+cd frontend
+npm exec playwright install
+```
 
 ## Verification
 
-After backend setup completes, verify with:
-```powershell
-# Backend
-cd backend
-mvn test                # Run backend tests
-mvn clean package       # Build backend
+After completing manual steps, verify the setup:
 
-# Frontend (already working)
-cd frontend
-npm test                # Run frontend tests
-npm run build           # Build frontend
-npm run lint            # Lint frontend
+### Backend
+```powershell
+# Check if build was successful
+Test-Path backend\target\backend.jar
 ```
+
+### Frontend
+```powershell
+# Check if dependencies are installed
+Test-Path frontend\node_modules
+```
+
+### Playwright
+```powershell
+# Run a simple E2E test
+cd frontend
+npm run e2e:fast
+```
+
+## Environment Information
+
+- **Current Java (default)**: Java 8 (1.8.0_401)
+- **Required Java**: Java 17 (located at C:\Environement\Java\jdk-17.0.5.8-hotspot)
+- **Maven**: 3.8.6
+- **npm**: 8.19.2
+- **Node.js**: Available (version not checked)
+
+## Files Created
+
+1. `mvn-java17-wrapper.cmd` - Maven wrapper with Java 17 environment
+2. `frontend/node_modules/` - Installed npm dependencies (1188 packages)
+3. Updated `.gitignore` - Added new wrapper scripts
 
 ## Next Steps
 
-1. Complete backend setup using one of the options above
-2. Start infrastructure (optional): `cd infra && docker-compose up -d`
-3. Start development:
-   - Backend: `cd backend && mvn spring-boot:run`
-   - Frontend: `cd frontend && npm start`
+1. Manually run backend Maven installation using one of the options above
+2. Install Playwright browsers
+3. Verify setup by running tests:
+   - Backend: `mvn test` (from backend directory with Java 17)
+   - Frontend: `npm test` (from frontend directory)
+   - E2E: `npm run e2e:fast` (from frontend directory)
 
 ## Notes
 
-- Frontend is ready to use immediately
-- Backend setup is a one-time operation
-- Java 17 is available at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- Maven 3.8.6 is available at: `C:\Environement\maven-3.8.6`
-- Helper scripts are available in the backend directory for convenience
+- The security policy prevents direct execution of scripts and modification of environment variables
+- All necessary files and wrappers have been created for manual execution
+- Frontend is fully set up and ready
+- Backend requires one manual command with proper JAVA_HOME
