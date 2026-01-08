@@ -242,6 +242,81 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
             .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void createAnnonce_WithActiveStatusWithoutRequiredFields_ReturnsBadRequest() throws Exception {
+        // Given - ACTIVE status requires title, price, and city
+        AnnonceCreateRequest request = new AnnonceCreateRequest();
+        request.setTitle("Test Title");
+        request.setStatus(AnnonceStatus.ACTIVE);
+        // Missing price and city
+
+        // When & Then - Should return 400 Bad Request
+        mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                .header(TENANT_HEADER, ORG1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createAnnonce_WithActiveStatusWithoutPrice_ReturnsBadRequest() throws Exception {
+        // Given - ACTIVE status requires price
+        AnnonceCreateRequest request = new AnnonceCreateRequest();
+        request.setTitle("Test Title");
+        request.setCity("Paris");
+        request.setStatus(AnnonceStatus.ACTIVE);
+        // Missing price
+
+        // When & Then - Should return 400 Bad Request
+        mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                .header(TENANT_HEADER, ORG1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createAnnonce_WithActiveStatusWithoutCity_ReturnsBadRequest() throws Exception {
+        // Given - ACTIVE status requires city
+        AnnonceCreateRequest request = new AnnonceCreateRequest();
+        request.setTitle("Test Title");
+        request.setPrice(BigDecimal.valueOf(100.00));
+        request.setStatus(AnnonceStatus.ACTIVE);
+        // Missing city
+
+        // When & Then - Should return 400 Bad Request
+        mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                .header(TENANT_HEADER, ORG1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createAnnonce_WithActiveStatusWithAllRequiredFields_ReturnsCreated() throws Exception {
+        // Given - ACTIVE status with all required fields
+        AnnonceCreateRequest request = new AnnonceCreateRequest();
+        request.setTitle("Test Title");
+        request.setCity("Paris");
+        request.setPrice(BigDecimal.valueOf(100.00));
+        request.setStatus(AnnonceStatus.ACTIVE);
+
+        // When & Then - Should succeed
+        mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                .header(TENANT_HEADER, ORG1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isCreated())
+            .andExpect(jsonPath("$.status").value("ACTIVE"))
+            .andExpect(jsonPath("$.title").value("Test Title"))
+            .andExpect(jsonPath("$.city").value("Paris"))
+            .andExpect(jsonPath("$.price").value(100.00));
+    }
+
     // ========== GET /{id} with Tenant Filtering Tests ==========
 
     @Test
@@ -839,7 +914,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
                 .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         // Then - Verify audit event
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -926,7 +1001,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    void deleteAnnonce_AsAdmin_Returns200Ok() throws Exception {
+    void deleteAnnonce_AsAdmin_Returns204NoContent() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Admin Delete Test", "Paris");
         annonce = annonceRepository.save(annonce);
@@ -935,7 +1010,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
                 .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk());
+            .andExpect(status().isNoContent());
 
         // Verify annonce is deleted
         assertThat(annonceRepository.findById(annonce.getId())).isEmpty();

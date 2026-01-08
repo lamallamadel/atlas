@@ -1,5 +1,6 @@
 package com.example.backend.dto;
 
+import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -37,6 +38,8 @@ public class AnnonceCreateRequest {
 
     @Size(max = 3, message = "Currency must not exceed 3 characters")
     private String currency;
+
+    private AnnonceStatus status;
 
     private List<String> photos;
 
@@ -141,5 +144,13 @@ public class AnnonceCreateRequest {
 
     public void setRulesJson(Map<String, Object> rulesJson) {
         this.rulesJson = rulesJson;
+    }
+
+    public AnnonceStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AnnonceStatus status) {
+        this.status = status;
     }
 }
