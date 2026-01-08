@@ -21,6 +21,10 @@ public class PartiePrenanteCreateRequest {
     @NotBlank(message = "Role is required")
     private String role;
 
+    @Schema(description = "Full name", example = "John Doe", nullable = true)
+    @Size(max = 255, message = "Name must not exceed 255 characters")
+    private String name;
+
     @Schema(description = "First name", example = "John", nullable = true)
     @Size(max = 255, message = "First name must not exceed 255 characters")
     private String firstName;
@@ -63,6 +67,14 @@ public class PartiePrenanteCreateRequest {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getFirstName() {

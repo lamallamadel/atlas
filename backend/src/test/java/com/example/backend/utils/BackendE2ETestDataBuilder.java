@@ -450,6 +450,11 @@ public class BackendE2ETestDataBuilder {
             return this;
         }
 
+        public PartiePrenanteBuilder withFullName(String name) {
+            partiePrenante.setName(name);
+            return this;
+        }
+
         public PartiePrenanteBuilder withFirstName(String firstName) {
             partiePrenante.setFirstName(firstName);
             return this;
@@ -494,6 +499,13 @@ public class BackendE2ETestDataBuilder {
             if (partiePrenante.getDossier() == null) {
                 throw new IllegalStateException("PartiePrenanteEntity must have a Dossier set before persisting");
             }
+            
+            if (partiePrenante.getName() == null) {
+                if (partiePrenante.getFirstName() != null && partiePrenante.getLastName() != null) {
+                    partiePrenante.setName(partiePrenante.getFirstName() + " " + partiePrenante.getLastName());
+                }
+            }
+            
             partiePrenante.setOrgId(resolveOrgId(explicitOrgId));
             PartiePrenanteEntity saved = partiePrenanteRepository.save(build());
             createdPartiePrenanteIds.add(saved.getId());

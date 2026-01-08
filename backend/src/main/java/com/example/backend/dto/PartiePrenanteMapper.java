@@ -10,6 +10,7 @@ public class PartiePrenanteMapper {
     public PartiePrenanteEntity toEntity(PartiePrenanteCreateRequest request) {
         PartiePrenanteEntity entity = new PartiePrenanteEntity();
         entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
+        entity.setName(request.getName());
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
         entity.setEmail(request.getEmail());
@@ -27,6 +28,7 @@ public class PartiePrenanteMapper {
     public PartiePrenanteEntity toEntity(PartiePrenanteRequest request) {
         PartiePrenanteEntity entity = new PartiePrenanteEntity();
         entity.setRole(request.getRole());
+        entity.setName(request.getName());
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
         entity.setEmail(request.getEmail());
@@ -38,6 +40,7 @@ public class PartiePrenanteMapper {
 
     public void updateEntity(PartiePrenanteEntity entity, PartiePrenanteUpdateRequest request) {
         entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
+        entity.setName(request.getName());
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
         entity.setEmail(request.getEmail());
@@ -51,6 +54,7 @@ public class PartiePrenanteMapper {
         response.setId(entity.getId());
         response.setDossierId(entity.getDossier() != null ? entity.getDossier().getId() : null);
         response.setRole(entity.getRole());
+        response.setName(entity.getName());
         response.setFirstName(entity.getFirstName());
         response.setLastName(entity.getLastName());
         response.setEmail(entity.getEmail());

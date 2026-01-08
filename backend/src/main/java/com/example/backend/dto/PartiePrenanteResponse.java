@@ -18,6 +18,9 @@ public class PartiePrenanteResponse {
     @Schema(description = "Role of the partie prenante", example = "BUYER")
     private PartiePrenanteRole role;
 
+    @Schema(description = "Full name", example = "John Doe", nullable = true)
+    private String name;
+
     @Schema(description = "First name", example = "John", nullable = true)
     private String firstName;
 
@@ -67,6 +70,14 @@ public class PartiePrenanteResponse {
 
     public void setRole(PartiePrenanteRole role) {
         this.role = role;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getFirstName() {

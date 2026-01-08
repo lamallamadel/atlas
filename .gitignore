@@ -276,3 +276,6 @@ run-maven-setup.js
 backend/Run-MavenInstall.ps1
 setup-initial.cmd
 backend/setup-maven-install.cmd
+setup-repo-initial.cmd
+setup-initial.js
+run-maven.js

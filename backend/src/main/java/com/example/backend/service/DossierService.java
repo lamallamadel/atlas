@@ -73,7 +73,12 @@ public class DossierService {
         dossier.setOrgId(orgId);
         
         if (dossier.getParties() != null && !dossier.getParties().isEmpty()) {
-            dossier.getParties().forEach(party -> party.setOrgId(orgId));
+            dossier.getParties().forEach(party -> {
+                party.setOrgId(orgId);
+                if (party.getName() == null && party.getFirstName() != null && party.getLastName() != null) {
+                    party.setName(party.getFirstName() + " " + party.getLastName());
+                }
+            });
         }
         
         Dossier saved = dossierRepository.save(dossier);

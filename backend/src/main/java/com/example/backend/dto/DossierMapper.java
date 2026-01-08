@@ -33,6 +33,9 @@ public class DossierMapper {
 
         if (request.getInitialParty() != null) {
             PartiePrenanteEntity party = partiePrenanteMapper.toEntity(request.getInitialParty());
+            if (party.getName() == null && party.getFirstName() != null && party.getLastName() != null) {
+                party.setName(party.getFirstName() + " " + party.getLastName());
+            }
             dossier.addParty(party);
         }
 

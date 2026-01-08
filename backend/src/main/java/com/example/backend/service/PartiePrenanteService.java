@@ -38,6 +38,8 @@ public class PartiePrenanteService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
+        validateNameFields(request);
+
         Dossier dossier = dossierRepository.findById(request.getDossierId())
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
 
@@ -49,8 +51,22 @@ public class PartiePrenanteService {
         entity.setOrgId(orgId);
         entity.setDossier(dossier);
 
+        if (entity.getName() == null && entity.getFirstName() != null && entity.getLastName() != null) {
+            entity.setName(entity.getFirstName() + " " + entity.getLastName());
+        }
+
         PartiePrenanteEntity saved = partiePrenanteRepository.save(entity);
         return partiePrenanteMapper.toResponse(saved);
+    }
+
+    private void validateNameFields(PartiePrenanteCreateRequest request) {
+        boolean hasName = request.getName() != null && !request.getName().trim().isEmpty();
+        boolean hasFirstName = request.getFirstName() != null && !request.getFirstName().trim().isEmpty();
+        boolean hasLastName = request.getLastName() != null && !request.getLastName().trim().isEmpty();
+
+        if (!hasName && !(hasFirstName && hasLastName)) {
+            throw new IllegalArgumentException("Either name or both firstName and lastName must be provided");
+        }
     }
 
     @Transactional

@@ -34,6 +34,9 @@ public class PartiePrenanteEntity extends BaseEntity {
     @Column(name = "role", nullable = false, length = 50)
     private PartiePrenanteRole role;
 
+    @Column(name = "name", length = 255)
+    private String name;
+
     @Column(name = "first_name", length = 255)
     private String firstName;
 
@@ -83,6 +86,14 @@ public class PartiePrenanteEntity extends BaseEntity {
 
     public void setRole(PartiePrenanteRole role) {
         this.role = role;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getFirstName() {
