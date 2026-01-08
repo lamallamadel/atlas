@@ -209,6 +209,8 @@ package.json
 package-lock.json
 SETUP_STATUS_AGENT.md
 setup-repo-init.ps1
+backend-install.ps1
+setup-backend-init.ps1
 mvn-java17.cmd
 setup-maven.js
 setup-backend-isolated.ps1

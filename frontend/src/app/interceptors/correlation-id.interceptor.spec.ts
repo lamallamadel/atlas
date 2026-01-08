@@ -63,6 +63,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/test');
       req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+      httpMock.verify();
 
       expect(authServiceSpy.handleSessionExpired).toHaveBeenCalled();
       expect(snackBar.open).toHaveBeenCalledWith(
@@ -86,6 +87,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/protected');
       req.flush({ detail: 'Token expired' }, { status: 401, statusText: 'Unauthorized' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Session expirée. Veuillez vous reconnecter.',
@@ -106,6 +108,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/admin');
       req.flush('Forbidden', { status: 403, statusText: 'Forbidden' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         "Accès refusé. Vous n'avez pas les droits nécessaires.",
@@ -125,6 +128,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/data');
       req.flush({ detail: 'Invalid data' }, { status: 400, statusText: 'Bad Request' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Invalid data',
@@ -143,6 +147,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/item/999');
       req.flush({ detail: 'Resource not found' }, { status: 404, statusText: 'Not Found' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Resource not found',
@@ -161,6 +166,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/resource');
       req.flush({ detail: 'Resource already exists' }, { status: 409, statusText: 'Conflict' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Resource already exists',
@@ -179,6 +185,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/test');
       req.flush({ detail: 'Internal error occurred' }, { status: 500, statusText: 'Internal Server Error' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Internal error occurred',
@@ -197,6 +204,7 @@ describe('CorrelationIdInterceptor', () => {
 
       const req = httpMock.expectOne('/api/data');
       req.flush('Bad Request', { status: 400, statusText: 'Bad Request' });
+      httpMock.verify();
 
       expect(snackBar.open).toHaveBeenCalledWith(
         'Requête invalide. Veuillez vérifier votre saisie.',
