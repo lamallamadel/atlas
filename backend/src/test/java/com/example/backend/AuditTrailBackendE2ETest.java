@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -527,7 +528,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                                 .param("entityType", "DOSSIER")
                                 .param("entityId", dossier.getId().toString())
                                 .param("page", "0")
-                                .param("size", "10"),
+                                .param("size", "10")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -563,7 +565,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                                 .param("entityType", "DOSSIER")
                                 .param("entityId", dossier.getId().toString())
                                 .param("page", "0")
-                                .param("size", "2"),
+                                .param("size", "2")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -579,7 +582,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                                 .param("entityType", "DOSSIER")
                                 .param("entityId", dossier.getId().toString())
                                 .param("page", "1")
-                                .param("size", "2"),
+                                .param("size", "2")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -624,7 +628,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                         get("/api/v1/audit-events")
                                 .param("dossierId", dossier.getId().toString())
                                 .param("page", "0")
-                                .param("size", "20"),
+                                .param("size", "20")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -674,7 +679,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                         get("/api/v1/audit-events")
                                 .param("dossierId", dossier1.getId().toString())
                                 .param("page", "0")
-                                .param("size", "20"),
+                                .param("size", "20")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -707,7 +713,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", org1Dossier.getId().toString()),
+                                .param("entityId", org1Dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -723,7 +730,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", org2Dossier.getId().toString()),
+                                .param("entityId", org2Dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_2, "test-user", "PRO"))),
                         ORG_2
                 )
         )
@@ -747,7 +755,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", org1Dossier.getId().toString()),
+                                .param("entityId", org1Dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_2, "test-user", "PRO"))),
                         ORG_2
                 )
         )
@@ -772,7 +781,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(
                 withTenantHeaders(
                         get("/api/v1/audit-events")
-                                .param("dossierId", dossier.getId().toString()),
+                                .param("dossierId", dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -782,7 +792,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(
                 withTenantHeaders(
                         get("/api/v1/audit-events")
-                                .param("dossierId", dossier.getId().toString()),
+                                .param("dossierId", dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_2, "test-user", "PRO"))),
                         ORG_2
                 )
         )
@@ -949,7 +960,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", dossier.getId().toString()),
+                                .param("entityId", dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -982,7 +994,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
                                 .param("entityId", dossier.getId().toString())
-                                .param("sort", "createdAt,asc"),
+                                .param("sort", "createdAt,asc")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -996,7 +1009,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     void getAuditEvents_WithoutRequiredParams_ReturnsBadRequest() throws Exception {
         mockMvc.perform(
                 withTenantHeaders(
-                        get("/api/v1/audit-events"),
+                        get("/api/v1/audit-events")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -1008,7 +1022,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(
                 withTenantHeaders(
                         get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER"),
+                                .param("entityType", "DOSSIER")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -1020,7 +1035,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         mockMvc.perform(
                 withTenantHeaders(
                         get("/api/v1/audit-events")
-                                .param("entityId", "123"),
+                                .param("entityId", "123")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -1131,7 +1147,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                         get("/api/v1/audit-events")
                                 .param("dossierId", dossier.getId().toString())
                                 .param("page", "0")
-                                .param("size", "50"),
+                                .param("size", "50")
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -1171,7 +1188,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", org1Dossier.getId().toString()),
+                                .param("entityId", org1Dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -1182,7 +1200,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "ANNONCE")
-                                .param("entityId", org2Annonce.getId().toString()),
+                                .param("entityId", org2Annonce.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_1, "test-user", "PRO"))),
                         ORG_1
                 )
         )
@@ -1193,7 +1212,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 withTenantHeaders(
                         get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", org2Dossier.getId().toString()),
+                                .param("entityId", org2Dossier.getId().toString())
+                                .with(jwt().jwt(createMockJwt(ORG_2, "test-user", "PRO"))),
                         ORG_2
                 )
         )
