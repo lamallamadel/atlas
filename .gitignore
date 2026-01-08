@@ -261,3 +261,9 @@ setup-backend-via-node.js
 # Setup scripts created during initial repo setup
 setup-maven-with-java17.ps1
 backend/run-setup-now.cmd
+
+# Initial setup helper scripts
+run-backend-install-temp.ps1
+setup-backend.cmd
+setup-maven.js
+package.json

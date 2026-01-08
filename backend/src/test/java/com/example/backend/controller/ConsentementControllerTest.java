@@ -8,6 +8,7 @@ import com.example.backend.entity.enums.AuditAction;
 import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.ConsentementRepository;
@@ -91,6 +92,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
         request.setMeta(customMeta);
 
@@ -137,6 +139,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.SMS);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.PENDING);
 
         mockMvc.perform(withHeaders(post("/api/v1/consentements")
@@ -152,6 +155,7 @@ class ConsentementControllerTest {
     void create_MissingDossierId_Returns400() throws Exception {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(withHeaders(post("/api/v1/consentements")
@@ -165,6 +169,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(999L);
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(withHeaders(post("/api/v1/consentements")
@@ -183,6 +188,7 @@ class ConsentementControllerTest {
 
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(withHeaders(post("/api/v1/consentements")
@@ -202,6 +208,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
 
         mockMvc.perform(withHeaders(post("/api/v1/consentements")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -214,6 +221,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(1L);
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(post("/api/v1/consentements")
@@ -230,6 +238,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(1L);
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(post("/api/v1/consentements").with(anonymous())
@@ -252,6 +261,7 @@ class ConsentementControllerTest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(withHeaders(post("/api/v1/consentements")
@@ -272,6 +282,7 @@ class ConsentementControllerTest {
         consentement.setOrgId(ORG_ID);
         consentement.setDossier(dossier);
         consentement.setChannel(ConsentementChannel.EMAIL);
+        consentement.setConsentType(ConsentementType.MARKETING);
         consentement.setStatus(ConsentementStatus.GRANTED);
         consentement = consentementRepository.save(consentement);
 
@@ -303,6 +314,7 @@ class ConsentementControllerTest {
         consent1.setOrgId(ORG_ID);
         consent1.setDossier(dossier);
         consent1.setChannel(ConsentementChannel.EMAIL);
+        consent1.setConsentType(ConsentementType.MARKETING);
         consent1.setStatus(ConsentementStatus.GRANTED);
         consentementRepository.save(consent1);
 
@@ -310,6 +322,7 @@ class ConsentementControllerTest {
         consent2.setOrgId(ORG_ID);
         consent2.setDossier(dossier);
         consent2.setChannel(ConsentementChannel.SMS);
+        consent2.setConsentType(ConsentementType.MARKETING);
         consent2.setStatus(ConsentementStatus.PENDING);
         consentementRepository.save(consent2);
 
@@ -334,6 +347,7 @@ class ConsentementControllerTest {
         consent1.setOrgId(ORG_ID);
         consent1.setDossier(dossier);
         consent1.setChannel(ConsentementChannel.EMAIL);
+        consent1.setConsentType(ConsentementType.MARKETING);
         consent1.setStatus(ConsentementStatus.GRANTED);
         consentementRepository.save(consent1);
 
@@ -341,6 +355,7 @@ class ConsentementControllerTest {
         consent2.setOrgId(ORG_ID);
         consent2.setDossier(dossier);
         consent2.setChannel(ConsentementChannel.SMS);
+        consent2.setConsentType(ConsentementType.MARKETING);
         consent2.setStatus(ConsentementStatus.PENDING);
         consentementRepository.save(consent2);
 
@@ -348,6 +363,7 @@ class ConsentementControllerTest {
         consent3.setOrgId(ORG_ID);
         consent3.setDossier(dossier);
         consent3.setChannel(ConsentementChannel.EMAIL);
+        consent3.setConsentType(ConsentementType.MARKETING);
         consent3.setStatus(ConsentementStatus.DENIED);
         consentementRepository.save(consent3);
 
@@ -373,6 +389,7 @@ class ConsentementControllerTest {
         consent1.setOrgId(ORG_ID);
         consent1.setDossier(dossier);
         consent1.setChannel(ConsentementChannel.EMAIL);
+        consent1.setConsentType(ConsentementType.MARKETING);
         consent1.setStatus(ConsentementStatus.GRANTED);
         consent1 = consentementRepository.save(consent1);
 
@@ -382,6 +399,7 @@ class ConsentementControllerTest {
         consent2.setOrgId(ORG_ID);
         consent2.setDossier(dossier);
         consent2.setChannel(ConsentementChannel.SMS);
+        consent2.setConsentType(ConsentementType.MARKETING);
         consent2.setStatus(ConsentementStatus.PENDING);
         consent2 = consentementRepository.save(consent2);
 
@@ -398,5 +416,24 @@ class ConsentementControllerTest {
         mockMvc.perform(withHeaders(get("/api/v1/consentements")
                         .param("dossierId", "999")))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void create_MissingConsentType_Returns400() throws Exception {
+        Dossier dossier = new Dossier();
+        dossier.setOrgId(ORG_ID);
+        dossier.setLeadPhone("+33612345678");
+        dossier.setStatus(DossierStatus.NEW);
+        dossier = dossierRepository.save(dossier);
+
+        ConsentementCreateRequest request = new ConsentementCreateRequest();
+        request.setDossierId(dossier.getId());
+        request.setChannel(ConsentementChannel.EMAIL);
+        request.setStatus(ConsentementStatus.GRANTED);
+
+        mockMvc.perform(withHeaders(post("/api/v1/consentements")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request))))
+                .andExpect(status().isBadRequest());
     }
 }

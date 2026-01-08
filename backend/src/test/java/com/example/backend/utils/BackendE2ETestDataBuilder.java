@@ -651,6 +651,7 @@ public class BackendE2ETestDataBuilder {
         public ConsentementBuilder() {
             consentement.setChannel(randomEnum(ConsentementChannel.class));
             consentement.setStatus(randomEnum(ConsentementStatus.class));
+            consentement.setConsentType(ConsentementType.MARKETING);
         }
 
         public ConsentementBuilder withOrgId(String orgId) {
@@ -674,6 +675,11 @@ public class BackendE2ETestDataBuilder {
 
         public ConsentementBuilder withStatus(ConsentementStatus status) {
             consentement.setStatus(status);
+            return this;
+        }
+
+        public ConsentementBuilder withConsentType(ConsentementType consentType) {
+            consentement.setConsentType(consentType);
             return this;
         }
 

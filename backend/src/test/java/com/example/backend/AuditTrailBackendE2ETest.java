@@ -429,6 +429,7 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         ConsentementCreateRequest createRequest = new ConsentementCreateRequest();
         createRequest.setDossierId(dossier.getId());
         createRequest.setChannel(ConsentementChannel.EMAIL);
+        createRequest.setConsentType(ConsentementType.MARKETING);
         createRequest.setStatus(ConsentementStatus.GRANTED);
         ConsentementResponse consentement = consentementService.create(createRequest);
 
@@ -1064,6 +1065,7 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         ConsentementCreateRequest consentReq = new ConsentementCreateRequest();
         consentReq.setDossierId(dossier.getId());
         consentReq.setChannel(ConsentementChannel.EMAIL);
+        consentReq.setConsentType(ConsentementType.MARKETING);
         consentReq.setStatus(ConsentementStatus.GRANTED);
         consentementService.create(consentReq);
 

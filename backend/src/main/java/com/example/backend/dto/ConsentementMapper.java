@@ -9,6 +9,7 @@ public class ConsentementMapper {
     public ConsentementEntity toEntity(ConsentementCreateRequest request) {
         ConsentementEntity consentement = new ConsentementEntity();
         consentement.setChannel(request.getChannel());
+        consentement.setConsentType(request.getConsentType());
         consentement.setStatus(request.getStatus());
         consentement.setMeta(request.getMeta());
         return consentement;
@@ -20,6 +21,7 @@ public class ConsentementMapper {
         response.setOrgId(consentement.getOrgId());
         response.setDossierId(consentement.getDossier() != null ? consentement.getDossier().getId() : null);
         response.setChannel(consentement.getChannel());
+        response.setConsentType(consentement.getConsentType());
         response.setStatus(consentement.getStatus());
         response.setMeta(consentement.getMeta());
         response.setCreatedAt(consentement.getCreatedAt());

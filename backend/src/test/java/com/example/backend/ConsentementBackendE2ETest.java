@@ -62,6 +62,7 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.SMS);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.PENDING);
 
         mockMvc.perform(withTenantHeaders(post("/api/v1/consentements"), ORG_ID, CORRELATION_ID)
@@ -89,6 +90,7 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         mockMvc.perform(withTenantHeaders(post("/api/v1/consentements"), ORG_ID, CORRELATION_ID)
@@ -111,6 +113,7 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.WHATSAPP);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.DENIED);
 
         mockMvc.perform(withTenantHeaders(post("/api/v1/consentements"), ORG_ID, CORRELATION_ID)
@@ -267,6 +270,7 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
         ConsentementCreateRequest request = new ConsentementCreateRequest();
         request.setDossierId(dossier.getId());
         request.setChannel(ConsentementChannel.EMAIL);
+        request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
         MvcResult result = mockMvc.perform(withTenantHeaders(post("/api/v1/consentements"), ORG_ID, CORRELATION_ID)
@@ -500,6 +504,21 @@ class ConsentementBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.content[2].id").value(consents.get(2).getId()))
                 .andExpect(jsonPath("$.content[3].id").value(consents.get(3).getId()))
                 .andExpect(jsonPath("$.content[4].id").value(consents.get(4).getId()));
+    }
+
+    @Test
+    void postConsentement_withoutConsentType_returnsBadRequest() throws Exception {
+        Dossier dossier = createDossier("Lead Validation", "+33600556677");
+
+        ConsentementCreateRequest request = new ConsentementCreateRequest();
+        request.setDossierId(dossier.getId());
+        request.setChannel(ConsentementChannel.EMAIL);
+        request.setStatus(ConsentementStatus.GRANTED);
+
+        mockMvc.perform(withTenantHeaders(post("/api/v1/consentements"), ORG_ID, CORRELATION_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     private Dossier createDossier(String leadName, String leadPhone) {

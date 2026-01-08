@@ -2,6 +2,7 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Map;
@@ -13,6 +14,9 @@ public class ConsentementCreateRequest {
 
     @NotNull(message = "Channel is required")
     private ConsentementChannel channel;
+
+    @NotNull(message = "Consent type is required")
+    private ConsentementType consentType;
 
     @NotNull(message = "Status is required")
     private ConsentementStatus status;
@@ -36,6 +40,14 @@ public class ConsentementCreateRequest {
 
     public void setChannel(ConsentementChannel channel) {
         this.channel = channel;
+    }
+
+    public ConsentementType getConsentType() {
+        return consentType;
+    }
+
+    public void setConsentType(ConsentementType consentType) {
+        this.consentType = consentType;
     }
 
     public ConsentementStatus getStatus() {
