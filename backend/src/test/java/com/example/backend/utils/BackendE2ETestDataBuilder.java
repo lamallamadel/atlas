@@ -502,16 +502,24 @@ public class BackendE2ETestDataBuilder {
     }
 
     public class MessageBuilder {
-        private MessageEntity message = new MessageEntity();
+        private MessageEntity message;
         private Dossier dossier;
         private String explicitOrgId = null;
 
         public MessageBuilder() {
+            initializeMessage();
+        }
+
+        private void initializeMessage() {
+            message = new MessageEntity();
             message.setDirection(randomEnum(MessageDirection.class));
             message.setChannel(randomEnum(MessageChannel.class));
             message.setContent("Test message content - " + UUID.randomUUID().toString());
             message.setTimestamp(LocalDateTime.now().minusHours(random.nextInt(24)));
             message.setProviderMessageId("msg-" + UUID.randomUUID().toString());
+            if (dossier != null) {
+                message.setDossier(dossier);
+            }
         }
 
         public MessageBuilder withOrgId(String orgId) {
@@ -564,6 +572,7 @@ public class BackendE2ETestDataBuilder {
             message.setOrgId(resolveOrgId(explicitOrgId));
             MessageEntity saved = messageRepository.save(build());
             createdMessageIds.add(saved.getId());
+            initializeMessage();
             return saved;
         }
     }

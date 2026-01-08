@@ -658,15 +658,21 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     void listMessages_FilterByEndDateOnly_ReturnsMessagesBeforeDate() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
-        createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
-        createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 5, 10, 0));
-        createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 10, 10, 0));
-        createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 15, 10, 0));
+        Long msg1 = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
+        Long msg2 = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 5, 10, 0));
+        Long msg3 = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 10, 10, 0));
+        Long msg4 = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 15, 10, 0));
+        
+        assertThat(msg1).isNotNull();
+        assertThat(msg2).isNotNull();
+        assertThat(msg3).isNotNull();
+        assertThat(msg4).isNotNull();
+        assertThat(messageRepository.count()).isEqualTo(4);
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
                                 .param("dossierId", dossier.getId().toString())
-                                .param("endDate", "2024-01-10T00:00:00"), TENANT_1))
+                                .param("endDate", "2024-01-10T10:00:00"), TENANT_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)));
     }
