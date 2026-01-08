@@ -5,12 +5,16 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointment")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@EntityListeners(AuditingEntityListener.class)
 public class AppointmentEntity extends BaseEntity {
 
     @Id
@@ -52,9 +56,11 @@ public class AppointmentEntity extends BaseEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
 
+    @LastModifiedBy
     @Column(name = "updated_by", length = 255)
     private String updatedBy;
 

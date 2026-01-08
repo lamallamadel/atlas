@@ -5,12 +5,15 @@ import com.example.backend.entity.enums.ActivityVisibility;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "activity")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@EntityListeners(AuditingEntityListener.class)
 public class ActivityEntity extends BaseEntity {
 
     @Id
@@ -40,6 +43,7 @@ public class ActivityEntity extends BaseEntity {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
 

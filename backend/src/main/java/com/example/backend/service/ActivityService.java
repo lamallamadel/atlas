@@ -13,8 +13,6 @@ import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,7 +53,7 @@ public class ActivityService {
         activity.setContent(request.getContent());
         activity.setDossier(dossier);
         activity.setVisibility(request.getVisibility());
-        activity.setCreatedBy(getCurrentUsername());
+        // createdBy is automatically set by JPA auditing
 
         ActivityEntity saved = activityRepository.save(activity);
         return activityMapper.toResponse(saved);
@@ -158,13 +156,5 @@ public class ActivityService {
         }
 
         activityRepository.delete(activity);
-    }
-
-    private String getCurrentUsername() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated()) {
-            return authentication.getName();
-        }
-        return "system";
     }
 }

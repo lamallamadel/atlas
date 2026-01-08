@@ -8,6 +8,9 @@ import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -16,6 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "dossier")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@EntityListeners(AuditingEntityListener.class)
 public class Dossier extends BaseEntity {
 
     @Id
@@ -66,9 +70,11 @@ public class Dossier extends BaseEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
 
+    @LastModifiedBy
     @Column(name = "updated_by", length = 255)
     private String updatedBy;
 

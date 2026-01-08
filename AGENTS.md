@@ -543,6 +543,110 @@ public enum MessageChannel {
 .andExpect(jsonPath("$.direction").value("INBOUND")) // Always uppercase
 ```
 
+#### E2E Test Authentication and Audit Fixes
+
+**Issue:** E2E tests were failing due to missing authentication context and audit field population issues.
+
+**Root Causes:**
+
+1. **Timestamp Format Inconsistencies:**
+   - LocalDateTime was serializing with milliseconds: `2024-01-15T10:30:00.123456`
+   - Tests expected format without milliseconds: `2024-01-15T10:30:00`
+
+2. **Missing createdBy/updatedBy Population:**
+   - Entity audit fields (createdBy, updatedBy) were not being populated automatically
+   - JPA auditing was not enabled
+
+3. **Enum Serialization Format:**
+   - Enums needed to consistently serialize as uppercase (e.g., "SCHEDULED" not "scheduled")
+
+**Solutions Implemented:**
+
+1. **Custom LocalDateTime Serializer (JacksonConfig):**
+   ```java
+   // Serializes LocalDateTime without milliseconds: 2024-01-15T10:30:00
+   private static class LocalDateTimeWithoutMillisSerializer extends JsonSerializer<LocalDateTime> {
+       private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+       
+       @Override
+       public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+           if (value == null) {
+               gen.writeNull();
+           } else {
+               gen.writeString(value.format(FORMATTER));
+           }
+       }
+   }
+   ```
+
+2. **JPA Auditing Configuration (JpaAuditingConfig):**
+   ```java
+   @Configuration
+   @EnableJpaAuditing(auditorAwareRef = "auditorProvider")
+   public class JpaAuditingConfig {
+       @Bean
+       public AuditorAware<String> auditorProvider() {
+           return new AuditorAwareImpl();
+       }
+       
+       static class AuditorAwareImpl implements AuditorAware<String> {
+           @Override
+           public Optional<String> getCurrentAuditor() {
+               Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+               if (authentication != null && authentication.getPrincipal() instanceof Jwt jwt) {
+                   return Optional.of(jwt.getSubject());
+               }
+               return Optional.of("system");
+           }
+       }
+   }
+   ```
+
+3. **Entity Annotations:**
+   - Added `@EntityListeners(AuditingEntityListener.class)` to entities with audit fields
+   - Added `@CreatedBy` and `@LastModifiedBy` annotations to audit fields
+   ```java
+   @Entity
+   @EntityListeners(AuditingEntityListener.class)
+   public class Dossier extends BaseEntity {
+       @CreatedBy
+       @Column(name = "created_by", length = 255)
+       private String createdBy;
+       
+       @LastModifiedBy
+       @Column(name = "updated_by", length = 255)
+       private String updatedBy;
+   }
+   ```
+
+**Entities with JPA Auditing Enabled:**
+- Dossier
+- Annonce
+- AppointmentEntity
+- ActivityEntity
+
+**Test Authentication Setup:**
+
+All E2E tests use `createMockJwt()` helper method from `BaseBackendE2ETest`:
+```java
+protected Jwt createMockJwt(String orgId, String subject, String... roles) {
+    return Jwt.withTokenValue("mock-token-" + orgId)
+            .header("alg", "none")
+            .claim("sub", subject)
+            .claim("org_id", orgId)
+            .claim("roles", List.of(roles))
+            .issuedAt(Instant.now())
+            .expiresAt(Instant.now().plusSeconds(3600))
+            .build();
+}
+```
+
+**Known Limitations:**
+
+- JPA auditing only works when entities are persisted through Spring Data repositories
+- Manual entity creation (e.g., in test data builders) may need explicit setCreatedBy/setUpdatedBy calls
+- Timestamp format is now locked to seconds precision; milliseconds are truncated
+
 #### Missing Test Data Issues
 
 **Symptom:**

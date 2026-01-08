@@ -10,6 +10,9 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.type.SqlTypes;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.annotation.LastModifiedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,6 +23,7 @@ import java.util.Map;
 @Entity
 @Table(name = "annonce")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
+@EntityListeners(AuditingEntityListener.class)
 public class Annonce extends BaseEntity {
 
     @Id
@@ -82,9 +86,11 @@ public class Annonce extends BaseEntity {
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
+    @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
 
+    @LastModifiedBy
     @Column(name = "updated_by", length = 255)
     private String updatedBy;
 
