@@ -622,6 +622,7 @@ public class BackendE2ETestDataBuilder {
 
     public class NotificationBuilder {
         private NotificationEntity notification = new NotificationEntity();
+        private Dossier dossier;
 
         public NotificationBuilder() {
             notification.setOrgId(defaultOrgId);
@@ -642,6 +643,18 @@ public class BackendE2ETestDataBuilder {
 
         public NotificationBuilder withOrgId(String orgId) {
             notification.setOrgId(orgId);
+            return this;
+        }
+
+        public NotificationBuilder withDossier(Dossier dossier) {
+            this.dossier = dossier;
+            notification.setDossierId(dossier.getId());
+            notification.setOrgId(dossier.getOrgId());
+            return this;
+        }
+
+        public NotificationBuilder withDossierId(Long dossierId) {
+            notification.setDossierId(dossierId);
             return this;
         }
 

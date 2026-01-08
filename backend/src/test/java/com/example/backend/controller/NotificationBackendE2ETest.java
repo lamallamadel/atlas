@@ -173,6 +173,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(ORG_ID);
+        notification.setDossierId(null);
         notification.setType(NotificationType.EMAIL);
         notification.setRecipient("success@example.com");
         notification.setSubject("Test Email");
@@ -208,6 +209,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(ORG_ID);
+        notification.setDossierId(null);
         notification.setType(NotificationType.EMAIL);
         notification.setRecipient("fail@example.com");
         notification.setSubject("Test Email");
@@ -239,6 +241,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(ORG_ID);
+        notification.setDossierId(null);
         notification.setType(NotificationType.EMAIL);
         notification.setRecipient("retry@example.com");
         notification.setSubject("Test Email");
@@ -272,6 +275,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(ORG_ID);
+        notification.setDossierId(null);
         notification.setType(NotificationType.EMAIL);
         notification.setRecipient("verify@example.com");
         notification.setSubject("Verification Email");
@@ -306,6 +310,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(ORG_ID);
+        notification.setDossierId(null);
         notification.setType(NotificationType.EMAIL);
         notification.setRecipient("template@example.com");
         notification.setSubject("Template Test");
@@ -497,6 +502,38 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.content.length()").value(0))
                 .andExpect(jsonPath("$.totalElements").value(0))
                 .andExpect(jsonPath("$.empty").value(true));
+    }
+
+    @Test
+    void getNotifications_WithGlobalNotifications_ReturnsAllIncludingGlobal() throws Exception {
+        createTestNotification(ORG_ID, null, NotificationType.EMAIL, NotificationStatus.PENDING);
+        createTestNotification(ORG_ID, null, NotificationType.SMS, NotificationStatus.SENT);
+        createTestNotification(ORG_ID, 100L, NotificationType.EMAIL, NotificationStatus.PENDING);
+
+        mockMvc.perform(
+                withTenantHeaders(get(BASE_URL), ORG_ID)
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(3))
+                .andExpect(jsonPath("$.totalElements").value(3));
+    }
+
+    @Test
+    void getNotifications_FilterByDossierId_ExcludesGlobalNotifications() throws Exception {
+        createTestNotification(ORG_ID, null, NotificationType.EMAIL, NotificationStatus.PENDING);
+        createTestNotification(ORG_ID, 100L, NotificationType.EMAIL, NotificationStatus.SENT);
+        createTestNotification(ORG_ID, 100L, NotificationType.SMS, NotificationStatus.PENDING);
+        createTestNotification(ORG_ID, 200L, NotificationType.EMAIL, NotificationStatus.PENDING);
+
+        mockMvc.perform(
+                withTenantHeaders(get(BASE_URL), ORG_ID)
+                        .param("dossierId", "100")
+        )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.length()").value(2))
+                .andExpect(jsonPath("$.content[0].dossierId").value(100))
+                .andExpect(jsonPath("$.content[1].dossierId").value(100))
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     private NotificationEntity createTestNotification(String orgId, Long dossierId, 

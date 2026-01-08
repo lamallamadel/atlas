@@ -244,3 +244,10 @@ backend/install-via-node.js
 install-backend-via-npm.js
 SETUP_STATUS_FINAL.md
 INITIAL_SETUP_COMPLETE.md
+mavenrc_pre.bat
+run-setup.cmd
+setup-environment.ps1
+setup-backend.js
+backend/package.json
+backend-output.txt
+backend-error.txt
