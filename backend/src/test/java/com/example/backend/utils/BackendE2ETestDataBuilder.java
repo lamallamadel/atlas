@@ -401,6 +401,7 @@ public class BackendE2ETestDataBuilder {
                 PartiePrenanteEntity party = partiePrenanteBuilder()
                     .withDossier(saved)
                     .withRole(initialPartyRole)
+                    .withName("Initial", "Party")
                     .persist();
             }
 
@@ -414,9 +415,11 @@ public class BackendE2ETestDataBuilder {
         private String explicitOrgId = null;
 
         public PartiePrenanteBuilder() {
+            String defaultFirstName = randomString("FirstName");
+            String defaultLastName = randomString("LastName");
             partiePrenante.setRole(randomEnum(PartiePrenanteRole.class));
-            partiePrenante.setFirstName(randomString("FirstName"));
-            partiePrenante.setLastName(randomString("LastName"));
+            partiePrenante.setFirstName(defaultFirstName);
+            partiePrenante.setLastName(defaultLastName);
             partiePrenante.setEmail(randomEmail());
             partiePrenante.setPhone(randomPhone());
             partiePrenante.setAddress(random.nextInt(100) + " Test Avenue");
@@ -438,6 +441,12 @@ public class BackendE2ETestDataBuilder {
 
         public PartiePrenanteBuilder withRole(PartiePrenanteRole role) {
             partiePrenante.setRole(role);
+            return this;
+        }
+
+        public PartiePrenanteBuilder withName(String firstName, String lastName) {
+            partiePrenante.setFirstName(firstName);
+            partiePrenante.setLastName(lastName);
             return this;
         }
 
@@ -472,6 +481,12 @@ public class BackendE2ETestDataBuilder {
         }
 
         public PartiePrenanteEntity build() {
+            if (partiePrenante.getFirstName() == null && partiePrenante.getLastName() == null) {
+                String defaultFirstName = randomString("FirstName");
+                String defaultLastName = randomString("LastName");
+                partiePrenante.setFirstName(defaultFirstName);
+                partiePrenante.setLastName(defaultLastName);
+            }
             return partiePrenante;
         }
 

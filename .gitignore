@@ -141,6 +141,7 @@ frontend/frontend.log
 *-temp.*
 temp-*.*
 setup-temp.*
+setup-maven.cmd
 java17.cmd
 setup-temp.cmd
 setup-backend.ps1
