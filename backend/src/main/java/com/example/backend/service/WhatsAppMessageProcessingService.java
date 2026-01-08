@@ -127,7 +127,7 @@ public class WhatsAppMessageProcessingService {
 
     private Dossier findOrCreateDossier(String phoneNumber, String contactName, String orgId) {
         List<DossierStatus> excludedStatuses = List.of(DossierStatus.WON, DossierStatus.LOST);
-        List<Dossier> existingDossiers = dossierRepository.findByLeadPhoneAndStatusNotIn(phoneNumber, excludedStatuses);
+        List<Dossier> existingDossiers = dossierRepository.findByLeadPhoneAndOrgIdAndStatusNotIn(phoneNumber, orgId, excludedStatuses);
 
         if (!existingDossiers.isEmpty()) {
             Dossier dossier = existingDossiers.get(0);

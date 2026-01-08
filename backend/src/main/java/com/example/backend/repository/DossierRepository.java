@@ -19,6 +19,8 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     @Query("SELECT DISTINCT d FROM Dossier d WHERE d.leadPhone = :phone AND d.status NOT IN :excludedStatuses")
     List<Dossier> findByLeadPhoneAndStatusNotIn(@Param("phone") String phone, @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
     
+    @Query("SELECT DISTINCT d FROM Dossier d WHERE d.leadPhone = :phone AND d.orgId = :orgId AND d.status NOT IN :excludedStatuses")
+    List<Dossier> findByLeadPhoneAndOrgIdAndStatusNotIn(@Param("phone") String phone, @Param("orgId") String orgId, @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
 
     Long countByStatusIn(List<DossierStatus> statuses);
 }
