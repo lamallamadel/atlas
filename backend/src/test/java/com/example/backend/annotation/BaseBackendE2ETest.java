@@ -5,8 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpHeaders;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -82,5 +87,38 @@ public abstract class BaseBackendE2ETest {
                 .andExpect(status().is(expectedStatus))
                 .andExpect(jsonPath("$.status").value(expectedStatus))
                 .andExpect(jsonPath("$.detail").exists());
+    }
+
+    /**
+     * Creates a mock JWT token for testing with the specified organization ID.
+     * The JWT includes necessary claims for authentication and authorization.
+     *
+     * @param orgId The organization ID to include in the JWT claims
+     * @return A mock JWT token
+     */
+    protected Jwt createMockJwt(String orgId) {
+        return createMockJwt(orgId, "test-user", "ADMIN");
+    }
+
+    /**
+     * Creates a mock JWT token for testing with specified organization ID, subject, and roles.
+     * The JWT includes necessary claims for authentication and authorization.
+     *
+     * @param orgId The organization ID to include in the JWT claims
+     * @param subject The subject (user ID) to include in the JWT
+     * @param roles The roles to assign to the user
+     * @return A mock JWT token
+     */
+    protected Jwt createMockJwt(String orgId, String subject, String... roles) {
+        List<String> rolesList = List.of(roles);
+        return Jwt.withTokenValue("mock-token-" + orgId)
+                .header("alg", "none")
+                .claim("sub", subject)
+                .claim("org_id", orgId)
+                .claim("roles", rolesList)
+                .claim("realm_access", Map.of("roles", rolesList))
+                .issuedAt(Instant.now())
+                .expiresAt(Instant.now().plusSeconds(3600))
+                .build();
     }
 }

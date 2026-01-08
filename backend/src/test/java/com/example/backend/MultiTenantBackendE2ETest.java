@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -63,6 +64,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setNotes("Test dossier");
 
         MvcResult result1 = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -77,6 +79,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
                 DossierResponse.class);
 
         MvcResult result2 = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_002)))
                         .header(TENANT_HEADER, ORG_002)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -104,6 +107,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33687654321");
 
         MvcResult createResult = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -116,11 +120,13 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
                 DossierResponse.class);
 
         mockMvc.perform(get("/api/v1/dossiers/" + created.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_002)))
                         .header(TENANT_HEADER, ORG_002)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/api/v1/dossiers/" + created.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                 .andExpect(status().isOk())
@@ -131,6 +137,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
     @Test
     public void testMissingOrgIdHeaderReturns400WithProblemDetails() throws Exception {
         mockMvc.perform(get("/api/v1/dossiers/1")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().contentType(MediaType.APPLICATION_PROBLEM_JSON))
@@ -148,6 +155,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33600000000");
 
         mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -157,6 +165,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         assertThat(TenantContext.getOrgId()).isNull();
 
         mockMvc.perform(get("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_002)))
                         .header(TENANT_HEADER, ORG_002)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                 .andExpect(status().isOk());
@@ -238,6 +247,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request1.setLeadPhone("+33700000001");
 
         MvcResult result1 = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -254,6 +264,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request2.setLeadPhone("+33700000002");
 
         MvcResult result2 = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_002)))
                         .header(TENANT_HEADER, ORG_002)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -305,6 +316,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request1.setLeadPhone("+33800000001");
 
         MvcResult result1 = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -321,6 +333,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request2.setLeadPhone("+33800000002");
 
         mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_002)))
                         .header(TENANT_HEADER, ORG_002)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -369,6 +382,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33900000000");
 
         MvcResult createResult = mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -381,11 +395,13 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
                 DossierResponse.class);
 
         mockMvc.perform(get("/api/v1/dossiers/" + created.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_002)))
                         .header(TENANT_HEADER, ORG_002)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(get("/api/v1/dossiers/" + (created.getId() + 9999))
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                 .andExpect(status().isNotFound());
@@ -400,6 +416,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33100000000");
 
         mockMvc.perform(post("/api/v1/dossiers")
+                        .with(jwt().jwt(createMockJwt(ORG_001)))
                         .header(TENANT_HEADER, ORG_001)
                         .header(CORRELATION_ID_HEADER, "test-correlation-id")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -410,6 +427,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         try {
             mockMvc.perform(get("/api/v1/dossiers/99999")
+                            .with(jwt().jwt(createMockJwt(ORG_002)))
                             .header(TENANT_HEADER, ORG_002)
                             .header(CORRELATION_ID_HEADER, "test-correlation-id"))
                     .andExpect(status().isNotFound());

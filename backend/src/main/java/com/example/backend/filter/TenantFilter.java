@@ -16,6 +16,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
 
+/**
+ * Tenant isolation filter that extracts the X-Org-Id header and sets it in TenantContext.
+ * 
+ * This filter runs at HIGHEST_PRECEDENCE to ensure it executes before the Spring Security
+ * filter chain. This is critical because:
+ * 1. It needs to extract the X-Org-Id header before security validation
+ * 2. It sets up the TenantContext that is used throughout the request
+ * 3. It ensures proper cleanup in a finally block, even if security checks fail
+ * 
+ * The X-Org-Id header is mandatory for all /api/** endpoints (except webhooks).
+ * Missing or empty X-Org-Id header results in HTTP 400 Bad Request.
+ */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class TenantFilter extends OncePerRequestFilter {
