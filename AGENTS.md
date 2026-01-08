@@ -443,3 +443,190 @@ If E2E tests fail because the backend doesn't start:
    cd backend
    mvn spring-boot:run -Dspring-boot.run.profiles=test
    ```
+
+#### Timestamp Format Mismatches
+
+**Symptom:**
+```
+java.lang.AssertionError: JSON path "$.createdAt" expected:<2024-01-15T10:30:00> but was:<2024-01-15T10:30:00.123456>
+```
+or
+```
+Expected timestamp format: 2024-06-15T10:00:00
+Actual timestamp format: 2024-06-15T10:00:00.0
+```
+
+**Solution:**
+
+The application uses ISO-8601 format for LocalDateTime serialization. A JacksonConfig class has been added to ensure consistent timestamp formatting:
+
+```java
+// backend/src/main/java/com/example/backend/config/JacksonConfig.java
+@Configuration
+public class JacksonConfig {
+    @Bean
+    @Primary
+    public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
+        ObjectMapper objectMapper = builder.createXmlMapper(false).build();
+        objectMapper.registerModule(new JavaTimeModule());
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        objectMapper.disable(SerializationFeature.WRITE_DATE_TIMESTAMPS_AS_NANOSECONDS);
+        return objectMapper;
+    }
+}
+```
+
+**Best Practices for Tests:**
+- Use `startsWith()` matcher for timestamps: `.andExpect(jsonPath("$.createdAt").value(startsWith("2024-01-15T10:30")))`
+- Or use `exists()` matcher when exact timestamp isn't critical: `.andExpect(jsonPath("$.createdAt").exists())`
+- Avoid comparing exact timestamps with nanosecond precision
+
+#### Enum Serialization Issues
+
+**Symptom:**
+```
+Expected: "SCHEDULED"
+Actual: "scheduled" or "Scheduled"
+```
+or
+```
+Cannot deserialize value of type `AppointmentStatus` from String "scheduled"
+```
+
+**Solution:**
+
+Enums are serialized using their `name()` method (uppercase) by default. The JacksonConfig ensures consistent enum handling:
+
+```java
+// Use name() method for enum serialization (not toString())
+objectMapper.disable(SerializationFeature.WRITE_ENUMS_USING_TO_STRING);
+objectMapper.disable(DeserializationFeature.READ_ENUMS_USING_TO_STRING);
+```
+
+**Enum Definitions:**
+
+Enums should be defined with simple uppercase constants:
+```java
+public enum AppointmentStatus {
+    SCHEDULED,
+    COMPLETED,
+    CANCELLED,
+    NO_SHOW
+}
+```
+
+If an enum needs a custom value field for database storage or external APIs, it should not override `toString()`:
+```java
+public enum MessageChannel {
+    EMAIL("email"),
+    SMS("sms"),
+    WHATSAPP("whatsapp");
+    
+    private final String value;
+    
+    MessageChannel(String value) {
+        this.value = value;
+    }
+    
+    public String getValue() {
+        return value;
+    }
+    
+    // No toString() override - Jackson will use name() for JSON serialization
+}
+```
+
+**Test Assertions:**
+```java
+.andExpect(jsonPath("$.status").value("SCHEDULED"))  // Always uppercase
+.andExpect(jsonPath("$.channel").value("EMAIL"))     // Always uppercase
+.andExpect(jsonPath("$.direction").value("INBOUND")) // Always uppercase
+```
+
+#### Missing Test Data Issues
+
+**Symptom:**
+```
+jakarta.persistence.EntityNotFoundException: Dossier not found with id: 123
+```
+or
+```
+org.springframework.dao.DataIntegrityViolationException: could not execute statement [Referential integrity constraint violation]
+```
+
+**Solution:**
+
+Use the `BackendE2ETestDataBuilder` consistently to create test data:
+
+```java
+@Autowired
+private BackendE2ETestDataBuilder testDataBuilder;
+
+@BeforeEach
+void setUp() {
+    testDataBuilder.withOrgId(ORG_ID);
+    
+    // Create test data with proper relationships
+    Dossier dossier = testDataBuilder.dossierBuilder()
+        .withOrgId(ORG_ID)
+        .withLeadPhone("+33612345678")
+        .withStatus(DossierStatus.NEW)
+        .persist();
+    
+    // Use the created dossier in subsequent tests
+    AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
+        .withDossier(dossier)  // Pass the actual dossier object
+        .withStatus(AppointmentStatus.SCHEDULED)
+        .persist();
+}
+
+@AfterEach
+void tearDown() {
+    testDataBuilder.deleteAllTestData();
+}
+```
+
+**Common Mistakes to Avoid:**
+1. Creating entities directly without using the builder (bypasses orgId and tenant context)
+2. Not calling `.persist()` on the builder
+3. Forgetting to set required foreign keys (e.g., dossier for appointments)
+4. Not cleaning up test data in @AfterEach hooks
+5. Using hardcoded IDs that don't exist in the database
+
+**Data Builder Features:**
+- Automatic orgId assignment from context or default
+- Foreign key relationship management
+- Automatic cleanup tracking
+- Random data generation for non-essential fields
+- Thread-safe for parallel test execution
+
+#### H2 vs PostgreSQL Dialect Differences
+
+**Symptom:**
+Tests pass with H2 but fail with PostgreSQL or vice versa.
+
+**Common Differences:**
+1. **Case Sensitivity**: PostgreSQL is case-sensitive, H2 can be configured either way
+2. **NULL Ordering**: PostgreSQL and H2 handle NULL differently in ORDER BY
+3. **JSON Types**: PostgreSQL uses JSONB, H2 uses JSON
+4. **Sequence Generation**: Different ID generation strategies
+
+**Solution:**
+
+The test profiles are configured to handle these differences:
+
+```yaml
+# application-backend-e2e-h2.yml
+spring:
+  datasource:
+    url: jdbc:h2:mem:e2edb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+  flyway:
+    placeholders:
+      json_type: JSON
+```
+
+**Best Practices:**
+- Run tests with both profiles before committing: `mvn verify -Pbackend-e2e-h2 && mvn verify -Pbackend-e2e-postgres`
+- Use database-agnostic SQL in migrations
+- Avoid database-specific functions in queries
+- Use Hibernate's `@JdbcTypeCode` for portable type mapping
