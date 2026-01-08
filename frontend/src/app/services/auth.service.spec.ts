@@ -83,7 +83,7 @@ describe('AuthService', () => {
     service.logout();
 
     expect(localStorage.getItem('auth_token')).toBeNull();
-    expect(router.navigate).toHaveBeenCalledWith(['/login']);
+    expect(router.navigate).toHaveBeenCalledWith(['/login'], { replaceUrl: true });
     expect(oauthService.logOut).toHaveBeenCalled();
   });
 });
