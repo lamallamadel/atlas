@@ -26,6 +26,13 @@ spring:
         jwt:
           issuer-uri: mock
 
+  task:
+    scheduling:
+      enabled: false
+    execution:
+      pool:
+        core-size: 1
+        max-size: 1
 
 logging:
   level:
