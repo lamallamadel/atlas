@@ -4,6 +4,7 @@ import com.example.backend.entity.NotificationEntity;
 import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
 import com.example.backend.repository.NotificationRepository;
+import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -109,7 +110,17 @@ public class NotificationService {
             log.error("Failed to send notification ID: {}", notification.getId(), e);
             
             notification.setRetryCount(notification.getRetryCount() + 1);
-            notification.setErrorMessage(e.getMessage());
+            
+            // Check if the exception or its cause is a MessagingException (JavaMailException)
+            String errorMessage;
+            if (e instanceof MessagingException || (e.getCause() instanceof MessagingException)) {
+                MessagingException mailException = e instanceof MessagingException ? 
+                    (MessagingException) e : (MessagingException) e.getCause();
+                errorMessage = "Failed to send email: " + mailException.getMessage();
+            } else {
+                errorMessage = e.getMessage();
+            }
+            notification.setErrorMessage(errorMessage);
             
             if (notification.getRetryCount() >= notification.getMaxRetries()) {
                 notification.setStatus(NotificationStatus.FAILED);

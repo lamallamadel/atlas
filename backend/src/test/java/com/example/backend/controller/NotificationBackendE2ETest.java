@@ -13,6 +13,7 @@ import com.example.backend.repository.NotificationRepository;
 import com.example.backend.service.NotificationService;
 import com.example.backend.utils.BackendE2ETestDataBuilder;
 import com.fasterxml.jackson.core.type.TypeReference;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -210,7 +211,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
     void processPendingNotifications_WithFailedEmail_TransitionsToFailedStatus() throws Exception {
         MimeMessage mockMessage = mock(MimeMessage.class);
         when(mailSender.createMimeMessage()).thenReturn(mockMessage);
-        doThrow(new RuntimeException("SMTP connection failed")).when(mailSender).send(any(MimeMessage.class));
+        doThrow(new MessagingException("SMTP connection failed")).when(mailSender).send(any(MimeMessage.class));
 
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(ORG_ID);

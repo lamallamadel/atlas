@@ -34,23 +34,18 @@ public class JavaMailEmailProvider implements EmailProvider {
 
     @Override
     public void send(NotificationEntity notification) throws Exception {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            helper.setFrom(fromEmail);
-            helper.setTo(notification.getRecipient());
-            helper.setSubject(notification.getSubject() != null ? notification.getSubject() : "Notification");
+        helper.setFrom(fromEmail);
+        helper.setTo(notification.getRecipient());
+        helper.setSubject(notification.getSubject() != null ? notification.getSubject() : "Notification");
 
-            String htmlContent = renderTemplate(notification.getTemplateId(), notification.getVariables());
-            helper.setText(htmlContent, true);
+        String htmlContent = renderTemplate(notification.getTemplateId(), notification.getVariables());
+        helper.setText(htmlContent, true);
 
-            mailSender.send(message);
-            log.info("Email sent successfully to: {}", notification.getRecipient());
-        } catch (MessagingException e) {
-            log.error("Failed to send email to: {}", notification.getRecipient(), e);
-            throw new Exception("Failed to send email", e);
-        }
+        mailSender.send(message);
+        log.info("Email sent successfully to: {}", notification.getRecipient());
     }
 
     private String renderTemplate(String templateId, Map<String, Object> variables) {
