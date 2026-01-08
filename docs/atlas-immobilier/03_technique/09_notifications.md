@@ -7,6 +7,7 @@
 - `docs/atlas-immobilier/02_fonctionnel/02_regles_metier.md`  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`  
 - `WHATSAPP_INTEGRATION.md` (racine repo)
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 ## Objectif
 
@@ -15,6 +16,12 @@ Mettre en place un système **réel** d’envoi de notifications/messages (en pr
 - résilience (outbox, retry, idempotence)
 - traçabilité (audit + timeline)
 - observabilité (métriques, monitoring, alerting)
+
+## Nomenclature des événements Outbox
+
+Les **types d’événements** émis vers l’outbox sont des codes techniques distincts des référentiels métier.
+Convention : préfixe `EVT_` (ex: `EVT_COOP_CALL_FOR_FUNDS`).
+Ne pas confondre avec les codes de référentiels (ex: `COOP_GROUP_FUNDING_OPEN`).
 
 Ce document décrit l’architecture et les contrats attendus pour attaquer le marché.
 
@@ -159,7 +166,7 @@ Voir également : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
 - `GET /api/v1/outbound/messages/{id}`  
   Retourne détails + statut + tentatives.
 
-- `GET /api/v1/outbound/messages?dossierId=...`  
+- `GET /api/v1/outbound/messages?dossierId=`  
   Listing par dossier.
 
 - `POST /api/v1/outbound/messages/{id}/retry` (ops/admin)  
@@ -203,3 +210,37 @@ Voir également : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
   - unit (policy/validation)
   - integration (DB outbox + worker)
   - E2E (parcours dossier + envoi WhatsApp)
+
+---
+
+## 6) Cas d’usage — Coop Habitat (TO-BE)
+
+> Source of truth : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.
+
+### 6.1 Templates WhatsApp (exemples)
+- `EVT_COOP_CALL_FOR_FUNDS` : appel de fonds (montant, échéance, référence plan/version)
+- `EVT_COOP_PAYMENT_REMINDER` : rappel J-3/J-1
+- `EVT_COOP_PAYMENT_LATE` : retard + pénalité
+- `EVT_COOP_PV_PUBLISHED` : PV / décision publiée
+- `EVT_COOP_ALLOCATION_PROPOSED` : proposition d’allocation (rang, lot, délai contestation)
+- `EVT_COOP_ALLOCATION_ASSIGNED` : allocation attribuée
+- `EVT_COOP_PROJECT_MILESTONE` : jalon projet (PERMITS/BUILDING/DELIVERY/HANDOVER)
+- `EVT_COOP_STATUS_CHANGE` : changement de statut group/projet
+
+### 6.2 Règles d’envoi (politiques)
+- Consentement WHATSAPP requis (`GRANTED`) — deny by default.
+- Idempotence : clé `(org_id, template_code, entity_type, entity_id, logical_event_id)`.
+- Scheduling : rappels J-3/J-1, relances J+1/J+7 (selon gouvernance).
+- Transparence : le message référence le plan/version (plan_id + version).
+
+### 6.3 Outbox events (exemples)
+- `EVT_COOP_CONTRIBUTION_DUE_CREATED`
+- `EVT_COOP_CONTRIBUTION_OVERDUE`
+- `EVT_COOP_ALLOCATION_VALIDATED`
+- `EVT_COOP_PROJECT_MILESTONE_UPDATED`
+- `EVT_COOP_DOCUMENT_PUBLISHED`
+
+Chaque event :
+- crée une entrée outbox,
+- est envoyé par le worker,
+- produit un `MESSAGE_LOG` (timeline) + audit “NOTIFICATION_SENT/FAILED”.

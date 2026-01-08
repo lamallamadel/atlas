@@ -42,3 +42,6 @@ Cette version consolide le **MVP Week 1 → Week 3** (fondations + CRUD + sécur
 3) Définir l'org dans le navigateur : `localStorage.setItem('org_id','ORG1')` (ou `ORG2`).
 
 Les détails (headers, rôles, obtention du token, isolation tenant) sont décrits dans `03_technique/04_security_multi_tenancy.md`.
+
+## Extension (TO-BE) — Coop Habitat
+Voir `02_fonctionnel/04_module_coop_habitat.md`.

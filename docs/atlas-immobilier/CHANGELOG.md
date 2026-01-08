@@ -12,7 +12,7 @@
 - Sécurisation des endpoints `'/api/**'` (actuator + swagger autorisés).
 - Multi-tenancy : header `X-Org-Id` obligatoire sur les endpoints API + `TenantContext` + filtre Hibernate `orgIdFilter` activé à chaque requête.
 - Tests : couverture des cas `401`/`403`, validation du `TenantFilter` et tests d’isolation cross-tenant sur services Annonce/Dossier.
-- Frontend : interceptor HTTP ajoutant `Authorization: Bearer ...` et `X-Org-Id` (depuis `localStorage`) + écran de login par token (dev).
+- Frontend : interceptor HTTP ajoutant `Authorization: Bearer <token>` + `X-Org-Id` (depuis `localStorage`) + écran de login par token (dev).
 
 ## Points restant « Advanced CRM » (spécification prête, implémentation à venir)
 - Endpoints + UI : **messages**, **consentements**, **audit read-only**, **appointments**, **workflow transitions**.

@@ -5,6 +5,7 @@
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/UAT_SCENARIOS.md`
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 ## Messagerie / activité
 1. En tant qu’agent, je peux enregistrer un **message entrant/sortant** associé à un Dossier (canal EMAIL/SMS/PHONE/WHATSAPP) pour conserver l’historique.
@@ -30,5 +31,15 @@
 13. En tant que manager, je paramètre les règles de transition (version future).
 
 ## Reporting & notifications
-14. En tant que manager, je visualise un **funnel** (NEW→QUALIFIED→WON/LOST), délais moyens, et attribution des sources.
+14. En tant que manager, je visualise un **funnel** (CRM_NEW→CRM_QUALIFIED→WON/LOST), délais moyens, et attribution des sources.
 15. En tant qu’agent, je reçois des notifications (email/sms) lors d’événements clés (nouveau lead, RDV, changement de statut).
+
+## Coop Habitat (extension TO-BE)
+
+16. En tant que responsable de coop, je crée un **groupement** avec des règles (FIFO, indexation, pénalités) et je publie les documents (statuts, PV).
+17. En tant que responsable, j’ajoute des **membres** avec un rang FIFO et je valide leur statut (KYC light).
+18. En tant que membre, je consulte mon **échéancier** et je dépose un justificatif de cotisation (preuve).
+19. En tant que responsable, je confirme/rejette une cotisation et je vois un **ledger** complet (transparence).
+20. En tant que responsable, je lance une **allocation de lot** (FIFO + éligibilité à jour) et je valide par PV.
+21. En tant que membre, je reçois des notifications WhatsApp (appel de fonds, rappel, allocation, jalons projet).
+22. En tant qu’auditeur/manager, je consulte l’audit et la timeline du groupement (preuves, décisions, changements).

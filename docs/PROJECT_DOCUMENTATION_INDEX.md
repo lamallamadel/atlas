@@ -7,6 +7,7 @@
 - `docs/PROJECT_STATUS.md`  
 - `docs/MVP_ROADMAP.md`  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 Ce document est l’index de navigation de la documentation. Il référence les documents “source of truth” et évite la duplication.
 
@@ -59,3 +60,6 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 
 - État d’avancement : `docs/atlas-immobilier/05_roadmap/00_etat_avancement_mvp.md`
 - Roadmap (vue détaillée) : `docs/MVP_ROADMAP.md`
+
+## Extension (TO-BE)
+- Coop Habitat : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`

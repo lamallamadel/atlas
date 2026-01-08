@@ -52,3 +52,14 @@ Ce document décrit **uniquement** l’état réel du projet (ce qui est présen
 ## Références
 - Contrat API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
 - Workflow dossier : `docs/atlas-immobilier/03_technique/06_workflow_dossier_state_machine.md`
+
+## Extension TO-BE — Module Coop Habitat
+
+- **Statut** : non implémenté (spécifié)
+- **Doc source** : `02_fonctionnel/04_module_coop_habitat.md`
+- **Dépendances** :
+  - Référentiels/workflows modulables (caseType/statusCode)
+  - Notifications outbound (Choix B) pour appels de fonds et jalons
+  - Modèle documents (PV/justificatifs) et audit
+
+Objectif : attaquer un segment “groupement/cooperative” avec une V1 déclarative (preuves) avant paiement intégré.

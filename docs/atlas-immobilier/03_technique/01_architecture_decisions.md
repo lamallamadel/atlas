@@ -27,3 +27,16 @@
 **Choix** : service dédié `DossierWorkflowService` (transition validation) plutôt que patch arbitraire.
 - Avantages : cohérence, automatisations (notifications, scoring), UI dynamique.
 - Contraintes : maintenir une matrice de transitions + règles contextuelles.
+
+## Décision E — Bounded contexts (CRM vs Coop Habitat)
+**Choix** : intégrer “Coop Habitat” comme un **bounded context** séparé (tables + services dédiés) tout en réutilisant les briques transverses :
+- multi-tenant (`org_id`), audit, timeline,
+- notifications outbound (outbox/worker),
+- référentiels/workflows modulables.
+
+- Avantages : évite de déformer le CRM, limite la complexité, facilite l’évolutivité (paiements V2).
+- Contraintes : définir clairement les frontières (pas de mélange “Dossier” et “Groupement” sans lien explicite).
+
+Docs :
+- `02_fonctionnel/04_module_coop_habitat.md`
+- `03_technique/09_notifications.md`

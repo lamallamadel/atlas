@@ -7,6 +7,7 @@
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
 - `docs/atlas-immobilier/03_technique/09_notifications.md`  
 - `docs/atlas-immobilier/03_technique/05_audit_logging_design.md`
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 Ce document centralise les règles applicables **à tous les métiers** (vente, location, mandat, projet) afin d’éviter des divergences.
 
@@ -21,9 +22,9 @@ Ce document centralise les règles applicables **à tous les métiers** (vente, 
   Référence : `03_referentiels_workflows_modulables.md`
 
 ### Politiques obligatoires
-- `CLOSED_WON` et `CLOSED_LOST` sont terminaux (override admin possible)
-- Passage vers `CLOSED_LOST` impose `LOSS_REASON`
-- Passage vers `CLOSED_WON` impose `WON_REASON`
+- `CRM_CLOSED_WON` et `CRM_CLOSED_LOST` sont terminaux (override admin possible)
+- Passage vers `CRM_CLOSED_LOST` impose `LOSS_REASON`
+- Passage vers `CRM_CLOSED_WON` impose `WON_REASON`
 
 ## 2) Consentement & communications (STRICT — market-ready)
 
@@ -70,3 +71,34 @@ Référence : `docs/atlas-immobilier/03_technique/04_security_multi_tenancy.md`
 Politiques :
 - Toutes les opérations core (dossier, statut, message, rdv, consentement) génèrent un audit event.
 - Les changements de statut génèrent status_history + activity `STATUS_CHANGE`.
+
+## 6) Coop Habitat (TO-BE) — règles de gouvernance & cotisation
+
+> **Périmètre** : module “Coop Habitat” (groupement).  
+> **Source of truth** : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.
+
+### 6.1 FIFO d’allocation (et non FIFO de livraison)
+- Le rang FIFO détermine la **priorité d’attribution** d’un lot.
+- La livraison dépend des jalons du projet (`COOP_PROJECT`) ; un lot peut être “attribué” avant d’être livrable.
+
+### 6.2 Éligibilité à l’allocation (cut-off)
+- Un membre est éligible à l’allocation si :
+  - `member_status=ACTIVE`,
+  - contributions à jour à la date de cut-off (ex: toutes les échéances <= cut-off confirmées),
+  - absence de blocage (litige / suspension), si activé par la gouvernance.
+
+### 6.3 Cotisation croissante (indexation) — règle de transparence
+- Toute formule d’indexation doit être :
+  - lisible (table d’échéances + explication),
+  - versionnée (changement de formule = nouvelle version + notification),
+  - tracée (audit + PV si décision collective).
+
+### 6.4 Preuve & audit (obligatoire)
+- Toute décision critique doit être justifiée par un document (PV/contrat) attaché et auditée :
+  - ouverture/fermeture de collecte,
+  - validation d’une allocation,
+  - exclusion/remplacement d’un membre,
+  - modification des règles financières.
+
+### 6.5 Notifications obligatoires (Choix B)
+- Appels de fonds, rappels, allocations et jalons projet déclenchent des notifications outbound (WhatsApp) via Outbox (voir `03_technique/09_notifications.md`).

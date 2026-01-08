@@ -6,12 +6,13 @@
 > **Dépendances**:  
 - `docs/01_product/03_user_journeys.md` (si/when introduit)  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 ## UAT gating (market-ready)
 
 Les scénarios ci-dessous peuvent être utilisés comme UAT complet. Pour une release “market-ready”, les scénarios **P0** doivent passer sans ambiguïté :
 
-- Parcours dossier : création → traitement → clôture (CLOSED_WON / CLOSED_LOST)
+- Parcours dossier : création → traitement → clôture (CRM_CLOSED_WON / CRM_CLOSED_LOST)
 - Transitions de statuts : transitions autorisées + historique
 - Timeline : notes + événements auto (statut / rdv / message)
 - Consentement : outbound bloqué si non GRANTED
@@ -27,7 +28,7 @@ This document describes the User Acceptance Testing (UAT) scenarios for the appl
 - [UAT-03: Create Dossier Linked to Annonce](#uat-03-create-dossier-linked-to-annonce)
 - [UAT-04: Patch Dossier Status](#uat-04-patch-dossier-status)
 - [UAT-05: Anti-Doublons Soft Warning](#uat-05-anti-doublons-soft-warning)
-- [UAT-06: Annonce ARCHIVED Validation](#uat-06-annonce-archived-validation)
+- [UAT-06: Annonce CRM_ARCHIVED Validation](#uat-06-annonce-archived-validation)
 
 ---
 
@@ -128,10 +129,10 @@ Test the creation of a new annonce through the multi-step wizard process, ensuri
 
 ### Error Scenarios to Test
 - Missing required field `orgId` → HTTP 400 with validation error
-- Missing required field `title` → HTTP 400 with validation error
-- Invalid `status` value → HTTP 400 with validation error
-- Negative `price` value → HTTP 400 with validation error
-- Negative `surface` value → HTTP 400 with validation error
+- Missing required field`title` → HTTP 400 with validation error
+- Invalid`status`value → HTTP 400 with validation error
+- Negative`price`value → HTTP 400 with validation error
+- Negative`surface`value → HTTP 400 with validation error
 
 ---
 
@@ -152,7 +153,7 @@ Test the ability to update the rulesJson field of an existing annonce, which sto
 
 #### Prerequisites
 - An existing annonce with ID (from UAT-01 or created separately)
-- Initial rulesJson: `{"pets": false, "smoking": false, "minimumLease": 12}`
+- Initial rulesJson:`{"pets": false, "smoking": false, "minimumLease": 12}`
 
 #### Steps
 1. **Get current annonce state:**
@@ -236,7 +237,7 @@ Test the ability to update the rulesJson field of an existing annonce, which sto
      "rulesJson": null
    }
    ```
-   - Verify `rulesJson` is null in response
+   - Verify `rulesJson`is null in response
 
 ### Expected Results
 - rulesJson can be updated with complex nested structures
@@ -258,7 +259,7 @@ Test the creation of a dossier (case/folder) that is linked to an existing annon
 ### Acceptance Criteria
 - User can create a dossier linked to a valid annonce
 - Dossier contains reference to the annonce ID
-- Dossier is created with NEW status by default
+- Dossier is created with CRM_NEW status by default
 - Lead information is properly stored
 - Initial party (partie prenante) can be created with the dossier
 - Dossier appears in filtered queries by annonceId
@@ -298,7 +299,7 @@ Test the creation of a dossier (case/folder) that is linked to an existing annon
    - Status code: 201 Created
    - Response contains `id`, `orgId`, `annonceId`
    - `annonceId` matches the provided value (1)
-   - `status` is "NEW" by default
+   - `status` is "CRM_NEW" by default
    - `leadPhone`, `leadName`, `leadSource` are correctly stored
    - `score` is 75
    - `source` is "WEB"
@@ -340,7 +341,7 @@ Test the creation of a dossier (case/folder) that is linked to an existing annon
 
 ### Error Scenarios to Test
 - Missing required field `orgId` → HTTP 400
-- Non-existent `annonceId` → HTTP 400 or creates dossier without annonce link (depending on validation rules)
+- Non-existent`annonceId` → HTTP 400 or creates dossier without annonce link (depending on validation rules)
 - Invalid phone format (if validated) → HTTP 400
 - Score outside 0-100 range → HTTP 400
 
@@ -362,30 +363,29 @@ Test the partial update (PATCH) operation to change only the status of a dossier
 ### Test Steps
 
 #### Prerequisites
-- An existing dossier with status "NEW" (from UAT-03)
+- An existing dossier with status "CRM_NEW" (from UAT-03)
 
 #### Steps
-1. **Get current dossier state:**
-   ```
+1. **Get current dossier state:**```
    GET /api/v1/dossiers/{id}
    ```
-   - Note current `status` ("NEW") and `updatedAt` values
+   - Note current `status` ("CRM_NEW") and `updatedAt` values
    - Note other field values (leadName, score, etc.)
 
-2. **Patch status to QUALIFIED:**
+2. **Patch status to CRM_QUALIFIED:**
    ```
    PATCH /api/v1/dossiers/{id}/status
    Content-Type: application/json
    ```
    ```json
    {
-     "status": "QUALIFIED"
+     "status": "CRM_QUALIFIED"
    }
    ```
 
 3. **Verify response:**
    - Status code: 200 OK
-   - `status` field is now "QUALIFIED"
+   - `status` field is now "CRM_QUALIFIED"
    - `updatedAt` timestamp is updated
    - All other fields remain unchanged:
      - `leadPhone` same as before
@@ -397,7 +397,7 @@ Test the partial update (PATCH) operation to change only the status of a dossier
    ```
    GET /api/v1/dossiers/{id}
    ```
-   - Verify `status` is "QUALIFIED"
+   - Verify `status` is "CRM_QUALIFIED"
    - Verify all other fields are unchanged
 
 5. **Patch status to APPOINTMENT:**
@@ -442,8 +442,7 @@ Test the partial update (PATCH) operation to change only the status of a dossier
 8. **Filter dossiers by status:**
    ```
    GET /api/v1/dossiers?status=LOST
-   ```
-   - Verify updated dossier appears in results
+   ```- Verify updated dossier appears in results
 
 ### Expected Results
 - Status can be updated independently of other fields
@@ -476,15 +475,14 @@ Test the duplicate detection system that checks for existing dossiers with the s
 ### Test Steps
 
 #### Prerequisites
-- An existing dossier with phone number "+33612345678" and status "NEW" or "QUALIFIED" (from UAT-03)
+- An existing dossier with phone number "+33612345678" and status "CRM_NEW" or "CRM_QUALIFIED" (from UAT-03)
 
 #### Steps
-1. **Verify existing dossier:**
-   ```
+1. **Verify existing dossier:**```
    GET /api/v1/dossiers?leadPhone=%2B33612345678
    ```
    - Note the ID of existing dossier
-   - Verify status is "NEW", "QUALIFIED", or "APPOINTMENT" (not LOST or WON)
+   - Verify status is "CRM_NEW", "CRM_QUALIFIED", or "APPOINTMENT" (not LOST or WON)
 
 2. **Create new dossier with same phone number:**
    ```
@@ -551,7 +549,7 @@ Test the duplicate detection system that checks for existing dossiers with the s
      "source": "WEB"
    }
    ```
-   - Verify `existingOpenDossierId` points to second dossier (not the LOST one)
+   - Verify `existingOpenDossierId`points to second dossier (not the LOST one)
    - Or no warning if only LOST dossiers exist
 
 ### Expected Results
@@ -569,18 +567,18 @@ Test the duplicate detection system that checks for existing dossiers with the s
 
 ---
 
-## UAT-06: Annonce ARCHIVED Validation
+## UAT-06: Annonce CRM_ARCHIVED Validation
 
 ### Description
-Test validation rules and business logic when an annonce is moved to ARCHIVED status, ensuring proper constraints and behavior.
+Test validation rules and business logic when an annonce is moved to CRM_ARCHIVED status, ensuring proper constraints and behavior.
 
 ### Acceptance Criteria
-- Annonce can be updated to ARCHIVED status
-- ARCHIVED annonces are excluded from default listings
-- ARCHIVED annonces can still be retrieved by ID
-- ARCHIVED status can be filtered explicitly
-- Attempting to create dossiers on ARCHIVED annonces fails (if validation exists)
-- Status can be changed from ARCHIVED back to other statuses (reactivation)
+- Annonce can be updated to CRM_ARCHIVED status
+- CRM_ARCHIVED annonces are excluded from default listings
+- CRM_ARCHIVED annonces can still be retrieved by ID
+- CRM_ARCHIVED status can be filtered explicitly
+- Attempting to create dossiers on CRM_ARCHIVED annonces fails (if validation exists)
+- Status can be changed from CRM_ARCHIVED back to other statuses (reactivation)
 
 ### Test Steps
 
@@ -588,58 +586,57 @@ Test validation rules and business logic when an annonce is moved to ARCHIVED st
 - An existing annonce with status "ACTIVE" (from UAT-01)
 
 #### Steps
-1. **Get current annonce:**
-   ```
+1. **Get current annonce:**```
    GET /api/v1/annonces/{id}
    ```
    - Verify current status is "ACTIVE"
 
-2. **Update status to ARCHIVED:**
+2. **Update status to CRM_ARCHIVED:**
    ```
    PUT /api/v1/annonces/{id}
    Content-Type: application/json
    ```
    ```json
    {
-     "status": "ARCHIVED"
+     "status": "CRM_ARCHIVED"
    }
    ```
 
 3. **Verify response:**
    - Status code: 200 OK
-   - `status` field is "ARCHIVED"
+   - `status` field is "CRM_ARCHIVED"
    - All other fields remain unchanged
    - `updatedAt` timestamp is updated
 
-4. **Retrieve ARCHIVED annonce by ID:**
+4. **Retrieve CRM_ARCHIVED annonce by ID:**
    ```
    GET /api/v1/annonces/{id}
    ```
    - Status code: 200 OK
-   - Annonce is returned with status "ARCHIVED"
+   - Annonce is returned with status "CRM_ARCHIVED"
    - All data is intact
 
 5. **List annonces without status filter:**
    ```
    GET /api/v1/annonces
    ```
-   - Verify ARCHIVED annonce appears (unless explicitly excluded by default)
+   - Verify CRM_ARCHIVED annonce appears (unless explicitly excluded by default)
    - Or verify it does NOT appear if default behavior excludes archived
 
 6. **List annonces with ACTIVE filter:**
    ```
    GET /api/v1/annonces?status=ACTIVE
    ```
-   - Verify ARCHIVED annonce does NOT appear in results
+   - Verify CRM_ARCHIVED annonce does NOT appear in results
 
-7. **List annonces with ARCHIVED filter:**
+7. **List annonces with CRM_ARCHIVED filter:**
    ```
-   GET /api/v1/annonces?status=ARCHIVED
+   GET /api/v1/annonces?status=CRM_ARCHIVED
    ```
-   - Verify ARCHIVED annonce appears in results
+   - Verify CRM_ARCHIVED annonce appears in results
    - Only archived annonces are returned
 
-8. **Test creating dossier on ARCHIVED annonce:**
+8. **Test creating dossier on CRM_ARCHIVED annonce:**
    ```
    POST /api/v1/dossiers
    Content-Type: application/json
@@ -678,22 +675,21 @@ Test validation rules and business logic when an annonce is moved to ARCHIVED st
     ```
     ```json
     {
-      "status": "ARCHIVED",
-      "description": "This property has been rented - ARCHIVED"
+      "status": "CRM_ARCHIVED",
+      "description": "This property has been rented - CRM_ARCHIVED"
     }
-    ```
-    - Verify both status and description are updated
+    ```- Verify both status and description are updated
     - Multiple fields can be updated simultaneously
 
 ### Expected Results
-- Annonce can be transitioned to ARCHIVED status
-- ARCHIVED annonces are properly filtered in queries
-- Direct retrieval of ARCHIVED annonces still works
-- Business rules for ARCHIVED annonces are enforced (if applicable)
+- Annonce can be transitioned to CRM_ARCHIVED status
+- CRM_ARCHIVED annonces are properly filtered in queries
+- Direct retrieval of CRM_ARCHIVED annonces still works
+- Business rules for CRM_ARCHIVED annonces are enforced (if applicable)
 - Status can be reversed (reactivation)
 
 ### Business Logic Considerations
-- Should ARCHIVED annonces accept new dossiers?
+- Should CRM_ARCHIVED annonces accept new dossiers?
 - Should existing dossiers be affected when annonce is archived?
 - Should there be a confirmation step before archiving?
 - Should archived annonces auto-close related open dossiers?
@@ -731,3 +727,14 @@ Test validation rules and business logic when an annonce is moved to ARCHIVED st
 - All scenarios should match OpenAPI/Swagger documentation
 - Document any discrepancies found during UAT
 - Update examples in API docs based on UAT findings
+
+## Scénarios UAT (TO-BE) — Coop Habitat
+
+1. **Créer un groupement** : créer group + définir règles FIFO/indexation + publier document “statuts”.
+2. **Onboard membre** : ajouter membre + rang FIFO + passage`PENDING_KYC → ACTIVE` avec pièces.
+3. **Ouvrir collecte** : `FUNDING_OPEN`, génération échéances, WhatsApp “appel de fonds”.
+4. **Déclarer contribution** : membre dépose justificatif, ledger `PENDING → CONFIRMED`.
+5. **Retard** : contribution devient `LATE`, WhatsApp “retard + pénalité”.
+6. **Créer projet + lots** : créer projet, lots A1/A2, statut `LAND_SECURED`.
+7. **Allocation FIFO** : proposer allocation (membre à jour) → valider par PV → `ASSIGNED`.
+8. **Jalon projet** : passer `PERMITS → BUILDING → DELIVERY`, notifications envoyées + timeline mise à jour.

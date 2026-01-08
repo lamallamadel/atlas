@@ -25,8 +25,8 @@ Garantir :
 ### Source d’autorités (rôles)
 Le mapping des rôles côté backend supporte deux formes de claims JWT :
 
-1) **Keycloak standard** : `realm_access.roles = ["PRO", "ADMIN", ...]`
-2) Claim simplifié : `roles = ["PRO", "ADMIN", ...]` (utile pour tests/dev)
+1) **Keycloak standard** : `realm_access.roles = ["PRO", "ADMIN", "MANAGER"]`
+2) Claim simplifié : `roles = ["PRO", "ADMIN", "MANAGER"]` (utile pour tests/dev)
 
 Les autorités Spring sont dérivées sous la forme `ROLE_<ROLE>`, par exemple :
 - `ADMIN` → `ROLE_ADMIN`

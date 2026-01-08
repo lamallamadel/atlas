@@ -60,3 +60,7 @@ Atlas Immobilier est un CRM immobilier centré sur la gestion de **dossiers** (c
 - Contrats API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
 - Roadmap : `docs/MVP_ROADMAP.md`
 - État d’avancement : `docs/atlas-immobilier/05_roadmap/00_etat_avancement_mvp.md`
+
+## Extension (TO-BE) — Coop Habitat
+- Module de gestion de groupement/cooperative (membres, cotisations, allocation lots, jalons projet) — spécifié, non implémenté.
+- Doc source : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.

@@ -49,3 +49,17 @@ Les sprints ci-dessous décrivent la suite logique (Advanced CRM).
 - Page reporting (charts)
 - NotificationService + templates + async
 - Observabilité + monitoring endpoints
+
+## Piste produit (TO-BE) — Sprint(s) “Coop Habitat”
+
+### Sprint C1 — Bounded context Coop (structure)
+- Entités : Group, Member, Project, Lot, ContributionPlan, Contribution (ledger), Allocation, Documents
+- Workflows group/projet/allocation
+- Audit + timeline auto
+
+### Sprint C2 — Outbound WhatsApp pour Coop
+- Templates + scheduling (appel de fonds, rappels, allocations, jalons)
+- Outbox events + monitoring
+
+### Sprint C3 — Gouvernance (PV/decisions) + litiges
+- Publication PV, contestation allocation, exclusion/remplacement membre (règles)

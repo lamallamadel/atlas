@@ -47,3 +47,14 @@ Référence : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_mo
 
 ## Hors périmètre immédiat (peut venir après)
 - BI avancée, connecteurs multiples, automatisations complexes
+
+## Extension produit (TO-BE) — Coop Habitat
+
+Atlas peut intégrer un module de gestion de **coopératives d’habitat / groupements** (V1 déclarative) :
+- membres + rang FIFO, cotisations + ledger + justificatifs,
+- allocation de lots (FIFO d’allocation),
+- suivi projet (jalons),
+- traçabilité (audit + timeline),
+- notifications WhatsApp outbound (Choix B) pour appels de fonds et jalons.
+
+Doc central : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.

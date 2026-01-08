@@ -5,6 +5,7 @@
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/atlas-immobilier/03_technique/03_api_contracts.md`
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 ## Full-text search PostgreSQL
 - Colonnes : `annonce.title`, `annonce.description`, `dossier.leadName`, `dossier.leadPhone`, notes/messages.
@@ -13,7 +14,7 @@
 
 ## KPIs recommandés
 - Volume de leads par période et par source.
-- Funnel : NEW → QUALIFYING → QUALIFIED → APPOINTMENT → WON/LOST.
+- Funnel : CRM_NEW → QUALIFYING → CRM_QUALIFIED → APPOINTMENT → WON/LOST.
 - Taux de conversion par annonce et par source.
 - Temps moyen par étape (lead age, time-to-close).
 - Activité : #messages sortants/entrants par dossier (qualité de suivi).

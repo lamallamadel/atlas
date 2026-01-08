@@ -21,3 +21,11 @@
 - Consentements : opt-in/out par canal et par personne.
 - Reporting : dashboard KPI (funnel, délais, sources).
 - Notifications : email/sms (scénarios clés).
+
+## Persona additionnel (TO-BE) — Responsable de coop / Groupement
+
+- Objectif : piloter un projet immobilier collectif en réduisant les conflits et en améliorant la transparence.
+- Besoins : gouvernance (PV/décisions), suivi des cotisations (ledger), allocation des lots, communication WhatsApp, preuves/audit.
+- Risques : défauts de paiement, contestations, dérive des coûts.
+
+Le module associé est spécifié dans : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.

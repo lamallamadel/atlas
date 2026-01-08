@@ -6,6 +6,7 @@
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
 - `docs/atlas-immobilier/03_technique/05_audit_logging_design.md`
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`
 
 ## Objectif
 
@@ -39,9 +40,9 @@ Référence : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_mo
 
 ## Règles transverses (gouvernance)
 
-- `CLOSED_WON` / `CLOSED_LOST` : terminaux par défaut
-- `CLOSED_LOST` exige `LOSS_REASON`
-- `CLOSED_WON` exige `WON_REASON`
+- `CRM_CLOSED_WON` / `CRM_CLOSED_LOST` : terminaux par défaut
+- `CRM_CLOSED_LOST` exige `LOSS_REASON`
+- `CRM_CLOSED_WON` exige `WON_REASON`
 
 ## Effets de bord obligatoires (observables)
 

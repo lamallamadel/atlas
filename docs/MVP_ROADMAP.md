@@ -96,3 +96,8 @@ Ce document décrit la roadmap MVP par semaines (S1 → S13). Il distingue :
 - `v0.4-week3` : socle sécurisé
 - `v0.5-week4plus` : CRM interne complet
 - `v0.6-market-ready` : consentement strict + WhatsApp outbound + QA stable
+
+## Extension (TO-BE) — Coop Habitat
+- Ajouter un bounded context Coop (Group/Member/Project/Lot/Contributions/Allocation/Documents)
+- Brancher notifications WhatsApp (Choix B) sur appels de fonds, allocations, jalons
+- Gouvernance (PV/décisions) + audit/timeline

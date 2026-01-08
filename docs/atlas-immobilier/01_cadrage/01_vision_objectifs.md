@@ -26,3 +26,12 @@ Transformer une annonce en **processus CRM** complet, mesurable et pilotable, av
 - Facturation, gestion comptable.
 - Signature électronique avancée.
 - Multi-DB ou multi-schémas : non retenu pour le MVP+ (voir multi-tenancy org_id).
+
+## Extension produit (TO-BE) — Coop Habitat / Habitat participatif
+
+Atlas peut évoluer vers un module de gestion de **groupements d’habitat participatif** (coopératives) :
+- membres, cotisations, allocation de lots (FIFO d’allocation),
+- suivi projet (terrain → permis → chantier → livraison),
+- transparence (audit + PV) et communication WhatsApp.
+
+Voir : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.
