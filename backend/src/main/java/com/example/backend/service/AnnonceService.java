@@ -218,14 +218,20 @@ public class AnnonceService {
 
     private void validateActiveAnnonce(Annonce annonce) {
         if (AnnonceStatus.ACTIVE.equals(annonce.getStatus())) {
+            List<String> missingFields = new ArrayList<>();
+            
             if (annonce.getTitle() == null || annonce.getTitle().trim().isEmpty()) {
-                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without a title");
+                missingFields.add("title");
             }
             if (annonce.getPrice() == null) {
-                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without a price");
+                missingFields.add("price");
             }
             if (annonce.getCity() == null || annonce.getCity().trim().isEmpty()) {
-                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without a city");
+                missingFields.add("city");
+            }
+            
+            if (!missingFields.isEmpty()) {
+                throw new IllegalArgumentException("Cannot set annonce to ACTIVE without required fields: " + String.join(", ", missingFields));
             }
         }
     }

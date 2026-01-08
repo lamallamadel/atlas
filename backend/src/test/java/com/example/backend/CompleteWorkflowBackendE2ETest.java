@@ -38,6 +38,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         annonceRequest.setSurface(85.5);
         annonceRequest.setPrice(BigDecimal.valueOf(450000));
         annonceRequest.setCurrency("EUR");
+        annonceRequest.setStatus(AnnonceStatus.ACTIVE);
 
         MvcResult annonceResult = mockMvc.perform(
                 withTenantHeaders(post("/api/v1/annonces")
