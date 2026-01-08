@@ -82,4 +82,21 @@ public class MessageService {
         Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
         return messages.map(messageMapper::toResponse);
     }
+
+    @Transactional
+    public void delete(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        MessageEntity message = messageRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Message not found with id: " + id));
+
+        if (!orgId.equals(message.getOrgId())) {
+            throw new EntityNotFoundException("Message not found with id: " + id);
+        }
+
+        messageRepository.delete(message);
+    }
 }

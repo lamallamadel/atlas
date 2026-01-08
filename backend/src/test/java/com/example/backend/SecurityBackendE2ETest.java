@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -267,7 +267,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
         assertThat(mockJwt).isNotNull();
         assertThat(mockJwt.getSubject()).isEqualTo("test-user");
-        assertThat(mockJwt.getClaim("roles")).isEqualTo(List.of("ADMIN"));
+        assertThat((List<?>) mockJwt.getClaim("roles")).isEqualTo(List.of("ADMIN"));
         
         mockMvc.perform(get("/api/v1/annonces")
                         .with(jwt().jwt(mockJwt))
@@ -289,7 +289,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
         Map<String, Object> realmAccess = mockJwt.getClaim("realm_access");
         assertThat(realmAccess).isNotNull();
-        assertThat(realmAccess).containsKey("roles");
+        org.assertj.core.api.Assertions.assertThat(realmAccess).containsKey("roles");
         assertThat(realmAccess.get("roles")).isEqualTo(List.of("ADMIN"));
     }
 

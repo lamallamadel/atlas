@@ -233,6 +233,25 @@ public class DossierService {
             }
         }
 
+
         return new BulkOperationResponse(successCount, failureCount, errors);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
+        
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + id);
+        }
+        
+        dossierRepository.delete(dossier);
+        searchService.deleteDossierIndex(id);
     }
 }

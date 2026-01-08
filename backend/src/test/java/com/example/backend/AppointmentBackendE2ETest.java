@@ -322,8 +322,9 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(2);
+	final Long expectedId = appointment.getId();   // ou final Long expectedId = id;
         assertThat(auditEvents).allMatch(event -> event.getAction() == AuditAction.UPDATED);
-        assertThat(auditEvents).allMatch(event -> event.getEntityId().equals(appointment.getId()));
+        assertThat(auditEvents).allMatch(event -> event.getEntityId().equals(expectedId));
     }
 
     @Test
