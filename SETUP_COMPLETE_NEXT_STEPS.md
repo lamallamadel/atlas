@@ -1,49 +1,100 @@
-# Setup Status & Next Steps
+# Setup Complete - Next Steps
 
-## ✅ Completed Setup
+## ✅ What's Been Done
 
-### Frontend (Angular)
-- **Status**: READY ✓
-- **Installed**: 1,188 npm packages
-- **Commands Available**:
-  ```bash
-  cd frontend
-  npm test          # Run tests
-  npm run build     # Build for production
-  npm run lint      # Lint code
-  npm start         # Start dev server (http://localhost:4200)
-  ```
+1. **Frontend Dependencies Installed**
+   - All 1,187 npm packages installed successfully
+   - Angular framework and all dependencies ready
+   - Playwright test framework installed
 
-## ⏳ Remaining Setup
+2. **Gitignore Updated**
+   - Setup helper scripts added to gitignore
+   - Build artifacts and dependencies properly excluded
 
-### Backend (Spring Boot)
-- **Status**: Needs Maven install
-- **One Command to Complete**:
-  ```cmd
-  mvn17.cmd -f backend\pom.xml clean install -DskipTests
-  ```
+3. **Helper Scripts Created**
+   - `setup-initial.cmd` - Complete setup (backend + frontend)
+   - `backend/setup-maven-install.cmd` - Backend-only setup
 
-### After Backend Setup
-```bash
+## ⚠️ Action Required: Backend Setup
+
+The backend Maven build requires Java 17, but environment variable modification was blocked by security policies. You need to run ONE of these commands:
+
+### Quick Setup (Recommended)
+```cmd
 cd backend
-mvn-java17.cmd test               # Run tests
-mvn-java17.cmd spring-boot:run    # Start server (http://localhost:8080)
+setup-maven-install.cmd
 ```
 
-## Quick Start
+### Alternative Methods
 
-1. **Complete backend setup** (run the mvn17.cmd command above)
-2. **Start infrastructure**: `cd infra && docker-compose up -d`
-3. **Start backend**: `cd backend && mvn-java17.cmd spring-boot:run`
-4. **Start frontend**: `cd frontend && npm start`
+**PowerShell**:
+```powershell
+cd backend
+.\do-install.ps1
+```
 
-Access:
-- Frontend: http://localhost:4200
-- Backend API: http://localhost:8080
-- API Docs: http://localhost:8080/swagger-ui.html
+**Manual (if scripts don't work)**:
+```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+cd backend
+mvn clean install -gs settings.xml
+```
 
-## Documentation
+## Optional: Playwright Browsers
 
-- `INITIAL_SETUP_SUMMARY.md` - Detailed setup information
-- `AGENTS.md` - Development commands reference
-- `SETUP.md` - Environment configuration guide
+If you plan to run E2E tests, install Playwright browsers:
+```bash
+cd frontend
+npx playwright install
+```
+
+*Skip this if you only need unit tests or building the app.*
+
+## Verify Setup
+
+After backend installation:
+```bash
+# Backend tests
+cd backend
+mvn test
+
+# Frontend tests  
+cd frontend
+npm run test
+
+# Quick E2E test
+cd frontend
+npm run e2e:fast
+```
+
+## Ready to Develop!
+
+Once backend Maven install completes, you're all set. See `AGENTS.md` for full command reference.
+
+### Quick Commands
+
+**Run Backend**:
+```bash
+cd backend
+mvn spring-boot:run
+```
+
+**Run Frontend**:
+```bash
+cd frontend
+npm start
+```
+
+**Run Tests**:
+```bash
+# Backend
+cd backend && mvn test
+
+# Frontend  
+cd frontend && npm run test
+
+# E2E
+cd frontend && npm run e2e
+```
+
+See `SETUP_STATUS.md` for detailed setup information.

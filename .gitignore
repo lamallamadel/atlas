@@ -274,3 +274,5 @@ setup-env-wrapper.ps1
 run-mvn-java17.cmd
 run-maven-setup.js
 backend/Run-MavenInstall.ps1
+setup-initial.cmd
+backend/setup-maven-install.cmd

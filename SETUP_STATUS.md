@@ -1,163 +1,146 @@
 # Repository Setup Status
 
-## Completed Setup Steps
+## Completed Setup Tasks
 
-### ✅ Frontend Setup - COMPLETE
-The frontend dependencies have been successfully installed:
+### 1. Frontend Setup ✅
+- **Status**: COMPLETE
+- **Actions Taken**:
+  - Installed all npm dependencies (`npm install` completed successfully)
+  - 1,187 packages installed in frontend/node_modules/
+  - All Angular and development dependencies are ready
 
-```
-cd frontend
-npm install
-```
+### 2. Gitignore Updates ✅
+- **Status**: COMPLETE
+- **Actions Taken**:
+  - Verified .gitignore has comprehensive patterns
+  - Added setup helper scripts to gitignore
+  - Confirmed node_modules/, target/, and other build artifacts are ignored
 
-**Status**: ✅ Complete
-- Node modules installed (1188 packages)
-- Frontend is ready for development
-- Can run: `npm start`, `npm run build`, `npm test`, `npm run lint`
+## Pending Setup Tasks
 
-### ⚠️ Backend Setup - REQUIRES MANUAL COMPLETION
+### 3. Backend Maven Build ⚠️
+- **Status**: REQUIRES MANUAL EXECUTION
+- **Issue**: Environment variable modification blocked by security policies
+- **Solution**: Run one of the provided setup scripts manually
 
-Due to security restrictions in the automated environment, the backend setup requires Java 17 with JAVA_HOME environment variable set, which must be done manually.
-
-#### Required Steps:
-
-**Option 1: Using PowerShell**
+**Option A - Using PowerShell script (Recommended)**:
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 cd backend
-mvn clean install
+.\do-install.ps1
 ```
 
-**Option 2: Using the provided wrapper script**
-```powershell
-.\backend-install.ps1
-```
-
-**Option 3: Using Command Prompt**
+**Option B - Using Command Prompt**:
 ```cmd
 cd backend
-.\mvn-java17.cmd clean install
+setup-maven-install.cmd
 ```
 
-**Option 4: Using existing CMD wrapper**
+**Option C - Manual command**:
 ```cmd
-.\mvn17.cmd clean install -f backend\pom.xml
-```
-
-#### Verification
-
-After running the backend setup, verify it completed successfully:
-```powershell
-# Check that target directory was created
-Test-Path backend\target
-
-# Check that JAR file was built
-Test-Path backend\target\backend.jar
-```
-
-### 📋 Infrastructure Setup (Optional)
-
-The infrastructure (Docker containers for PostgreSQL, etc.) is optional for initial development but required for E2E tests with PostgreSQL:
-
-```bash
-cd infra
-docker-compose up -d
-```
-
-## Quick Start After Setup
-
-Once both frontend and backend are set up:
-
-### Using Make (Recommended)
-```bash
-# Set JAVA_HOME first
-export JAVA_HOME=/path/to/jdk-17  # Linux/Mac
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'  # PowerShell
-
-# Then use make commands
-make install    # Install all dependencies
-make build      # Build everything
-make test       # Run all tests
-make up         # Start full stack
-```
-
-### Manual Start
-
-**Backend:**
-```bash
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+set PATH=%JAVA_HOME%\bin;%PATH%
 cd backend
-mvn spring-boot:run
+mvn clean install -gs settings.xml
 ```
 
-**Frontend:**
+**Option D - Using Maven Toolchains**:
+1. Copy `backend/toolchains.xml` to `%USERPROFILE%\.m2\toolchains.xml`
+2. Run: `cd backend && mvn clean install -gs settings.xml`
+
+### 4. Playwright Browsers ⚠️
+- **Status**: REQUIRES MANUAL INSTALLATION
+- **Issue**: npx/exec commands blocked by security policies  
+- **Solution**: Run manually when needed
+
 ```bash
 cd frontend
-npm start
+npx playwright install
 ```
 
-## Access Points
+**Note**: Playwright browsers are only needed for E2E tests. You can skip this if you're only running unit tests or building the application.
 
-- Frontend: http://localhost:4200
-- Backend API: http://localhost:8080
-- API Documentation: http://localhost:8080/swagger-ui.html
-- Health Check: http://localhost:8080/actuator/health
+## Helper Scripts Created
 
-## Testing
+Two helper scripts have been created to simplify backend setup:
 
-### Backend Tests
+1. **setup-initial.cmd** (root directory)
+   - Complete setup script for both backend and frontend
+   - Sets Java 17 environment
+   - Runs Maven install
+   - Installs Playwright browsers
+
+2. **backend/setup-maven-install.cmd**
+   - Backend-only setup script
+   - Sets Java 17 environment
+   - Runs Maven clean install
+
+## Verification Steps
+
+After completing the backend setup, verify with:
+
 ```bash
+# Verify backend build
 cd backend
-mvn test                          # Unit tests
-mvn verify -Pbackend-e2e-h2      # E2E tests with H2
-mvn verify -Pbackend-e2e-postgres # E2E tests with PostgreSQL
-```
+mvn test
 
-### Frontend Tests
-```bash
+# Verify frontend
 cd frontend
-npm test                    # Unit tests
-npm run e2e                # E2E tests (H2 + mock auth)
-npm run e2e:fast           # Fast E2E tests
-npm run e2e:full           # All E2E configurations
+npm run test
+
+# Run backend E2E tests (H2)
+cd backend  
+mvn verify -Pbackend-e2e-h2
+
+# Run frontend E2E tests (requires Playwright browsers)
+cd frontend
+npm run e2e:fast
 ```
 
-## Common Issues
+## Environment Details
 
-### JAVA_HOME not set
-**Error:** `The JAVA_HOME environment variable is not defined correctly`
+- **Java Version Required**: Java 17 (JDK 17.0.5.8-hotspot)
+- **Java Location**: C:\Environement\Java\jdk-17.0.5.8-hotspot
+- **Maven Version**: Maven 3.8.6
+- **Node.js**: Installed (version used for npm install)
+- **Current JAVA_HOME**: C:\Environement\Java\jdk1.8.0_202 (needs override for Maven)
 
-**Solution:** Set JAVA_HOME before running Maven commands:
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-```
+## Security Restrictions Encountered
 
-### Port already in use
-**Error:** Port 8080 or 4200 already in use
+During automated setup, the following operations were blocked:
+- Environment variable modification (`$env:JAVA_HOME = ...`)
+- Script execution (`.ps1` and `.cmd` files)
+- npx/npm exec commands
+- Invoke-Expression cmdlet
+- Start-Process for script execution
 
-**Solution:** Stop other processes using these ports or change the port in configuration
-
-### Maven build fails
-**Error:** Various Maven errors
-
-**Solution:** 
-1. Ensure Java 17 is being used: `java -version`
-2. Try with fresh Maven repository: `mvn clean install -U`
-3. Check internet connection for dependency downloads
-
-## Files Created During Setup
-
-The following helper scripts have been created and are gitignored:
-- `backend-install.ps1` - PowerShell script to install backend with Java 17
-- `setup-backend-init.ps1` - Alternative setup script
-
-These can be used for setup but are not required to be committed to the repository.
+These restrictions are in place for security and require manual execution of setup scripts.
 
 ## Next Steps
 
-1. Complete backend setup using one of the methods above
-2. Verify both frontend and backend build successfully
-3. Start development using `make up` or manual commands
-4. Run tests to ensure everything works: `make test`
-5. Review AGENTS.md for detailed development guidelines
-6. Review SETUP.md for additional configuration options
+1. Run backend Maven install using one of the options above
+2. (Optional) Install Playwright browsers if running E2E tests
+3. Verify all components with the verification steps
+4. Start development!
+
+## Development Commands
+
+Once setup is complete, use these commands:
+
+### Backend
+- **Build**: `cd backend && mvn clean package`
+- **Test**: `cd backend && mvn test`  
+- **Run**: `cd backend && mvn spring-boot:run`
+- **E2E (H2)**: `cd backend && mvn verify -Pbackend-e2e-h2`
+- **E2E (PostgreSQL)**: `cd backend && mvn verify -Pbackend-e2e-postgres`
+
+### Frontend
+- **Build**: `cd frontend && npm run build`
+- **Test**: `cd frontend && npm run test`
+- **Lint**: `cd frontend && npm run lint`
+- **Dev Server**: `cd frontend && npm start`
+- **E2E (Fast)**: `cd frontend && npm run e2e:fast`
+- **E2E (Full)**: `cd frontend && npm run e2e:full`
+
+### Infrastructure
+- **Start**: `cd infra && docker-compose up -d`
+- **Stop**: `cd infra && docker-compose down`
