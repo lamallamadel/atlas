@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     url: jdbc:h2:mem:testdb
     username: sa
@@ -25,6 +27,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: mock
+
+          
 
   task:
     scheduling:
