@@ -281,3 +281,6 @@ setup-initial.js
 run-maven.js
 mvn-java17-wrapper.cmd
 setup-maven-install.cmd
+setup-backend-simple.js
+backend/run-setup-temp.cmd
+INITIAL_SETUP_STATUS.md

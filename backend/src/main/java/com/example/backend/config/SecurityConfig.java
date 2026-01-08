@@ -94,6 +94,7 @@ public class SecurityConfig {
      *   <li>Rejects tokens starting with "eyJ" (real JWT format) to simulate signature validation failures</li>
      *   <li>Rejects tokens containing "invalid" to allow testing of error handling</li>
      *   <li>Always accepts tokens starting with "mock-" regardless of other patterns</li>
+     *   <li>Extracts org_id from token format "mock-token-{orgId}" and includes it in JWT claims</li>
      * </ul>
      * 
      * <p><strong>Real Mode:</strong> When issuer-uri is set to a real IdP URL.</p>
@@ -120,16 +121,31 @@ public class SecurityConfig {
                     throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT token");
                 }
                 
+                // Extract org_id from token if present (format: "mock-token-ORG-XXX")
+                String orgId = null;
+                if (token.startsWith("mock-token-")) {
+                    String[] parts = token.split("-", 3);
+                    if (parts.length >= 3) {
+                        orgId = parts[2];
+                    }
+                }
+                
                 // Accept valid mock tokens
-                return Jwt.withTokenValue(token)
+                var jwtBuilder = Jwt.withTokenValue(token)
                     .header("alg", "none")
                     .claim("sub", "test-user")
                     // compatible with extractRoles()
                     .claim("roles", List.of("ADMIN"))
                     .claim("realm_access", Map.of("roles", List.of("ADMIN")))
                     .issuedAt(Instant.now())
-                    .expiresAt(Instant.now().plusSeconds(3600))
-                    .build();
+                    .expiresAt(Instant.now().plusSeconds(3600));
+                
+                // Add org_id claim if extracted from token
+                if (orgId != null) {
+                    jwtBuilder.claim("org_id", orgId);
+                }
+                
+                return jwtBuilder.build();
             };
         }
 

@@ -19,13 +19,15 @@ import org.springframework.context.annotation.Primary;
  * - Subject: "test-user"
  * - Roles: ["ADMIN"] 
  * - Realm access: {"roles": ["ADMIN"]}
+ * - org_id: extracted from token format "mock-token-{orgId}"
  * 
  * For tests, use the helper methods in BaseBackendE2ETest:
  * - createMockJwt(String orgId)
  * - createMockJwt(String orgId, String subject, String... roles)
  * 
- * These helpers create JWTs with custom claims including org_id, which is useful
- * for testing but note that the X-Org-Id header is still required by TenantFilter.
+ * These helpers create JWTs with token values formatted as "mock-token-{orgId}", allowing
+ * the mock decoder to extract and include the org_id claim. The X-Org-Id header is still
+ * required by TenantFilter for tenant isolation.
  * 
  * TenantFilter runs at HIGHEST_PRECEDENCE before the SecurityFilterChain, ensuring
  * the X-Org-Id header is extracted and TenantContext is set up before JWT validation.
