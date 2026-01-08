@@ -257,3 +257,7 @@ backend-error.txt
 run-backend-setup-java17.cmd
 setup-backend-maven.ps1
 setup-backend-via-node.js
+
+# Setup scripts created during initial repo setup
+setup-maven-with-java17.ps1
+backend/run-setup-now.cmd

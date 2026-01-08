@@ -258,7 +258,7 @@
         <profile>
             <id>backend-e2e-h2</id>
             <properties>
-                <spring.profiles.active>test</spring.profiles.active>
+                <spring.profiles.active>backend-e2e,backend-e2e-h2</spring.profiles.active>
             </properties>
             <build>
                 <plugins>
@@ -301,7 +301,7 @@
         <profile>
             <id>backend-e2e-postgres</id>
             <properties>
-                <spring.profiles.active>e2e-postgres</spring.profiles.active>
+                <spring.profiles.active>backend-e2e,backend-e2e-postgres</spring.profiles.active>
             </properties>
             <build>
                 <plugins>
