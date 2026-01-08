@@ -316,6 +316,42 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    void whenMockJwtIssuerUri_decoderRejectsRealJwtTokens() {
+        // Real JWT tokens (starting with "eyJ") should be rejected in mock mode
+        String realJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
+        
+        try {
+            jwtDecoder.decode(realJwtToken);
+            org.junit.jupiter.api.Assertions.fail("Expected JwtException to be thrown for real JWT token in mock mode");
+        } catch (org.springframework.security.oauth2.jwt.JwtException e) {
+            assertThat(e.getMessage()).contains("Invalid JWT signature");
+        }
+    }
+
+    @Test
+    void whenMockJwtIssuerUri_decoderRejectsInvalidTokens() {
+        // Tokens containing "invalid" should be rejected in mock mode
+        try {
+            jwtDecoder.decode("invalid-jwt-token");
+            org.junit.jupiter.api.Assertions.fail("Expected BadJwtException to be thrown for invalid token in mock mode");
+        } catch (org.springframework.security.oauth2.jwt.BadJwtException e) {
+            assertThat(e.getMessage()).contains("Invalid JWT token");
+        }
+    }
+
+    @Test
+    void whenMockJwtIssuerUri_decoderAcceptsMockPrefixedTokens() {
+        // Tokens starting with "mock-" should always be accepted, even with "invalid" or "eyJ"
+        Jwt jwt1 = jwtDecoder.decode("mock-invalid-token");
+        assertThat(jwt1).isNotNull();
+        assertThat(jwt1.getTokenValue()).isEqualTo("mock-invalid-token");
+
+        Jwt jwt2 = jwtDecoder.decode("mock-eyJabc123");
+        assertThat(jwt2).isNotNull();
+        assertThat(jwt2.getTokenValue()).isEqualTo("mock-eyJabc123");
+    }
+
+    @Test
     void whenMultipleSecuredEndpointsWithSameCorrelationId_allUseTheSameCorrelationId() throws Exception {
         String correlationId = "multi-request-" + UUID.randomUUID();
 

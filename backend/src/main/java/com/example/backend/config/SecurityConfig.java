@@ -84,19 +84,53 @@ public class SecurityConfig {
         return source;
     }
 
+    /**
+     * JWT decoder bean that supports both mock mode (for tests) and real OAuth2 JWT validation.
+     * 
+     * <p><strong>Mock Mode:</strong> Activated when issuer-uri is null, blank, or "mock".</p>
+     * <p>In mock mode, the decoder:</p>
+     * <ul>
+     *   <li>Accepts most token strings and returns a valid JWT with test claims</li>
+     *   <li>Rejects tokens starting with "eyJ" (real JWT format) to simulate signature validation failures</li>
+     *   <li>Rejects tokens containing "invalid" to allow testing of error handling</li>
+     *   <li>Always accepts tokens starting with "mock-" regardless of other patterns</li>
+     * </ul>
+     * 
+     * <p><strong>Real Mode:</strong> When issuer-uri is set to a real IdP URL.</p>
+     * <p>Uses NimbusJwtDecoder with full JWT signature validation and issuer/timestamp checks.</p>
+     */
     @Bean
     public JwtDecoder jwtDecoder() {
         // For tests/local runs without a real IdP:
         if (issuerUri == null || issuerUri.isBlank() || issuerUri.equalsIgnoreCase("mock")) {
-            return token -> Jwt.withTokenValue(token)
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                // compatible with extractRoles()
-                .claim("roles", List.of("ADMIN"))
-                .claim("realm_access", Map.of("roles", List.of("ADMIN")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
+            return token -> {
+                // Reject tokens that look like malformed JWTs or explicitly invalid patterns
+                if (token == null || token.isBlank()) {
+                    throw new org.springframework.security.oauth2.jwt.BadJwtException("Token cannot be blank");
+                }
+                
+                // Reject tokens that start with "eyJ" (base64 encoded JWT header) but are not from our mock
+                // This simulates rejection of real JWT tokens with invalid signatures
+                if (token.startsWith("eyJ") && !token.startsWith("mock-")) {
+                    throw new org.springframework.security.oauth2.jwt.JwtException("Invalid JWT signature");
+                }
+                
+                // Reject tokens explicitly marked as invalid
+                if (token.contains("invalid") && !token.startsWith("mock-")) {
+                    throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT token");
+                }
+                
+                // Accept valid mock tokens
+                return Jwt.withTokenValue(token)
+                    .header("alg", "none")
+                    .claim("sub", "test-user")
+                    // compatible with extractRoles()
+                    .claim("roles", List.of("ADMIN"))
+                    .claim("realm_access", Map.of("roles", List.of("ADMIN")))
+                    .issuedAt(Instant.now())
+                    .expiresAt(Instant.now().plusSeconds(3600))
+                    .build();
+            };
         }
 
         final String effectiveJwkSetUri = (jwkSetUri == null || jwkSetUri.isBlank())
