@@ -19,17 +19,21 @@ import java.io.IOException;
 /**
  * Tenant isolation filter that extracts the X-Org-Id header and sets it in TenantContext.
  * 
- * This filter runs at HIGHEST_PRECEDENCE to ensure it executes before the Spring Security
+ * This filter runs at HIGHEST_PRECEDENCE - 100 to ensure it executes before the Spring Security
  * filter chain. This is critical because:
  * 1. It needs to extract the X-Org-Id header before security validation
  * 2. It sets up the TenantContext that is used throughout the request
  * 3. It ensures proper cleanup in a finally block, even if security checks fail
  * 
- * The X-Org-Id header is mandatory for all /api/** endpoints (except webhooks).
+ * The X-Org-Id header is mandatory for all /api/** endpoints except:
+ * - /actuator/** (monitoring endpoints)
+ * - /swagger-ui/** (API documentation)
+ * - /api/v1/webhooks/** (webhook endpoints)
+ * 
  * Missing or empty X-Org-Id header results in HTTP 400 Bad Request.
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(Ordered.HIGHEST_PRECEDENCE - 100)
 public class TenantFilter extends OncePerRequestFilter {
 
     private static final String ORG_ID_HEADER = "X-Org-Id";
@@ -45,8 +49,7 @@ public class TenantFilter extends OncePerRequestFilter {
 
         String path = request.getRequestURI();
 
-        // Never require tenant header on webhooks
-        if (path.startsWith("/api/v1/webhooks")) {
+        if (isPermitAllEndpoint(path)) {
             filterChain.doFilter(request, response);
             return;
         }
@@ -77,6 +80,15 @@ public class TenantFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private boolean isPermitAllEndpoint(String path) {
+        return path.startsWith("/actuator/")
+                || path.startsWith("/swagger-ui/")
+                || path.startsWith("/swagger-ui.html")
+                || path.startsWith("/api-docs/")
+                || path.startsWith("/v3/api-docs/")
+                || path.startsWith("/api/v1/webhooks/");
     }
 
 }
