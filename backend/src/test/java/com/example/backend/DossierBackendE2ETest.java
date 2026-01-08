@@ -22,7 +22,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -30,11 +29,11 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @BackendE2ETest
-@WithMockUser(roles = "ADMIN")
 public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String ORG_ID = "test-org-e2e";
@@ -77,6 +76,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setInitialParty(partyRequest);
 
         mockMvc.perform(post(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -133,6 +133,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setInitialParty(partyRequest);
 
         String responseJson = mockMvc.perform(post(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -167,6 +168,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadName("John Doe");
 
         mockMvc.perform(post(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -195,6 +197,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Starting qualification process");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -216,6 +219,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(DossierStatus.QUALIFIED);
         request.setReason("Client is qualified");
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -234,6 +238,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(DossierStatus.APPOINTMENT);
         request.setReason("Appointment scheduled");
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -252,6 +257,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(DossierStatus.WON);
         request.setReason("Deal closed successfully");
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -282,6 +288,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Trying to change won status");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -308,6 +315,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Trying to reopen lost dossier");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -334,6 +342,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Skipping intermediate steps");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -362,6 +371,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(dossier2);
 
         mockMvc.perform(get(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("leadPhone", "+33612345678")
                         .param("page", "0")
@@ -396,6 +406,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(dossier3);
 
         mockMvc.perform(get(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("status", "QUALIFYING")
                         .param("page", "0")
@@ -451,6 +462,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(dossier3);
 
         mockMvc.perform(get(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("annonceId", annonce1.getId().toString())
                         .param("page", "0")
@@ -473,6 +485,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         }
 
         mockMvc.perform(get(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("page", "0")
                         .param("size", "10"))
@@ -484,6 +497,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.size").value(10));
 
         mockMvc.perform(get(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("page", "1")
                         .param("size", "10"))
@@ -492,6 +506,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.number").value(1));
 
         mockMvc.perform(get(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("page", "2")
                         .param("size", "10"))
@@ -517,6 +532,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("First transition");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -527,12 +543,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Second transition");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         mockMvc.perform(get(BASE_URL + "/{id}/status-history", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .param("page", "0")
                         .param("size", "20"))
@@ -557,6 +575,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         createRequest.setLeadSource("Website");
 
         String createResponseJson = mockMvc.perform(post(BASE_URL)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(createRequest)))
@@ -584,6 +603,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         patchRequest.setReason("Client called back");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossierId)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(patchRequest)))
@@ -608,6 +628,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         assertThat(latestHistory.getTransitionedAt()).isNotNull();
 
         mockMvc.perform(get(BASE_URL + "/{id}/status-history", dossierId)
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -635,6 +656,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Client not interested");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -667,6 +689,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Did not meet criteria");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -694,6 +717,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Found another property");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -721,6 +745,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Client no-showed");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -748,6 +773,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Pre-qualified client");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -775,6 +801,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setReason("Direct appointment scheduling");
 
         mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
+                        .with(jwt().jwt(createMockJwt(ORG_ID, "test-user", "ADMIN")))
                         .header(TENANT_HEADER, ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))

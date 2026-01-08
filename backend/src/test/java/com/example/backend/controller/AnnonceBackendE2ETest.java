@@ -18,7 +18,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
@@ -28,6 +27,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -89,7 +89,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== POST /api/v1/annonces Tests ==========
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createAnnonce_WithFullJsonbFields_ReturnsCreatedAndPersistsCorrectly() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -132,6 +131,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .header(CORRELATION_ID_HEADER, "test-create-001")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -186,7 +186,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void createAnnonce_WithMinimalFields_ReturnsCreatedWithDefaults() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -194,6 +193,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -207,7 +207,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createAnnonce_WithEmptyPhotosArray_ReturnsCreated() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -216,6 +215,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -224,7 +224,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createAnnonce_WithComplexNestedRulesJson_HandlesCorrectly() throws Exception {
         // Given - Test deep nesting in JSONB
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -243,6 +242,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -252,7 +252,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createAnnonce_MissingTitle_ReturnsBadRequest() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -260,6 +259,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -269,7 +269,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== GET /{id} with Tenant Filtering Tests ==========
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void getAnnonceById_WithSameTenant_ReturnsAnnonce() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Test Annonce", "Paris");
@@ -277,6 +276,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(annonce.getId()))
@@ -285,7 +285,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void getAnnonceById_CrossTenant_Returns404() throws Exception {
         // Given - Create annonce in ORG2
         Annonce annonce = createTestAnnonce(ORG2, "ORG2 Annonce", "Lyon");
@@ -293,21 +292,21 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When - Try to access from ORG1
         mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void getAnnonceById_NonExistent_Returns404() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/annonces/999999")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void getAnnonceById_WithCompleteJsonbData_ReturnsAllFields() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Complete Data Test", "Paris");
@@ -327,6 +326,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.photos", hasSize(2)))
@@ -340,13 +340,13 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== GET with Filters, Pagination, and Sorting Tests ==========
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listAnnonces_NoFilters_ReturnsAllForTenant() throws Exception {
         // Given - Seed consistent test data
         seedTestData();
 
         // When & Then - ORG1 should have exactly 2 annonces
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
@@ -354,7 +354,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_FilterByStatus_ReturnsMatchingAnnonces() throws Exception {
         // Given - Create test data with various statuses
         Annonce draft = createTestAnnonce(ORG1, "Draft Annonce", "Paris");
@@ -376,6 +375,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by PUBLISHED for ORG1 only
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "PUBLISHED"))
             .andExpect(status().isOk())
@@ -386,7 +386,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listAnnonces_FilterByCity_ReturnsMatchingAnnonces() throws Exception {
         // Given - Create test data in multiple cities
         annonceRepository.save(createTestAnnonce(ORG1, "Paris Annonce 1", "Paris"));
@@ -399,6 +398,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by Paris for ORG1 only
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("city", "Paris"))
             .andExpect(status().isOk())
@@ -407,7 +407,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_FilterByType_ReturnsMatchingAnnonces() throws Exception {
         // Given
         Annonce sale = createTestAnnonce(ORG1, "For Sale", "Paris");
@@ -424,6 +423,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by RENT
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .param("type", "RENT"))
             .andExpect(status().isOk())
@@ -432,7 +432,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listAnnonces_SearchQueryInTitle_ReturnsMatchingAnnonces() throws Exception {
         // Given
         annonceRepository.save(createTestAnnonce(ORG1, "Beautiful Apartment", "Paris"));
@@ -441,6 +440,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Search for "apartment"
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("q", "apartment"))
             .andExpect(status().isOk())
@@ -449,7 +449,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_SearchQueryInDescription_ReturnsMatchingAnnonces() throws Exception {
         // Given
         Annonce annonce1 = createTestAnnonce(ORG1, "Property 1", "Paris");
@@ -462,6 +461,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Search for "balcony"
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .param("q", "balcony"))
             .andExpect(status().isOk())
@@ -470,7 +470,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listAnnonces_CombinedFilters_ReturnsMatchingAnnonces() throws Exception {
         // Given - Create diverse test data
         Annonce match = createTestAnnonce(ORG1, "Paris Rental", "Paris");
@@ -496,6 +495,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by status=PUBLISHED, city=Paris, type=RENT for ORG1
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "PUBLISHED")
                 .param("city", "Paris")
@@ -508,7 +508,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_WithPagination_ReturnsCorrectPage() throws Exception {
         // Given - Create 25 annonces
         for (int i = 1; i <= 25; i++) {
@@ -517,6 +516,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Request page 1 (second page) with size 10
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .param("page", "1")
                 .param("size", "10"))
@@ -529,7 +529,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listAnnonces_SortByTitleAsc_ReturnsSortedResults() throws Exception {
         // Given
         annonceRepository.save(createTestAnnonce(ORG1, "Zebra Property", "Paris"));
@@ -538,6 +537,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Sort by title ascending
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("sort", "title,asc"))
             .andExpect(status().isOk())
@@ -548,7 +548,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_SortByCreatedAtDesc_ReturnsSortedResults() throws Exception {
         // Given
         Annonce oldest = createTestAnnonce(ORG1, "Oldest", "Paris");
@@ -564,6 +563,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Sort by createdAt descending (newest first)
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .param("sort", "createdAt,desc"))
             .andExpect(status().isOk())
@@ -575,7 +575,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== PUT with Partial Updates Tests ==========
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void updateAnnonce_PartialUpdate_OnlyUpdatesSpecifiedFields() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Original Title", "Paris");
@@ -590,6 +589,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setPrice(BigDecimal.valueOf(200.00));
 
         MvcResult result = mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -610,7 +610,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void updateAnnonce_UpdatePhotosArray_ReplacesCompleteArray() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Photo Test", "Paris");
@@ -622,6 +621,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setPhotos(List.of("new1.jpg", "new2.jpg", "new3.jpg"));
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -637,7 +637,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void updateAnnonce_UpdateRulesJson_MergesOrReplacesObject() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Rules Test", "Paris");
@@ -655,6 +654,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setRulesJson(newRules);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -669,7 +669,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void updateAnnonce_ChangeStatus_UpdatesSuccessfully() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Status Change Test", "Paris");
@@ -681,6 +680,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setStatus(AnnonceStatus.PUBLISHED);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -693,7 +693,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void updateAnnonce_CrossTenant_Returns404() throws Exception {
         // Given - Create annonce in ORG2
         Annonce annonce = createTestAnnonce(ORG2, "ORG2 Annonce", "Lyon");
@@ -704,6 +703,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setTitle("Hacked Title");
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -716,7 +716,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void updateAnnonce_NonExistent_Returns404() throws Exception {
         // Given
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
@@ -724,6 +723,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/annonces/999999")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -733,7 +733,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== Audit Events with Diff Calculation Tests ==========
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createAnnonce_GeneratesAuditEventWithAfterDiff() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -743,6 +742,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -777,7 +777,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void updateAnnonce_GeneratesAuditEventWithChangesDiff() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Original Title", "Paris");
@@ -793,6 +792,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setPrice(BigDecimal.valueOf(200.00));
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -832,7 +832,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void deleteAnnonce_GeneratesAuditEventWithBeforeDiff() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "To Be Deleted", "Paris");
@@ -843,6 +842,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk());
 
@@ -871,7 +871,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void updateAnnonce_WithJsonbChanges_RecordsDiffCorrectly() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "JSONB Update Test", "Paris");
@@ -895,6 +894,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setRulesJson(newRules);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -915,7 +915,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== RBAC 403 Tests ==========
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void deleteAnnonce_AsPro_Returns403Forbidden() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Pro Delete Test", "Paris");
@@ -923,6 +922,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - PRO role should not be able to delete
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isForbidden());
 
@@ -931,7 +931,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void deleteAnnonce_AsAdmin_Returns200Ok() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Admin Delete Test", "Paris");
@@ -939,6 +938,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - ADMIN role should be able to delete
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk());
 
@@ -947,7 +947,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createAnnonce_AsPro_Returns201Created() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -955,6 +954,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - PRO role should be able to create
         mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -962,7 +962,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void updateAnnonce_AsPro_Returns200Ok() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Pro Update Test", "Paris");
@@ -973,6 +972,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - PRO role should be able to update
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -982,7 +982,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== H2 vs Postgres JSONB Compatibility Tests ==========
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void jsonbCompatibility_ArrayOfStrings_WorksInBothDatabases() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -991,6 +990,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1002,6 +1002,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify retrieval works
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.photos", hasSize(3)))
@@ -1011,7 +1012,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void jsonbCompatibility_NestedObject_WorksInBothDatabases() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -1026,6 +1026,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1037,6 +1038,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify retrieval and nested structure
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.rulesJson.restrictions.age.min").value(18))
@@ -1045,7 +1047,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void jsonbCompatibility_MixedTypes_WorksInBothDatabases() throws Exception {
         // Given - Test various JSON types: string, number, boolean, array, object
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -1063,6 +1064,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1074,6 +1076,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify all types are preserved
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.meta.stringField").value("value"))
@@ -1085,7 +1088,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void jsonbCompatibility_EmptyJsonObjects_WorksInBothDatabases() throws Exception {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
@@ -1096,6 +1098,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1107,13 +1110,13 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify empty collections are handled
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.photos").isEmpty());
     }
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void jsonbCompatibility_UpdateJsonFields_PreservesStructure() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "JSONB Update Compatibility", "Paris");
@@ -1134,6 +1137,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setRulesJson(newRules);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -1151,13 +1155,13 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     // ========== Additional Cross-Tenant Isolation Tests ==========
 
     @Test
-    @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_OnlyReturnsOwnTenantData() throws Exception {
         // Given - Seed consistent test data for both tenants
         seedTestData();
 
         // When - List from ORG1
         MvcResult result = mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
@@ -1177,6 +1181,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When - List from ORG2
         MvcResult result2 = mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG2, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG2))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
@@ -1196,7 +1201,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void deleteAnnonce_CrossTenant_Returns404() throws Exception {
         // Given - Create annonce in ORG2
         Annonce annonce = createTestAnnonce(ORG2, "ORG2 Delete Test", "Paris");
@@ -1205,6 +1209,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // When - Try to delete from ORG1 (even with forbidden response, it should be 404 for security)
         // Note: PRO can't delete anyway, but testing cross-tenant isolation
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isForbidden()); // PRO role gets 403 first
 
@@ -1214,7 +1219,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listAnnonces_FilterByStatusAndCity_VerifiesTenantIsolation() throws Exception {
         // Given - Create comprehensive test data
         // ORG1: 2 ACTIVE in Paris, 1 ACTIVE in Lyon, 1 PAUSED in Paris
@@ -1241,6 +1245,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter ORG1 by ACTIVE status only
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "ACTIVE"))
             .andExpect(status().isOk())
@@ -1249,6 +1254,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When & Then - Filter ORG1 by city=Paris only
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("city", "Paris"))
             .andExpect(status().isOk())
@@ -1257,6 +1263,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When & Then - Filter ORG1 by ACTIVE status AND city=Paris
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "ACTIVE")
                 .param("city", "Paris"))
@@ -1266,6 +1273,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When & Then - Filter ORG2 by ACTIVE status AND city=Paris
         mockMvc.perform(get("/api/v1/annonces")
+                .with(jwt().jwt(createMockJwt(ORG2, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG2)
                 .param("status", "ACTIVE")
                 .param("city", "Paris"))
