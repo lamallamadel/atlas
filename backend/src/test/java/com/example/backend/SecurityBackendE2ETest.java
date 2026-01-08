@@ -99,6 +99,21 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    void whenInvalidJWTSignature_returns401WithWWWAuthenticateHeader() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/annonces")
+                        .header("Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c")
+                        .header(TENANT_HEADER, "ORG1")
+                        .header(CORRELATION_ID_HEADER, "test-corr-id"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(header().exists("WWW-Authenticate"))
+                .andReturn();
+
+        String wwwAuthenticate = result.getResponse().getHeader("WWW-Authenticate");
+        assertThat(wwwAuthenticate).isNotNull();
+        assertThat(wwwAuthenticate).contains("Bearer");
+    }
+
+    @Test
     void whenProUserCallsDelete_returns403() throws Exception {
         Annonce annonce = createAndSaveAnnonce("ORG1");
 
