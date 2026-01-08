@@ -62,30 +62,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.deleteAll();
     }
 
-    private void seedTestData() {
-        // Seed exactly 2 annonces for ORG1
-        Annonce org1Annonce1 = createTestAnnonce(ORG1, "ORG1 Property 1", "Paris");
-        org1Annonce1.setStatus(AnnonceStatus.ACTIVE);
-        org1Annonce1.setType(AnnonceType.SALE);
-        annonceRepository.save(org1Annonce1);
-
-        Annonce org1Annonce2 = createTestAnnonce(ORG1, "ORG1 Property 2", "Lyon");
-        org1Annonce2.setStatus(AnnonceStatus.ACTIVE);
-        org1Annonce2.setType(AnnonceType.RENT);
-        annonceRepository.save(org1Annonce2);
-
-        // Seed exactly 2 annonces for ORG2
-        Annonce org2Annonce1 = createTestAnnonce(ORG2, "ORG2 Property 1", "Paris");
-        org2Annonce1.setStatus(AnnonceStatus.ACTIVE);
-        org2Annonce1.setType(AnnonceType.SALE);
-        annonceRepository.save(org2Annonce1);
-
-        Annonce org2Annonce2 = createTestAnnonce(ORG2, "ORG2 Property 2", "Marseille");
-        org2Annonce2.setStatus(AnnonceStatus.PAUSED);
-        org2Annonce2.setType(AnnonceType.LEASE);
-        annonceRepository.save(org2Annonce2);
-    }
-
     // ========== POST /api/v1/annonces Tests ==========
 
     @Test
@@ -341,8 +317,27 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void listAnnonces_NoFilters_ReturnsAllForTenant() throws Exception {
-        // Given - Seed consistent test data
-        seedTestData();
+        // Given - Create exactly 2 annonces for ORG1
+        Annonce org1Annonce1 = createTestAnnonce(ORG1, "ORG1 Property 1", "Paris");
+        org1Annonce1.setStatus(AnnonceStatus.ACTIVE);
+        org1Annonce1.setType(AnnonceType.SALE);
+        annonceRepository.save(org1Annonce1);
+
+        Annonce org1Annonce2 = createTestAnnonce(ORG1, "ORG1 Property 2", "Lyon");
+        org1Annonce2.setStatus(AnnonceStatus.ACTIVE);
+        org1Annonce2.setType(AnnonceType.RENT);
+        annonceRepository.save(org1Annonce2);
+
+        // Create annonces for ORG2 to verify tenant isolation
+        Annonce org2Annonce1 = createTestAnnonce(ORG2, "ORG2 Property 1", "Paris");
+        org2Annonce1.setStatus(AnnonceStatus.ACTIVE);
+        org2Annonce1.setType(AnnonceType.SALE);
+        annonceRepository.save(org2Annonce1);
+
+        Annonce org2Annonce2 = createTestAnnonce(ORG2, "ORG2 Property 2", "Marseille");
+        org2Annonce2.setStatus(AnnonceStatus.PAUSED);
+        org2Annonce2.setType(AnnonceType.LEASE);
+        annonceRepository.save(org2Annonce2);
 
         // When & Then - ORG1 should have exactly 2 annonces
         mockMvc.perform(get("/api/v1/annonces")
@@ -1156,8 +1151,27 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void listAnnonces_OnlyReturnsOwnTenantData() throws Exception {
-        // Given - Seed consistent test data for both tenants
-        seedTestData();
+        // Given - Create exactly 2 annonces for ORG1
+        Annonce org1Annonce1 = createTestAnnonce(ORG1, "ORG1 Property 1", "Paris");
+        org1Annonce1.setStatus(AnnonceStatus.ACTIVE);
+        org1Annonce1.setType(AnnonceType.SALE);
+        annonceRepository.save(org1Annonce1);
+
+        Annonce org1Annonce2 = createTestAnnonce(ORG1, "ORG1 Property 2", "Lyon");
+        org1Annonce2.setStatus(AnnonceStatus.ACTIVE);
+        org1Annonce2.setType(AnnonceType.RENT);
+        annonceRepository.save(org1Annonce2);
+
+        // Create exactly 2 annonces for ORG2
+        Annonce org2Annonce1 = createTestAnnonce(ORG2, "ORG2 Property 1", "Paris");
+        org2Annonce1.setStatus(AnnonceStatus.ACTIVE);
+        org2Annonce1.setType(AnnonceType.SALE);
+        annonceRepository.save(org2Annonce1);
+
+        Annonce org2Annonce2 = createTestAnnonce(ORG2, "ORG2 Property 2", "Marseille");
+        org2Annonce2.setStatus(AnnonceStatus.PAUSED);
+        org2Annonce2.setType(AnnonceType.LEASE);
+        annonceRepository.save(org2Annonce2);
 
         // When - List from ORG1
         MvcResult result = mockMvc.perform(get("/api/v1/annonces")
