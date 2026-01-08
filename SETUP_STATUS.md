@@ -1,104 +1,90 @@
 # Repository Setup Status
 
-## Completed Setup Tasks
+## Completed Tasks
 
-### ✅ Frontend Setup (Complete)
-- **npm install** executed successfully in `frontend/` directory
-- All 1,188 packages installed
-- Dependencies ready for development
+### Frontend Setup ✅
+- **npm install** completed successfully
+- All 1188 packages installed in frontend directory
+- Dependencies ready for build, lint, and test commands
 
-### ⚠️ Backend Setup (Manual Step Required)
+**Note:** Playwright browsers installation requires manual execution:
+```powershell
+cd frontend
+npx playwright install
+```
 
-The backend Maven setup requires Java 17 to be active, but due to security restrictions, environment variables cannot be set automatically.
+### Backend Setup ⏸️
+- **Toolchains configuration** is properly set up in `backend/toolchains.xml`
+- Points to Java 17 at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- Maven dependencies **not yet installed** due to environment variable restrictions
 
-#### Prerequisites Verified:
-- ✅ Java 17 is installed at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- ✅ Maven 3.8.6 is installed and accessible
-- ✅ Toolchains.xml is properly configured in `~/.m2/toolchains.xml` with Java 17 path
-- ✅ Backend settings.xml is configured for direct Maven Central access
+## Remaining Setup Required
 
-#### Manual Setup Required:
+### Backend Maven Installation
 
-To complete the backend setup, run ONE of the following commands:
+The backend requires Maven to run with Java 17. Due to security restrictions, environment variables cannot be set programmatically. You need to manually run ONE of the following commands:
 
-**Option 1: Using the provided wrapper script (Recommended)**
+**Option 1: Using the wrapper script (Recommended)**
+```powershell
+cd backend
+.\install-java17.ps1
+```
+
+**Option 2: Using the root-level wrapper**
 ```cmd
 mvn17.cmd -f backend\pom.xml clean install -DskipTests
 ```
 
-**Option 2: Set JAVA_HOME manually and run Maven**
+**Option 3: Using PowerShell with manual JAVA_HOME**
 ```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
 mvn clean install -DskipTests
 ```
 
-**Option 3: Create mavenrc_pre.bat in your home directory**
-Create `%USERPROFILE%\mavenrc_pre.bat` with the following content:
-```batch
-@echo off
-set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"
-set "PATH=%JAVA_HOME%\bin;%PATH%"
-```
-
-Then run:
+**Option 4: Using CMD with manual JAVA_HOME**
 ```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
 cd backend
 mvn clean install -DskipTests
 ```
 
-## What's Ready
+### Playwright Browsers (Optional for E2E tests)
 
-### Frontend
-- ✅ All npm packages installed
-- ✅ Can run: `npm start` (dev server)
-- ✅ Can run: `npm run build` (production build)
-- ✅ Can run: `npm test` (unit tests)
-- ✅ Can run: `npm run e2e` (Playwright E2E tests)
-
-### Backend (After Manual Setup)
-- ⏳ Will be able to run: `mvn spring-boot:run` (dev server)
-- ⏳ Will be able to run: `mvn test` (unit tests)
-- ⏳ Will be able to run: `mvn clean package` (build)
-- ⏳ Will be able to run: `mvn verify -Pbackend-e2e-h2` (E2E tests)
-
-## Directory Structure
-```
-/
-├── backend/          # Spring Boot application (needs Maven install)
-│   ├── pom.xml       # Maven configuration
-│   ├── settings.xml  # Maven settings (proxy bypass)
-│   └── toolchains.xml # Java 17 toolchain config
-├── frontend/         # Angular application (✅ READY)
-│   ├── node_modules/ # ✅ Installed
-│   └── package.json
-└── infra/            # Docker infrastructure
-    └── docker-compose.yml
+After backend setup, install Playwright browsers:
+```powershell
+cd frontend
+npx playwright install
 ```
 
-## Helper Scripts Available
+## Verification
 
-The following helper scripts are available in the repository root to assist with setup:
+After completing the manual backend setup, verify with:
 
-- `mvn17.cmd` - Maven wrapper that sets JAVA_HOME to Java 17
-- `run-setup.cmd` - Complete setup script for both backend and frontend
-- `setup-environment.ps1` - PowerShell setup script
+**Backend:**
+```powershell
+cd backend
+mvn test
+```
 
-## Next Steps
+**Frontend:**
+```powershell
+cd frontend
+npm test
+```
 
-1. Complete backend Maven install using one of the options above
-2. Verify setup by running tests:
-   ```cmd
-   cd backend
-   mvn test
-   ```
-3. Start development servers (optional):
-   - Backend: `cd backend && mvn spring-boot:run`
-   - Frontend: `cd frontend && npm start`
+## Why Manual Steps Are Required
 
-## Notes
+The security policy blocks:
+- Setting environment variables (`$env:JAVA_HOME = ...`)
+- Executing .cmd or .ps1 scripts directly
+- Running npx commands
+- Using inline code execution
 
-- Frontend is fully configured and ready for development
-- Backend requires one-time Maven dependency download (~200-500MB)
-- Docker is required only for E2E tests with PostgreSQL
-- H2 in-memory database can be used for development (no Docker required)
+These restrictions prevent automated environment configuration but can be bypassed by running commands in a regular PowerShell/CMD session.
+
+## Summary
+
+- ✅ Frontend: Ready (npm install complete)
+- ⏸️ Backend: Requires one manual Maven install command
+- ⏸️ Playwright: Requires manual browser installation for E2E tests
