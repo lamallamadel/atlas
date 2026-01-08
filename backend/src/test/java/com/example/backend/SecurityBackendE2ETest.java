@@ -157,8 +157,10 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void whenCorsPreflightOptions_returnsAccessControlAllowOriginHeader() throws Exception {
+        String requestOrigin = "http://localhost:3000";
+        
         MvcResult result = mockMvc.perform(options("/api/v1/annonces")
-                        .header("Origin", "http://localhost:3000")
+                        .header("Origin", requestOrigin)
                         .header("Access-Control-Request-Method", "GET")
                         .header("Access-Control-Request-Headers", "Authorization,X-Org-Id"))
                 .andExpect(status().isOk())
@@ -166,13 +168,15 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
         String allowOrigin = result.getResponse().getHeader("Access-Control-Allow-Origin");
         assertThat(allowOrigin).isNotNull();
-        assertThat(allowOrigin).isEqualTo("*");
+        assertThat(allowOrigin).isEqualTo(requestOrigin);
     }
 
     @Test
     void whenCorsPreflightOptionsWithDifferentOrigin_returnsAccessControlAllowOriginHeader() throws Exception {
+        String requestOrigin = "http://example.com";
+        
         MvcResult result = mockMvc.perform(options("/api/v1/dossiers")
-                        .header("Origin", "http://example.com")
+                        .header("Origin", requestOrigin)
                         .header("Access-Control-Request-Method", "POST")
                         .header("Access-Control-Request-Headers", "Authorization,X-Org-Id,Content-Type"))
                 .andExpect(status().isOk())
@@ -183,7 +187,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
         String allowHeaders = result.getResponse().getHeader("Access-Control-Allow-Headers");
 
         assertThat(allowOrigin).isNotNull();
-        assertThat(allowOrigin).isEqualTo("*");
+        assertThat(allowOrigin).isEqualTo(requestOrigin);
         assertThat(allowMethods).isNotNull();
         assertThat(allowHeaders).isNotNull();
     }
