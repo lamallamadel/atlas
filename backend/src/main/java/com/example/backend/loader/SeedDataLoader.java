@@ -56,7 +56,7 @@ public class SeedDataLoader implements CommandLineRunner {
 
         List<Annonce> annonces = new ArrayList<>();
 
-        // ORG-001 Annonces
+        // ORG-001 Annonces (exactly 2 for predictable testing)
         Annonce annonce1 = new Annonce();
         annonce1.setOrgId(ORG_001);
         annonce1.setTitle("Beautiful 3BR Apartment in Downtown");
@@ -100,149 +100,47 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce2.setUpdatedBy("system-seed");
         annonces.add(annonce2);
 
+        // ORG-002 Annonces (exactly 2 for predictable testing)
         Annonce annonce3 = new Annonce();
-        annonce3.setOrgId(ORG_001);
-        annonce3.setTitle("Commercial Space in Business District");
-        annonce3.setDescription("Prime commercial location perfect for retail or office space.");
-        annonce3.setCategory("Commercial");
-        annonce3.setType(AnnonceType.LEASE);
-        annonce3.setAddress("789 Business Boulevard");
-        annonce3.setCity("Marseille");
-        annonce3.setSurface(180.0);
-        annonce3.setPrice(new BigDecimal("2800.00"));
+        annonce3.setOrgId(ORG_002);
+        annonce3.setTitle("Elegant 2BR Condo with Terrace");
+        annonce3.setDescription("Bright and spacious condo with a large terrace overlooking the city.");
+        annonce3.setCategory("Residential");
+        annonce3.setType(AnnonceType.SALE);
+        annonce3.setAddress("45 Avenue Montaigne");
+        annonce3.setCity("Paris");
+        annonce3.setSurface(95.0);
+        annonce3.setPrice(new BigDecimal("650000.00"));
         annonce3.setCurrency("EUR");
-        annonce3.setStatus(AnnonceStatus.ARCHIVED);
-        annonce3.setMeta(Map.of("source", "seed", "org", ORG_001));
+        annonce3.setStatus(AnnonceStatus.ACTIVE);
+        annonce3.setPhotos(Arrays.asList(
+                "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"
+        ));
+        annonce3.setMeta(Map.of("source", "seed", "priority", "medium", "org", ORG_002));
         annonce3.setCreatedBy("system-seed");
         annonce3.setUpdatedBy("system-seed");
         annonces.add(annonce3);
 
         Annonce annonce4 = new Annonce();
-        annonce4.setOrgId(ORG_001);
-        annonce4.setTitle("Modern Studio in Le Marais");
-        annonce4.setDescription("Charming studio in the heart of Le Marais.");
+        annonce4.setOrgId(ORG_002);
+        annonce4.setTitle("Cozy 1BR Apartment in Montmartre");
+        annonce4.setDescription("Perfect starter home in the charming Montmartre district.");
         annonce4.setCategory("Residential");
         annonce4.setType(AnnonceType.RENT);
-        annonce4.setAddress("10 Rue des Rosiers");
+        annonce4.setAddress("22 Rue Lepic");
         annonce4.setCity("Paris");
-        annonce4.setSurface(35.0);
-        annonce4.setPrice(new BigDecimal("1200.00"));
+        annonce4.setSurface(48.0);
+        annonce4.setPrice(new BigDecimal("1350.00"));
         annonce4.setCurrency("EUR");
         annonce4.setStatus(AnnonceStatus.ACTIVE);
-        annonce4.setMeta(Map.of("source", "seed-uat", "org", ORG_001));
+        annonce4.setMeta(Map.of("source", "seed", "org", ORG_002));
         annonce4.setCreatedBy("system-seed");
         annonce4.setUpdatedBy("system-seed");
         annonces.add(annonce4);
 
-        Annonce annonce5 = new Annonce();
-        annonce5.setOrgId(ORG_001);
-        annonce5.setTitle("Modern Studio in Le Marais");
-        annonce5.setDescription("This is a duplicate for UAT testing.");
-        annonce5.setCategory("Residential");
-        annonce5.setType(AnnonceType.RENT);
-        annonce5.setAddress("10 Rue des Rosiers");
-        annonce5.setCity("Paris");
-        annonce5.setSurface(35.0);
-        annonce5.setPrice(new BigDecimal("1250.00"));
-        annonce5.setCurrency("EUR");
-        annonce5.setStatus(AnnonceStatus.DRAFT);
-        annonce5.setMeta(Map.of("source", "seed-duplicate", "org", ORG_001));
-        annonce5.setCreatedBy("system-seed");
-        annonce5.setUpdatedBy("system-seed");
-        annonces.add(annonce5);
-
-        // ORG-002 Annonces
-        Annonce annonce6 = new Annonce();
-        annonce6.setOrgId(ORG_002);
-        annonce6.setTitle("Elegant 2BR Condo with Terrace");
-        annonce6.setDescription("Bright and spacious condo with a large terrace overlooking the city.");
-        annonce6.setCategory("Residential");
-        annonce6.setType(AnnonceType.SALE);
-        annonce6.setAddress("45 Avenue Montaigne");
-        annonce6.setCity("Paris");
-        annonce6.setSurface(95.0);
-        annonce6.setPrice(new BigDecimal("650000.00"));
-        annonce6.setCurrency("EUR");
-        annonce6.setStatus(AnnonceStatus.ACTIVE);
-        annonce6.setPhotos(Arrays.asList(
-                "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"
-        ));
-        annonce6.setMeta(Map.of("source", "seed", "priority", "medium", "org", ORG_002));
-        annonce6.setCreatedBy("system-seed");
-        annonce6.setUpdatedBy("system-seed");
-        annonces.add(annonce6);
-
-        Annonce annonce7 = new Annonce();
-        annonce7.setOrgId(ORG_002);
-        annonce7.setTitle("Cozy 1BR Apartment in Montmartre");
-        annonce7.setDescription("Perfect starter home in the charming Montmartre district.");
-        annonce7.setCategory("Residential");
-        annonce7.setType(AnnonceType.RENT);
-        annonce7.setAddress("22 Rue Lepic");
-        annonce7.setCity("Paris");
-        annonce7.setSurface(48.0);
-        annonce7.setPrice(new BigDecimal("1350.00"));
-        annonce7.setCurrency("EUR");
-        annonce7.setStatus(AnnonceStatus.ACTIVE);
-        annonce7.setMeta(Map.of("source", "seed", "org", ORG_002));
-        annonce7.setCreatedBy("system-seed");
-        annonce7.setUpdatedBy("system-seed");
-        annonces.add(annonce7);
-
-        Annonce annonce8 = new Annonce();
-        annonce8.setOrgId(ORG_002);
-        annonce8.setTitle("Office Space in Tech Hub");
-        annonce8.setDescription("Modern office space in the heart of the tech district with excellent connectivity.");
-        annonce8.setCategory("Commercial");
-        annonce8.setType(AnnonceType.LEASE);
-        annonce8.setAddress("101 Innovation Drive");
-        annonce8.setCity("Lyon");
-        annonce8.setSurface(220.0);
-        annonce8.setPrice(new BigDecimal("4200.00"));
-        annonce8.setCurrency("EUR");
-        annonce8.setStatus(AnnonceStatus.ACTIVE);
-        annonce8.setMeta(Map.of("source", "seed", "priority", "high", "org", ORG_002));
-        annonce8.setCreatedBy("system-seed");
-        annonce8.setUpdatedBy("system-seed");
-        annonces.add(annonce8);
-
-        Annonce annonce9 = new Annonce();
-        annonce9.setOrgId(ORG_002);
-        annonce9.setTitle("Penthouse with Panoramic Views");
-        annonce9.setDescription("Luxurious penthouse with 360-degree views of the city skyline.");
-        annonce9.setCategory("Residential");
-        annonce9.setType(AnnonceType.SALE);
-        annonce9.setAddress("88 Grande Rue");
-        annonce9.setCity("Marseille");
-        annonce9.setSurface(310.0);
-        annonce9.setPrice(new BigDecimal("1250000.00"));
-        annonce9.setCurrency("EUR");
-        annonce9.setStatus(AnnonceStatus.ACTIVE);
-        annonce9.setMeta(Map.of("source", "seed", "priority", "high", "org", ORG_002));
-        annonce9.setCreatedBy("system-seed");
-        annonce9.setUpdatedBy("system-seed");
-        annonces.add(annonce9);
-
-        Annonce annonce10 = new Annonce();
-        annonce10.setOrgId(ORG_002);
-        annonce10.setTitle("Retail Space in Shopping District");
-        annonce10.setDescription("High-traffic retail location ideal for boutique or restaurant.");
-        annonce10.setCategory("Commercial");
-        annonce10.setType(AnnonceType.LEASE);
-        annonce10.setAddress("15 Rue de Commerce");
-        annonce10.setCity("Lyon");
-        annonce10.setSurface(85.0);
-        annonce10.setPrice(new BigDecimal("2200.00"));
-        annonce10.setCurrency("EUR");
-        annonce10.setStatus(AnnonceStatus.PAUSED);
-        annonce10.setMeta(Map.of("source", "seed", "org", ORG_002));
-        annonce10.setCreatedBy("system-seed");
-        annonce10.setUpdatedBy("system-seed");
-        annonces.add(annonce10);
-
         List<Annonce> savedAnnonces = annonceRepository.saveAll(annonces);
         logger.info("Loaded {} annonces ({} for ORG-001, {} for ORG-002)", 
-                savedAnnonces.size(), 5, 5);
+                savedAnnonces.size(), 2, 2);
     }
 
     private void loadDossiers() {

@@ -251,3 +251,6 @@ setup-backend.js
 backend/package.json
 backend-output.txt
 backend-error.txt
+run-backend-setup-java17.cmd
+setup-backend-maven.ps1
+setup-backend-via-node.js

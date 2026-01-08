@@ -62,6 +62,30 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.deleteAll();
     }
 
+    private void seedTestData() {
+        // Seed exactly 2 annonces for ORG1
+        Annonce org1Annonce1 = createTestAnnonce(ORG1, "ORG1 Property 1", "Paris");
+        org1Annonce1.setStatus(AnnonceStatus.ACTIVE);
+        org1Annonce1.setType(AnnonceType.SALE);
+        annonceRepository.save(org1Annonce1);
+
+        Annonce org1Annonce2 = createTestAnnonce(ORG1, "ORG1 Property 2", "Lyon");
+        org1Annonce2.setStatus(AnnonceStatus.ACTIVE);
+        org1Annonce2.setType(AnnonceType.RENT);
+        annonceRepository.save(org1Annonce2);
+
+        // Seed exactly 2 annonces for ORG2
+        Annonce org2Annonce1 = createTestAnnonce(ORG2, "ORG2 Property 1", "Paris");
+        org2Annonce1.setStatus(AnnonceStatus.ACTIVE);
+        org2Annonce1.setType(AnnonceType.SALE);
+        annonceRepository.save(org2Annonce1);
+
+        Annonce org2Annonce2 = createTestAnnonce(ORG2, "ORG2 Property 2", "Marseille");
+        org2Annonce2.setStatus(AnnonceStatus.PAUSED);
+        org2Annonce2.setType(AnnonceType.LEASE);
+        annonceRepository.save(org2Annonce2);
+    }
+
     // ========== POST /api/v1/annonces Tests ==========
 
     @Test
@@ -318,12 +342,10 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void listAnnonces_NoFilters_ReturnsAllForTenant() throws Exception {
-        // Given
-        annonceRepository.save(createTestAnnonce(ORG1, "Annonce 1", "Paris"));
-        annonceRepository.save(createTestAnnonce(ORG1, "Annonce 2", "Lyon"));
-        annonceRepository.save(createTestAnnonce(ORG2, "Annonce 3", "Paris")); // Different tenant
+        // Given - Seed consistent test data
+        seedTestData();
 
-        // When & Then
+        // When & Then - ORG1 should have exactly 2 annonces
         mockMvc.perform(get("/api/v1/annonces")
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
@@ -334,7 +356,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_FilterByStatus_ReturnsMatchingAnnonces() throws Exception {
-        // Given
+        // Given - Create test data with various statuses
         Annonce draft = createTestAnnonce(ORG1, "Draft Annonce", "Paris");
         draft.setStatus(AnnonceStatus.DRAFT);
         annonceRepository.save(draft);
@@ -346,13 +368,19 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce archived = createTestAnnonce(ORG1, "Archived Annonce", "Paris");
         archived.setStatus(AnnonceStatus.ARCHIVED);
         annonceRepository.save(archived);
+        
+        // Add ORG2 data to verify tenant isolation
+        Annonce org2Published = createTestAnnonce(ORG2, "ORG2 Published", "Paris");
+        org2Published.setStatus(AnnonceStatus.PUBLISHED);
+        annonceRepository.save(org2Published);
 
-        // When & Then - Filter by PUBLISHED
+        // When & Then - Filter by PUBLISHED for ORG1 only
         mockMvc.perform(get("/api/v1/annonces")
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "PUBLISHED"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.totalElements").value(1))
             .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
             .andExpect(jsonPath("$.content[0].title").value("Published Annonce"));
     }
@@ -360,13 +388,16 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void listAnnonces_FilterByCity_ReturnsMatchingAnnonces() throws Exception {
-        // Given
+        // Given - Create test data in multiple cities
         annonceRepository.save(createTestAnnonce(ORG1, "Paris Annonce 1", "Paris"));
         annonceRepository.save(createTestAnnonce(ORG1, "Paris Annonce 2", "Paris"));
         annonceRepository.save(createTestAnnonce(ORG1, "Lyon Annonce", "Lyon"));
         annonceRepository.save(createTestAnnonce(ORG1, "Marseille Annonce", "Marseille"));
+        
+        // Add ORG2 data in Paris to verify tenant isolation
+        annonceRepository.save(createTestAnnonce(ORG2, "ORG2 Paris Annonce", "Paris"));
 
-        // When & Then - Filter by Paris
+        // When & Then - Filter by Paris for ORG1 only
         mockMvc.perform(get("/api/v1/annonces")
                 .header(TENANT_HEADER, ORG1)
                 .param("city", "Paris"))
@@ -441,7 +472,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void listAnnonces_CombinedFilters_ReturnsMatchingAnnonces() throws Exception {
-        // Given
+        // Given - Create diverse test data
         Annonce match = createTestAnnonce(ORG1, "Paris Rental", "Paris");
         match.setStatus(AnnonceStatus.PUBLISHED);
         match.setType(AnnonceType.RENT);
@@ -456,8 +487,14 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         noMatchCity.setStatus(AnnonceStatus.PUBLISHED);
         noMatchCity.setType(AnnonceType.RENT);
         annonceRepository.save(noMatchCity);
+        
+        // Add ORG2 data that would match filters - should not appear in results
+        Annonce org2Match = createTestAnnonce(ORG2, "ORG2 Paris Rental", "Paris");
+        org2Match.setStatus(AnnonceStatus.PUBLISHED);
+        org2Match.setType(AnnonceType.RENT);
+        annonceRepository.save(org2Match);
 
-        // When & Then - Filter by status=PUBLISHED, city=Paris, type=RENT
+        // When & Then - Filter by status=PUBLISHED, city=Paris, type=RENT for ORG1
         mockMvc.perform(get("/api/v1/annonces")
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "PUBLISHED")
@@ -465,7 +502,9 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
                 .param("type", "RENT"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.content[0].title").value("Paris Rental"));
+            .andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("Paris Rental"))
+            .andExpect(jsonPath("$.content[0].orgId").value(ORG1));
     }
 
     @Test
@@ -1114,11 +1153,8 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void listAnnonces_OnlyReturnsOwnTenantData() throws Exception {
-        // Given - Create data in multiple tenants
-        annonceRepository.save(createTestAnnonce(ORG1, "ORG1 Annonce 1", "Paris"));
-        annonceRepository.save(createTestAnnonce(ORG1, "ORG1 Annonce 2", "Lyon"));
-        annonceRepository.save(createTestAnnonce(ORG2, "ORG2 Annonce 1", "Paris"));
-        annonceRepository.save(createTestAnnonce(ORG2, "ORG2 Annonce 2", "Lyon"));
+        // Given - Seed consistent test data for both tenants
+        seedTestData();
 
         // When - List from ORG1
         MvcResult result = mockMvc.perform(get("/api/v1/annonces")
@@ -1138,6 +1174,25 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
             assertThat(item.get("orgId")).isEqualTo(ORG1);
             assertThat(item.get("title").toString()).startsWith("ORG1");
         }
+        
+        // When - List from ORG2
+        MvcResult result2 = mockMvc.perform(get("/api/v1/annonces")
+                .header(TENANT_HEADER, ORG2))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(2)))
+            .andExpect(jsonPath("$.totalElements").value(2))
+            .andReturn();
+
+        // Then - Verify only ORG2 data is returned
+        String responseJson2 = result2.getResponse().getContentAsString();
+        Map<String, Object> responseMap2 = objectMapper.readValue(responseJson2, new TypeReference<>() {});
+        @SuppressWarnings("unchecked")
+        List<Map<String, Object>> content2 = (List<Map<String, Object>>) responseMap2.get("content");
+        
+        for (Map<String, Object> item : content2) {
+            assertThat(item.get("orgId")).isEqualTo(ORG2);
+            assertThat(item.get("title").toString()).startsWith("ORG2");
+        }
     }
 
     @Test
@@ -1156,6 +1211,68 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Verify annonce still exists and unchanged
         Annonce unchanged = annonceRepository.findById(annonce.getId()).orElseThrow();
         assertThat(unchanged.getOrgId()).isEqualTo(ORG2);
+    }
+
+    @Test
+    @WithMockUser(roles = {"PRO"})
+    void listAnnonces_FilterByStatusAndCity_VerifiesTenantIsolation() throws Exception {
+        // Given - Create comprehensive test data
+        // ORG1: 2 ACTIVE in Paris, 1 ACTIVE in Lyon, 1 PAUSED in Paris
+        Annonce org1Paris1 = createTestAnnonce(ORG1, "ORG1 Paris Active 1", "Paris");
+        org1Paris1.setStatus(AnnonceStatus.ACTIVE);
+        annonceRepository.save(org1Paris1);
+        
+        Annonce org1Paris2 = createTestAnnonce(ORG1, "ORG1 Paris Active 2", "Paris");
+        org1Paris2.setStatus(AnnonceStatus.ACTIVE);
+        annonceRepository.save(org1Paris2);
+        
+        Annonce org1Lyon = createTestAnnonce(ORG1, "ORG1 Lyon Active", "Lyon");
+        org1Lyon.setStatus(AnnonceStatus.ACTIVE);
+        annonceRepository.save(org1Lyon);
+        
+        Annonce org1ParisPaused = createTestAnnonce(ORG1, "ORG1 Paris Paused", "Paris");
+        org1ParisPaused.setStatus(AnnonceStatus.PAUSED);
+        annonceRepository.save(org1ParisPaused);
+        
+        // ORG2: 1 ACTIVE in Paris (should not appear in ORG1 results)
+        Annonce org2Paris = createTestAnnonce(ORG2, "ORG2 Paris Active", "Paris");
+        org2Paris.setStatus(AnnonceStatus.ACTIVE);
+        annonceRepository.save(org2Paris);
+
+        // When & Then - Filter ORG1 by ACTIVE status only
+        mockMvc.perform(get("/api/v1/annonces")
+                .header(TENANT_HEADER, ORG1)
+                .param("status", "ACTIVE"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(3)))
+            .andExpect(jsonPath("$.totalElements").value(3));
+        
+        // When & Then - Filter ORG1 by city=Paris only
+        mockMvc.perform(get("/api/v1/annonces")
+                .header(TENANT_HEADER, ORG1)
+                .param("city", "Paris"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(3)))
+            .andExpect(jsonPath("$.totalElements").value(3));
+        
+        // When & Then - Filter ORG1 by ACTIVE status AND city=Paris
+        mockMvc.perform(get("/api/v1/annonces")
+                .header(TENANT_HEADER, ORG1)
+                .param("status", "ACTIVE")
+                .param("city", "Paris"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(2)))
+            .andExpect(jsonPath("$.totalElements").value(2));
+        
+        // When & Then - Filter ORG2 by ACTIVE status AND city=Paris
+        mockMvc.perform(get("/api/v1/annonces")
+                .header(TENANT_HEADER, ORG2)
+                .param("status", "ACTIVE")
+                .param("city", "Paris"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.totalElements").value(1))
+            .andExpect(jsonPath("$.content[0].title").value("ORG2 Paris Active"));
     }
 
     // ========== Helper Methods ==========

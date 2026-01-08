@@ -1,207 +1,133 @@
 # Repository Setup Status
 
-## Completed Tasks
+## ✅ Completed Setup Tasks
 
-### ✅ Frontend Setup - COMPLETE
-- **Status**: Fully installed and ready to use
-- **Dependencies**: 676 npm packages installed successfully
-- **Location**: `frontend/node_modules/`
-- **Next Steps**: 
-  - Build: `cd frontend && npm run build`
-  - Test: `cd frontend && npm test`  
-  - Lint: `cd frontend && npm run lint`
-  - Dev Server: `cd frontend && npm start`
+### Frontend
+- **npm install**: ✅ **COMPLETE**
+  - All 1,188 packages installed successfully
+  - Angular CLI 16.2.16 verified and working
+  - Node.js 18.12.1 detected
+  - All dependencies resolved in `frontend/node_modules/`
 
-### ⚠️ Backend Setup - REQUIRES MANUAL COMMAND
-- **Status**: Dependencies need to be installed
-- **Reason**: Security policy prevents automated Maven install execution
-- **Required Action**: Run ONE of the following commands manually:
+### Playwright
+- **Playwright package**: ✅ **INSTALLED**
+  - @playwright/test@1.57.0 installed as dev dependency
+  - Playwright CLI available at `frontend/node_modules/.bin/playwright.cmd`
+  
+⚠️ **Playwright browsers NOT yet installed** - see manual step below
 
-#### Option 1: Using the setup script (Recommended)
+## ⏳ Pending Setup Tasks
+
+### Backend (Maven/Java)
+- **Status**: ⏳ **REQUIRES MANUAL EXECUTION**
+- **Reason**: Security policy prevents automated modification of environment variables (JAVA_HOME)
+
+#### Required Manual Steps:
+
+**Option 1: Using the provided setup script (RECOMMENDED)**
+
+```cmd
+.\COMPLETE-SETUP.cmd
+```
+
+This script will:
+1. Set JAVA_HOME to Java 17 (C:\Environement\Java\jdk-17.0.5.8-hotspot)
+2. Run `mvn clean install -DskipTests` in the backend directory
+3. Verify the setup was successful
+
+**Option 2: Manual command execution**
+
 ```cmd
 cd backend
 setup.cmd
 ```
 
-#### Option 2: Using PowerShell
+**Option 3: Direct Maven command (PowerShell)**
+
 ```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-.\run-maven.ps1
+mvn clean install
 ```
 
-#### Option 3: Using the Maven wrapper
+### Playwright Browsers (Optional)
+
+If you plan to run frontend E2E tests, install Playwright browsers:
+
 ```cmd
-cd backend
-mvn-java17.cmd clean install -DskipTests
-```
-
-#### Option 4: Using Node.js
-```cmd
-cd backend
-node install-backend.js
-```
-
-### 📋 What the Backend Setup Does
-1. Sets JAVA_HOME to Java 17 (`C:\Environement\Java\jdk-17.0.5.8-hotspot`)
-2. Runs `mvn clean install -DskipTests`
-3. Downloads all Maven dependencies (~150-200 MB)
-4. Compiles the Spring Boot application
-5. Installs artifacts to local Maven repository
-
-**Duration**: Approximately 2-3 minutes on first run
-
-## Environment Configuration
-
-### Java Configuration
-- **Required**: Java 17 (JDK 17.0.5.8 or later)
-- **Location**: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- **Toolchains**: Pre-configured in `backend/toolchains.xml`
-- **Maven Settings**: Custom settings in `backend/settings.xml`
-
-### Current System Java
-- **Detected**: Java 8 (1.8.0_401)
-- **Note**: This is why helper scripts are needed - they temporarily set JAVA_HOME to Java 17
-
-## Repository Structure
-
-```
-/
-├── backend/          # Spring Boot application (needs Maven install)
-│   ├── src/
-│   ├── pom.xml
-│   ├── toolchains.xml
-│   ├── settings.xml
-│   └── setup.cmd    # ← Run this to complete setup
-├── frontend/         # Angular application (✓ READY)
-│   ├── src/
-│   ├── node_modules/  # ✓ Installed (676 packages)
-│   └── package.json
-└── infra/           # Docker infrastructure
-    └── docker-compose.yml
-```
-
-## After Backend Setup Completes
-
-Once you run the backend setup command, you'll be able to:
-
-### Backend Commands
-```bash
-cd backend
-
-# Build
-mvn clean package
-
-# Test  
-mvn test
-
-# Run development server
-mvn spring-boot:run
-
-# Run E2E tests (H2)
-mvn verify -Pbackend-e2e-h2
-
-# Run E2E tests (PostgreSQL)
-mvn verify -Pbackend-e2e-postgres
-```
-
-### Frontend Commands
-```bash
 cd frontend
-
-# Build (production)
-npm run build
-
-# Test
-npm test
-
-# Lint
-npm run lint
-
-# Development server
-npm start
-
-# E2E tests
-npm run e2e
-npm run e2e:fast
-npm run e2e:ui
+npx playwright install
 ```
 
-### Full Stack Development
-```powershell
-# Start everything
-.\dev.ps1 up
+Or install only Chromium (faster):
 
-# Check status
-.\dev.ps1 status
-
-# View logs
-.\dev.ps1 logs
-
-# Stop everything
-.\dev.ps1 down
+```cmd
+cd frontend
+npx playwright install chromium
 ```
-
-## Infrastructure (Optional)
-
-To start PostgreSQL and other infrastructure services:
-
-```bash
-cd infra
-docker-compose up -d
-```
-
-**Note**: The application can run without infrastructure using H2 in-memory database for development.
 
 ## Verification
 
-After backend setup, verify installation:
-
-```bash
-cd backend
-
-# Check Maven setup
-mvn-java17.cmd --version
-
-# Verify build works
-mvn-java17.cmd clean verify -DskipTests
-
-# Run a simple test
-mvn-java17.cmd test -Dtest=BackendApplicationTests
+### Frontend Verification
+```cmd
+cd frontend
+npm run ng -- version
 ```
 
-## Troubleshooting
+Expected: Angular CLI version information should display
 
-### If Maven fails with "JAVA_HOME not defined"
-Use the provided helper scripts which automatically set JAVA_HOME:
-- `backend/setup.cmd` (Windows Command Prompt)
-- `backend/run-maven.ps1` (PowerShell)
-- `backend/mvn-java17.cmd` (for any Maven command)
-
-### If build fails with dependency errors
-```bash
+### Backend Verification (after manual setup)
+```cmd
 cd backend
-mvn-java17.cmd dependency:resolve
-mvn-java17.cmd clean install -U
+mvn -version
 ```
 
-### If port conflicts occur
-- Backend uses port 8080
-- Frontend uses port 4200
-- PostgreSQL uses port 5432
+Expected: Maven and Java 17 version information
+
+```cmd
+mvn test
+```
+
+Expected: Tests should run successfully
+
+## Current Java Environment
+
+- **System Java**: Java 8 (C:\Program Files (x86)\Common Files\Oracle\Java\javapath\java.exe)
+- **Required Java**: Java 17 (C:\Environement\Java\jdk-17.0.5.8-hotspot) ✅ Verified present
+- **Maven**: 3.8.6 (C:\Environement\maven-3.8.6\bin\mvn.cmd)
+
+## Project Configuration Files
+
+All required configuration files are already present:
+- ✅ `backend/pom.xml` - Maven configuration
+- ✅ `backend/toolchains.xml` - Java 17 toolchain configuration
+- ✅ `backend/settings.xml` - Maven repository settings
+- ✅ `frontend/package.json` - npm configuration
+- ✅ `frontend/playwright.config.ts` - Playwright E2E test configuration
+
+## Available Commands After Setup
+
+### Backend
+```cmd
+cd backend
+mvn clean package    # Build
+mvn test             # Run tests
+mvn spring-boot:run  # Start dev server
+```
+
+### Frontend
+```cmd
+cd frontend
+npm run build        # Build
+npm test             # Run unit tests
+npm start            # Start dev server
+npm run e2e          # Run E2E tests (after Playwright browsers installed)
+```
 
 ## Next Steps
 
-1. **Complete backend setup** by running one of the commands listed above
-2. **Start development** with `.\dev.ps1 up` or individual services
-3. **Access the application**:
-   - Frontend: http://localhost:4200
-   - Backend API: http://localhost:8080
-   - API Docs: http://localhost:8080/swagger-ui.html
-   - Health Check: http://localhost:8080/actuator/health
+1. **Run backend setup** using one of the options above
+2. **(Optional)** Install Playwright browsers if you plan to run E2E tests
+3. **Verify** the setup by running build and test commands
 
-## Documentation
-
-- **AGENTS.md**: Complete development guide for AI agents
-- **SETUP.md**: Detailed setup instructions
-- **QUICKSTART.md**: Quick start guide
-- **README.md**: Project overview
+The repository is now ready for development once the backend Maven installation is complete!
