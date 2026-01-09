@@ -85,6 +85,9 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private jakarta.persistence.EntityManager entityManager;
+
     @BeforeEach
     void setUp() {
         // Delete all seed data and test data for fresh state
@@ -490,6 +493,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         createRequest.setContent("Follow-up call scheduled");
         createRequest.setVisibility(ActivityVisibility.INTERNAL);
         ActivityResponse activity = activityService.create(createRequest);
+        entityManager.flush();
+        entityManager.clear();
 
         List<AuditEventEntity> createEvents = auditEventRepository.findAll();
         assertThat(createEvents).hasSize(1);
@@ -500,6 +505,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setContent("Follow-up call completed");
         updateRequest.setVisibility(ActivityVisibility.CLIENT_VISIBLE);
         activityService.update(activity.getId(), updateRequest);
+        entityManager.flush();
+        entityManager.clear();
 
         List<AuditEventEntity> updateEvents = auditEventRepository.findAll();
         assertThat(updateEvents).hasSize(1);
@@ -508,6 +515,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         auditEventRepository.deleteAll();
 
         activityService.delete(activity.getId());
+        entityManager.flush();
+        entityManager.clear();
 
         List<AuditEventEntity> deleteEvents = auditEventRepository.findAll();
         assertThat(deleteEvents).hasSize(1);

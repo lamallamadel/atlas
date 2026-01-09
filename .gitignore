@@ -284,3 +284,7 @@ setup-maven-install.cmd
 setup-backend-simple.js
 backend/run-setup-temp.cmd
 INITIAL_SETUP_STATUS.md
+setup-backend-env.ps1
+setup-initial-build.cmd
+REPO_INITIAL_SETUP_STATUS.md
+SETUP_COMPLETION_REPORT.md
