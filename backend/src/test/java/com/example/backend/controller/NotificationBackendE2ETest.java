@@ -156,8 +156,13 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser( roles = {"ADMIN"})
     void createNotification_WithDossierId_StoresDossierId() throws Exception {
+        Dossier dossier = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+        Long dossierId = dossier.getId();
+        
         NotificationCreateRequest request = new NotificationCreateRequest();
-        request.setDossierId(999L);
+        request.setDossierId(dossierId);
         request.setType(NotificationType.EMAIL);
         request.setRecipient("test@example.com");
         request.setSubject("Dossier Update");
@@ -169,7 +174,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
                         .content(objectMapper.writeValueAsString(request))
         )
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.dossierId").value(999))
+                .andExpect(jsonPath("$.dossierId").value(dossierId))
                 .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
@@ -177,7 +182,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
         NotificationEntity savedEntity = notificationRepository.findById(response.getId()).orElse(null);
         assertThat(savedEntity).isNotNull();
-        assertThat(savedEntity.getDossierId()).isEqualTo(999L);
+        assertThat(savedEntity.getDossierId()).isEqualTo(dossierId);
     }
 
     @Test
