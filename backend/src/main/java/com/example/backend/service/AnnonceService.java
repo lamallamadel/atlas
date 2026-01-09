@@ -112,7 +112,14 @@ public class AnnonceService {
 
     @Transactional(readOnly = true)
     public Page<AnnonceResponse> list(AnnonceStatus status, String q, String city, String type, Pageable pageable) {
-        Specification<Annonce> spec = Specification.where(null);
+        
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        // IMPORTANT: base spec = tenant isolation
+        Specification<Annonce> spec = (root, query, cb) -> cb.equal(root.get("orgId"), orgId);
 
         if (status != null) {
             spec = spec.and((root, query, criteriaBuilder) ->

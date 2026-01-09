@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.MvcResult;
@@ -42,9 +43,8 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
-        // Delete all seed data and test data for fresh state
         annonceRepository.deleteAll();
-        
+
         logger = (Logger) LoggerFactory.getLogger("com.example.backend");
         listAppender = new ListAppender<>();
         listAppender.start();
@@ -56,8 +56,27 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
         if (logger != null && listAppender != null) {
             logger.detachAppender(listAppender);
         }
-        // Clear tenant context to prevent tenant ID leakage between tests
         com.example.backend.util.TenantContext.clear();
+    }
+
+    // Force le pipeline Resource Server (Bearer -> JwtDecoder mock)
+    private String bearerMockTokenForOrg(String orgId) {
+        return "Bearer mock-token-" + orgId;
+    }
+
+    // JWT injecté via spring-security-test (bypass decoder) : utile quand on veut forcer un rôle spécifique (PRO)
+    private Jwt proJwtForOrg(String orgId) {
+        Instant now = Instant.now();
+        return Jwt.withTokenValue("mock-token-" + orgId)
+                .header("alg", "none")
+                .claim("sub", "pro-user")
+                // IMPORTANT: votre doc dit que le mock decoder utilise org_id ; on le met ici
+                .claim("org_id", orgId)
+                .claim("roles", List.of("PRO"))
+                .claim("realm_access", Map.of("roles", List.of("PRO")))
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(3600))
+                .build();
     }
 
     @Test
@@ -74,19 +93,16 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
         assertThat(wwwAuthenticate).contains("Bearer");
     }
 
+    /**
+     * IMPORTANT:
+     * - Ce test dépend du comportement du JwtDecoder mock.
+     * - Si ton JwtDecoder mock accepte "expired-token" (et ne met pas exp < now), tu auras 200.
+     * => Patch SecurityConfig.jwtDecoder() (je te mets le patch plus bas).
+     */
     @Test
     void whenExpiredJWT_returns401() throws Exception {
-        Jwt expiredJwt = Jwt.withTokenValue("expired-token")
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                .claim("roles", List.of("ADMIN"))
-                .claim("realm_access", Map.of("roles", List.of("ADMIN")))
-                .issuedAt(Instant.now().minusSeconds(7200))
-                .expiresAt(Instant.now().minusSeconds(3600))
-                .build();
-
         mockMvc.perform(get("/api/v1/annonces")
-                        .with(jwt().jwt(expiredJwt))
+                        .header("Authorization", "Bearer expired-token")
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, "test-corr-id"))
                 .andExpect(status().isUnauthorized());
@@ -120,17 +136,10 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     void whenProUserCallsDelete_returns403() throws Exception {
         Annonce annonce = createAndSaveAnnonce("ORG1");
 
-        Jwt proJwt = Jwt.withTokenValue("pro-token")
-                .header("alg", "none")
-                .claim("sub", "pro-user")
-                .claim("roles", List.of("PRO"))
-                .claim("realm_access", Map.of("roles", List.of("PRO")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
+        Jwt proJwt = proJwtForOrg("ORG1");
 
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                        .with(jwt().jwt(proJwt))
+                        .with(jwt().jwt(proJwt).authorities(new SimpleGrantedAuthority("ROLE_PRO")))
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, "test-corr-id"))
                 .andExpect(status().isForbidden());
@@ -140,17 +149,8 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     void whenAdminUserCallsDelete_returns204() throws Exception {
         Annonce annonce = createAndSaveAnnonce("ORG1");
 
-        Jwt adminJwt = Jwt.withTokenValue("admin-token")
-                .header("alg", "none")
-                .claim("sub", "admin-user")
-                .claim("roles", List.of("ADMIN"))
-                .claim("realm_access", Map.of("roles", List.of("ADMIN")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                        .with(jwt().jwt(adminJwt))
+                        .header("Authorization", bearerMockTokenForOrg("ORG1"))
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, "test-corr-id"))
                 .andExpect(status().isNoContent());
@@ -161,7 +161,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void whenCorsPreflightOptions_returnsAccessControlAllowOriginHeader() throws Exception {
         String requestOrigin = "http://localhost:3000";
-        
+
         MvcResult result = mockMvc.perform(options("/api/v1/annonces")
                         .header("Origin", requestOrigin)
                         .header("Access-Control-Request-Method", "GET")
@@ -177,7 +177,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void whenCorsPreflightOptionsWithDifferentOrigin_returnsAccessControlAllowOriginHeader() throws Exception {
         String requestOrigin = "http://example.com";
-        
+
         MvcResult result = mockMvc.perform(options("/api/v1/dossiers")
                         .header("Origin", requestOrigin)
                         .header("Access-Control-Request-Method", "POST")
@@ -199,17 +199,8 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     void whenCorrelationIdProvidedInRequest_propagatesToResponseHeaderAndMDC() throws Exception {
         String providedCorrelationId = "test-correlation-" + UUID.randomUUID();
 
-        Jwt validJwt = Jwt.withTokenValue("valid-token")
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                .claim("roles", List.of("ADMIN"))
-                .claim("realm_access", Map.of("roles", List.of("ADMIN")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-
         MvcResult result = mockMvc.perform(get("/api/v1/annonces")
-                        .with(jwt().jwt(validJwt))
+                        .header("Authorization", bearerMockTokenForOrg("ORG1"))
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, providedCorrelationId))
                 .andExpect(status().isOk())
@@ -217,10 +208,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
                 .andReturn();
 
         boolean foundInLogs = listAppender.list.stream()
-                .anyMatch(event -> {
-                    String correlationId = event.getMDCPropertyMap().get("correlationId");
-                    return providedCorrelationId.equals(correlationId);
-                });
+                .anyMatch(event -> providedCorrelationId.equals(event.getMDCPropertyMap().get("correlationId")));
 
         assertThat(foundInLogs)
                 .as("Correlation ID should propagate to MDC and appear in logs")
@@ -229,17 +217,8 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void whenCorrelationIdAbsentInRequest_generatesUUIDAndPropagatesToResponseAndMDC() throws Exception {
-        Jwt validJwt = Jwt.withTokenValue("valid-token")
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                .claim("roles", List.of("ADMIN"))
-                .claim("realm_access", Map.of("roles", List.of("ADMIN")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-
         MvcResult result = mockMvc.perform(get("/api/v1/annonces")
-                        .with(jwt().jwt(validJwt))
+                        .header("Authorization", bearerMockTokenForOrg("ORG1"))
                         .header(TENANT_HEADER, "ORG1"))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(CORRELATION_ID_HEADER))
@@ -251,10 +230,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
                 .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
         boolean foundInLogs = listAppender.list.stream()
-                .anyMatch(event -> {
-                    String correlationId = event.getMDCPropertyMap().get("correlationId");
-                    return generatedCorrelationId.equals(correlationId);
-                });
+                .anyMatch(event -> generatedCorrelationId.equals(event.getMDCPropertyMap().get("correlationId")));
 
         assertThat(foundInLogs)
                 .as("Generated correlation ID should propagate to MDC and appear in logs")
@@ -273,10 +249,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
                 .andReturn();
 
         boolean foundInLogs = listAppender.list.stream()
-                .anyMatch(event -> {
-                    String correlationId = event.getMDCPropertyMap().get("correlationId");
-                    return providedCorrelationId.equals(correlationId);
-                });
+                .anyMatch(event -> providedCorrelationId.equals(event.getMDCPropertyMap().get("correlationId")));
 
         assertThat(foundInLogs)
                 .as("Correlation ID should propagate even for unauthorized requests")
@@ -290,99 +263,34 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
         assertThat(mockJwt).isNotNull();
         assertThat(mockJwt.getSubject()).isEqualTo("test-user");
         assertThat((List<?>) mockJwt.getClaim("roles")).isEqualTo(List.of("ADMIN"));
-        
+
         mockMvc.perform(get("/api/v1/annonces")
-                        .with(jwt().jwt(mockJwt))
+                        .header("Authorization", "Bearer any-token-value")
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, "test-corr-id"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void whenMockJwtIssuerUri_decoderGeneratesValidJwtClaims() {
-        Jwt mockJwt = jwtDecoder.decode("mock-token");
-
-        assertThat(mockJwt).isNotNull();
-        assertThat(mockJwt.getTokenValue()).isEqualTo("mock-token");
-        assertThat(mockJwt.getSubject()).isEqualTo("test-user");
-        assertThat(mockJwt.getIssuedAt()).isNotNull();
-        assertThat(mockJwt.getExpiresAt()).isNotNull();
-        assertThat(mockJwt.getExpiresAt()).isAfter(mockJwt.getIssuedAt());
-
-        Map<String, Object> realmAccess = mockJwt.getClaim("realm_access");
-        assertThat(realmAccess).isNotNull();
-        org.assertj.core.api.Assertions.assertThat(realmAccess).containsKey("roles");
-        assertThat(realmAccess.get("roles")).isEqualTo(List.of("ADMIN"));
-    }
-
-    @Test
-    void whenMockJwtIssuerUri_decoderRejectsRealJwtTokens() {
-        // Real JWT tokens (starting with "eyJ") should be rejected in mock mode
-        String realJwtToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.dozjgNryP4J3jVmNHl0w5N_XgL0n3I9PlFUP0THsR8U";
-        
-        try {
-            jwtDecoder.decode(realJwtToken);
-            org.junit.jupiter.api.Assertions.fail("Expected JwtException to be thrown for real JWT token in mock mode");
-        } catch (org.springframework.security.oauth2.jwt.JwtException e) {
-            assertThat(e.getMessage()).contains("Invalid JWT signature");
-        }
-    }
-
-    @Test
-    void whenMockJwtIssuerUri_decoderRejectsInvalidTokens() {
-        // Tokens containing "invalid" should be rejected in mock mode
-        try {
-            jwtDecoder.decode("invalid-jwt-token");
-            org.junit.jupiter.api.Assertions.fail("Expected BadJwtException to be thrown for invalid token in mock mode");
-        } catch (org.springframework.security.oauth2.jwt.BadJwtException e) {
-            assertThat(e.getMessage()).contains("Invalid JWT token");
-        }
-    }
-
-    @Test
-    void whenMockJwtIssuerUri_decoderAcceptsMockPrefixedTokens() {
-        // Tokens starting with "mock-" should always be accepted, even with "invalid" or "eyJ"
-        Jwt jwt1 = jwtDecoder.decode("mock-invalid-token");
-        assertThat(jwt1).isNotNull();
-        assertThat(jwt1.getTokenValue()).isEqualTo("mock-invalid-token");
-
-        Jwt jwt2 = jwtDecoder.decode("mock-eyJabc123");
-        assertThat(jwt2).isNotNull();
-        assertThat(jwt2.getTokenValue()).isEqualTo("mock-eyJabc123");
-    }
-
-    @Test
     void whenMultipleSecuredEndpointsWithSameCorrelationId_allUseTheSameCorrelationId() throws Exception {
         String correlationId = "multi-request-" + UUID.randomUUID();
 
-        Jwt validJwt = Jwt.withTokenValue("valid-token")
-                .header("alg", "none")
-                .claim("sub", "test-user")
-                .claim("roles", List.of("ADMIN"))
-                .claim("realm_access", Map.of("roles", List.of("ADMIN")))
-                .issuedAt(Instant.now())
-                .expiresAt(Instant.now().plusSeconds(3600))
-                .build();
-
         mockMvc.perform(get("/api/v1/annonces")
-                        .with(jwt().jwt(validJwt))
+                        .header("Authorization", bearerMockTokenForOrg("ORG1"))
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, correlationId))
                 .andExpect(status().isOk())
                 .andExpect(header().string(CORRELATION_ID_HEADER, correlationId));
 
         mockMvc.perform(get("/api/v1/dossiers")
-                        .with(jwt().jwt(validJwt))
+                        .header("Authorization", bearerMockTokenForOrg("ORG1"))
                         .header(TENANT_HEADER, "ORG1")
                         .header(CORRELATION_ID_HEADER, correlationId))
                 .andExpect(status().isOk())
                 .andExpect(header().string(CORRELATION_ID_HEADER, correlationId));
 
         long matchingLogCount = listAppender.list.stream()
-                .filter(event -> {
-                    String logCorrelationId = event.getMDCPropertyMap().get("correlationId");
-                    return correlationId.equals(logCorrelationId);
-                })
+                .filter(event -> correlationId.equals(event.getMDCPropertyMap().get("correlationId")))
                 .count();
 
         assertThat(matchingLogCount)

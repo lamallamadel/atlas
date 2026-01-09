@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @BackendE2ETest
+@WithMockUser(username = "test-user", roles = "PRO")
 class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String BASE_URL = "/api/v1/parties-prenantes";
@@ -399,6 +400,9 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
             request.setDossierId(dossier.getId());
             request.setRole("BUYER");
             request.setPhone(phone);
+            request.setFirstName("Test");
+            request.setLastName("User");
+            request.setAddress("123 Main St");
 
             mockMvc.perform(withTenantHeaders(
                             post(BASE_URL)
@@ -468,10 +472,6 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
         PartiePrenanteUpdateRequest updateRequest = new PartiePrenanteUpdateRequest();
         updateRequest.setRole("SELLER");
-        updateRequest.setFirstName("Jane");
-        updateRequest.setLastName("Smith");
-        updateRequest.setEmail("jane@example.com");
-        updateRequest.setPhone("+33698765432");
 
         mockMvc.perform(withTenantHeaders(
                         put(BASE_URL + "/" + entityId)
@@ -551,6 +551,7 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
         PartiePrenanteCreateRequest request = new PartiePrenanteCreateRequest();
         request.setDossierId(dossier.getId());
         request.setFirstName("Test");
+        request.setLastName("Doe");
 
         mockMvc.perform(withTenantHeaders(
                         post(BASE_URL)
@@ -565,6 +566,10 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
         PartiePrenanteCreateRequest request = new PartiePrenanteCreateRequest();
         request.setRole("BUYER");
         request.setFirstName("Test");
+        request.setLastName("Doe");
+        request.setEmail("test@example.com");
+        request.setPhone("1234567890");
+        request.setAddress("123 Main St");
 
         mockMvc.perform(withTenantHeaders(
                         post(BASE_URL)
@@ -579,6 +584,11 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
         PartiePrenanteCreateRequest request = new PartiePrenanteCreateRequest();
         request.setDossierId(99999L);
         request.setRole("BUYER");
+        request.setFirstName("Test");
+        request.setLastName("Doe");
+        request.setEmail("test@example.com");
+        request.setPhone("1234567890");
+        request.setAddress("123 Main St");
 
         mockMvc.perform(withTenantHeaders(
                         post(BASE_URL)
@@ -594,12 +604,16 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
         PartiePrenanteCreateRequest request = new PartiePrenanteCreateRequest();
         request.setDossierId(dossier.getId());
+        request.setFirstName("Test");
+        request.setLastName("Doe");
+        request.setEmail("test@example.com");
+        request.setPhone("1234567890");
+        request.setAddress("123 Main St");
         request.setRole("BUYER");
 
-        mockMvc.perform(withTenantHeaders(
-                        post(BASE_URL)
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)), TENANT_ID, CORRELATION_ID))
+        mockMvc.perform(withTenantHeaders(post(BASE_URL), TENANT_ID, CORRELATION_ID)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound());
     }
 
@@ -608,8 +622,7 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
     void putUpdate_NonExistingEntity_Returns404() throws Exception {
         PartiePrenanteUpdateRequest request = new PartiePrenanteUpdateRequest();
         request.setRole("BUYER");
-        request.setFirstName("Test");
-
+    
         mockMvc.perform(withTenantHeaders(
                         put(BASE_URL + "/99999")
                                 .contentType(MediaType.APPLICATION_JSON)

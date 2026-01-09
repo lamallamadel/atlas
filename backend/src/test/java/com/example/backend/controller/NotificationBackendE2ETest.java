@@ -154,6 +154,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    @WithMockUser( roles = {"ADMIN"})
     void createNotification_WithDossierId_StoresDossierId() throws Exception {
         NotificationCreateRequest request = new NotificationCreateRequest();
         request.setDossierId(999L);

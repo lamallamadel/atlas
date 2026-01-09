@@ -19,6 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
@@ -46,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * - H2 vs Postgres JSONB compatibility
  */
 @BackendE2ETest
+@WithMockUser( roles = {"PRO"})
 class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String ORG1 = "ORG1";
@@ -115,7 +117,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .header(CORRELATION_ID_HEADER, "test-create-001")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -177,7 +179,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -199,7 +201,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -226,7 +228,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -243,7 +245,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -260,7 +262,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Should return 400 Bad Request
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -278,7 +280,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Should return 400 Bad Request
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -296,7 +298,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Should return 400 Bad Request
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -314,7 +316,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Should succeed
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -335,7 +337,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(annonce.getId()))
@@ -351,7 +353,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When - Try to access from ORG1
         mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isNotFound());
     }
@@ -360,7 +362,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     void getAnnonceById_NonExistent_Returns404() throws Exception {
         // When & Then
         mockMvc.perform(get("/api/v1/annonces/999999")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isNotFound());
     }
@@ -385,7 +387,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.photos", hasSize(2)))
@@ -424,7 +426,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - ORG1 should have exactly 2 annonces
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
@@ -453,7 +455,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by PUBLISHED for ORG1 only
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "PUBLISHED"))
             .andExpect(status().isOk())
@@ -476,7 +478,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by Paris for ORG1 only
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("city", "Paris"))
             .andExpect(status().isOk())
@@ -501,7 +503,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by RENT
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("type", "RENT"))
             .andExpect(status().isOk())
@@ -518,7 +520,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Search for "apartment"
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("q", "apartment"))
             .andExpect(status().isOk())
@@ -539,7 +541,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Search for "balcony"
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("q", "balcony"))
             .andExpect(status().isOk())
@@ -573,7 +575,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter by status=PUBLISHED, city=Paris, type=RENT for ORG1
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "PUBLISHED")
                 .param("city", "Paris")
@@ -594,7 +596,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Request page 1 (second page) with size 10
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("page", "1")
                 .param("size", "10"))
@@ -615,7 +617,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Sort by title ascending
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("sort", "title,asc"))
             .andExpect(status().isOk())
@@ -641,7 +643,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Sort by createdAt descending (newest first)
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("sort", "createdAt,desc"))
             .andExpect(status().isOk())
@@ -667,7 +669,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setPrice(BigDecimal.valueOf(200.00));
 
         MvcResult result = mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -699,7 +701,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setPhotos(List.of("new1.jpg", "new2.jpg", "new3.jpg"));
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -732,7 +734,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setRulesJson(newRules);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -758,7 +760,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setStatus(AnnonceStatus.PUBLISHED);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -781,7 +783,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setTitle("Hacked Title");
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -801,7 +803,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then
         mockMvc.perform(put("/api/v1/annonces/999999")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -820,7 +822,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -870,7 +872,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setPrice(BigDecimal.valueOf(200.00));
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -910,6 +912,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    @WithMockUser( roles = {"ADMIN"})
     void deleteAnnonce_GeneratesAuditEventWithBeforeDiff() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "To Be Deleted", "Paris");
@@ -920,7 +923,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isNoContent());
 
@@ -972,7 +975,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setRulesJson(newRules);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -1000,7 +1003,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - PRO role should not be able to delete
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isForbidden());
 
@@ -1009,6 +1012,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
+    @WithMockUser( roles = {"ADMIN"})
     void deleteAnnonce_AsAdmin_Returns204NoContent() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Admin Delete Test", "Paris");
@@ -1016,7 +1020,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - ADMIN role should be able to delete
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isNoContent());
 
@@ -1032,7 +1036,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - PRO role should be able to create
         mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1050,7 +1054,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - PRO role should be able to update
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -1068,7 +1072,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1080,7 +1084,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify retrieval works
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.photos", hasSize(3)))
@@ -1104,7 +1108,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1116,7 +1120,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify retrieval and nested structure
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.rulesJson.restrictions.age.min").value(18))
@@ -1142,7 +1146,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1154,7 +1158,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify all types are preserved
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.meta.stringField").value("value"))
@@ -1176,7 +1180,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When
         MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -1188,7 +1192,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // Then - Verify empty collections are handled
         mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.photos").isEmpty());
@@ -1215,7 +1219,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setRulesJson(newRules);
 
         mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateRequest)))
@@ -1258,7 +1262,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When - List from ORG1
         MvcResult result = mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "ADMIN")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
@@ -1278,7 +1282,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When - List from ORG2
         MvcResult result2 = mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG2, "test-user", "ADMIN")))
                 .header(TENANT_HEADER, ORG2))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
@@ -1306,7 +1309,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // When - Try to delete from ORG1 (even with forbidden response, it should be 404 for security)
         // Note: PRO can't delete anyway, but testing cross-tenant isolation
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1))
             .andExpect(status().isForbidden()); // PRO role gets 403 first
 
@@ -1342,7 +1345,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
         // When & Then - Filter ORG1 by ACTIVE status only
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "ACTIVE"))
             .andExpect(status().isOk())
@@ -1351,7 +1354,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When & Then - Filter ORG1 by city=Paris only
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("city", "Paris"))
             .andExpect(status().isOk())
@@ -1360,7 +1363,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When & Then - Filter ORG1 by ACTIVE status AND city=Paris
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG1, "test-user", "PRO")))
+                
                 .header(TENANT_HEADER, ORG1)
                 .param("status", "ACTIVE")
                 .param("city", "Paris"))
@@ -1370,7 +1373,6 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         
         // When & Then - Filter ORG2 by ACTIVE status AND city=Paris
         mockMvc.perform(get("/api/v1/annonces")
-                .with(jwt().jwt(createMockJwt(ORG2, "test-user", "PRO")))
                 .header(TENANT_HEADER, ORG2)
                 .param("status", "ACTIVE")
                 .param("city", "Paris"))

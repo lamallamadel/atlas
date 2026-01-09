@@ -16,7 +16,7 @@ The `BaseBackendE2ETest` class provides helper methods to create mock JWTs:
 @Test
 public void testExample() throws Exception {
     mockMvc.perform(get("/api/v1/dossiers")
-            .with(jwt().jwt(createMockJwt("ORG-001")))  // Add JWT authentication
+                .with(jwt().jwt(createMockJwt("ORG-001")))  // Add JWT authentication
             .header(TENANT_HEADER, "ORG-001")           // Add tenant header
             .header(CORRELATION_ID_HEADER, "test-corr-id"))
         .andExpect(status().isOk());
