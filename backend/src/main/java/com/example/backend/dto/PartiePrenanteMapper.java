@@ -39,7 +39,9 @@ public class PartiePrenanteMapper {
     }
 
     public void updateEntity(PartiePrenanteEntity entity, PartiePrenanteUpdateRequest request) {
-        entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
+        if (request.getRole() != null) {
+            entity.setRole(PartiePrenanteRole.valueOf(request.getRole()));
+        }
         entity.setName(request.getName());
         entity.setFirstName(request.getFirstName());
         entity.setLastName(request.getLastName());
