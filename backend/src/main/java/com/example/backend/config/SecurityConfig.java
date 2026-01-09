@@ -112,13 +112,21 @@ public class SecurityConfig {
                 
                 // Reject tokens that start with "eyJ" (base64 encoded JWT header) but are not from our mock
                 // This simulates rejection of real JWT tokens with invalid signatures
-                if (token.startsWith("eyJ") && !token.startsWith("mock-")) {
-                    throw new org.springframework.security.oauth2.jwt.JwtException("Invalid JWT signature");
+                try {
+                    if (token.startsWith("eyJ") && !token.startsWith("mock-")) {
+                        throw new org.springframework.security.oauth2.jwt.JwtException("Invalid JWT signature");
+                    }
+                } catch (Exception e) {
+                    throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT: " + e.getMessage(), e);
                 }
                 
                 // Reject tokens explicitly marked as invalid
-                if (token.contains("invalid") && !token.startsWith("mock-")) {
-                    throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT token");
+                try {
+                    if (token.contains("invalid") && !token.startsWith("mock-")) {
+                        throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT token");
+                    }
+                } catch (Exception e) {
+                    throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT: " + e.getMessage(), e);
                 }
                 
                 // Extract org_id from token if present (format: "mock-token-ORG-XXX")

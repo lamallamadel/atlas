@@ -1,160 +1,213 @@
-# Initial Repository Setup - Status
+# Initial Repository Setup - Complete
 
-## ✓ Completed
+## Summary
 
-### Frontend Setup
-- **Status**: ✅ COMPLETE
-- **Action**: npm install completed successfully in frontend directory
-- **Result**: All 1188 packages installed
-- **Dependencies**: Angular 16.2, Playwright, Material Design, and all dev dependencies
+Initial repository setup has been partially completed. The frontend is fully set up, while the backend requires one manual command due to Maven proxy configuration restrictions.
 
-## ⚠ Backend Setup - Manual Intervention Required
+## ✅ Completed Successfully
 
-### Why Manual Setup is Needed
-Due to PowerShell execution restrictions in the current environment, the backend Maven setup requires manual execution. All setup scripts and configurations are in place.
+### 1. Frontend Dependencies (npm)
+- **Status**: ✅ Complete
+- **Action**: Installed 1188 npm packages
+- **Location**: `frontend/node_modules/`
+- **Package Manager**: npm 8.19.2
+- **Framework**: Angular 16 with TypeScript 5.1
 
-### Backend Setup Options
+**Installed Dependencies Include**:
+- Angular 16.2.0 (core, common, forms, router, etc.)
+- Angular Material 16.2.0
+- Playwright 1.57.0 (for E2E testing)
+- Chart.js 4.4.0
+- OAuth2 OIDC client
+- Karma/Jasmine (for unit testing)
+- ESLint (for linting)
 
-Choose ONE of the following methods:
+### 2. Environment Verification
+- ✅ Node.js/npm installed and working
+- ✅ Maven 3.8.6 installed and accessible
+- ✅ Java 17 available at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- ✅ Project structure verified
+- ✅ Helper scripts created
 
-#### Option 1: Using Batch Script (Recommended - Easiest)
+## ⚠️ Requires One Manual Step
+
+### Backend Dependencies (Maven)
+The backend Maven dependencies need to be installed with one command.
+
+**Why**: The global Maven settings file contains a proxy configuration (`localhost:8888`) that conflicts with dependency downloads. The project's `backend/settings.xml` overrides this, but must be explicitly referenced.
+
+**Quick Setup** - Run ONE of these commands:
+
+#### Recommended: Use the provided batch file
 ```cmd
-cd backend
-do-install.cmd
+.\complete-backend-setup.bat
+```
+This script will:
+1. Set JAVA_HOME to Java 17
+2. Copy the correct Maven settings to `~/.m2/` 
+3. Run `mvn clean install -DskipTests`
+
+#### Alternative: Use the mvn17 wrapper
+```cmd
+mvn17.cmd -f backend\pom.xml clean install -DskipTests
 ```
 
-This script:
-- Sets JAVA_HOME to Java 17
-- Runs `mvn clean install` with the project settings.xml
-- Handles all environment configuration automatically
-
-#### Option 2: Using PowerShell Script
+#### Alternative: Manual Maven command
 ```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-.\install-java17.ps1
-```
-
-#### Option 3: Using Node.js Script
-```cmd
-cd backend
-node install.js
-```
-
-#### Option 4: Manual Maven Command
-```cmd
-cd backend
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-set PATH=%JAVA_HOME%\bin;%PATH%
 mvn clean install -DskipTests
+cd ..
 ```
 
-#### Option 5: Using Maven Toolchains (if configured)
-```cmd
+### Playwright Browsers (Optional - for E2E tests)
+```powershell
+cd frontend
+npx playwright install
+cd ..
+```
+
+This installs Chromium, Firefox, and WebKit browsers for cross-browser E2E testing.
+
+## 📂 Repository Structure
+
+```
+/
+├── backend/                 # Spring Boot 3.2.1 application (Java 17)
+│   ├── src/
+│   ├── pom.xml
+│   ├── settings.xml        # Maven settings (no proxy)
+│   ├── toolchains.xml      # Java 17 toolchain config
+│   └── setup.cmd           # Backend setup script
+├── frontend/                # Angular 16 application
+│   ├── src/
+│   ├── e2e/                # Playwright E2E tests
+│   ├── node_modules/       # ✅ Installed
+│   ├── package.json
+│   └── *.config.ts         # Playwright configurations
+├── infra/                   # Docker Compose infrastructure
+│   ├── docker-compose.yml
+│   └── reset-db scripts
+├── mvn17.cmd               # Maven wrapper with Java 17
+├── complete-backend-setup.bat  # One-command backend setup
+└── AGENTS.md               # Development guide
+```
+
+## 🧪 Testing the Setup
+
+After running the backend setup command, verify with:
+
+```powershell
+# Verify backend compiles
 cd backend
-mvn clean install -DskipTests
+mvn compile
+
+# Verify frontend builds  
+cd frontend
+npm run build
+
+# Run backend tests
+cd backend
+mvn test
+
+# Run frontend tests
+cd frontend
+npm test
 ```
-Note: Toolchains.xml is already present in `%USERPROFILE%\.m2\toolchains.xml`
 
-### Prerequisites Verified
-- ✅ Java 17 is installed at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- ✅ Maven 3.8.6 is installed at: `C:\Environement\maven-3.8.6`
-- ✅ Maven toolchains.xml exists in: `C:\Users\a891780\.m2\toolchains.xml`
-- ✅ Node.js 18.12.1 is available
-- ✅ All setup helper scripts are in place
+## 🚀 Running the Application
 
-### After Backend Setup
+Once setup is complete:
 
-Once the backend Maven build completes, you will be able to:
-
-1. **Run tests**: 
-   ```bash
-   cd backend
-   mvn test
-   ```
-
-2. **Run backend E2E tests (H2)**:
-   ```bash
-   cd backend
-   mvn verify -Pbackend-e2e-h2
-   ```
-
-3. **Run backend E2E tests (PostgreSQL)**:
-   ```bash
-   cd backend
-   mvn verify -Pbackend-e2e-postgres
-   ```
-
-4. **Start the backend dev server**:
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
-
-5. **Run frontend E2E tests**:
-   ```bash
-   cd frontend
-   npm run e2e
-   ```
-
-## Quick Start After Backend Setup
-
-Use the convenience scripts in the project root:
-
-**PowerShell**:
+### Start Backend (Terminal 1)
 ```powershell
-# Start full development stack
-.\dev.ps1 up
-
-# Stop all services
-.\dev.ps1 down
-
-# Check status
-.\dev.ps1 status
+cd backend
+mvn spring-boot:run
 ```
+Backend will run on http://localhost:8080
 
-**Bash** (Linux/Mac):
-```bash
-# Start full development stack
-./dev up
-
-# Stop all services
-./dev down
-
-# Check status
-./dev status
-```
-
-## Environment Configuration
-
-A helper script `setenv.ps1` is available in the project root:
+### Start Frontend (Terminal 2)
 ```powershell
-. .\setenv.ps1
+cd frontend  
+npm start
+```
+Frontend will run on http://localhost:4200
+
+### Run E2E Tests (Terminal 3)
+```powershell
+cd frontend
+npm run e2e          # Full E2E test suite
+npm run e2e:fast     # Fast mode (single browser, H2 database)
+npm run e2e:ui       # Interactive UI mode
 ```
 
-This sets:
-- `JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- Updates PATH to include Java 17 bin directory
+## 📖 Key Commands Reference
 
-## Setup Scripts Reference
+### Backend
+- `mvn test` - Run backend tests
+- `mvn spring-boot:run` - Start backend server
+- `mvn clean package` - Build JAR file
+- `mvn verify -Pbackend-e2e-h2` - Run backend E2E tests with H2
+- `mvn verify -Pbackend-e2e-postgres` - Run backend E2E tests with PostgreSQL
 
-The following helper scripts were created/verified:
+### Frontend
+- `npm start` - Start dev server
+- `npm test` - Run unit tests
+- `npm run build` - Build for production
+- `npm run lint` - Run ESLint
+- `npm run e2e` - Run E2E tests
+- `npm run e2e:fast` - Fast E2E tests
+- `npm run e2e:ui` - Interactive E2E test UI
 
-1. **backend/do-install.cmd** - Batch file to run Maven with Java 17
-2. **backend/install-java17.ps1** - PowerShell script for Maven setup
-3. **backend/install.js** - Node.js script for Maven setup
-4. **setenv.ps1** - Environment configuration helper
-5. **mvn17.cmd** - Root-level Maven wrapper for Java 17
+### Infrastructure
+- `cd infra && docker-compose up -d` - Start PostgreSQL/services
+- `cd infra && docker-compose down` - Stop services
+- `cd infra && .\reset-db.ps1` - Reset database
 
-## Troubleshooting
+## 🔧 Configuration Files Created
 
-If Maven reports "JAVA_HOME is not defined correctly":
-1. Verify Java 17 is at the expected path
-2. Use one of the provided wrapper scripts (do-install.cmd, install-java17.ps1, or install.js)
-3. Or manually set JAVA_HOME before running Maven
+1. **complete-backend-setup.bat** - One-command backend setup script
+2. **SETUP_COMPLETED.md** - Detailed setup status and instructions
+3. **INITIAL_SETUP_COMPLETE.md** - This file
 
-## Next Steps
+## 📝 Notes
 
-1. **Complete backend setup** using one of the options above
-2. **Verify the setup** by running tests
-3. **Start development** using the dev.ps1 or dev scripts
-4. **Refer to AGENTS.md** for detailed development workflows and testing procedures
+1. **Java 17 Required**: The project requires Java 17. Use `mvn17.cmd` or set `JAVA_HOME` manually.
+
+2. **Maven Proxy Issue**: If Maven fails with proxy errors, ensure you've copied `backend/settings.xml` to `~/.m2/settings.xml`, or use the `complete-backend-setup.bat` script which does this automatically.
+
+3. **Toolchains**: The `backend/toolchains.xml` file configures Maven to use Java 17 even if a different Java version is in your PATH.
+
+4. **Docker**: Required for PostgreSQL-based E2E tests. H2 (in-memory) tests work without Docker.
+
+5. **Vulnerabilities**: The frontend npm install reported 27 vulnerabilities. These are mostly in dev dependencies (Karma, ESLint) and can be addressed with `npm audit fix` if needed.
+
+## ✅ Next Steps
+
+1. Run `.\complete-backend-setup.bat` to complete backend setup
+2. (Optional) Run `cd frontend && npx playwright install` for E2E testing
+3. Start the backend: `cd backend && mvn spring-boot:run`
+4. Start the frontend: `cd frontend && npm start`
+5. Access the application at http://localhost:4200
+
+## 🆘 Troubleshooting
+
+### Maven Proxy Errors
+**Symptom**: Maven fails with "Connection refused" to localhost:8888
+
+**Solution**: Run `complete-backend-setup.bat` which copies the correct settings file.
+
+### Java Version Errors
+**Symptom**: Maven says Java 8 detected, but project requires Java 17
+
+**Solution**: Use `mvn17.cmd` wrapper or set `JAVA_HOME`:
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+```
+
+### Port Already in Use
+**Symptom**: Backend fails to start - "Port 8080 already in use"
+
+**Solution**: Kill the process using port 8080 or change the port in `backend/src/main/resources/application.yml`
+
+For more details, see `AGENTS.md` and `SETUP.md`.
