@@ -59,8 +59,10 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @BeforeEach
     void setUp() {
-        // Delete all seed data and test data for fresh state
+        // Delete all notifications for clean state
         notificationRepository.deleteAll();
+        // Delete all test data including dossiers and related entities
+        testDataBuilder.deleteAllTestData();
         reset(mailSender);
     }
 
@@ -380,18 +382,53 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void getNotifications_FilterByDossierId_ReturnsMatchingNotifications() throws Exception {
-        createTestNotification(ORG_ID, 100L, NotificationType.EMAIL, NotificationStatus.PENDING);
-        createTestNotification(ORG_ID, 100L, NotificationType.SMS, NotificationStatus.SENT);
-        createTestNotification(ORG_ID, 200L, NotificationType.EMAIL, NotificationStatus.PENDING);
+        // Create dossiers with valid associations
+        Dossier dossier100 = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+        Dossier dossier200 = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+
+        // Create notifications linked to dossiers using testDataBuilder
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.SMS)
+                .withStatus(NotificationStatus.SENT)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier200)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
 
         mockMvc.perform(
                 withTenantHeaders(get(BASE_URL), ORG_ID)
-                        .param("dossierId", "100")
+                        .param("dossierId", dossier100.getId().toString())
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.content[0].dossierId").value(100))
-                .andExpect(jsonPath("$.content[1].dossierId").value(100))
+                .andExpect(jsonPath("$.content[0].dossierId").value(dossier100.getId().intValue()))
+                .andExpect(jsonPath("$.content[1].dossierId").value(dossier100.getId().intValue()))
                 .andExpect(jsonPath("$.totalElements").value(2));
     }
 
@@ -431,20 +468,64 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void getNotifications_FilterByMultipleCriteria_ReturnsMatchingNotifications() throws Exception {
-        createTestNotification(ORG_ID, 100L, NotificationType.EMAIL, NotificationStatus.PENDING);
-        createTestNotification(ORG_ID, 100L, NotificationType.EMAIL, NotificationStatus.SENT);
-        createTestNotification(ORG_ID, 100L, NotificationType.SMS, NotificationStatus.PENDING);
-        createTestNotification(ORG_ID, 200L, NotificationType.EMAIL, NotificationStatus.PENDING);
+        // Create dossiers with valid associations
+        Dossier dossier100 = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+        Dossier dossier200 = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+
+        // Create notifications with different combinations using testDataBuilder
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.SENT)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.SMS)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier200)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
 
         mockMvc.perform(
                 withTenantHeaders(get(BASE_URL), ORG_ID)
-                        .param("dossierId", "100")
+                        .param("dossierId", dossier100.getId().toString())
                         .param("type", "EMAIL")
                         .param("status", "PENDING")
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
-                .andExpect(jsonPath("$.content[0].dossierId").value(100))
+                .andExpect(jsonPath("$.content[0].dossierId").value(dossier100.getId().intValue()))
                 .andExpect(jsonPath("$.content[0].type").value("EMAIL"))
                 .andExpect(jsonPath("$.content[0].status").value("PENDING"))
                 .andExpect(jsonPath("$.totalElements").value(1));
@@ -540,19 +621,63 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void getNotifications_FilterByDossierId_ExcludesGlobalNotifications() throws Exception {
-        createTestNotification(ORG_ID, null, NotificationType.EMAIL, NotificationStatus.PENDING);
-        createTestNotification(ORG_ID, 100L, NotificationType.EMAIL, NotificationStatus.SENT);
-        createTestNotification(ORG_ID, 100L, NotificationType.SMS, NotificationStatus.PENDING);
-        createTestNotification(ORG_ID, 200L, NotificationType.EMAIL, NotificationStatus.PENDING);
+        // Create global notification (no dossier) using testDataBuilder
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        // Create dossiers with valid associations
+        Dossier dossier100 = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+        Dossier dossier200 = testDataBuilder.dossierBuilder()
+                .withOrgId(ORG_ID)
+                .persist();
+
+        // Create notifications linked to dossiers using testDataBuilder
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.SENT)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier100)
+                .withType(NotificationType.SMS)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
+
+        testDataBuilder.notificationBuilder()
+                .withOrgId(ORG_ID)
+                .withDossier(dossier200)
+                .withType(NotificationType.EMAIL)
+                .withStatus(NotificationStatus.PENDING)
+                .withRecipient("test@example.com")
+                .withSubject("Test Subject")
+                .withTemplateId("test-template")
+                .persist();
 
         mockMvc.perform(
                 withTenantHeaders(get(BASE_URL), ORG_ID)
-                        .param("dossierId", "100")
+                        .param("dossierId", dossier100.getId().toString())
         )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.content[0].dossierId").value(100))
-                .andExpect(jsonPath("$.content[1].dossierId").value(100))
+                .andExpect(jsonPath("$.content[0].dossierId").value(dossier100.getId().intValue()))
+                .andExpect(jsonPath("$.content[1].dossierId").value(dossier100.getId().intValue()))
                 .andExpect(jsonPath("$.totalElements").value(2));
     }
 
@@ -577,7 +702,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
                     .withType(type)
                     .withStatus(status)
                     .withRecipient("test@example.com")
-                    .withSubject("Test Subject")
+                .withSubject("Test Subject")
                     .withTemplateId("test-template")
                     .persist();
         }
