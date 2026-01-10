@@ -662,6 +662,9 @@ export class DossierDetailComponent implements OnInit {
 
     const dialogRef = this.dialog.open(PartiePrenanteFormDialogComponent, {
       width: '500px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       data: dialogData
     });
 
@@ -752,6 +755,9 @@ export class DossierDetailComponent implements OnInit {
   deletePartie(partie: PartiePrenanteResponse): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '400px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       data: {
         title: 'Supprimer la partie prenante',
         message: `Êtes-vous sûr de vouloir supprimer ${partie.firstName} ${partie.lastName} ?`
@@ -839,6 +845,9 @@ export class DossierDetailComponent implements OnInit {
 
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
       width: '600px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       data: dialogData
     });
 
@@ -955,6 +964,9 @@ export class DossierDetailComponent implements OnInit {
   deleteAppointment(appointment: AppointmentResponse): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '400px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       data: {
         title: 'Supprimer le rendez-vous',
         message: `Êtes-vous sûr de vouloir supprimer ce rendez-vous ?`
@@ -1118,6 +1130,9 @@ export class DossierDetailComponent implements OnInit {
 
     const dialogRef = this.dialog.open(MessageFormDialogComponent, {
       width: '500px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       data: dialogData
     });
 

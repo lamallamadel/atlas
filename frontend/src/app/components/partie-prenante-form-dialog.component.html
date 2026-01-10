@@ -1,56 +1,59 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Ajouter' }} une partie prenante</h2>
+<div @slideIn>
+  <h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Ajouter' }} une partie prenante</h2>
 
-<mat-dialog-content>
-  <form [formGroup]="partieForm" class="partie-form">
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Rôle</mat-label>
-      <mat-select formControlName="role">
-        <mat-option *ngFor="let option of roleOptions" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="partieForm.get('role')?.hasError('required')">
-        {{ getErrorMessage('role') }}
-      </mat-error>
-    </mat-form-field>
+  <mat-dialog-content>
+    <form [formGroup]="partieForm" class="partie-form">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Rôle</mat-label>
+        <mat-select formControlName="role">
+          <mat-option *ngFor="let option of roleOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="partieForm.get('role')?.hasError('required')">
+          {{ getErrorMessage('role') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Prénom</mat-label>
-      <input matInput formControlName="firstName" placeholder="Prénom">
-      <mat-error *ngIf="partieForm.get('firstName')?.hasError('required')">
-        {{ getErrorMessage('firstName') }}
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Prénom</mat-label>
+        <input matInput formControlName="firstName" placeholder="Prénom">
+        <mat-error *ngIf="partieForm.get('firstName')?.hasError('required')">
+          {{ getErrorMessage('firstName') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Nom</mat-label>
-      <input matInput formControlName="lastName" placeholder="Nom">
-      <mat-error *ngIf="partieForm.get('lastName')?.hasError('required')">
-        {{ getErrorMessage('lastName') }}
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Nom</mat-label>
+        <input matInput formControlName="lastName" placeholder="Nom">
+        <mat-error *ngIf="partieForm.get('lastName')?.hasError('required')">
+          {{ getErrorMessage('lastName') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Téléphone</mat-label>
-      <input matInput formControlName="phone" placeholder="0612345678">
-      <mat-error *ngIf="partieForm.get('phone')?.invalid">
-        {{ getErrorMessage('phone') }}
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Téléphone</mat-label>
+        <input matInput formControlName="phone" placeholder="0612345678">
+        <mat-error *ngIf="partieForm.get('phone')?.invalid">
+          {{ getErrorMessage('phone') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Email</mat-label>
-      <input matInput formControlName="email" placeholder="email@example.com">
-      <mat-error *ngIf="partieForm.get('email')?.invalid">
-        {{ getErrorMessage('email') }}
-      </mat-error>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput formControlName="email" placeholder="email@example.com">
+        <mat-error *ngIf="partieForm.get('email')?.invalid">
+          {{ getErrorMessage('email') }}
+        </mat-error>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!partieForm.valid">
-    {{ isEditMode ? 'Modifier' : 'Ajouter' }}
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Annuler</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!partieForm.valid || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Modifier' : 'Ajouter' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

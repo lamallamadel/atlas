@@ -1,113 +1,91 @@
-# 🚀 Start Here - Quick Setup Guide
-
-Welcome to the repository! Follow these steps to get started.
+# Quick Start - Newly Cloned Repository
 
 ## Current Status
 
-✅ **Frontend**: Fully set up and ready  
-⚠️ **Backend**: One command needed to complete setup
+✅ **Frontend**: Dependencies installed and ready  
+⚠️ **Backend**: Requires Maven build (manual step needed)
 
-## Complete Setup (One Command)
+## Complete Setup (2 minutes)
 
-Run this command from the repository root:
+Run ONE of these commands from the repository root:
 
+**Windows Command Prompt:**
 ```cmd
-.\complete-backend-setup.bat
+complete-setup.cmd
+```
+
+**PowerShell:**
+```powershell
+.\complete-setup.ps1
 ```
 
 This will:
-- Set Java 17 environment  
-- Configure Maven settings (bypass proxy)
-- Install all backend dependencies
-- Takes ~2-5 minutes depending on internet speed
+1. Build the backend with Java 17
+2. Install Playwright browsers for E2E tests
 
-## Start Development
+## Why Manual Setup?
 
-After running the setup command above:
-
-### 1. Start Backend
-```powershell
-cd backend
-mvn spring-boot:run
-```
-✅ Backend API: http://localhost:8080
-
-### 2. Start Frontend (new terminal)
-```powershell
-cd frontend
-npm start
-```
-✅ Frontend App: http://localhost:4200
-
-## Optional: E2E Testing Setup
-
-To run end-to-end tests, install Playwright browsers:
-
-```powershell
-cd frontend
-npx playwright install
-```
-
-Then run tests:
-```powershell
-npm run e2e:fast
-```
+The automated setup completed the frontend installation but security restrictions prevent automated environment variable modification required for the backend Java 17 build. The scripts above handle this safely.
 
 ## Verify Setup
 
-Check that everything works:
+After running the setup script:
 
-```powershell
-# Backend
+```cmd
+# Test backend
 cd backend
 mvn test
 
-# Frontend
+# Test frontend
 cd frontend
 npm test
 ```
 
-## Tech Stack
+## Start Development
 
-- **Backend**: Spring Boot 3.2.1 + Java 17 + Maven
-- **Frontend**: Angular 16 + TypeScript 5.1 + npm
-- **Database**: PostgreSQL (Docker) or H2 (in-memory)
-- **Testing**: JUnit 5 (backend), Jasmine/Karma (frontend unit), Playwright (E2E)
+```cmd
+# Terminal 1 - Backend
+cd backend
+mvn spring-boot:run
 
-## Common Commands
-
-### Backend
-```powershell
-mvn test                    # Run tests
-mvn spring-boot:run         # Start server
-mvn clean package           # Build JAR
+# Terminal 2 - Frontend
+cd frontend
+npm start
 ```
 
-### Frontend
-```powershell
-npm start                   # Dev server
-npm test                    # Unit tests
-npm run build               # Production build
-npm run e2e                 # E2E tests
+Then access:
+- Frontend: http://localhost:4200
+- Backend API: http://localhost:8080
+- API Docs: http://localhost:8080/swagger-ui.html
+
+## Alternative: Manual Steps
+
+If you prefer to run commands manually:
+
+```cmd
+# Set Java 17
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+
+# Build backend
+cd backend
+mvn clean install -DskipTests -gs settings.xml
+cd ..
+
+# Install Playwright (optional)
+cd frontend
+npx playwright install
+cd ..
 ```
 
 ## Need Help?
 
-- **Setup Issues**: See [INITIAL_SETUP_COMPLETE.md](./INITIAL_SETUP_COMPLETE.md)
-- **Development Guide**: See [AGENTS.md](./AGENTS.md)
-- **Troubleshooting**: See [SETUP_COMPLETED.md](./SETUP_COMPLETED.md)
+- **Full Setup Guide**: See `SETUP_STATUS.md`
+- **Development Guide**: See `AGENTS.md`
+- **Project Overview**: See `README.md`
 
-## Troubleshooting
+## Tech Stack
 
-### "Maven proxy error"
-→ Run `.\complete-backend-setup.bat` - it fixes proxy config
-
-### "Java 8 detected but 17 required"
-→ The setup script sets Java 17 automatically
-
-### "Port 8080 already in use"
-→ Stop other services on port 8080 or change port in `backend/src/main/resources/application.yml`
-
----
-
-**Ready?** Run `.\complete-backend-setup.bat` to complete setup! 🎉
+- **Backend**: Spring Boot 3.2.1 + Java 17 + Maven
+- **Frontend**: Angular 16 + TypeScript
+- **Database**: PostgreSQL (prod) / H2 (test)
+- **Testing**: JUnit 5 + Playwright

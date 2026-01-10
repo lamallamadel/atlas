@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { AppointmentStatus } from '../services/appointment-api.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 export interface AppointmentFormData {
   id?: number;
@@ -17,11 +18,20 @@ export interface AppointmentFormData {
 @Component({
   selector: 'app-appointment-form-dialog',
   templateUrl: './appointment-form-dialog.component.html',
-  styleUrls: ['./appointment-form-dialog.component.css']
+  styleUrls: ['./appointment-form-dialog.component.css'],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class AppointmentFormDialogComponent implements OnInit {
   appointmentForm!: FormGroup;
   isEditMode = false;
+  isSubmitting = false;
   AppointmentStatus = AppointmentStatus;
 
   statusOptions = [
@@ -70,7 +80,8 @@ export class AppointmentFormDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.appointmentForm.valid) {
+    if (this.appointmentForm.valid && !this.isSubmitting) {
+      this.isSubmitting = true;
       const formValue = this.appointmentForm.value;
       this.dialogRef.close({
         id: this.data?.id,

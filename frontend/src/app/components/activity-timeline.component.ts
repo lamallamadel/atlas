@@ -156,6 +156,9 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   deleteActivity(activity: ActivityResponse): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '400px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       data: {
         title: 'Supprimer l\'activité',
         message: 'Êtes-vous sûr de vouloir supprimer cette activité ?'

@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { PartiePrenanteRole } from '../services/dossier-api.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 export interface PartiePrenanteFormData {
   id?: number;
@@ -15,11 +16,20 @@ export interface PartiePrenanteFormData {
 @Component({
   selector: 'app-partie-prenante-form-dialog',
   templateUrl: './partie-prenante-form-dialog.component.html',
-  styleUrls: ['./partie-prenante-form-dialog.component.css']
+  styleUrls: ['./partie-prenante-form-dialog.component.css'],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class PartiePrenanteFormDialogComponent implements OnInit {
   partieForm!: FormGroup;
   isEditMode = false;
+  isSubmitting = false;
   PartiePrenanteRole = PartiePrenanteRole;
 
   roleOptions = [
@@ -52,7 +62,8 @@ export class PartiePrenanteFormDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.partieForm.valid) {
+    if (this.partieForm.valid && !this.isSubmitting) {
+      this.isSubmitting = true;
       const formValue = this.partieForm.value;
       this.dialogRef.close({
         id: this.data?.id,

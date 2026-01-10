@@ -1,59 +1,62 @@
-<h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Planifier' }} un rendez-vous</h2>
+<div @slideIn>
+  <h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Planifier' }} un rendez-vous</h2>
 
-<mat-dialog-content>
-  <form [formGroup]="appointmentForm" class="appointment-form">
-    <div *ngIf="getFormErrorMessage()" class="form-error-message">
-      {{ getFormErrorMessage() }}
-    </div>
+  <mat-dialog-content>
+    <form [formGroup]="appointmentForm" class="appointment-form">
+      <div *ngIf="getFormErrorMessage()" class="form-error-message">
+        {{ getFormErrorMessage() }}
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Date et heure de début</mat-label>
-      <input matInput type="datetime-local" formControlName="startTime" placeholder="jj/mm/aaaa hh:mm">
-      <mat-error *ngIf="appointmentForm.get('startTime')?.invalid">
-        {{ getErrorMessage('startTime') }}
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date et heure de début</mat-label>
+        <input matInput type="datetime-local" formControlName="startTime" placeholder="jj/mm/aaaa hh:mm">
+        <mat-error *ngIf="appointmentForm.get('startTime')?.invalid">
+          {{ getErrorMessage('startTime') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Date et heure de fin</mat-label>
-      <input matInput type="datetime-local" formControlName="endTime" placeholder="jj/mm/aaaa hh:mm">
-      <mat-error *ngIf="appointmentForm.get('endTime')?.invalid">
-        {{ getErrorMessage('endTime') }}
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Date et heure de fin</mat-label>
+        <input matInput type="datetime-local" formControlName="endTime" placeholder="jj/mm/aaaa hh:mm">
+        <mat-error *ngIf="appointmentForm.get('endTime')?.invalid">
+          {{ getErrorMessage('endTime') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Lieu</mat-label>
-      <input matInput formControlName="location" placeholder="Adresse du rendez-vous">
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Lieu</mat-label>
+        <input matInput formControlName="location" placeholder="Adresse du rendez-vous">
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Assigné à</mat-label>
-      <input matInput formControlName="assignedTo" placeholder="Nom de la personne">
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Assigné à</mat-label>
+        <input matInput formControlName="assignedTo" placeholder="Nom de la personne">
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Statut</mat-label>
-      <mat-select formControlName="status">
-        <mat-option *ngFor="let option of statusOptions" [value]="option.value">
-          {{ option.label }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="appointmentForm.get('status')?.hasError('required')">
-        {{ getErrorMessage('status') }}
-      </mat-error>
-    </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Statut</mat-label>
+        <mat-select formControlName="status">
+          <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="appointmentForm.get('status')?.hasError('required')">
+          {{ getErrorMessage('status') }}
+        </mat-error>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Notes</mat-label>
-      <textarea matInput formControlName="notes" placeholder="Notes additionnelles" rows="4"></textarea>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Notes</mat-label>
+        <textarea matInput formControlName="notes" placeholder="Notes additionnelles" rows="4"></textarea>
+      </mat-form-field>
+    </form>
+  </mat-dialog-content>
 
-<mat-dialog-actions align="end">
-  <button mat-button (click)="onCancel()">Annuler</button>
-  <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!appointmentForm.valid">
-    {{ isEditMode ? 'Modifier' : 'Planifier' }}
-  </button>
-</mat-dialog-actions>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Annuler</button>
+    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!appointmentForm.valid || isSubmitting">
+      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Modifier' : 'Planifier' }}</span>
+    </button>
+  </mat-dialog-actions>
+</div>

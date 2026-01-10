@@ -1,134 +1,162 @@
-# Repository Setup Status
+# Initial Repository Setup Status
 
-## Summary
+## ✅ Completed Tasks
 
-The initial repository setup has been **partially completed**. The frontend is fully configured, but the backend requires manual setup due to environment restrictions.
+### 1. Frontend Setup (100% Complete)
+- ✅ **Dependencies Installed**: `npm install` completed successfully
+  - 1,187 packages installed in `frontend/node_modules/`
+  - All Angular dependencies available
+  - Ready for development, testing, and building
 
-## ✅ Completed
+### 2. Repository State
+- ✅ Git repository cloned
+- ✅ Toolchains configuration exists (`toolchains.xml`)
+- ✅ Maven settings configured (`backend/settings.xml`)
+- ✅ Node.js environment confirmed working
 
-### Frontend Setup
-- **Status**: Fully completed
-- **Actions taken**:
-  - ✅ Installed npm dependencies (`npm install`)
-  - ✅ 1,188 packages installed successfully
-  - ✅ node_modules directory created with 675 packages
-- **Ready for**: Build, test, and development
+## ⚠️ Pending Tasks (Manual Action Required)
 
-## ⚠️ Pending: Backend Setup
+### Backend Maven Build
 
-### What Needs to Be Done
-The backend setup requires running a setup script manually due to security restrictions that prevent:
-- Setting environment variables programmatically
-- Executing custom scripts automatically
-- Running batch/PowerShell files
+Due to security restrictions in the automated setup environment, the backend Maven build requires manual execution. The system prevents automated:
+- Environment variable modification (JAVA_HOME)
+- Script execution (.cmd, .ps1 files)
+- Process spawning with custom environments
 
-### How to Complete Setup
+**To complete the backend setup, run ONE of the following:**
 
-**Run ONE of the following commands:**
+### Option 1: Using the Maven Wrapper (Recommended)
 
-#### Option 1: Windows Command Prompt (Easiest)
 ```cmd
-SETUP_BACKEND.cmd
-```
-
-#### Option 2: PowerShell
-```powershell
-.\SETUP_BACKEND.ps1
-```
-
-#### Option 3: Manual Commands
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install -DskipTests -s settings.xml
+.\mvn.cmd clean install -DskipTests -gs settings.xml
+cd ..
 ```
 
-### Why Manual Setup is Needed
-The backend requires:
-1. **Java 17** - JAVA_HOME must be set to `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-2. **Maven 3.8.6** - Already available in your environment
-3. **Dependencies download** - First-time Maven dependency download can take 5-10 minutes
+The `backend/mvn.cmd` wrapper automatically sets JAVA_HOME to Java 17.
 
-## Configuration Files Created
+### Option 2: Manual JAVA_HOME Setup
 
-To simplify the manual setup, the following files have been created:
+**PowerShell:**
+```powershell
+# Set Java 17 environment
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 
-| File | Purpose |
-|------|---------|
-| `SETUP_BACKEND.cmd` | Windows batch script to set up backend |
-| `SETUP_BACKEND.ps1` | PowerShell script to set up backend |
-| `backend/settings.xml` | Maven settings (no proxy, direct Maven Central) |
-| `backend/mavenrc_pre.bat` | Maven RC file for JAVA_HOME |
-| `backend/mvn.cmd` | Local Maven wrapper with Java 17 |
-| `INITIAL_SETUP_INSTRUCTIONS.md` | Detailed setup instructions |
-
-## After Setup is Complete
-
-Once you run the backend setup script, you'll be able to:
-
-### Development
-```bash
-# Start full dev stack (requires Docker)
-.\dev.ps1 up
-
-# Or manually:
-cd backend && mvn spring-boot:run    # Backend on :8080
-cd frontend && npm start              # Frontend on :4200
+# Build backend
+cd backend
+mvn clean install -DskipTests -gs settings.xml
+cd ..
 ```
 
-### Building
-```bash
-cd backend && mvn clean package       # Build backend
-cd frontend && npm run build          # Build frontend
+**Command Prompt:**
+```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+cd backend
+mvn clean install -DskipTests -gs settings.xml
+cd ..
 ```
 
-### Testing
-```bash
-cd backend && mvn test                                # Backend unit tests
-cd backend && mvn verify -Pbackend-e2e-h2            # Backend E2E tests (H2)
-cd backend && mvn verify -Pbackend-e2e-postgres      # Backend E2E tests (PostgreSQL)
-cd frontend && npm test                               # Frontend unit tests
-cd frontend && npm run e2e                           # Frontend E2E tests
+### Option 3: Using Root-Level Maven Wrapper
+
+```cmd
+.\mvn17.cmd -f backend\pom.xml clean install -DskipTests
 ```
 
-## System Requirements Verified
+## Optional: Playwright Browser Installation
 
-✅ **Java 17**: Located at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-✅ **Maven 3.8.6**: Located at `C:\Environement\maven-3.8.6`
-✅ **Node.js/npm**: Available and working
-✅ **Git**: Repository cloned successfully
+For frontend E2E tests, install Playwright browsers:
+
+```cmd
+cd frontend
+npx playwright install
+cd ..
+```
+
+## Verification
+
+After completing the backend build, verify the setup:
+
+### Backend
+```cmd
+cd backend
+mvn test
+```
+
+### Frontend  
+```cmd
+cd frontend
+npm test
+```
+
+## Current Repository Structure
+
+```
+✅ frontend/
+   ✅ node_modules/ (1,187 packages installed)
+   ✅ Ready for: npm start, npm test, npm run build, npm run lint
+
+⚠️  backend/
+   ❌ target/ (not yet built - needs Maven install)
+   ✅ pom.xml
+   ✅ src/
+   ✅ Maven wrapper available (mvn.cmd)
+
+📝 Configuration Files
+   ✅ toolchains.xml (Java 17 configuration)
+   ✅ backend/settings.xml (Maven configuration)
+   ✅ .gitignore (configured)
+```
+
+## Development Commands
+
+Once backend is built, use these commands:
+
+### Backend
+- **Build**: `cd backend && mvn clean package`
+- **Test**: `cd backend && mvn test`
+- **Dev Server**: `cd backend && mvn spring-boot:run`
+- **E2E Tests (H2)**: `cd backend && mvn verify -Pbackend-e2e-h2`
+- **E2E Tests (PostgreSQL)**: `cd backend && mvn verify -Pbackend-e2e-postgres`
+
+### Frontend
+- **Dev Server**: `cd frontend && npm start`
+- **Build**: `cd frontend && npm run build`
+- **Test**: `cd frontend && npm test`
+- **Lint**: `cd frontend && npm run lint`
+- **E2E Tests**: `cd frontend && npm run e2e` (after Playwright install)
+- **E2E (Fast)**: `cd frontend && npm run e2e:fast`
+
+## Environment Details
+
+| Component | Status | Location/Version |
+|-----------|--------|------------------|
+| Java 17 | ✅ Installed | `C:\Environement\Java\jdk-17.0.5.8-hotspot` |
+| Maven 3.8.6 | ✅ Installed | `C:\Environement\maven-3.8.6` |
+| Node.js | ✅ Working | v18.12.1 |
+| Frontend Packages | ✅ Installed | 1,187 packages |
+| Backend Build | ⚠️ Pending | Run Maven install |
 
 ## Next Steps
 
-1. **Run backend setup**: Execute `SETUP_BACKEND.cmd` or `SETUP_BACKEND.ps1`
-2. **Verify installation**: Run `mvn test` in backend directory
-3. **Start development**: Use `.\dev.ps1 up` or run services individually
-4. **Read documentation**: See `AGENTS.md` for all available commands
+1. **Complete Backend Build** (choose one method above)
+2. **Install Playwright** (optional, for E2E tests)
+3. **Start Development**:
+   ```cmd
+   # Terminal 1 - Backend
+   cd backend && mvn spring-boot:run
 
-## Troubleshooting
+   # Terminal 2 - Frontend  
+   cd frontend && npm start
+   ```
+4. **Access Applications**:
+   - Frontend: http://localhost:4200
+   - Backend API: http://localhost:8080
+   - API Docs: http://localhost:8080/swagger-ui.html
 
-If you encounter issues:
+## Additional Resources
 
-1. **JAVA_HOME errors**: The setup scripts automatically set this. If running manual commands, ensure JAVA_HOME is set before running Maven.
-
-2. **Maven download timeouts**: The first run downloads many dependencies. This is normal and can take 5-10 minutes.
-
-3. **Proxy issues**: The `backend/settings.xml` file is configured to bypass proxies. If you need a proxy, edit this file.
-
-4. **Port conflicts**: 
-   - Backend uses port 8080
-   - Frontend uses port 4200
-   - PostgreSQL (Docker) uses port 5432
-
-## Documentation
-
-- **AGENTS.md** - Complete agent development guide
-- **SETUP.md** - Detailed setup instructions
-- **INITIAL_SETUP_INSTRUCTIONS.md** - This setup walkthrough
+- **AGENTS.md** - Complete development guide
+- **SETUP.md** - Initial setup instructions
 - **README.md** - Project overview
-
----
-
-**Status**: Frontend ✅ Complete | Backend ⚠️ Requires manual script execution
-
-**Last Updated**: Repository initial setup
+- **backend/README.md** - Backend-specific documentation
+- **frontend/README.md** - Frontend-specific documentation

@@ -1,141 +1,264 @@
-# Initial Repository Setup - Completion Instructions
+# Repository Setup - Final Steps Required
 
-## ✅ What Has Been Completed
+## What Was Completed Automatically
 
-### Frontend Setup (100% Complete)
-- ✅ Analyzed frontend configuration (`package.json`)
-- ✅ Installed all npm dependencies (1,188 packages)
-- ✅ Created `node_modules` directory with all required packages
-- ✅ **Frontend is ready for build, lint, and test commands**
+✅ **Frontend Setup (100% Complete)**
+- Installed 1,187 npm packages
+- All Angular dependencies available in `frontend/node_modules/`
+- Ready for development, testing, and building
 
-### Repository Configuration
-- ✅ Verified Java 17 installation at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- ✅ Confirmed Maven 3.8.6 availability
-- ✅ Identified all helper scripts for Java 17/Maven execution
-- ✅ Created `.mvn` configuration directory
-- ✅ Set up Maven configuration files
+✅ **Setup Scripts Created**
+- `complete-setup.cmd` - Windows batch script to finish setup
+- `complete-setup.ps1` - PowerShell script to finish setup
+- `START_HERE.md` - Quick start guide
+- `SETUP_STATUS.md` - Detailed status report
 
-## ⚠️ Backend Setup - One Command Required
+## What Needs Manual Action
 
-### Why Manual Completion is Needed
+⚠️ **Backend Maven Build**
 
-The backend Maven build requires environment variable modifications (JAVA_HOME) which are restricted by the automated setup security policies. However, the repository includes multiple helper scripts that handle this automatically.
+Due to security restrictions, the automated setup cannot:
+- Set the JAVA_HOME environment variable
+- Execute scripts that modify the process environment
+- Spawn processes with custom environment configurations
 
-### Complete Backend Setup (Choose ONE option)
+**This is a one-time setup step that takes ~2 minutes.**
 
-**Option 1 - PowerShell (Recommended):**
+## How to Complete Setup
+
+From the repository root directory, run:
+
+### Option 1: Automated Script (Recommended)
+
+**Command Prompt:**
+```cmd
+complete-setup.cmd
+```
+
+**PowerShell:**
 ```powershell
+.\complete-setup.ps1
+```
+
+This will:
+1. Set JAVA_HOME to Java 17
+2. Build the backend with Maven
+3. Install Playwright browsers (optional, for E2E tests)
+
+### Option 2: Manual Commands
+
+If you prefer to see each step:
+
+```cmd
+REM Set Java 17 environment
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+
+REM Build backend
 cd backend
-.\run-maven.ps1
-```
+mvn clean install -DskipTests -gs settings.xml
+cd ..
 
-**Option 2 - Command Prompt:**
-```cmd
-cd backend
-setup.cmd
-```
-
-**Option 3 - Using Root mvn17 Wrapper:**
-```cmd
-mvn17.cmd clean install -f backend\pom.xml
-```
-
-**Option 4 - Using Backend mvn-java17 Wrapper:**
-```cmd
-backend\mvn-java17.cmd clean install
-```
-
-### What the Setup Command Does
-
-1. Sets JAVA_HOME to Java 17
-2. Downloads all Maven dependencies (~200+ packages, 3-5 minutes)
-3. Compiles the Spring Boot application
-4. Runs unit tests
-5. Packages the application as JAR
-
-### Expected Output
-
-When successful, you'll see:
-```
-[INFO] BUILD SUCCESS
-[INFO] Total time: XX:XX min
-```
-
-## 📋 Verification After Setup
-
-### Test Frontend (Already Working)
-```powershell
+REM Install Playwright browsers (optional)
 cd frontend
-npm run build    # Should complete successfully
-npm test         # Should run tests
-npm run lint     # Should lint code
+npx playwright install
+cd ..
 ```
 
-### Test Backend (After Setup)
-```powershell
+### Option 3: Using Maven Wrapper
+
+The repository includes a Maven wrapper that automatically sets Java 17:
+
+```cmd
 cd backend
-mvn clean package  # Should build successfully
-mvn test           # Should run tests
-mvn spring-boot:run # Should start server on port 8080
+.\mvn.cmd clean install -DskipTests -gs settings.xml
+cd ..
 ```
 
-## 🚀 Available Helper Scripts
+## Verification
 
-The repository includes these helper scripts for your convenience:
+After completing the setup:
 
-| Script | Purpose | Usage |
-|--------|---------|-------|
-| `backend/setup.cmd` | Complete backend setup | `cd backend && setup.cmd` |
-| `backend/run-maven.ps1` | Maven with Java 17 | `cd backend && .\run-maven.ps1` |
-| `backend/mvn-java17.cmd` | Maven wrapper | `backend\mvn-java17.cmd <args>` |
-| `mvn17.cmd` | Root-level Maven wrapper | `mvn17.cmd <args>` |
-| `dev.ps1` | Full stack management | `.\dev.ps1 up` |
-| `COMPLETE-SETUP.cmd` | One-click complete setup | `.\COMPLETE-SETUP.cmd` |
+### Test Backend
+```cmd
+cd backend
+mvn test
+```
+Expected: All tests pass ✅
 
-## 📚 Command Reference
+### Test Frontend
+```cmd
+cd frontend
+npm test
+```
+Expected: All tests pass ✅
 
-### Backend Commands (After Setup)
-- **Build**: `cd backend && mvn clean package`
-- **Test**: `cd backend && mvn test`
-- **Lint**: Not configured (Checkstyle can be added if needed)
-- **Dev Server**: `cd backend && mvn spring-boot:run`
-- **With Java 17**: `cd backend && .\mvn-java17.cmd <any-mvn-command>`
+## Start Development
 
-### Frontend Commands (Ready Now)
-- **Build**: `cd frontend && npm run build`
-- **Test**: `cd frontend && npm test`
-- **Lint**: `cd frontend && npm run lint`
-- **Dev Server**: `cd frontend && npm start`
+Once setup is complete:
 
-### Infrastructure (Optional)
-- **Start Services**: `cd infra && docker-compose up -d`
-- **Stop Services**: `cd infra && docker-compose down`
-- **Reset Database**: `cd infra && .\reset-db.ps1` (Windows) or `./reset-db.sh` (Linux)
+```cmd
+REM Terminal 1 - Start Backend
+cd backend
+mvn spring-boot:run
 
-### Full Stack Management
-- **Start All**: `.\dev.ps1 up`
-- **Stop All**: `.\dev.ps1 down`
-- **Check Status**: `.\dev.ps1 status`
-- **View Logs**: `.\dev.ps1 logs`
+REM Terminal 2 - Start Frontend (in a new terminal)
+cd frontend
+npm start
+```
 
-## 🎯 Next Steps
+Access the application:
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:8080
+- **API Documentation**: http://localhost:8080/swagger-ui.html
+- **Actuator Health**: http://localhost:8080/actuator/health
 
-1. **Complete backend setup** by running ONE of the commands above
-2. **Verify setup** by running `mvn test` in the backend directory
-3. **Start developing** using the commands in the reference above
+## Available Commands
 
-## 📖 Additional Documentation
+### Backend Commands
+```cmd
+cd backend
 
-- **AGENTS.md** - Complete agent development guide
-- **SETUP.md** - Detailed setup instructions
-- **QUICKSTART.md** - Quick start guide
+REM Build
+mvn clean package
+
+REM Run tests
+mvn test
+
+REM Run dev server
+mvn spring-boot:run
+
+REM E2E tests with H2
+mvn verify -Pbackend-e2e-h2
+
+REM E2E tests with PostgreSQL (requires Docker)
+mvn verify -Pbackend-e2e-postgres
+```
+
+### Frontend Commands
+```cmd
+cd frontend
+
+REM Start dev server
+npm start
+
+REM Build for production
+npm run build
+
+REM Run unit tests
+npm test
+
+REM Lint code
+npm run lint
+
+REM E2E tests (after completing setup)
+npm run e2e
+
+REM Fast E2E tests (single browser)
+npm run e2e:fast
+
+REM E2E tests with UI mode
+npm run e2e:ui
+```
+
+## Environment Details
+
+| Component | Status | Details |
+|-----------|--------|---------|
+| Java 17 | ✅ Available | `C:\Environement\Java\jdk-17.0.5.8-hotspot` |
+| Maven 3.8.6 | ✅ Available | `C:\Environement\maven-3.8.6` |
+| Node.js | ✅ Working | v18.12.1 |
+| Frontend | ✅ Ready | 1,187 packages installed |
+| Backend | ⚠️ Pending | Run `complete-setup.cmd` to build |
+| Playwright | ⚠️ Pending | Installed by setup script (optional) |
+
+## Infrastructure (Optional)
+
+For local development with PostgreSQL and other services:
+
+```cmd
+cd infra
+docker-compose up -d
+```
+
+This starts:
+- PostgreSQL database
+- Other infrastructure services
+
+See `infra/README.md` for details.
+
+## Troubleshooting
+
+### "JAVA_HOME is not defined correctly"
+
+This means JAVA_HOME isn't set in your current terminal session. Solutions:
+
+1. Run the `complete-setup.cmd` script (sets it automatically)
+2. Or set it manually:
+   ```cmd
+   set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+   ```
+
+### Maven build fails with "Unable to download dependencies"
+
+Check your internet connection and try:
+```cmd
+cd backend
+mvn clean install -DskipTests -gs settings.xml -U
+```
+
+The `-U` flag forces dependency updates.
+
+### Port 8080 or 4200 already in use
+
+Another application is using these ports. Either:
+1. Stop the other application
+2. Change ports in configuration:
+   - Backend: `backend/src/main/resources/application.yml`
+   - Frontend: `frontend/angular.json` (change port in serve options)
+
+### Playwright installation fails
+
+This is optional. You can install it later when needed:
+```cmd
+cd frontend
+npx playwright install
+```
+
+## Documentation
+
+- **START_HERE.md** - Quick start guide (this file's summary)
+- **SETUP_STATUS.md** - Detailed setup status
+- **AGENTS.md** - Complete development guide
 - **README.md** - Project overview
+- **backend/README.md** - Backend documentation
+- **frontend/README.md** - Frontend documentation
+
+## Success Criteria
+
+Setup is complete when:
+- ✅ Frontend dependencies installed (DONE)
+- ✅ Backend builds successfully (after running complete-setup.cmd)
+- ✅ All tests pass
+- ✅ Dev servers start without errors
+
+---
 
 ## Summary
 
-- ✅ **Frontend**: Fully set up and ready to use
-- ⚠️ **Backend**: Run one command from the options above (takes 3-5 minutes)
-- ✅ **Helper Scripts**: All configured and ready to use
-- ✅ **Documentation**: Complete and available
+**To finish setup, run from the repository root:**
 
-The repository is 95% set up. The final 5% (backend Maven install) requires one manual command due to Java environment variable requirements, but multiple convenient helper scripts are provided to make this easy.
+```cmd
+complete-setup.cmd
+```
+
+**Then start developing:**
+
+```cmd
+REM Terminal 1
+cd backend && mvn spring-boot:run
+
+REM Terminal 2
+cd frontend && npm start
+```
+
+**That's it! Happy coding! 🚀**

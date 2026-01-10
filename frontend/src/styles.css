@@ -45,3 +45,18 @@ a {
 .warning-snackbar .mat-simple-snackbar-action {
   color: white !important;
 }
+
+/* Responsive Dialog Styles */
+@media (max-width: 599px) {
+  .responsive-dialog .mat-mdc-dialog-container {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  .responsive-dialog .mat-mdc-dialog-surface {
+    border-radius: 0 !important;
+  }
+}

@@ -2,6 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageChannel, MessageDirection } from '../services/message-api.service';
+import { trigger, transition, style, animate } from '@angular/animations';
 
 export interface MessageFormData {
   dossierId: number;
@@ -10,10 +11,19 @@ export interface MessageFormData {
 @Component({
   selector: 'app-message-form-dialog',
   templateUrl: './message-form-dialog.component.html',
-  styleUrls: ['./message-form-dialog.component.css']
+  styleUrls: ['./message-form-dialog.component.css'],
+  animations: [
+    trigger('slideIn', [
+      transition(':enter', [
+        style({ transform: 'translateX(100%)', opacity: 0 }),
+        animate('300ms ease-out', style({ transform: 'translateX(0)', opacity: 1 }))
+      ])
+    ])
+  ]
 })
 export class MessageFormDialogComponent implements OnInit {
   messageForm!: FormGroup;
+  isSubmitting = false;
   MessageChannel = MessageChannel;
   MessageDirection = MessageDirection;
 
@@ -63,7 +73,8 @@ export class MessageFormDialogComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.messageForm.valid) {
+    if (this.messageForm.valid && !this.isSubmitting) {
+      this.isSubmitting = true;
       const formValue = this.messageForm.value;
       const timestamp = new Date(formValue.timestamp).toISOString();
       

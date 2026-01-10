@@ -1,36 +1,61 @@
 @echo off
-REM Complete Repository Setup
-REM Run this script to complete the backend setup
+REM Complete Repository Setup Script
+REM This script finishes the initial repository setup by building the backend
 
-echo ============================================================
-echo Repository Setup
-echo ============================================================
 echo.
-echo Frontend: Already completed (npm install done)
-echo Backend: Running Maven install with Java 17...
+echo ========================================
+echo   Complete Repository Setup
+echo ========================================
 echo.
 
+REM Set Java 17 environment
+set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"
+set "PATH=%JAVA_HOME%\bin;%PATH%"
+
+echo [1/3] Java Environment
+echo   JAVA_HOME: %JAVA_HOME%
+echo.
+
+REM Build backend
+echo [2/3] Building Backend...
 cd backend
-call setup.cmd
-cd ..
-
-if %ERRORLEVEL% EQU 0 (
+mvn clean install -DskipTests -gs settings.xml
+if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo ============================================================
-    echo ✓ Setup Complete!
-    echo ============================================================
-    echo.
-    echo You can now run build, lint, and test commands:
-    echo   Backend build:  cd backend  then  mvn clean package
-    echo   Backend test:   cd backend  then  mvn test
-    echo   Frontend build: cd frontend  then  npm run build
-    echo   Frontend test:  cd frontend  then  npm test
-    echo.
-) else (
-    echo.
-    echo ============================================================
-    echo ✗ Setup incomplete
-    echo ============================================================
-    echo Please check the error messages above
-    echo.
+    echo ERROR: Backend build failed
+    cd ..
+    pause
+    exit /b 1
 )
+cd ..
+echo   Backend build: SUCCESS
+echo.
+
+REM Install Playwright browsers (optional)
+echo [3/3] Installing Playwright Browsers (optional)...
+cd frontend
+call npx playwright install
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo WARNING: Playwright browser installation failed
+    echo This is optional - you can install later with: cd frontend ^&^& npx playwright install
+)
+cd ..
+echo.
+
+echo ========================================
+echo   Setup Complete!
+echo ========================================
+echo.
+echo Repository is now ready for development.
+echo.
+echo Next steps:
+echo   1. Start backend:  cd backend ^&^& mvn spring-boot:run
+echo   2. Start frontend: cd frontend ^&^& npm start
+echo.
+echo Access points:
+echo   - Frontend:  http://localhost:4200
+echo   - Backend:   http://localhost:8080
+echo   - API Docs:  http://localhost:8080/swagger-ui.html
+echo.
+pause

@@ -50,6 +50,9 @@ export class BulkOperationService {
 
     this.dialog.open(BulkOperationDialogComponent, {
       width: '500px',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'responsive-dialog',
       disableClose: true,
       data: dialogData
     });
