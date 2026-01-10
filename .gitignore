@@ -275,8 +275,6 @@ setup-env-wrapper.ps1
 run-mvn-java17.cmd
 run-maven-setup.js
 backend/Run-MavenInstall.ps1
-setup-initial.cmd
-backend/setup-maven-install.cmd
 setup-repo-initial.cmd
 setup-initial.js
 run-maven.js
@@ -295,6 +293,7 @@ setup-backend.js
 MANUAL_SETUP_REQUIRED.md
 run-initial-setup.ps1
 setup_backend_build.py
+setup-repo-install.ps1
 
 # Initial setup artifacts (created during repo clone setup)
 setup-backend-build.cmd

@@ -1,46 +1,81 @@
-<div class="app-layout">
-  <header class="header">
-    <div class="header-content">
-      <button class="menu-toggle" (click)="toggleMenu()">
-        <span class="menu-icon"></span>
-      </button>
-      <h1 class="app-title">Atlas Immobilier</h1>
-      <app-global-search-bar></app-global-search-bar>
-    </div>
-  </header>
+<mat-sidenav-container class="sidenav-container">
+  <mat-sidenav
+    #drawer
+    class="sidenav"
+    fixedInViewport
+    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'"
+    [opened]="(isHandset$ | async) === false">
+    <mat-toolbar class="sidenav-header">
+      <span class="brand-text">Atlas Immobilier</span>
+    </mat-toolbar>
+    <mat-nav-list class="nav-list">
+      <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Tableau de bord</span>
+      </a>
+      <a mat-list-item routerLink="/reports" routerLinkActive="active" (click)="closeSidenavOnMobile()">
+        <mat-icon matListItemIcon>insights</mat-icon>
+        <span matListItemTitle>Rapports & KPI</span>
+      </a>
+      <a mat-list-item routerLink="/annonces" routerLinkActive="active" (click)="closeSidenavOnMobile()">
+        <mat-icon matListItemIcon>campaign</mat-icon>
+        <span matListItemTitle>Annonces</span>
+      </a>
+      <a mat-list-item routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()">
+        <mat-icon matListItemIcon>folder</mat-icon>
+        <span matListItemTitle>Dossiers</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
 
-  <div class="layout-container">
-    <nav class="sidebar" [class.open]="menuOpen">
-      <ul class="nav-menu">
-        <li class="nav-item">
-          <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
-            <span class="nav-icon">📊</span>
-            <span class="nav-text">Tableau de bord</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/reports" routerLinkActive="active" class="nav-link">
-            <span class="nav-icon">📈</span>
-            <span class="nav-text">Rapports & KPI</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/annonces" routerLinkActive="active" class="nav-link">
-            <span class="nav-icon">📢</span>
-            <span class="nav-text">Annonces</span>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a routerLink="/dossiers" routerLinkActive="active" class="nav-link">
-            <span class="nav-icon">📁</span>
-            <span class="nav-text">Dossiers</span>
-          </a>
-        </li>
-      </ul>
-    </nav>
+  <mat-sidenav-content class="sidenav-content">
+    <mat-toolbar color="primary" class="top-toolbar">
+      <button
+        type="button"
+        mat-icon-button
+        (click)="drawer.toggle()"
+        *ngIf="isHandset$ | async"
+        class="menu-button">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <span class="toolbar-spacer"></span>
+      
+      <app-global-search-bar></app-global-search-bar>
+      
+      <span class="toolbar-spacer"></span>
+      
+      <div class="user-menu-container">
+        <button
+          mat-icon-button
+          class="user-menu-button"
+          [matMenuTriggerFor]="userMenu"
+          aria-label="User menu">
+          <mat-icon>account_circle</mat-icon>
+        </button>
+        
+        <mat-menu #userMenu="matMenu" class="user-dropdown-menu">
+          <div class="user-menu-header" mat-menu-item disabled>
+            <div class="user-info">
+              <mat-icon class="user-avatar-large">account_circle</mat-icon>
+              <div class="user-details">
+                <div class="user-name">Utilisateur</div>
+                <div class="user-email">user@example.com</div>
+              </div>
+            </div>
+          </div>
+          <mat-divider></mat-divider>
+          <button mat-menu-item (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            <span>Déconnexion</span>
+          </button>
+        </mat-menu>
+      </div>
+    </mat-toolbar>
 
     <main class="main-content">
       <router-outlet></router-outlet>
     </main>
-  </div>
-</div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

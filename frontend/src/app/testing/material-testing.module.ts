@@ -21,6 +21,12 @@ import { MatExpansionModule } from '@angular/material/expansion';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatListModule } from '@angular/material/list';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatDividerModule } from '@angular/material/divider';
+import { LayoutModule } from '@angular/cdk/layout';
 
 @NgModule({
     imports: [
@@ -44,7 +50,13 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatExpansionModule,
         MatPaginatorModule,
         MatDatepickerModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        MatSidenavModule,
+        MatToolbarModule,
+        MatListModule,
+        MatMenuModule,
+        MatDividerModule,
+        LayoutModule
     ],
     exports: [
         CommonModule,
@@ -67,7 +79,13 @@ import { MatNativeDateModule } from '@angular/material/core';
         MatExpansionModule,
         MatPaginatorModule,
         MatDatepickerModule,
-        MatNativeDateModule
+        MatNativeDateModule,
+        MatSidenavModule,
+        MatToolbarModule,
+        MatListModule,
+        MatMenuModule,
+        MatDividerModule,
+        LayoutModule
     ]
 })
 export class MaterialTestingModule { }
