@@ -1,0 +1,282 @@
+/* Material Design component animation overrides and enhancements */
+
+/* Enhanced Material Card animations */
+.mat-mdc-card {
+  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mat-mdc-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Material Button ripple enhancements */
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-icon-button {
+  transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mat-mdc-raised-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+.mat-mdc-raised-button:not(:disabled):active {
+  transform: translateY(0) scale(0.98);
+}
+
+.mat-mdc-button:not(:disabled):active,
+.mat-mdc-icon-button:not(:disabled):active {
+  transform: scale(0.95);
+}
+
+/* Material FAB enhancements */
+.mat-mdc-fab,
+.mat-mdc-mini-fab {
+  transition: transform 200ms cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mat-mdc-fab:not(:disabled):hover,
+.mat-mdc-mini-fab:not(:disabled):hover {
+  transform: scale(1.1) translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2) !important;
+}
+
+.mat-mdc-fab:not(:disabled):active,
+.mat-mdc-mini-fab:not(:disabled):active {
+  transform: scale(1.05);
+}
+
+/* Material Chip animations */
+.mat-mdc-chip {
+  transition: transform 150ms cubic-bezier(0.4, 0, 0.2, 1),
+              background-color 150ms ease !important;
+}
+
+.mat-mdc-chip:hover {
+  transform: scale(1.05);
+}
+
+.mat-mdc-chip:active {
+  transform: scale(0.98);
+}
+
+/* Material List Item animations */
+.mat-mdc-list-item {
+  transition: background-color 150ms ease,
+              transform 150ms ease !important;
+}
+
+.mat-mdc-list-item:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.mat-mdc-list-item:active {
+  transform: scale(0.99);
+}
+
+/* Material Menu animations */
+.mat-mdc-menu-panel {
+  animation: fadeIn 200ms ease-out;
+}
+
+.mat-mdc-menu-item {
+  transition: background-color 150ms ease,
+              padding-left 150ms ease !important;
+}
+
+.mat-mdc-menu-item:hover {
+  padding-left: 20px !important;
+}
+
+/* Material Expansion Panel animations */
+.mat-expansion-panel {
+  transition: box-shadow 280ms cubic-bezier(0.4, 0, 0.2, 1),
+              transform 280ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.mat-expansion-panel:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+.mat-expansion-panel-header {
+  transition: background-color 150ms ease !important;
+}
+
+.mat-expansion-panel-header:hover {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Material Form Field enhancements */
+.mat-mdc-form-field {
+  transition: transform 200ms ease !important;
+}
+
+.mat-mdc-form-field:focus-within {
+  transform: scale(1.01);
+}
+
+/* Material Checkbox and Radio enhancements */
+.mat-mdc-checkbox,
+.mat-mdc-radio-button {
+  transition: transform 150ms ease !important;
+}
+
+.mat-mdc-checkbox:active,
+.mat-mdc-radio-button:active {
+  transform: scale(0.95);
+}
+
+/* Material Slide Toggle animations */
+.mat-mdc-slide-toggle {
+  transition: transform 150ms ease !important;
+}
+
+.mat-mdc-slide-toggle:active {
+  transform: scale(0.98);
+}
+
+/* Material Select animations */
+.mat-mdc-select-trigger {
+  transition: background-color 150ms ease !important;
+}
+
+.mat-mdc-select:hover .mat-mdc-select-trigger {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+/* Material Tab animations */
+.mat-mdc-tab {
+  transition: background-color 150ms ease,
+              transform 150ms ease !important;
+}
+
+.mat-mdc-tab:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.mat-mdc-tab:active {
+  transform: scale(0.98);
+}
+
+/* Material Progress Bar pulse */
+.mat-mdc-progress-bar {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Material Snackbar slide in */
+.mat-mdc-snack-bar-container {
+  animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Material Dialog animations */
+.mat-mdc-dialog-container {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Material Tooltip animations */
+.mat-mdc-tooltip {
+  animation: fadeIn 150ms ease-out;
+}
+
+/* Material Sidenav animations */
+.mat-drawer-backdrop {
+  animation: fadeIn 250ms ease-out;
+}
+
+/* Material Toolbar enhancements */
+.mat-toolbar {
+  transition: box-shadow 200ms ease !important;
+}
+
+/* Material Autocomplete panel */
+.mat-mdc-autocomplete-panel {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Material Bottom Sheet */
+.mat-bottom-sheet-container {
+  animation: slideUp 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Material Datepicker */
+.mat-datepicker-popup {
+  animation: fadeIn 200ms ease-out;
+}
+
+/* Material Paginator */
+.mat-mdc-paginator {
+  transition: background-color 150ms ease !important;
+}
+
+/* Enhanced table row animations */
+.mat-mdc-row {
+  transition: background-color 150ms ease,
+              transform 150ms ease,
+              box-shadow 150ms ease !important;
+}
+
+.mat-mdc-row:hover {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Material Stepper animations */
+.mat-stepper-horizontal,
+.mat-stepper-vertical {
+  transition: all 300ms ease !important;
+}
+
+.mat-step-header:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Ripple effect enhancement */
+.mat-ripple-element {
+  opacity: 0.1 !important;
+  transition: opacity 150ms ease !important;
+}
+
+/* Reduced motion support for Material components */
+@media (prefers-reduced-motion: reduce) {
+  .mat-mdc-card:hover,
+  .mat-mdc-raised-button:hover,
+  .mat-mdc-fab:hover,
+  .mat-mdc-mini-fab:hover,
+  .mat-mdc-chip:hover,
+  .mat-expansion-panel:hover,
+  .mat-mdc-form-field:focus-within,
+  .mat-mdc-row:hover {
+    transform: none !important;
+  }
+
+  .mat-mdc-button:active,
+  .mat-mdc-raised-button:active,
+  .mat-mdc-icon-button:active,
+  .mat-mdc-fab:active,
+  .mat-mdc-mini-fab:active,
+  .mat-mdc-chip:active,
+  .mat-mdc-list-item:active,
+  .mat-mdc-checkbox:active,
+  .mat-mdc-radio-button:active,
+  .mat-mdc-slide-toggle:active,
+  .mat-mdc-tab:active {
+    transform: none !important;
+  }
+
+  .mat-mdc-menu-panel,
+  .mat-mdc-snack-bar-container,
+  .mat-mdc-dialog-container,
+  .mat-mdc-tooltip,
+  .mat-drawer-backdrop,
+  .mat-mdc-autocomplete-panel,
+  .mat-bottom-sheet-container,
+  .mat-datepicker-popup,
+  .mat-mdc-progress-bar {
+    animation: none !important;
+  }
+}

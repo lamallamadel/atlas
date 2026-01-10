@@ -13,6 +13,7 @@ import { FilterPresetService, FilterPreset } from '../../services/filter-preset.
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
 interface AppliedFilter {
   key: string;
@@ -24,7 +25,8 @@ interface AppliedFilter {
 @Component({
   selector: 'app-dossiers',
   templateUrl: './dossiers.component.html',
-  styleUrls: ['./dossiers.component.css']
+  styleUrls: ['./dossiers.component.css'],
+  animations: [listStaggerAnimation, itemAnimation]
 })
 export class DossiersComponent implements OnInit {
   dossiers: DossierResponse[] = [];

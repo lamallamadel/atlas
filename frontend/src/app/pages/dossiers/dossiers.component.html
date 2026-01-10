@@ -132,10 +132,11 @@
   <!-- Applied Filters Chips -->
   <div class="applied-filters" *ngIf="appliedFilters.length > 0" role="region" aria-label="Filtres actifs">
     <span class="filters-label">Filtres actifs:</span>
-    <mat-chip-set aria-label="Filtres appliqués">
+    <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
       <mat-chip
         *ngFor="let filter of appliedFilters"
         (removed)="removeFilter(filter)"
+        [@itemAnimation]
         [attr.aria-label]="filter.label + ': ' + filter.displayValue">
         <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
         <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">

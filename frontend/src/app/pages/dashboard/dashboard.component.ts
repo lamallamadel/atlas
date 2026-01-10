@@ -6,6 +6,7 @@ import { DossierResponse } from '../../services/dossier-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
 import { interval, Subject, takeUntil, takeWhile } from 'rxjs';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
+import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
 interface KpiCard {
   title: string;
@@ -21,7 +22,8 @@ interface KpiCard {
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.css']
+  styleUrls: ['./dashboard.component.css'],
+  animations: [listStaggerAnimation, itemAnimation]
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();

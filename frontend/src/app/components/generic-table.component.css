@@ -99,6 +99,16 @@ table.sticky-header {
 
 .clickable-row {
   cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease;
+}
+
+.clickable-row:hover {
+  background-color: rgba(0, 0, 0, 0.03);
+  transform: scale(1.002);
+}
+
+.clickable-row:active {
+  transform: scale(0.998);
 }
 
 .selected-row {

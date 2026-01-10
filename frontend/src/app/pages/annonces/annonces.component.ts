@@ -9,6 +9,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
+import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
 interface AppliedFilter {
   key: string;
@@ -20,7 +21,8 @@ interface AppliedFilter {
 @Component({
   selector: 'app-annonces',
   templateUrl: './annonces.component.html',
-  styleUrls: ['./annonces.component.css']
+  styleUrls: ['./annonces.component.css'],
+  animations: [listStaggerAnimation, itemAnimation]
 })
 export class AnnoncesComponent implements OnInit {
   annonces: AnnonceResponse[] = [];

@@ -5,6 +5,7 @@ import { MatSort } from '@angular/material/sort';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil } from 'rxjs';
+import { listStaggerAnimation } from '../animations/list-animations';
 
 export interface ColumnConfig {
   key: string;
@@ -28,7 +29,8 @@ export interface RowAction {
 @Component({
   selector: 'app-generic-table',
   templateUrl: './generic-table.component.html',
-  styleUrls: ['./generic-table.component.css']
+  styleUrls: ['./generic-table.component.css'],
+  animations: [listStaggerAnimation]
 })
 export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() columns: ColumnConfig[] = [];

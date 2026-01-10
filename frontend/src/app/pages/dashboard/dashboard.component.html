@@ -5,10 +5,11 @@
   <div class="page-content">
     <section aria-labelledby="kpi-section-title">
       <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
-      <div class="kpi-cards-container" role="list">
+      <div class="kpi-cards-container" role="list" [@listStaggerAnimation]="getKpiCardKeys().length">
         <mat-card 
           *ngFor="let key of getKpiCardKeys()"
           class="kpi-card"
+          [@itemAnimation]
           [class.loading]="kpiCards[key].loading"
           role="listitem"
           [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)">
@@ -88,8 +89,8 @@
               <span>Aucun dossier</span>
             </div>
             
-            <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list">
-              <mat-card *ngFor="let dossier of recentDossiers" class="dossier-item" appearance="outlined" role="listitem">
+            <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list" [@listStaggerAnimation]="recentDossiers.length">
+              <mat-card *ngFor="let dossier of recentDossiers" class="dossier-item" [@itemAnimation] appearance="outlined" role="listitem">
                 <mat-card-content>
                   <div class="dossier-info">
                     <div class="dossier-field">

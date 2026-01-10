@@ -1,1 +1,6 @@
 @import '../styles/variables.scss';
+
+.page-transition-wrapper {
+  position: relative;
+  width: 100%;
+}

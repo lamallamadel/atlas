@@ -198,6 +198,7 @@ run-backend-maven-install.cmd
 
 # Nested frontend directory (duplicate)
 frontend/frontend/
+backend/frontend/
 
 # Additional temporary setup scripts
 run-backend-install.cmd

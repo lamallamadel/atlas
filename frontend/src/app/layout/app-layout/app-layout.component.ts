@@ -4,11 +4,14 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
+import { RouterOutlet } from '@angular/router';
+import { routeFadeSlideAnimation } from '../../animations/route-animations';
 
 @Component({
   selector: 'app-layout',
   templateUrl: './app-layout.component.html',
-  styleUrls: ['./app-layout.component.css']
+  styleUrls: ['./app-layout.component.css'],
+  animations: [routeFadeSlideAnimation]
 })
 export class AppLayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;
@@ -67,5 +70,9 @@ export class AppLayoutComponent implements OnInit {
         this.drawer.close();
       }
     }).unsubscribe();
+  }
+
+  prepareRoute(outlet: RouterOutlet) {
+    return outlet?.activatedRouteData?.['animation'];
   }
 }

@@ -100,7 +100,9 @@
     </mat-toolbar>
 
     <main id="main-content" class="main-content" role="main" tabindex="-1">
-      <router-outlet></router-outlet>
+      <div [@routeFadeSlideAnimation]="prepareRoute(outlet)">
+        <router-outlet #outlet="outlet"></router-outlet>
+      </div>
     </main>
   </mat-sidenav-content>
 </mat-sidenav-container>

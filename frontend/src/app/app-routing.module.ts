@@ -16,27 +16,27 @@ import { SearchComponent } from './pages/search/search.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  { path: 'login', component: LoginComponent },
+  { path: 'login', component: LoginComponent, data: { animation: 'LoginPage' } },
   // OAuth2/OIDC redirect target
-  { path: 'auth/callback', component: LoginComponent },
-  { path: 'access-denied', component: AccessDeniedComponent },
-  { path: 'session-expired', component: SessionExpiredComponent },
+  { path: 'auth/callback', component: LoginComponent, data: { animation: 'LoginPage' } },
+  { path: 'access-denied', component: AccessDeniedComponent, data: { animation: 'AccessDeniedPage' } },
+  { path: 'session-expired', component: SessionExpiredComponent, data: { animation: 'SessionExpiredPage' } },
   {
     path: '',
     component: AppLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent },
-      { path: 'reports', component: ReportsDashboardComponent },
-      { path: 'search', component: SearchComponent },
-      { path: 'annonces', component: AnnoncesComponent },
-      { path: 'annonces/new', component: AnnonceCreateComponent },
-      { path: 'annonces/:id', component: AnnonceDetailComponent },
-      { path: 'annonces/:id/edit', component: AnnonceCreateComponent },
-      { path: 'dossiers', component: DossiersComponent },
-      { path: 'dossiers/new', component: DossierCreateComponent },
-      { path: 'dossiers/:id', component: DossierDetailComponent }
+      { path: 'dashboard', component: DashboardComponent, data: { animation: 'DashboardPage' } },
+      { path: 'reports', component: ReportsDashboardComponent, data: { animation: 'ReportsPage' } },
+      { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
+      { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
+      { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
+      { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
+      { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
+      { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
+      { path: 'dossiers/new', component: DossierCreateComponent, data: { animation: 'DossierCreatePage' } },
+      { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } }
     ]
   }
 ];
