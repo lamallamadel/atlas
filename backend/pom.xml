@@ -315,6 +315,7 @@
                                 <include>**/*E2ETest.java</include>
                             </includes>
                             <systemPropertyVariables>
+                            <spring.profiles.active>${spring.profiles.active}</spring.profiles.active>
                                 <test.database>postgres</test.database>
                             </systemPropertyVariables>
                         </configuration>
