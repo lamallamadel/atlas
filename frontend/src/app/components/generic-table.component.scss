@@ -1,0 +1,433 @@
+@import '../../styles/utilities.scss';
+
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-wrapper {
+  position: relative;
+  overflow: auto;
+  max-height: 70vh;
+
+  @include mobile-only {
+    max-height: none;
+  }
+}
+
+/* Table Base Styles */
+table {
+  width: 100%;
+  background: var(--color-neutral-0);
+  transition: var(--transition-shadow);
+}
+
+/* Sticky Header */
+table.sticky-header {
+  .mat-header-row {
+    position: sticky;
+    top: 0;
+    z-index: var(--z-index-sticky);
+    background: var(--color-neutral-0);
+  }
+}
+
+/* Header Styles */
+.mat-header-cell {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+  font-size: var(--font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: var(--color-neutral-50);
+  border-bottom: 2px solid var(--color-primary-500);
+  padding: var(--spacing-4) var(--spacing-3);
+
+  @include mobile-only {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-3) var(--spacing-2);
+  }
+}
+
+.resizable-header {
+  position: relative;
+  padding-right: var(--spacing-8) !important;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  position: relative;
+}
+
+.header-text {
+  flex: 1;
+}
+
+/* Resize Handle */
+.resize-handle {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: var(--color-neutral-300);
+  cursor: col-resize;
+  opacity: 0;
+  transition: var(--transition-opacity);
+  border-radius: var(--radius-sm);
+
+  &:hover {
+    background: var(--color-primary-500);
+    opacity: 1;
+  }
+
+  &:active {
+    opacity: 1;
+    background: var(--color-primary-600);
+  }
+}
+
+.resizable-header:hover .resize-handle {
+  opacity: 0.6;
+}
+
+/* Row Styles */
+.mat-row {
+  transition: all var(--duration-normal) ease-in-out;
+  cursor: default;
+
+  &:hover {
+    background-color: var(--color-primary-alpha-10);
+    box-shadow: var(--shadow-2);
+    transform: translateY(-1px);
+    z-index: var(--z-default);
+  }
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: var(--transition-base);
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.03);
+    transform: scale(1.002);
+  }
+
+  &:active {
+    transform: scale(0.998);
+  }
+}
+
+.selected-row {
+  background-color: var(--color-primary-alpha-20) !important;
+
+  &:hover {
+    background-color: var(--color-primary-alpha-30) !important;
+  }
+}
+
+/* Cell Styles */
+.mat-cell {
+  color: var(--color-neutral-800);
+  font-size: var(--font-size-sm);
+  padding: var(--spacing-4) var(--spacing-3);
+
+  @include mobile-only {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-3) var(--spacing-2);
+  }
+}
+
+.selection-cell {
+  width: 48px;
+  max-width: 48px;
+  padding: 0 var(--spacing-2) !important;
+  text-align: center;
+
+  @include mobile-only {
+    width: 40px;
+    max-width: 40px;
+  }
+}
+
+.actions-header {
+  width: auto;
+  min-width: 120px;
+
+  @include mobile-only {
+    min-width: 80px;
+  }
+}
+
+.actions-cell {
+  text-align: right;
+  white-space: nowrap;
+
+  button {
+    margin-left: var(--spacing-1);
+
+    @include mobile-only {
+      padding: var(--spacing-2);
+      width: 36px;
+      height: 36px;
+    }
+  }
+}
+
+/* Empty State */
+.no-data {
+  padding: 0 !important;
+  border-bottom: none !important;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12) var(--spacing-6);
+  text-align: center;
+
+  @include mobile-only {
+    padding: var(--spacing-8) var(--spacing-4);
+  }
+
+  @include tablet {
+    padding: var(--spacing-10) var(--spacing-5);
+  }
+}
+
+.empty-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: var(--color-neutral-400);
+  margin-bottom: var(--spacing-4);
+
+  @include mobile-only {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.empty-title {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+  margin: 0 0 var(--spacing-2) 0;
+
+  @include mobile-only {
+    font-size: var(--font-size-lg);
+  }
+}
+
+.empty-message {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-500);
+  margin: 0;
+  max-width: 400px;
+
+  @include mobile-only {
+    font-size: var(--font-size-sm);
+    max-width: 300px;
+  }
+}
+
+/* Mobile Card View */
+.card-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+  padding: var(--spacing-2);
+
+  @include mobile-only {
+    gap: var(--spacing-3);
+  }
+}
+
+/* Virtual Scroll Viewport */
+.virtual-scroll-viewport {
+  height: 600px;
+  width: 100%;
+
+  @include mobile-only {
+    height: calc(100vh - 200px);
+  }
+
+  .cdk-virtual-scroll-content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+
+    @include mobile-only {
+      gap: var(--spacing-3);
+    }
+  }
+}
+
+.data-card {
+  position: relative;
+  transition: var(--transition-base);
+  cursor: pointer;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+
+  &:hover {
+    box-shadow: var(--shadow-3);
+    transform: translateY(-2px);
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-1);
+  }
+}
+
+.card-selection {
+  position: absolute;
+  top: var(--spacing-3);
+  right: var(--spacing-3);
+  z-index: var(--z-default);
+
+  @include mobile-only {
+    top: var(--spacing-2);
+    right: var(--spacing-2);
+  }
+}
+
+.card-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+  margin-bottom: var(--spacing-3);
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+
+  @include mobile-only {
+    margin-bottom: var(--spacing-2);
+  }
+}
+
+.field-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.field-value {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-900);
+  word-break: break-word;
+
+  @include mobile-only {
+    font-size: var(--font-size-sm);
+  }
+}
+
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+  padding: var(--spacing-2) var(--spacing-4);
+  margin: 0 !important;
+  border-top: 1px solid var(--color-neutral-200);
+
+  @include mobile-only {
+    padding: var(--spacing-2) var(--spacing-3);
+    flex-wrap: wrap;
+  }
+}
+
+/* Paginator */
+mat-paginator {
+  background: var(--color-neutral-50);
+  border-top: 1px solid var(--color-neutral-300);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+}
+
+/* Material Design Overrides for better integration */
+::ng-deep {
+  .mat-sort-header-arrow {
+    color: var(--color-primary-500);
+  }
+
+  .mat-checkbox-checked.mat-accent .mat-checkbox-background {
+    background-color: var(--color-primary-500);
+  }
+
+  .mat-checkbox-indeterminate.mat-accent .mat-checkbox-background {
+    background-color: var(--color-primary-500);
+  }
+
+  // Responsive paginator adjustments
+  @include mobile-only {
+    .mat-mdc-paginator {
+      font-size: var(--font-size-xs);
+    }
+
+    .mat-mdc-paginator-container {
+      flex-wrap: wrap;
+      min-height: auto;
+      padding: var(--spacing-2);
+    }
+
+    .mat-mdc-paginator-page-size {
+      margin: var(--spacing-2) 0;
+    }
+
+    .mat-mdc-paginator-range-label {
+      margin: var(--spacing-2) var(--spacing-3);
+    }
+  }
+}
+
+/* Elevation Changes on Hover */
+.mat-elevation-z2 {
+  box-shadow: var(--shadow-2);
+}
+
+/* Print Styles */
+@media print {
+  .resize-handle {
+    display: none;
+  }
+
+  .actions-cell {
+    display: none;
+  }
+
+  .mat-row:hover {
+    box-shadow: none;
+    transform: none;
+  }
+
+  .card-container .data-card {
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid var(--color-neutral-300);
+  }
+}
+
+/* Prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .mat-row,
+  .data-card,
+  .clickable-row {
+    transition: none;
+    animation: none;
+  }
+
+  .mat-row:hover,
+  .data-card:hover {
+    transform: none;
+  }
+}

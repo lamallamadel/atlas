@@ -10,7 +10,7 @@ import { routeFadeSlideAnimation } from '../../animations/route-animations';
 @Component({
   selector: 'app-layout',
   templateUrl: './app-layout.component.html',
-  styleUrls: ['./app-layout.component.css'],
+  styleUrls: ['./app-layout.component.scss'],
   animations: [routeFadeSlideAnimation]
 })
 export class AppLayoutComponent implements OnInit {

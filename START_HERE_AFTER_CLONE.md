@@ -1,186 +1,74 @@
-# 🚀 Start Here - Newly Cloned Repository
+# 🚀 Start Here - Initial Setup Required
 
-Welcome! You've just cloned this repository. Here's what you need to know to get started.
+This repository has been freshly cloned and needs initial setup before you can build, test, or run the application.
 
-## Quick Start (3 Steps)
+## Quick Start
 
-### Step 1: Complete Setup
-Run the setup script to build the backend:
+### ✅ Step 1: Frontend (Already Complete)
+
+The frontend dependencies have been installed automatically:
+- ✅ 1,178 npm packages installed
+- ✅ Ready to use
+
+### ⚠️ Step 2: Backend (Your Action Required)
+
+Run the backend setup script:
 
 ```cmd
-setup-repo.cmd
+run-backend-setup.bat
+```
+
+**OR** if you prefer PowerShell:
+
+```powershell
+.\setup-repo-initial.ps1
 ```
 
 This will:
-- ✅ Build the backend (Maven clean install)
-- ✅ Install Playwright browsers for E2E tests
+- Set up Java 17 environment
+- Configure Maven toolchains
+- Install all backend dependencies
 
-**Note:** Frontend dependencies are already installed (`npm install` was completed during initial setup).
-
-### Step 2: Start the Application
-
-**Terminal 1 - Backend:**
-```cmd
-cd backend
-mvn spring-boot:run
-```
-
-**Terminal 2 - Frontend:**
-```cmd
-cd frontend
-npm start
-```
-
-### Step 3: Open Your Browser
-- **Frontend:** http://localhost:4200
-- **Backend API:** http://localhost:8080
-- **API Docs:** http://localhost:8080/swagger-ui.html
-
-## That's It! 🎉
-
-You're now ready to develop. See the commands below for common tasks.
+**Time required:** 2-5 minutes
 
 ---
 
-## Common Development Commands
+## What If the Scripts Don't Work?
 
-### Backend
-```cmd
-cd backend
-
-# Run tests
-mvn test
-
-# Run E2E tests (H2 in-memory database)
-mvn verify -Pbackend-e2e-h2
-
-# Run E2E tests (PostgreSQL with Testcontainers)
-mvn verify -Pbackend-e2e-postgres
-
-# Build package
-mvn clean package
-
-# Start dev server
-mvn spring-boot:run
-```
-
-### Frontend
-```cmd
-cd frontend
-
-# Run unit tests
-npm test
-
-# Run E2E tests (fast - single browser, H2 backend)
-npm run e2e:fast
-
-# Run E2E tests (all configurations)
-npm run e2e:full
-
-# Run E2E tests with UI (interactive debugging)
-npm run e2e:ui
-
-# Build for production
-npm run build
-
-# Start dev server
-npm start
-```
-
-### Infrastructure (Optional - Requires Docker)
-```cmd
-cd infra
-
-# Start PostgreSQL and other services
-docker-compose up -d
-
-# Stop services
-docker-compose down
-
-# Reset database
-.\reset-db.ps1    # Windows PowerShell
-./reset-db.sh     # Linux/Mac
-```
+See **`INITIAL_REPO_SETUP_INSTRUCTIONS.md`** for:
+- Manual setup steps
+- Alternative setup options
+- Troubleshooting guide
 
 ---
 
-## Project Structure
+## After Setup
 
-```
-/
-├── backend/          Spring Boot 3.2.1 (Java 17)
-│   ├── src/main/     Application code
-│   ├── src/test/     Unit tests
-│   └── pom.xml       Maven configuration
-│
-├── frontend/         Angular 16
-│   ├── src/app/      Application code
-│   ├── src/test/     Unit tests
-│   ├── e2e/          Playwright E2E tests
-│   └── package.json  npm configuration
-│
-├── infra/           Docker infrastructure
-│   └── docker-compose.yml
-│
-└── docs/            Documentation
-```
+See **`SETUP_STATUS_AUTOMATED_AGENT.md`** for:
+- Detailed status of what was done
+- How to verify setup completed successfully
+- Commands to run development servers, tests, and builds
 
-## Important Notes
+---
 
-### Java 17 Required
-Maven commands require Java 17. The helper script `backend/mvn-java17.cmd` automatically sets this:
+## Quick Reference
 
-```cmd
-cd backend
-mvn-java17.cmd clean package
-```
-
-Or set manually:
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-```
-
-### Environment Prerequisites
-- ✅ Java 17 - `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- ✅ Maven 3.8.6 - `C:\Environement\maven-3.8.6`
-- ✅ Node.js 18+ - Confirmed working
-- 🐳 Docker - Optional (for infrastructure)
+| Document | Purpose |
+|----------|---------|
+| **`START_HERE_AFTER_CLONE.md`** (this file) | First stop after cloning |
+| **`SETUP_STATUS_AUTOMATED_AGENT.md`** | Detailed setup status and next steps |
+| **`INITIAL_REPO_SETUP_INSTRUCTIONS.md`** | Complete setup guide with all options |
+| **`AGENTS.md`** | Development commands reference |
+| **`SETUP.md`** | Technical setup details |
 
 ---
 
 ## Need Help?
 
-See these comprehensive guides:
-
-| Document | Purpose |
-|----------|---------|
-| **SETUP_INSTRUCTIONS_INITIAL_CLONE.md** | Detailed setup instructions |
-| **INITIAL_SETUP_COMPLETE.md** | Setup completion status |
-| **SETUP_STATUS.md** | Current repository status |
-| **AGENTS.md** | Complete development guide |
-| **README.md** | Project overview |
+1. Read `INITIAL_REPO_SETUP_INSTRUCTIONS.md` for detailed instructions
+2. Check `SETUP_STATUS_AUTOMATED_AGENT.md` for current status
+3. See `AGENTS.md` for all available commands
 
 ---
 
-## Troubleshooting
-
-### "JAVA_HOME is not defined correctly"
-```cmd
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-```
-
-### Port 8080 or 4200 already in use
-Stop other applications or configure different ports.
-
-### Tests fail
-Ensure all services are running and ports are available.
-
----
-
-**Ready? Run this command to complete setup:**
-
-```cmd
-setup-repo.cmd
-```
-
-Then start developing! 🚀
+**TL;DR:** Run `run-backend-setup.bat` then you're ready to develop! 🎉

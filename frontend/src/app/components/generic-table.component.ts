@@ -29,7 +29,7 @@ export interface RowAction {
 @Component({
   selector: 'app-generic-table',
   templateUrl: './generic-table.component.html',
-  styleUrls: ['./generic-table.component.css'],
+  styleUrls: ['./generic-table.component.scss'],
   animations: [listStaggerAnimation]
 })
 export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
