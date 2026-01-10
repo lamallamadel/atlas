@@ -4,109 +4,148 @@
   </div>
   <div class="page-content">
     <div class="kpi-cards-container">
-      <div class="kpi-card">
-        <app-loading-skeleton *ngIf="loadingAnnonces" variant="dashboard-kpi"></app-loading-skeleton>
-        <div *ngIf="!loadingAnnonces">
-          <div class="kpi-card-header">
-            <h3 class="kpi-card-title">Annonces actives</h3>
+      <mat-card 
+        *ngFor="let key of getKpiCardKeys()"
+        class="kpi-card"
+        [class.loading]="kpiCards[key].loading">
+        <mat-card-header>
+          <div mat-card-avatar class="kpi-icon-container" [style.background-color]="kpiCards[key].color">
+            <mat-icon class="kpi-icon">{{kpiCards[key].icon}}</mat-icon>
           </div>
-          <div class="kpi-card-body">
-            <div *ngIf="errorAnnonces" class="kpi-error">
-              <span class="error-icon">✗</span>
-              <span>{{errorAnnonces}}</span>
+          <mat-card-title class="kpi-card-title">{{kpiCards[key].title}}</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <app-loading-skeleton *ngIf="kpiCards[key].loading" variant="dashboard-kpi"></app-loading-skeleton>
+          
+          <div *ngIf="!kpiCards[key].loading" class="kpi-content">
+            <div *ngIf="kpiCards[key].error" class="kpi-error">
+              <mat-icon color="warn">error</mat-icon>
+              <span>{{kpiCards[key].error}}</span>
             </div>
-            <div *ngIf="!errorAnnonces" class="kpi-value">
-              {{annoncesActivesCount}}
-            </div>
-          </div>
-          <div class="kpi-card-footer" *ngIf="!errorAnnonces">
-            <button class="kpi-view-all-button" (click)="navigateToAnnoncesActives()">Voir tous</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="kpi-card">
-        <app-loading-skeleton *ngIf="loadingDossiers" variant="dashboard-kpi"></app-loading-skeleton>
-        <div *ngIf="!loadingDossiers">
-          <div class="kpi-card-header">
-            <h3 class="kpi-card-title">Dossiers à traiter</h3>
-          </div>
-          <div class="kpi-card-body">
-            <div *ngIf="errorDossiers" class="kpi-error">
-              <span class="error-icon">✗</span>
-              <span>{{errorDossiers}}</span>
-            </div>
-            <div *ngIf="!errorDossiers" class="kpi-value">
-              {{dossiersATraiterCount}}
-            </div>
-          </div>
-          <div class="kpi-card-footer" *ngIf="!errorDossiers">
-            <button class="kpi-view-all-button" (click)="navigateToDossiersATraiter()">Voir tous</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="kpi-card kpi-card-wide">
-        <div class="kpi-card-header">
-          <h3 class="kpi-card-title">Derniers dossiers</h3>
-        </div>
-        <div class="kpi-card-body">
-          <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"></app-loading-skeleton>
-          <div *ngIf="!loadingRecent && errorRecent" class="kpi-error">
-            <span class="error-icon">✗</span>
-            <span>{{errorRecent}}</span>
-          </div>
-          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0" class="kpi-empty">
-            Aucun dossier
-          </div>
-          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list">
-            <div *ngFor="let dossier of recentDossiers" class="dossier-item">
-              <div class="dossier-info">
-                <div class="dossier-id">
-                  <strong>ID:</strong> {{dossier.id}}
-                </div>
-                <div class="dossier-lead" *ngIf="dossier.leadName">
-                  <strong>Lead:</strong> {{dossier.leadName}}
-                </div>
-                <div class="dossier-phone" *ngIf="dossier.leadPhone">
-                  <strong>Téléphone:</strong> {{dossier.leadPhone}}
-                </div>
-                <div class="dossier-status">
-                  <strong>Statut:</strong> {{dossier.status}}
-                </div>
-                <div class="dossier-date">
-                  <strong>Créé le:</strong> {{dossier.createdAt | date:'short'}}
-                </div>
+            
+            <div *ngIf="!kpiCards[key].error" class="kpi-value-container">
+              <div class="kpi-value" [style.color]="kpiCards[key].color">
+                {{kpiCards[key].displayValue}}
+              </div>
+              <div class="kpi-chart-container">
+                <canvas 
+                  [id]="'chart-' + key"
+                  #annoncesChart 
+                  *ngIf="key === 'annoncesActives'"
+                  class="kpi-chart"></canvas>
+                <canvas 
+                  [id]="'chart-' + key"
+                  #dossiersChart 
+                  *ngIf="key === 'dossiersATraiter'"
+                  class="kpi-chart"></canvas>
               </div>
             </div>
           </div>
-        </div>
-      </div>
+        </mat-card-content>
+        
+        <mat-card-actions *ngIf="!kpiCards[key].loading && !kpiCards[key].error">
+          <button 
+            mat-button 
+            color="primary"
+            (click)="key === 'annoncesActives' ? navigateToAnnoncesActives() : navigateToDossiersATraiter()">
+            Voir tous
+          </button>
+        </mat-card-actions>
+      </mat-card>
+
+      <mat-card class="kpi-card kpi-card-wide">
+        <mat-card-header>
+          <div mat-card-avatar class="kpi-icon-container" style="background-color: #4caf50;">
+            <mat-icon class="kpi-icon">history</mat-icon>
+          </div>
+          <mat-card-title class="kpi-card-title">Derniers dossiers</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"></app-loading-skeleton>
+          
+          <div *ngIf="!loadingRecent && errorRecent" class="kpi-error">
+            <mat-icon color="warn">error</mat-icon>
+            <span>{{errorRecent}}</span>
+          </div>
+          
+          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0" class="kpi-empty">
+            <mat-icon>info</mat-icon>
+            <span>Aucun dossier</span>
+          </div>
+          
+          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list">
+            <mat-card *ngFor="let dossier of recentDossiers" class="dossier-item" appearance="outlined">
+              <mat-card-content>
+                <div class="dossier-info">
+                  <div class="dossier-field">
+                    <mat-icon class="field-icon">tag</mat-icon>
+                    <span class="field-label">ID:</span>
+                    <span class="field-value">{{dossier.id}}</span>
+                  </div>
+                  <div class="dossier-field" *ngIf="dossier.leadName">
+                    <mat-icon class="field-icon">person</mat-icon>
+                    <span class="field-label">Lead:</span>
+                    <span class="field-value">{{dossier.leadName}}</span>
+                  </div>
+                  <div class="dossier-field" *ngIf="dossier.leadPhone">
+                    <mat-icon class="field-icon">phone</mat-icon>
+                    <span class="field-label">Téléphone:</span>
+                    <span class="field-value">{{dossier.leadPhone}}</span>
+                  </div>
+                  <div class="dossier-field">
+                    <mat-icon class="field-icon">info</mat-icon>
+                    <span class="field-label">Statut:</span>
+                    <span class="field-value">{{dossier.status}}</span>
+                  </div>
+                  <div class="dossier-field">
+                    <mat-icon class="field-icon">event</mat-icon>
+                    <span class="field-label">Créé le:</span>
+                    <span class="field-value">{{dossier.createdAt | date:'short'}}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </mat-card-content>
+      </mat-card>
     </div>
 
     <div class="api-status-container">
-      <h3>État de la connexion API</h3>
-      <div class="status-card" [ngClass]="{
-        'status-checking': apiStatus === 'checking',
-        'status-connected': apiStatus === 'connected',
-        'status-disconnected': apiStatus === 'disconnected'
-      }">
-        <div class="status-indicator">
-          <span class="status-icon">{{apiStatus === 'connected' ? '✓' : apiStatus === 'disconnected' ? '✗' : '⟳'}}</span>
-          <span class="status-text">
+      <mat-card [class]="'status-card status-' + apiStatus">
+        <mat-card-header>
+          <div mat-card-avatar class="status-icon-container">
+            <mat-icon class="status-icon">
+              {{apiStatus === 'connected' ? 'check_circle' : apiStatus === 'disconnected' ? 'error' : 'sync'}}
+            </mat-icon>
+          </div>
+          <mat-card-title>État de la connexion API</mat-card-title>
+          <mat-card-subtitle>
             {{apiStatus === 'connected' ? 'Connecté' : apiStatus === 'disconnected' ? 'Déconnecté' : 'Vérification...'}}
-          </span>
-        </div>
-        <div class="status-details" *ngIf="lastChecked">
-          <p>Dernière vérification : {{lastChecked | date:'short'}}</p>
-        </div>
-        <div class="status-error" *ngIf="errorMessage">
-          <p class="error-message">{{errorMessage}}</p>
-        </div>
-        <button class="refresh-button" (click)="checkApiConnection()" [disabled]="apiStatus === 'checking'">
-          Actualiser
-        </button>
-      </div>
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="status-details" *ngIf="lastChecked">
+            <p>Dernière vérification : {{lastChecked | date:'short'}}</p>
+          </div>
+          <div class="status-error" *ngIf="errorMessage">
+            <p class="error-message">{{errorMessage}}</p>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button 
+            mat-raised-button 
+            color="primary"
+            (click)="checkApiConnection()" 
+            [disabled]="apiStatus === 'checking'">
+            <mat-icon>refresh</mat-icon>
+            Actualiser
+          </button>
+        </mat-card-actions>
+      </mat-card>
     </div>
   </div>
 </div>
