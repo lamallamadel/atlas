@@ -288,3 +288,7 @@ setup-backend-env.ps1
 setup-initial-build.cmd
 REPO_INITIAL_SETUP_STATUS.md
 SETUP_COMPLETION_REPORT.md
+setup-backend-deps.ps1
+setup-backend.bat
+setup-backend.js
+MANUAL_SETUP_REQUIRED.md
