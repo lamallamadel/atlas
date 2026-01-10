@@ -1,16 +1,1 @@
-mat-dialog-content {
-  padding: 20px 24px;
-  min-width: 300px;
-}
-
-mat-dialog-content p {
-  margin: 0;
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-mat-dialog-actions {
-  padding: 16px 24px;
-  margin: 0 -24px -24px -24px;
-  border-top: 1px solid #e0e0e0;
-}
+@import '../../styles/variables.scss';

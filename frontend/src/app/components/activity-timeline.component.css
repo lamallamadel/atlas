@@ -1,3 +1,5 @@
+@import '../../styles/variables.scss';
+
 .activity-timeline-container {
   padding: 20px;
 }

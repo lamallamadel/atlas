@@ -1,204 +1,139 @@
 # Repository Setup Status
 
-## ✅ Completed Tasks
+**Date:** Initial Clone Setup
+**Status:** Partially Complete - Manual Backend Build Required
 
-### 1. Frontend Setup - **COMPLETE**
+## What Was Completed ✅
 
-#### Dependencies Installed
-- ✅ **npm install** completed successfully
-- ✅ **1,188 packages** installed in `frontend/node_modules/`
-- ✅ All Angular dependencies (@angular/core, @angular/material, etc.)
-- ✅ All development dependencies (eslint, jasmine, karma, etc.)
-- ✅ No critical installation errors
+### 1. Frontend Setup (Complete)
+- ✅ **npm install** - All Angular dependencies installed
+- ✅ **node_modules/** - 1,187 packages installed successfully
+- ✅ Frontend is ready for development
 
-#### Playwright E2E Testing
-- ✅ **Playwright v1.57.0** installed
-- ✅ **Browser binaries downloaded**:
-  - Chromium 1200 (headless shell included)
-  - Firefox 1497
-  - WebKit 2227
-  - Supporting tools (ffmpeg, winldd)
-- ✅ Installation location: `%LOCALAPPDATA%\ms-playwright`
+### 2. Setup Scripts Created
+- ✅ **setup-repo.ps1** - PowerShell setup script
+- ✅ **setup-repo.cmd** - Windows batch setup script
+- ✅ **SETUP_INSTRUCTIONS_INITIAL_CLONE.md** - Complete setup documentation
+- ✅ **backend/mvn-java17.cmd** - Helper script for Maven with Java 17
+- ✅ **backend/mavenrc_pre.cmd** - Maven pre-execution config
 
-#### Environment
-- ✅ Node.js: v18.12.1
-- ✅ npm: v8.19.2
-- ✅ Current directory: Repository root restored
+### 3. Documentation
+- ✅ Comprehensive setup instructions created
+- ✅ .gitignore updated with setup artifacts
 
-### 2. Configuration Files - **VERIFIED**
+## What Requires Manual Action ⚠️
 
-All necessary configuration files are in place and ready:
+### Backend Build (Maven)
+The backend requires Java 17 to be set as JAVA_HOME before running Maven. Due to security restrictions, the automated setup could not set environment variables or execute Maven.
 
-#### Backend Configuration
-- ✅ `backend/pom.xml` - Maven POM with Java 17 configuration
-- ✅ `backend/toolchains.xml` - Maven toolchains pointing to Java 17
-- ✅ `backend/settings.xml` - Maven settings with repository configuration
-- ✅ `backend/mavenrc_pre.bat` - Windows Maven pre-execution script
-- ✅ `backend/.mavenrc` - Unix-like Maven runtime configuration
+**You need to run:**
 
-#### Helper Scripts
-- ✅ `mvn17.cmd` - Wrapper to run Maven with Java 17
-- ✅ `do-mvn-setup.cmd` - Quick setup script
-- ✅ `setup-backend-maven.js` - Node.js Maven runner
-- ✅ `setup_backend_build.py` - Python Maven runner
-
-#### Frontend Configuration
-- ✅ `frontend/package.json` - All dependencies specified
-- ✅ `frontend/angular.json` - Angular CLI configuration
-- ✅ `frontend/playwright*.config.ts` - Multiple Playwright configurations
-- ✅ `frontend/proxy.conf.json` - Development proxy configuration
-
-### 3. Documentation - **CREATED**
-
-- ✅ `INITIAL_SETUP_INSTRUCTIONS.md` - Comprehensive setup guide
-- ✅ `SETUP_STATUS.md` - This status document
-
-## ⚠️ Pending Task
-
-### Backend Maven Build - **REQUIRES MANUAL EXECUTION**
-
-**Why it's pending:**
-Due to security restrictions in the automated environment, commands that modify environment variables or execute batch/PowerShell scripts are blocked. The Maven build requires `JAVA_HOME` to be set to Java 17, but this cannot be done programmatically in the current security context.
-
-**What needs to be done:**
-Run ONE of the following commands from the repository root:
-
-#### Option 1: Using the helper script (Simplest)
+**Option A - Using provided scripts (Recommended):**
 ```cmd
-.\mvn17.cmd clean install -DskipTests -f backend\pom.xml
+setup-repo.cmd
+```
+or
+```powershell
+.\setup-repo.ps1
 ```
 
-#### Option 2: Using PowerShell
+**Option B - Manual commands:**
 ```powershell
+# Set JAVA_HOME
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+
+# Build backend
 cd backend
-mvn clean install -DskipTests
-```
+mvn clean install
 
-#### Option 3: Using existing script
-```cmd
-.\do-mvn-setup.cmd
-```
-
-**Expected outcome:**
-- Maven downloads all dependencies
-- Project compiles successfully
-- JAR file created at `backend/target/backend-0.0.1-SNAPSHOT.jar`
-- Build time: ~2-5 minutes (depending on internet speed)
-
-## 📋 Verification Steps
-
-After completing the backend build, verify the setup:
-
-```powershell
-# 1. Check backend JAR was created
-Test-Path backend\target\backend-0.0.1-SNAPSHOT.jar
-
-# 2. Verify frontend can build
-cd frontend
-npm run build
-
-# 3. Check Playwright is working
-npx playwright --version
-
-# 4. Optionally run quick tests
-cd ..\backend
-mvn test
-
+# Install Playwright browsers
 cd ..\frontend
-npm run e2e:fast
+npx playwright install
 ```
 
-## 🚀 Next Steps After Setup
+## Quick Verification Commands
 
-Once the backend build completes, you can:
+After running the setup script or manual commands, verify with:
 
-### Start Development Servers
-
-**Backend:**
-```bash
-cd backend
-mvn spring-boot:run
-```
-Access at: http://localhost:8080
-
-**Frontend:**
-```bash
-cd frontend
-npm start
-```
-Access at: http://localhost:4200
-
-### Run Tests
-
-**Backend Unit Tests:**
-```bash
+```cmd
+# Backend tests
 cd backend
 mvn test
-```
 
-**Backend E2E Tests (H2):**
-```bash
-cd backend
-mvn verify -Pbackend-e2e-h2
-```
-
-**Backend E2E Tests (PostgreSQL):**
-```bash
-cd backend
-mvn verify -Pbackend-e2e-postgres
-```
-*Requires Docker*
-
-**Frontend E2E Tests:**
-```bash
+# Frontend tests
 cd frontend
-npm run e2e              # H2 + Mock Auth (default)
-npm run e2e:fast         # Quick single-browser test
-npm run e2e:ui           # Interactive UI mode
-npm run e2e:full         # All configurations
+npm test
 ```
 
-### Build for Production
+## What's Next
 
-**Backend:**
-```bash
-cd backend
-mvn clean package
+Once the backend is built:
+
+1. **Start Infrastructure** (optional, for PostgreSQL):
+   ```cmd
+   cd infra
+   docker-compose up -d
+   ```
+
+2. **Run Backend Dev Server**:
+   ```cmd
+   cd backend
+   mvn spring-boot:run
+   ```
+   
+3. **Run Frontend Dev Server**:
+   ```cmd
+   cd frontend
+   npm start
+   ```
+
+4. **Access Application**:
+   - Frontend: http://localhost:4200
+   - Backend API: http://localhost:8080
+   - API Docs: http://localhost:8080/swagger-ui.html
+
+## Architecture Overview
+
 ```
-Output: `backend/target/backend-0.0.1-SNAPSHOT.jar`
-
-**Frontend:**
-```bash
-cd frontend
-npm run build
+Repository Structure:
+├── backend/          ✅ Dependencies need building (mvn clean install)
+│   ├── src/
+│   ├── pom.xml
+│   └── mvn-java17.cmd (helper script)
+├── frontend/         ✅ READY (npm install complete)
+│   ├── src/
+│   ├── node_modules/  (1,187 packages)
+│   └── package.json
+└── infra/           ⚠️  Requires Docker
+    └── docker-compose.yml
 ```
-Output: `frontend/dist/`
 
-## 📊 Summary
+## Environment Requirements
 
-| Component | Status | Details |
-|-----------|--------|---------|
-| Frontend Dependencies | ✅ Complete | 1,188 packages installed |
-| Playwright Browsers | ✅ Complete | Chromium, Firefox, WebKit |
-| Backend Configuration | ✅ Ready | All config files in place |
-| Helper Scripts | ✅ Ready | Multiple options available |
-| Backend Build | ⚠️ **Pending** | **Run `mvn17.cmd` manually** |
+- ✅ Java 17: Available at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- ✅ Maven 3.8.6: Available at `C:\Environement\maven-3.8.6`
+- ✅ Node.js: Confirmed working (npm installed packages)
+- ⚠️  Docker: Required for infrastructure (check: `docker --version`)
 
-## 🔧 System Requirements Met
+## Helpful Resources
 
-- ✅ Java 17 available at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- ✅ Maven 3.8.6 available at: `C:\Environement\maven-3.8.6`
-- ✅ Node.js v18.12.1
-- ✅ npm v8.19.2
-- ✅ Python 3.11.0 (available if needed)
+- **Complete Setup Guide**: `SETUP_INSTRUCTIONS_INITIAL_CLONE.md`
+- **Development Guide**: `AGENTS.md`
+- **Project Documentation**: `README.md`
+- **Backend README**: `backend/README.md`
+- **Frontend README**: `frontend/README.md`
 
-## 💡 Quick Start Command
+## Summary
+
+**Frontend:** ✅ Ready for development  
+**Backend:** ⚠️ Needs Maven build (run `setup-repo.cmd` or set JAVA_HOME manually)  
+**Infrastructure:** ⚠️ Needs Docker (optional for development)
+
+---
 
 To complete the setup, simply run:
-
 ```cmd
-.\mvn17.cmd clean install -DskipTests -f backend\pom.xml
+setup-repo.cmd
 ```
 
-Then start coding! 🎉
+This will complete the backend build and Playwright installation, making the repository fully ready for development.

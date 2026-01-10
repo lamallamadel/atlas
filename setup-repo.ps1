@@ -1,62 +1,78 @@
-#!/usr/bin/env pwsh
 # Repository Initial Setup Script
+# This script sets up the backend and frontend for development
 
-Write-Host "=== Repository Initial Setup ===" -ForegroundColor Cyan
+Write-Host "======================================" -ForegroundColor Cyan
+Write-Host " Repository Initial Setup" -ForegroundColor Cyan
+Write-Host "======================================" -ForegroundColor Cyan
 Write-Host ""
 
-# Set Java 17 for this session
+# Step 1: Set JAVA_HOME for backend build
+Write-Host "[1/4] Setting JAVA_HOME to Java 17..." -ForegroundColor Yellow
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
-Write-Host "Java Home: $env:JAVA_HOME" -ForegroundColor Green
+Write-Host "JAVA_HOME set to: $env:JAVA_HOME" -ForegroundColor Green
+java -version
 Write-Host ""
 
-# Setup .m2 toolchains if needed
-$m2Dir = "$env:USERPROFILE\.m2"
-if (-not (Test-Path $m2Dir)) {
-    Write-Host "Creating .m2 directory..." -ForegroundColor Yellow
-    New-Item -ItemType Directory -Path $m2Dir | Out-Null
-}
-
-$toolchainsPath = "$m2Dir\toolchains.xml"
-if (-not (Test-Path $toolchainsPath)) {
-    Write-Host "Copying toolchains.xml to .m2 directory..." -ForegroundColor Yellow
-    Copy-Item -Path "backend\toolchains.xml" -Destination $toolchainsPath -Force
-}
-
-Write-Host "=== Step 1: Installing Backend Dependencies ===" -ForegroundColor Cyan
-Write-Host ""
-
+# Step 2: Build backend
+Write-Host "[2/4] Building backend (Maven clean install)..." -ForegroundColor Yellow
 Set-Location backend
-& mvn clean install -DskipTests -s settings.xml
-$backendResult = $LASTEXITCODE
-Set-Location ..
+mvn clean install -DskipTests
 
-if ($backendResult -ne 0) {
-    Write-Host "Backend installation failed!" -ForegroundColor Red
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Backend build failed!" -ForegroundColor Red
+    Set-Location ..
     exit 1
 }
 
-Write-Host ""
-Write-Host "=== Step 2: Installing Frontend Dependencies ===" -ForegroundColor Cyan
+Write-Host "Backend build successful!" -ForegroundColor Green
+Set-Location ..
 Write-Host ""
 
+# Step 3: Install frontend dependencies
+Write-Host "[3/4] Installing frontend dependencies (npm install)..." -ForegroundColor Yellow
 Set-Location frontend
-& npm install
-$frontendResult = $LASTEXITCODE
-Set-Location ..
+npm install
 
-if ($frontendResult -ne 0) {
-    Write-Host "Frontend installation failed!" -ForegroundColor Red
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "Frontend npm install failed!" -ForegroundColor Red
+    Set-Location ..
     exit 1
 }
 
+Write-Host "Frontend dependencies installed!" -ForegroundColor Green
 Write-Host ""
-Write-Host "=== Setup Complete ===" -ForegroundColor Green
+
+# Step 4: Install Playwright browsers
+Write-Host "[4/4] Installing Playwright browsers..." -ForegroundColor Yellow
+npx playwright install
+
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "WARNING: Playwright browser installation failed. You may need to run this manually:" -ForegroundColor Yellow
+    Write-Host "  cd frontend" -ForegroundColor Yellow
+    Write-Host "  npx playwright install" -ForegroundColor Yellow
+}
+else {
+    Write-Host "Playwright browsers installed!" -ForegroundColor Green
+}
+
+Set-Location ..
 Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "  - Backend build: cd backend; mvn clean package" -ForegroundColor White
-Write-Host "  - Backend test: cd backend; mvn test" -ForegroundColor White
-Write-Host "  - Frontend build: cd frontend; npm run build" -ForegroundColor White
-Write-Host "  - Frontend test: cd frontend; npm test" -ForegroundColor White
+
+# Summary
+Write-Host "======================================" -ForegroundColor Cyan
+Write-Host " Setup Complete!" -ForegroundColor Green
+Write-Host "======================================" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "You can now:" -ForegroundColor White
+Write-Host "  - Run backend tests:  cd backend && mvn test" -ForegroundColor White
+Write-Host "  - Build backend:      cd backend && mvn clean package" -ForegroundColor White
+Write-Host "  - Run backend server: cd backend && mvn spring-boot:run" -ForegroundColor White
+Write-Host "  - Run frontend tests: cd frontend && npm test" -ForegroundColor White
+Write-Host "  - Run frontend E2E:   cd frontend && npm run e2e" -ForegroundColor White
+Write-Host "  - Start frontend:     cd frontend && npm start" -ForegroundColor White
+Write-Host ""
+Write-Host "Note: Remember to set JAVA_HOME before running Maven commands:" -ForegroundColor Yellow
+Write-Host "  `$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'" -ForegroundColor Yellow
 Write-Host ""

@@ -295,3 +295,9 @@ setup-backend.js
 MANUAL_SETUP_REQUIRED.md
 run-initial-setup.ps1
 setup_backend_build.py
+
+# Initial setup artifacts (created during repo clone setup)
+setup-backend-build.cmd
+backend/mavenrc_pre.cmd
+backend/.mavenrc
+SETUP_INSTRUCTIONS_INITIAL_CLONE.md
