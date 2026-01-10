@@ -1,0 +1,173 @@
+@use '@angular/material' as mat;
+
+// Include the common styles for Angular Material
+@include mat.core();
+
+// Define custom typography configuration with Roboto and Open Sans
+$custom-typography: mat.define-typography-config(
+  $font-family: '"Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+  $headline-1: mat.define-typography-level(112px, 112px, 300, 'Roboto', -0.0134em),
+  $headline-2: mat.define-typography-level(56px, 56px, 400, 'Roboto', -0.0089em),
+  $headline-3: mat.define-typography-level(45px, 48px, 400, 'Roboto', 0em),
+  $headline-4: mat.define-typography-level(34px, 40px, 400, 'Roboto', 0.0074em),
+  $headline-5: mat.define-typography-level(24px, 32px, 400, 'Roboto', 0em),
+  $headline-6: mat.define-typography-level(20px, 32px, 500, 'Roboto', 0.0075em),
+  $subtitle-1: mat.define-typography-level(16px, 28px, 400, 'Roboto', 0.0094em),
+  $subtitle-2: mat.define-typography-level(14px, 24px, 500, 'Roboto', 0.0071em),
+  $body-1: mat.define-typography-level(16px, 24px, 400, 'Open Sans', 0.0179em),
+  $body-2: mat.define-typography-level(14px, 20px, 400, 'Open Sans', 0.0179em),
+  $caption: mat.define-typography-level(12px, 20px, 400, 'Open Sans', 0.0333em),
+  $button: mat.define-typography-level(14px, 14px, 500, 'Roboto', 0.0893em),
+);
+
+// Apply typography
+@include mat.typography-hierarchy($custom-typography);
+
+// Define the real estate CRM color palettes
+$real-estate-primary: (
+  50: #e5eaf3,
+  100: #becbe0,
+  200: #93a9cc,
+  300: #6787b8,
+  400: #476da8,
+  500: #2c5aa0,
+  600: #265192,
+  700: #1f4782,
+  800: #193d72,
+  900: #0f2d54,
+  A100: #a3c1ff,
+  A200: #709fff,
+  A400: #3d7dff,
+  A700: #2469ff,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: white,
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(0, 0, 0, 0.87),
+    A200: rgba(0, 0, 0, 0.87),
+    A400: white,
+    A700: white,
+  )
+);
+
+$real-estate-accent: (
+  50: #fceee5,
+  100: #f8d4bd,
+  200: #f4b891,
+  300: #f09c65,
+  400: #ec8644,
+  500: #e67e22,
+  600: #e3731e,
+  700: #df6619,
+  800: #db5814,
+  900: #d5420c,
+  A100: #ffffff,
+  A200: #ffd8ca,
+  A400: #ffb097,
+  A700: #ff9d7e,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: rgba(0, 0, 0, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(0, 0, 0, 0.87),
+    A200: rgba(0, 0, 0, 0.87),
+    A400: rgba(0, 0, 0, 0.87),
+    A700: rgba(0, 0, 0, 0.87),
+  )
+);
+
+$real-estate-warn: (
+  50: #fceae9,
+  100: #f7cac7,
+  200: #f2a7a2,
+  300: #ed847d,
+  400: #e96861,
+  500: #e74c3c,
+  600: #e44538,
+  700: #e03c30,
+  800: #dd3328,
+  900: #d7241b,
+  A100: #ffffff,
+  A200: #ffd5d3,
+  A400: #ffa3a0,
+  A700: #ff8a86,
+  contrast: (
+    50: rgba(0, 0, 0, 0.87),
+    100: rgba(0, 0, 0, 0.87),
+    200: rgba(0, 0, 0, 0.87),
+    300: rgba(0, 0, 0, 0.87),
+    400: rgba(0, 0, 0, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(0, 0, 0, 0.87),
+    A200: rgba(0, 0, 0, 0.87),
+    A400: rgba(0, 0, 0, 0.87),
+    A700: rgba(0, 0, 0, 0.87),
+  )
+);
+
+// Create the theme object with custom palettes
+$primary-palette: mat.define-palette($real-estate-primary, 500, 300, 700);
+$accent-palette: mat.define-palette($real-estate-accent, 500, 300, 700);
+$warn-palette: mat.define-palette($real-estate-warn, 500, 300, 700);
+
+// Create the light theme
+$real-estate-theme: mat.define-light-theme((
+  color: (
+    primary: $primary-palette,
+    accent: $accent-palette,
+    warn: $warn-palette,
+  ),
+  typography: $custom-typography,
+  density: 0,
+));
+
+// Include theme styles for core and each component used in your app
+@include mat.all-component-themes($real-estate-theme);
+
+// Define density variants for compact layouts (tables, etc.)
+.compact-density {
+  $compact-theme: mat.define-light-theme((
+    color: (
+      primary: $primary-palette,
+      accent: $accent-palette,
+      warn: $warn-palette,
+    ),
+    typography: $custom-typography,
+    density: -1,
+  ));
+  
+  @include mat.all-component-densities($compact-theme);
+}
+
+// Additional density option for maximum compactness
+.compact-density-max {
+  $compact-max-theme: mat.define-light-theme((
+    color: (
+      primary: $primary-palette,
+      accent: $accent-palette,
+      warn: $warn-palette,
+    ),
+    typography: $custom-typography,
+    density: -2,
+  ));
+  
+  @include mat.all-component-densities($compact-max-theme);
+}

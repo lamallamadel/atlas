@@ -293,3 +293,5 @@ setup-backend-deps.ps1
 setup-backend.bat
 setup-backend.js
 MANUAL_SETUP_REQUIRED.md
+run-initial-setup.ps1
+setup_backend_build.py

@@ -1,160 +1,149 @@
-# Initial Repository Setup Instructions
+# Initial Repository Setup - Completed Steps
 
-## Setup Status
+## Status Summary
 
-✅ **Frontend**: Dependencies installed successfully (1,188 packages)
-⚠️ **Backend**: Requires manual setup due to Java 17 environment configuration
+### ✅ Frontend Setup - COMPLETE
+- **npm install**: Successfully installed all frontend dependencies (1188 packages)
+- **Playwright**: Playwright v1.57.0 is installed and browsers have been downloaded
+- Location: `frontend/`
+- Node.js version: 18.12.1
+- npm version: 8.19.2
 
-## What Has Been Done
+### ⚠️ Backend Setup - REQUIRES MANUAL STEP
+- **Issue**: The automated system cannot set environment variables or run batch/PowerShell scripts due to security restrictions
+- **What's needed**: Run Maven build with Java 17
 
-### Frontend (Complete)
-- ✅ Navigated to `frontend/` directory
-- ✅ Ran `npm install` successfully
-- ✅ All 1,188 packages installed
-- ✅ Ready for development
+## Backend Setup - Manual Instructions
 
-### Backend (Manual Setup Required)
-- Created setup scripts in `backend/` directory
-- Requires Java 17 environment configuration before Maven can run
+### Option 1: Using the provided helper script (Recommended)
 
-## Manual Backend Setup (Required)
-
-The backend requires Java 17, but Maven needs the `JAVA_HOME` environment variable to be set. Due to security constraints, this must be done manually.
-
-### Option 1: Using the Provided Batch Script (Windows - Easiest)
+Run one of these existing helper scripts from the repository root:
 
 ```cmd
-cd backend
-.\setup-repo.cmd
+.\mvn17.cmd clean install -DskipTests -f backend\pom.xml
 ```
 
-This script will:
-1. Set `JAVA_HOME` to `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-2. Run `mvn clean install -gs settings.xml`
-3. Install all backend dependencies
-
-### Option 2: Using PowerShell Script
-
-```powershell
-cd backend
-.\Run-MavenInstall.ps1
-```
-
-### Option 3: Using Existing Helper Scripts
+OR
 
 ```cmd
-cd backend
-.\run-mvn-java17.cmd clean install
+.\do-mvn-setup.cmd
 ```
 
-### Option 4: Manual Environment Setup
+### Option 2: Using PowerShell
 
-**Windows PowerShell:**
 ```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install -gs settings.xml
+mvn clean install -DskipTests
+cd ..
 ```
 
-**Windows Command Prompt:**
-```cmd
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-cd backend
-mvn clean install -gs settings.xml
-```
+### Option 3: Manual steps
+
+1. Open a new command prompt or PowerShell window
+2. Set JAVA_HOME:
+   ```cmd
+   set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+   ```
+3. Navigate to backend directory:
+   ```cmd
+   cd backend
+   ```
+4. Run Maven:
+   ```cmd
+   mvn clean install -DskipTests
+   ```
 
 ## Verification
 
-After running the backend setup, verify the installation:
+After running the backend setup, verify everything is working:
 
-### Backend Verification
-```bash
-cd backend
-mvn -version  # Should show Java 17
-mvn test      # Run tests
-```
+```powershell
+# Verify backend build
+Test-Path backend\target\backend-0.0.1-SNAPSHOT.jar
 
-### Frontend Verification
-```bash
+# Test frontend build
 cd frontend
-npm run lint  # Run linter
-npm test      # Run tests
+npm run build
+
+# Run backend tests (optional)
+cd ..\backend
+mvn test
+
+# Run frontend E2E tests (optional)
+cd ..\frontend
+npm run e2e:fast
 ```
 
-## Next Steps
+## Repository Configuration
 
-Once both frontend and backend are set up:
+The following files have been pre-configured for the setup:
 
-1. **Start Infrastructure** (if using PostgreSQL):
-   ```bash
-   cd infra
-   docker-compose up -d
-   ```
+- ✅ `backend/toolchains.xml` - Maven toolchains configuration for Java 17
+- ✅ `backend/settings.xml` - Maven settings with proper repository configuration
+- ✅ `backend/.mavenrc` - Maven runtime configuration (for Unix-like systems)
+- ✅ `backend/mavenrc_pre.bat` - Maven pre-execution script for Windows
+- ✅ `mvn17.cmd` - Wrapper script to run Maven with Java 17
+- ✅ `frontend/package.json` - All npm dependencies specified
+- ✅ `frontend/node_modules/` - All dependencies installed (1188 packages)
+- ✅ Playwright browsers installed in `%LOCALAPPDATA%\ms-playwright`
 
-2. **Run Backend**:
-   ```bash
+## Next Steps After Backend Setup
+
+Once the backend build completes successfully, you can:
+
+1. **Run the backend dev server**:
+   ```cmd
    cd backend
    mvn spring-boot:run
    ```
 
-3. **Run Frontend**:
-   ```bash
+2. **Run the frontend dev server** (in another terminal):
+   ```cmd
    cd frontend
    npm start
    ```
 
-4. **Access the Application**:
-   - Frontend: http://localhost:4200
-   - Backend API: http://localhost:8080
-   - API Docs: http://localhost:8080/swagger-ui.html
-   - Health Check: http://localhost:8080/actuator/health
+3. **Run tests**:
+   - Backend tests: `cd backend && mvn test`
+   - Backend E2E (H2): `cd backend && mvn verify -Pbackend-e2e-h2`
+   - Backend E2E (PostgreSQL): `cd backend && mvn verify -Pbackend-e2e-postgres`
+   - Frontend E2E: `cd frontend && npm run e2e`
 
-## Development Commands Reference
-
-### Backend
-- **Build**: `mvn clean package`
-- **Test**: `mvn test`
-- **Run**: `mvn spring-boot:run`
-- **E2E Tests (H2)**: `mvn verify -Pbackend-e2e-h2`
-- **E2E Tests (PostgreSQL)**: `mvn verify -Pbackend-e2e-postgres`
-
-### Frontend
-- **Build**: `npm run build`
-- **Test**: `npm test`
-- **Lint**: `npm run lint`
-- **Run**: `npm start`
-- **E2E Tests**: `npm run e2e`
+4. **Build for production**:
+   - Backend: `cd backend && mvn clean package`
+   - Frontend: `cd frontend && npm run build`
 
 ## Troubleshooting
 
-### Issue: "JAVA_HOME is not defined correctly"
+### Java Version Issues
 
-**Solution**: Ensure JAVA_HOME is set to the Java 17 installation:
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-```
+If you see "JAVA_HOME environment variable is not defined correctly":
+- Make sure Java 17 is installed at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- Use the `mvn17.cmd` wrapper script which automatically sets JAVA_HOME
 
-### Issue: Maven command not found
+### Maven Build Fails
 
-**Solution**: Maven is installed at `C:\Environement\maven-3.8.6\bin\mvn.cmd`. Ensure it's in your PATH or use the full path.
+If Maven build fails:
+1. Check your internet connection (Maven needs to download dependencies)
+2. Try cleaning the local Maven repository: `mvn clean`
+3. Run with debug output: `mvn -X clean install -DskipTests`
 
-### Issue: Port conflicts
+### Port Conflicts
 
-**Solution**: Check if ports 8080 (backend) or 4200 (frontend) are already in use:
-```powershell
-Get-NetTCPConnection -LocalPort 8080
-Get-NetTCPConnection -LocalPort 4200
-```
+If you get port conflict errors:
+- Backend default port: 8080
+- Frontend default port: 4200
+- PostgreSQL (if running): 5432
 
-## Files Created
-
-- `backend/setup-repo.cmd` - Batch script for backend setup
-- `backend/Run-MavenInstall.ps1` - PowerShell script for backend setup
-- This file (`INITIAL_SETUP_INSTRUCTIONS.md`) - Setup instructions
+Use `Get-NetTCPConnection -LocalPort <port>` to check what's using a port.
 
 ## Summary
 
-- ✅ Frontend is fully set up and ready to use
-- ⚠️ Backend requires one manual command to complete setup
-- All necessary scripts have been created for easy setup
-- See AGENTS.md for additional development commands and architecture details
+**Current State:**
+- ✅ Frontend: Fully configured and ready to use
+- ⚠️ Backend: Requires one manual Maven build command to complete setup
+- ✅ All configuration files: In place and ready
+- ✅ Helper scripts: Available for easy setup
+
+**To complete setup:** Run `.\mvn17.cmd clean install -DskipTests -f backend\pom.xml` from the repository root.
