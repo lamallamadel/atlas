@@ -22,6 +22,8 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.lang.reflect.Method;
+
 
 @Aspect
 @Component
@@ -83,6 +85,11 @@ public class AuditAspect {
                 auditEvent.setDiff(diff);
 
                 auditEventRepository.save(auditEvent);
+
+                // Additional audit for cascaded children on DOSSIER create
+if (action == AuditAction.CREATED && entityType == AuditEntityType.DOSSIER) {
+    emitCascadedPartiePrenanteCreatedEvents(result, userId, orgId);
+}
             }
         } catch (Exception ignored) {
             // Non-blocking auditing
@@ -263,4 +270,36 @@ public class AuditAspect {
     private Map<String, Object> normalizeIds(Map<String, Object> map) {
         return (Map<String, Object>) normalizeIds((Object) map);
     }
+
+    @SuppressWarnings("unchecked")
+    private void emitCascadedPartiePrenanteCreatedEvents(Object dossierResult, String userId, String orgId) {
+        if (dossierResult == null) return;
+
+        try {
+            Method getParties = dossierResult.getClass().getMethod("getParties");
+            Object partiesObj = getParties.invoke(dossierResult);
+            if (!(partiesObj instanceof Iterable<?> parties)) return;
+
+            for (Object party : parties) {
+                Long partyId = extractEntityIdFromResult(party);
+                if (partyId == null) continue;
+
+                AuditEventEntity partyEvent = new AuditEventEntity();
+                partyEvent.setEntityType(AuditEntityType.PARTIE_PRENANTE);
+                partyEvent.setEntityId(partyId);
+                partyEvent.setAction(AuditAction.CREATED);
+                partyEvent.setUserId(userId);
+                partyEvent.setOrgId(orgId);
+
+                Map<String, Object> diff = new LinkedHashMap<>();
+                diff.put("after", normalizeIds(safeConvertToMap(party)));
+                partyEvent.setDiff(diff);
+
+                auditEventRepository.save(partyEvent);
+            }
+        } catch (Exception ignored) {
+            // Non-blocking auditing
+        }
+    }
+
 }

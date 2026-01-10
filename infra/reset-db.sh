@@ -6,13 +6,13 @@
 set -e
 
 echo "Stopping PostgreSQL container..."
-docker-compose down
+docker compose down -v
 
 echo "Removing PostgreSQL volume..."
 docker volume rm postgres_data 2>/dev/null || echo "Volume not found, continuing..."
 
 echo "Starting PostgreSQL container with fresh volume..."
-docker-compose up -d
+docker compose up -d
 
 echo "Waiting for PostgreSQL to be healthy..."
 until docker-compose ps | grep -q "healthy"; do

@@ -78,6 +78,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
                 .expiresAt(now.plusSeconds(3600))
                 .build();
     }
+    
 
     @Test
     void whenMissingAuthorizationBearerToken_returns401WithWWWAuthenticateHeader() throws Exception {
