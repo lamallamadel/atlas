@@ -110,6 +110,34 @@ public class SecurityConfig {
                     throw new org.springframework.security.oauth2.jwt.BadJwtException("Token cannot be blank");
                 }
                 
+                // Handle expired tokens by returning a JWT with past expiration time
+                // This allows Spring Security's JwtTimestampValidator to reject with 401
+                if (token.contains("expired")) {
+                    // Extract org_id from token if present (format: "mock-token-ORG-XXX")
+                    String orgId = null;
+                    if (token.startsWith("mock-token-")) {
+                        String[] parts = token.split("-", 3);
+                        if (parts.length >= 3) {
+                            orgId = parts[2];
+                        }
+                    }
+                    
+                    var expiredJwtBuilder = Jwt.withTokenValue(token)
+                        .header("alg", "none")
+                        .claim("sub", "test-user")
+                        .claim("roles", List.of("ADMIN"))
+                        .claim("realm_access", Map.of("roles", List.of("ADMIN")))
+                        .issuedAt(Instant.now().minusSeconds(7200))
+                        .expiresAt(Instant.now().minusSeconds(3600));
+                    
+                    // Add org_id claim if extracted from token
+                    if (orgId != null) {
+                        expiredJwtBuilder.claim("org_id", orgId);
+                    }
+                    
+                    return expiredJwtBuilder.build();
+                }
+                
                 // Reject tokens that start with "eyJ" (base64 encoded JWT header) but are not from our mock
                 // This simulates rejection of real JWT tokens with invalid signatures
                 try {
