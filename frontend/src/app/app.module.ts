@@ -44,6 +44,7 @@ import { SessionExpiredComponent } from './pages/session-expired/session-expired
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
+import { LoadingSkeletonComponent } from './components/loading-skeleton.component';
 import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent } from './components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
@@ -87,6 +88,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     GenericTableComponent,
     EmptyStateComponent,
     BadgeStatusComponent,
+    LoadingSkeletonComponent,
     PartiePrenanteFormDialogComponent,
     MessageFormDialogComponent,
     ConfirmDeleteDialogComponent,

@@ -5,46 +5,44 @@
   <div class="page-content">
     <div class="kpi-cards-container">
       <div class="kpi-card">
-        <div class="kpi-card-header">
-          <h3 class="kpi-card-title">Annonces actives</h3>
-        </div>
-        <div class="kpi-card-body">
-          <div *ngIf="loadingAnnonces" class="kpi-loading">
-            <span class="loading-spinner">⟳</span>
-            <span>Chargement...</span>
+        <app-loading-skeleton *ngIf="loadingAnnonces" variant="dashboard-kpi"></app-loading-skeleton>
+        <div *ngIf="!loadingAnnonces">
+          <div class="kpi-card-header">
+            <h3 class="kpi-card-title">Annonces actives</h3>
           </div>
-          <div *ngIf="!loadingAnnonces && errorAnnonces" class="kpi-error">
-            <span class="error-icon">✗</span>
-            <span>{{errorAnnonces}}</span>
+          <div class="kpi-card-body">
+            <div *ngIf="errorAnnonces" class="kpi-error">
+              <span class="error-icon">✗</span>
+              <span>{{errorAnnonces}}</span>
+            </div>
+            <div *ngIf="!errorAnnonces" class="kpi-value">
+              {{annoncesActivesCount}}
+            </div>
           </div>
-          <div *ngIf="!loadingAnnonces && !errorAnnonces" class="kpi-value">
-            {{annoncesActivesCount}}
+          <div class="kpi-card-footer" *ngIf="!errorAnnonces">
+            <button class="kpi-view-all-button" (click)="navigateToAnnoncesActives()">Voir tous</button>
           </div>
-        </div>
-        <div class="kpi-card-footer" *ngIf="!loadingAnnonces && !errorAnnonces">
-          <button class="kpi-view-all-button" (click)="navigateToAnnoncesActives()">Voir tous</button>
         </div>
       </div>
 
       <div class="kpi-card">
-        <div class="kpi-card-header">
-          <h3 class="kpi-card-title">Dossiers à traiter</h3>
-        </div>
-        <div class="kpi-card-body">
-          <div *ngIf="loadingDossiers" class="kpi-loading">
-            <span class="loading-spinner">⟳</span>
-            <span>Chargement...</span>
+        <app-loading-skeleton *ngIf="loadingDossiers" variant="dashboard-kpi"></app-loading-skeleton>
+        <div *ngIf="!loadingDossiers">
+          <div class="kpi-card-header">
+            <h3 class="kpi-card-title">Dossiers à traiter</h3>
           </div>
-          <div *ngIf="!loadingDossiers && errorDossiers" class="kpi-error">
-            <span class="error-icon">✗</span>
-            <span>{{errorDossiers}}</span>
+          <div class="kpi-card-body">
+            <div *ngIf="errorDossiers" class="kpi-error">
+              <span class="error-icon">✗</span>
+              <span>{{errorDossiers}}</span>
+            </div>
+            <div *ngIf="!errorDossiers" class="kpi-value">
+              {{dossiersATraiterCount}}
+            </div>
           </div>
-          <div *ngIf="!loadingDossiers && !errorDossiers" class="kpi-value">
-            {{dossiersATraiterCount}}
+          <div class="kpi-card-footer" *ngIf="!errorDossiers">
+            <button class="kpi-view-all-button" (click)="navigateToDossiersATraiter()">Voir tous</button>
           </div>
-        </div>
-        <div class="kpi-card-footer" *ngIf="!loadingDossiers && !errorDossiers">
-          <button class="kpi-view-all-button" (click)="navigateToDossiersATraiter()">Voir tous</button>
         </div>
       </div>
 
@@ -53,10 +51,7 @@
           <h3 class="kpi-card-title">Derniers dossiers</h3>
         </div>
         <div class="kpi-card-body">
-          <div *ngIf="loadingRecent" class="kpi-loading">
-            <span class="loading-spinner">⟳</span>
-            <span>Chargement...</span>
-          </div>
+          <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"></app-loading-skeleton>
           <div *ngIf="!loadingRecent && errorRecent" class="kpi-error">
             <span class="error-icon">✗</span>
             <span>{{errorRecent}}</span>

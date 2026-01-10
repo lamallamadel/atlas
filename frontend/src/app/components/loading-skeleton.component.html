@@ -1,0 +1,83 @@
+<div class="skeleton-container" [ngClass]="'skeleton-' + variant">
+  <!-- Card variant -->
+  <div *ngIf="variant === 'card'" class="skeleton-card">
+    <div *ngFor="let i of rowsArray" class="skeleton-card-item">
+      <div class="skeleton-card-header">
+        <div class="skeleton-rectangle skeleton-avatar"></div>
+        <div class="skeleton-card-header-content">
+          <div class="skeleton-rectangle skeleton-title"></div>
+          <div class="skeleton-rectangle skeleton-subtitle"></div>
+        </div>
+      </div>
+      <div class="skeleton-card-body">
+        <div class="skeleton-rectangle skeleton-line"></div>
+        <div class="skeleton-rectangle skeleton-line"></div>
+        <div class="skeleton-rectangle skeleton-line skeleton-line-short"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List variant -->
+  <div *ngIf="variant === 'list'" class="skeleton-list">
+    <div *ngFor="let i of rowsArray" class="skeleton-list-item">
+      <div class="skeleton-rectangle skeleton-list-icon"></div>
+      <div class="skeleton-list-content">
+        <div class="skeleton-rectangle skeleton-list-title"></div>
+        <div class="skeleton-rectangle skeleton-list-subtitle"></div>
+      </div>
+      <div class="skeleton-rectangle skeleton-list-action"></div>
+    </div>
+  </div>
+
+  <!-- Table variant -->
+  <div *ngIf="variant === 'table'" class="skeleton-table">
+    <div class="skeleton-table-header">
+      <div *ngFor="let i of columnsArray" class="skeleton-rectangle skeleton-table-header-cell"></div>
+    </div>
+    <div class="skeleton-table-body">
+      <div *ngFor="let i of rowsArray" class="skeleton-table-row">
+        <div *ngFor="let j of columnsArray" class="skeleton-rectangle skeleton-table-cell"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form variant -->
+  <div *ngIf="variant === 'form'" class="skeleton-form">
+    <div *ngFor="let i of rowsArray" class="skeleton-form-group">
+      <div class="skeleton-rectangle skeleton-form-label"></div>
+      <div class="skeleton-rectangle skeleton-form-input"></div>
+    </div>
+    <div class="skeleton-form-actions">
+      <div class="skeleton-rectangle skeleton-button"></div>
+      <div class="skeleton-rectangle skeleton-button"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard KPI variant -->
+  <div *ngIf="variant === 'dashboard-kpi'" class="skeleton-dashboard-kpi">
+    <div class="skeleton-kpi-header">
+      <div class="skeleton-rectangle skeleton-kpi-title"></div>
+    </div>
+    <div class="skeleton-kpi-value">
+      <div class="skeleton-rectangle skeleton-kpi-number"></div>
+    </div>
+    <div class="skeleton-kpi-footer">
+      <div class="skeleton-rectangle skeleton-kpi-button"></div>
+    </div>
+  </div>
+
+  <!-- Detail variant -->
+  <div *ngIf="variant === 'detail'" class="skeleton-detail">
+    <div class="skeleton-detail-header">
+      <div class="skeleton-rectangle skeleton-detail-back"></div>
+      <div class="skeleton-rectangle skeleton-detail-title"></div>
+      <div class="skeleton-rectangle skeleton-detail-badge"></div>
+    </div>
+    <div class="skeleton-detail-content">
+      <div *ngFor="let i of rowsArray" class="skeleton-detail-row">
+        <div class="skeleton-rectangle skeleton-detail-label"></div>
+        <div class="skeleton-rectangle skeleton-detail-value"></div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -19,8 +19,9 @@
     </div>
   </div>
 
-  <div *ngIf="loading" class="loading-spinner">
-    <mat-spinner></mat-spinner>
+  <div *ngIf="loading">
+    <app-loading-skeleton variant="dashboard-kpi"></app-loading-skeleton>
+    <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px;"></app-loading-skeleton>
   </div>
 
   <div *ngIf="error" class="error-message">

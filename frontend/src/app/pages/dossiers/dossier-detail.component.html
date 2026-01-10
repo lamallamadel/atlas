@@ -7,10 +7,7 @@
   </div>
 
   <div class="page-content">
-    <div *ngIf="loading" class="loading-state">
-      <div class="spinner"></div>
-      <p>Chargement des détails du dossier...</p>
-    </div>
+    <app-loading-skeleton *ngIf="loading" variant="detail" [rows]="15"></app-loading-skeleton>
 
     <div *ngIf="error && !loading" class="error-state">
       <p class="error-message">{{ error }}</p>
@@ -320,10 +317,7 @@
               </button>
             </div>
 
-            <div *ngIf="loadingMessages" class="loading-state">
-              <div class="spinner-small"></div>
-              <p>Chargement des messages...</p>
-            </div>
+            <app-loading-skeleton *ngIf="loadingMessages" variant="list" [rows]="5"></app-loading-skeleton>
 
             <div *ngIf="!loadingMessages" class="timeline-view">
               <div *ngIf="getMessagesSorted().length === 0" class="empty-message">
@@ -358,10 +352,7 @@
               </button>
             </div>
 
-            <div *ngIf="loadingAppointments" class="loading-state">
-              <div class="spinner-small"></div>
-              <p>Chargement des rendez-vous...</p>
-            </div>
+            <app-loading-skeleton *ngIf="loadingAppointments" variant="table" [rows]="5" [columns]="6"></app-loading-skeleton>
 
             <div *ngIf="!loadingAppointments" class="data-table-wrapper">
               <table class="data-table" *ngIf="appointments.length > 0">
@@ -416,10 +407,7 @@
 
         <mat-tab label="Consentements">
           <div class="tab-content">
-            <div *ngIf="consentementsLoading" class="loading-state">
-              <div class="spinner-small"></div>
-              <p>Chargement des consentements...</p>
-            </div>
+            <app-loading-skeleton *ngIf="consentementsLoading" variant="card" [rows]="2"></app-loading-skeleton>
 
             <div *ngIf="!consentementsLoading">
               <div class="consent-cards-grid">
@@ -568,10 +556,7 @@
               </div>
             </div>
 
-            <div *ngIf="auditEventsLoading" class="loading-state">
-              <div class="spinner-small"></div>
-              <p>Chargement de l'historique...</p>
-            </div>
+            <app-loading-skeleton *ngIf="auditEventsLoading" variant="table" [rows]="8" [columns]="6"></app-loading-skeleton>
 
             <div *ngIf="!auditEventsLoading">
               <div class="data-table-wrapper" *ngIf="auditEvents.length > 0">

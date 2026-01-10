@@ -14,10 +14,7 @@
   </div>
 
   <div class="page-content">
-    <div *ngIf="loading" class="loading-state">
-      <div class="spinner"></div>
-      <p>Chargement des détails de l'annonce...</p>
-    </div>
+    <app-loading-skeleton *ngIf="loading" variant="detail" [rows]="12"></app-loading-skeleton>
 
     <div *ngIf="error && !loading" class="error-state">
       <p class="error-message">{{ error }}</p>

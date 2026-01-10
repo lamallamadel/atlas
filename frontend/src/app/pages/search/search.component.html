@@ -34,9 +34,7 @@
     </span>
   </div>
 
-  <div class="loading-spinner" *ngIf="isLoading">
-    <p>Searching...</p>
-  </div>
+  <app-loading-skeleton *ngIf="isLoading" variant="card" [rows]="5"></app-loading-skeleton>
 
   <div class="error-message" *ngIf="error">
     <p>{{ error }}</p>
