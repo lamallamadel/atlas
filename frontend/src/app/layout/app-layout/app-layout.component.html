@@ -1,3 +1,5 @@
+<a href="#main-content" class="skip-to-content">Passer au contenu principal</a>
+
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
     #drawer
@@ -5,39 +7,60 @@
     fixedInViewport
     [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
     [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(isHandset$ | async) === false">
-    <mat-toolbar class="sidenav-header">
+    [opened]="(isHandset$ | async) === false"
+    [attr.aria-label]="'Menu de navigation principal'">
+    <mat-toolbar class="sidenav-header" role="banner">
       <span class="brand-text">Atlas Immobilier</span>
     </mat-toolbar>
-    <mat-nav-list class="nav-list">
-      <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-        <mat-icon matListItemIcon>dashboard</mat-icon>
-        <span matListItemTitle>Tableau de bord</span>
-      </a>
-      <a mat-list-item routerLink="/reports" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-        <mat-icon matListItemIcon>insights</mat-icon>
-        <span matListItemTitle>Rapports & KPI</span>
-      </a>
-      <a mat-list-item routerLink="/annonces" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-        <mat-icon matListItemIcon>campaign</mat-icon>
-        <span matListItemTitle>Annonces</span>
-      </a>
-      <a mat-list-item routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()">
-        <mat-icon matListItemIcon>folder</mat-icon>
-        <span matListItemTitle>Dossiers</span>
-      </a>
-    </mat-nav-list>
+    <nav aria-label="Navigation principale">
+      <mat-nav-list class="nav-list">
+        <a mat-list-item 
+           routerLink="/dashboard" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Accéder au tableau de bord">
+          <mat-icon matListItemIcon aria-hidden="true">dashboard</mat-icon>
+          <span matListItemTitle>Tableau de bord</span>
+        </a>
+        <a mat-list-item 
+           routerLink="/reports" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Accéder aux rapports et KPI">
+          <mat-icon matListItemIcon aria-hidden="true">insights</mat-icon>
+          <span matListItemTitle>Rapports & KPI</span>
+        </a>
+        <a mat-list-item 
+           routerLink="/annonces" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Accéder aux annonces">
+          <mat-icon matListItemIcon aria-hidden="true">campaign</mat-icon>
+          <span matListItemTitle>Annonces</span>
+        </a>
+        <a mat-list-item 
+           routerLink="/dossiers" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Accéder aux dossiers">
+          <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
+          <span matListItemTitle>Dossiers</span>
+        </a>
+      </mat-nav-list>
+    </nav>
   </mat-sidenav>
 
   <mat-sidenav-content class="sidenav-content">
-    <mat-toolbar color="primary" class="top-toolbar">
+    <mat-toolbar color="primary" class="top-toolbar" role="banner">
       <button
         type="button"
         mat-icon-button
         (click)="drawer.toggle()"
         *ngIf="isHandset$ | async"
-        class="menu-button">
-        <mat-icon>menu</mat-icon>
+        class="menu-button"
+        aria-label="Ouvrir le menu de navigation"
+        [attr.aria-expanded]="drawer.opened">
+        <mat-icon aria-hidden="true">menu</mat-icon>
       </button>
       
       <span class="toolbar-spacer"></span>
@@ -51,30 +74,32 @@
           mat-icon-button
           class="user-menu-button"
           [matMenuTriggerFor]="userMenu"
-          aria-label="User menu">
-          <mat-icon>account_circle</mat-icon>
+          aria-label="Ouvrir le menu utilisateur"
+          aria-haspopup="true"
+          [attr.aria-expanded]="userMenuOpen">
+          <mat-icon aria-hidden="true">account_circle</mat-icon>
         </button>
         
-        <mat-menu #userMenu="matMenu" class="user-dropdown-menu">
+        <mat-menu #userMenu="matMenu" class="user-dropdown-menu" aria-label="Options utilisateur">
           <div class="user-menu-header" mat-menu-item disabled>
             <div class="user-info">
-              <mat-icon class="user-avatar-large">account_circle</mat-icon>
+              <mat-icon class="user-avatar-large" aria-hidden="true">account_circle</mat-icon>
               <div class="user-details">
                 <div class="user-name">Utilisateur</div>
                 <div class="user-email">user@example.com</div>
               </div>
             </div>
           </div>
-          <mat-divider></mat-divider>
-          <button mat-menu-item (click)="logout()">
-            <mat-icon>logout</mat-icon>
+          <mat-divider role="separator"></mat-divider>
+          <button mat-menu-item (click)="logout()" aria-label="Se déconnecter de l'application">
+            <mat-icon aria-hidden="true">logout</mat-icon>
             <span>Déconnexion</span>
           </button>
         </mat-menu>
       </div>
     </mat-toolbar>
 
-    <main class="main-content">
+    <main id="main-content" class="main-content" role="main" tabindex="-1">
       <router-outlet></router-outlet>
     </main>
   </mat-sidenav-content>

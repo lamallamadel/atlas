@@ -1,28 +1,28 @@
-<div @slideIn>
-  <h2 mat-dialog-title>Nouveau message</h2>
+<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+  <h2 mat-dialog-title id="dialog-title">Nouveau message</h2>
 
   <mat-dialog-content>
     <form [formGroup]="messageForm" class="message-form">
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Canal</mat-label>
-        <mat-select formControlName="channel">
+        <mat-select formControlName="channel" aria-required="true" [attr.aria-invalid]="messageForm.get('channel')?.hasError('required') && messageForm.get('channel')?.touched">
           <mat-option *ngFor="let option of channelOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
         </mat-select>
-        <mat-error *ngIf="messageForm.get('channel')?.hasError('required')">
+        <mat-error *ngIf="messageForm.get('channel')?.hasError('required')" role="alert">
           {{ getErrorMessage('channel') }}
         </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Direction</mat-label>
-        <mat-select formControlName="direction">
+        <mat-select formControlName="direction" aria-required="true" [attr.aria-invalid]="messageForm.get('direction')?.hasError('required') && messageForm.get('direction')?.touched">
           <mat-option *ngFor="let option of directionOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
         </mat-select>
-        <mat-error *ngIf="messageForm.get('direction')?.hasError('required')">
+        <mat-error *ngIf="messageForm.get('direction')?.hasError('required')" role="alert">
           {{ getErrorMessage('direction') }}
         </mat-error>
       </mat-form-field>
@@ -34,8 +34,10 @@
           formControlName="content" 
           placeholder="Contenu du message"
           rows="5"
+          aria-required="true"
+          [attr.aria-invalid]="messageForm.get('content')?.hasError('required') && messageForm.get('content')?.touched"
         ></textarea>
-        <mat-error *ngIf="messageForm.get('content')?.hasError('required')">
+        <mat-error *ngIf="messageForm.get('content')?.hasError('required')" role="alert">
           {{ getErrorMessage('content') }}
         </mat-error>
       </mat-form-field>
@@ -46,8 +48,10 @@
           matInput 
           type="datetime-local" 
           formControlName="timestamp"
+          aria-required="true"
+          [attr.aria-invalid]="messageForm.get('timestamp')?.hasError('required') && messageForm.get('timestamp')?.touched"
         >
-        <mat-error *ngIf="messageForm.get('timestamp')?.hasError('required')">
+        <mat-error *ngIf="messageForm.get('timestamp')?.hasError('required')" role="alert">
           {{ getErrorMessage('timestamp') }}
         </mat-error>
       </mat-form-field>
@@ -55,10 +59,16 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Annuler</button>
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!messageForm.valid || isSubmitting">
-      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la création du message">Annuler</button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="onSubmit()" 
+            [disabled]="!messageForm.valid || isSubmitting"
+            [attr.aria-busy]="isSubmitting"
+            [attr.aria-label]="isSubmitting ? 'Création en cours' : 'Créer le message'">
+      <mat-spinner *ngIf="isSubmitting" diameter="20" aria-hidden="true"></mat-spinner>
       <span *ngIf="!isSubmitting">Créer</span>
+      <span *ngIf="isSubmitting" class="sr-only" role="status" aria-live="polite">Création en cours</span>
     </button>
   </mat-dialog-actions>
 </div>

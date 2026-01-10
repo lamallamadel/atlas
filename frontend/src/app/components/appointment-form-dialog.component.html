@@ -1,62 +1,78 @@
-<div @slideIn>
-  <h2 mat-dialog-title>{{ isEditMode ? 'Modifier' : 'Planifier' }} un rendez-vous</h2>
+<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+  <h2 mat-dialog-title id="dialog-title">{{ isEditMode ? 'Modifier' : 'Planifier' }} un rendez-vous</h2>
 
   <mat-dialog-content>
     <form [formGroup]="appointmentForm" class="appointment-form">
-      <div *ngIf="getFormErrorMessage()" class="form-error-message">
+      <div *ngIf="getFormErrorMessage()" class="form-error-message" role="alert" aria-live="assertive">
         {{ getFormErrorMessage() }}
       </div>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Date et heure de début</mat-label>
-        <input matInput type="datetime-local" formControlName="startTime" placeholder="jj/mm/aaaa hh:mm">
-        <mat-error *ngIf="appointmentForm.get('startTime')?.invalid">
+        <mat-label>Date et heure de début <span class="required" aria-label="obligatoire">*</span></mat-label>
+        <input matInput 
+               type="datetime-local" 
+               formControlName="startTime" 
+               placeholder="jj/mm/aaaa hh:mm"
+               aria-required="true"
+               [attr.aria-invalid]="appointmentForm.get('startTime')?.invalid && appointmentForm.get('startTime')?.touched">
+        <mat-error *ngIf="appointmentForm.get('startTime')?.invalid" role="alert">
           {{ getErrorMessage('startTime') }}
         </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Date et heure de fin</mat-label>
-        <input matInput type="datetime-local" formControlName="endTime" placeholder="jj/mm/aaaa hh:mm">
-        <mat-error *ngIf="appointmentForm.get('endTime')?.invalid">
+        <mat-label>Date et heure de fin <span class="required" aria-label="obligatoire">*</span></mat-label>
+        <input matInput 
+               type="datetime-local" 
+               formControlName="endTime" 
+               placeholder="jj/mm/aaaa hh:mm"
+               aria-required="true"
+               [attr.aria-invalid]="appointmentForm.get('endTime')?.invalid && appointmentForm.get('endTime')?.touched">
+        <mat-error *ngIf="appointmentForm.get('endTime')?.invalid" role="alert">
           {{ getErrorMessage('endTime') }}
         </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Lieu</mat-label>
-        <input matInput formControlName="location" placeholder="Adresse du rendez-vous">
+        <input matInput formControlName="location" placeholder="Adresse du rendez-vous" aria-label="Lieu du rendez-vous">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Assigné à</mat-label>
-        <input matInput formControlName="assignedTo" placeholder="Nom de la personne">
+        <input matInput formControlName="assignedTo" placeholder="Nom de la personne" aria-label="Personne assignée au rendez-vous">
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Statut</mat-label>
-        <mat-select formControlName="status">
+        <mat-label>Statut <span class="required" aria-label="obligatoire">*</span></mat-label>
+        <mat-select formControlName="status" aria-required="true" [attr.aria-invalid]="appointmentForm.get('status')?.hasError('required') && appointmentForm.get('status')?.touched">
           <mat-option *ngFor="let option of statusOptions" [value]="option.value">
             {{ option.label }}
           </mat-option>
         </mat-select>
-        <mat-error *ngIf="appointmentForm.get('status')?.hasError('required')">
+        <mat-error *ngIf="appointmentForm.get('status')?.hasError('required')" role="alert">
           {{ getErrorMessage('status') }}
         </mat-error>
       </mat-form-field>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Notes</mat-label>
-        <textarea matInput formControlName="notes" placeholder="Notes additionnelles" rows="4"></textarea>
+        <textarea matInput formControlName="notes" placeholder="Notes additionnelles" rows="4" aria-label="Notes additionnelles sur le rendez-vous"></textarea>
       </mat-form-field>
     </form>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Annuler</button>
-    <button mat-raised-button color="primary" (click)="onSubmit()" [disabled]="!appointmentForm.valid || isSubmitting">
-      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la planification du rendez-vous">Annuler</button>
+    <button mat-raised-button 
+            color="primary" 
+            (click)="onSubmit()" 
+            [disabled]="!appointmentForm.valid || isSubmitting"
+            [attr.aria-busy]="isSubmitting"
+            [attr.aria-label]="isSubmitting ? (isEditMode ? 'Modification en cours' : 'Planification en cours') : (isEditMode ? 'Modifier le rendez-vous' : 'Planifier le rendez-vous')">
+      <mat-spinner *ngIf="isSubmitting" diameter="20" aria-hidden="true"></mat-spinner>
       <span *ngIf="!isSubmitting">{{ isEditMode ? 'Modifier' : 'Planifier' }}</span>
+      <span *ngIf="isSubmitting" class="sr-only" role="status" aria-live="polite">{{ isEditMode ? 'Modification en cours' : 'Planification en cours' }}</span>
     </button>
   </mat-dialog-actions>
 </div>

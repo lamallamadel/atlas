@@ -1,30 +1,30 @@
 <div class="reports-dashboard-container">
-  <div class="header">
+  <header class="header">
     <h1>KPI & Reporting Dashboard</h1>
     
-    <div class="date-filter">
+    <div class="date-filter" role="group" aria-label="Filtres de date">
       <mat-form-field appearance="outline">
         <mat-label>From Date</mat-label>
-        <input matInput type="date" [(ngModel)]="dateFrom">
+        <input matInput type="date" [(ngModel)]="dateFrom" aria-label="Date de début pour le filtre">
       </mat-form-field>
       
       <mat-form-field appearance="outline">
         <mat-label>To Date</mat-label>
-        <input matInput type="date" [(ngModel)]="dateTo">
+        <input matInput type="date" [(ngModel)]="dateTo" aria-label="Date de fin pour le filtre">
       </mat-form-field>
       
-      <button mat-raised-button color="primary" (click)="applyDateFilter()">
+      <button mat-raised-button color="primary" (click)="applyDateFilter()" aria-label="Appliquer les filtres de date">
         Apply Filter
       </button>
     </div>
-  </div>
+  </header>
 
   <div *ngIf="loading">
-    <app-loading-skeleton variant="dashboard-kpi"></app-loading-skeleton>
-    <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px;"></app-loading-skeleton>
+    <app-loading-skeleton variant="dashboard-kpi" aria-label="Chargement des KPI"></app-loading-skeleton>
+    <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px;" aria-label="Chargement des rapports"></app-loading-skeleton>
   </div>
 
-  <div *ngIf="error" class="error-message">
+  <div *ngIf="error" class="error-message" role="alert" aria-live="assertive">
     <mat-card>
       <mat-card-content>
         <p>{{ error }}</p>
@@ -32,48 +32,58 @@
     </mat-card>
   </div>
 
-  <div *ngIf="!loading && !error" class="dashboard-content">
-    <div class="kpi-cards">
-      <mat-card class="kpi-card">
+  <main *ngIf="!loading && !error" class="dashboard-content">
+    <section class="kpi-cards" aria-labelledby="kpi-section-title" role="list">
+      <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
+      
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Temps de réponse moyen: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' heures'">
         <mat-card-header>
-          <mat-card-title>Avg Response Time</mat-card-title>
+          <mat-card-title>
+            <h3>Avg Response Time</h3>
+          </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="kpi-value">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
-          <div class="kpi-unit">hours</div>
+          <div class="kpi-value" aria-live="polite">{{ kpiReport?.averageResponseTimeHours?.toFixed(2) || 0 }}</div>
+          <div class="kpi-unit" aria-hidden="true">hours</div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Taux de présentation aux rendez-vous: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' pour cent'">
         <mat-card-header>
-          <mat-card-title>Appointment Show Rate</mat-card-title>
+          <mat-card-title>
+            <h3>Appointment Show Rate</h3>
+          </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="kpi-value">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
-          <div class="kpi-unit">completed</div>
+          <div class="kpi-value" aria-live="polite">{{ kpiReport?.appointmentShowRate?.toFixed(1) || 0 }}%</div>
+          <div class="kpi-unit" aria-hidden="true">completed</div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Vélocité du pipeline: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' jours jusqu\'à la clôture'">
         <mat-card-header>
-          <mat-card-title>Pipeline Velocity</mat-card-title>
+          <mat-card-title>
+            <h3>Pipeline Velocity</h3>
+          </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="kpi-value">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
-          <div class="kpi-unit">days to close</div>
+          <div class="kpi-value" aria-live="polite">{{ kpiReport?.pipelineVelocityDays?.toFixed(1) || 0 }}</div>
+          <div class="kpi-unit" aria-hidden="true">days to close</div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Taux de conversion global: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' pour cent'">
         <mat-card-header>
-          <mat-card-title>Overall Conversion</mat-card-title>
+          <mat-card-title>
+            <h3>Overall Conversion</h3>
+          </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <div class="kpi-value">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
-          <div class="kpi-unit">win rate</div>
+          <div class="kpi-value" aria-live="polite">{{ pipelineSummary?.overallConversionRate?.toFixed(1) || 0 }}%</div>
+          <div class="kpi-unit" aria-hidden="true">win rate</div>
         </mat-card-content>
       </mat-card>
-    </div>
+    </section>
 
     <div class="charts-grid">
       <mat-card class="chart-card">
@@ -197,5 +207,5 @@
         </mat-card-content>
       </mat-card>
     </div>
-  </div>
+  </main>
 </div>

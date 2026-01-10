@@ -1,149 +1,155 @@
 <div class="page-container">
-  <div class="page-header">
-    <h2 class="page-title">Annonces</h2>
-    <button class="btn-create" (click)="createAnnonce()">
-      <span class="btn-icon">+</span>
+  <header class="page-header">
+    <h1 class="page-title">Annonces</h1>
+    <button class="btn-create" (click)="createAnnonce()" aria-label="Créer une nouvelle annonce">
+      <span class="btn-icon" aria-hidden="true">+</span>
       Créer une annonce
     </button>
-  </div>
+  </header>
 
   <!-- Desktop Filters -->
-  <div class="filters-container" *ngIf="!isMobile">
-    <mat-expansion-panel 
-      [(expanded)]="filterPanelExpanded"
-      class="filter-panel">
-      <mat-expansion-panel-header>
-        <mat-panel-title>
-          <mat-icon>filter_list</mat-icon>
-          <span>Filtres</span>
-          <span class="filter-count" *ngIf="appliedFilters.length > 0">
-            ({{ appliedFilters.length }})
-          </span>
-        </mat-panel-title>
-      </mat-expansion-panel-header>
+  <section *ngIf="!isMobile" aria-label="Filtres de recherche">
+    <div class="filters-container">
+      <mat-expansion-panel 
+        [(expanded)]="filterPanelExpanded"
+        class="filter-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <mat-icon aria-hidden="true">filter_list</mat-icon>
+            <span>Filtres</span>
+            <span class="filter-count" *ngIf="appliedFilters.length > 0" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
+              ({{ appliedFilters.length }})
+            </span>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
 
-      <div class="filter-content">
-        <div class="filter-row">
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Recherche</mat-label>
-            <input
-              matInput
-              placeholder="Rechercher des annonces..."
-              [(ngModel)]="searchQuery"
-              (keyup.enter)="applyFilters()"
-            />
-            <mat-icon matSuffix>search</mat-icon>
-          </mat-form-field>
+        <div class="filter-content">
+          <div class="filter-row">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Recherche</mat-label>
+              <input
+                matInput
+                placeholder="Rechercher des annonces..."
+                [(ngModel)]="searchQuery"
+                (keyup.enter)="applyFilters()"
+                aria-label="Rechercher des annonces par mots-clés"
+              />
+              <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Statut</mat-label>
-            <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()">
-              <mat-option value="">Tous</mat-option>
-              <mat-option [value]="AnnonceStatus.DRAFT">Brouillon</mat-option>
-              <mat-option [value]="AnnonceStatus.PUBLISHED">Publié</mat-option>
-              <mat-option [value]="AnnonceStatus.ACTIVE">Actif</mat-option>
-              <mat-option [value]="AnnonceStatus.PAUSED">En pause</mat-option>
-              <mat-option [value]="AnnonceStatus.ARCHIVED">Archivé</mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Statut</mat-label>
+              <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()" aria-label="Filtrer par statut">
+                <mat-option value="">Tous</mat-option>
+                <mat-option [value]="AnnonceStatus.DRAFT">Brouillon</mat-option>
+                <mat-option [value]="AnnonceStatus.PUBLISHED">Publié</mat-option>
+                <mat-option [value]="AnnonceStatus.ACTIVE">Actif</mat-option>
+                <mat-option [value]="AnnonceStatus.PAUSED">En pause</mat-option>
+                <mat-option [value]="AnnonceStatus.ARCHIVED">Archivé</mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Ville</mat-label>
-            <mat-select [(ngModel)]="selectedCity" (selectionChange)="applyFilters()">
-              <mat-option value="">Toutes</mat-option>
-              <mat-option *ngFor="let city of availableCities" [value]="city">
-                {{ city }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Ville</mat-label>
+              <mat-select [(ngModel)]="selectedCity" (selectionChange)="applyFilters()" aria-label="Filtrer par ville">
+                <mat-option value="">Toutes</mat-option>
+                <mat-option *ngFor="let city of availableCities" [value]="city">
+                  {{ city }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
 
-          <mat-form-field appearance="outline" class="filter-field">
-            <mat-label>Type/Catégorie</mat-label>
-            <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilters()">
-              <mat-option value="">Tous</mat-option>
-              <mat-option *ngFor="let type of availableTypes" [value]="type">
-                {{ type }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Type/Catégorie</mat-label>
+              <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilters()" aria-label="Filtrer par type ou catégorie">
+                <mat-option value="">Tous</mat-option>
+                <mat-option *ngFor="let type of availableTypes" [value]="type">
+                  {{ type }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
 
-        <div class="filter-actions">
-          <button mat-raised-button color="primary" (click)="applyFilters()">
-            <mat-icon>check</mat-icon>
-            Appliquer
-          </button>
-          <button mat-button (click)="resetFilters()">
-            <mat-icon>clear</mat-icon>
-            Réinitialiser
-          </button>
-          
-          <div class="preset-menu-container">
-            <button mat-button [matMenuTriggerFor]="presetMenu">
-              <mat-icon>bookmark</mat-icon>
-              Presets
+          <div class="filter-actions">
+            <button mat-raised-button color="primary" (click)="applyFilters()" aria-label="Appliquer les filtres sélectionnés">
+              <mat-icon aria-hidden="true">check</mat-icon>
+              Appliquer
             </button>
-            <mat-menu #presetMenu="matMenu">
-              <button mat-menu-item (click)="saveCurrentFilters()">
-                <mat-icon>save</mat-icon>
-                <span>Sauvegarder les filtres actuels</span>
+            <button mat-button (click)="resetFilters()" aria-label="Réinitialiser tous les filtres">
+              <mat-icon aria-hidden="true">clear</mat-icon>
+              Réinitialiser
+            </button>
+            
+            <div class="preset-menu-container">
+              <button mat-button [matMenuTriggerFor]="presetMenu" aria-label="Gérer les presets de filtres" aria-haspopup="true">
+                <mat-icon aria-hidden="true">bookmark</mat-icon>
+                Presets
               </button>
-              <mat-divider *ngIf="savedPresets.length > 0"></mat-divider>
-              <button 
-                mat-menu-item 
-                *ngFor="let preset of savedPresets"
-                (click)="loadPreset(preset)">
-                <mat-icon>folder</mat-icon>
-                <span>{{ preset.name }}</span>
-                <button 
-                  mat-icon-button 
-                  (click)="deletePreset(preset, $event)"
-                  class="delete-preset-btn">
-                  <mat-icon>delete</mat-icon>
+              <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
+                <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
+                  <mat-icon aria-hidden="true">save</mat-icon>
+                  <span>Sauvegarder les filtres actuels</span>
                 </button>
-              </button>
-              <div *ngIf="savedPresets.length === 0" class="empty-presets">
-                <span class="empty-text">Aucun preset sauvegardé</span>
-              </div>
-            </mat-menu>
+                <mat-divider *ngIf="savedPresets.length > 0" role="separator"></mat-divider>
+                <button 
+                  mat-menu-item 
+                  *ngFor="let preset of savedPresets"
+                  (click)="loadPreset(preset)"
+                  [attr.aria-label]="'Charger le preset ' + preset.name">
+                  <mat-icon aria-hidden="true">folder</mat-icon>
+                  <span>{{ preset.name }}</span>
+                  <button 
+                    mat-icon-button 
+                    (click)="deletePreset(preset, $event)"
+                    class="delete-preset-btn"
+                    [attr.aria-label]="'Supprimer le preset ' + preset.name">
+                    <mat-icon aria-hidden="true">delete</mat-icon>
+                  </button>
+                </button>
+                <div *ngIf="savedPresets.length === 0" class="empty-presets" role="status">
+                  <span class="empty-text">Aucun preset sauvegardé</span>
+                </div>
+              </mat-menu>
+            </div>
           </div>
         </div>
-      </div>
-    </mat-expansion-panel>
-  </div>
+      </mat-expansion-panel>
+    </div>
+  </section>
 
   <!-- Mobile Filter Button -->
   <div class="mobile-filter-button" *ngIf="isMobile">
-    <button mat-raised-button color="primary" (click)="openMobileFilters()">
-      <mat-icon>filter_list</mat-icon>
+    <button mat-raised-button color="primary" (click)="openMobileFilters()" aria-label="Ouvrir les filtres">
+      <mat-icon aria-hidden="true">filter_list</mat-icon>
       Filtres
-      <span class="filter-badge" *ngIf="appliedFilters.length > 0">
+      <span class="filter-badge" *ngIf="appliedFilters.length > 0" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
         {{ appliedFilters.length }}
       </span>
     </button>
   </div>
 
   <!-- Applied Filters Chips -->
-  <div class="applied-filters" *ngIf="appliedFilters.length > 0">
+  <div class="applied-filters" *ngIf="appliedFilters.length > 0" role="region" aria-label="Filtres actifs">
     <span class="filters-label">Filtres actifs:</span>
-    <mat-chip-set aria-label="Applied filters">
+    <mat-chip-set aria-label="Filtres appliqués">
       <mat-chip
         *ngFor="let filter of appliedFilters"
-        (removed)="removeFilter(filter)">
+        (removed)="removeFilter(filter)"
+        [attr.aria-label]="filter.label + ': ' + filter.displayValue">
         <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
-        <button matChipRemove>
-          <mat-icon>cancel</mat-icon>
+        <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
+          <mat-icon aria-hidden="true">cancel</mat-icon>
         </button>
       </mat-chip>
     </mat-chip-set>
   </div>
 
-  <div class="page-content">
-    <app-loading-skeleton *ngIf="loading" variant="table" [rows]="10" [columns]="8"></app-loading-skeleton>
+  <main class="page-content">
+    <app-loading-skeleton *ngIf="loading" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des annonces"></app-loading-skeleton>
 
-    <div *ngIf="error && !loading" class="error-state">
+    <div *ngIf="error && !loading" class="error-state" role="alert" aria-live="assertive">
       <p class="error-message">{{ error }}</p>
-      <button class="btn-retry" (click)="loadAnnonces()">Réessayer</button>
+      <button class="btn-retry" (click)="loadAnnonces()" aria-label="Réessayer de charger les annonces">Réessayer</button>
     </div>
 
     <app-empty-state 
@@ -154,7 +160,8 @@
       [secondaryAction]="emptyStateSecondaryAction">
     </app-empty-state>
 
-    <div *ngIf="!loading && !error && annonces.length > 0">
+    <section *ngIf="!loading && !error && annonces.length > 0" aria-labelledby="results-title">
+      <h2 id="results-title" class="sr-only">Résultats de la recherche</h2>
       <app-generic-table
         [columns]="columns"
         [data]="annonces"
@@ -164,8 +171,8 @@
         (rowAction)="onRowAction($event)">
       </app-generic-table>
 
-      <div class="pagination-section" *ngIf="page">
-        <div class="pagination-info">
+      <nav class="pagination-section" *ngIf="page" aria-label="Pagination des annonces">
+        <div class="pagination-info" role="status" aria-live="polite">
           Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} annonces
         </div>
         <div class="pagination-controls">
@@ -173,6 +180,8 @@
             class="btn-page"
             [disabled]="page.first"
             (click)="previousPage()"
+            aria-label="Page précédente"
+            [attr.aria-disabled]="page.first"
           >
             Précédent
           </button>
@@ -184,6 +193,8 @@
             [class.ellipsis]="pageNum === -1"
             [disabled]="pageNum === -1"
             (click)="pageNum !== -1 && goToPage(pageNum)"
+            [attr.aria-label]="pageNum === -1 ? null : 'Aller à la page ' + (pageNum + 1)"
+            [attr.aria-current]="pageNum === currentPage ? 'page' : null"
           >
             {{ pageNum === -1 ? '...' : pageNum + 1 }}
           </button>
@@ -192,11 +203,13 @@
             class="btn-page"
             [disabled]="page.last"
             (click)="nextPage()"
+            aria-label="Page suivante"
+            [attr.aria-disabled]="page.last"
           >
             Suivant
           </button>
         </div>
-      </div>
-    </div>
-  </div>
+      </nav>
+    </section>
+  </main>
 </div>

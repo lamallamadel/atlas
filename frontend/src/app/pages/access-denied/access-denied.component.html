@@ -1,6 +1,6 @@
-<div class="error-container">
-  <div class="error-card">
-    <div class="error-icon-wrapper">
+<div class="error-container" role="main">
+  <div class="error-card" role="alert" aria-live="assertive">
+    <div class="error-icon-wrapper" aria-hidden="true">
       <div class="error-icon">🚫</div>
     </div>
     
@@ -16,10 +16,10 @@
     </p>
     
     <div class="error-actions">
-      <button class="btn btn-primary" (click)="goToDashboard()">
+      <button class="btn btn-primary" (click)="goToDashboard()" aria-label="Retourner au tableau de bord">
         Retour au tableau de bord
       </button>
-      <button class="btn btn-secondary" (click)="logout()">
+      <button class="btn btn-secondary" (click)="logout()" aria-label="Se déconnecter de l'application">
         Se déconnecter
       </button>
     </div>

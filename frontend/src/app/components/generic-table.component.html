@@ -1,22 +1,24 @@
 <div class="table-container">
   <!-- Desktop Table View -->
   <div *ngIf="!isMobile" class="table-wrapper">
-    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2" [class.sticky-header]="stickyHeader">
+    <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z2" [class.sticky-header]="stickyHeader" role="table" aria-label="Tableau de données">
       
       <!-- Selection Column -->
       <ng-container matColumnDef="select" *ngIf="enableRowSelection">
-        <th mat-header-cell *matHeaderCellDef class="selection-cell">
+        <th mat-header-cell *matHeaderCellDef class="selection-cell" role="columnheader">
           <mat-checkbox
             (change)="$event ? toggleAllRows() : null"
             [checked]="selection.hasValue() && isAllSelected()"
-            [indeterminate]="selection.hasValue() && !isAllSelected()">
+            [indeterminate]="selection.hasValue() && !isAllSelected()"
+            aria-label="Sélectionner toutes les lignes">
           </mat-checkbox>
         </th>
-        <td mat-cell *matCellDef="let row" class="selection-cell">
+        <td mat-cell *matCellDef="let row" class="selection-cell" role="cell">
           <mat-checkbox
             (click)="$event.stopPropagation()"
             (change)="$event ? toggleRow(row) : null"
-            [checked]="selection.isSelected(row)">
+            [checked]="selection.isSelected(row)"
+            [attr.aria-label]="'Sélectionner la ligne ' + row.id">
           </mat-checkbox>
         </td>
       </ng-container>
@@ -26,46 +28,57 @@
         <th mat-header-cell *matHeaderCellDef 
             [mat-sort-header]="column.sortable !== false && enableSort ? column.key : ''"
             [ngStyle]="getColumnStyle(column)"
-            class="resizable-header">
+            class="resizable-header"
+            role="columnheader"
+            [attr.aria-sort]="column.sortable !== false && enableSort ? 'none' : null">
           <div class="header-content">
             <span class="header-text">{{ column.header }}</span>
             <div *ngIf="column.resizable !== false" 
                  class="resize-handle" 
-                 (mousedown)="onResizeStart($event, column.key)">
+                 (mousedown)="onResizeStart($event, column.key)"
+                 role="separator"
+                 aria-label="Redimensionner la colonne"
+                 tabindex="0">
             </div>
           </div>
         </th>
-        <td mat-cell *matCellDef="let row" [ngStyle]="getColumnStyle(column)">
+        <td mat-cell *matCellDef="let row" [ngStyle]="getColumnStyle(column)" role="cell">
           <span [innerHTML]="formatValue(row[column.key], column, row)"></span>
         </td>
       </ng-container>
 
       <!-- Actions Column -->
       <ng-container matColumnDef="actions" *ngIf="showActions">
-        <th mat-header-cell *matHeaderCellDef class="actions-header">Actions</th>
-        <td mat-cell *matCellDef="let row" class="actions-cell">
+        <th mat-header-cell *matHeaderCellDef class="actions-header" role="columnheader">Actions</th>
+        <td mat-cell *matCellDef="let row" class="actions-cell" role="cell">
           <button 
             *ngFor="let action of actions"
             [hidden]="!shouldShowAction(action, row)"
             mat-icon-button 
             [color]="action.color || 'primary'"
             [matTooltip]="action.tooltip"
-            (click)="$event.stopPropagation(); onAction(action.action, row)">
-            <mat-icon>{{ action.icon }}</mat-icon>
+            (click)="$event.stopPropagation(); onAction(action.action, row)"
+            [attr.aria-label]="action.tooltip || action.action">
+            <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
           </button>
         </td>
       </ng-container>
 
-      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: stickyHeader"></tr>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: stickyHeader" role="row"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" 
           [class.clickable-row]="rowClickable"
           [class.selected-row]="selection.isSelected(row)"
-          (click)="onRowClick(row)"></tr>
+          (click)="onRowClick(row)"
+          [attr.tabindex]="rowClickable ? '0' : null"
+          [attr.role]="rowClickable ? 'button' : 'row'"
+          [attr.aria-label]="rowClickable ? 'Cliquer pour voir les détails' : null"
+          (keydown.enter)="rowClickable && onRowClick(row)"
+          (keydown.space)="rowClickable && onRowClick(row)"></tr>
 
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length">
-          <div class="empty-state">
-            <mat-icon class="empty-icon">inbox</mat-icon>
+      <tr class="mat-row" *matNoDataRow role="row">
+        <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" role="cell">
+          <div class="empty-state" role="status">
+            <mat-icon class="empty-icon" aria-hidden="true">inbox</mat-icon>
             <h3 class="empty-title">Aucune donnée disponible</h3>
             <p class="empty-message">Il n'y a actuellement aucune donnée à afficher</p>
           </div>
@@ -76,19 +89,27 @@
 
   <!-- Mobile Card View -->
   <div *ngIf="isMobile" class="card-container">
-    <div *ngIf="data.length === 0" class="empty-state">
-      <mat-icon class="empty-icon">inbox</mat-icon>
+    <div *ngIf="data.length === 0" class="empty-state" role="status">
+      <mat-icon class="empty-icon" aria-hidden="true">inbox</mat-icon>
       <h3 class="empty-title">Aucune donnée disponible</h3>
       <p class="empty-message">Il n'y a actuellement aucune donnée à afficher</p>
     </div>
 
-    <mat-card *ngFor="let row of dataSource.data" class="data-card" (click)="onRowClick(row)">
+    <mat-card *ngFor="let row of dataSource.data; let i = index" 
+              class="data-card" 
+              (click)="onRowClick(row)"
+              [attr.tabindex]="rowClickable ? '0' : null"
+              [attr.role]="rowClickable ? 'button' : 'article'"
+              [attr.aria-label]="'Élément ' + (i + 1)"
+              (keydown.enter)="rowClickable && onRowClick(row)"
+              (keydown.space)="rowClickable && onRowClick(row)">
       <!-- Selection Checkbox -->
       <div *ngIf="enableRowSelection" class="card-selection">
         <mat-checkbox
           (click)="$event.stopPropagation()"
           (change)="$event ? toggleRow(row) : null"
-          [checked]="selection.isSelected(row)">
+          [checked]="selection.isSelected(row)"
+          [attr.aria-label]="'Sélectionner l\'élément ' + (i + 1)">
         </mat-checkbox>
       </div>
 
@@ -108,8 +129,9 @@
           mat-icon-button 
           [color]="action.color || 'primary'"
           [matTooltip]="action.tooltip"
-          (click)="$event.stopPropagation(); onAction(action.action, row)">
-          <mat-icon>{{ action.icon }}</mat-icon>
+          (click)="$event.stopPropagation(); onAction(action.action, row)"
+          [attr.aria-label]="action.tooltip || action.action">
+          <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
         </button>
       </mat-card-actions>
     </mat-card>
@@ -121,6 +143,6 @@
     [pageSize]="pageSize"
     [pageSizeOptions]="pageSizeOptions"
     showFirstLastButtons
-    aria-label="Sélectionner la page">
+    aria-label="Sélectionner la page de résultats">
   </mat-paginator>
 </div>

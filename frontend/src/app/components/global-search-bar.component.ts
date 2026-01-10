@@ -7,9 +7,11 @@ import { Subject, of } from 'rxjs';
 @Component({
   selector: 'app-global-search-bar',
   template: `
-    <div class="search-container">
+    <div class="search-container" role="search">
+      <label for="global-search-input" class="sr-only">Rechercher des annonces et dossiers</label>
       <div class="search-input-wrapper">
         <input
+          id="global-search-input"
           #searchInput
           type="text"
           class="search-input"
@@ -18,37 +20,53 @@ import { Subject, of } from 'rxjs';
           (input)="onSearchInput($event)"
           (focus)="showDropdown = true"
           (blur)="onBlur()"
+          aria-label="Rechercher des annonces et dossiers"
+          aria-autocomplete="list"
+          [attr.aria-expanded]="showDropdown && (searchResults.length > 0 || isLoading || error)"
+          [attr.aria-controls]="showDropdown ? 'search-results' : null"
+          [attr.aria-activedescendant]="null"
         />
-        <span class="search-icon">
+        <span class="search-icon" aria-hidden="true">
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="11" cy="11" r="8"></circle>
             <path d="m21 21-4.35-4.35"></path>
           </svg>
         </span>
-        <button *ngIf="searchQuery" class="clear-button" (click)="clearSearch()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <button *ngIf="searchQuery" class="clear-button" (click)="clearSearch()" aria-label="Effacer la recherche" type="button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <line x1="18" y1="6" x2="6" y2="18"></line>
             <line x1="6" y1="6" x2="18" y2="18"></line>
           </svg>
         </button>
       </div>
       
-      <div class="search-dropdown" *ngIf="showDropdown && (searchResults.length > 0 || isLoading || error)">
-        <div class="loading" *ngIf="isLoading">
+      <div id="search-results" 
+           class="search-dropdown" 
+           *ngIf="showDropdown && (searchResults.length > 0 || isLoading || error)"
+           role="listbox"
+           [attr.aria-label]="'Résultats de recherche'">
+        <div class="loading" *ngIf="isLoading" role="status" aria-live="polite">
           <span>Searching...</span>
         </div>
         
-        <div class="error" *ngIf="error && !isLoading">
+        <div class="error" *ngIf="error && !isLoading" role="alert" aria-live="assertive">
           <span>{{ error }}</span>
         </div>
         
-        <div class="results" *ngIf="!isLoading && !error && searchResults.length > 0">
+        <div class="results" *ngIf="!isLoading && !error && searchResults.length > 0" role="group">
           <div
-            *ngFor="let result of searchResults"
+            *ngFor="let result of searchResults; let i = index"
             class="result-item"
             (mousedown)="navigateToResult(result)"
+            [attr.id]="'search-result-' + i"
+            role="option"
+            tabindex="0"
+            [attr.aria-label]="result.type + ': ' + result.title + (result.description ? '. ' + result.description : '')"
+            [attr.aria-selected]="false"
+            (keydown.enter)="navigateToResult(result)"
+            (keydown.space)="navigateToResult(result)"
           >
-            <div class="result-type-badge" [class.annonce]="result.type === 'annonce'" [class.dossier]="result.type === 'dossier'">
+            <div class="result-type-badge" [class.annonce]="result.type === 'annonce'" [class.dossier]="result.type === 'dossier'" aria-hidden="true">
               {{ result.type }}
             </div>
             <div class="result-content">
@@ -57,22 +75,25 @@ import { Subject, of } from 'rxjs';
                 {{ truncate(result.description, 100) }}
               </div>
             </div>
-            <div class="result-score" *ngIf="elasticsearchAvailable">
+            <div class="result-score" *ngIf="elasticsearchAvailable" aria-label="Score de pertinence">
               <span class="score-badge">{{ result.relevanceScore | number:'1.2-2' }}</span>
             </div>
           </div>
         </div>
         
-        <div class="no-results" *ngIf="!isLoading && !error && searchResults.length === 0 && searchQuery">
+        <div class="no-results" *ngIf="!isLoading && !error && searchResults.length === 0 && searchQuery" role="status" aria-live="polite">
           <span>No results found</span>
         </div>
         
         <div class="search-footer" *ngIf="!isLoading && searchResults.length > 0">
-          <button class="view-all-button" (mousedown)="viewAllResults()">
+          <button class="view-all-button" 
+                  (mousedown)="viewAllResults()"
+                  type="button"
+                  [attr.aria-label]="'Voir tous les résultats de recherche (' + totalHits + ' résultats)'">
             View all results ({{ totalHits }})
           </button>
-          <span class="es-status" *ngIf="!elasticsearchAvailable" title="Using PostgreSQL search">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <span class="es-status" *ngIf="!elasticsearchAvailable" title="Using PostgreSQL search" aria-label="Utilisation de la recherche PostgreSQL">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <circle cx="12" cy="12" r="10"></circle>
               <line x1="12" y1="8" x2="12" y2="12"></line>
               <line x1="12" y1="16" x2="12.01" y2="16"></line>

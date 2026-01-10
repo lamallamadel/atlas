@@ -1,110 +1,126 @@
 <div class="login-container">
   <div class="login-card">
     <div class="login-header">
-      <h2 class="login-title">Connexion</h2>
+      <h1 class="login-title">Connexion</h1>
       <p class="login-subtitle">Veuillez vous authentifier pour accéder à l'application</p>
     </div>
 
     <div class="login-content">
-      <div *ngIf="errorMessage" class="error-message">
-        <span class="error-icon">✗</span>
+      <div *ngIf="errorMessage" class="error-message" role="alert" aria-live="assertive">
+        <span class="error-icon" aria-hidden="true">✗</span>
         <span>{{errorMessage}}</span>
       </div>
 
-      <div class="login-section">
-        <h3 class="section-title">Organisation (Tenant)</h3>
-        <p class="section-description">ID d'organisation envoyé dans l'en-tête <strong>X-Org-Id</strong></p>
+      <section aria-labelledby="org-section-title">
+        <div class="login-section">
+          <h2 id="org-section-title" class="section-title">Organisation (Tenant)</h2>
+          <p class="section-description">ID d'organisation envoyé dans l'en-tête <strong>X-Org-Id</strong></p>
 
-        <div class="form-group">
-          <label for="orgId">Org Id</label>
-          <input
-            id="orgId"
-            [(ngModel)]="orgId"
-            name="orgId"
-            class="token-input"
-            placeholder="ORG-001"
-            [disabled]="isLoading"
-          />
-        </div>
-      </div>
-
-      <div class="divider">
-        <span>OU</span>
-      </div>
-
-      <div class="login-section">
-        <h3 class="section-title">Keycloak (OIDC)</h3>
-        <p class="section-description">Connexion via Keycloak (Authorization Code + PKCE)</p>
-
-        <button
-          type="button"
-          class="btn btn-primary"
-          (click)="loginWithKeycloak()"
-          [disabled]="isLoading"
-        >
-          <span>Se connecter avec Keycloak</span>
-        </button>
-      </div>
-
-      <div class="divider">
-        <span>OU</span>
-      </div>
-
-      <div class="login-section">
-        <h3 class="section-title">Token manuel (Développement)</h3>
-        <p class="section-description">Entrez un token JWT valide pour vous connecter</p>
-        
-        <form (ngSubmit)="login()" class="token-form">
           <div class="form-group">
-            <label for="token">Token JWT</label>
-            <textarea 
-              id="token"
-              [(ngModel)]="token"
-              name="token"
+            <label for="orgId">Org Id</label>
+            <input
+              id="orgId"
+              [(ngModel)]="orgId"
+              name="orgId"
               class="token-input"
-              rows="4"
-              placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+              placeholder="ORG-001"
               [disabled]="isLoading"
-            ></textarea>
+              aria-describedby="org-id-description"
+            />
+            <span id="org-id-description" class="sr-only">Identifiant d'organisation pour l'en-tête HTTP</span>
           </div>
-          
-          <button 
-            type="submit" 
-            class="btn btn-primary"
-            [disabled]="isLoading"
-          >
-            <span *ngIf="!isLoading">Se connecter avec le token</span>
-            <span *ngIf="isLoading">Connexion...</span>
-          </button>
-        </form>
-      </div>
+        </div>
+      </section>
 
-      <div class="divider">
+      <div class="divider" role="separator" aria-label="ou">
         <span>OU</span>
       </div>
 
-      <div class="login-section">
-        <h3 class="section-title">Mock OIDC (Développement)</h3>
-        <p class="section-description">Générer un token de test pour le développement</p>
-        
-        <div class="mock-buttons">
-          <button 
-            class="btn btn-secondary"
-            (click)="mockOidcLogin()"
+      <section aria-labelledby="keycloak-section-title">
+        <div class="login-section">
+          <h2 id="keycloak-section-title" class="section-title">Keycloak (OIDC)</h2>
+          <p class="section-description">Connexion via Keycloak (Authorization Code + PKCE)</p>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            (click)="loginWithKeycloak()"
             [disabled]="isLoading"
+            aria-label="Se connecter avec Keycloak OIDC"
           >
-            <span>Mock User Login</span>
-          </button>
-          
-          <button 
-            class="btn btn-admin"
-            (click)="mockAdminLogin()"
-            [disabled]="isLoading"
-          >
-            <span>Mock Admin Login</span>
+            <span>Se connecter avec Keycloak</span>
           </button>
         </div>
+      </section>
+
+      <div class="divider" role="separator" aria-label="ou">
+        <span>OU</span>
       </div>
+
+      <section aria-labelledby="token-section-title">
+        <div class="login-section">
+          <h2 id="token-section-title" class="section-title">Token manuel (Développement)</h2>
+          <p class="section-description">Entrez un token JWT valide pour vous connecter</p>
+          
+          <form (ngSubmit)="login()" class="token-form">
+            <div class="form-group">
+              <label for="token">Token JWT</label>
+              <textarea 
+                id="token"
+                [(ngModel)]="token"
+                name="token"
+                class="token-input"
+                rows="4"
+                placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                [disabled]="isLoading"
+                aria-describedby="token-description"
+              ></textarea>
+              <span id="token-description" class="sr-only">Token JWT pour authentification manuelle en développement</span>
+            </div>
+            
+            <button 
+              type="submit" 
+              class="btn btn-primary"
+              [disabled]="isLoading"
+              [attr.aria-label]="isLoading ? 'Connexion en cours' : 'Se connecter avec le token JWT'"
+            >
+              <span *ngIf="!isLoading">Se connecter avec le token</span>
+              <span *ngIf="isLoading" aria-live="polite">Connexion...</span>
+            </button>
+          </form>
+        </div>
+      </section>
+
+      <div class="divider" role="separator" aria-label="ou">
+        <span>OU</span>
+      </div>
+
+      <section aria-labelledby="mock-section-title">
+        <div class="login-section">
+          <h2 id="mock-section-title" class="section-title">Mock OIDC (Développement)</h2>
+          <p class="section-description">Générer un token de test pour le développement</p>
+          
+          <div class="mock-buttons">
+            <button 
+              class="btn btn-secondary"
+              (click)="mockOidcLogin()"
+              [disabled]="isLoading"
+              aria-label="Se connecter en tant qu'utilisateur test"
+            >
+              <span>Mock User Login</span>
+            </button>
+            
+            <button 
+              class="btn btn-admin"
+              (click)="mockAdminLogin()"
+              [disabled]="isLoading"
+              aria-label="Se connecter en tant qu'administrateur test"
+            >
+              <span>Mock Admin Login</span>
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   </div>
 </div>

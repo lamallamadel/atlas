@@ -1,6 +1,6 @@
-<div class="error-container">
-  <div class="error-card">
-    <div class="error-icon-wrapper">
+<div class="error-container" role="main">
+  <div class="error-card" role="alert" aria-live="assertive">
+    <div class="error-icon-wrapper" aria-hidden="true">
       <div class="error-icon">⏱️</div>
     </div>
     
@@ -15,7 +15,7 @@
     </p>
     
     <div class="error-actions">
-      <button class="btn btn-primary" (click)="login()">
+      <button class="btn btn-primary" (click)="login()" aria-label="Se reconnecter à l'application">
         Se reconnecter
       </button>
     </div>

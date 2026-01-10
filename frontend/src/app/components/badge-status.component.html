@@ -2,7 +2,9 @@
   [ngClass]="[getStatusClass(), shouldPulse() ? 'badge-pulse' : '']"
   [matTooltip]="getStatusDescription()"
   matTooltipPosition="above"
-  class="badge-chip">
-  <mat-icon class="badge-icon">{{ getStatusIcon() }}</mat-icon>
+  class="badge-chip"
+  role="status"
+  [attr.aria-label]="getStatusLabel() + ': ' + getStatusDescription()">
+  <mat-icon class="badge-icon" aria-hidden="true">{{ getStatusIcon() }}</mat-icon>
   <span class="badge-label">{{ getStatusLabel() }}</span>
 </mat-chip>

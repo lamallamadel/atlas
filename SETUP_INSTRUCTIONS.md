@@ -1,120 +1,117 @@
-# Initial Setup Instructions
+# Initial Repository Setup Instructions
 
-This repository has been prepared for initial setup. Due to security restrictions in the automated environment, please run the following commands manually to complete the setup.
+## Setup Status
 
-## Prerequisites
+### ✅ Completed
+1. **Frontend dependencies installed** - `npm install` completed successfully in `frontend/` directory
+   - 1187 packages installed
+   - Angular 16.2.0 and all dependencies are ready
+   
+### ⚠️ Manual Steps Required
 
-Ensure you have:
-- Java 17 (JDK 17.0.5.8 or later) installed at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- Maven 3.6+
-- Node.js 16+ and npm
+#### 1. Playwright Browsers Installation (Frontend E2E Tests)
+The Playwright browser installation is blocked by security restrictions. Please run:
 
-## Setup Steps
+```bash
+cd frontend
+npx playwright install
+```
 
-### Option 1: Using the Install Scripts (Recommended)
+This will install Chromium, Firefox, and WebKit browsers needed for E2E testing.
 
-#### Backend Setup
-```powershell
+#### 2. Maven Proxy Configuration (Backend Build)
+The Maven build is failing due to proxy configuration. The system is trying to use `localhost:8888` as a proxy, which is not accessible.
+
+**Option A: Update Global Maven Settings (Recommended)**
+
+Locate your Maven global settings file (usually `C:\Environement\maven-3.8.6\conf\settings.xml` or `%USERPROFILE%\.m2\settings.xml`) and ensure the proxy configuration is either removed or properly configured for your network.
+
+**Option B: Use Project Settings File**
+
+Run Maven with the project's settings.xml that disables proxies:
+
+```bash
 cd backend
-node install.js
+mvn.cmd clean install -s settings.xml
+```
+
+**Option C: Set Environment Variable**
+
+Before running Maven, unset the proxy environment variables:
+
+```bash
+cd backend
+cmd /c "set http_proxy= && set https_proxy= && mvn.cmd clean install"
+```
+
+#### 3. Backend Build Command
+
+Once proxy issues are resolved, run:
+
+```bash
+cd backend
+mvn.cmd clean install
+```
+
+Or use the wrapper script:
+
+```bash
+.\backend\run-maven.ps1 clean install
 ```
 
 This will:
-- Set JAVA_HOME to Java 17
-- Run `mvn clean install -DskipTests`
 - Download all Maven dependencies
+- Compile the Spring Boot application
+- Run tests (or use `-DskipTests` to skip)
+- Create the JAR file in `backend/target/`
 
-#### Frontend Setup
-```powershell
-cd frontend
-npm install
-```
+## Verification Commands
 
-This will download all Node.js/Angular dependencies.
-
-### Option 2: Manual Setup
-
-If the install scripts don't work, run these commands:
-
-#### Backend Setup
-```powershell
-# Set JAVA_HOME in your PowerShell session
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
-
-# Navigate to backend and install
-cd backend
-mvn clean install -DskipTests
-```
-
-Or use the provided wrapper:
-```powershell
-cd backend
-.\mvn-java17.cmd clean install -DskipTests
-```
-
-#### Frontend Setup
-```powershell
-cd frontend
-npm install
-```
-
-## Verification
-
-After setup, verify everything works:
-
-### Backend
-```powershell
-cd backend
-.\mvn-java17.cmd test
-```
+After completing the manual steps, verify the setup:
 
 ### Frontend
-```powershell
+```bash
 cd frontend
-npm test
+npm run build          # Should compile successfully
+npm test               # Should run Karma tests
+npm run e2e:fast       # Should run Playwright E2E tests
+```
+
+### Backend
+```bash
+cd backend
+mvn.cmd test                        # Run unit tests
+mvn.cmd verify -Pbackend-e2e-h2    # Run E2E tests with H2
+mvn.cmd spring-boot:run            # Start the development server
+```
+
+## Environment Configuration
+
+The project is configured to use:
+- **Java 17** (JDK 17.0.5.8) via toolchains.xml
+- **Maven 3.8.6**
+- **Node.js v18.12.1**
+
+The `backend/mvn.cmd` wrapper automatically sets JAVA_HOME to the correct Java 17 installation.
+
+## Troubleshooting
+
+### Maven Proxy Errors
+If you see "Connection refused: localhost:8888", this indicates a proxy configuration issue. Follow Option A, B, or C above.
+
+### Java Version Errors
+If you see Java version mismatches, ensure you're using the `mvn.cmd` wrapper in the backend directory, not the global Maven command directly.
+
+### Playwright Installation Fails
+Run with admin privileges or use:
+```bash
+npx playwright install --with-deps
 ```
 
 ## Next Steps
 
-Once setup is complete:
-
-1. **Start Infrastructure** (optional, for full-stack development):
-   ```powershell
-   cd infra
-   docker-compose up -d
-   ```
-
-2. **Run Backend Dev Server**:
-   ```powershell
-   cd backend
-   .\mvn-java17.cmd spring-boot:run
-   ```
-
-3. **Run Frontend Dev Server**:
-   ```powershell
-   cd frontend
-   npm start
-   ```
-
-The backend will be available at http://localhost:8080
-The frontend will be available at http://localhost:4200
-
-## Troubleshooting
-
-### JAVA_HOME Issues
-If you get Java version errors, ensure JAVA_HOME points to Java 17:
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-```
-
-### Maven Issues
-The project includes a `mvn-java17.cmd` wrapper that automatically sets the correct Java version. Use it instead of calling `mvn` directly.
-
-### Frontend Issues
-If npm install fails, try:
-```powershell
-cd frontend
-npm cache clean --force
-npm install
-```
+Once the build succeeds:
+1. Review AGENTS.md for detailed development commands
+2. Check SETUP.md for infrastructure setup (Docker, PostgreSQL)
+3. Start the backend: `cd backend && mvn.cmd spring-boot:run`
+4. Start the frontend: `cd frontend && npm start`

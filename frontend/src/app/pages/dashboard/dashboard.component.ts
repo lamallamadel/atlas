@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { PingService } from '../../services/ping.service';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
+import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
 import { interval, Subject, takeUntil, takeWhile } from 'rxjs';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 
@@ -65,7 +66,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   constructor(
     private pingService: PingService,
     private dashboardKpiService: DashboardKpiService,
-    private router: Router
+    private router: Router,
+    private ariaAnnouncer: AriaLiveAnnouncerService
   ) { }
 
   ngOnInit(): void {
@@ -94,11 +96,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   checkApiConnection(): void {
     this.apiStatus = 'checking';
     this.errorMessage = '';
+    this.ariaAnnouncer.announcePolite('Vérification de la connexion API en cours');
 
     this.pingService.ping().subscribe({
       next: () => {
         this.apiStatus = 'connected';
         this.lastChecked = new Date();
+        this.ariaAnnouncer.announcePolite('Connexion API établie avec succès');
       },
       error: (error) => {
         this.apiStatus = 'disconnected';
@@ -106,6 +110,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.errorMessage = error.status ?
           `HTTP ${error.status}: ${error.statusText}` :
           'Unable to reach the API server';
+        this.ariaAnnouncer.announceAssertive('Échec de la connexion API: ' + this.errorMessage);
       }
     });
   }
@@ -126,10 +131,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.kpiCards['annoncesActives'].loading = false;
         this.animateCounter('annoncesActives', count);
         this.updateChart('annoncesActives', count);
+        this.ariaAnnouncer.announcePolite(`${count} annonces actives chargées`);
       },
       error: () => {
         this.kpiCards['annoncesActives'].loading = false;
         this.kpiCards['annoncesActives'].error = 'Erreur lors du chargement des annonces actives';
+        this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des annonces actives');
       }
     });
   }
@@ -144,10 +151,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.kpiCards['dossiersATraiter'].loading = false;
         this.animateCounter('dossiersATraiter', count);
         this.updateChart('dossiersATraiter', count);
+        this.ariaAnnouncer.announcePolite(`${count} dossiers à traiter chargés`);
       },
       error: () => {
         this.kpiCards['dossiersATraiter'].loading = false;
         this.kpiCards['dossiersATraiter'].error = 'Erreur lors du chargement des dossiers à traiter';
+        this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des dossiers à traiter');
       }
     });
   }
@@ -160,10 +169,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       next: (dossiers) => {
         this.recentDossiers = dossiers;
         this.loadingRecent = false;
+        this.ariaAnnouncer.announcePolite(`${dossiers.length} dossiers récents chargés`);
       },
       error: () => {
         this.loadingRecent = false;
         this.errorRecent = 'Erreur lors du chargement des derniers dossiers';
+        this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des derniers dossiers');
       }
     });
   }

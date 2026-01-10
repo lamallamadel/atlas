@@ -13,8 +13,8 @@ export class ReportsDashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  dateFrom: string = '';
-  dateTo: string = '';
+  dateFrom = '';
+  dateTo = '';
 
   conversionBySourceChartData: ChartData<'bar'> = {
     labels: [],

@@ -1,6 +1,8 @@
-<div class="skeleton-container" [ngClass]="'skeleton-' + variant">
+<div class="skeleton-container" [ngClass]="'skeleton-' + variant" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
+  <span class="sr-only">Chargement des données en cours...</span>
+  
   <!-- Card variant -->
-  <div *ngIf="variant === 'card'" class="skeleton-card">
+  <div *ngIf="variant === 'card'" class="skeleton-card" aria-hidden="true">
     <div *ngFor="let i of rowsArray" class="skeleton-card-item">
       <div class="skeleton-card-header">
         <div class="skeleton-rectangle skeleton-avatar"></div>
@@ -18,7 +20,7 @@
   </div>
 
   <!-- List variant -->
-  <div *ngIf="variant === 'list'" class="skeleton-list">
+  <div *ngIf="variant === 'list'" class="skeleton-list" aria-hidden="true">
     <div *ngFor="let i of rowsArray" class="skeleton-list-item">
       <div class="skeleton-rectangle skeleton-list-icon"></div>
       <div class="skeleton-list-content">
@@ -30,7 +32,7 @@
   </div>
 
   <!-- Table variant -->
-  <div *ngIf="variant === 'table'" class="skeleton-table">
+  <div *ngIf="variant === 'table'" class="skeleton-table" aria-hidden="true">
     <div class="skeleton-table-header">
       <div *ngFor="let i of columnsArray" class="skeleton-rectangle skeleton-table-header-cell"></div>
     </div>
@@ -42,7 +44,7 @@
   </div>
 
   <!-- Form variant -->
-  <div *ngIf="variant === 'form'" class="skeleton-form">
+  <div *ngIf="variant === 'form'" class="skeleton-form" aria-hidden="true">
     <div *ngFor="let i of rowsArray" class="skeleton-form-group">
       <div class="skeleton-rectangle skeleton-form-label"></div>
       <div class="skeleton-rectangle skeleton-form-input"></div>
@@ -54,7 +56,7 @@
   </div>
 
   <!-- Dashboard KPI variant -->
-  <div *ngIf="variant === 'dashboard-kpi'" class="skeleton-dashboard-kpi">
+  <div *ngIf="variant === 'dashboard-kpi'" class="skeleton-dashboard-kpi" aria-hidden="true">
     <div class="skeleton-kpi-header">
       <div class="skeleton-rectangle skeleton-kpi-title"></div>
     </div>
@@ -67,7 +69,7 @@
   </div>
 
   <!-- Detail variant -->
-  <div *ngIf="variant === 'detail'" class="skeleton-detail">
+  <div *ngIf="variant === 'detail'" class="skeleton-detail" aria-hidden="true">
     <div class="skeleton-detail-header">
       <div class="skeleton-rectangle skeleton-detail-back"></div>
       <div class="skeleton-rectangle skeleton-detail-title"></div>

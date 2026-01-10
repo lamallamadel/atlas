@@ -1,151 +1,171 @@
 <div class="page-container">
   <div class="page-header">
-    <h2 class="page-title">Tableau de bord</h2>
+    <h1 class="page-title">Tableau de bord</h1>
   </div>
   <div class="page-content">
-    <div class="kpi-cards-container">
-      <mat-card 
-        *ngFor="let key of getKpiCardKeys()"
-        class="kpi-card"
-        [class.loading]="kpiCards[key].loading">
-        <mat-card-header>
-          <div mat-card-avatar class="kpi-icon-container" [style.background-color]="kpiCards[key].color">
-            <mat-icon class="kpi-icon">{{kpiCards[key].icon}}</mat-icon>
-          </div>
-          <mat-card-title class="kpi-card-title">{{kpiCards[key].title}}</mat-card-title>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <app-loading-skeleton *ngIf="kpiCards[key].loading" variant="dashboard-kpi"></app-loading-skeleton>
+    <section aria-labelledby="kpi-section-title">
+      <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
+      <div class="kpi-cards-container" role="list">
+        <mat-card 
+          *ngFor="let key of getKpiCardKeys()"
+          class="kpi-card"
+          [class.loading]="kpiCards[key].loading"
+          role="listitem"
+          [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)">
+          <mat-card-header>
+            <div mat-card-avatar class="kpi-icon-container" [style.background-color]="kpiCards[key].color" aria-hidden="true">
+              <mat-icon class="kpi-icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
+            </div>
+            <mat-card-title class="kpi-card-title">
+              <h3>{{kpiCards[key].title}}</h3>
+            </mat-card-title>
+          </mat-card-header>
           
-          <div *ngIf="!kpiCards[key].loading" class="kpi-content">
-            <div *ngIf="kpiCards[key].error" class="kpi-error">
-              <mat-icon color="warn">error</mat-icon>
-              <span>{{kpiCards[key].error}}</span>
+          <mat-card-content>
+            <app-loading-skeleton *ngIf="kpiCards[key].loading" variant="dashboard-kpi" aria-label="Chargement des données"></app-loading-skeleton>
+            
+            <div *ngIf="!kpiCards[key].loading" class="kpi-content">
+              <div *ngIf="kpiCards[key].error" class="kpi-error" role="alert" aria-live="assertive">
+                <mat-icon color="warn" aria-hidden="true">error</mat-icon>
+                <span>{{kpiCards[key].error}}</span>
+              </div>
+              
+              <div *ngIf="!kpiCards[key].error" class="kpi-value-container">
+                <div class="kpi-value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
+                  {{kpiCards[key].displayValue}}
+                </div>
+                <div class="kpi-chart-container" aria-hidden="true">
+                  <canvas 
+                    [id]="'chart-' + key"
+                    #annoncesChart 
+                    *ngIf="key === 'annoncesActives'"
+                    class="kpi-chart"
+                    role="img"
+                    [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                  <canvas 
+                    [id]="'chart-' + key"
+                    #dossiersChart 
+                    *ngIf="key === 'dossiersATraiter'"
+                    class="kpi-chart"
+                    role="img"
+                    [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+          
+          <mat-card-actions *ngIf="!kpiCards[key].loading && !kpiCards[key].error">
+            <button 
+              mat-button 
+              color="primary"
+              (click)="key === 'annoncesActives' ? navigateToAnnoncesActives() : navigateToDossiersATraiter()"
+              [attr.aria-label]="'Voir tous les ' + kpiCards[key].title.toLowerCase()">
+              Voir tous
+            </button>
+          </mat-card-actions>
+        </mat-card>
+
+        <mat-card class="kpi-card kpi-card-wide" aria-labelledby="recent-dossiers-title">
+          <mat-card-header>
+            <div mat-card-avatar class="kpi-icon-container" style="background-color: #4caf50;" aria-hidden="true">
+              <mat-icon class="kpi-icon" aria-hidden="true">history</mat-icon>
+            </div>
+            <mat-card-title class="kpi-card-title">
+              <h3 id="recent-dossiers-title">Derniers dossiers</h3>
+            </mat-card-title>
+          </mat-card-header>
+          
+          <mat-card-content>
+            <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-loading-skeleton>
+            
+            <div *ngIf="!loadingRecent && errorRecent" class="kpi-error" role="alert" aria-live="assertive">
+              <mat-icon color="warn" aria-hidden="true">error</mat-icon>
+              <span>{{errorRecent}}</span>
             </div>
             
-            <div *ngIf="!kpiCards[key].error" class="kpi-value-container">
-              <div class="kpi-value" [style.color]="kpiCards[key].color">
-                {{kpiCards[key].displayValue}}
-              </div>
-              <div class="kpi-chart-container">
-                <canvas 
-                  [id]="'chart-' + key"
-                  #annoncesChart 
-                  *ngIf="key === 'annoncesActives'"
-                  class="kpi-chart"></canvas>
-                <canvas 
-                  [id]="'chart-' + key"
-                  #dossiersChart 
-                  *ngIf="key === 'dossiersATraiter'"
-                  class="kpi-chart"></canvas>
-              </div>
+            <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0" class="kpi-empty" role="status">
+              <mat-icon aria-hidden="true">info</mat-icon>
+              <span>Aucun dossier</span>
             </div>
-          </div>
-        </mat-card-content>
-        
-        <mat-card-actions *ngIf="!kpiCards[key].loading && !kpiCards[key].error">
-          <button 
-            mat-button 
-            color="primary"
-            (click)="key === 'annoncesActives' ? navigateToAnnoncesActives() : navigateToDossiersATraiter()">
-            Voir tous
-          </button>
-        </mat-card-actions>
-      </mat-card>
+            
+            <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list">
+              <mat-card *ngFor="let dossier of recentDossiers" class="dossier-item" appearance="outlined" role="listitem">
+                <mat-card-content>
+                  <div class="dossier-info">
+                    <div class="dossier-field">
+                      <mat-icon class="field-icon" aria-hidden="true">tag</mat-icon>
+                      <span class="field-label">ID:</span>
+                      <span class="field-value">{{dossier.id}}</span>
+                    </div>
+                    <div class="dossier-field" *ngIf="dossier.leadName">
+                      <mat-icon class="field-icon" aria-hidden="true">person</mat-icon>
+                      <span class="field-label">Lead:</span>
+                      <span class="field-value">{{dossier.leadName}}</span>
+                    </div>
+                    <div class="dossier-field" *ngIf="dossier.leadPhone">
+                      <mat-icon class="field-icon" aria-hidden="true">phone</mat-icon>
+                      <span class="field-label">Téléphone:</span>
+                      <span class="field-value">{{dossier.leadPhone}}</span>
+                    </div>
+                    <div class="dossier-field">
+                      <mat-icon class="field-icon" aria-hidden="true">info</mat-icon>
+                      <span class="field-label">Statut:</span>
+                      <span class="field-value">{{dossier.status}}</span>
+                    </div>
+                    <div class="dossier-field">
+                      <mat-icon class="field-icon" aria-hidden="true">event</mat-icon>
+                      <span class="field-label">Créé le:</span>
+                      <span class="field-value">{{dossier.createdAt | date:'short'}}</span>
+                    </div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </section>
 
-      <mat-card class="kpi-card kpi-card-wide">
-        <mat-card-header>
-          <div mat-card-avatar class="kpi-icon-container" style="background-color: #4caf50;">
-            <mat-icon class="kpi-icon">history</mat-icon>
-          </div>
-          <mat-card-title class="kpi-card-title">Derniers dossiers</mat-card-title>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"></app-loading-skeleton>
+    <section aria-labelledby="api-status-title">
+      <h2 id="api-status-title" class="sr-only">État de la connexion API</h2>
+      <div class="api-status-container">
+        <mat-card [class]="'status-card status-' + apiStatus" [attr.aria-label]="'État de connexion: ' + (apiStatus === 'connected' ? 'Connecté' : apiStatus === 'disconnected' ? 'Déconnecté' : 'Vérification en cours')">
+          <mat-card-header>
+            <div mat-card-avatar class="status-icon-container" aria-hidden="true">
+              <mat-icon class="status-icon" aria-hidden="true">
+                {{apiStatus === 'connected' ? 'check_circle' : apiStatus === 'disconnected' ? 'error' : 'sync'}}
+              </mat-icon>
+            </div>
+            <mat-card-title>
+              <h3>État de la connexion API</h3>
+            </mat-card-title>
+            <mat-card-subtitle role="status" aria-live="polite">
+              {{apiStatus === 'connected' ? 'Connecté' : apiStatus === 'disconnected' ? 'Déconnecté' : 'Vérification...'}}
+            </mat-card-subtitle>
+          </mat-card-header>
           
-          <div *ngIf="!loadingRecent && errorRecent" class="kpi-error">
-            <mat-icon color="warn">error</mat-icon>
-            <span>{{errorRecent}}</span>
-          </div>
+          <mat-card-content>
+            <div class="status-details" *ngIf="lastChecked">
+              <p>Dernière vérification : {{lastChecked | date:'short'}}</p>
+            </div>
+            <div class="status-error" *ngIf="errorMessage" role="alert">
+              <p class="error-message">{{errorMessage}}</p>
+            </div>
+          </mat-card-content>
           
-          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0" class="kpi-empty">
-            <mat-icon>info</mat-icon>
-            <span>Aucun dossier</span>
-          </div>
-          
-          <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list">
-            <mat-card *ngFor="let dossier of recentDossiers" class="dossier-item" appearance="outlined">
-              <mat-card-content>
-                <div class="dossier-info">
-                  <div class="dossier-field">
-                    <mat-icon class="field-icon">tag</mat-icon>
-                    <span class="field-label">ID:</span>
-                    <span class="field-value">{{dossier.id}}</span>
-                  </div>
-                  <div class="dossier-field" *ngIf="dossier.leadName">
-                    <mat-icon class="field-icon">person</mat-icon>
-                    <span class="field-label">Lead:</span>
-                    <span class="field-value">{{dossier.leadName}}</span>
-                  </div>
-                  <div class="dossier-field" *ngIf="dossier.leadPhone">
-                    <mat-icon class="field-icon">phone</mat-icon>
-                    <span class="field-label">Téléphone:</span>
-                    <span class="field-value">{{dossier.leadPhone}}</span>
-                  </div>
-                  <div class="dossier-field">
-                    <mat-icon class="field-icon">info</mat-icon>
-                    <span class="field-label">Statut:</span>
-                    <span class="field-value">{{dossier.status}}</span>
-                  </div>
-                  <div class="dossier-field">
-                    <mat-icon class="field-icon">event</mat-icon>
-                    <span class="field-label">Créé le:</span>
-                    <span class="field-value">{{dossier.createdAt | date:'short'}}</span>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-
-    <div class="api-status-container">
-      <mat-card [class]="'status-card status-' + apiStatus">
-        <mat-card-header>
-          <div mat-card-avatar class="status-icon-container">
-            <mat-icon class="status-icon">
-              {{apiStatus === 'connected' ? 'check_circle' : apiStatus === 'disconnected' ? 'error' : 'sync'}}
-            </mat-icon>
-          </div>
-          <mat-card-title>État de la connexion API</mat-card-title>
-          <mat-card-subtitle>
-            {{apiStatus === 'connected' ? 'Connecté' : apiStatus === 'disconnected' ? 'Déconnecté' : 'Vérification...'}}
-          </mat-card-subtitle>
-        </mat-card-header>
-        
-        <mat-card-content>
-          <div class="status-details" *ngIf="lastChecked">
-            <p>Dernière vérification : {{lastChecked | date:'short'}}</p>
-          </div>
-          <div class="status-error" *ngIf="errorMessage">
-            <p class="error-message">{{errorMessage}}</p>
-          </div>
-        </mat-card-content>
-        
-        <mat-card-actions>
-          <button 
-            mat-raised-button 
-            color="primary"
-            (click)="checkApiConnection()" 
-            [disabled]="apiStatus === 'checking'">
-            <mat-icon>refresh</mat-icon>
-            Actualiser
-          </button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
+          <mat-card-actions>
+            <button 
+              mat-raised-button 
+              color="primary"
+              (click)="checkApiConnection()" 
+              [disabled]="apiStatus === 'checking'"
+              [attr.aria-label]="apiStatus === 'checking' ? 'Vérification en cours' : 'Actualiser la connexion API'">
+              <mat-icon aria-hidden="true">refresh</mat-icon>
+              Actualiser
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </section>
   </div>
 </div>

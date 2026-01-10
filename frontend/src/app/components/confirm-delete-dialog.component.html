@@ -1,15 +1,21 @@
-<div @slideIn>
-  <h2 mat-dialog-title>{{ data.title }}</h2>
+<div @slideIn role="alertdialog" aria-labelledby="dialog-title" aria-describedby="dialog-message" aria-modal="true">
+  <h2 mat-dialog-title id="dialog-title">{{ data.title }}</h2>
 
   <mat-dialog-content>
-    <p>{{ data.message }}</p>
+    <p id="dialog-message">{{ data.message }}</p>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting">Annuler</button>
-    <button mat-raised-button color="warn" (click)="onConfirm()" [disabled]="isSubmitting">
-      <mat-spinner *ngIf="isSubmitting" diameter="20"></mat-spinner>
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la suppression">Annuler</button>
+    <button mat-raised-button 
+            color="warn" 
+            (click)="onConfirm()" 
+            [disabled]="isSubmitting"
+            [attr.aria-busy]="isSubmitting"
+            [attr.aria-label]="isSubmitting ? 'Suppression en cours' : 'Confirmer la suppression'">
+      <mat-spinner *ngIf="isSubmitting" diameter="20" aria-hidden="true"></mat-spinner>
       <span *ngIf="!isSubmitting">Supprimer</span>
+      <span *ngIf="isSubmitting" class="sr-only" role="status" aria-live="polite">Suppression en cours</span>
     </button>
   </mat-dialog-actions>
 </div>
