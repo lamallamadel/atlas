@@ -95,6 +95,7 @@ test-results/
 test-reports/
 test_output*.txt
 test-results*.txt
+backend/target/e2e-test-logs/
 
 # Playwright
 playwright-report/
