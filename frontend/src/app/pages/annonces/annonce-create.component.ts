@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -9,6 +9,8 @@ import {
   ValidationErrors
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { CdkDragDrop } from '@angular/cdk/drag-drop';
+import { MatStepper } from '@angular/material/stepper';
 import {
   AnnonceApiService,
   AnnonceCreateRequest,
@@ -23,6 +25,8 @@ import {
   styleUrls: ['./annonce-create.component.css']
 })
 export class AnnonceCreateComponent implements OnInit {
+  @ViewChild('stepper') stepper!: MatStepper;
+
   step1FormGroup!: FormGroup;
   step2FormGroup!: FormGroup;
   step3FormGroup!: FormGroup;
@@ -44,7 +48,6 @@ export class AnnonceCreateComponent implements OnInit {
     { value: AnnonceStatus.ARCHIVED, label: 'Archivé' }
   ];
 
-  // Catégorie du bien (correspond à "category" côté backend)
   categoryOptions = [
     { value: 'APARTMENT', label: 'Appartement' },
     { value: 'HOUSE', label: 'Maison' },
@@ -52,13 +55,16 @@ export class AnnonceCreateComponent implements OnInit {
     { value: 'COMMERCIAL', label: 'Commercial' }
   ];
 
-  // Type d’annonce (correspond à enum backend AnnonceType => "type")
   annonceTypeOptions = [
     { value: 'SALE', label: 'Vente' },
     { value: 'RENT', label: 'Location' },
     { value: 'LEASE', label: 'Bail' },
     { value: 'EXCHANGE', label: 'Échange' }
   ];
+
+  dragDropActive = false;
+  previewUrls: { [key: number]: string } = {};
+  photoLoadErrors: { [key: number]: boolean } = {};
 
   constructor(
     private fb: FormBuilder,
@@ -109,9 +115,12 @@ export class AnnonceCreateComponent implements OnInit {
 
   addPhoto(): void {
     if (this.newPhotoUrl.trim()) {
+      const url = this.newPhotoUrl.trim();
       this.photos.push(
-        this.fb.control(this.newPhotoUrl.trim(), [Validators.required, Validators.maxLength(1000)])
+        this.fb.control(url, [Validators.required, Validators.maxLength(1000)])
       );
+      const index = this.photos.length - 1;
+      this.previewUrls[index] = url;
       this.newPhotoUrl = '';
     }
   }
@@ -119,14 +128,79 @@ export class AnnonceCreateComponent implements OnInit {
   removePhoto(index: number): void {
     this.photos.removeAt(index);
     delete this.photoErrors[index];
+    delete this.previewUrls[index];
+    delete this.photoLoadErrors[index];
+    this.reindexPreviews();
+  }
+
+  reindexPreviews(): void {
+    const newPreviewUrls: { [key: number]: string } = {};
+    const newPhotoLoadErrors: { [key: number]: boolean } = {};
+    this.photos.controls.forEach((control, index) => {
+      newPreviewUrls[index] = control.value;
+      if (this.photoLoadErrors[index]) {
+        newPhotoLoadErrors[index] = true;
+      }
+    });
+    this.previewUrls = newPreviewUrls;
+    this.photoLoadErrors = newPhotoLoadErrors;
   }
 
   onPhotoError(index: number): void {
     this.photoErrors[index] = true;
+    this.photoLoadErrors[index] = true;
   }
 
   onPhotoLoad(index: number): void {
     this.photoErrors[index] = false;
+    this.photoLoadErrors[index] = false;
+  }
+
+  onDragEnter(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDropActive = true;
+  }
+
+  onDragOver(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDropActive = true;
+  }
+
+  onDragLeave(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDropActive = false;
+  }
+
+  onDrop(event: DragEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    this.dragDropActive = false;
+
+    const text = event.dataTransfer?.getData('text');
+    if (text && this.isValidUrl(text)) {
+      this.newPhotoUrl = text;
+      this.addPhoto();
+    }
+  }
+
+  isValidUrl(string: string): boolean {
+    try {
+      new URL(string);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  dropPhoto(event: CdkDragDrop<string[]>): void {
+    const photosArray = this.photos;
+    const item = photosArray.at(event.previousIndex);
+    photosArray.removeAt(event.previousIndex);
+    photosArray.insert(event.currentIndex, item);
+    this.reindexPreviews();
   }
 
   jsonValidator(control: AbstractControl): ValidationErrors | null {
@@ -187,8 +261,9 @@ export class AnnonceCreateComponent implements OnInit {
         if (annonce.photos && annonce.photos.length > 0) {
           const photosArray = this.step3FormGroup.get('photos') as FormArray;
           photosArray.clear();
-          annonce.photos.forEach(photo => {
+          annonce.photos.forEach((photo, index) => {
             photosArray.push(this.fb.control(photo, [Validators.required, Validators.maxLength(1000)]));
+            this.previewUrls[index] = photo;
           });
         }
 
@@ -232,7 +307,7 @@ export class AnnonceCreateComponent implements OnInit {
     }
   }
 
-  private parseRulesJson(): any | undefined {
+  private parseRulesJson(): Record<string, unknown> | undefined {
     const step4Value = this.step4FormGroup.value;
     try {
       const rulesJsonStr = step4Value.rulesJson?.trim();
@@ -397,7 +472,7 @@ export class AnnonceCreateComponent implements OnInit {
   getFieldLabel(fieldName: string): string {
     const labels: { [key: string]: string } = {
       category: 'Catégorie',
-      annonceType: 'Type d’annonce',
+      annonceType: 'Type d\'annonce',
       title: 'Titre',
       description: 'Description',
       price: 'Prix',
@@ -421,8 +496,30 @@ export class AnnonceCreateComponent implements OnInit {
         const parsed = JSON.parse(control.value);
         control.setValue(JSON.stringify(parsed, null, 2));
       }
-    } catch {
-      // Invalid JSON => do nothing
+    } catch (error) {
+      // Invalid JSON, do nothing
     }
+  }
+
+  isStepCompleted(stepIndex: number): boolean {
+    switch (stepIndex) {
+      case 0:
+        return this.step1FormGroup.valid;
+      case 1:
+        return this.step2FormGroup.valid;
+      case 2:
+        return this.step3FormGroup.valid;
+      case 3:
+        return this.step4FormGroup.valid;
+      default:
+        return false;
+    }
+  }
+
+  getStepIcon(stepIndex: number): string {
+    if (this.isStepCompleted(stepIndex)) {
+      return 'check_circle';
+    }
+    return 'edit';
   }
 }

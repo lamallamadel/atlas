@@ -13,219 +13,229 @@
 
     <mat-stepper *ngIf="!loading" [linear]="true" #stepper class="annonce-stepper">
       <!-- Step 1: Category, AnnonceType, Title, Description -->
-      <mat-step [stepControl]="step1FormGroup" label="Informations de base">
+      <mat-step [stepControl]="step1FormGroup" [completed]="isStepCompleted(0)">
+        <ng-template matStepLabel>
+          <span class="step-label">
+            <mat-icon class="step-icon">{{ getStepIcon(0) }}</mat-icon>
+            Informations de base
+          </span>
+        </ng-template>
         <form [formGroup]="step1FormGroup" class="step-form">
           <h3 class="step-title">Informations de base</h3>
 
-          <!-- Category (APARTMENT/HOUSE/STUDIO/COMMERCIAL) -->
-          <div class="form-group">
-            <label for="category" class="form-label">
-              Catégorie <span class="required">*</span>
-            </label>
-            <select id="category" class="form-select" formControlName="category"
-              [class.invalid]="isFieldInvalid(step1FormGroup, 'category')">
-              <option value="">Sélectionner une catégorie</option>
-              <option *ngFor="let option of categoryOptions" [value]="option.value">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Catégorie <span class="required">*</span></mat-label>
+            <mat-select formControlName="category">
+              <mat-option value="">Sélectionner une catégorie</mat-option>
+              <mat-option *ngFor="let option of categoryOptions" [value]="option.value">
                 {{ option.label }}
-              </option>
-            </select>
-            <div *ngIf="getFieldError(step1FormGroup, 'category')" class="field-error">
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="getFieldError(step1FormGroup, 'category')">
               {{ getFieldError(step1FormGroup, 'category') }}
-            </div>
-          </div>
+            </mat-error>
+          </mat-form-field>
 
-          <!-- Annonce Type (SALE/RENT/LEASE/EXCHANGE) -->
-          <div class="form-group">
-            <label for="annonceType" class="form-label">
-              Type d’annonce <span class="required">*</span>
-            </label>
-            <select id="annonceType" class="form-select" formControlName="annonceType"
-              [class.invalid]="isFieldInvalid(step1FormGroup, 'annonceType')">
-              <option value="">Sélectionner un type</option>
-              <option *ngFor="let option of annonceTypeOptions" [value]="option.value">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Type d'annonce <span class="required">*</span></mat-label>
+            <mat-select formControlName="annonceType">
+              <mat-option value="">Sélectionner un type</mat-option>
+              <mat-option *ngFor="let option of annonceTypeOptions" [value]="option.value">
                 {{ option.label }}
-              </option>
-            </select>
-            <div *ngIf="getFieldError(step1FormGroup, 'annonceType')" class="field-error">
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="getFieldError(step1FormGroup, 'annonceType')">
               {{ getFieldError(step1FormGroup, 'annonceType') }}
-            </div>
-          </div>
+            </mat-error>
+          </mat-form-field>
 
-          <div class="form-group">
-            <label for="title" class="form-label">
-              Titre <span class="required">*</span>
-            </label>
-            <input id="title" type="text" class="form-input" formControlName="title"
-              [class.invalid]="isFieldInvalid(step1FormGroup, 'title')" placeholder="Saisir le titre de l'annonce" />
-            <div *ngIf="getFieldError(step1FormGroup, 'title')" class="field-error">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Titre <span class="required">*</span></mat-label>
+            <input matInput formControlName="title" placeholder="Saisir le titre de l'annonce" />
+            <mat-error *ngIf="getFieldError(step1FormGroup, 'title')">
               {{ getFieldError(step1FormGroup, 'title') }}
-            </div>
-          </div>
+            </mat-error>
+          </mat-form-field>
 
-          <div class="form-group">
-            <label for="description" class="form-label">
-              Description
-            </label>
-            <textarea id="description" class="form-textarea" formControlName="description"
-              [class.invalid]="isFieldInvalid(step1FormGroup, 'description')"
-              placeholder="Saisir la description de l'annonce" rows="5"></textarea>
-            <div *ngIf="getFieldError(step1FormGroup, 'description')" class="field-error">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" placeholder="Saisir la description de l'annonce"
+              rows="5"></textarea>
+            <mat-error *ngIf="getFieldError(step1FormGroup, 'description')">
               {{ getFieldError(step1FormGroup, 'description') }}
-            </div>
-          </div>
+            </mat-error>
+          </mat-form-field>
 
           <div class="step-actions">
-            <button type="button" class="btn-cancel" (click)="onCancel()">Annuler</button>
-            <button type="button" class="btn-next" matStepperNext>Suivant</button>
+            <button type="button" mat-stroked-button class="btn-cancel" (click)="onCancel()">Annuler</button>
+            <button type="button" mat-raised-button color="primary" class="btn-next" matStepperNext>Suivant</button>
           </div>
         </form>
       </mat-step>
 
       <!-- Step 2: Price, City, Address, Surface -->
-      <mat-step [stepControl]="step2FormGroup" label="Localisation et détails">
+      <mat-step [stepControl]="step2FormGroup" [completed]="isStepCompleted(1)">
+        <ng-template matStepLabel>
+          <span class="step-label">
+            <mat-icon class="step-icon">{{ getStepIcon(1) }}</mat-icon>
+            Localisation et détails
+          </span>
+        </ng-template>
         <form [formGroup]="step2FormGroup" class="step-form">
           <h3 class="step-title">Localisation et détails</h3>
 
           <div class="form-row">
-            <div class="form-group">
-              <label for="price" class="form-label">
-                Prix (EUR)
-              </label>
-              <input id="price" type="number" class="form-input" formControlName="price"
-                [class.invalid]="isFieldInvalid(step2FormGroup, 'price')" placeholder="0.00" step="0.01" min="0" />
-              <div *ngIf="getFieldError(step2FormGroup, 'price')" class="field-error">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Prix (EUR)</mat-label>
+              <input matInput type="number" formControlName="price" placeholder="0.00" step="0.01" min="0" />
+              <mat-error *ngIf="getFieldError(step2FormGroup, 'price')">
                 {{ getFieldError(step2FormGroup, 'price') }}
-              </div>
-            </div>
+              </mat-error>
+            </mat-form-field>
 
-            <div class="form-group">
-              <label for="surface" class="form-label">
-                Surface (m²)
-              </label>
-              <input id="surface" type="number" class="form-input" formControlName="surface"
-                [class.invalid]="isFieldInvalid(step2FormGroup, 'surface')" placeholder="0" step="1" min="0" />
-              <div *ngIf="getFieldError(step2FormGroup, 'surface')" class="field-error">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Surface (m²)</mat-label>
+              <input matInput type="number" formControlName="surface" placeholder="0" step="1" min="0" />
+              <mat-error *ngIf="getFieldError(step2FormGroup, 'surface')">
                 {{ getFieldError(step2FormGroup, 'surface') }}
-              </div>
-            </div>
+              </mat-error>
+            </mat-form-field>
           </div>
 
-          <div class="form-group">
-            <label for="city" class="form-label">
-              Ville
-            </label>
-            <input id="city" type="text" class="form-input" formControlName="city"
-              [class.invalid]="isFieldInvalid(step2FormGroup, 'city')" placeholder="Saisir la ville" />
-            <div *ngIf="getFieldError(step2FormGroup, 'city')" class="field-error">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Ville</mat-label>
+            <input matInput formControlName="city" placeholder="Saisir la ville" />
+            <mat-error *ngIf="getFieldError(step2FormGroup, 'city')">
               {{ getFieldError(step2FormGroup, 'city') }}
-            </div>
-          </div>
+            </mat-error>
+          </mat-form-field>
 
-          <div class="form-group">
-            <label for="address" class="form-label">
-              Adresse
-            </label>
-            <input id="address" type="text" class="form-input" formControlName="address"
-              [class.invalid]="isFieldInvalid(step2FormGroup, 'address')" placeholder="Saisir l'adresse" />
-            <div *ngIf="getFieldError(step2FormGroup, 'address')" class="field-error">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Adresse</mat-label>
+            <input matInput formControlName="address" placeholder="Saisir l'adresse" />
+            <mat-error *ngIf="getFieldError(step2FormGroup, 'address')">
               {{ getFieldError(step2FormGroup, 'address') }}
-            </div>
-          </div>
+            </mat-error>
+          </mat-form-field>
 
           <div class="step-actions">
-            <button type="button" class="btn-back" matStepperPrevious>Retour</button>
-            <button type="button" class="btn-next" matStepperNext>Suivant</button>
+            <button type="button" mat-stroked-button class="btn-back" matStepperPrevious>Retour</button>
+            <button type="button" mat-raised-button color="primary" class="btn-next" matStepperNext>Suivant</button>
           </div>
         </form>
       </mat-step>
 
       <!-- Step 3: Photos -->
-      <mat-step [stepControl]="step3FormGroup" label="Photos">
+      <mat-step [stepControl]="step3FormGroup" [completed]="isStepCompleted(2)">
+        <ng-template matStepLabel>
+          <span class="step-label">
+            <mat-icon class="step-icon">{{ getStepIcon(2) }}</mat-icon>
+            Photos
+          </span>
+        </ng-template>
         <form [formGroup]="step3FormGroup" class="step-form">
           <h3 class="step-title">Photos</h3>
 
           <div class="photos-section">
-            <!-- Photo List Display -->
-            <div *ngIf="photos.length === 0" class="empty-photos">
-              <p class="empty-title">Aucune photo ajoutée</p>
-              <p class="empty-subtitle">Ajoutez une URL de photo ci-dessous</p>
-            </div>
-
-            <div *ngIf="photos.length > 0" class="photos-list">
-              <div *ngFor="let photo of photos.controls; let i = index" class="photo-row">
-                <div class="photo-thumbnail">
-                  <img *ngIf="!photoErrors[i]" [src]="getPhotoControl(i).value" [alt]="'Photo ' + (i + 1)"
-                    (error)="onPhotoError(i)" (load)="onPhotoLoad(i)" class="photo-preview" />
-                  <div *ngIf="photoErrors[i]" class="photo-error-placeholder">
-                    <span>⚠</span>
-                  </div>
-                </div>
-                <div class="photo-url">
-                  {{ getPhotoControl(i).value }}
-                </div>
-                <button type="button" class="btn-delete-photo" (click)="removePhoto(i)" title="Supprimer cette photo">
-                  Supprimer
-                </button>
-              </div>
+            <!-- Drag and Drop Zone -->
+            <div class="drag-drop-zone" [class.drag-active]="dragDropActive" (dragenter)="onDragEnter($event)"
+              (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)">
+              <mat-icon class="upload-icon">cloud_upload</mat-icon>
+              <p class="upload-text">Glissez et déposez une URL de photo ici</p>
+              <p class="upload-subtext">ou utilisez le champ ci-dessous</p>
             </div>
 
             <!-- Add Photo Input -->
             <div class="add-photo-section">
-              <div class="add-photo-input-group">
-                <label for="newPhotoUrl" class="form-label">
-                  Ajouter une nouvelle photo
-                </label>
-                <div class="add-photo-wrapper">
-                  <input id="newPhotoUrl" type="text" class="form-input" [(ngModel)]="newPhotoUrl"
-                    [ngModelOptions]="{standalone: true}" placeholder="Saisir l'URL de la photo"
-                    (keyup.enter)="addPhoto()" />
-                  <button type="button" class="btn-add-photo" (click)="addPhoto()" [disabled]="!newPhotoUrl.trim()">
-                    Ajouter
-                  </button>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Ajouter une nouvelle photo</mat-label>
+                <input matInput [(ngModel)]="newPhotoUrl" [ngModelOptions]="{standalone: true}"
+                  placeholder="Saisir l'URL de la photo" (keyup.enter)="addPhoto()" />
+                <button mat-icon-button matSuffix (click)="addPhoto()" [disabled]="!newPhotoUrl.trim()"
+                  type="button">
+                  <mat-icon>add_circle</mat-icon>
+                </button>
+              </mat-form-field>
+            </div>
+
+            <!-- Photo Thumbnails with Drag and Drop Reordering -->
+            <div *ngIf="photos.length === 0" class="empty-photos">
+              <mat-icon class="empty-icon">photo_library</mat-icon>
+              <p class="empty-title">Aucune photo ajoutée</p>
+              <p class="empty-subtitle">Ajoutez une URL de photo ci-dessus</p>
+            </div>
+
+            <div *ngIf="photos.length > 0" class="photos-grid" cdkDropList (cdkDropListDropped)="dropPhoto($event)">
+              <div *ngFor="let photo of photos.controls; let i = index" class="photo-item" cdkDrag>
+                <div class="photo-drag-placeholder" *cdkDragPlaceholder></div>
+                <div class="photo-thumbnail-wrapper">
+                  <div class="photo-thumbnail">
+                    <img *ngIf="!photoLoadErrors[i]" [src]="previewUrls[i]" [alt]="'Photo ' + (i + 1)"
+                      (error)="onPhotoError(i)" (load)="onPhotoLoad(i)" class="photo-preview" />
+                    <div *ngIf="photoLoadErrors[i]" class="photo-error-placeholder">
+                      <mat-icon>broken_image</mat-icon>
+                      <span>Erreur de chargement</span>
+                    </div>
+                    <div class="photo-overlay">
+                      <button mat-icon-button class="btn-delete-photo" (click)="removePhoto(i)"
+                        title="Supprimer cette photo" type="button">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="photo-index">Photo {{ i + 1 }}</div>
                 </div>
               </div>
             </div>
           </div>
 
           <div class="step-actions">
-            <button type="button" class="btn-back" matStepperPrevious>Retour</button>
-            <button type="button" class="btn-next" matStepperNext>Suivant</button>
+            <button type="button" mat-stroked-button class="btn-back" matStepperPrevious>Retour</button>
+            <button type="button" mat-raised-button color="primary" class="btn-next" matStepperNext>Suivant</button>
           </div>
         </form>
       </mat-step>
 
       <!-- Step 4: Rules JSON -->
-      <mat-step [stepControl]="step4FormGroup" label="Règles">
+      <mat-step [stepControl]="step4FormGroup" [completed]="isStepCompleted(3)">
+        <ng-template matStepLabel>
+          <span class="step-label">
+            <mat-icon class="step-icon">{{ getStepIcon(3) }}</mat-icon>
+            Règles
+          </span>
+        </ng-template>
         <form [formGroup]="step4FormGroup" class="step-form">
           <h3 class="step-title">Règles JSON</h3>
 
-          <div class="form-group">
-            <label for="rulesJson" class="form-label">
-              Règles JSON <span class="required">*</span>
-            </label>
-            <div class="json-editor-controls">
-              <button type="button" class="btn-format-json" (click)="formatJson()">
-                Formater le JSON
-              </button>
-            </div>
-            <textarea id="rulesJson" class="form-textarea json-editor" formControlName="rulesJson"
-              [class.invalid]="isFieldInvalid(step4FormGroup, 'rulesJson')"
-              placeholder='Saisir les règles au format JSON, par ex. {"allowPets": true, "smokingAllowed": false}'
-              rows="10"></textarea>
-            <div *ngIf="getFieldError(step4FormGroup, 'rulesJson')" class="field-error">
-              {{ getFieldError(step4FormGroup, 'rulesJson') }}
-            </div>
-            <div class="json-hint">
-              Saisir un format JSON valide. Utilisez le bouton "Formater le JSON" pour auto-formater votre JSON.
-            </div>
+          <div class="json-editor-controls">
+            <button type="button" mat-stroked-button (click)="formatJson()">
+              <mat-icon>code</mat-icon>
+              Formater le JSON
+            </button>
           </div>
 
+          <mat-form-field appearance="outline" class="full-width json-field">
+            <mat-label>Règles JSON</mat-label>
+            <textarea matInput formControlName="rulesJson"
+              placeholder='Saisir les règles au format JSON, par ex. {"allowPets": true, "smokingAllowed": false}'
+              rows="10" class="json-editor"></textarea>
+            <mat-error *ngIf="getFieldError(step4FormGroup, 'rulesJson')">
+              {{ getFieldError(step4FormGroup, 'rulesJson') }}
+            </mat-error>
+            <mat-hint>Saisir un format JSON valide. Utilisez le bouton "Formater le JSON" pour auto-formater votre
+              JSON.</mat-hint>
+          </mat-form-field>
+
           <div class="step-actions">
-            <button type="button" class="btn-back" matStepperPrevious>Retour</button>
-            <button type="button" class="btn-submit" (click)="onSubmit()" [disabled]="submitting">
-              <span *ngIf="!submitting">{{ isEditMode ? 'Modifier' : 'Créer' }}</span>
+            <button type="button" mat-stroked-button class="btn-back" matStepperPrevious>Retour</button>
+            <button type="button" mat-raised-button color="primary" class="btn-submit" (click)="onSubmit()"
+              [disabled]="submitting">
+              <span *ngIf="!submitting">
+                <mat-icon>{{ isEditMode ? 'save' : 'add_circle' }}</mat-icon>
+                {{ isEditMode ? 'Modifier' : 'Créer' }}
+              </span>
               <span *ngIf="submitting" class="btn-loading">
-                <span class="btn-spinner"></span>
+                <mat-spinner diameter="20" class="btn-spinner"></mat-spinner>
                 {{ isEditMode ? 'Modification...' : 'Création...' }}
               </span>
             </button>

@@ -1,1 +1,593 @@
 @import '../../../styles/variables.scss';
+
+.page-container {
+  padding: var(--spacing-6);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: var(--spacing-6);
+}
+
+.page-title {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
+  margin: 0;
+}
+
+.page-content {
+  background: var(--color-neutral-0);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  padding: var(--spacing-8);
+}
+
+.error-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  padding: var(--spacing-4);
+  background-color: var(--color-error-50);
+  border: 1px solid var(--color-error-300);
+  border-radius: var(--radius-md);
+  color: var(--color-error-800);
+  margin-bottom: var(--spacing-6);
+  font-size: var(--font-size-sm);
+}
+
+.error-icon {
+  font-size: var(--font-size-xl);
+  color: var(--color-error-600);
+}
+
+/* ========================================
+   MAT-STEPPER STYLING
+   ======================================== */
+
+::ng-deep .annonce-stepper {
+  background: transparent;
+}
+
+::ng-deep .annonce-stepper .mat-stepper-horizontal {
+  background: transparent;
+}
+
+::ng-deep .annonce-stepper .mat-horizontal-stepper-header-container {
+  margin-bottom: var(--spacing-8);
+  padding: var(--spacing-4);
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+::ng-deep .annonce-stepper .mat-step-header {
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  transition: var(--transition-base);
+}
+
+::ng-deep .annonce-stepper .mat-step-header:hover {
+  background: var(--color-primary-alpha-10);
+}
+
+::ng-deep .annonce-stepper .mat-step-header.cdk-keyboard-focused,
+::ng-deep .annonce-stepper .mat-step-header.cdk-program-focused {
+  background: var(--color-primary-alpha-20);
+}
+
+::ng-deep .annonce-stepper .mat-step-header .mat-step-icon {
+  background-color: var(--color-neutral-400);
+  color: var(--color-neutral-0);
+  width: 32px;
+  height: 32px;
+  margin-right: var(--spacing-2);
+}
+
+::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-selected {
+  background-color: var(--color-primary-500);
+  color: var(--color-neutral-0);
+}
+
+::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-done {
+  background-color: var(--color-success-500);
+  color: var(--color-neutral-0);
+}
+
+::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-edit {
+  background-color: var(--color-primary-500);
+  color: var(--color-neutral-0);
+}
+
+::ng-deep .annonce-stepper .mat-step-header .mat-step-icon-state-error {
+  background-color: var(--color-error-500);
+  color: var(--color-neutral-0);
+}
+
+::ng-deep .annonce-stepper .mat-step-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+}
+
+::ng-deep .annonce-stepper .mat-step-label-selected {
+  color: var(--color-primary-700);
+  font-weight: var(--font-weight-semibold);
+}
+
+::ng-deep .annonce-stepper .mat-stepper-horizontal-line {
+  border-top-color: var(--color-neutral-300);
+  border-top-width: 2px;
+  margin: 0 var(--spacing-2);
+}
+
+.step-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.step-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.step-form {
+  padding: var(--spacing-6) var(--spacing-4);
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
+  margin-bottom: var(--spacing-6);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 2px solid var(--color-primary-200);
+}
+
+/* ========================================
+   FORM FIELDS WITH MATERIAL
+   ======================================== */
+
+::ng-deep .step-form .mat-form-field {
+  display: block;
+  margin-bottom: var(--spacing-4);
+}
+
+::ng-deep .step-form .mat-form-field.full-width {
+  width: 100%;
+}
+
+::ng-deep .step-form .mat-form-field.half-width {
+  width: calc(50% - var(--spacing-2));
+}
+
+.form-row {
+  display: flex;
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline {
+  color: var(--color-neutral-300);
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-outline-thick {
+  color: var(--color-primary-500);
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-outline-thick {
+  color: var(--color-primary-500);
+  box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid .mat-form-field-outline-thick {
+  color: var(--color-error-500);
+}
+
+::ng-deep .mat-form-field-appearance-outline .mat-form-field-label {
+  color: var(--color-neutral-600);
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-focused .mat-form-field-label {
+  color: var(--color-primary-600);
+}
+
+::ng-deep .mat-form-field-appearance-outline.mat-form-field-invalid .mat-form-field-label {
+  color: var(--color-error-600);
+}
+
+::ng-deep .mat-error {
+  font-size: var(--font-size-xs);
+  color: var(--color-error-600);
+  margin-top: var(--spacing-1);
+}
+
+::ng-deep .mat-hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-600);
+  margin-top: var(--spacing-1);
+}
+
+.required {
+  color: var(--color-error-500);
+}
+
+/* ========================================
+   PHOTOS SECTION
+   ======================================== */
+
+.photos-section {
+  margin-bottom: var(--spacing-6);
+}
+
+.drag-drop-zone {
+  border: 2px dashed var(--color-neutral-300);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-8);
+  text-align: center;
+  background: var(--color-neutral-50);
+  transition: var(--transition-base);
+  cursor: pointer;
+  margin-bottom: var(--spacing-6);
+}
+
+.drag-drop-zone:hover {
+  border-color: var(--color-primary-400);
+  background: var(--color-primary-alpha-10);
+}
+
+.drag-drop-zone.drag-active {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-alpha-20);
+  border-style: solid;
+  box-shadow: 0 0 0 4px var(--color-primary-alpha-10);
+}
+
+.upload-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: var(--color-primary-400);
+  margin: 0 auto var(--spacing-4);
+}
+
+.upload-text {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  margin-bottom: var(--spacing-2);
+}
+
+.upload-subtext {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+}
+
+.add-photo-section {
+  margin-bottom: var(--spacing-6);
+}
+
+.empty-photos {
+  text-align: center;
+  padding: var(--spacing-8);
+  background: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-neutral-200);
+}
+
+.empty-icon {
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  color: var(--color-neutral-400);
+  margin: 0 auto var(--spacing-4);
+}
+
+.empty-title {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  margin-bottom: var(--spacing-2);
+}
+
+.empty-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+}
+
+/* ========================================
+   PHOTO THUMBNAILS GRID WITH DRAG-DROP
+   ======================================== */
+
+.photos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-4);
+}
+
+.photo-item {
+  position: relative;
+  cursor: move;
+  transition: var(--transition-base);
+}
+
+.photo-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.photo-drag-placeholder {
+  background: var(--color-primary-alpha-10);
+  border: 2px dashed var(--color-primary-400);
+  border-radius: var(--radius-lg);
+  min-height: 200px;
+}
+
+.photo-thumbnail-wrapper {
+  background: var(--color-neutral-0);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+}
+
+.photo-thumbnail {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  background: var(--color-neutral-100);
+  overflow: hidden;
+}
+
+.photo-preview {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: var(--transition-base);
+}
+
+.photo-item:hover .photo-preview {
+  transform: scale(1.05);
+}
+
+.photo-error-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-error-50);
+  color: var(--color-error-600);
+  font-size: var(--font-size-sm);
+  gap: var(--spacing-2);
+}
+
+.photo-error-placeholder mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+}
+
+.photo-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: var(--transition-base);
+}
+
+.photo-thumbnail:hover .photo-overlay {
+  opacity: 1;
+}
+
+.btn-delete-photo {
+  background: var(--color-error-500);
+  color: var(--color-neutral-0);
+}
+
+.btn-delete-photo:hover {
+  background: var(--color-error-600);
+}
+
+.photo-index {
+  padding: var(--spacing-2) var(--spacing-3);
+  text-align: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  background: var(--color-neutral-50);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+/* ========================================
+   JSON EDITOR
+   ======================================== */
+
+.json-editor-controls {
+  margin-bottom: var(--spacing-4);
+}
+
+::ng-deep .json-field .mat-form-field-wrapper {
+  padding-bottom: 0;
+}
+
+.json-editor {
+  font-family: 'Courier New', Consolas, monospace;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+  resize: vertical;
+}
+
+/* ========================================
+   STEP ACTIONS
+   ======================================== */
+
+.step-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-4);
+  margin-top: var(--spacing-8);
+  padding-top: var(--spacing-6);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.btn-cancel,
+.btn-back {
+  padding: var(--spacing-2) var(--spacing-6);
+}
+
+.btn-next,
+.btn-submit {
+  padding: var(--spacing-2) var(--spacing-6);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.btn-loading {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+::ng-deep .btn-spinner {
+  display: inline-block;
+}
+
+::ng-deep .btn-spinner .mat-progress-spinner circle {
+  stroke: currentColor;
+}
+
+/* ========================================
+   MATERIAL BUTTON OVERRIDES
+   ======================================== */
+
+::ng-deep .mat-raised-button {
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-base);
+}
+
+::ng-deep .mat-raised-button:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+::ng-deep .mat-raised-button:active {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(0);
+}
+
+::ng-deep .mat-stroked-button {
+  border-width: 2px;
+  transition: var(--transition-base);
+}
+
+::ng-deep .mat-stroked-button:hover {
+  background: var(--color-neutral-50);
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  .page-container {
+    padding: var(--spacing-4);
+  }
+
+  .page-content {
+    padding: var(--spacing-4);
+  }
+
+  .step-form {
+    padding: var(--spacing-4) var(--spacing-2);
+  }
+
+  .form-row {
+    flex-direction: column;
+  }
+
+  ::ng-deep .step-form .mat-form-field.half-width {
+    width: 100%;
+  }
+
+  .photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: var(--spacing-3);
+  }
+
+  .step-actions {
+    flex-direction: column;
+  }
+
+  .step-actions button {
+    width: 100%;
+  }
+
+  ::ng-deep .annonce-stepper .mat-horizontal-stepper-header-container {
+    padding: var(--spacing-2);
+  }
+
+  ::ng-deep .annonce-stepper .mat-step-header {
+    padding: var(--spacing-2);
+  }
+
+  .step-label {
+    font-size: var(--font-size-xs);
+  }
+
+  .step-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .page-title {
+    font-size: var(--font-size-xl);
+  }
+
+  .step-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .photos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  ::ng-deep .annonce-stepper .mat-step-header .mat-step-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
