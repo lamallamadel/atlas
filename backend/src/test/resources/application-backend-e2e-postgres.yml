@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   config:
     activate:
       on-profile: backend-e2e-postgres
