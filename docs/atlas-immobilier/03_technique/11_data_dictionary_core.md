@@ -86,7 +86,7 @@
 | `id` | UUID | ✅ | PK |
 | `org_id` | UUID | ✅ | org de l’annonce |
 | `annonce_id` | UUID | ✅ | FK |
-| `reason_code` | text | ✅ | `REPORT_DUPLICATE`, `REPORT_FRAUD`, ... |
+| `reason_code` | text | ✅ | `REPORT_DUPLICATE`, `REPORT_FRAUD`, `REPORT_WRONG_INFO`, `REPORT_OTHER` (voir nomenclature) |
 | `comment` | text | ❌ | |
 | `status_code` | text | ✅ | `REPORT_OPEN`, `REPORT_IN_REVIEW`, `REPORT_CLOSED` |
 | `created_at` | timestamptz | ✅ | |
@@ -101,8 +101,8 @@
 | `id` | UUID | ✅ | PK |
 | `org_id` | UUID | ✅ | tenant |
 | `annonce_id` | UUID | ❌ | FK (optionnel) |
-| `case_type_code` | text | ✅ | ex: `CRM_LEAD`, `CRM_MANDATE`, `COOP_GROUP`, ... |
-| `status_code` | text | ✅ | ex: `CRM_NEW`, `CRM_QUALIFIED`, ... (workflow) |
+| `case_type_code` | text | ✅ | ex: `CRM_LEAD`, `CRM_LEAD_BUY`, `CRM_LEAD_RENT`, `CRM_MANDATE`, `CRM_SALE_TRANSACTION`, `CRM_RENTAL_TRANSACTION`, `COOP_GROUP`, `COOP_PROJECT`, `COOP_MEMBER`, `COOP_ALLOCATION_CASE` (voir nomenclature) |
+| `status_code` | text | ✅ | ex: `CRM_NEW`, `CRM_CONTACTED`, `CRM_SCREENING`, `CRM_QUALIFIED`, `CRM_VISIT_PLANNED`, `CRM_OFFER_RECEIVED`, `CRM_CLOSED_WON`, `CRM_CLOSED_LOST` (selon workflow; voir nomenclature) |
 | `source_code` | text | ✅ | ex: `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM` |
 | `contact_name` | text | ✅ | |
 | `phone` | text | ✅ | normalisé |
@@ -205,7 +205,7 @@
 | Champ | Type | Requis | Notes |
 |---|---|---:|---|
 | `org_id` | UUID | ✅ | |
-| `feature_key` | text | ✅ | `module.trust.basic`, ... |
+| `feature_key` | text | ✅ | `module.trust.basic`, `module.trust.kyc`, `module.developers`, `module.financing`, `module.rentals`, `module.pm`, `module.concierge`, `module.cobuy` (liste complète: nomenclature) |
 | `enabled` | boolean | ✅ | |
 | `limits_json` | jsonb | ❌ | quotas/limites |
 

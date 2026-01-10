@@ -91,7 +91,7 @@ Cette section décrit les tables à introduire pour basculer des enums codés ve
 
 - `ref_dictionary`  
   - `org_id` (nullable si global)  
-  - `dict_type` (ex: CASE_TYPE, CASE_STATUS, LOSS_REASON…)  
+  - `dict_type` (ex: CASE_TYPE, CASE_STATUS, LOSS_REASON, WON_REASON, ANN_STATUS, TX_TYPE, REPORT_REASON, REPORT_STATUS, CONSENT_TYPE, CONSENT_SOURCE)  
   - `code` (clé stable)  
   - `label` / `label_fr` / `label_ar` (selon besoin)  
   - `sort_order`  
@@ -140,7 +140,7 @@ Objectif : ajouter un sous-domaine “coopérative/groupement” en conservant l
 #### Groupement (`coop_group`)
 - `id`, `org_id`
 - `name`, `city`
-- `status_code` (FORMATION/KYC_READY/FUNDING_OPEN/…)
+- `status_code` (COOP_GROUP_FORMATION / COOP_GROUP_KYC_READY / COOP_GROUP_FUNDING_OPEN / COOP_GROUP_ALLOCATION_RUNNING / COOP_GROUP_CLOSED / COOP_GROUP_CANCELLED)
 - `rules_json` (FIFO, indexation, pénalités, cut-off)
 - `created_at`, `updated_at`
 
@@ -157,7 +157,7 @@ Index :
 
 #### Lot (`coop_lot`)
 - `id`, `org_id`, `project_id` (FK)
-- `code` (A1, B2…), `type`, `surface`, `floor`, `price_reference` (optionnel)
+- `code` (ex: A1, A2, B1, B2), `type`, `surface`, `floor`, `price_reference` (optionnel)
 - `status_code` (AVAILABLE/RESERVED/ASSIGNED/DELIVERED)
 - `created_at`, `updated_at`
 
@@ -185,7 +185,7 @@ Contraintes :
 - `id`, `org_id`, `group_id`, `member_id`
 - `due_date`, `amount_due`
 - `paid_date`, `amount_paid`
-- `method` (BANK_TRANSFER/CASH/…)
+- `method` (PAY_METHOD_BANK_TRANSFER / PAY_METHOD_CASH / PAY_METHOD_CARD / PAY_METHOD_CHECK / PAY_METHOD_OTHER)
 - `status` (`APPT_PENDING`/`APPT_CONFIRMED`/`APPT_REJECTED`/`APPT_LATE`/`APPT_WAIVED`)  
   > Statuts techniques d’Appointment (distincts du workflow dossier).
 - `proof_document_id` (FK document)
@@ -209,9 +209,9 @@ Contraintes :
 #### Documents (`document`)
 Réutiliser une table générique (si existante) ou ajouter :
 - `id`, `org_id`
-- `entity_type` (COOP_GROUP/COOP_PROJECT/COOP_MEMBER/COOP_ALLOCATION/…)
+- `entity_type` (COOP_GROUP / COOP_PROJECT / COOP_MEMBER / COOP_ALLOCATION / COOP_ALLOCATION_CASE)
 - `entity_id`
-- `type` (PV, CONTRACT, PAYMENT_PROOF, …)
+- `type` (DOC_PV, DOC_CONTRACT, DOC_PAYMENT_PROOF, DOC_IDENTITY, DOC_OTHER)
 - `storage_ref` (S3/minio/local), `hash`, `created_at`
 
 > Les tables `audit_event` et `activity` doivent tracer toutes les opérations critiques (voir docs audit/timeline).

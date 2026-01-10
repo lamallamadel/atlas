@@ -23,13 +23,13 @@ Le principe : les “enums métier” deviennent des **référentiels tenant-sco
 ## TO-BE (cible)
 
 ### 1) Dossier = Case universel
-Un dossier (case) représente une affaire/processus dans le temps : lead, transaction, mandat, projet…
+Un dossier (case) représente une affaire/processus dans le temps : lead, mandat, transaction (vente/location), et éventuellement projets (promoteur) ou coop habitat.
 
 Champs structurants :
-- `caseType` : type métier (vente, location, mandat, projet…)
+- `caseType` : type métier (ex: `CRM_LEAD_BUY`, `CRM_LEAD_RENT`, `CRM_MANDATE`, `CRM_SALE_TRANSACTION`, `CRM_RENTAL_TRANSACTION`, `COOP_GROUP`).
 - `statusCode` : statut courant (appartenant au workflow du type)
 - `lossReason` / `wonReason` : requis à la clôture
-- `source` : provenance du lead/case (WhatsApp, Avito…)
+- `source` : provenance du lead/case (ex: `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM` (MVP). Extensions possibles: `LEAD_SOURCE_PHONE`, `LEAD_SOURCE_AVITO`, `LEAD_SOURCE_MUBAWAB`.).
 
 ### 2) Référentiels (dictionnaires)
 Tous les éléments métier configurables sont en data (et tenant-scopés) :
@@ -37,7 +37,7 @@ Tous les éléments métier configurables sont en data (et tenant-scopés) :
 - Statuts (CASE_STATUS)
 - Raisons perte/gain (LOSS_REASON / WON_REASONN)
 - Sources (LEAD_SOURCE)
-- Types RDV, outcomes, types d’activités, catégories de tâches…
+- Types RDV (`APPOINT_VISIT`, `APPOINT_CALL`), statuts RDV (`APPOINT_SCHEDULED`, `APPOINT_DONE`, `APPOINT_NO_SHOW`, `APPOINT_CANCELLED`), types d’activités (`ACT_*`) et canaux (`CHAN_*`).
 
 ### 3) Workflows
 Un workflow est défini par :
