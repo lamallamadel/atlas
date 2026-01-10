@@ -38,6 +38,7 @@
               "src/styles/theme.scss",
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
+              "src/styles/print.scss",
               "src/styles.css"
             ],
             "scripts": []
@@ -109,6 +110,7 @@
               "src/styles/theme.scss",
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
+              "src/styles/print.scss",
               "src/styles.css"
             ],
             "scripts": []
