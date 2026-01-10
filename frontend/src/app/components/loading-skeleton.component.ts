@@ -1,11 +1,12 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kpi' | 'detail';
 
 @Component({
   selector: 'app-loading-skeleton',
   templateUrl: './loading-skeleton.component.html',
-  styleUrls: ['./loading-skeleton.component.css']
+  styleUrls: ['./loading-skeleton.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoadingSkeletonComponent {
   @Input() variant: SkeletonVariant = 'card';
@@ -18,5 +19,9 @@ export class LoadingSkeletonComponent {
 
   get columnsArray(): number[] {
     return Array(this.columns).fill(0).map((_, i) => i);
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

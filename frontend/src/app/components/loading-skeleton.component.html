@@ -3,7 +3,7 @@
   
   <!-- Card variant -->
   <div *ngIf="variant === 'card'" class="skeleton-card" aria-hidden="true">
-    <div *ngFor="let i of rowsArray" class="skeleton-card-item">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-card-item">
       <div class="skeleton-card-header">
         <div class="skeleton-rectangle skeleton-avatar"></div>
         <div class="skeleton-card-header-content">
@@ -21,7 +21,7 @@
 
   <!-- List variant -->
   <div *ngIf="variant === 'list'" class="skeleton-list" aria-hidden="true">
-    <div *ngFor="let i of rowsArray" class="skeleton-list-item">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-list-item">
       <div class="skeleton-rectangle skeleton-list-icon"></div>
       <div class="skeleton-list-content">
         <div class="skeleton-rectangle skeleton-list-title"></div>
@@ -34,18 +34,18 @@
   <!-- Table variant -->
   <div *ngIf="variant === 'table'" class="skeleton-table" aria-hidden="true">
     <div class="skeleton-table-header">
-      <div *ngFor="let i of columnsArray" class="skeleton-rectangle skeleton-table-header-cell"></div>
+      <div *ngFor="let i of columnsArray; trackBy: trackByIndex" class="skeleton-rectangle skeleton-table-header-cell"></div>
     </div>
     <div class="skeleton-table-body">
-      <div *ngFor="let i of rowsArray" class="skeleton-table-row">
-        <div *ngFor="let j of columnsArray" class="skeleton-rectangle skeleton-table-cell"></div>
+      <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-table-row">
+        <div *ngFor="let j of columnsArray; trackBy: trackByIndex" class="skeleton-rectangle skeleton-table-cell"></div>
       </div>
     </div>
   </div>
 
   <!-- Form variant -->
   <div *ngIf="variant === 'form'" class="skeleton-form" aria-hidden="true">
-    <div *ngFor="let i of rowsArray" class="skeleton-form-group">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-form-group">
       <div class="skeleton-rectangle skeleton-form-label"></div>
       <div class="skeleton-rectangle skeleton-form-input"></div>
     </div>
@@ -76,7 +76,7 @@
       <div class="skeleton-rectangle skeleton-detail-badge"></div>
     </div>
     <div class="skeleton-detail-content">
-      <div *ngFor="let i of rowsArray" class="skeleton-detail-row">
+      <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-detail-row">
         <div class="skeleton-rectangle skeleton-detail-label"></div>
         <div class="skeleton-rectangle skeleton-detail-value"></div>
       </div>

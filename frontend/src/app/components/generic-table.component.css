@@ -192,6 +192,18 @@ table.sticky-header {
   padding: var(--spacing-2);
 }
 
+/* Virtual Scroll Viewport */
+.virtual-scroll-viewport {
+  height: 600px;
+  width: 100%;
+}
+
+.virtual-scroll-viewport .cdk-virtual-scroll-content-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-4);
+}
+
 .data-card {
   position: relative;
   transition: all var(--duration-normal) ease-in-out;

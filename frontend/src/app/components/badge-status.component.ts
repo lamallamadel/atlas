@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export type EntityType = 'annonce' | 'dossier';
 
@@ -15,7 +15,8 @@ interface StatusConfig {
 @Component({
   selector: 'app-badge-status',
   templateUrl: './badge-status.component.html',
-  styleUrls: ['./badge-status.component.css']
+  styleUrls: ['./badge-status.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BadgeStatusComponent {
   @Input() status!: string;

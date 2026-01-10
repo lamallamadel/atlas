@@ -5,8 +5,10 @@ import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
 import { interval, Subject, takeUntil, takeWhile } from 'rxjs';
-import { Chart, ChartConfiguration } from 'chart.js/auto';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
+
+type Chart = any;
+type ChartConfiguration = any;
 
 interface KpiCard {
   title: string;
@@ -79,8 +81,18 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     setTimeout(() => {
-      this.initCharts();
+      this.loadChartJsAndInitCharts();
     }, 100);
+  }
+
+  private async loadChartJsAndInitCharts(): Promise<void> {
+    try {
+      const chartModule = await import('chart.js/auto');
+      const Chart = chartModule.Chart;
+      this.initCharts();
+    } catch (error) {
+      console.error('Failed to load Chart.js:', error);
+    }
   }
 
   ngOnDestroy(): void {
@@ -222,23 +234,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  initCharts(): void {
+  async initCharts(): Promise<void> {
     if (this.annoncesChartRef) {
-      this.annoncesChart = this.createChart(
+      this.annoncesChart = await this.createChart(
         this.annoncesChartRef.nativeElement,
         this.kpiCards['annoncesActives']
       );
     }
 
     if (this.dossiersChartRef) {
-      this.dossiersChart = this.createChart(
+      this.dossiersChart = await this.createChart(
         this.dossiersChartRef.nativeElement,
         this.kpiCards['dossiersATraiter']
       );
     }
   }
 
-  createChart(canvas: HTMLCanvasElement, card: KpiCard): Chart {
+  async createChart(canvas: HTMLCanvasElement, card: KpiCard): Promise<Chart> {
+    const chartModule = await import('chart.js/auto');
+    const Chart = chartModule.Chart;
+    
     const config: ChartConfiguration = {
       type: 'line',
       data: {
@@ -328,5 +343,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   getKpiCardKeys(): string[] {
     return Object.keys(this.kpiCards);
+  }
+
+  trackByKey(index: number, key: string): string {
+    return key;
+  }
+
+  trackByDossierId(index: number, dossier: DossierResponse): number {
+    return dossier.id;
   }
 }

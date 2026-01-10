@@ -495,4 +495,24 @@ export class AnnoncesComponent implements OnInit {
 
     return pages;
   }
+
+  trackByCity(index: number, city: string): string {
+    return city;
+  }
+
+  trackByType(index: number, type: string): string {
+    return type;
+  }
+
+  trackByPreset(index: number, preset: FilterPreset): string {
+    return preset.id;
+  }
+
+  trackByFilter(index: number, filter: AppliedFilter): string {
+    return filter.key;
+  }
+
+  trackByPageNum(index: number, pageNum: number): number {
+    return pageNum;
+  }
 }

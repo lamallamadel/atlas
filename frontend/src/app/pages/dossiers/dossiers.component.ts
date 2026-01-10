@@ -528,4 +528,20 @@ export class DossiersComponent implements OnInit {
 
     return pages;
   }
+
+  trackByAnnonce(index: number, annonce: AnnonceResponse): number {
+    return annonce.id;
+  }
+
+  trackByPreset(index: number, preset: FilterPreset): string {
+    return preset.id;
+  }
+
+  trackByFilter(index: number, filter: AppliedFilter): string {
+    return filter.key;
+  }
+
+  trackByPageNum(index: number, pageNum: number): number {
+    return pageNum;
+  }
 }

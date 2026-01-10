@@ -48,6 +48,8 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   @Input() rowClickable = false;
   @Input() enableRowSelection = false;
   @Input() stickyHeader = true;
+  @Input() enableVirtualScroll = false;
+  @Input() virtualScrollItemSize = 48;
 
   @Output() rowAction = new EventEmitter<{ action: string; row: unknown }>();
   @Output() rowClick = new EventEmitter<unknown>();
@@ -235,5 +237,21 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
 
   getRowValue(row: unknown, columnKey: string): unknown {
     return (row as any)[columnKey];
+  }
+
+  trackByColumnKey(index: number, column: ColumnConfig): string {
+    return column.key;
+  }
+
+  trackByAction(index: number, action: RowAction): string {
+    return action.action;
+  }
+
+  trackByRowId(index: number, row: unknown): number | string {
+    return (row as any)['id'] ?? index;
+  }
+
+  trackByIndex(index: number): number {
+    return index;
   }
 }

@@ -71,7 +71,7 @@
   </div>
 
   <div *ngIf="!loading && activities.length > 0" class="timeline">
-    <div *ngFor="let activity of activities" class="timeline-item">
+    <div *ngFor="let activity of activities; trackBy: trackByActivityId" class="timeline-item">
       <div class="timeline-marker">
         <mat-icon [class]="getActivityTypeBadgeClass(activity.type)">
           {{ getActivityTypeIcon(activity.type) }}

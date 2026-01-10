@@ -32,6 +32,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -144,6 +145,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatBottomSheetModule,
     DragDropModule,
     LayoutModule,
+    ScrollingModule,
     NgChartsModule
   ],
   providers: [

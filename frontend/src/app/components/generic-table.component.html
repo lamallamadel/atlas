@@ -24,7 +24,7 @@
       </ng-container>
 
       <!-- Data Columns -->
-      <ng-container *ngFor="let column of columns" [matColumnDef]="column.key">
+      <ng-container *ngFor="let column of columns; trackBy: trackByColumnKey" [matColumnDef]="column.key">
         <th mat-header-cell *matHeaderCellDef 
             [mat-sort-header]="column.sortable !== false && enableSort ? column.key : ''"
             [ngStyle]="getColumnStyle(column)"
@@ -52,7 +52,7 @@
         <th mat-header-cell *matHeaderCellDef class="actions-header" role="columnheader">Actions</th>
         <td mat-cell *matCellDef="let row" class="actions-cell" role="cell">
           <button 
-            *ngFor="let action of actions"
+            *ngFor="let action of actions; trackBy: trackByAction"
             [hidden]="!shouldShowAction(action, row)"
             mat-icon-button 
             [color]="action.color || 'primary'"
@@ -95,8 +95,57 @@
       <p class="empty-message">Il n'y a actuellement aucune donnée à afficher</p>
     </div>
 
-    <mat-card *ngFor="let row of dataSource.data; let i = index" 
-              class="data-card" 
+    <!-- Virtual Scroll for Mobile -->
+    <cdk-virtual-scroll-viewport 
+      *ngIf="enableVirtualScroll && data.length > 0"
+      [itemSize]="virtualScrollItemSize" 
+      class="virtual-scroll-viewport">
+      <mat-card *cdkVirtualFor="let row of dataSource.data; let i = index; trackBy: trackByRowId" 
+                class="data-card" 
+                (click)="onRowClick(row)"
+                [attr.tabindex]="rowClickable ? '0' : null"
+                [attr.role]="rowClickable ? 'button' : 'article'"
+                [attr.aria-label]="'Élément ' + (i + 1)"
+                (keydown.enter)="rowClickable && onRowClick(row)"
+                (keydown.space)="rowClickable && onRowClick(row)">
+        <!-- Selection Checkbox -->
+        <div *ngIf="enableRowSelection" class="card-selection">
+          <mat-checkbox
+            (click)="$event.stopPropagation()"
+            (change)="$event ? toggleRow(row) : null"
+            [checked]="selection.isSelected(row)"
+            [attr.aria-label]="'Sélectionner l\'élément ' + (i + 1)">
+          </mat-checkbox>
+        </div>
+
+        <!-- Card Content -->
+        <mat-card-content>
+          <div *ngFor="let column of columns; trackBy: trackByColumnKey" class="card-field">
+            <span class="field-label">{{ column.header }}:</span>
+            <span class="field-value" [innerHTML]="formatValue(getRowValue(row, column.key), column, row)"></span>
+          </div>
+        </mat-card-content>
+
+        <!-- Card Actions -->
+        <mat-card-actions *ngIf="showActions" class="card-actions">
+          <button 
+            *ngFor="let action of actions; trackBy: trackByAction"
+            [hidden]="!shouldShowAction(action, row)"
+            mat-icon-button 
+            [color]="action.color || 'primary'"
+            [matTooltip]="action.tooltip"
+            (click)="$event.stopPropagation(); onAction(action.action, row)"
+            [attr.aria-label]="action.tooltip || action.action">
+            <mat-icon aria-hidden="true">{{ action.icon }}</mat-icon>
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </cdk-virtual-scroll-viewport>
+
+    <!-- Regular Scroll for Mobile -->
+    <ng-container *ngIf="!enableVirtualScroll && data.length > 0">
+      <mat-card *ngFor="let row of dataSource.data; let i = index; trackBy: trackByRowId" 
+                class="data-card" 
               (click)="onRowClick(row)"
               [attr.tabindex]="rowClickable ? '0' : null"
               [attr.role]="rowClickable ? 'button' : 'article'"
@@ -115,7 +164,7 @@
 
       <!-- Card Content -->
       <mat-card-content>
-        <div *ngFor="let column of columns" class="card-field">
+        <div *ngFor="let column of columns; trackBy: trackByColumnKey" class="card-field">
           <span class="field-label">{{ column.header }}:</span>
           <span class="field-value" [innerHTML]="formatValue(getRowValue(row, column.key), column, row)"></span>
         </div>
@@ -124,7 +173,7 @@
       <!-- Card Actions -->
       <mat-card-actions *ngIf="showActions" class="card-actions">
         <button 
-          *ngFor="let action of actions"
+          *ngFor="let action of actions; trackBy: trackByAction"
           [hidden]="!shouldShowAction(action, row)"
           mat-icon-button 
           [color]="action.color || 'primary'"
@@ -135,6 +184,7 @@
         </button>
       </mat-card-actions>
     </mat-card>
+    </ng-container>
   </div>
 
   <!-- Paginator -->

@@ -258,4 +258,8 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     }
     return content.substring(0, 200) + '...';
   }
+
+  trackByActivityId(index: number, activity: ActivityResponse): number {
+    return activity.id;
+  }
 }

@@ -64,7 +64,7 @@
                 #annonceAuto="matAutocomplete" 
                 [displayWith]="displayAnnonceFn.bind(this)"
                 (optionSelected)="onAnnonceSelected($event.option.value); onFilterChange()">
-                <mat-option *ngFor="let a of filteredAnnonces | async" [value]="a">
+                <mat-option *ngFor="let a of filteredAnnonces | async; trackBy: trackByAnnonce" [value]="a">
                   {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
                 </mat-option>
               </mat-autocomplete>
@@ -94,7 +94,7 @@
                 <mat-divider *ngIf="savedPresets.length > 0" role="separator"></mat-divider>
                 <button 
                   mat-menu-item 
-                  *ngFor="let preset of savedPresets"
+                  *ngFor="let preset of savedPresets; trackBy: trackByPreset"
                   (click)="loadPreset(preset)"
                   [attr.aria-label]="'Charger le preset ' + preset.name">
                   <mat-icon aria-hidden="true">folder</mat-icon>
@@ -134,7 +134,7 @@
     <span class="filters-label">Filtres actifs:</span>
     <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
       <mat-chip
-        *ngFor="let filter of appliedFilters"
+        *ngFor="let filter of appliedFilters; trackBy: trackByFilter"
         (removed)="removeFilter(filter)"
         [@itemAnimation]
         [attr.aria-label]="filter.label + ': ' + filter.displayValue">
@@ -191,7 +191,7 @@
           </button>
 
           <button
-            *ngFor="let pageNum of getPageNumbers()"
+            *ngFor="let pageNum of getPageNumbers(); trackBy: trackByPageNum"
             class="btn-page-num"
             [class.active]="pageNum === currentPage"
             [class.ellipsis]="pageNum === -1"

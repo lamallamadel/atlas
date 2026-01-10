@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
 export interface ActionButtonConfig {
   label: string;
@@ -8,7 +8,8 @@ export interface ActionButtonConfig {
 @Component({
   selector: 'app-empty-state',
   templateUrl: './empty-state.component.html',
-  styleUrls: ['./empty-state.component.css']
+  styleUrls: ['./empty-state.component.css'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EmptyStateComponent {
   @Input() message = 'Aucune donnée disponible';

@@ -7,7 +7,7 @@
       <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
       <div class="kpi-cards-container" role="list" [@listStaggerAnimation]="getKpiCardKeys().length">
         <mat-card 
-          *ngFor="let key of getKpiCardKeys()"
+          *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey"
           class="kpi-card"
           [@itemAnimation]
           [class.loading]="kpiCards[key].loading"
@@ -90,7 +90,7 @@
             </div>
             
             <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list" [@listStaggerAnimation]="recentDossiers.length">
-              <mat-card *ngFor="let dossier of recentDossiers" class="dossier-item" [@itemAnimation] appearance="outlined" role="listitem">
+              <mat-card *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" class="dossier-item" [@itemAnimation] appearance="outlined" role="listitem">
                 <mat-card-content>
                   <div class="dossier-info">
                     <div class="dossier-field">
