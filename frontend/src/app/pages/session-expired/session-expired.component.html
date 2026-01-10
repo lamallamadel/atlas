@@ -1,9 +1,44 @@
-<div class="error-container" role="main">
-  <div class="error-card" role="alert" aria-live="assertive">
-    <div class="error-icon-wrapper" aria-hidden="true">
-      <div class="error-icon">⏱️</div>
-    </div>
-    
+<div class="error-page-container" role="main" [@fadeIn]>
+  <div class="error-illustration" aria-hidden="true">
+    <svg class="error-svg" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="clockGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#f39c12;stop-opacity:1" />
+          <stop offset="100%" style="stop-color:#e67e22;stop-opacity:1" />
+        </linearGradient>
+      </defs>
+      <circle cx="100" cy="100" r="85" fill="#fff3e0" opacity="0.3"/>
+      <circle cx="100" cy="100" r="70" fill="white" stroke="url(#clockGradient)" stroke-width="4"/>
+      <line x1="100" y1="100" x2="100" y2="50" stroke="url(#clockGradient)" stroke-width="3" stroke-linecap="round">
+        <animateTransform
+          attributeName="transform"
+          type="rotate"
+          from="0 100 100"
+          to="360 100 100"
+          dur="12s"
+          repeatCount="indefinite"/>
+      </line>
+      <line x1="100" y1="100" x2="130" y2="100" stroke="url(#clockGradient)" stroke-width="2" stroke-linecap="round">
+        <animateTransform
+          attributeName="transform"
+          type="rotate"
+          from="0 100 100"
+          to="360 100 100"
+          dur="60s"
+          repeatCount="indefinite"/>
+      </line>
+      <circle cx="100" cy="100" r="5" fill="url(#clockGradient)"/>
+      <g opacity="0.6">
+        <circle cx="100" cy="35" r="2" fill="url(#clockGradient)"/>
+        <circle cx="165" cy="100" r="2" fill="url(#clockGradient)"/>
+        <circle cx="100" cy="165" r="2" fill="url(#clockGradient)"/>
+        <circle cx="35" cy="100" r="2" fill="url(#clockGradient)"/>
+      </g>
+    </svg>
+    <mat-icon class="error-icon-badge">schedule</mat-icon>
+  </div>
+  
+  <div class="error-content" role="alert" aria-live="assertive">
     <h1 class="error-title">Session expirée</h1>
     
     <p class="error-message">
@@ -11,11 +46,17 @@
     </p>
     
     <p class="error-details">
+      Pour protéger vos données, nous vous déconnectons automatiquement après une période d'inactivité.
       Veuillez vous reconnecter pour continuer à utiliser l'application.
     </p>
     
     <div class="error-actions">
-      <button class="btn btn-primary" (click)="login()" aria-label="Se reconnecter à l'application">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="login()" 
+        aria-label="Se reconnecter à l'application">
+        <mat-icon>login</mat-icon>
         Se reconnecter
       </button>
     </div>

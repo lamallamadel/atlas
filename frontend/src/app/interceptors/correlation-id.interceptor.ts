@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { ToastNotificationService } from '../services/toast-notification.service';
 
 interface ProblemDetail {
   type?: string;
@@ -17,19 +17,15 @@ interface ProblemDetail {
 
 @Injectable()
 export class CorrelationIdInterceptor implements HttpInterceptor {
+  private pendingRequests = new Map<string, HttpRequest<any>>();
 
   constructor(
-    private snackBar: MatSnackBar,
+    private toastService: ToastNotificationService,
     private router: Router,
     private authService: AuthService
   ) { }
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-    // IMPORTANT:
-    // - Only add correlation headers to backend API calls.
-    // - Do NOT add custom headers to Keycloak/OIDC discovery requests, otherwise the browser
-    //   will perform a CORS preflight that typically fails (Keycloak won't allow X-Correlation-Id
-    //   unless explicitly configured).
     if (!req.url.includes('/api/')) {
       return next.handle(req);
     }
@@ -42,6 +38,8 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       }
     });
 
+    this.pendingRequests.set(correlationId, modifiedReq);
+
     return next.handle(modifiedReq).pipe(
       catchError((error: HttpErrorResponse) => {
         console.error(`HTTP Error [${correlationId}]:`, {
@@ -52,81 +50,93 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
           correlationId: correlationId
         });
 
-        this.handleError(error);
+        this.handleError(error, modifiedReq, correlationId);
+        this.pendingRequests.delete(correlationId);
         return throwError(() => error);
       })
     );
   }
 
-  private handleError(error: HttpErrorResponse): void {
+  private handleError(error: HttpErrorResponse, originalRequest: HttpRequest<any>, correlationId: string): void {
     const problemDetail = this.parseProblemDetail(error);
 
     switch (error.status) {
       case 401:
-        this.snackBar.open('Session expirée. Veuillez vous reconnecter.', 'Fermer', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
-        // IMPORTANT: clear tokens first to avoid a redirect ping-pong
-        // (login auto-redirects to dashboard if a stale token is still present).
-        this.authService.handleSessionExpired();
+        this.toastService.error(
+          'Session expirée. Veuillez vous reconnecter.',
+          'Reconnecter',
+          () => {
+            this.authService.handleSessionExpired();
+          }
+        );
         break;
 
       case 403:
-        this.snackBar.open("Accès refusé. Vous n'avez pas les droits nécessaires.", 'Fermer', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        this.toastService.error(
+          "Accès refusé. Vous n'avez pas les droits nécessaires.",
+          'Fermer'
+        );
         break;
 
       case 400: {
         const badRequestMessage = problemDetail?.detail || 'Requête invalide. Veuillez vérifier votre saisie.';
-        this.snackBar.open(badRequestMessage, 'Fermer', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        this.toastService.error(badRequestMessage, 'Fermer');
         break;
       }
 
       case 404: {
         const notFoundMessage = problemDetail?.detail || 'La ressource demandée est introuvable.';
-        this.snackBar.open(notFoundMessage, 'Fermer', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        this.toastService.error(notFoundMessage, 'Fermer');
         break;
       }
 
       case 409: {
         const conflictMessage = problemDetail?.detail || 'Un conflit est survenu. Veuillez réessayer.';
-        this.snackBar.open(conflictMessage, 'Fermer', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        this.toastService.warning(
+          conflictMessage,
+          'Réessayer',
+          () => this.retryRequest(originalRequest, correlationId)
+        );
         break;
       }
 
       case 500: {
-        const serverErrorMessage = problemDetail?.detail || 'Une erreur interne est survenue. Veuillez réessayer plus tard.';
-        this.snackBar.open(serverErrorMessage, 'Fermer', {
-          duration: 5000,
-          horizontalPosition: 'center',
-          verticalPosition: 'top',
-          panelClass: ['error-snackbar']
-        });
+        const serverErrorMessage = problemDetail?.detail || 'Une erreur interne est survenue.';
+        this.toastService.error(
+          serverErrorMessage,
+          'Réessayer',
+          () => this.retryRequest(originalRequest, correlationId)
+        );
+        break;
+      }
+
+      case 0:
+      case 504:
+      case 503: {
+        this.toastService.error(
+          'Impossible de contacter le serveur. Vérifiez votre connexion.',
+          'Réessayer',
+          () => this.retryRequest(originalRequest, correlationId)
+        );
+        break;
+      }
+
+      default: {
+        if (error.status >= 500) {
+          this.toastService.error(
+            'Une erreur serveur est survenue.',
+            'Réessayer',
+            () => this.retryRequest(originalRequest, correlationId)
+          );
+        }
         break;
       }
     }
+  }
+
+  private retryRequest(request: HttpRequest<any>, correlationId: string): void {
+    console.log(`Retrying request [${correlationId}]:`, request.url);
+    window.location.reload();
   }
 
   private parseProblemDetail(error: HttpErrorResponse): ProblemDetail | null {

@@ -60,8 +60,11 @@ import { GlobalSearchBarComponent } from './components/global-search-bar.compone
 import { SearchComponent } from './pages/search/search.component';
 import { ActivityTimelineComponent } from './components/activity-timeline.component';
 import { MobileFilterSheetComponent } from './components/mobile-filter-sheet.component';
+import { EnhancedSnackbarComponent } from './components/enhanced-snackbar.component';
+import { SuccessAnimationComponent } from './components/success-animation.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
+import { FormValidationAnimationDirective } from './directives/form-validation-animation.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -105,6 +108,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     SearchComponent,
     ActivityTimelineComponent,
     MobileFilterSheetComponent,
+    EnhancedSnackbarComponent,
+    SuccessAnimationComponent,
+    FormValidationAnimationDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
