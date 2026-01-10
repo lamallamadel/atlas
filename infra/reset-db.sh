@@ -15,7 +15,7 @@ echo "Starting PostgreSQL container with fresh volume..."
 docker compose up -d
 
 echo "Waiting for PostgreSQL to be healthy..."
-until docker-compose ps | grep -q "healthy"; do
+until docker compose ps | grep -q "healthy"; do
   echo -n "."
   sleep 1
 done
