@@ -1,91 +1,89 @@
-# Quick Start - Newly Cloned Repository
+# Quick Start After Clone
 
-## Current Status
+## Setup Status
 
-✅ **Frontend**: Dependencies installed and ready  
-⚠️ **Backend**: Requires Maven build (manual step needed)
+✅ **Frontend** - Fully configured and ready
+- Node.js dependencies installed (`frontend/node_modules/`)
+- Playwright browsers installed for E2E tests
 
-## Complete Setup (2 minutes)
+⚠️ **Backend** - Requires one more step (see below)
 
-Run ONE of these commands from the repository root:
+## Complete the Setup
 
-**Windows Command Prompt:**
+To finish the backend setup, run **ONE** of these commands from the repository root:
+
+### Option 1: Batch Script (Easiest)
 ```cmd
-complete-setup.cmd
+COMPLETE_SETUP.cmd
 ```
 
-**PowerShell:**
+### Option 2: PowerShell Script
 ```powershell
-.\complete-setup.ps1
+.\SETUP_BACKEND.ps1
 ```
 
-This will:
-1. Build the backend with Java 17
-2. Install Playwright browsers for E2E tests
-
-## Why Manual Setup?
-
-The automated setup completed the frontend installation but security restrictions prevent automated environment variable modification required for the backend Java 17 build. The scripts above handle this safely.
-
-## Verify Setup
-
-After running the setup script:
-
-```cmd
-# Test backend
+### Option 3: Manual Command
+```powershell
 cd backend
-mvn test
-
-# Test frontend
-cd frontend
-npm test
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+mvn clean install --toolchains ..\toolchains.xml --settings settings.xml
+cd ..
 ```
 
-## Start Development
+## After Setup
 
-```cmd
-# Terminal 1 - Backend
+Once the backend build completes, you're ready to develop!
+
+### Start Development
+
+```powershell
+# Start backend (from backend directory)
 cd backend
 mvn spring-boot:run
 
-# Terminal 2 - Frontend
+# In another terminal, start frontend (from frontend directory)
 cd frontend
 npm start
 ```
 
-Then access:
-- Frontend: http://localhost:4200
-- Backend API: http://localhost:8080
-- API Docs: http://localhost:8080/swagger-ui.html
+### Run Tests
 
-## Alternative: Manual Steps
-
-If you prefer to run commands manually:
-
-```cmd
-# Set Java 17
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-
-# Build backend
+```powershell
+# Backend tests
 cd backend
-mvn clean install -DskipTests -gs settings.xml
-cd ..
+mvn test
 
-# Install Playwright (optional)
+# Frontend tests
 cd frontend
-npx playwright install
-cd ..
+npm test
+
+# E2E tests
+npm run e2e
 ```
+
+### Quick Commands Reference
+
+See `AGENTS.md` for complete command reference.
+
+**Backend:**
+- Build: `mvn clean package`
+- Test: `mvn test`
+- E2E (H2): `mvn verify -Pbackend-e2e-h2`
+- E2E (PostgreSQL): `mvn verify -Pbackend-e2e-postgres`
+
+**Frontend:**
+- Serve: `npm start`
+- Test: `npm test`
+- Lint: `npm run lint`
+- E2E: `npm run e2e`
+- E2E (fast): `npm run e2e:fast`
+
+**Access:**
+- Frontend: http://localhost:4200
+- Backend: http://localhost:8080
+- API Docs: http://localhost:8080/swagger-ui.html
+- Health: http://localhost:8080/actuator/health
 
 ## Need Help?
 
-- **Full Setup Guide**: See `SETUP_STATUS.md`
-- **Development Guide**: See `AGENTS.md`
-- **Project Overview**: See `README.md`
-
-## Tech Stack
-
-- **Backend**: Spring Boot 3.2.1 + Java 17 + Maven
-- **Frontend**: Angular 16 + TypeScript
-- **Database**: PostgreSQL (prod) / H2 (test)
-- **Testing**: JUnit 5 + Playwright
+See detailed setup information in `INITIAL_SETUP_STATUS.md`.

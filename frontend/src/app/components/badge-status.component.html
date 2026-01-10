@@ -1,3 +1,8 @@
-<span [ngClass]="getStatusClass()">
-  {{ getStatusLabel() }}
-</span>
+<mat-chip 
+  [ngClass]="[getStatusClass(), shouldPulse() ? 'badge-pulse' : '']"
+  [matTooltip]="getStatusDescription()"
+  matTooltipPosition="above"
+  class="badge-chip">
+  <mat-icon class="badge-icon">{{ getStatusIcon() }}</mat-icon>
+  <span class="badge-label">{{ getStatusLabel() }}</span>
+</mat-chip>

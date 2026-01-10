@@ -5,6 +5,13 @@ export type EntityType = 'annonce' | 'dossier';
 export type AnnonceStatusType = 'DRAFT' | 'PUBLISHED' | 'ACTIVE' | 'PAUSED' | 'ARCHIVED';
 export type DossierStatusType = 'NEW' | 'QUALIFYING' | 'QUALIFIED' | 'APPOINTMENT' | 'WON' | 'LOST';
 
+interface StatusConfig {
+  label: string;
+  icon: string;
+  description: string;
+  isPulse?: boolean;
+}
+
 @Component({
   selector: 'app-badge-status',
   templateUrl: './badge-status.component.html',
@@ -23,13 +30,29 @@ export class BadgeStatusComponent {
     return '';
   }
 
-  getStatusLabel(): string {
+  getStatusConfig(): StatusConfig {
     if (this.entityType === 'annonce') {
-      return this.getAnnonceStatusLabel(this.status as AnnonceStatusType);
+      return this.getAnnonceStatusConfig(this.status as AnnonceStatusType);
     } else if (this.entityType === 'dossier') {
-      return this.getDossierStatusLabel(this.status as DossierStatusType);
+      return this.getDossierStatusConfig(this.status as DossierStatusType);
     }
-    return this.status;
+    return { label: this.status, icon: 'circle', description: '' };
+  }
+
+  getStatusLabel(): string {
+    return this.getStatusConfig().label;
+  }
+
+  getStatusIcon(): string {
+    return this.getStatusConfig().icon;
+  }
+
+  getStatusDescription(): string {
+    return this.getStatusConfig().description;
+  }
+
+  shouldPulse(): boolean {
+    return this.getStatusConfig().isPulse || false;
   }
 
   private getAnnonceStatusClass(status: AnnonceStatusType): string {
@@ -68,39 +91,95 @@ export class BadgeStatusComponent {
     }
   }
 
-  private getAnnonceStatusLabel(status: AnnonceStatusType): string {
+  private getAnnonceStatusConfig(status: AnnonceStatusType): StatusConfig {
     switch (status) {
       case 'DRAFT':
-        return 'Brouillon';
+        return {
+          label: 'Brouillon',
+          icon: 'edit',
+          description: 'Annonce en cours de rédaction'
+        };
       case 'PUBLISHED':
-        return 'Publié';
+        return {
+          label: 'Publié',
+          icon: 'check_circle',
+          description: 'Annonce publiée et visible',
+          isPulse: true
+        };
       case 'ACTIVE':
-        return 'Actif';
+        return {
+          label: 'Actif',
+          icon: 'check_circle',
+          description: 'Annonce active et visible',
+          isPulse: true
+        };
       case 'PAUSED':
-        return 'En pause';
+        return {
+          label: 'En pause',
+          icon: 'pause_circle',
+          description: 'Annonce temporairement suspendue'
+        };
       case 'ARCHIVED':
-        return 'Archivé';
+        return {
+          label: 'Archivé',
+          icon: 'archive',
+          description: 'Annonce archivée'
+        };
       default:
-        return status;
+        return {
+          label: status,
+          icon: 'circle',
+          description: ''
+        };
     }
   }
 
-  private getDossierStatusLabel(status: DossierStatusType): string {
+  private getDossierStatusConfig(status: DossierStatusType): StatusConfig {
     switch (status) {
       case 'NEW':
-        return 'Nouveau';
+        return {
+          label: 'Nouveau',
+          icon: 'fiber_new',
+          description: 'Nouveau dossier créé',
+          isPulse: true
+        };
       case 'QUALIFYING':
-        return 'Qualification';
+        return {
+          label: 'Qualification',
+          icon: 'schedule',
+          description: 'Dossier en cours de qualification',
+          isPulse: true
+        };
       case 'QUALIFIED':
-        return 'Qualifié';
+        return {
+          label: 'Qualifié',
+          icon: 'verified',
+          description: 'Dossier qualifié et prêt'
+        };
       case 'APPOINTMENT':
-        return 'Rendez-vous';
+        return {
+          label: 'Rendez-vous',
+          icon: 'event',
+          description: 'Rendez-vous programmé'
+        };
       case 'WON':
-        return 'Gagné';
+        return {
+          label: 'Gagné',
+          icon: 'check_circle',
+          description: 'Dossier gagné avec succès'
+        };
       case 'LOST':
-        return 'Perdu';
+        return {
+          label: 'Perdu',
+          icon: 'cancel',
+          description: 'Dossier perdu ou annulé'
+        };
       default:
-        return status;
+        return {
+          label: status,
+          icon: 'circle',
+          description: ''
+        };
     }
   }
 }

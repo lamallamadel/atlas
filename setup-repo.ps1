@@ -1,78 +1,57 @@
 # Repository Initial Setup Script
-# This script sets up the backend and frontend for development
+Write-Host "Setting up repository..." -ForegroundColor Green
 
-Write-Host "======================================" -ForegroundColor Cyan
-Write-Host " Repository Initial Setup" -ForegroundColor Cyan
-Write-Host "======================================" -ForegroundColor Cyan
-Write-Host ""
-
-# Step 1: Set JAVA_HOME for backend build
-Write-Host "[1/4] Setting JAVA_HOME to Java 17..." -ForegroundColor Yellow
+# Set Java 17
+$oldJavaHome = $env:JAVA_HOME
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
-Write-Host "JAVA_HOME set to: $env:JAVA_HOME" -ForegroundColor Green
+Write-Host "`nJava version:" -ForegroundColor Cyan
 java -version
-Write-Host ""
 
-# Step 2: Build backend
-Write-Host "[2/4] Building backend (Maven clean install)..." -ForegroundColor Yellow
+# Backend setup
+Write-Host "`n=== Installing Backend Dependencies ===" -ForegroundColor Green
 Set-Location backend
-mvn clean install -DskipTests
+& C:\Environement\maven-3.8.6\bin\mvn.cmd clean install --toolchains ..\toolchains.xml --settings settings.xml
+$backendExitCode = $LASTEXITCODE
+Set-Location ..
 
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Backend build failed!" -ForegroundColor Red
-    Set-Location ..
-    exit 1
+if ($backendExitCode -eq 0) {
+    Write-Host "`n✓ Backend setup completed successfully" -ForegroundColor Green
+} else {
+    Write-Host "`n✗ Backend setup failed with exit code: $backendExitCode" -ForegroundColor Red
 }
 
-Write-Host "Backend build successful!" -ForegroundColor Green
-Set-Location ..
-Write-Host ""
-
-# Step 3: Install frontend dependencies
-Write-Host "[3/4] Installing frontend dependencies (npm install)..." -ForegroundColor Yellow
+# Frontend setup
+Write-Host "`n=== Installing Frontend Dependencies ===" -ForegroundColor Green
 Set-Location frontend
 npm install
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Frontend npm install failed!" -ForegroundColor Red
-    Set-Location ..
-    exit 1
-}
-
-Write-Host "Frontend dependencies installed!" -ForegroundColor Green
-Write-Host ""
-
-# Step 4: Install Playwright browsers
-Write-Host "[4/4] Installing Playwright browsers..." -ForegroundColor Yellow
-npx playwright install
-
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "WARNING: Playwright browser installation failed. You may need to run this manually:" -ForegroundColor Yellow
-    Write-Host "  cd frontend" -ForegroundColor Yellow
-    Write-Host "  npx playwright install" -ForegroundColor Yellow
-}
-else {
-    Write-Host "Playwright browsers installed!" -ForegroundColor Green
-}
-
+$frontendExitCode = $LASTEXITCODE
 Set-Location ..
-Write-Host ""
 
-# Summary
-Write-Host "======================================" -ForegroundColor Cyan
-Write-Host " Setup Complete!" -ForegroundColor Green
-Write-Host "======================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "You can now:" -ForegroundColor White
-Write-Host "  - Run backend tests:  cd backend && mvn test" -ForegroundColor White
-Write-Host "  - Build backend:      cd backend && mvn clean package" -ForegroundColor White
-Write-Host "  - Run backend server: cd backend && mvn spring-boot:run" -ForegroundColor White
-Write-Host "  - Run frontend tests: cd frontend && npm test" -ForegroundColor White
-Write-Host "  - Run frontend E2E:   cd frontend && npm run e2e" -ForegroundColor White
-Write-Host "  - Start frontend:     cd frontend && npm start" -ForegroundColor White
-Write-Host ""
-Write-Host "Note: Remember to set JAVA_HOME before running Maven commands:" -ForegroundColor Yellow
-Write-Host "  `$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'" -ForegroundColor Yellow
-Write-Host ""
+if ($frontendExitCode -eq 0) {
+    Write-Host "`n✓ Frontend dependencies installed successfully" -ForegroundColor Green
+} else {
+    Write-Host "`n✗ Frontend npm install failed with exit code: $frontendExitCode" -ForegroundColor Red
+}
+
+# Install Playwright browsers
+Write-Host "`n=== Installing Playwright Browsers ===" -ForegroundColor Green
+Set-Location frontend
+npx playwright install
+$playwrightExitCode = $LASTEXITCODE
+Set-Location ..
+
+if ($playwrightExitCode -eq 0) {
+    Write-Host "`n✓ Playwright browsers installed successfully" -ForegroundColor Green
+} else {
+    Write-Host "`n✗ Playwright install failed with exit code: $playwrightExitCode" -ForegroundColor Red
+}
+
+# Restore Java Home
+$env:JAVA_HOME = $oldJavaHome
+
+Write-Host "`n=== Setup Complete ===" -ForegroundColor Green
+Write-Host "Backend: $(if ($backendExitCode -eq 0) { '✓' } else { '✗' })" -ForegroundColor $(if ($backendExitCode -eq 0) { 'Green' } else { 'Red' })
+Write-Host "Frontend: $(if ($frontendExitCode -eq 0) { '✓' } else { '✗' })" -ForegroundColor $(if ($frontendExitCode -eq 0) { 'Green' } else { 'Red' })
+Write-Host "Playwright: $(if ($playwrightExitCode -eq 0) { '✓' } else { '✗' })" -ForegroundColor $(if ($playwrightExitCode -eq 0) { 'Green' } else { 'Red' })
