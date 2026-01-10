@@ -8,8 +8,9 @@ public enum AuditEntityType {
     MESSAGE("message"),
     APPOINTMENT("appointment"),
     USER("user"),
-    ORGANIZATION("organization");
-
+    ORGANIZATION("organization"),
+    NOTIFICATION("notification"),
+    ACTIVITY("activity");
     private final String value;
 
     AuditEntityType(String value) {

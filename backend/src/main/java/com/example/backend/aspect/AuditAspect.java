@@ -111,6 +111,8 @@ public class AuditAspect {
         if (entityName.contains("appointment")) return AuditEntityType.APPOINTMENT;
         if (entityName.contains("user")) return AuditEntityType.USER;
         if (entityName.contains("organization")) return AuditEntityType.ORGANIZATION;
+        if (entityName.contains("notification")) return AuditEntityType.NOTIFICATION;
+        if (entityName.contains("activity")) return AuditEntityType.ACTIVITY;
 
         return null;
     }
