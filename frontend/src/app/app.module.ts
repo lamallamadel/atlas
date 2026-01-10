@@ -27,6 +27,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { LayoutModule } from '@angular/cdk/layout';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -133,6 +134,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatListModule,
     MatMenuModule,
     MatDividerModule,
+    MatCheckboxModule,
     LayoutModule,
     NgChartsModule
   ],

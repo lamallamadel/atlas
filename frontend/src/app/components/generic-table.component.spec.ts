@@ -6,6 +6,9 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatCardModule } from '@angular/material/card';
+import { LayoutModule } from '@angular/cdk/layout';
 import { GenericTableComponent, ColumnConfig, RowAction } from './generic-table.component';
 
 describe('GenericTableComponent', () => {
@@ -33,7 +36,10 @@ describe('GenericTableComponent', () => {
         MatSortModule,
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule
+        MatTooltipModule,
+        MatCheckboxModule,
+        MatCardModule,
+        LayoutModule
       ]
     })
       .compileComponents();
@@ -63,6 +69,13 @@ describe('GenericTableComponent', () => {
     component.showActions = false;
     component.updateDisplayedColumns();
     expect(component.displayedColumns).toEqual(['id', 'name', 'email']);
+  });
+
+  it('should update displayed columns with selection', () => {
+    component.enableRowSelection = true;
+    component.showActions = false;
+    component.updateDisplayedColumns();
+    expect(component.displayedColumns).toEqual(['select', 'id', 'name', 'email']);
   });
 
   it('should emit rowAction event when action is triggered', () => {
@@ -111,5 +124,67 @@ describe('GenericTableComponent', () => {
     };
 
     expect(component.shouldShowAction(action, mockData[0])).toBe(true);
+  });
+
+  it('should toggle all rows selection', () => {
+    component.enableRowSelection = true;
+    component.toggleAllRows();
+    expect(component.selection.selected.length).toBe(mockData.length);
+    
+    component.toggleAllRows();
+    expect(component.selection.selected.length).toBe(0);
+  });
+
+  it('should toggle individual row selection', () => {
+    component.enableRowSelection = true;
+    const row = mockData[0];
+    
+    component.toggleRow(row);
+    expect(component.selection.isSelected(row)).toBe(true);
+    
+    component.toggleRow(row);
+    expect(component.selection.isSelected(row)).toBe(false);
+  });
+
+  it('should detect if all rows are selected', () => {
+    component.enableRowSelection = true;
+    expect(component.isAllSelected()).toBe(false);
+    
+    component.selection.select(...mockData);
+    expect(component.isAllSelected()).toBe(true);
+  });
+
+  it('should emit selection change event', () => {
+    spyOn(component.selectionChange, 'emit');
+    component.enableRowSelection = true;
+    
+    component.toggleRow(mockData[0]);
+    expect(component.selectionChange.emit).toHaveBeenCalledWith([mockData[0]]);
+  });
+
+  it('should handle column width settings', () => {
+    const column: ColumnConfig = { 
+      key: 'name', 
+      header: 'Name', 
+      width: '200px',
+      minWidth: '100px'
+    };
+    
+    const style = component.getColumnStyle(column);
+    expect(style['width']).toBe('200px');
+    expect(style['min-width']).toBe('100px');
+  });
+
+  it('should initialize column widths from config', () => {
+    const columnsWithWidth: ColumnConfig[] = [
+      { key: 'id', header: 'ID', width: '100px' },
+      { key: 'name', header: 'Name', width: '200px' }
+    ];
+    
+    component.columns = columnsWithWidth;
+    component.initializeColumnWidths();
+    
+    expect(component.columnWidths.get('id')).toBe(100);
+    expect(component.columnWidths.get('name')).toBe(200);
   });
 });

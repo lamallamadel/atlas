@@ -1,82 +1,142 @@
-# Initial Setup Instructions
+# Initial Repository Setup Instructions
 
-This repository requires both backend (Java/Maven) and frontend (Node.js/npm) setup.
+This document provides instructions for setting up the repository after cloning.
 
-## Prerequisites Check
+## What Has Been Done
 
-Before proceeding, ensure you have:
-- Java 17 (JDK 17.0.5.8 or later)
-- Maven 3.6+
-- Node.js 18+ and npm
-- Docker & Docker Compose (optional, for infrastructure)
+1. ✅ **Frontend Dependencies Installed**: `npm install` has been successfully run in the `frontend` directory
+   - 1187 packages installed
+   - Ready for build, test, and development
 
-## Setup Steps
+2. ✅ **Configuration Files Created**:
+   - `backend/.mavenrc` - Maven configuration for Unix-like systems
+   - `backend/mavenrc_pre.bat` - Maven pre-execution batch script for Windows
+   - `mvn-java17.bat` - Maven wrapper script with Java 17
+   - `run-setup.bat` - Complete setup script
+   - `setup-initial.ps1` - PowerShell setup script
+   - `initial-setup.cmd` - Batch setup script
 
-Due to security restrictions in the automated environment, please run the following commands manually:
+3. ✅ **Toolchains Configuration**: The `toolchains.xml` file exists in `C:\Users\a891780\.m2\` directory
+   - Configured for Java 17 at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
 
-### Step 1: Frontend Setup (Angular)
+## What Still Needs To Be Done
 
+Due to security restrictions in the execution environment, the following steps need to be completed manually:
+
+### 1. Backend Setup (Maven)
+
+The backend dependencies need to be installed. Run ONE of the following:
+
+**Option A - Using the provided batch script:**
+```cmd
+run-setup.bat
+```
+
+**Option B - Using the PowerShell script:**
 ```powershell
-cd frontend
-npm install
+.\setup-initial.ps1
+```
+
+**Option C - Manual commands:**
+```cmd
+cd backend
+mvn clean install -gs settings.xml -DskipTests
 cd ..
 ```
 
-This will install all Node.js dependencies for the Angular frontend application.
+**Note**: The system has Java 8 set in JAVA_HOME, but the project requires Java 17. The toolchains.xml is configured to use Java 17. If you encounter issues, you may need to temporarily set JAVA_HOME:
 
-### Step 2: Backend Setup (Spring Boot)
-
-The backend requires Java 17. Choose one of the following methods:
-
-#### Option A: Using the provided Node.js script (Recommended)
-```powershell
-node backend\install.js
-```
-
-#### Option B: Using PowerShell script
-```powershell
-.\backend\build-with-java17.ps1
-```
-
-#### Option C: Using batch file
 ```cmd
-.\backend\setup.cmd
+set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"
+cd backend
+mvn clean install -gs settings.xml -DskipTests
+cd ..
 ```
 
-#### Option D: Manual setup
-```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-cd backend
-mvn clean install -DskipTests
+### 2. Playwright Browsers Installation
+
+After the backend is set up, install Playwright browsers for E2E testing:
+
+```cmd
+cd frontend
+npx playwright install
 cd ..
 ```
 
 ## Verification
 
-After running both setups, you should be able to run:
+After completing the setup, verify everything is working:
 
-### Frontend
-- Build: `cd frontend && npm run build`
-- Test: `cd frontend && npm test`
-- Lint: `cd frontend && npm run lint`
-- Dev server: `cd frontend && npm start`
-
-### Backend
-- Build: `cd backend && mvn clean package`
-- Test: `cd backend && mvn test`
-- Dev server: `cd backend && mvn spring-boot:run`
-
-## Infrastructure (Optional)
-
-To start local Docker services:
-```powershell
-cd infra
-docker-compose up -d
+### Backend Verification:
+```cmd
+cd backend
+mvn test
 ```
 
-## Notes
+### Frontend Verification:
+```cmd
+cd frontend
+npm test
+```
 
-- The frontend installation will create a `node_modules` directory with approximately 1,180 packages
-- The backend installation will create a `target` directory with compiled artifacts
-- Both `node_modules` and `target` are already in `.gitignore`
-- If you encounter Java version issues, ensure JAVA_HOME is set correctly before running Maven commands
+### E2E Tests:
+```cmd
+cd frontend
+npm run e2e:fast
+```
+
+## Quick Reference Commands
+
+From the repository root:
+
+- **Build backend**: `cd backend && mvn clean package`
+- **Run backend**: `cd backend && mvn spring-boot:run`
+- **Test backend**: `cd backend && mvn test`
+- **Backend E2E (H2)**: `cd backend && mvn verify -Pbackend-e2e-h2`
+- **Backend E2E (PostgreSQL)**: `cd backend && mvn verify -Pbackend-e2e-postgres`
+- **Test frontend**: `cd frontend && npm test`
+- **Run frontend**: `cd frontend && npm start`
+- **E2E tests (fast)**: `cd frontend && npm run e2e:fast`
+- **E2E tests (full)**: `cd frontend && npm run e2e:full`
+
+## Troubleshooting
+
+### JAVA_HOME Issues
+
+If you encounter "JAVA_HOME environment variable is not defined correctly":
+
+1. Check current JAVA_HOME: `echo %JAVA_HOME%`
+2. Set it to Java 17: `set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"`
+3. Verify: `java -version` (should show Java 17)
+
+### Maven Issues
+
+If Maven fails to download dependencies:
+
+1. The backend has a `settings.xml` configured to use Maven Central directly
+2. Use it with: `mvn -gs settings.xml [command]`
+3. Check internet connectivity if downloads fail
+
+### Playwright Installation
+
+If Playwright browsers fail to install:
+
+1. Ensure you have sufficient disk space
+2. Try with admin privileges if needed
+3. Alternative: `npx playwright install --with-deps`
+
+## Environment Information
+
+- **Java 17 Path**: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- **Maven**: 3.8.6 (`C:\Environement\maven-3.8.6`)
+- **Node/npm**: 8.19.2
+- **Maven Local Repository**: `C:\Users\a891780\.m2`
+
+## Next Steps
+
+Once setup is complete:
+
+1. Review `AGENTS.md` for development guidelines
+2. Check `README.md` for project overview
+3. See `SETUP.md` for detailed setup information
+4. Start development with `backend/mvn spring-boot:run` and `frontend/npm start`

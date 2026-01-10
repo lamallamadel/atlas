@@ -1,7 +1,10 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnInit, AfterViewInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ViewChild, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { SelectionModel } from '@angular/cdk/collections';
+import { Subject, takeUntil } from 'rxjs';
 
 export interface ColumnConfig {
   key: string;
@@ -9,6 +12,9 @@ export interface ColumnConfig {
   sortable?: boolean;
   type?: 'text' | 'number' | 'date' | 'boolean' | 'custom';
   format?: (value: unknown, row: unknown) => string;
+  resizable?: boolean;
+  width?: string;
+  minWidth?: string;
 }
 
 export interface RowAction {
@@ -24,7 +30,7 @@ export interface RowAction {
   templateUrl: './generic-table.component.html',
   styleUrls: ['./generic-table.component.css']
 })
-export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
+export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() columns: ColumnConfig[] = [];
   @Input() data: unknown[] = [];
   @Input() showActions = true;
@@ -38,27 +44,41 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
   @Input() showPagination = true;
   @Input() enableSort = true;
   @Input() rowClickable = false;
+  @Input() enableRowSelection = false;
+  @Input() stickyHeader = true;
 
   @Output() rowAction = new EventEmitter<{ action: string; row: unknown }>();
   @Output() rowClick = new EventEmitter<unknown>();
+  @Output() selectionChange = new EventEmitter<unknown[]>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   dataSource = new MatTableDataSource<unknown>([]);
   displayedColumns: string[] = [];
+  selection = new SelectionModel<unknown>(true, []);
+  isMobile = false;
+  columnWidths: Map<string, number> = new Map();
+  
+  private destroy$ = new Subject<void>();
+
+  constructor(private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit(): void {
     this.dataSource.data = this.data;
     this.updateDisplayedColumns();
+    this.initializeColumnWidths();
+    this.observeBreakpoints();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
       this.dataSource.data = this.data;
+      this.selection.clear();
     }
     if (changes['columns']) {
       this.updateDisplayedColumns();
+      this.initializeColumnWidths();
     }
   }
 
@@ -71,8 +91,38 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
     }
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  observeBreakpoints(): void {
+    this.breakpointObserver
+      .observe([Breakpoints.XSmall, Breakpoints.Small])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile = result.matches;
+      });
+  }
+
+  initializeColumnWidths(): void {
+    this.columns.forEach(col => {
+      if (col.width) {
+        const widthValue = parseInt(col.width);
+        this.columnWidths.set(col.key, widthValue);
+      }
+    });
+  }
+
   updateDisplayedColumns(): void {
-    this.displayedColumns = this.columns.map(col => col.key);
+    this.displayedColumns = [];
+    
+    if (this.enableRowSelection) {
+      this.displayedColumns.push('select');
+    }
+    
+    this.displayedColumns.push(...this.columns.map(col => col.key));
+    
     if (this.showActions) {
       this.displayedColumns.push('actions');
     }
@@ -114,5 +164,74 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges {
     if (this.rowClickable) {
       this.rowClick.emit(row);
     }
+  }
+
+  isAllSelected(): boolean {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.length;
+    return numSelected === numRows && numRows > 0;
+  }
+
+  toggleAllRows(): void {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.selection.select(...this.dataSource.data);
+    }
+    this.emitSelectionChange();
+  }
+
+  toggleRow(row: unknown): void {
+    this.selection.toggle(row);
+    this.emitSelectionChange();
+  }
+
+  emitSelectionChange(): void {
+    this.selectionChange.emit(this.selection.selected);
+  }
+
+  onResizeStart(event: MouseEvent, columnKey: string): void {
+    event.preventDefault();
+    const startX = event.pageX;
+    const startWidth = this.columnWidths.get(columnKey) || 150;
+
+    const onMouseMove = (e: MouseEvent) => {
+      const diff = e.pageX - startX;
+      const newWidth = Math.max(50, startWidth + diff);
+      this.columnWidths.set(columnKey, newWidth);
+    };
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  }
+
+  getColumnWidth(columnKey: string): string {
+    const width = this.columnWidths.get(columnKey);
+    return width ? `${width}px` : 'auto';
+  }
+
+  getColumnStyle(column: ColumnConfig): { [key: string]: string } {
+    const style: { [key: string]: string } = {};
+    
+    if (column.width) {
+      style['width'] = column.width;
+    } else if (this.columnWidths.has(column.key)) {
+      style['width'] = this.getColumnWidth(column.key);
+    }
+    
+    if (column.minWidth) {
+      style['min-width'] = column.minWidth;
+    }
+    
+    return style;
+  }
+
+  getRowValue(row: unknown, columnKey: string): unknown {
+    return (row as any)[columnKey];
   }
 }

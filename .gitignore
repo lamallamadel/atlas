@@ -300,3 +300,8 @@ setup-backend-build.cmd
 backend/mavenrc_pre.cmd
 backend/.mavenrc
 SETUP_INSTRUCTIONS_INITIAL_CLONE.md
+initial-setup.cmd
+mvn-java17.bat
+run-setup.bat
+setup-initial.ps1
+backend/mavenrc_pre.bat
