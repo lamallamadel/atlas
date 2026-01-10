@@ -1,10 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
+import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
+import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
+
+interface AppliedFilter {
+  key: string;
+  label: string;
+  value: string;
+  displayValue: string;
+}
 
 @Component({
   selector: 'app-annonces',
@@ -29,8 +40,15 @@ export class AnnoncesComponent implements OnInit {
 
   AnnonceStatus = AnnonceStatus;
 
+  filterPanelExpanded = false;
+  appliedFilters: AppliedFilter[] = [];
+  isMobile = false;
+  savedPresets: FilterPreset[] = [];
+  showPresetMenu = false;
+
   private dateFormatPipe = new DateFormatPipe();
   private priceFormatPipe = new PriceFormatPipe();
+  private readonly FILTER_CONTEXT = 'annonces';
 
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
@@ -116,18 +134,27 @@ export class AnnoncesComponent implements OnInit {
   constructor(
     private annonceApiService: AnnonceApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private filterPresetService: FilterPresetService,
+    private bottomSheet: MatBottomSheet,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
     this.loadCities();
+    this.loadSavedPresets();
     
-    // Check for query parameters and apply filters
+    this.breakpointObserver.observe([Breakpoints.Handset])
+      .subscribe(result => {
+        this.isMobile = result.matches;
+      });
+    
     this.route.queryParams.subscribe(params => {
       if (params['status']) {
         this.selectedStatus = params['status'] as AnnonceStatus;
       }
       this.loadAnnonces();
+      this.updateAppliedFilters();
     });
   }
 
@@ -140,6 +167,10 @@ export class AnnoncesComponent implements OnInit {
         console.error('Error loading cities:', err);
       }
     });
+  }
+
+  loadSavedPresets(): void {
+    this.savedPresets = this.filterPresetService.getPresets(this.FILTER_CONTEXT);
   }
 
   loadAnnonces(): void {
@@ -190,6 +221,7 @@ export class AnnoncesComponent implements OnInit {
 
   applyFilters(): void {
     this.currentPage = 0;
+    this.updateAppliedFilters();
     this.loadAnnonces();
   }
 
@@ -199,7 +231,162 @@ export class AnnoncesComponent implements OnInit {
     this.selectedCity = '';
     this.selectedType = '';
     this.currentPage = 0;
+    this.updateAppliedFilters();
     this.loadAnnonces();
+  }
+
+  updateAppliedFilters(): void {
+    this.appliedFilters = [];
+
+    if (this.searchQuery.trim()) {
+      this.appliedFilters.push({
+        key: 'searchQuery',
+        label: 'Recherche',
+        value: this.searchQuery,
+        displayValue: this.searchQuery
+      });
+    }
+
+    if (this.selectedStatus) {
+      this.appliedFilters.push({
+        key: 'selectedStatus',
+        label: 'Statut',
+        value: this.selectedStatus,
+        displayValue: this.getStatusLabel(this.selectedStatus)
+      });
+    }
+
+    if (this.selectedCity) {
+      this.appliedFilters.push({
+        key: 'selectedCity',
+        label: 'Ville',
+        value: this.selectedCity,
+        displayValue: this.selectedCity
+      });
+    }
+
+    if (this.selectedType) {
+      this.appliedFilters.push({
+        key: 'selectedType',
+        label: 'Type',
+        value: this.selectedType,
+        displayValue: this.selectedType
+      });
+    }
+  }
+
+  removeFilter(filter: AppliedFilter): void {
+    switch (filter.key) {
+      case 'searchQuery':
+        this.searchQuery = '';
+        break;
+      case 'selectedStatus':
+        this.selectedStatus = '';
+        break;
+      case 'selectedCity':
+        this.selectedCity = '';
+        break;
+      case 'selectedType':
+        this.selectedType = '';
+        break;
+    }
+    this.applyFilters();
+  }
+
+  openMobileFilters(): void {
+    const filterConfig: FilterConfig[] = [
+      {
+        key: 'searchQuery',
+        label: 'Recherche',
+        type: 'text',
+        placeholder: 'Rechercher des annonces...'
+      },
+      {
+        key: 'selectedStatus',
+        label: 'Statut',
+        type: 'select',
+        options: [
+          { value: AnnonceStatus.DRAFT, label: 'Brouillon' },
+          { value: AnnonceStatus.PUBLISHED, label: 'Publié' },
+          { value: AnnonceStatus.ACTIVE, label: 'Actif' },
+          { value: AnnonceStatus.PAUSED, label: 'En pause' },
+          { value: AnnonceStatus.ARCHIVED, label: 'Archivé' }
+        ]
+      },
+      {
+        key: 'selectedCity',
+        label: 'Ville',
+        type: 'select',
+        options: this.availableCities.map(city => ({ value: city, label: city }))
+      },
+      {
+        key: 'selectedType',
+        label: 'Type',
+        type: 'select',
+        options: this.availableTypes.map(type => ({ value: type, label: type }))
+      }
+    ];
+
+    const sheetRef = this.bottomSheet.open(MobileFilterSheetComponent, {
+      data: {
+        filters: {
+          searchQuery: this.searchQuery,
+          selectedStatus: this.selectedStatus,
+          selectedCity: this.selectedCity,
+          selectedType: this.selectedType
+        },
+        config: filterConfig
+      }
+    });
+
+    sheetRef.afterDismissed().subscribe(result => {
+      if (result?.action === 'apply') {
+        this.searchQuery = result.filters.searchQuery || '';
+        this.selectedStatus = result.filters.selectedStatus || '';
+        this.selectedCity = result.filters.selectedCity || '';
+        this.selectedType = result.filters.selectedType || '';
+        this.applyFilters();
+      } else if (result?.action === 'reset') {
+        this.resetFilters();
+      }
+    });
+  }
+
+  saveCurrentFilters(): void {
+    const name = prompt('Nom du preset de filtres:');
+    if (!name) return;
+
+    const filters = {
+      searchQuery: this.searchQuery,
+      selectedStatus: this.selectedStatus,
+      selectedCity: this.selectedCity,
+      selectedType: this.selectedType
+    };
+
+    this.filterPresetService.savePreset(this.FILTER_CONTEXT, name, filters);
+    this.loadSavedPresets();
+  }
+
+  loadPreset(preset: FilterPreset): void {
+    const filters = preset.filters;
+    this.searchQuery = (filters['searchQuery'] as string) || '';
+    this.selectedStatus = (filters['selectedStatus'] as AnnonceStatus) || '';
+    this.selectedCity = (filters['selectedCity'] as string) || '';
+    this.selectedType = (filters['selectedType'] as string) || '';
+    this.applyFilters();
+    this.showPresetMenu = false;
+  }
+
+  deletePreset(preset: FilterPreset, event: Event): void {
+    event.stopPropagation();
+    if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
+      this.filterPresetService.deletePreset(this.FILTER_CONTEXT, preset.id);
+      this.loadSavedPresets();
+    }
+  }
+
+  togglePresetMenu(): void {
+    this.showPresetMenu = !this.showPresetMenu;
   }
 
   onSearch(): void {

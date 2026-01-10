@@ -1,1 +1,186 @@
 @import '../../../styles/variables.scss';
+
+.filters-container {
+  margin-bottom: var(--spacing-4);
+}
+
+.filter-panel {
+  box-shadow: var(--shadow-1);
+  border-radius: var(--radius-lg);
+}
+
+.filter-panel ::ng-deep .mat-expansion-panel-header {
+  padding: var(--spacing-4);
+}
+
+.filter-panel ::ng-deep .mat-expansion-panel-header-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  font-weight: var(--font-weight-medium);
+}
+
+.filter-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  background-color: var(--color-primary-500);
+  color: white;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  margin-left: var(--spacing-2);
+}
+
+.filter-content {
+  padding: var(--spacing-4);
+  padding-top: 0;
+}
+
+.filter-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--spacing-4);
+  margin-bottom: var(--spacing-4);
+}
+
+.filter-field {
+  width: 100%;
+}
+
+.filter-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.preset-menu-container {
+  margin-left: auto;
+}
+
+.delete-preset-btn {
+  margin-left: auto !important;
+  width: 32px !important;
+  height: 32px !important;
+  line-height: 32px !important;
+}
+
+.delete-preset-btn mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+
+.empty-presets {
+  padding: var(--spacing-4);
+  text-align: center;
+}
+
+.empty-text {
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-sm);
+}
+
+.mobile-filter-button {
+  margin-bottom: var(--spacing-4);
+  display: flex;
+  justify-content: center;
+}
+
+.mobile-filter-button button {
+  position: relative;
+  padding: var(--spacing-3) var(--spacing-6);
+}
+
+.filter-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background-color: var(--color-error-500);
+  color: white;
+  border-radius: var(--radius-full);
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-bold);
+  padding: 0 6px;
+}
+
+.applied-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+  margin-bottom: var(--spacing-4);
+  padding: var(--spacing-3);
+  background-color: var(--color-neutral-50);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-neutral-200);
+  flex-wrap: wrap;
+}
+
+.filters-label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+  white-space: nowrap;
+}
+
+.applied-filters mat-chip-set {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-2);
+}
+
+.applied-filters mat-chip {
+  background-color: var(--color-primary-100);
+  color: var(--color-primary-800);
+  border-radius: var(--radius-lg);
+}
+
+.applied-filters mat-chip strong {
+  margin-right: var(--spacing-1);
+}
+
+.muted {
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-sm);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .filter-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .filter-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-actions button {
+    width: 100%;
+  }
+  
+  .preset-menu-container {
+    margin-left: 0;
+    width: 100%;
+  }
+  
+  .applied-filters {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* Legacy styles for backward compatibility */
+.filters-section {
+  display: none;
+}

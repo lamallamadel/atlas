@@ -28,6 +28,8 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { LayoutModule } from '@angular/cdk/layout';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -55,6 +57,7 @@ import { ReportsDashboardComponent } from './components/reports-dashboard.compon
 import { GlobalSearchBarComponent } from './components/global-search-bar.component';
 import { SearchComponent } from './pages/search/search.component';
 import { ActivityTimelineComponent } from './components/activity-timeline.component';
+import { MobileFilterSheetComponent } from './components/mobile-filter-sheet.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { DateFormatPipe } from './pipes/date-format.pipe';
@@ -99,6 +102,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     GlobalSearchBarComponent,
     SearchComponent,
     ActivityTimelineComponent,
+    MobileFilterSheetComponent,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe
@@ -135,6 +139,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatMenuModule,
     MatDividerModule,
     MatCheckboxModule,
+    MatChipsModule,
+    MatBottomSheetModule,
     LayoutModule,
     NgChartsModule
   ],

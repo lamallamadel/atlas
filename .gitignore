@@ -305,3 +305,10 @@ mvn-java17.bat
 run-setup.bat
 setup-initial.ps1
 backend/mavenrc_pre.bat
+
+# Local Maven repository cache
+backend/.m2-local/
+
+# Additional setup scripts
+setup-backend-install.ps1
+INITIAL_SETUP_COMPLETE_NOW.md

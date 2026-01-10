@@ -1,14 +1,25 @@
 import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
+import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
+import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
+import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
+
+interface AppliedFilter {
+  key: string;
+  label: string;
+  value: string;
+  displayValue: string;
+}
 
 @Component({
   selector: 'app-dossiers',
@@ -32,8 +43,15 @@ export class DossiersComponent implements OnInit {
 
   DossierStatus = DossierStatus;
 
+  filterPanelExpanded = false;
+  appliedFilters: AppliedFilter[] = [];
+  isMobile = false;
+  savedPresets: FilterPreset[] = [];
+  showPresetMenu = false;
+
   private dateFormatPipe = new DateFormatPipe();
   private phoneFormatPipe = new PhoneFormatPipe();
+  private readonly FILTER_CONTEXT = 'dossiers';
 
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
@@ -107,18 +125,27 @@ export class DossiersComponent implements OnInit {
     private dossierApiService: DossierApiService,
     private annonceApiService: AnnonceApiService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private filterPresetService: FilterPresetService,
+    private bottomSheet: MatBottomSheet,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
+    this.loadSavedPresets();
     
-    // Check for query parameters and apply filters
+    this.breakpointObserver.observe([Breakpoints.Handset])
+      .subscribe(result => {
+        this.isMobile = result.matches;
+      });
+    
     this.route.queryParams.subscribe(params => {
       if (params['status']) {
         this.selectedStatus = params['status'] as DossierStatus;
       }
       this.loadDossiers();
+      this.updateAppliedFilters();
     });
   }
 
@@ -157,7 +184,6 @@ export class DossiersComponent implements OnInit {
     if (typeof v === 'string') {
       const trimmed = v.trim();
       if (!trimmed) {
-        // No text -> clear selection
         this.selectedAnnonceId = null;
         this.annonceIdFilter = '';
         return;
@@ -168,6 +194,10 @@ export class DossiersComponent implements OnInit {
         this.annonceIdFilter = String(parsed);
       }
     }
+  }
+
+  loadSavedPresets(): void {
+    this.savedPresets = this.filterPresetService.getPresets(this.FILTER_CONTEXT);
   }
 
   loadDossiers(): void {
@@ -219,6 +249,7 @@ export class DossiersComponent implements OnInit {
   onFilterChange(): void {
     this.syncAnnonceFilterFromControl();
     this.currentPage = 0;
+    this.updateAppliedFilters();
     this.loadDossiers();
   }
 
@@ -227,7 +258,167 @@ export class DossiersComponent implements OnInit {
     this.phoneFilter = '';
     this.clearAnnonceSelection();
     this.currentPage = 0;
+    this.updateAppliedFilters();
     this.loadDossiers();
+  }
+
+  updateAppliedFilters(): void {
+    this.appliedFilters = [];
+
+    if (this.selectedStatus) {
+      this.appliedFilters.push({
+        key: 'selectedStatus',
+        label: 'Statut',
+        value: this.selectedStatus,
+        displayValue: this.getStatusLabel(this.selectedStatus)
+      });
+    }
+
+    if (this.phoneFilter.trim()) {
+      this.appliedFilters.push({
+        key: 'phoneFilter',
+        label: 'Téléphone',
+        value: this.phoneFilter,
+        displayValue: this.phoneFilter
+      });
+    }
+
+    if (this.selectedAnnonceId !== null) {
+      const annonceValue = this.annonceSearchControl.value;
+      const displayValue = typeof annonceValue === 'object' && annonceValue 
+        ? this.displayAnnonceFn(annonceValue)
+        : `ID: ${this.selectedAnnonceId}`;
+      
+      this.appliedFilters.push({
+        key: 'annonceId',
+        label: 'Annonce',
+        value: String(this.selectedAnnonceId),
+        displayValue
+      });
+    } else if (this.annonceIdFilter.trim()) {
+      this.appliedFilters.push({
+        key: 'annonceId',
+        label: 'Annonce',
+        value: this.annonceIdFilter,
+        displayValue: `ID: ${this.annonceIdFilter}`
+      });
+    }
+  }
+
+  removeFilter(filter: AppliedFilter): void {
+    switch (filter.key) {
+      case 'selectedStatus':
+        this.selectedStatus = '';
+        break;
+      case 'phoneFilter':
+        this.phoneFilter = '';
+        break;
+      case 'annonceId':
+        this.clearAnnonceSelection();
+        break;
+    }
+    this.onFilterChange();
+  }
+
+  openMobileFilters(): void {
+    const filterConfig: FilterConfig[] = [
+      {
+        key: 'selectedStatus',
+        label: 'Statut',
+        type: 'select',
+        options: [
+          { value: DossierStatus.NEW, label: 'Nouveau' },
+          { value: DossierStatus.QUALIFIED, label: 'Qualifié' },
+          { value: DossierStatus.APPOINTMENT, label: 'Rendez-vous' },
+          { value: DossierStatus.WON, label: 'Gagné' },
+          { value: DossierStatus.LOST, label: 'Perdu' }
+        ]
+      },
+      {
+        key: 'phoneFilter',
+        label: 'Téléphone',
+        type: 'text',
+        placeholder: 'Filtrer par téléphone...'
+      },
+      {
+        key: 'annonceIdFilter',
+        label: 'ID Annonce',
+        type: 'text',
+        placeholder: 'ID de l\'annonce...'
+      }
+    ];
+
+    const sheetRef = this.bottomSheet.open(MobileFilterSheetComponent, {
+      data: {
+        filters: {
+          selectedStatus: this.selectedStatus,
+          phoneFilter: this.phoneFilter,
+          annonceIdFilter: this.annonceIdFilter
+        },
+        config: filterConfig
+      }
+    });
+
+    sheetRef.afterDismissed().subscribe(result => {
+      if (result?.action === 'apply') {
+        this.selectedStatus = result.filters.selectedStatus || '';
+        this.phoneFilter = result.filters.phoneFilter || '';
+        this.annonceIdFilter = result.filters.annonceIdFilter || '';
+        if (this.annonceIdFilter) {
+          const parsed = parseInt(this.annonceIdFilter, 10);
+          if (!isNaN(parsed)) {
+            this.selectedAnnonceId = parsed;
+          }
+        }
+        this.onFilterChange();
+      } else if (result?.action === 'reset') {
+        this.clearFilters();
+      }
+    });
+  }
+
+  saveCurrentFilters(): void {
+    const name = prompt('Nom du preset de filtres:');
+    if (!name) return;
+
+    const filters = {
+      selectedStatus: this.selectedStatus,
+      phoneFilter: this.phoneFilter,
+      annonceIdFilter: this.annonceIdFilter,
+      selectedAnnonceId: this.selectedAnnonceId
+    };
+
+    this.filterPresetService.savePreset(this.FILTER_CONTEXT, name, filters);
+    this.loadSavedPresets();
+  }
+
+  loadPreset(preset: FilterPreset): void {
+    const filters = preset.filters;
+    this.selectedStatus = (filters['selectedStatus'] as DossierStatus) || '';
+    this.phoneFilter = (filters['phoneFilter'] as string) || '';
+    this.annonceIdFilter = (filters['annonceIdFilter'] as string) || '';
+    this.selectedAnnonceId = (filters['selectedAnnonceId'] as number) || null;
+    
+    if (this.annonceIdFilter) {
+      this.annonceSearchControl.setValue(this.annonceIdFilter, { emitEvent: false });
+    } else {
+      this.annonceSearchControl.setValue('', { emitEvent: false });
+    }
+    
+    this.onFilterChange();
+    this.showPresetMenu = false;
+  }
+
+  deletePreset(preset: FilterPreset, event: Event): void {
+    event.stopPropagation();
+    if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
+      this.filterPresetService.deletePreset(this.FILTER_CONTEXT, preset.id);
+      this.loadSavedPresets();
+    }
+  }
+
+  togglePresetMenu(): void {
+    this.showPresetMenu = !this.showPresetMenu;
   }
 
   goToPage(page: number): void {

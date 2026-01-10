@@ -7,61 +7,135 @@
     </button>
   </div>
 
-  <div class="filters-section">
-    <div class="search-box">
-      <input
-        type="text"
-        class="search-input"
-        placeholder="Rechercher des annonces..."
-        [(ngModel)]="searchQuery"
-        (keyup.enter)="applyFilters()"
-      />
-    </div>
+  <!-- Desktop Filters -->
+  <div class="filters-container" *ngIf="!isMobile">
+    <mat-expansion-panel 
+      [(expanded)]="filterPanelExpanded"
+      class="filter-panel">
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>filter_list</mat-icon>
+          <span>Filtres</span>
+          <span class="filter-count" *ngIf="appliedFilters.length > 0">
+            ({{ appliedFilters.length }})
+          </span>
+        </mat-panel-title>
+      </mat-expansion-panel-header>
 
-    <div class="filter-box">
-      <label for="status-filter" class="filter-label">Statut :</label>
-      <select
-        id="status-filter"
-        class="filter-select"
-        [(ngModel)]="selectedStatus"
-        (change)="applyFilters()"
-      >
-        <option value="">Tous</option>
-        <option [value]="AnnonceStatus.DRAFT">Brouillon</option>
-        <option [value]="AnnonceStatus.PUBLISHED">Publié</option>
-        <option [value]="AnnonceStatus.ACTIVE">Actif</option>
-        <option [value]="AnnonceStatus.PAUSED">En pause</option>
-        <option [value]="AnnonceStatus.ARCHIVED">Archivé</option>
-      </select>
-    </div>
+      <div class="filter-content">
+        <div class="filter-row">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Recherche</mat-label>
+            <input
+              matInput
+              placeholder="Rechercher des annonces..."
+              [(ngModel)]="searchQuery"
+              (keyup.enter)="applyFilters()"
+            />
+            <mat-icon matSuffix>search</mat-icon>
+          </mat-form-field>
 
-    <div class="filter-box">
-      <label for="city-filter" class="filter-label">Ville :</label>
-      <select
-        id="city-filter"
-        class="filter-select"
-        [(ngModel)]="selectedCity"
-        (change)="applyFilters()"
-      >
-        <option value="">Toutes</option>
-        <option *ngFor="let city of availableCities" [value]="city">{{ city }}</option>
-      </select>
-    </div>
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Statut</mat-label>
+            <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()">
+              <mat-option value="">Tous</mat-option>
+              <mat-option [value]="AnnonceStatus.DRAFT">Brouillon</mat-option>
+              <mat-option [value]="AnnonceStatus.PUBLISHED">Publié</mat-option>
+              <mat-option [value]="AnnonceStatus.ACTIVE">Actif</mat-option>
+              <mat-option [value]="AnnonceStatus.PAUSED">En pause</mat-option>
+              <mat-option [value]="AnnonceStatus.ARCHIVED">Archivé</mat-option>
+            </mat-select>
+          </mat-form-field>
 
-    <div class="filter-box">
-      <label for="type-filter" class="filter-label">Type/Catégorie :</label>
-      <select
-        id="type-filter"
-        class="filter-select"
-        [(ngModel)]="selectedType"
-        (change)="applyFilters()"
-      >
-        <option value="">Tous</option>
-        <option *ngFor="let type of availableTypes" [value]="type">{{ type }}</option>
-      </select>
-    </div>
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Ville</mat-label>
+            <mat-select [(ngModel)]="selectedCity" (selectionChange)="applyFilters()">
+              <mat-option value="">Toutes</mat-option>
+              <mat-option *ngFor="let city of availableCities" [value]="city">
+                {{ city }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
 
-    <button class="btn-reset" (click)="resetFilters()">Réinitialiser</button>
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Type/Catégorie</mat-label>
+            <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilters()">
+              <mat-option value="">Tous</mat-option>
+              <mat-option *ngFor="let type of availableTypes" [value]="type">
+                {{ type }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="filter-actions">
+          <button mat-raised-button color="primary" (click)="applyFilters()">
+            <mat-icon>check</mat-icon>
+            Appliquer
+          </button>
+          <button mat-button (click)="resetFilters()">
+            <mat-icon>clear</mat-icon>
+            Réinitialiser
+          </button>
+          
+          <div class="preset-menu-container">
+            <button mat-button [matMenuTriggerFor]="presetMenu">
+              <mat-icon>bookmark</mat-icon>
+              Presets
+            </button>
+            <mat-menu #presetMenu="matMenu">
+              <button mat-menu-item (click)="saveCurrentFilters()">
+                <mat-icon>save</mat-icon>
+                <span>Sauvegarder les filtres actuels</span>
+              </button>
+              <mat-divider *ngIf="savedPresets.length > 0"></mat-divider>
+              <button 
+                mat-menu-item 
+                *ngFor="let preset of savedPresets"
+                (click)="loadPreset(preset)">
+                <mat-icon>folder</mat-icon>
+                <span>{{ preset.name }}</span>
+                <button 
+                  mat-icon-button 
+                  (click)="deletePreset(preset, $event)"
+                  class="delete-preset-btn">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </button>
+              <div *ngIf="savedPresets.length === 0" class="empty-presets">
+                <span class="empty-text">Aucun preset sauvegardé</span>
+              </div>
+            </mat-menu>
+          </div>
+        </div>
+      </div>
+    </mat-expansion-panel>
+  </div>
+
+  <!-- Mobile Filter Button -->
+  <div class="mobile-filter-button" *ngIf="isMobile">
+    <button mat-raised-button color="primary" (click)="openMobileFilters()">
+      <mat-icon>filter_list</mat-icon>
+      Filtres
+      <span class="filter-badge" *ngIf="appliedFilters.length > 0">
+        {{ appliedFilters.length }}
+      </span>
+    </button>
+  </div>
+
+  <!-- Applied Filters Chips -->
+  <div class="applied-filters" *ngIf="appliedFilters.length > 0">
+    <span class="filters-label">Filtres actifs:</span>
+    <mat-chip-set aria-label="Applied filters">
+      <mat-chip
+        *ngFor="let filter of appliedFilters"
+        (removed)="removeFilter(filter)">
+        <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
+        <button matChipRemove>
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    </mat-chip-set>
   </div>
 
   <div class="page-content">
