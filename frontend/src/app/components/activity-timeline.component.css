@@ -1,83 +1,125 @@
 @import '../../styles/variables.scss';
 
+/* ========================================
+   ACTIVITY TIMELINE CONTAINER
+   ======================================== */
 .activity-timeline-container {
-  padding: 20px;
+  padding: var(--spacing-5);
 }
 
+/* ========================================
+   TIMELINE HEADER
+   ======================================== */
 .timeline-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--spacing-6);
+  padding-bottom: var(--spacing-4);
+  border-bottom: var(--border-width-2) solid var(--color-neutral-200);
 }
 
 .timeline-header h3 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 500;
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-900);
 }
 
+/* ========================================
+   NOTE FORM
+   ======================================== */
 .note-form {
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-6);
+  animation: slideDown var(--duration-moderate) var(--ease-out);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .note-form h4 {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  font-weight: 500;
+  margin: 0 0 var(--spacing-4) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-800);
 }
 
 .full-width {
   width: 100%;
 }
 
+/* ========================================
+   RICH TEXT EDITOR
+   ======================================== */
 .rich-text-editor {
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  margin-bottom: 16px;
+  border: var(--border-width-2) solid var(--color-neutral-300);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--spacing-4);
   overflow: hidden;
+  transition: var(--transition-colors);
+  background: var(--color-neutral-0);
+}
+
+.rich-text-editor:focus-within {
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha-10);
 }
 
 .editor-toolbar {
   display: flex;
-  gap: 4px;
-  padding: 8px;
-  background-color: #f5f5f5;
-  border-bottom: 1px solid #ddd;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2);
+  background: linear-gradient(to bottom, var(--color-neutral-50), var(--color-neutral-100));
+  border-bottom: var(--border-width-1) solid var(--color-neutral-300);
 }
 
 .toolbar-divider {
   width: 1px;
-  background-color: #ddd;
-  margin: 0 8px;
+  background-color: var(--color-neutral-400);
+  margin: var(--spacing-1) var(--spacing-2);
 }
 
 .editor-content {
   min-height: 150px;
-  padding: 16px;
+  max-height: 400px;
+  padding: var(--spacing-4);
   outline: none;
-  background-color: white;
+  background-color: var(--color-neutral-0);
+  overflow-y: auto;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  color: var(--color-neutral-900);
 }
 
 .editor-content:empty:before {
   content: attr(data-placeholder);
-  color: #999;
+  color: var(--color-neutral-500);
+  font-style: italic;
 }
 
 .editor-content.disabled {
-  background-color: #f5f5f5;
+  background-color: var(--color-neutral-100);
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .editor-content ul,
 .editor-content ol {
-  margin-left: 20px;
+  margin-left: var(--spacing-5);
   padding-left: 0;
 }
 
 .editor-content b,
 .editor-content strong {
-  font-weight: bold;
+  font-weight: var(--font-weight-bold);
 }
 
 .editor-content i,
@@ -89,86 +131,216 @@
   text-decoration: underline;
 }
 
+/* ========================================
+   FORM ACTIONS
+   ======================================== */
 .form-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 16px;
+  gap: var(--spacing-3);
+  margin-top: var(--spacing-4);
 }
 
+/* ========================================
+   LOADING STATE
+   ======================================== */
 .loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: var(--spacing-12);
 }
 
 .loading-container p {
-  margin-top: 16px;
-  color: #666;
+  margin-top: var(--spacing-4);
+  color: var(--color-neutral-600);
+  font-size: var(--font-size-base);
 }
 
+/* ========================================
+   NO ACTIVITIES STATE
+   ======================================== */
 .no-activities {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
-  color: #999;
+  padding: var(--spacing-16);
+  color: var(--color-neutral-500);
 }
 
 .no-activities mat-icon {
-  font-size: 64px;
-  width: 64px;
-  height: 64px;
-  margin-bottom: 16px;
-  opacity: 0.5;
+  font-size: 80px;
+  width: 80px;
+  height: 80px;
+  margin-bottom: var(--spacing-4);
+  opacity: 0.4;
+  color: var(--color-neutral-400);
 }
 
+.no-activities p {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-medium);
+}
+
+/* ========================================
+   ENHANCED TIMELINE WITH VERTICAL CONNECTORS
+   ======================================== */
 .timeline {
   position: relative;
-  padding-left: 40px;
+  padding-left: var(--spacing-12);
+  padding-top: var(--spacing-2);
+  padding-bottom: var(--spacing-2);
 }
 
+/* Vertical connector line */
 .timeline::before {
   content: '';
   position: absolute;
   left: 20px;
   top: 0;
   bottom: 0;
-  width: 2px;
-  background: #e0e0e0;
+  width: 3px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    var(--color-primary-200) 5%,
+    var(--color-primary-300) 50%,
+    var(--color-primary-200) 95%,
+    transparent 100%
+  );
+  border-radius: var(--radius-full);
 }
 
+/* ========================================
+   TIMELINE ITEMS
+   ======================================== */
 .timeline-item {
   position: relative;
-  margin-bottom: 30px;
+  margin-bottom: var(--spacing-6);
+  animation: slideInTimeline var(--duration-moderate) var(--ease-out);
 }
 
+@keyframes slideInTimeline {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Enhanced timeline marker with icons */
 .timeline-marker {
   position: absolute;
-  left: -28px;
-  top: 12px;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
+  left: -48px;
+  top: 16px;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  z-index: 1;
+  background: var(--color-neutral-0);
+  box-shadow: var(--shadow-md);
+  border: 3px solid var(--color-primary-200);
+  z-index: var(--z-above);
+  transition: all var(--duration-moderate) var(--ease-out);
+}
+
+.timeline-item:hover .timeline-marker {
+  box-shadow: var(--shadow-lg);
+  transform: scale(1.1);
+  border-color: var(--color-primary-400);
 }
 
 .timeline-marker mat-icon {
   font-size: 24px;
   width: 24px;
   height: 24px;
+  transition: var(--transition-transform);
 }
 
+.timeline-item:hover .timeline-marker mat-icon {
+  transform: scale(1.1);
+}
+
+/* Icon colors based on activity type */
+.activity-badge.activity-note mat-icon {
+  color: var(--color-info-500);
+}
+
+.activity-badge.activity-status mat-icon {
+  color: var(--color-warning-500);
+}
+
+.activity-badge.activity-appointment mat-icon {
+  color: var(--color-success-500);
+}
+
+.activity-badge.activity-message mat-icon {
+  color: var(--color-secondary-500);
+}
+
+.activity-badge.activity-system mat-icon {
+  color: var(--color-neutral-600);
+}
+
+.activity-badge.activity-consent mat-icon {
+  color: var(--color-primary-500);
+}
+
+/* ========================================
+   ACTIVITY CARD
+   ======================================== */
 .activity-card {
-  margin-left: 20px;
+  margin-left: var(--spacing-5);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: all var(--duration-moderate) var(--ease-out);
+  background: var(--color-neutral-0);
+  border-left: 4px solid transparent;
+}
+
+.activity-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  border-left-color: var(--color-primary-500);
+}
+
+/* Border color based on activity type */
+.timeline-item:has(.activity-badge.activity-note) .activity-card {
+  border-left-color: var(--color-info-200);
+}
+
+.timeline-item:has(.activity-badge.activity-status) .activity-card {
+  border-left-color: var(--color-warning-200);
+}
+
+.timeline-item:has(.activity-badge.activity-appointment) .activity-card {
+  border-left-color: var(--color-success-200);
+}
+
+.timeline-item:has(.activity-badge.activity-message) .activity-card {
+  border-left-color: var(--color-secondary-200);
+}
+
+/* ========================================
+   ACTIVITY CARD HEADER
+   ======================================== */
+::ng-deep .activity-card .mat-mdc-card-header {
+  padding: var(--spacing-4);
+  background: linear-gradient(135deg, var(--color-neutral-50), var(--color-neutral-100));
+  border-bottom: var(--border-width-1) solid var(--color-neutral-200);
 }
 
 .activity-header {
@@ -176,83 +348,256 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: var(--spacing-4);
 }
 
 .activity-info {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-2);
 }
 
 .activity-type {
-  font-weight: 500;
-  font-size: 16px;
-  color: #333;
+  font-weight: var(--font-weight-semibold);
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-900);
 }
 
 .activity-meta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 4px;
+  gap: var(--spacing-1);
 }
 
 .activity-time {
-  font-size: 13px;
-  color: #666;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  font-weight: var(--font-weight-medium);
 }
 
 .activity-author {
-  font-size: 12px;
-  color: #999;
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-500);
+  font-style: italic;
+}
+
+/* ========================================
+   ACTIVITY CARD CONTENT
+   ======================================== */
+::ng-deep .activity-card .mat-mdc-card-content {
+  padding: var(--spacing-4);
 }
 
 .activity-content {
-  margin-top: 12px;
-  line-height: 1.6;
-  color: #555;
+  line-height: var(--line-height-relaxed);
+  color: var(--color-neutral-800);
+  font-size: var(--font-size-base);
 }
 
-.activity-badge {
-  color: white;
+.activity-content ::ng-deep p {
+  margin: 0 0 var(--spacing-3) 0;
 }
 
-.activity-badge.activity-note {
-  color: #2196F3;
+.activity-content ::ng-deep p:last-child {
+  margin-bottom: 0;
 }
 
-.activity-badge.activity-status {
-  color: #FF9800;
+.activity-content ::ng-deep ul,
+.activity-content ::ng-deep ol {
+  margin: var(--spacing-3) 0;
+  padding-left: var(--spacing-6);
 }
 
-.activity-badge.activity-appointment {
-  color: #4CAF50;
+.activity-content ::ng-deep li {
+  margin-bottom: var(--spacing-2);
 }
 
-.activity-badge.activity-message {
-  color: #9C27B0;
+.activity-content ::ng-deep strong,
+.activity-content ::ng-deep b {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-900);
 }
 
+.activity-content ::ng-deep em,
+.activity-content ::ng-deep i {
+  font-style: italic;
+}
+
+/* ========================================
+   ACTIVITY CARD ACTIONS
+   ======================================== */
+::ng-deep mat-card-actions {
+  padding: var(--spacing-3) var(--spacing-4);
+  margin: 0;
+  border-top: var(--border-width-1) solid var(--color-neutral-200);
+  background: var(--color-neutral-50);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-2);
+}
+
+/* ========================================
+   VISIBILITY BADGE
+   ======================================== */
 .visibility-badge {
-  display: inline-block;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 12px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-1) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: var(--border-width-1) solid transparent;
 }
 
 .visibility-badge.visibility-internal {
-  background-color: #E3F2FD;
-  color: #1976D2;
+  background-color: var(--color-info-50);
+  color: var(--color-info-700);
+  border-color: var(--color-info-200);
 }
 
 .visibility-badge.visibility-client {
-  background-color: #FFF3E0;
-  color: #F57C00;
+  background-color: var(--color-warning-50);
+  color: var(--color-warning-700);
+  border-color: var(--color-warning-200);
 }
 
-mat-card-actions {
-  padding: 8px 16px;
-  margin: 0;
-  border-top: 1px solid #f0f0f0;
+/* ========================================
+   RESPONSIVE LAYOUT - MOBILE
+   ======================================== */
+@media (max-width: 768px) {
+  .activity-timeline-container {
+    padding: var(--spacing-4);
+  }
+
+  .timeline-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-3);
+  }
+
+  .timeline-header h3 {
+    font-size: var(--font-size-xl);
+  }
+
+  .timeline {
+    padding-left: var(--spacing-10);
+  }
+
+  .timeline::before {
+    left: 16px;
+    width: 2px;
+  }
+
+  .timeline-marker {
+    left: -40px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .timeline-marker mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .activity-card {
+    margin-left: var(--spacing-3);
+  }
+
+  .activity-header {
+    flex-direction: column;
+    gap: var(--spacing-3);
+  }
+
+  .activity-meta {
+    align-items: flex-start;
+  }
+
+  .activity-type {
+    font-size: var(--font-size-sm);
+  }
+
+  .note-form {
+    margin-bottom: var(--spacing-5);
+  }
+
+  .editor-content {
+    min-height: 120px;
+  }
 }
+
+@media (max-width: 576px) {
+  .activity-timeline-container {
+    padding: var(--spacing-3);
+  }
+
+  .timeline-header h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  .timeline {
+    padding-left: var(--spacing-8);
+  }
+
+  .timeline::before {
+    left: 12px;
+  }
+
+  .timeline-marker {
+    left: -32px;
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
+  }
+
+  .timeline-marker mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .activity-card {
+    margin-left: var(--spacing-2);
+  }
+
+  ::ng-deep .activity-card .mat-mdc-card-header,
+  ::ng-deep .activity-card .mat-mdc-card-content,
+  ::ng-deep mat-card-actions {
+    padding: var(--spacing-3);
+  }
+
+  .activity-type {
+    font-size: var(--font-size-sm);
+  }
+
+  .activity-content {
+    font-size: var(--font-size-sm);
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions button {
+    width: 100%;
+  }
+}
+
+/* ========================================
+   ANIMATION FOR SMOOTH TRANSITIONS
+   ======================================== */
+.timeline-item {
+  transition: all var(--duration-moderate) var(--ease-out);
+}
+
+/* Stagger animation for multiple items */
+.timeline-item:nth-child(1) { animation-delay: 0ms; }
+.timeline-item:nth-child(2) { animation-delay: 50ms; }
+.timeline-item:nth-child(3) { animation-delay: 100ms; }
+.timeline-item:nth-child(4) { animation-delay: 150ms; }
+.timeline-item:nth-child(5) { animation-delay: 200ms; }
+.timeline-item:nth-child(n+6) { animation-delay: 250ms; }
