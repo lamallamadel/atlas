@@ -6,9 +6,6 @@ spring:
       on-profile: backend-e2e-postgres
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/testdb
-    username: testuser
-    password: testpass
     driver-class-name: org.postgresql.Driver
 
   jpa:
