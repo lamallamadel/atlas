@@ -63,3 +63,13 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 
 ## Extension (TO-BE)
 - Coop Habitat : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`
+
+## Produit (contrats additionnels)
+
+- Feature flags & plans (modules activables) : `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`
+- Glossaire : `docs/atlas-immobilier/01_cadrage/03_glossaire.md`
+
+## Sécurité (contrats additionnels)
+
+- RBAC (rôles & permissions) : `docs/atlas-immobilier/03_technique/10_rbac_permissions.md`
+- Dictionnaire de données (Core) : `docs/atlas-immobilier/03_technique/11_data_dictionary_core.md`

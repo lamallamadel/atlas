@@ -45,3 +45,11 @@ Les détails (headers, rôles, obtention du token, isolation tenant) sont décri
 
 ## Extension (TO-BE) — Coop Habitat
 Voir `02_fonctionnel/04_module_coop_habitat.md`.
+
+
+## Modularité (plateforme unique)
+
+- Modules activables (plans/entitlements) : `02_fonctionnel/05_feature_flags_plans.md`
+- RBAC (rôles/permissions) : `03_technique/10_rbac_permissions.md`
+- Dictionnaire de données (Core) : `03_technique/11_data_dictionary_core.md`
+- Glossaire : `01_cadrage/03_glossaire.md`

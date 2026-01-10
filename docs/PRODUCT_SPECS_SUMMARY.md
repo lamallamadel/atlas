@@ -1,60 +1,57 @@
 # Atlas Immobilier — Périmètre produit (résumé)
 
 > **Statut**: À jour (résumé produit)  
-> **Dernière vérification**: 2026-01-07  
+> **Dernière vérification**: 2026-01-08  
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
+- `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`  
+- `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`  
 - `docs/atlas-immobilier/03_technique/09_notifications.md`
 
 ## Vision
 
-Atlas Immobilier est un CRM immobilier conçu pour être **modulable** selon les métiers (agence location, transaction vente, mandats, promotion/construction), tout en restant **robuste** (traçabilité, conformité, multi-tenancy).
+Atlas Immobilier est une plateforme (portail + CRM) conçue pour être **modulable par métier** tout en restant **robuste** :
+- multi‑tenancy `org_id`,
+- workflows contrôlés,
+- traçabilité (timeline + audit),
+- conformité (consentements).
 
-Le concept central est le **Dossier (Case)** : un dossier représente une affaire/processus (lead, transaction, mandat, projet) qui évolue dans un **workflow**.
+Le concept central est le **Dossier (Case)** : un dossier représente une intention/activité (lead, transaction, mandat, projet, coop) qui évolue dans un **workflow**.
 
 ## Concepts clés
+- **Annonce** : bien publié (vente/location) + qualité + modération.
+- **Dossier** : capture/qualification/assignation + `case_type_code` + `status_code`.
+- **Timeline** : messages (WhatsApp/SMS/email/phone), événements, tâches, RDV.
+- **Workflows** : transitions autorisées (AS‑IS) puis configurables tenant‑scopés (TO‑BE).
+- **Trust layer** : déduplication, signalement, modération, vérification progressive.
+- **Feature flags / plans** : modules activables par organisation + quotas.
 
-### Dossier = Case universel
-Un dossier a :
-- un **type** (`caseType`) représentant le métier (lead, vente, location, mandat, projet…)
-- un **statut** (`statusCode`) appartenant au workflow de ce type
-- une **timeline** (notes, tâches, événements automatiques)
-- des **rendez-vous**, **messages**, **consentements**, **parties prenantes**
-- une traçabilité **audit + historique de statuts**
+## Modules (catalogue)
+### Core (MVP)
+- Annonces (CRUD + publication + recherche/carte)
+- Dossiers (CRM basique : pipeline, assignation, filtres)
+- RDV/Visites
+- Timeline (messages/événements)
+- Audit + consentements
+- Reporting basique
 
-### Référentiels + workflows configurables (multi-métiers)
-Les types/statuts/raisons/sources/etc. sont traités comme des **référentiels tenant-scopés** (data-driven), afin d’offrir :
-- un maximum de cheminements possibles,
-- une adaptation par organisation, sans redéploiement.
+### Extensions (V1+)
+- Trust avancé (badges/KYC léger)
+- Neuf / Promoteurs (programmes, lots)
+- Location (dossier locataire)
+- Financement (pré‑qualification + partenaires)
+- Investissement + Data quartier (V1.5)
+- Gestion locative + Conciergerie (V1.5)
+- Coop Habitat (V2 — sous réserve conformité)
 
-Référence : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
-
-## MVP market-ready (cible)
-
-### P0 (non négociable)
-- Pipeline dossier (workflow) + historique
-- Timeline lisible (notes + événements auto)
-- Consentement strict (bloquant) pour outbound
-- Audit trail sur les actions core
-- Search/listing + dashboard minimal
-- WhatsApp inbound + **WhatsApp outbound réel (Choix B)**
-
-### P1
-- Qualification (scoring simple)
-- Rappels RDV (scheduler)
-- Exports basiques (audit, dossiers)
-
-## Hors périmètre immédiat (peut venir après)
+## Hors périmètre immédiat
 - BI avancée, connecteurs multiples, automatisations complexes
+- Comptabilité/facturation
+- Signature électronique avancée
 
 ## Extension produit (TO-BE) — Coop Habitat
 
-Atlas peut intégrer un module de gestion de **coopératives d’habitat / groupements** (V1 déclarative) :
-- membres + rang FIFO, cotisations + ledger + justificatifs,
-- allocation de lots (FIFO d’allocation),
-- suivi projet (jalons),
-- traçabilité (audit + timeline),
-- notifications WhatsApp outbound (Choix B) pour appels de fonds et jalons.
-
 Doc central : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.
+
+Note : ce module est juridiquement sensible ; il doit être cadré avant exposition publique.

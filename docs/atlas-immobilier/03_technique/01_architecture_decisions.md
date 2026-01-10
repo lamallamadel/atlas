@@ -40,3 +40,12 @@
 Docs :
 - `02_fonctionnel/04_module_coop_habitat.md`
 - `03_technique/09_notifications.md`
+
+
+---
+
+## Décision E — Modules activables via feature flags (entitlements)
+**Choix** : capacité “plateforme unique” grâce à des **modules activables** tenant‑scopés (`org_id`) et des quotas.
+- Source de vérité : `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`
+- Avantages : packaging produit, déploiement progressif, réduction du scope MVP.
+- Contraintes : enforcement serveur (403/quota), tests d’entitlements, cohérence FE/BE.

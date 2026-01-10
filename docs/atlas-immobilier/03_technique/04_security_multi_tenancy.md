@@ -121,3 +121,9 @@ Copier `access_token` et le coller dans l’écran Login du front.
 ## 5) Points d’attention / limites connues
 - `X-Org-Id` est une stratégie pragmatique pour le MVP : la trajectoire cible reste l’extraction d’orgId depuis le JWT (claim) lorsque l’IdP est stabilisé côté métier.
 - Les entités « Advanced CRM » (messages/consentements/audit/appointments) existent côté modèle BD, mais les endpoints et l’UI sont planifiés sur les sprints suivants (voir `05_roadmap/`).
+
+---
+
+## RBAC (rôles & permissions)
+
+Voir le contrat RBAC : `docs/atlas-immobilier/03_technique/10_rbac_permissions.md`.
