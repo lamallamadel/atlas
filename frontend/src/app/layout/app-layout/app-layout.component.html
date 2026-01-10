@@ -69,6 +69,17 @@
       
       <span class="toolbar-spacer"></span>
       
+      <button
+        mat-icon-button
+        (click)="toggleTheme()"
+        class="theme-toggle-button"
+        [attr.aria-label]="(isDarkTheme$ | async) ? 'Basculer en mode clair' : 'Basculer en mode sombre'"
+        [matTooltip]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'">
+        <mat-icon aria-hidden="true">
+          {{ (isDarkTheme$ | async) ? 'light_mode' : 'dark_mode' }}
+        </mat-icon>
+      </button>
+      
       <div class="user-menu-container">
         <button
           mat-icon-button

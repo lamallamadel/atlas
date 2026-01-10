@@ -1,9 +1,7 @@
 @use '@angular/material' as mat;
 
-// Include the common styles for Angular Material
 @include mat.core();
 
-// Define custom typography configuration with Roboto and Open Sans
 $custom-typography: mat.define-typography-config(
   $font-family: '"Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
   $headline-1: mat.define-typography-level(112px, 112px, 300, 'Roboto', -0.0134em),
@@ -20,10 +18,8 @@ $custom-typography: mat.define-typography-config(
   $button: mat.define-typography-level(14px, 14px, 500, 'Roboto', 0.0893em),
 );
 
-// Apply typography
 @include mat.typography-hierarchy($custom-typography);
 
-// Define the real estate CRM color palettes
 $real-estate-primary: (
   50: #e5eaf3,
   100: #becbe0,
@@ -123,12 +119,10 @@ $real-estate-warn: (
   )
 );
 
-// Create the theme object with custom palettes
 $primary-palette: mat.define-palette($real-estate-primary, 500, 300, 700);
 $accent-palette: mat.define-palette($real-estate-accent, 500, 300, 700);
 $warn-palette: mat.define-palette($real-estate-warn, 500, 300, 700);
 
-// Create the light theme
 $real-estate-theme: mat.define-light-theme((
   color: (
     primary: $primary-palette,
@@ -139,10 +133,8 @@ $real-estate-theme: mat.define-light-theme((
   density: 0,
 ));
 
-// Include theme styles for core and each component used in your app
 @include mat.all-component-themes($real-estate-theme);
 
-// Define density variants for compact layouts (tables, etc.)
 .compact-density {
   $compact-theme: mat.define-light-theme((
     color: (
@@ -157,7 +149,6 @@ $real-estate-theme: mat.define-light-theme((
   @include mat.all-component-densities($compact-theme);
 }
 
-// Additional density option for maximum compactness
 .compact-density-max {
   $compact-max-theme: mat.define-light-theme((
     color: (

@@ -1,0 +1,156 @@
+@use '@angular/material' as mat;
+@use 'theme' as base-theme;
+
+$dark-primary: mat.define-palette(base-theme.$real-estate-primary, 400, 300, 700);
+$dark-accent: mat.define-palette(base-theme.$real-estate-accent, 400, 300, 700);
+$dark-warn: mat.define-palette(base-theme.$real-estate-warn, 400, 300, 700);
+
+$real-estate-dark-theme: mat.define-dark-theme((
+  color: (
+    primary: $dark-primary,
+    accent: $dark-accent,
+    warn: $dark-warn,
+  ),
+  typography: base-theme.$custom-typography,
+  density: 0,
+));
+
+body.dark-theme {
+  @include mat.all-component-colors($real-estate-dark-theme);
+  
+  --color-primary-50: #1e2a3f;
+  --color-primary-100: #2c4060;
+  --color-primary-200: #3d5580;
+  --color-primary-300: #5270a5;
+  --color-primary-400: #6b8ac5;
+  --color-primary-500: #89a7e0;
+  --color-primary-600: #a3bde8;
+  --color-primary-700: #bcd2f0;
+  --color-primary-800: #d4e3f7;
+  --color-primary-900: #e8f0fb;
+
+  --color-secondary-50: #3d2814;
+  --color-secondary-100: #5a3d1f;
+  --color-secondary-200: #7a522b;
+  --color-secondary-300: #9c6938;
+  --color-secondary-400: #c08345;
+  --color-secondary-500: #e69f54;
+  --color-secondary-600: #f0b573;
+  --color-secondary-700: #f5ca92;
+  --color-secondary-800: #f9deb1;
+  --color-secondary-900: #fdf1d0;
+
+  --color-neutral-0: #121212;
+  --color-neutral-50: #1a1a1a;
+  --color-neutral-100: #1e1e1e;
+  --color-neutral-200: #2a2a2a;
+  --color-neutral-300: #383838;
+  --color-neutral-400: #4a4a4a;
+  --color-neutral-500: #6b6b6b;
+  --color-neutral-600: #9e9e9e;
+  --color-neutral-700: #bdbdbd;
+  --color-neutral-800: #e0e0e0;
+  --color-neutral-900: #f5f5f5;
+  --color-neutral-1000: #ffffff;
+
+  --color-success-50: #1b2e1f;
+  --color-success-100: #234029;
+  --color-success-200: #2d5535;
+  --color-success-300: #3a6d42;
+  --color-success-400: #4a8851;
+  --color-success-500: #5da765;
+  --color-success-600: #75c77f;
+  --color-success-700: #91d89b;
+  --color-success-800: #b0e6b9;
+  --color-success-900: #d0f2d7;
+
+  --color-warning-50: #3d2c14;
+  --color-warning-100: #5a421f;
+  --color-warning-200: #7a5a2b;
+  --color-warning-300: #9c7538;
+  --color-warning-400: #c09345;
+  --color-warning-500: #e6b454;
+  --color-warning-600: #f0c973;
+  --color-warning-700: #f5db92;
+  --color-warning-800: #f9e9b1;
+  --color-warning-900: #fdf5d0;
+
+  --color-error-50: #3a1b1b;
+  --color-error-100: #532323;
+  --color-error-200: #702e2e;
+  --color-error-300: #913b3b;
+  --color-error-400: #b64c4c;
+  --color-error-500: #de6060;
+  --color-error-600: #ed7f7f;
+  --color-error-700: #f4a1a1;
+  --color-error-800: #f9c3c3;
+  --color-error-900: #fde3e3;
+
+  --color-info-50: #1a2b3f;
+  --color-info-100: #233d5a;
+  --color-info-200: #2f5278;
+  --color-info-300: #3c6a9a;
+  --color-info-400: #4d85bf;
+  --color-info-500: #61a3e4;
+  --color-info-600: #7db8ee;
+  --color-info-700: #9dcbf4;
+  --color-info-800: #bedcf9;
+  --color-info-900: #dfedfd;
+
+  --color-primary-alpha-10: rgba(137, 167, 224, 0.1);
+  --color-primary-alpha-20: rgba(137, 167, 224, 0.2);
+  --color-primary-alpha-30: rgba(137, 167, 224, 0.3);
+  --color-primary-alpha-40: rgba(137, 167, 224, 0.4);
+  --color-primary-alpha-50: rgba(137, 167, 224, 0.5);
+
+  --color-secondary-alpha-10: rgba(230, 159, 84, 0.1);
+  --color-secondary-alpha-20: rgba(230, 159, 84, 0.2);
+  --color-secondary-alpha-30: rgba(230, 159, 84, 0.3);
+  --color-secondary-alpha-40: rgba(230, 159, 84, 0.4);
+  --color-secondary-alpha-50: rgba(230, 159, 84, 0.5);
+
+  --color-neutral-alpha-10: rgba(245, 245, 245, 0.1);
+  --color-neutral-alpha-20: rgba(245, 245, 245, 0.2);
+  --color-neutral-alpha-30: rgba(245, 245, 245, 0.3);
+  --color-neutral-alpha-40: rgba(245, 245, 245, 0.4);
+  --color-neutral-alpha-50: rgba(245, 245, 245, 0.5);
+
+  --shadow-1: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px -1px rgba(0, 0, 0, 0.3);
+  --shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
+  --shadow-3: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
+  --shadow-4: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  --shadow-5: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  
+  --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+
+  color: var(--color-neutral-900);
+  background-color: var(--color-neutral-100);
+}
+
+.dark-theme .compact-density {
+  $dark-compact-theme: mat.define-dark-theme((
+    color: (
+      primary: $dark-primary,
+      accent: $dark-accent,
+      warn: $dark-warn,
+    ),
+    typography: base-theme.$custom-typography,
+    density: -1,
+  ));
+  
+  @include mat.all-component-densities($dark-compact-theme);
+}
+
+.dark-theme .compact-density-max {
+  $dark-compact-max-theme: mat.define-dark-theme((
+    color: (
+      primary: $dark-primary,
+      accent: $dark-accent,
+      warn: $dark-warn,
+    ),
+    typography: base-theme.$custom-typography,
+    density: -2,
+  ));
+  
+  @include mat.all-component-densities($dark-compact-max-theme);
+}

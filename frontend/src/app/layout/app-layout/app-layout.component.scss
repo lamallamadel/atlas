@@ -104,6 +104,20 @@
   flex: 1 1 auto;
 }
 
+.theme-toggle-button {
+  margin-left: var(--spacing-2);
+  transition: var(--transition-base);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: rotate(180deg);
+  }
+
+  mat-icon {
+    transition: var(--transition-transform);
+  }
+}
+
 .user-menu-container {
   position: relative;
   margin-left: var(--spacing-4);
@@ -252,11 +266,80 @@
   }
 }
 
-// Prefers reduced motion
 @media (prefers-reduced-motion: reduce) {
   .sidenav,
   .nav-list a,
-  .user-menu-button {
+  .user-menu-button,
+  .theme-toggle-button {
     transition: none;
+  }
+}
+
+:host-context(.dark-theme) {
+  .sidenav {
+    background-color: var(--color-neutral-50);
+  }
+
+  .sidenav-header {
+    background: linear-gradient(135deg, #4a5a8a 0%, #5a3d72 100%);
+  }
+
+  .nav-list a {
+    color: var(--color-neutral-800);
+
+    &:hover {
+      background-color: rgba(137, 167, 224, 0.12);
+    }
+
+    &.active {
+      background: linear-gradient(135deg, rgba(137, 167, 224, 0.18) 0%, rgba(163, 189, 232, 0.18) 100%);
+      color: var(--color-primary-500);
+
+      mat-icon {
+        color: var(--color-primary-500);
+      }
+    }
+  }
+
+  .sidenav-content {
+    background-color: var(--color-neutral-100);
+  }
+
+  .top-toolbar {
+    background: linear-gradient(135deg, #4a5a8a 0%, #5a3d72 100%);
+  }
+
+  .user-menu-header {
+    background-color: var(--color-neutral-200);
+  }
+
+  .user-name {
+    color: var(--color-neutral-900);
+  }
+
+  .user-email {
+    color: var(--color-neutral-700);
+  }
+
+  .user-avatar-large {
+    color: var(--color-primary-500);
+  }
+
+  :ng-deep .user-dropdown-menu {
+    background-color: var(--color-neutral-50);
+
+    button[mat-menu-item] {
+      &:hover {
+        background-color: rgba(137, 167, 224, 0.12);
+
+        mat-icon {
+          color: var(--color-primary-500);
+        }
+      }
+
+      mat-icon {
+        color: var(--color-neutral-800);
+      }
+    }
   }
 }

@@ -8,6 +8,7 @@ import { of } from 'rxjs';
 
 import { AppLayoutComponent } from './app-layout.component';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
 
 @Component({ selector: 'app-global-search-bar', template: '' })
@@ -17,10 +18,14 @@ describe('AppLayoutComponent', () => {
   let component: AppLayoutComponent;
   let fixture: ComponentFixture<AppLayoutComponent>;
   let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockThemeService: jasmine.SpyObj<ThemeService>;
   let mockBreakpointObserver: jasmine.SpyObj<BreakpointObserver>;
 
   beforeEach(async () => {
     mockAuthService = jasmine.createSpyObj('AuthService', ['logout']);
+    mockThemeService = jasmine.createSpyObj('ThemeService', ['toggleTheme', 'getCurrentTheme'], {
+      currentTheme$: of('light')
+    });
     mockBreakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
     mockBreakpointObserver.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
 
@@ -29,6 +34,7 @@ describe('AppLayoutComponent', () => {
       imports: [RouterTestingModule, MaterialTestingModule],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
+        { provide: ThemeService, useValue: mockThemeService },
         { provide: BreakpointObserver, useValue: mockBreakpointObserver }
       ],
       schemas: [NO_ERRORS_SCHEMA]
@@ -85,5 +91,17 @@ describe('AppLayoutComponent', () => {
     component.closeSidenavOnMobile();
     
     expect(component.drawer.close).toHaveBeenCalled();
+  });
+
+  it('should toggle theme when toggleTheme is called', () => {
+    component.toggleTheme();
+    expect(mockThemeService.toggleTheme).toHaveBeenCalled();
+  });
+
+  it('should observe dark theme state', (done) => {
+    component.isDarkTheme$.subscribe(isDark => {
+      expect(isDark).toBe(false);
+      done();
+    });
   });
 });

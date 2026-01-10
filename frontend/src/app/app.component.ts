@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { routeFadeSlideAnimation } from './animations/route-animations';
+import { ThemeService } from './services/theme.service';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +11,8 @@ import { routeFadeSlideAnimation } from './animations/route-animations';
 })
 export class AppComponent {
   title = 'frontend';
+
+  constructor(private themeService: ThemeService) {}
 
   prepareRoute(outlet: RouterOutlet) {
     return outlet?.activatedRouteData?.['animation'];

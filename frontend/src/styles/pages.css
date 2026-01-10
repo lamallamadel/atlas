@@ -256,3 +256,64 @@
     transform: none !important;
   }
 }
+
+/* Dark Theme Support */
+.dark-theme .page-title {
+  color: var(--color-neutral-900);
+}
+
+.dark-theme .btn-create {
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  box-shadow: 0 2px 8px rgba(137, 167, 224, 0.3);
+}
+
+.dark-theme .btn-create:hover {
+  box-shadow: 0 4px 12px rgba(137, 167, 224, 0.4);
+}
+
+.dark-theme .btn-retry {
+  background-color: var(--color-primary-500);
+}
+
+.dark-theme .btn-retry:hover {
+  background-color: var(--color-primary-600);
+}
+
+.dark-theme .btn-page,
+.dark-theme .btn-page-num {
+  border: 1px solid var(--color-neutral-400);
+  background-color: var(--color-neutral-50);
+  color: var(--color-neutral-900);
+}
+
+.dark-theme .btn-page:hover:not(:disabled),
+.dark-theme .btn-page-num:hover:not(:disabled) {
+  background-color: var(--color-primary-alpha-10);
+  border-color: var(--color-primary-500);
+}
+
+.dark-theme .btn-page-num.active {
+  background-color: var(--color-primary-500);
+  color: var(--color-neutral-1000);
+  border-color: var(--color-primary-500);
+}
+
+.dark-theme .page-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
+.dark-theme .error-message {
+  color: var(--color-error-500);
+}
+
+.dark-theme .pagination-section {
+  background-color: var(--color-neutral-50);
+}
+
+.dark-theme .pagination-info {
+  color: var(--color-neutral-700);
+}
+
+.dark-theme .mat-mdc-icon-button::before {
+  background: rgba(255, 255, 255, 0.1);
+}

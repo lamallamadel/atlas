@@ -280,3 +280,50 @@
     animation: none !important;
   }
 }
+
+/* Dark Theme Support for Material Components */
+.dark-theme .mat-mdc-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark-theme .mat-mdc-raised-button:not(:disabled):hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark-theme .mat-mdc-fab:not(:disabled):hover,
+.dark-theme .mat-mdc-mini-fab:not(:disabled):hover {
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark-theme .mat-mdc-list-item:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .mat-expansion-panel:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+}
+
+.dark-theme .mat-expansion-panel-header:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dark-theme .mat-mdc-select:hover .mat-mdc-select-trigger {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+}
+
+.dark-theme .mat-mdc-tab:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .mat-mdc-row:hover {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dark-theme .mat-step-header:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+
+.dark-theme .mat-ripple-element {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}

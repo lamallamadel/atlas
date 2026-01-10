@@ -248,3 +248,84 @@ textarea:disabled {
     scroll-behavior: auto !important;
   }
 }
+
+/* Dark Theme Overrides */
+.dark-theme {
+  color-scheme: dark;
+}
+
+.dark-theme body {
+  color: var(--color-neutral-900);
+  background-color: var(--color-neutral-100);
+}
+
+.dark-theme .skip-to-content {
+  background: var(--color-primary-500);
+  color: var(--color-neutral-1000);
+}
+
+.dark-theme .skip-to-content:focus {
+  outline: 2px solid var(--color-primary-400);
+}
+
+.dark-theme button:focus-visible,
+.dark-theme a:focus-visible,
+.dark-theme input:focus-visible,
+.dark-theme select:focus-visible,
+.dark-theme textarea:focus-visible,
+.dark-theme [tabindex]:focus-visible,
+.dark-theme .mat-mdc-button:focus-visible,
+.dark-theme .mat-mdc-raised-button:focus-visible,
+.dark-theme .mat-mdc-icon-button:focus-visible,
+.dark-theme .mat-mdc-fab:focus-visible,
+.dark-theme .mat-mdc-mini-fab:focus-visible {
+  outline: 2px solid var(--color-primary-400) !important;
+  outline-offset: 2px !important;
+}
+
+.dark-theme .mat-mdc-menu-item:focus,
+.dark-theme .mat-mdc-list-item:focus,
+.dark-theme .mat-mdc-option:focus {
+  outline: 2px solid var(--color-primary-400) !important;
+  outline-offset: -2px !important;
+}
+
+.dark-theme .validation-error-container .error-message {
+  color: var(--color-error-500);
+}
+
+.dark-theme .success-snackbar {
+  background-color: var(--color-success-600) !important;
+}
+
+.dark-theme .enhanced-snackbar.success-snackbar .mdc-snackbar__surface {
+  background-color: var(--color-success-600) !important;
+  box-shadow: 0 4px 12px rgba(117, 199, 127, 0.3) !important;
+}
+
+.dark-theme .error-snackbar {
+  background-color: var(--color-error-600) !important;
+}
+
+.dark-theme .enhanced-snackbar.error-snackbar .mdc-snackbar__surface {
+  background-color: var(--color-error-600) !important;
+  box-shadow: 0 4px 12px rgba(237, 127, 127, 0.3) !important;
+}
+
+.dark-theme .warning-snackbar {
+  background-color: var(--color-warning-600) !important;
+}
+
+.dark-theme .enhanced-snackbar.warning-snackbar .mdc-snackbar__surface {
+  background-color: var(--color-warning-600) !important;
+  box-shadow: 0 4px 12px rgba(240, 201, 115, 0.3) !important;
+}
+
+.dark-theme .info-snackbar {
+  background-color: var(--color-info-600) !important;
+}
+
+.dark-theme .enhanced-snackbar.info-snackbar .mdc-snackbar__surface {
+  background-color: var(--color-info-600) !important;
+  box-shadow: 0 4px 12px rgba(125, 184, 238, 0.3) !important;
+}
