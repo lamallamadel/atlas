@@ -1,147 +1,95 @@
-# Initial Repository Setup Status
+# Initial Setup Status
 
-## ✅ Completed
+## Current State
 
-### Frontend Dependencies
-- **Status:** ✅ Installed successfully
-- **Location:** `frontend/node_modules/`
-- **Packages:** 1178 packages installed
-- **Command used:** `npm install`
+This is a newly cloned repository. The automated initial setup could not be completed due to security restrictions on environment variable manipulation in the current session.
 
-## ⚠️ Requires Manual Completion
+## What Has Been Prepared
 
-Due to PowerShell security restrictions, the following steps require manual execution:
+The following setup files and configurations have been created for you:
 
-### 1. Playwright Browsers Installation
+### ✅ Setup Scripts (Ready to Run)
 
-**Required for:** Frontend E2E tests
+1. **SETUP.ps1** - PowerShell setup script (Windows, recommended)
+2. **SETUP.cmd** - Batch file setup script (Windows Command Prompt)
+3. **setup.js** - Node.js setup script (cross-platform)
 
-**Commands to run:**
+### ✅ Backend Configuration
+
+- `backend/toolchains.xml` - Maven toolchains configured for Java 17
+- `backend/mvn17.cmd` - Maven wrapper that automatically uses Java 17
+- `backend/.mavenrc` - Maven RC file for Java home
+- `backend/mavenrc_pre.bat` - Pre-execution Maven configuration
+
+### ✅ Documentation
+
+- **START_HERE_AFTER_CLONE.md** - Quick start guide with all setup options
+- **SETUP_INSTRUCTIONS_MANUAL.md** - Detailed manual setup instructions
+- **AGENTS.md** - Complete development guide (already existed)
+
+## Next Steps (Required)
+
+**You MUST run ONE of the setup scripts to install dependencies:**
+
+### Option 1: PowerShell (Recommended)
 ```powershell
-cd frontend
-npx playwright install
+.\SETUP.ps1
 ```
 
-Or use the npm script:
-```powershell
-cd frontend
-npm run install-browsers
+### Option 2: Command Prompt
+```cmd
+SETUP.cmd
 ```
 
-### 2. Backend Maven Dependencies
-
-**Required for:** Backend build, test, and run
-
-**Prerequisite:** Java 17 must be available
-
-**Option A - Use the provided setup script (Recommended):**
-```powershell
-.\COMPLETE_INITIAL_SETUP.cmd
+### Option 3: Node.js
+```cmd
+node setup.js
 ```
 
-This script will:
-- Set JAVA_HOME to Java 17
-- Run `mvn clean install -DskipTests` in backend
-- Install Playwright browsers
+## What the Setup Does
 
-**Option B - Manual Maven setup:**
+The setup script will:
 
-1. Set JAVA_HOME for your session:
-   ```powershell
-   $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-   $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
-   ```
+1. ✓ Verify Java 17 installation
+2. ✓ Install backend dependencies (Maven packages) - ~5-10 minutes
+3. ✓ Install frontend dependencies (npm packages) - ~3-5 minutes
+4. ✓ Install Playwright browsers for E2E testing - ~2-3 minutes
 
-2. Verify Java 17:
-   ```powershell
-   java -version
-   ```
+**Total estimated time: 10-20 minutes** (depending on internet speed)
 
-3. Install backend dependencies:
-   ```powershell
-   cd backend
-   mvn clean install -DskipTests
-   ```
+## After Setup Completes
 
-**Option C - Use Maven Toolchains (Alternative):**
+You'll be able to run:
 
-1. Copy toolchains configuration:
-   ```powershell
-   $m2Dir = "$env:USERPROFILE\.m2"
-   if (-not (Test-Path $m2Dir)) { New-Item -ItemType Directory -Path $m2Dir -Force }
-   Copy-Item backend\toolchains.xml "$m2Dir\toolchains.xml" -Force
-   ```
+- **Build backend**: `cd backend && mvn clean package`
+- **Test backend**: `cd backend && mvn test`
+- **Run backend server**: `cd backend && mvn spring-boot:run`
+- **Run frontend E2E tests**: `cd frontend && npm run e2e`
+- **Run backend E2E tests (H2)**: `cd backend && mvn verify -Pbackend-e2e-h2`
+- **Run backend E2E tests (PostgreSQL)**: `cd backend && mvn verify -Pbackend-e2e-postgres`
 
-2. Run Maven (still requires JAVA_HOME to be set for Maven itself to run)
+## System Requirements
 
-## Next Steps
+- ✅ Java 17 - Located at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- ✅ Maven 3.8.6 - Located at `C:\Environement\maven-3.8.6`
+- ✅ Node.js v25.2.1 - Available in PATH
+- ⏳ Backend dependencies - Need to install
+- ⏳ Frontend dependencies - Need to install
+- ⏳ Playwright browsers - Need to install
 
-After completing the manual steps above, you will be able to:
+## Troubleshooting
 
-### Backend Commands
-- **Build:** `cd backend && mvn clean package`
-- **Test:** `cd backend && mvn test`
-- **Run:** `cd backend && mvn spring-boot:run`
-- **E2E Tests (H2):** `cd backend && mvn verify -Pbackend-e2e-h2`
-- **E2E Tests (PostgreSQL):** `cd backend && mvn verify -Pbackend-e2e-postgres`
+If setup fails:
 
-### Frontend Commands
-- **Build:** `cd frontend && npm run build`
-- **Test:** `cd frontend && npm test`
-- **Run:** `cd frontend && npm start`
-- **E2E Tests:** `cd frontend && npm run e2e`
-- **E2E Tests (Fast):** `cd frontend && npm run e2e:fast`
+1. **Java not found**: Update paths in setup scripts and `backend/toolchains.xml`
+2. **Maven errors**: Check internet connection and proxy settings
+3. **npm errors**: Verify Node.js and npm versions
+4. **Playwright errors**: Can be installed later with `cd frontend && npx playwright install`
 
-### Infrastructure
-- **Start services:** `cd infra && docker-compose up -d`
-- **Stop services:** `cd infra && docker-compose down`
+## Manual Setup Alternative
 
-## Quick Setup Command
+If automated setup doesn't work, see **SETUP_INSTRUCTIONS_MANUAL.md** for step-by-step manual instructions.
 
-The fastest way to complete setup is to run:
+---
 
-```powershell
-.\COMPLETE_INITIAL_SETUP.cmd
-```
-
-This single command will complete all remaining setup steps.
-
-## Verification
-
-After setup is complete, verify everything works:
-
-1. **Java 17:**
-   ```powershell
-   java -version
-   # Should show: openjdk version "17.0.5.8" or similar
-   ```
-
-2. **Backend builds:**
-   ```powershell
-   cd backend
-   mvn clean package -DskipTests
-   ```
-
-3. **Frontend builds:**
-   ```powershell
-   cd frontend
-   npm run build
-   ```
-
-4. **Playwright browsers:**
-   ```powershell
-   cd frontend
-   npx playwright --version
-   ```
-
-## Additional Information
-
-- See `AGENTS.md` for complete command reference and architecture details
-- See `SETUP.md` for detailed setup instructions
-- Java 17 location: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- Maven location: `C:\Environement\maven-3.8.6`
-- Toolchains configuration: `backend/toolchains.xml`
-
-## Security Note
-
-Some PowerShell operations were blocked during automated setup due to security policies. This is normal and expected. The manual steps above use standard, safe commands that should work without issues.
+**Ready to start?** Open **START_HERE_AFTER_CLONE.md** for detailed instructions!

@@ -1,6 +1,6 @@
 @echo off
-setlocal
-set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"
-set "PATH=%JAVA_HOME%\bin;%PATH%"
-cd backend
-mvn clean install -DskipTests -s settings.xml
+C:\Environement\Java\jdk-17.0.5.8-hotspot\bin\java.exe -version
+echo.
+echo Building backend with Maven...
+cd /d "%~dp0backend"
+C:\Environement\maven-3.8.6\bin\mvn.cmd clean install -DskipTests -Djava.home=C:\Environement\Java\jdk-17.0.5.8-hotspot
