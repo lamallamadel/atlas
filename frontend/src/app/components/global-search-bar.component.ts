@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
@@ -15,7 +15,7 @@ import { Subject, of } from 'rxjs';
           #searchInput
           type="text"
           class="search-input"
-          placeholder="Search annonces and dossiers..."
+          placeholder="Rechercher une annonce ou un dossier…"
           [(ngModel)]="searchQuery"
           (input)="onSearchInput($event)"
           (focus)="showDropdown = true"
@@ -309,7 +309,7 @@ export class GlobalSearchBarComponent implements OnInit {
           this.isLoading = true;
           this.error = '';
           return this.searchService.autocomplete(query).pipe(
-            catchError(err => {
+            catchError(() => {
               this.error = 'Search failed. Please try again.';
               return of({ results: [], totalHits: 0, elasticsearchAvailable: false });
             })
@@ -359,5 +359,13 @@ export class GlobalSearchBarComponent implements OnInit {
   truncate(text: string, length: number): string {
     if (!text) return '';
     return text.length > length ? text.substring(0, length) + '...' : text;
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardShortcut(event: KeyboardEvent) {
+    if (event.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+      event.preventDefault();
+      this.searchInput.nativeElement.focus();
+    }
   }
 }

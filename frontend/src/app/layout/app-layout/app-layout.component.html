@@ -74,7 +74,8 @@
         (click)="toggleTheme()"
         class="theme-toggle-button"
         [attr.aria-label]="(isDarkTheme$ | async) ? 'Basculer en mode clair' : 'Basculer en mode sombre'"
-        [matTooltip]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'">
+        [matTooltip]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'"
+        matTooltipPosition="below">
         <mat-icon aria-hidden="true">
           {{ (isDarkTheme$ | async) ? 'light_mode' : 'dark_mode' }}
         </mat-icon>
@@ -87,7 +88,9 @@
           [matMenuTriggerFor]="userMenu"
           aria-label="Ouvrir le menu utilisateur"
           aria-haspopup="true"
-          [attr.aria-expanded]="userMenuOpen">
+          [attr.aria-expanded]="userMenuOpen"
+          matTooltip="Menu utilisateur"
+          matTooltipPosition="below">
           <mat-icon aria-hidden="true">account_circle</mat-icon>
         </button>
         
