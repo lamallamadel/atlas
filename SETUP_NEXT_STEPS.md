@@ -1,93 +1,157 @@
-# Setup Completion - Next Steps
+# Next Steps to Complete Setup
 
-## Current Status
+## What's Already Done ✅
 
-✓ **Frontend**: Fully set up and ready
-- All npm packages installed (1188 packages)
-- Playwright E2E testing framework ready
-- Chromium browser installed
+1. **Frontend Dependencies** - Installed (1,177 packages)
+2. **Repository Configuration** - Updated .gitignore
+3. **Helper Scripts** - Created in backend directory
 
-⚠️ **Backend**: Requires manual completion (see below)
+## What You Need to Do 📋
 
-## To Complete Backend Setup
+### Step 1: Build the Backend (Required)
 
-Run ONE of these commands from the repository root:
+The backend Maven build requires Java 17 to be set as JAVA_HOME. Choose one of these methods:
 
-### Recommended: Use the prepared setup script
-```cmd
-backend\setup.cmd
-```
-
-### Alternative: Use the complete setup batch file
-```cmd
-complete-backend-setup.bat
-```
-
-### Manual approach
-```cmd
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-set PATH=%JAVA_HOME%\bin;%PATH%
+**Method A - Using Helper Script (Easiest):**
+```powershell
 cd backend
-mvn clean install -DskipTests
+.\mvn-java17.cmd clean package -DskipTests
 ```
 
-## Verification
-
-After running the backend setup, verify with:
-```cmd
+**Method B - Using Node.js:**
+```powershell
 cd backend
-mvn -v
+node install-backend.js
 ```
 
-Should show:
-```
-Apache Maven 3.x.x
-Java version: 17.x.x
-```
-
-## Then You Can Run
-
-### Backend Commands
-```bash
+**Method C - Setting JAVA_HOME Manually:**
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn test                      # Run all tests
-mvn clean package             # Build the application
-mvn spring-boot:run           # Start the dev server
-mvn verify -Pbackend-e2e-h2   # Run E2E tests with H2
+mvn clean package -DskipTests
 ```
 
-### Frontend Commands
-```bash
+This will:
+- Download all Maven dependencies (~200+ packages)
+- Compile the Java code
+- Create `backend/target/backend.jar`
+- Take approximately 3-5 minutes on first run
+
+### Step 2: Install Playwright Browsers (Required for E2E Tests)
+
+```powershell
 cd frontend
-npm run build                 # Build for production
-npm test                      # Run unit tests
-npm run lint                  # Run linter
-npm run e2e                   # Run E2E tests
-npm run e2e:fast             # Run fast E2E tests
-npm start                     # Start dev server (requires backend running)
+npx playwright install
 ```
 
-### Infrastructure
-```bash
-cd infra
-docker-compose up -d          # Start PostgreSQL and other services
-docker-compose down           # Stop services
+This will download Chromium, Firefox, and WebKit browsers for testing (~500MB).
+
+## Verify Your Setup
+
+After completing the above steps, verify everything works:
+
+### Check Backend
+```powershell
+# Verify JAR was created
+Test-Path backend\target\backend.jar
+# Should return: True
+
+# Try running the backend
+cd backend
+mvn spring-boot:run
+# Should start on http://localhost:8080
+# Press Ctrl+C to stop
 ```
 
-## Quick Test After Setup
+### Check Frontend
+```powershell
+# Try running the frontend
+cd frontend
+npm start
+# Should start on http://localhost:4200
+# Press Ctrl+C to stop
+```
 
-1. Complete backend setup (see above)
-2. Run backend tests: `cd backend && mvn test`
-3. Run frontend tests: `cd frontend && npm test`
-4. Start backend: `cd backend && mvn spring-boot:run`
-5. In another terminal, start frontend: `cd frontend && npm start`
-6. Open browser to http://localhost:4200
+### Run Tests
+```powershell
+# Backend tests
+cd backend
+mvn test
 
-## Why Manual Step Required
+# Frontend tests
+cd frontend
+npm test
+```
 
-PowerShell security policies in the automated session blocked commands that:
-- Set environment variables
-- Execute batch/cmd scripts
-- Start external processes
+## Common Issues & Solutions
 
-These restrictions don't apply to interactive terminal sessions, so running any of the scripts above in a regular command prompt or PowerShell window will work without issues.
+### Issue: "JAVA_HOME is not defined correctly"
+**Solution:** Use one of the helper scripts (Method A or B above) that set JAVA_HOME automatically.
+
+### Issue: Maven downloads are slow
+**Solution:** The backend/settings.xml is configured to use Maven Central directly. First build will be slow due to dependency downloads.
+
+### Issue: Port 8080 already in use
+**Solution:** Stop any running service on port 8080, or change the backend port in `backend/src/main/resources/application.yml`
+
+### Issue: Port 4200 already in use
+**Solution:** Stop any running service on port 4200, or run frontend with: `ng serve --port 4201`
+
+## Development Workflow
+
+Once setup is complete, use these commands for daily development:
+
+### Start Full Stack
+```powershell
+# Terminal 1 - Backend
+cd backend
+mvn spring-boot:run
+
+# Terminal 2 - Frontend
+cd frontend
+npm start
+```
+
+### Run Tests
+```powershell
+# Backend unit tests
+cd backend
+mvn test
+
+# Backend E2E tests (H2 database)
+cd backend
+mvn verify -Pbackend-e2e-h2
+
+# Frontend unit tests
+cd frontend
+npm test
+
+# Frontend E2E tests
+cd frontend
+npm run e2e
+```
+
+### Build for Production
+```powershell
+# Backend
+cd backend
+mvn clean package
+
+# Frontend
+cd frontend
+npm run build
+```
+
+## Additional Resources
+
+- **`AGENTS.md`** - Complete development guide with all commands
+- **`README.md`** - Project overview and architecture
+- **`SETUP.md`** - Detailed setup instructions
+- **Backend API Docs** - http://localhost:8080/swagger-ui.html (when running)
+
+## Need Help?
+
+1. Check `AGENTS.md` for detailed command reference
+2. Check `KNOWN_ISSUES.md` for common problems
+3. Ensure Java 17 and Maven 3.8+ are properly installed
+4. Verify Docker is running (needed for E2E tests with PostgreSQL)

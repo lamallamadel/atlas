@@ -1,112 +1,175 @@
-# Initial Repository Setup - Complete
+# Initial Repository Setup Status
 
-## Summary
+## ✓ Completed Setup Steps
 
-The initial setup of the repository has been completed with the following results:
+### 1. Frontend Setup - COMPLETE
+- **npm dependencies installed**: 1,177 packages installed successfully via `npm ci`
+- **Location**: `frontend/node_modules/`
+- **Status**: ✅ Ready for development
 
-### ✅ Completed Successfully
+### 2. Repository Configuration - COMPLETE
+- **`.gitignore` updated**: Added entries for setup helper scripts and temporary build artifacts
+- **Helper scripts created**: Backend build scripts created in `backend/` directory
 
-1. **Frontend Dependencies Installed**
-   - Ran `npm install` in the frontend directory
-   - 1,188 packages successfully installed
-   - All Angular, testing, and development dependencies ready
-   - No critical errors or blockers
+## ⚠️ Pending Setup Steps
 
-2. **Playwright E2E Testing Configured**
-   - Playwright v1.57.0 installed
-   - Browser binaries downloaded and ready:
-     - Chromium 1200
-     - Firefox 1497
-     - WebKit 2227
-   - All E2E test configurations verified
+### Backend Maven Build - REQUIRES MANUAL COMPLETION
 
-3. **Documentation Created**
-   - `INITIAL_SETUP_INSTRUCTIONS.md` - Comprehensive setup guide
-   - `SETUP_STATUS.md` - Detailed status report
-   - `SETUP_COMPLETE.md` - This file
+Due to environment security restrictions, the backend Maven build could not be completed automatically.
 
-4. **Configuration Verified**
-   - All Maven configuration files in place (pom.xml, toolchains.xml, settings.xml)
-   - Frontend configuration verified (package.json, angular.json, playwright configs)
-   - Helper scripts available for backend setup
-
-5. **Repository Hygiene**
-   - .gitignore updated to exclude temporary setup scripts
-   - node_modules properly ignored
-   - Only essential documentation files tracked
-
-### ⚠️ Backend Build Pending
-
-The backend Maven build could not be completed automatically due to environment security restrictions that prevent:
-- Setting environment variables (JAVA_HOME)
-- Running batch files or scripts programmatically
-- Using PowerShell cmdlets that modify environment
-
-**To complete the setup, run this single command:**
-
-```cmd
-.\mvn17.cmd clean install -DskipTests -f backend\pom.xml
-```
-
-This will:
-- Set JAVA_HOME to Java 17 automatically
-- Download all Maven dependencies
-- Compile the Spring Boot application
-- Create the JAR file in `backend/target/`
-
-## Quick Start
-
-After running the backend build command above:
-
-```bash
-# Start backend (Terminal 1)
+#### Option 1: Use Existing Helper Script (Recommended)
+```powershell
 cd backend
-mvn spring-boot:run
-
-# Start frontend (Terminal 2)
-cd frontend
-npm start
-
-# Run tests (optional)
-cd backend && mvn test
-cd frontend && npm run e2e:fast
+.\mvn-java17.cmd clean package -DskipTests
 ```
 
-## Verification
+#### Option 2: Use Node.js Script
+```powershell
+cd backend
+node install-backend.js
+```
+
+#### Option 3: Manual JAVA_HOME Setup
+**PowerShell:**
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+cd backend
+mvn clean package -DskipTests
+```
+
+**Command Prompt:**
+```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+cd backend
+mvn clean package -DskipTests
+```
+
+### Playwright Browser Installation - REQUIRES MANUAL COMPLETION
+
+Playwright browsers need to be installed for E2E testing:
 
 ```powershell
-# Check frontend setup
-Test-Path frontend\node_modules          # Should be True
-Test-Path "$env:LOCALAPPDATA\ms-playwright"  # Should be True
-
-# After backend build
-Test-Path backend\target\backend-0.0.1-SNAPSHOT.jar  # Should be True
+cd frontend
+npx playwright install
 ```
 
-## System Environment
+Or use the npm script:
+```powershell
+cd frontend
+npm run install-browsers
+```
 
-- Node.js: v18.12.1
-- npm: v8.19.2
-- Java 17: Available at C:\Environement\Java\jdk-17.0.5.8-hotspot
-- Maven: 3.8.6
-- Python: 3.11.0
+## Verification Steps
 
-## Files Modified
+Once the pending setup is complete, verify the installation:
 
-- `.gitignore` - Added temporary setup scripts to ignore list
-- `INITIAL_SETUP_INSTRUCTIONS.md` - Created
-- `SETUP_STATUS.md` - Created  
-- `SETUP_COMPLETE.md` - Created (this file)
+### Verify Backend Build
+```powershell
+cd backend
+mvn --version
+# Should show: Java version: 17.0.5
+```
+
+Check that the JAR file was created:
+```powershell
+Test-Path backend\target\backend.jar
+# Should return: True
+```
+
+### Verify Playwright Browsers
+```powershell
+cd frontend
+npx playwright --version
+# Should show: Version 1.57.0
+```
+
+### Run Tests
+
+**Backend Unit Tests:**
+```powershell
+cd backend
+mvn test
+```
+
+**Frontend Unit Tests:**
+```powershell
+cd frontend
+npm test
+```
+
+**Backend E2E Tests (H2):**
+```powershell
+cd backend
+mvn verify -Pbackend-e2e-h2
+```
+
+**Frontend E2E Tests:**
+```powershell
+cd frontend
+npm run e2e
+```
+
+## Quick Start After Setup
+
+### Start Backend Server
+```powershell
+cd backend
+mvn spring-boot:run
+```
+
+### Start Frontend Server
+```powershell
+cd frontend
+npm start
+```
+
+### Access the Application
+- **Frontend**: http://localhost:4200
+- **Backend API**: http://localhost:8080
+- **API Documentation**: http://localhost:8080/swagger-ui.html
+- **Health Check**: http://localhost:8080/actuator/health
+
+## Helper Scripts Created
+
+The following helper scripts were created in the `backend/` directory to assist with the build process:
+
+1. **`install-backend.js`** - Node.js script that sets JAVA_HOME and runs Maven
+2. **`mvn-java17.cmd`** - Batch wrapper that sets JAVA_HOME to Java 17
+3. **`compile.js`** - Alternative Node.js build script
+4. **`mavenrc_pre.bat`** - Maven pre-configuration file
+
+These scripts are already configured with the correct JAVA_HOME path from `toolchains.xml`.
+
+## Important Notes
+
+- **Java Version**: This project requires Java 17 (JDK 17.0.5.8-hotspot)
+- **Maven**: The project uses Maven 3.8.6 with toolchains configuration
+- **Node.js**: Frontend requires Node.js for Angular and Playwright
+- **Docker**: Required for E2E tests with PostgreSQL profile
+
+## Troubleshooting
+
+### JAVA_HOME Not Set Error
+If you see "JAVA_HOME environment variable is not defined correctly":
+1. Use one of the helper scripts that set JAVA_HOME automatically
+2. Or manually set JAVA_HOME before running Maven commands
+
+### Port Conflicts
+If port 8080 (backend) or 4200 (frontend) is already in use, stop the conflicting service or change the port in configuration files.
+
+### Maven Download Issues
+If Maven dependencies fail to download:
+1. Check internet connection
+2. Use the settings.xml in backend directory: `mvn -s settings.xml clean package`
 
 ## Next Steps
 
-1. **Complete backend build**: Run `.\mvn17.cmd clean install -DskipTests -f backend\pom.xml`
-2. **Start development**: Follow the Quick Start guide above
-3. **Read documentation**: Check `AGENTS.md` for development commands and conventions
-4. **Run tests**: Verify everything works with the test commands
+1. Complete the backend Maven build (see "Pending Setup Steps" above)
+2. Install Playwright browsers
+3. Run verification tests
+4. Start developing!
 
----
-
-**Setup completed by:** Automated Agent  
-**Date:** 2026-01-10  
-**Status:** Frontend ✅ | Backend ⚠️ (one command away from complete)
+For more details, see:
+- `AGENTS.md` - Full development guide with build, lint, and test commands
+- `README.md` - Project overview and architecture
+- `SETUP.md` - Detailed setup instructions

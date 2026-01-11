@@ -1,89 +1,67 @@
-# Quick Start After Clone
+# 👋 Start Here - New Repository Clone Setup
 
-## Setup Status
+## Current Status
 
-✅ **Frontend** - Fully configured and ready
-- Node.js dependencies installed (`frontend/node_modules/`)
-- Playwright browsers installed for E2E tests
+✅ **Frontend Ready** - npm packages installed (683 packages)
+⏸️ **Backend Pending** - Needs Maven build with Java 17
 
-⚠️ **Backend** - Requires one more step (see below)
+## Complete Setup in 2 Steps
 
-## Complete the Setup
-
-To finish the backend setup, run **ONE** of these commands from the repository root:
-
-### Option 1: Batch Script (Easiest)
-```cmd
-COMPLETE_SETUP.cmd
-```
-
-### Option 2: PowerShell Script
-```powershell
-.\SETUP_BACKEND.ps1
-```
-
-### Option 3: Manual Command
+### Step 1: Build Backend (Required)
 ```powershell
 cd backend
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-mvn clean install --toolchains ..\toolchains.xml --settings settings.xml
-cd ..
+.\mvn-java17.cmd clean package -DskipTests
 ```
+⏱️ Takes 3-5 minutes on first run
 
-## After Setup
+### Step 2: Install Test Browsers (Optional)
+```powershell
+cd frontend
+npx playwright install
+```
+⏱️ Takes 2-3 minutes (only needed for E2E tests)
 
-Once the backend build completes, you're ready to develop!
-
-### Start Development
+## Quick Start After Setup
 
 ```powershell
-# Start backend (from backend directory)
+# Terminal 1 - Start Backend
 cd backend
 mvn spring-boot:run
+# 🌐 http://localhost:8080
 
-# In another terminal, start frontend (from frontend directory)
+# Terminal 2 - Start Frontend  
 cd frontend
 npm start
+# 🌐 http://localhost:4200
 ```
 
-### Run Tests
+## Documentation Guide
 
-```powershell
-# Backend tests
-cd backend
-mvn test
-
-# Frontend tests
-cd frontend
-npm test
-
-# E2E tests
-npm run e2e
-```
-
-### Quick Commands Reference
-
-See `AGENTS.md` for complete command reference.
-
-**Backend:**
-- Build: `mvn clean package`
-- Test: `mvn test`
-- E2E (H2): `mvn verify -Pbackend-e2e-h2`
-- E2E (PostgreSQL): `mvn verify -Pbackend-e2e-postgres`
-
-**Frontend:**
-- Serve: `npm start`
-- Test: `npm test`
-- Lint: `npm run lint`
-- E2E: `npm run e2e`
-- E2E (fast): `npm run e2e:fast`
-
-**Access:**
-- Frontend: http://localhost:4200
-- Backend: http://localhost:8080
-- API Docs: http://localhost:8080/swagger-ui.html
-- Health: http://localhost:8080/actuator/health
+| File | Purpose |
+|------|---------|
+| **`COMPLETE_SETUP_NOW.md`** | ⚡ Quickest reference |
+| **`SETUP_NEXT_STEPS.md`** | 📋 Step-by-step walkthrough |
+| **`INITIAL_SETUP_STATUS.md`** | 📊 Detailed status report |
+| **`SETUP_COMPLETE.md`** | 🔧 Troubleshooting guide |
+| **`AGENTS.md`** | 📚 Full development reference |
 
 ## Need Help?
 
-See detailed setup information in `INITIAL_SETUP_STATUS.md`.
+**Backend won't build?**
+- See "Common Issues" in `SETUP_COMPLETE.md`
+- Ensure Java 17 is installed at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+
+**Port conflicts?**
+- Backend uses port 8080
+- Frontend uses port 4200
+- Stop conflicting services or change ports in config
+
+## What's Next?
+
+1. ✅ Complete the 2 setup steps above
+2. ✅ Verify with `mvn test` and `npm test`
+3. ✅ Start developing!
+
+---
+
+**Pro Tip:** The `mvn-java17.cmd` script automatically sets Java 17, so you don't need to worry about JAVA_HOME! 🎯

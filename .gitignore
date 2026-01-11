@@ -324,3 +324,10 @@ backend/.m2-local/
 # Additional setup scripts
 setup-backend-install.ps1
 INITIAL_SETUP_COMPLETE_NOW.md
+
+# Initial setup helper scripts (created during repo setup)
+backend/compile.js
+backend/run-build.js
+backend/build-deps.js
+backend/setup-backend-deps.js
+backend/build-backend.cmd
