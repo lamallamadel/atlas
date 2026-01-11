@@ -212,7 +212,9 @@ export class DossierApiService {
   }
 
   getPendingCount(): Observable<number> {
-    return this.list({ status: DossierStatus.NEW, size: 0 }).pipe(
+    // Spring Data pagination requires size >= 1; using size=1 to minimize data transfer
+    // while still retrieving totalElements from the paginated response
+    return this.list({ status: DossierStatus.NEW, size: 1 }).pipe(
       map(page => page.totalElements)
     );
   }
