@@ -244,3 +244,9 @@ Approche recommandée :
 ### Templates de workflows (TO-BE)
 Les templates détaillés sont décrits dans :
 - `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`
+
+## Workflow spécifique — B2B Demo (biz → pro)
+
+- Machine à états dédiée : `docs/atlas-immobilier/02_fonctionnel/08_workflow_b2b_demo.md`
+- UI Pro associée : `docs/atlas-immobilier/02_fonctionnel/09_ui_pro_crm_b2b_demo.md`
+- Règle clé : l’UI consomme `allowedTransitions` (pas de logique hardcodée)

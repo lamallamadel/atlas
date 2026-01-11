@@ -52,3 +52,8 @@ Parcours critiques :
 - integration tests (Testcontainers)
 - e2e (Playwright headless)
 - artefacts : rapports coverage
+
+
+## Acceptance Criteria (MVP)
+
+- Scénarios E2E (Portail + Biz + Pro) : `docs/atlas-immobilier/04_qa_prod/03_e2e_acceptance_mvp.md`

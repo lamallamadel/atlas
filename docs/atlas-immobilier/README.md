@@ -53,3 +53,14 @@ Voir `02_fonctionnel/04_module_coop_habitat.md`.
 - RBAC (rôles/permissions) : `03_technique/10_rbac_permissions.md`
 - Dictionnaire de données (Core) : `03_technique/11_data_dictionary_core.md`
 - Glossaire : `01_cadrage/03_glossaire.md`
+
+
+## Extension MVP — 3 sites (Portail + Biz + Pro)
+
+- **Portail public** (`atlasia.ma`) : `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`
+- **Site vitrine B2B** (`biz.atlasia.ma`) : `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`
+- **Espace Pro** (`pro.atlasia.ma`) :
+  - Pipeline B2B Demo : `docs/atlas-immobilier/02_fonctionnel/09_ui_pro_crm_b2b_demo.md`
+  - Publications / Listings : `docs/atlas-immobilier/02_fonctionnel/10_ui_pro_listings_publication.md`
+
+> Convention domaines: `www.atlasia.ma` redirige en 301 vers `atlasia.ma`.

@@ -33,7 +33,7 @@ Valeurs autorisées (contrat):
   - `APPOINT_TYPE`, `APPOINT_STATUS`, `APPT_CONFIRM_STATUS`, `MOD_STATUS`
   - `REPORT_REASON`, `REPORT_STATUS`, `CONSENT_TYPE`, `CONSENT_SOURCE`
   - `MEDIA_TYPE`, `DOC_TYPE`, `PAY_METHOD`, `ACTIVITY_TYPE`
-  - `CHANNEL_TYPE`
+  - `CHANNEL_TYPE`, `LEAD_SOURCE`, `NEED_TYPE`, `PLAN_TYPE`, `PUBLICATION_CHANNEL`, `B2B_LOST_REASON`
 
 > Note: `ACTIVITY_TYPE` et `CHANNEL_TYPE` sont introduits dès maintenant pour cadrer l’évolution “messages & activités”.
 
@@ -75,7 +75,7 @@ Codes standard (contrat):
 
   - `COOP_ALLOCATION`, `COOP_ALLOCATION_CASE`, `COOP_GROUP`
   - `COOP_MEMBER`, `COOP_PROJECT`, `CRM_LEAD`
-  - `CRM_LEAD_BUY`, `CRM_LEAD_RENT`, `CRM_MANDATE`
+  - `CRM_LEAD_BUY`, `CRM_LEAD_RENT`, `CRM_LEAD_B2B_DEMO`, `CRM_MANDATE`
   - `CRM_PROPERTY_LISTING`, `CRM_RENTAL_TRANSACTION`, `CRM_SALE_TRANSACTION`
 
 Notes:
@@ -115,7 +115,19 @@ Ces statuts existent dans la documentation et restent valides. Leur usage exact 
   - `CRM_UNREACHABLE`, `CRM_VALUATION_DONE`, `CRM_VISIT_DONE`, `CRM_VISIT_PLANNED`
   - `CRM_WON_SIGNED`
 
-## 5.3 `ACTIVITY_TYPE` (timeline / activités)
+#
+
+### 5.2.X Pipeline B2B Demo (biz → pro)
+
+  - `B2B_NEW`, `B2B_QUALIFIED`, `B2B_SCHEDULED`, `B2B_DONE`, `B2B_WON`, `B2B_LOST`
+
+- `B2B_NEW`: demande de démo reçue (site `biz.atlasia.ma`)
+- `B2B_QUALIFIED`: qualification effectuée
+- `B2B_SCHEDULED`: démo planifiée (RDV associé)
+- `B2B_DONE`: démo réalisée
+- `B2B_WON`: client signé / onboarding
+- `B2B_LOST`: prospect perdu (raison obligatoire)
+# 5.3 `ACTIVITY_TYPE` (timeline / activités)
   - `ACT_APPOINTMENT_LOG`, `ACT_DOCUMENT_LOG`, `ACT_MESSAGE_LOG`, `ACT_NOTE`
   - `ACT_STATUS_CHANGE`, `ACT_SYSTEM`, `ACT_TASK`
 
@@ -129,9 +141,31 @@ Ces statuts existent dans la documentation et restent valides. Leur usage exact 
 
 # 5.5 `LEAD_SOURCE` (provenance)
 
-  - `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM`, `LEAD_SOURCE_PHONE`
+  - `LEAD_SOURCE_WHATSAPP`, `LEAD_SOURCE_FORM`, `LEAD_SOURCE_PHONE`, `LEAD_SOURCE_BIZ_DEMO_FORM`, `LEAD_SOURCE_BIZ_CONTACT_FORM`
   - `LEAD_SOURCE_AVITO`, `LEAD_SOURCE_MUBAWAB`, `LEAD_SOURCE_OTHER`
 
+
+
+## 5.6 `NEED_TYPE` (besoins B2B/B2C)
+
+  - `NEED_PORTAL`, `NEED_CRM`, `NEED_APPOINTMENTS`, `NEED_TRUST`
+  - `NEED_DEVELOPERS`, `NEED_RENTALS`, `NEED_FINANCING`
+  - `NEED_PROPERTY_MGMT`, `NEED_CONCIERGE`
+
+## 5.7 `PLAN_TYPE` (plans commerciaux)
+
+  - `PLAN_PRO_STARTER`, `PLAN_PRO_GROWTH`, `PLAN_PROMOTER`
+
+## 5.8 `PUBLICATION_CHANNEL` (canal de publication)
+
+  - `PUB_PUBLIC_WEB` (portail `atlasia.ma`)
+  - `PUB_AGENCY_PAGE` (vitrine agence)
+  - `PUB_PROMOTER_PAGE` (vitrine promoteur)
+
+## 5.9 `B2B_LOST_REASON` (raisons perte B2B)
+
+  - `B2B_LOST_NO_RESPONSE`, `B2B_LOST_NO_BUDGET`, `B2B_LOST_NOT_FIT`
+  - `B2B_LOST_COMPETITOR`, `B2B_LOST_TIMING`, `B2B_LOST_OTHER`
 ---
 
 # 6) RDV / Visites

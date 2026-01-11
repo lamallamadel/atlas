@@ -144,3 +144,8 @@ Référence : `docs/atlas-immobilier/03_technique/09_notifications.md`
 - `POST /api/v1/coop/groups/{groupId}/allocations` (propose FIFO)
 - `PATCH /api/v1/coop/allocations/{id}` (validate/assign/reject)
 - `POST /api/v1/coop/allocations/{id}/documents` (PV/decision)
+
+## Annexes API (spécifiques MVP)
+
+- API Pro CRM B2B Demo : `docs/atlas-immobilier/03_technique/12_api_pro_crm_b2b_demo.md`
+- API Pro Listings / Publications : `docs/atlas-immobilier/03_technique/13_api_pro_listings.md`

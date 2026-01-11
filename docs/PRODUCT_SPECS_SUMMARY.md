@@ -55,3 +55,10 @@ Le concept central est le **Dossier (Case)** : un dossier représente une intent
 Doc central : `docs/atlas-immobilier/02_fonctionnel/04_module_coop_habitat.md`.
 
 Note : ce module est juridiquement sensible ; il doit être cadré avant exposition publique.
+
+
+## MVP — 3 sites (public + corporate + pro)
+
+- Portail annonces : `atlasia.ma` (spec: `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`)
+- Site vitrine corporate : `biz.atlasia.ma` (spec: `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`)
+- Espace Pro/CRM : `pro.atlasia.ma` (B2B Demo + Listings)

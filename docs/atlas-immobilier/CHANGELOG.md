@@ -42,3 +42,15 @@
 - Harmonisation documentation selon 4 règles de cohérence (source of truth, encart statut, AS-IS vs TO-BE, enums → référentiels).
 - Ajout des spécifications “référentiels + workflows modulables” (multi-métiers immobilier).
 - Mise à jour notifications/outbound selon **Choix B** : WhatsApp Outbound réel (provider, templates, outbox, retry, monitoring) + consentement strict.
+
+## 2026-01-10 — MVP “3 sites” (Portail + Biz + Pro)
+
+Ajouts post `docs_merged_normalized` :
+- Spécification Portail d’annonces (`atlasia.ma`) + URLs/SEO.
+- Spécification site vitrine B2B (`biz.atlasia.ma`) + formulaire démo.
+- Workflow B2B Demo (statuts/transitions + lost reasons) pour `CRM_LEAD_B2B_DEMO`.
+- Contrat API Pro pour dossiers B2B Demo.
+- Spécification UI Pro (Kanban/Liste/Détail) B2B Demo.
+- Spécification UI Pro Publications / Listings.
+- Contrat API Pro Listings (CRUD, médias, transitions, trust, reports).
+- Acceptance Criteria E2E (Portail + Biz + Pro).
