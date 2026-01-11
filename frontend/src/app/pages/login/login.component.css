@@ -454,12 +454,21 @@ textarea.ng-invalid.ng-touched:focus {
 /* Tablet (768px and below) */
 @media (max-width: 768px) {
   .login-container {
-    padding: var(--spacing-3);
+    padding: var(--spacing-4);
   }
 
   .login-card {
     max-width: 100%;
+    border-radius: var(--radius-xl);
     padding: var(--spacing-6);
+  }
+
+  .login-section {
+    padding: var(--spacing-4);
+  }
+
+  .mock-buttons {
+    flex-direction: column;
   }
 
   .login-logo {
@@ -506,6 +515,7 @@ textarea.ng-invalid.ng-touched:focus {
   }
 
   .login-header {
+    text-align: center;
     margin-bottom: var(--spacing-6);
   }
 
@@ -522,7 +532,7 @@ textarea.ng-invalid.ng-touched:focus {
   }
 
   .login-title {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-2xl);
   }
 
   .login-subtitle {
@@ -537,7 +547,9 @@ textarea.ng-invalid.ng-touched:focus {
     margin: var(--spacing-4) 0;
   }
 
-  .login-button {
+  .login-button,
+  .btn {
+    width: 100%;
     padding: var(--spacing-3) var(--spacing-4);
     font-size: var(--font-size-sm);
   }
