@@ -156,8 +156,8 @@
 
     <app-empty-state 
       *ngIf="!loading && !error && dossiers.length === 0"
-      message="Aucun dossier trouvé"
-      subtext="Créez votre premier dossier pour commencer à gérer vos prospects ou effacez les filtres pour voir tous les dossiers."
+      [message]="emptyStateMessage"
+      [subtext]="emptyStateSubtext"
       [primaryAction]="emptyStatePrimaryAction"
       [secondaryAction]="emptyStateSecondaryAction">
     </app-empty-state>

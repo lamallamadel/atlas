@@ -113,15 +113,33 @@ export class DossiersComponent implements OnInit {
     { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' }
   ];
 
-  emptyStatePrimaryAction: ActionButtonConfig = {
-    label: 'Créer un dossier',
-    handler: () => this.createDossier()
-  };
+  get emptyStateMessage(): string {
+    return this.appliedFilters.length > 0
+      ? 'Aucun dossier ne correspond à vos filtres'
+      : 'Vous n\'avez encore aucun dossier';
+  }
 
-  emptyStateSecondaryAction: ActionButtonConfig = {
-    label: 'Effacer les filtres',
-    handler: () => this.clearFilters()
-  };
+  get emptyStateSubtext(): string {
+    return this.appliedFilters.length > 0
+      ? 'Essayez de modifier ou réinitialiser les filtres pour voir d\'autres résultats.'
+      : '';
+  }
+
+  get emptyStatePrimaryAction(): ActionButtonConfig {
+    return {
+      label: 'Créer un dossier',
+      handler: () => this.createDossier()
+    };
+  }
+
+  get emptyStateSecondaryAction(): ActionButtonConfig | undefined {
+    return this.appliedFilters.length > 0
+      ? {
+          label: 'Réinitialiser les filtres',
+          handler: () => this.clearFilters()
+        }
+      : undefined;
+  }
 
   constructor(
     private dossierApiService: DossierApiService,

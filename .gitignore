@@ -331,3 +331,9 @@ backend/run-build.js
 backend/build-deps.js
 backend/setup-backend-deps.js
 backend/build-backend.cmd
+
+# Current session setup artifacts
+maven-wrapper.cmd
+setup-java-maven.ps1
+run-maven-setup.js
+SETUP_STATUS_AFTER_CLONE.md
