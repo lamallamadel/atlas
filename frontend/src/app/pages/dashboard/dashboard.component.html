@@ -1,6 +1,14 @@
 <div class="page-container">
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
+    <mat-button-toggle-group 
+      [value]="selectedPeriod$ | async" 
+      (change)="onPeriodChange($event.value)"
+      aria-label="Sélecteur de période">
+      <mat-button-toggle value="TODAY">Aujourd'hui</mat-button-toggle>
+      <mat-button-toggle value="LAST_7_DAYS">7 jours</mat-button-toggle>
+      <mat-button-toggle value="LAST_30_DAYS">30 jours</mat-button-toggle>
+    </mat-button-toggle-group>
   </div>
   <div class="page-content">
     <!-- Ligne 1: KPI Cards (2-4 cards) -->

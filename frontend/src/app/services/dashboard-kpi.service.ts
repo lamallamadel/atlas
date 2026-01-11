@@ -12,12 +12,14 @@ export class DashboardKpiService {
 
   constructor(private http: HttpClient) { }
 
-  getActiveAnnoncesCount(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/kpis/annonces-actives`);
+  getActiveAnnoncesCount(period?: string): Observable<number> {
+    const options = period ? { params: { period } } : {};
+    return this.http.get<number>(`${this.apiUrl}/kpis/annonces-actives`, options);
   }
 
-  getDossiersATraiterCount(): Observable<number> {
-    return this.http.get<number>(`${this.apiUrl}/kpis/dossiers-a-traiter`);
+  getDossiersATraiterCount(period?: string): Observable<number> {
+    const options = period ? { params: { period } } : {};
+    return this.http.get<number>(`${this.apiUrl}/kpis/dossiers-a-traiter`, options);
   }
 
   getRecentDossiers(): Observable<DossierResponse[]> {

@@ -30,6 +30,7 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -149,6 +150,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatCheckboxModule,
     MatChipsModule,
     MatBottomSheetModule,
+    MatButtonToggleModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,

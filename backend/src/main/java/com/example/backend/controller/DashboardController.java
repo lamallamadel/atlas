@@ -30,8 +30,8 @@ public class DashboardController {
             @ApiResponse(responseCode = "200", description = "Count retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Long.class)))
     })
-    public ResponseEntity<Long> getActiveAnnoncesCount() {
-        Long count = dashboardService.getActiveAnnoncesCount();
+    public ResponseEntity<Long> getActiveAnnoncesCount(@RequestParam(required = false) String period) {
+        Long count = dashboardService.getActiveAnnoncesCount(period);
         return ResponseEntity.ok(count);
     }
 
@@ -41,8 +41,8 @@ public class DashboardController {
             @ApiResponse(responseCode = "200", description = "Count retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Long.class)))
     })
-    public ResponseEntity<Long> getDossiersATraiterCount() {
-        Long count = dashboardService.getDossiersATraiterCount();
+    public ResponseEntity<Long> getDossiersATraiterCount(@RequestParam(required = false) String period) {
+        Long count = dashboardService.getDossiersATraiterCount(period);
         return ResponseEntity.ok(count);
     }
 

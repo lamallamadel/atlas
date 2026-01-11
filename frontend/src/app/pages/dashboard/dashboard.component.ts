@@ -5,7 +5,7 @@ import { PingService } from '../../services/ping.service';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
-import { interval, Subject, takeUntil, takeWhile } from 'rxjs';
+import { interval, Subject, takeUntil, takeWhile, BehaviorSubject, skip } from 'rxjs';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
 type Chart = any;
@@ -30,6 +30,8 @@ interface KpiCard {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
+  
+  selectedPeriod$ = new BehaviorSubject<string>('TODAY');
   
   apiStatus: 'checking' | 'connected' | 'disconnected' = 'checking';
   lastChecked: Date | null = null;
@@ -84,6 +86,22 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.observeBreakpoints();
     this.checkApiConnection();
     this.loadKpis();
+    this.observePeriodChanges();
+  }
+
+  observePeriodChanges(): void {
+    this.selectedPeriod$
+      .pipe(
+        skip(1),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.loadKpis();
+      });
+  }
+
+  onPeriodChange(period: string): void {
+    this.selectedPeriod$.next(period);
   }
 
   observeBreakpoints(): void {
@@ -156,7 +174,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.kpiCards['annoncesActives'].loading = true;
     this.kpiCards['annoncesActives'].error = '';
 
-    this.dashboardKpiService.getActiveAnnoncesCount().subscribe({
+    const period = this.selectedPeriod$.value;
+    this.dashboardKpiService.getActiveAnnoncesCount(period).subscribe({
       next: (count) => {
         this.kpiCards['annoncesActives'].value = count;
         this.kpiCards['annoncesActives'].loading = false;
@@ -176,7 +195,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.kpiCards['dossiersATraiter'].loading = true;
     this.kpiCards['dossiersATraiter'].error = '';
 
-    this.dashboardKpiService.getDossiersATraiterCount().subscribe({
+    const period = this.selectedPeriod$.value;
+    this.dashboardKpiService.getDossiersATraiterCount(period).subscribe({
       next: (count) => {
         this.kpiCards['dossiersATraiter'].value = count;
         this.kpiCards['dossiersATraiter'].loading = false;
