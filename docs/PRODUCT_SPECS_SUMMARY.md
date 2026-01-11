@@ -62,6 +62,7 @@ Note : ce module est juridiquement sensible ; il doit être cadré avant exposit
 
 - Portail annonces : `atlasia.ma` (spec: `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`)
 - Site vitrine corporate : `biz.atlasia.ma` (spec: `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`)
+- SEO & tracking vitrine (spec: `docs/atlas-immobilier/02_fonctionnel/11_biz_seo_tracking.md`)
 - Espace Pro/CRM : `pro.atlasia.ma` (B2B Demo + Listings)
 
 

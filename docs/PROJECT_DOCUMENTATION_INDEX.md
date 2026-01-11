@@ -80,6 +80,7 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 ### Sites (3 entrées)
 - Portail annonces (public) : `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`
 - Site vitrine B2B (biz) : `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`
+- Biz — SEO & Tracking : `docs/atlas-immobilier/02_fonctionnel/11_biz_seo_tracking.md`
 - UI Pro B2B Demo : `docs/atlas-immobilier/02_fonctionnel/09_ui_pro_crm_b2b_demo.md`
 - UI Pro Listings : `docs/atlas-immobilier/02_fonctionnel/10_ui_pro_listings_publication.md`
 - API Pro B2B Demo : `docs/atlas-immobilier/03_technique/12_api_pro_crm_b2b_demo.md`

@@ -1,5 +1,7 @@
 # Site vitrine corporate — Spécification UI (MVP)
 
+> Voir aussi : `docs/atlas-immobilier/02_fonctionnel/11_biz_seo_tracking.md`
+
 > **Domaine**: `biz.atlasia.ma`  
 > **Statut**: TO-BE (cible MVP)  
 > **Source of truth**: Oui (pour le site vitrine B2B)  

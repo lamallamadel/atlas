@@ -57,3 +57,7 @@ Ajouts post `docs_merged_normalized` :
 
 ## Documentation — 2026-01-10
 - Ajout de la page unique **Arborescence & déploiement (MVP)** : `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`
+
+
+## Documentation — 2026-01-11
+- Ajout de la spécification **Biz — SEO & Tracking (MVP)** : `docs/atlas-immobilier/02_fonctionnel/11_biz_seo_tracking.md`
