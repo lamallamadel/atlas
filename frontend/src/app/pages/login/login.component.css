@@ -227,6 +227,29 @@ textarea.ng-invalid.ng-touched:focus {
   letter-spacing: 0.05em;
 }
 
+/* Divider Styles */
+.divider {
+  display: flex;
+  align-items: center;
+  margin: var(--spacing-6) 0;
+  text-align: center;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-neutral-300);
+}
+
+.divider span {
+  padding: 0 var(--spacing-3);
+  color: var(--color-neutral-500);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+}
+
 /* Button Styles */
 .login-button {
   width: 100%;

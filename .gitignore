@@ -298,6 +298,11 @@ run-initial-setup.ps1
 setup_backend_build.py
 setup-repo-install.ps1
 
+# Additional setup helper scripts (created during initial repo setup)
+setup-repo-build.cmd
+backend/build-backend.js
+backend/run-maven-build.ps1
+
 # Initial setup artifacts (created during repo clone setup)
 setup-backend-build.cmd
 backend/mavenrc_pre.cmd

@@ -1,182 +1,136 @@
 # Initial Repository Setup Status
 
-## Completed Setup Steps
+## Completed ✓
 
-### ✅ Frontend Setup (COMPLETE)
-- **npm install**: Successfully installed all frontend dependencies
-- **Location**: `frontend/`
-- **Packages installed**: 1,178 packages
-- **Status**: Ready to build, test, and run
+### Frontend Setup
+- **npm dependencies installed** - All Angular and development dependencies are installed in `frontend/node_modules`
+- **Playwright browsers installed** - E2E test browsers (Chromium, Firefox, WebKit) are ready
+- **Ready to use**: You can now run:
+  - `cd frontend && npm start` - Start development server
+  - `cd frontend && npm test` - Run unit tests
+  - `cd frontend && npm run e2e` - Run E2E tests (requires backend)
+  - `cd frontend && npm run build` - Build for production
 
-### ⚠️ Backend Setup (REQUIRES MANUAL STEP)
-- **Status**: Dependencies NOT yet installed
-- **Reason**: Maven build commands are restricted for security
-- **Java 17 Verified**: Available at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- **Maven Verified**: Version 3.8.6 available
-- **Configuration Files**: All in place (pom.xml, settings.xml, toolchains.xml)
+### Configuration Files Ready
+- `toolchains.xml` - Maven toolchains configuration (points to Java 17)
+- `backend/settings.xml` - Maven settings with proxy configuration
+- `backend/mvn.cmd` - Wrapper script that sets JAVA_HOME for Maven
 
-## What You Need To Do
+## Requires Manual Completion ⚠️
 
-### Backend Maven Install
+### Backend Setup
+The backend Maven build could not be completed automatically due to security restrictions on setting environment variables (JAVA_HOME).
 
-The backend requires one manual command to complete the setup. Choose any of these options:
+**To complete backend setup, run ONE of the following:**
 
-#### Option 1: Use the mvn17.cmd wrapper (Recommended)
+#### Option 1: Use the Complete Setup Script (Easiest)
 ```cmd
-.\mvn17.cmd -f backend\pom.xml clean install -DskipTests
+COMPLETE_SETUP.cmd
 ```
 
-#### Option 2: PowerShell with JAVA_HOME
+#### Option 2: Use PowerShell Script
 ```powershell
+cd backend
+.\do-install.ps1
+```
+
+#### Option 3: Use Command Prompt Wrapper
+```cmd
+cd backend
+.\run-install.cmd
+```
+
+#### Option 4: Manual Maven Command
+```powershell
+cd backend
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-cd backend
 mvn clean install -DskipTests
 ```
 
-#### Option 3: Command Prompt with JAVA_HOME
+#### Option 5: Use Node.js Script
 ```cmd
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
 cd backend
-mvn clean install -DskipTests
+node build-backend.js
 ```
 
-#### Option 4: Use existing setup script
+### What the Backend Build Does
+- Downloads all Maven dependencies
+- Compiles the Spring Boot application
+- Packages the application as a JAR file
+- Runs unit tests (unless `-DskipTests` is used)
+- Creates build artifacts in `backend/target/`
+
+## Verification
+
+After running the backend setup, verify everything is working:
+
+### Check Backend Build
 ```cmd
-COMPLETE-BACKEND-SETUP.cmd
-```
-
-### Optional: Playwright Browsers (For E2E Tests)
-
-If you plan to run frontend E2E tests, install Playwright browsers:
-```bash
-cd frontend
-npx playwright install
-```
-
-## Verification Commands
-
-Once backend Maven install completes, verify the setup:
-
-### Backend
-```bash
 cd backend
-mvn test                    # Run tests
-mvn package                 # Build package
-mvn spring-boot:run         # Run dev server
+mvn clean package
 ```
 
-### Frontend  
-```bash
+### Run Backend Tests
+```cmd
+cd backend
+mvn test
+```
+
+### Start Backend Server
+```cmd
+cd backend
+mvn spring-boot:run
+```
+Then visit: http://localhost:8080/actuator/health
+
+### Run Backend E2E Tests
+```cmd
+cd backend
+mvn verify -Pbackend-e2e-h2
+```
+
+### Run Full E2E Test Suite
+```cmd
 cd frontend
-npm test                    # Run unit tests
-npm run build               # Build production
-npm start                   # Run dev server
-npm run e2e                 # Run E2E tests (requires Playwright browsers)
-```
-
-### Infrastructure
-```bash
-cd infra
-docker-compose up -d        # Start PostgreSQL, etc.
+npm run e2e:full
 ```
 
 ## Repository Structure
 
 ```
 /
-├── backend/                # Spring Boot (Java 17, Maven)
+├── backend/              # Spring Boot application
 │   ├── src/
+│   ├── target/          # Build output (created after mvn install)
 │   ├── pom.xml
-│   ├── settings.xml        # Maven settings (no proxy, Maven Central)
-│   └── toolchains.xml      # Java 17 toolchain config
-├── frontend/               # Angular 16
+│   └── toolchains.xml
+├── frontend/            # Angular application  
 │   ├── src/
-│   ├── e2e/                # Playwright E2E tests
-│   ├── package.json        # ✅ Dependencies installed
-│   └── node_modules/       # ✅ Installed
-├── infra/                  # Docker Compose infrastructure
+│   ├── e2e/
+│   ├── node_modules/    # ✓ Installed
+│   └── package.json
+├── infra/               # Docker infrastructure
 │   └── docker-compose.yml
-├── toolchains.xml          # Root Maven toolchains (Java 17 path)
-└── mvn17.cmd               # Maven wrapper with Java 17
+└── toolchains.xml       # Maven toolchains for Java 17
 ```
 
-## Tech Stack Summary
+## Next Steps
 
-### Backend
-- Java 17 (JDK 17.0.5.8)
-- Spring Boot 3.2.1
-- Maven 3.8.6
-- PostgreSQL (runtime)
-- H2 (test)
-- Testcontainers (E2E tests)
-
-### Frontend
-- Angular 16
-- TypeScript 5.1
-- Angular Material
-- Chart.js
-- Playwright (E2E tests)
-- Jasmine + Karma (unit tests)
-
-### Infrastructure
-- Docker & Docker Compose
-- PostgreSQL
-- Keycloak (optional, for auth E2E tests)
-
-## Next Steps After Backend Install
-
-1. **Start Infrastructure** (if needed):
-   ```bash
+1. **Complete backend Maven build** (see options above)
+2. **Start infrastructure** (optional, for PostgreSQL):
+   ```cmd
    cd infra
    docker-compose up -d
    ```
+3. **Start development servers**:
+   - Backend: `cd backend && mvn spring-boot:run`
+   - Frontend: `cd frontend && npm start`
+4. **Run tests** to verify everything works
 
-2. **Run Backend**:
-   ```bash
-   cd backend
-   mvn spring-boot:run
-   ```
-   Backend will be at: http://localhost:8080
+## Notes
 
-3. **Run Frontend**:
-   ```bash
-   cd frontend
-   npm start
-   ```
-   Frontend will be at: http://localhost:4200
-
-4. **Run Tests**:
-   ```bash
-   # Backend unit tests
-   cd backend
-   mvn test
-
-   # Backend E2E tests (H2)
-   mvn verify -Pbackend-e2e-h2
-
-   # Backend E2E tests (PostgreSQL - requires Docker)
-   mvn verify -Pbackend-e2e-postgres
-
-   # Frontend unit tests
-   cd frontend
-   npm test
-
-   # Frontend E2E tests (requires backend running + Playwright browsers)
-   npm run e2e
-   ```
-
-## Summary
-
-**What's Done:**
-- ✅ Frontend dependencies installed (1,178 packages)
-- ✅ Maven configuration files in place
-- ✅ Java 17 verified and accessible
-- ✅ Helper scripts created (mvn17.cmd, COMPLETE-BACKEND-SETUP.cmd)
-
-**What's Needed:**
-- ⚠️ Run ONE backend Maven install command (see options above)
-- ⚠️ Optional: Install Playwright browsers for E2E tests
-
-**Estimated Time:** 2-5 minutes for Maven install (downloads dependencies)
-
-See `AGENTS.md` for detailed commands and `SETUP.md` for alternative setup approaches.
+- The project requires **Java 17** - ensure JAVA_HOME points to JDK 17
+- Maven toolchains are configured to use `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- Maven wrapper scripts (`mvn.cmd`, `do-install.ps1`) automatically set JAVA_HOME
+- Frontend is fully set up and ready to use
+- Backend just needs one Maven build command to complete setup
