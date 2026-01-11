@@ -120,6 +120,13 @@ public class DossierController {
             @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.")
             @RequestParam(defaultValue = "id,asc") String sort) {
 
+        if (page < 0) {
+            throw new IllegalArgumentException("Page number must be at least 0");
+        }
+        if (size < 1) {
+            throw new IllegalArgumentException("Page size must be at least 1");
+        }
+
         Pageable pageable = createPageable(page, size, sort);
         Page<DossierResponse> response = dossierService.list(status, leadPhone, annonceId, pageable);
         return ResponseEntity.ok(response);

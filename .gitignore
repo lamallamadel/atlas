@@ -378,3 +378,8 @@ run-backend-maven.js
 package.json
 SETUP_STATUS_AFTER_CLONE.md
 setup-maven-build.js
+setup-temp-java17-mvn.cmd
+run-mvn-install.ps1
+setup-maven-toolchains.cmd
+mvn-java17-wrapper.ps1
+SETUP_STATUS_INITIAL.md
