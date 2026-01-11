@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -23,4 +24,10 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     List<Dossier> findByLeadPhoneAndOrgIdAndStatusNotIn(@Param("phone") String phone, @Param("orgId") String orgId, @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
 
     Long countByStatusIn(List<DossierStatus> statuses);
+    
+    @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status = :status AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) > :startDate")
+    Long countByStatusAndCreatedAtAfter(@Param("status") DossierStatus status, @Param("startDate") LocalDateTime startDate);
+    
+    @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status = :status AND d.orgId = :orgId AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) > :startDate")
+    Long countByStatusAndCreatedAtAfter(@Param("status") DossierStatus status, @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate);
 }
