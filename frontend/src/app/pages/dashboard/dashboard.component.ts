@@ -1,10 +1,12 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
 import { ActionButtonConfig } from '../../components/empty-state.component';
+import { DossierCreateDialogComponent } from '../dossiers/dossier-create-dialog.component';
 import { interval, Subject, takeUntil, takeWhile, BehaviorSubject, skip } from 'rxjs';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
@@ -78,7 +80,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     private dashboardKpiService: DashboardKpiService,
     private router: Router,
     private ariaAnnouncer: AriaLiveAnnouncerService,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit(): void {
@@ -418,14 +421,35 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   getEmptyStatePrimaryAction(): ActionButtonConfig {
     return {
       label: 'Créer un dossier',
-      handler: () => this.router.navigate(['/dossiers/new'])
+      handler: () => this.openCreateDossierDialog()
     };
   }
 
   getEmptyStateSecondaryAction(): ActionButtonConfig {
     return {
       label: 'Importer des leads',
-      handler: () => this.router.navigate(['/dossiers/new'])
+      handler: () => this.openCreateDossierDialog()
     };
+  }
+
+  private openCreateDossierDialog(): void {
+    const dialogRef = this.dialog.open(DossierCreateDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (result.openExisting) {
+          this.router.navigate(['/dossiers', result.openExisting]);
+        } else {
+          this.loadRecentDossiers();
+          if (result.id) {
+            this.router.navigate(['/dossiers', result.id]);
+          }
+        }
+      }
+    });
   }
 }

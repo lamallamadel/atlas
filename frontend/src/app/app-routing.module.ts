@@ -6,7 +6,6 @@ import { AnnoncesComponent } from './pages/annonces/annonces.component';
 import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
 import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
-import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
@@ -35,7 +34,6 @@ const routes: Routes = [
       { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
       { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
       { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
-      { path: 'dossiers/new', component: DossierCreateComponent, data: { animation: 'DossierCreatePage' } },
       { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } }
     ]
   }

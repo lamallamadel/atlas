@@ -1,0 +1,129 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Créer un nouveau dossier</h2>
+
+  <mat-dialog-content>
+    <div *ngIf="error" class="error-alert" role="alert" aria-live="assertive">
+      <mat-icon class="error-icon">warning</mat-icon>
+      <span>{{ error }}</span>
+    </div>
+
+    <div *ngIf="duplicates.length > 0" class="warning-banner" role="alert" aria-live="polite">
+      <div class="warning-content">
+        <mat-icon class="warning-icon">warning</mat-icon>
+        <div class="warning-text">
+          <strong>Doublon trouvé !</strong>
+          <p>Un dossier avec ce numéro de téléphone existe déjà.</p>
+        </div>
+      </div>
+      <div class="warning-actions">
+        <button
+          *ngFor="let duplicate of duplicates"
+          mat-stroked-button
+          color="primary"
+          (click)="openExistingDossier(duplicate.id)"
+          type="button"
+          [attr.aria-label]="'Ouvrir le dossier existant numéro ' + duplicate.id"
+        >
+          Ouvrir l'existant (ID : {{ duplicate.id }})
+        </button>
+      </div>
+    </div>
+
+    <form [formGroup]="dossierForm" (ngSubmit)="onSubmit()" class="dossier-form">
+      <div class="form-grid">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Nom du prospect</mat-label>
+          <input
+            matInput
+            formControlName="leadName"
+            placeholder="Saisir le nom du prospect"
+            [attr.aria-invalid]="isFieldInvalid('leadName')"
+          />
+          <mat-error *ngIf="getFieldError('leadName')">
+            {{ getFieldError('leadName') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Téléphone du prospect</mat-label>
+          <input
+            matInput
+            formControlName="leadPhone"
+            placeholder="Ex : 06 12 34 56 78"
+            (blur)="onPhoneBlur()"
+            [attr.aria-invalid]="isFieldInvalid('leadPhone')"
+          />
+          <mat-hint *ngIf="!getFieldError('leadPhone')">Exemple : 06 12 34 56 78</mat-hint>
+          <mat-error *ngIf="getFieldError('leadPhone')">
+            {{ getFieldError('leadPhone') }}
+          </mat-error>
+          <mat-icon matSuffix *ngIf="checkingDuplicates">
+            <mat-spinner diameter="20"></mat-spinner>
+          </mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Source du prospect</mat-label>
+          <input
+            matInput
+            formControlName="leadSource"
+            placeholder="Saisir la source du prospect"
+            [attr.aria-invalid]="isFieldInvalid('leadSource')"
+          />
+          <mat-error *ngIf="getFieldError('leadSource')">
+            {{ getFieldError('leadSource') }}
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Annonce (optionnel)</mat-label>
+          <input
+            matInput
+            [formControl]="annonceSearchControl"
+            [matAutocomplete]="auto"
+            placeholder="Rechercher une annonce..."
+          />
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
+            <mat-option *ngFor="let annonce of filteredAnnonces | async" [value]="annonce">
+              {{ displayAnnonceFn(annonce) }}
+            </mat-option>
+          </mat-autocomplete>
+          <mat-error *ngIf="getFieldError('annonceId')">
+            {{ getFieldError('annonceId') }}
+          </mat-error>
+        </mat-form-field>
+      </div>
+
+      <mat-expansion-panel class="advanced-panel">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            Avancé
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ID annonce (saisie directe)</mat-label>
+          <input
+            matInput
+            type="number"
+            [value]="dossierForm.get('annonceId')?.value || ''"
+            (input)="onAnnonceIdDirectInput($event)"
+            placeholder="Saisir l'ID de l'annonce"
+          />
+        </mat-form-field>
+      </mat-expansion-panel>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="onCancel()" [disabled]="submitting">
+      Annuler
+    </button>
+    <button mat-raised-button color="primary" type="submit" (click)="onSubmit()" [disabled]="submitting">
+      <span *ngIf="!submitting">Créer</span>
+      <span *ngIf="submitting" class="btn-loading">
+        <mat-spinner diameter="16" class="inline-spinner"></mat-spinner>
+        Création...
+      </span>
+    </button>
+  </mat-dialog-actions>
+</div>

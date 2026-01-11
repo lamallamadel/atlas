@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
@@ -11,6 +12,7 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
+import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -162,7 +164,8 @@ export class DossiersComponent implements OnInit {
     private route: ActivatedRoute,
     private filterPresetService: FilterPresetService,
     private bottomSheet: MatBottomSheet,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -483,7 +486,24 @@ export class DossiersComponent implements OnInit {
   }
 
   createDossier(): void {
-    this.router.navigate(['/dossiers/new']);
+    const dialogRef = this.dialog.open(DossierCreateDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        if (result.openExisting) {
+          this.router.navigate(['/dossiers', result.openExisting]);
+        } else {
+          this.loadDossiers();
+          if (result.id) {
+            this.router.navigate(['/dossiers', result.id]);
+          }
+        }
+      }
+    });
   }
 
   onRowAction(event: { action: string; row: unknown }): void {

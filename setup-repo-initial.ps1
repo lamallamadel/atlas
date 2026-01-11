@@ -1,80 +1,67 @@
-# Initial Repository Setup Script
-# This script sets up both backend (Maven/Java) and frontend (npm) dependencies
+# Initial repository setup script
+# This script sets up the backend and frontend dependencies
 
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Initial Repository Setup" -ForegroundColor Cyan
+Write-Host "Starting Initial Repository Setup" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
 
-# Step 1: Setup Maven toolchains
-Write-Host "Step 1: Setting up Maven toolchains..." -ForegroundColor Yellow
+# Step 1: Copy toolchains.xml to Maven directory
+Write-Host "`n[1/4] Configuring Maven toolchains..." -ForegroundColor Yellow
 $m2Dir = Join-Path $env:USERPROFILE ".m2"
 if (-not (Test-Path $m2Dir)) {
-    New-Item -ItemType Directory -Path $m2Dir | Out-Null
-    Write-Host "  Created .m2 directory" -ForegroundColor Green
+    New-Item -ItemType Directory -Path $m2Dir -Force | Out-Null
 }
+Copy-Item -Path "toolchains.xml" -Destination (Join-Path $m2Dir "toolchains.xml") -Force
+Write-Host "✓ Toolchains configured" -ForegroundColor Green
 
-$toolchainsSource = Join-Path $PSScriptRoot "toolchains.xml"
-$toolchainsDest = Join-Path $m2Dir "toolchains.xml"
-Copy-Item -Path $toolchainsSource -Destination $toolchainsDest -Force
-Write-Host "  Copied toolchains.xml to ~/.m2/" -ForegroundColor Green
-Write-Host ""
-
-# Step 2: Install backend dependencies
-Write-Host "Step 2: Installing backend dependencies (Maven)..." -ForegroundColor Yellow
-$oldJavaHome = $env:JAVA_HOME
+# Step 2: Build backend with Java 17
+Write-Host "`n[2/4] Building backend (this may take several minutes)..." -ForegroundColor Yellow
+Push-Location backend
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+& mvn clean install -DskipTests -gs settings.xml -t toolchains.xml
+$backendResult = $LASTEXITCODE
+Pop-Location
 
-Push-Location backend
-try {
-    Write-Host "  Running: mvn clean install -DskipTests" -ForegroundColor Gray
-    & mvn clean install -DskipTests
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "  Backend dependencies installed successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "  Backend installation failed with exit code $LASTEXITCODE" -ForegroundColor Red
-        Pop-Location
-        $env:JAVA_HOME = $oldJavaHome
-        exit 1
-    }
-} finally {
-    Pop-Location
-    $env:JAVA_HOME = $oldJavaHome
+if ($backendResult -eq 0) {
+    Write-Host "✓ Backend build successful" -ForegroundColor Green
+} else {
+    Write-Host "✗ Backend build failed" -ForegroundColor Red
+    exit 1
 }
-Write-Host ""
 
 # Step 3: Install frontend dependencies
-Write-Host "Step 3: Installing frontend dependencies (npm)..." -ForegroundColor Yellow
+Write-Host "`n[3/4] Installing frontend dependencies..." -ForegroundColor Yellow
 Push-Location frontend
-try {
-    Write-Host "  Running: npm install" -ForegroundColor Gray
-    & npm install
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "  Frontend dependencies installed successfully!" -ForegroundColor Green
-    } else {
-        Write-Host "  Frontend installation failed with exit code $LASTEXITCODE" -ForegroundColor Red
-        Pop-Location
-        exit 1
-    }
-} finally {
-    Pop-Location
-}
-Write-Host ""
+& npm install
+$frontendResult = $LASTEXITCODE
+Pop-Location
 
-# Summary
+if ($frontendResult -eq 0) {
+    Write-Host "✓ Frontend dependencies installed" -ForegroundColor Green
+} else {
+    Write-Host "✗ Frontend npm install failed" -ForegroundColor Red
+    exit 1
+}
+
+# Step 4: Install Playwright browsers
+Write-Host "`n[4/4] Installing Playwright browsers..." -ForegroundColor Yellow
+Push-Location frontend
+& npx playwright install
+$playwrightResult = $LASTEXITCODE
+Pop-Location
+
+if ($playwrightResult -eq 0) {
+    Write-Host "✓ Playwright browsers installed" -ForegroundColor Green
+} else {
+    Write-Host "⚠ Playwright browser installation had issues (you may need to run manually)" -ForegroundColor Yellow
+}
+
+Write-Host "`n========================================" -ForegroundColor Cyan
+Write-Host "Initial Repository Setup Complete!" -ForegroundColor Cyan
 Write-Host "========================================" -ForegroundColor Cyan
-Write-Host "  Setup Complete!" -ForegroundColor Green
-Write-Host "========================================" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Yellow
-Write-Host "  - Backend:" -ForegroundColor Cyan
-Write-Host "    cd backend && mvn spring-boot:run"
-Write-Host ""
-Write-Host "  - Frontend:" -ForegroundColor Cyan
-Write-Host "    cd frontend && npm start"
-Write-Host ""
-Write-Host "  - Run tests:" -ForegroundColor Cyan
-Write-Host "    Backend: cd backend && mvn test"
-Write-Host "    Frontend: cd frontend && npm test"
-Write-Host ""
+Write-Host "`nYou can now run:" -ForegroundColor White
+Write-Host "  - Backend tests: cd backend && mvn test" -ForegroundColor Gray
+Write-Host "  - Backend dev: cd backend && mvn spring-boot:run" -ForegroundColor Gray
+Write-Host "  - Frontend dev: cd frontend && npm start" -ForegroundColor Gray
+Write-Host "  - Frontend E2E: cd frontend && npm run e2e" -ForegroundColor Gray

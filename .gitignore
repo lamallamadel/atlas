@@ -346,3 +346,13 @@ SETUP_STATUS_AFTER_CLONE.md
 setup-backend-deps.ps1
 setup-frontend-deps.ps1
 SETUP_COMPLETE.md
+
+# Agent-created initial setup files (current session)
+setup-repo-initial.ps1
+setup-backend.bat
+setup-frontend.bat
+mavenrc_pre.bat
+.mavenrc
+SETUP_INSTRUCTIONS_AFTER_CLONE.md
+INITIAL_SETUP_STATUS.md
+START_HERE.md

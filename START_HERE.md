@@ -1,67 +1,66 @@
-# 👋 Start Here - New Repository Clone Setup
+# 🚀 Start Here - Post-Clone Setup
 
 ## Current Status
 
-✅ **Frontend Ready** - npm packages installed (683 packages)
-⏸️ **Backend Pending** - Needs Maven build with Java 17
+✅ **Frontend Dependencies Installed** - npm packages are ready  
+⚠️ **Backend Build Needed** - Run Maven install with Java 17  
+⚠️ **Playwright Browsers Needed** - Install browser binaries  
 
-## Complete Setup in 2 Steps
+## Quick Setup (2 commands)
 
-### Step 1: Build Backend (Required)
-```powershell
+### 1. Build Backend
+```cmd
 cd backend
-.\mvn-java17.cmd clean package -DskipTests
+mvn.cmd clean install
+cd ..
 ```
-⏱️ Takes 3-5 minutes on first run
 
-### Step 2: Install Test Browsers (Optional)
-```powershell
+### 2. Install Playwright Browsers
+```cmd
 cd frontend
 npx playwright install
+cd ..
 ```
-⏱️ Takes 2-3 minutes (only needed for E2E tests)
 
-## Quick Start After Setup
+## Verify Setup Works
 
-```powershell
-# Terminal 1 - Start Backend
+```cmd
+REM Test backend
+cd backend
+mvn test
+
+REM Test frontend
+cd frontend
+npm test
+
+REM E2E tests
+npm run e2e:fast
+```
+
+## Done! ✨
+
+You're now ready to develop. See these files for more info:
+
+- **AGENTS.md** - All development commands (dev servers, tests, E2E, builds)
+- **INITIAL_SETUP_STATUS.md** - Detailed setup status and troubleshooting
+- **SETUP_INSTRUCTIONS_AFTER_CLONE.md** - Complete setup instructions
+
+## Development Commands
+
+**Backend Dev Server:**
+```cmd
 cd backend
 mvn spring-boot:run
-# 🌐 http://localhost:8080
-
-# Terminal 2 - Start Frontend  
-cd frontend
-npm start
-# 🌐 http://localhost:4200
 ```
 
-## Documentation Guide
+**Frontend Dev Server:**
+```cmd
+cd frontend
+npm start
+```
 
-| File | Purpose |
-|------|---------|
-| **`COMPLETE_SETUP_NOW.md`** | ⚡ Quickest reference |
-| **`SETUP_NEXT_STEPS.md`** | 📋 Step-by-step walkthrough |
-| **`INITIAL_SETUP_STATUS.md`** | 📊 Detailed status report |
-| **`SETUP_COMPLETE.md`** | 🔧 Troubleshooting guide |
-| **`AGENTS.md`** | 📚 Full development reference |
-
-## Need Help?
-
-**Backend won't build?**
-- See "Common Issues" in `SETUP_COMPLETE.md`
-- Ensure Java 17 is installed at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-
-**Port conflicts?**
-- Backend uses port 8080
-- Frontend uses port 4200
-- Stop conflicting services or change ports in config
-
-## What's Next?
-
-1. ✅ Complete the 2 setup steps above
-2. ✅ Verify with `mvn test` and `npm test`
-3. ✅ Start developing!
+Access the app at `http://localhost:4200` (frontend proxies to backend on port 8080).
 
 ---
 
-**Pro Tip:** The `mvn-java17.cmd` script automatically sets Java 17, so you don't need to worry about JAVA_HOME! 🎯
+**Need Help?** Check `AGENTS.md` for troubleshooting and detailed documentation.

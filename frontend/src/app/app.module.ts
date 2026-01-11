@@ -43,6 +43,7 @@ import { AnnonceCreateComponent } from './pages/annonces/annonce-create.componen
 import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
 import { DossiersComponent } from './pages/dossiers/dossiers.component';
 import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
+import { DossierCreateDialogComponent } from './pages/dossiers/dossier-create-dialog.component';
 import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
@@ -92,6 +93,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AnnonceDetailComponent,
     DossiersComponent,
     DossierCreateComponent,
+    DossierCreateDialogComponent,
     DossierDetailComponent,
     LoginComponent,
     AccessDeniedComponent,
