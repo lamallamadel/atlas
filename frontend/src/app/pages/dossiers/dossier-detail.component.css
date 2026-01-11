@@ -8,42 +8,6 @@
   background: var(--color-neutral-50);
 }
 
-.page-header {
-  position: sticky;
-  top: 0;
-  z-index: var(--z-index-sticky);
-  background: var(--color-neutral-0);
-  padding: var(--spacing-4) var(--spacing-6);
-  box-shadow: var(--shadow-sm);
-  transition: var(--transition-shadow);
-}
-
-.btn-back {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  padding: var(--spacing-2) var(--spacing-4);
-  background: transparent;
-  border: var(--border-width-1) solid var(--color-neutral-300);
-  border-radius: var(--radius-lg);
-  color: var(--color-neutral-700);
-  font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-medium);
-  cursor: pointer;
-  transition: var(--transition-colors);
-}
-
-.btn-back:hover {
-  background: var(--color-neutral-100);
-  border-color: var(--color-neutral-400);
-  color: var(--color-neutral-900);
-}
-
-.back-icon {
-  font-size: var(--font-size-xl);
-  line-height: 1;
-}
-
 .page-content {
   max-width: 1400px;
   margin: 0 auto;
@@ -51,16 +15,41 @@
 }
 
 /* ========================================
-   STICKY DOSSIER HEADER WITH FAB
+   BACK LINK
+   ======================================== */
+.link-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-4);
+  color: var(--color-primary-600);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--transition-colors);
+}
+
+.link-back:hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+}
+
+.arrow-left {
+  font-size: var(--font-size-lg);
+  line-height: 1;
+}
+
+/* ========================================
+   STICKY DOSSIER HEADER - CRM STRUCTURE
    ======================================== */
 .dossier-header {
   position: sticky;
-  top: 72px;
+  top: 0;
   z-index: var(--z-index-sticky);
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--spacing-4);
+  flex-direction: column;
+  gap: var(--spacing-3);
   padding: var(--spacing-5);
   margin-bottom: var(--spacing-6);
   background: var(--color-neutral-0);
@@ -73,17 +62,25 @@
   box-shadow: var(--shadow-lg);
 }
 
-.dossier-title-section {
+/* Header Line 1: Title + Badge + Button */
+.header-line-1 {
   display: flex;
+  justify-content: space-between;
   align-items: center;
   gap: var(--spacing-4);
+}
+
+.title-and-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
   flex: 1;
   min-width: 0;
 }
 
 .dossier-title {
   margin: 0;
-  font-size: var(--font-size-2xl);
+  font-size: var(--font-size-xl);
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-900);
   overflow: hidden;
@@ -91,33 +88,61 @@
   white-space: nowrap;
 }
 
-/* Floating Action Button */
-.btn-change-status {
+/* Secondary Button Style */
+.btn-change-status-secondary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--spacing-2);
-  padding: var(--spacing-3) var(--spacing-6);
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
-  border: none;
-  border-radius: var(--radius-full);
-  color: var(--color-neutral-0);
+  padding: var(--spacing-2) var(--spacing-5);
+  background: var(--color-neutral-0);
+  border: var(--border-width-1) solid var(--color-neutral-300);
+  border-radius: var(--radius-lg);
+  color: var(--color-neutral-700);
   font-size: var(--font-size-sm);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
-  box-shadow: var(--shadow-md);
-  transition: all var(--duration-moderate) var(--ease-out);
+  white-space: nowrap;
+  transition: var(--transition-colors);
 }
 
-.btn-change-status:hover {
-  background: linear-gradient(135deg, var(--color-primary-600), var(--color-primary-700));
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
+.btn-change-status-secondary:hover {
+  background: var(--color-neutral-50);
+  border-color: var(--color-neutral-400);
+  color: var(--color-neutral-900);
 }
 
-.btn-change-status:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-sm);
+.btn-change-status-secondary:active {
+  background: var(--color-neutral-100);
+}
+
+/* Header Line 2: Compact Metadata */
+.header-line-2 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-4);
+  padding-top: var(--spacing-2);
+  border-top: var(--border-width-1) solid var(--color-neutral-200);
+}
+
+.metadata-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.metadata-label {
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.metadata-value {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-900);
 }
 
 /* ========================================
@@ -248,33 +273,49 @@
 }
 
 /* ========================================
-   MATERIAL TAB ENHANCEMENTS
+   MATERIAL TAB ENHANCEMENTS - LIMITED WIDTH
    ======================================== */
-::ng-deep .mat-mdc-tab-group {
+.tabs-container {
+  width: 100%;
+}
+
+::ng-deep .tabs-container .mat-mdc-tab-group {
   background: transparent;
 }
 
-::ng-deep .mat-mdc-tab-header {
+::ng-deep .tabs-container .mat-mdc-tab-header {
   background: var(--color-neutral-0);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
   box-shadow: var(--shadow-sm);
   padding: 0 var(--spacing-4);
 }
 
-::ng-deep .mat-mdc-tab-labels {
+::ng-deep .tabs-container .mat-mdc-tab-labels {
   gap: var(--spacing-2);
 }
 
-::ng-deep .mat-mdc-tab {
-  min-width: 120px;
+::ng-deep .tabs-container .mat-mdc-tab {
+  min-width: 100px;
+  max-width: 180px;
   transition: var(--transition-colors);
 }
 
-::ng-deep .mat-mdc-tab:hover {
+::ng-deep .tabs-container .mat-mdc-tab:hover {
   background: var(--color-primary-alpha-10);
 }
 
-::ng-deep .mat-mdc-tab-body-wrapper {
+/* Reinforced active indicator - 3px border-bottom primary-500 */
+::ng-deep .tabs-container .mat-mdc-tab.mdc-tab--active .mdc-tab-indicator__content--underline,
+::ng-deep .tabs-container .mat-mdc-tab .mdc-tab-indicator__content--underline {
+  border-top-width: 3px;
+  border-color: var(--color-primary-500);
+}
+
+::ng-deep .tabs-container .mat-mdc-tab.mdc-tab--active {
+  font-weight: var(--font-weight-semibold);
+}
+
+::ng-deep .tabs-container .mat-mdc-tab-body-wrapper {
   background: var(--color-neutral-0);
   border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   box-shadow: var(--shadow-md);
@@ -282,7 +323,7 @@
 }
 
 /* Smooth tab content transitions with fade animation */
-::ng-deep .mat-mdc-tab-body-content {
+::ng-deep .tabs-container .mat-mdc-tab-body-content {
   animation: fadeIn var(--duration-moderate) var(--ease-out);
   transform: none !important;
 }
@@ -1007,24 +1048,38 @@
   }
 
   .dossier-header {
-    flex-direction: column;
-    align-items: stretch;
-    top: 64px;
+    gap: var(--spacing-4);
   }
 
-  .dossier-title-section {
+  .header-line-1 {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .title-and-badge {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--spacing-2);
   }
 
   .dossier-title {
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     white-space: normal;
   }
 
-  .btn-change-status {
+  .btn-change-status-secondary {
     width: 100%;
     justify-content: center;
+  }
+
+  .header-line-2 {
+    gap: var(--spacing-3);
+  }
+
+  .metadata-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-1);
   }
 
   /* Single column layout for info sections */
@@ -1084,10 +1139,6 @@
 }
 
 @media (max-width: 576px) {
-  .page-header {
-    padding: var(--spacing-3) var(--spacing-4);
-  }
-
   .page-content {
     padding: var(--spacing-3);
   }
@@ -1097,7 +1148,15 @@
   }
 
   .dossier-title {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
+  }
+
+  .metadata-label {
+    font-size: 10px;
+  }
+
+  .metadata-value {
+    font-size: var(--font-size-xs);
   }
 
   ::ng-deep .mat-mdc-tab-header {
@@ -1106,6 +1165,7 @@
 
   ::ng-deep .mat-mdc-tab {
     min-width: 80px;
+    max-width: 140px;
     font-size: var(--font-size-xs);
   }
 }

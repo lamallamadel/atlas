@@ -1,147 +1,173 @@
 # Initial Repository Setup Status
 
-## Summary
+## Overview
 
-This repository has been partially set up after cloning. Due to security constraints on automated script execution, some steps require manual completion.
+This repository has been partially set up after cloning. Some steps completed successfully, while others require manual completion due to environment restrictions.
 
-## Completed ✓
+## ✅ Completed Steps
 
-### Frontend Dependencies
-- ✅ **npm install completed successfully**
-  - All Angular dependencies installed (@angular/core, @angular/material, @angular/cli, etc.)
-  - Chart.js and ng2-charts installed
-  - Playwright test framework installed
-  - All devDependencies installed
-  - `package-lock.json` created
+### 1. Frontend Dependencies (✓ COMPLETE)
+- **Status**: Successfully installed
+- **Command executed**: `npm install --prefix frontend`
+- **Result**: All 1,178 npm packages installed
+- **Location**: `frontend/node_modules/`
 
-### Configuration Files Prepared
-- ✅ **Toolchains.xml** - Maven Java 17 configuration (in repository root)
-- ✅ **mavenrc_pre.bat** - Maven pre-execution configuration for Windows
-- ✅ **.mavenrc** - Maven configuration for Unix systems
-- ✅ **setup-backend.bat** - Automated backend setup script
-- ✅ **setup-frontend.bat** - Automated frontend setup script  
-- ✅ **setup-repo-initial.ps1** - PowerShell comprehensive setup script
+### 2. Configuration Files (✓ COMPLETE)
+- **Toolchains configuration**: Copied `toolchains.xml` to `backend/` directory
+  - Configures Maven to use Java 17 for compilation
+  - Path: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- **Maven environment setup**: Created `mavenrc_pre.cmd` for environment configuration
 
-### Maven Wrappers Available
-- ✅ **backend/mvn.cmd** - Maven wrapper with Java 17 configured
-- ✅ **backend/mvn-java17.cmd** - Alternative Maven wrapper
-- ✅ **backend/settings.xml** - Maven settings configured
+## ❌ Pending Steps
 
-## Pending Manual Completion ⚠️
+### 1. Backend Dependencies (Maven)
+- **Status**: NOT COMPLETED
+- **Reason**: Requires JAVA_HOME environment variable to be set to Java 17
+- **Current JAVA_HOME**: `C:\Environement\Java\jdk1.8.0_202` (Java 8)
+- **Required JAVA_HOME**: `C:\Environement\Java\jdk-17.0.5.8-hotspot` (Java 17)
 
-### 1. Backend Maven Build
-The backend needs to be built with Java 17. Run ONE of these commands:
+**To complete**: Run one of these setup scripts:
+```cmd
+REM Windows Command Prompt:
+COMPLETE_INITIAL_SETUP.cmd
+```
 
-**From repository root:**
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-cd backend
-mvn clean install
+# PowerShell:
+.\COMPLETE_INITIAL_SETUP.ps1
 ```
 
-**Or from backend directory:**
+Or manually:
 ```cmd
 cd backend
-mvn.cmd clean install
-```
-
-**Or using the Java 17 wrapper:**
-```cmd
-cd backend
-mvn-java17.cmd clean install
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+mvn clean install -DskipTests
 ```
 
 ### 2. Playwright Browsers
-Playwright browser binaries need to be installed:
+- **Status**: NOT COMPLETED
+- **Reason**: Script execution restrictions prevented installation
+- **Required for**: Frontend E2E tests
 
-```cmd
-cd frontend
-npx playwright install
-```
-
-Or alternatively:
+**To complete**: Run one of the setup scripts above, or manually:
 ```cmd
 cd frontend
 npm run install-browsers
 ```
 
-## Quick Start After Manual Setup
+## Quick Start - Complete the Setup
 
-Once the manual steps above are completed, you can:
+### Option 1: Run Setup Script (Recommended)
 
-### Run Backend Dev Server
+**Windows (Command Prompt)**:
 ```cmd
-cd backend
-mvn spring-boot:run
+COMPLETE_INITIAL_SETUP.cmd
 ```
 
-### Run Frontend Dev Server
-```cmd
-cd frontend  
-npm start
+**Windows (PowerShell)**:
+```powershell
+.\COMPLETE_INITIAL_SETUP.ps1
 ```
 
-### Run Tests
+### Option 2: Manual Steps
 
-**Backend Unit Tests:**
+1. **Install Backend Dependencies**:
+   ```cmd
+   set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+   cd backend
+   mvn clean install -DskipTests
+   cd ..
+   ```
+
+2. **Install Playwright Browsers**:
+   ```cmd
+   cd frontend
+   npm run install-browsers
+   cd ..
+   ```
+
+## After Setup is Complete
+
+Once you've run the setup script or completed the manual steps, you'll be able to:
+
+### Backend Commands
 ```cmd
 cd backend
+
+# Build
+mvn clean package
+
+# Run tests
 mvn test
+
+# Run dev server
+mvn spring-boot:run
+
+# Run E2E tests with H2
+mvn verify -Pbackend-e2e-h2
+
+# Run E2E tests with PostgreSQL
+mvn verify -Pbackend-e2e-postgres
 ```
 
-**Frontend Unit Tests:**
+### Frontend Commands
 ```cmd
 cd frontend
+
+# Start dev server
+npm start
+
+# Build
+npm run build
+
+# Run unit tests
 npm test
+
+# Run E2E tests (H2 + Mock Auth)
+npm run e2e
+
+# Run E2E tests (all configurations)
+npm run e2e:full
 ```
 
-**Frontend E2E Tests:**
+## System Information
+
+### Java Versions Available
+- Java 8: `C:\Environement\Java\jdk1.8.0_202` (currently active)
+- Java 17: `C:\Environement\Java\jdk-17.0.5.8-hotspot` (required for this project)
+
+### Tools Installed
+- Maven: `C:\Environement\maven-3.8.6`
+- Node.js: `v25.2.1`
+- npm: `11.6.2`
+
+## Troubleshooting
+
+### "JAVA_HOME is not defined correctly"
+This means JAVA_HOME is pointing to Java 8 instead of Java 17. Use the setup script or manually set:
 ```cmd
-cd frontend
-npm run e2e:fast
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
 ```
 
-## Environment Details
+### Maven build fails
+1. Verify Java 17 is installed: `java -version` (after setting JAVA_HOME)
+2. Check network connection (Maven downloads dependencies)
+3. Try with explicit settings: `mvn clean install -DskipTests --settings backend/settings.xml`
 
-| Component | Status | Version/Path |
-|-----------|--------|--------------|
-| Java 8 | Current Default | 1.8.0_401 |
-| Java 17 | Available | C:\Environement\Java\jdk-17.0.5.8-hotspot |
-| Maven | Available | 3.8.6 |
-| Node.js | Available | - |
-| npm | Available | 11.6.2 |
-| Frontend deps | ✅ Installed | All packages in node_modules |
-| Backend build | ⚠️ Pending | target/ directory does not exist |
-| Playwright browsers | ⚠️ Pending | Need to run install |
-
-## Why Manual Steps Are Needed
-
-Due to security constraints that prevent automated script execution and environment variable modification in this setup environment, the following operations could not be completed automatically:
-
-- Setting JAVA_HOME environment variable
-- Executing .bat, .cmd, or .ps1 script files
-- Running Maven with inline code execution potential
-- Copying toolchains.xml to user's .m2 directory
-- Running npx commands
-
-These are security measures to prevent potential prompt injection or unauthorized code execution.
+### Playwright installation fails
+1. Ensure you've run `npm install` first
+2. Run: `cd frontend && npm run install-browsers`
+3. If it fails, try: `npx playwright install` from the frontend directory
 
 ## Next Steps
 
-1. Complete the manual steps listed in the "Pending Manual Completion" section above
-2. Verify the setup by running the test commands
-3. See `AGENTS.md` for comprehensive development commands and testing strategies
-4. See `SETUP_INSTRUCTIONS_AFTER_CLONE.md` for detailed setup instructions
+1. **Run the setup script**: `COMPLETE_INITIAL_SETUP.cmd` or `.\COMPLETE_INITIAL_SETUP.ps1`
+2. **Verify setup**: Try running `cd backend && mvn test`
+3. **Start developing**: See `AGENTS.md` for development commands
+4. **Setup infrastructure** (optional): `cd infra && docker-compose up -d`
 
-## Files Created for User Convenience
+## References
 
-The following helper files have been created to simplify manual setup:
-
-- `SETUP_INSTRUCTIONS_AFTER_CLONE.md` - Detailed setup instructions
-- `setup-repo-initial.ps1` - One-command PowerShell setup (if execution policy allows)
-- `setup-backend.bat` - Backend-only setup batch file
-- `setup-frontend.bat` - Frontend-only setup batch file (Playwright browsers)
-- `mavenrc_pre.bat` - Maven environment configuration
-- `.mavenrc` - Maven environment configuration (Unix)
-
-The repository is now ready for the final manual setup steps!
+- **AGENTS.md**: Complete development guide with all commands
+- **SETUP.md**: Detailed setup instructions
+- **README.md**: Project overview and architecture

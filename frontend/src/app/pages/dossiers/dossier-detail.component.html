@@ -1,11 +1,4 @@
 <div class="page-container">
-  <div class="page-header">
-    <button class="btn-back" (click)="goBack()">
-      <span class="back-icon">←</span>
-      Retour aux dossiers
-    </button>
-  </div>
-
   <div class="page-content">
     <app-loading-skeleton *ngIf="loading" variant="detail" [rows]="15"></app-loading-skeleton>
 
@@ -15,19 +8,44 @@
     </div>
 
     <div *ngIf="!loading && !error && dossier" class="detail-content">
+      <a class="link-back" (click)="goBack()" (keydown.enter)="goBack()" (keydown.space)="goBack()" tabindex="0" role="button">
+        <span class="arrow-left">←</span>
+        Retour aux dossiers
+      </a>
+
       <div class="dossier-header">
-        <div class="dossier-title-section">
-          <h2 class="dossier-title">
-            Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ dossier.leadPhone || 'Sans téléphone' }}
-          </h2>
-          <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
+        <div class="header-line-1">
+          <div class="title-and-badge">
+            <h1 class="dossier-title">
+              Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ (dossier.leadPhone | phoneFormat) || 'Sans téléphone' }}
+            </h1>
+            <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
+          </div>
+          <button
+            class="btn-change-status-secondary"
+            (click)="toggleStatusChange()"
+          >
+            Changer statut
+          </button>
         </div>
-        <button
-          class="btn-change-status"
-          (click)="toggleStatusChange()"
-        >
-          Changer statut
-        </button>
+        <div class="header-line-2">
+          <div class="metadata-item">
+            <span class="metadata-label">Téléphone :</span>
+            <span class="metadata-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Source :</span>
+            <span class="metadata-value">{{ dossier.source || '—' }}</span>
+          </div>
+          <div class="metadata-item" *ngIf="dossier.annonceId">
+            <span class="metadata-label">Annonce :</span>
+            <span class="metadata-value">#{{ dossier.annonceId }}</span>
+          </div>
+          <div class="metadata-item">
+            <span class="metadata-label">Créé le :</span>
+            <span class="metadata-value">{{ formatDate(dossier.createdAt) }}</span>
+          </div>
+        </div>
       </div>
 
       <div *ngIf="dossier.existingOpenDossierId" class="warning-message">
