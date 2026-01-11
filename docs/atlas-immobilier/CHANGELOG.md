@@ -64,3 +64,8 @@ Ajouts post `docs_merged_normalized` :
 
 - Ajout du document **MVP — Scope Freeze** : `docs/atlas-immobilier/01_cadrage/05_mvp_scope_freeze.md`
 - Ajout du document **Référentiel — Freeze MVP** : `docs/atlas-immobilier/02_fonctionnel/12_referential_freeze_mvp.md`
+
+- Ajout du document **API Public — Portail & Biz (MVP)** : `docs/atlas-immobilier/03_technique/15_api_public_portal_biz.md`
+- Ajout du document **Modèle de données — MVP (DB Schema)** : `docs/atlas-immobilier/03_technique/16_db_mvp_schema.md`
+- Ajout du document **Runbook — Dev & Déploiement (MVP)** : `docs/atlas-immobilier/03_technique/17_runbook_dev_deploy_mvp.md`
+- Ajout du document **Backlog — Exécution MVP** : `docs/atlas-immobilier/05_roadmap/02_backlog_mvp_execution.md`

@@ -13,6 +13,13 @@ Ce document liste les contrats REST. Il distingue :
 - **AS-IS** : endpoints présents dans le repo.
 - **TO-BE** : endpoints à ajouter pour la cible market-ready (référentiels/workflow, outbound provider, monitoring).
 
+
+## MVP — Séparation Public vs Pro
+
+- Public (Portail/Biz) : `docs/atlas-immobilier/03_technique/15_api_public_portal_biz.md`
+- Pro (CRM) : `docs/atlas-immobilier/03_technique/12_api_pro_crm_b2b_demo.md`
+- Pro (Listings) : `docs/atlas-immobilier/03_technique/13_api_pro_listings.md`
+
 ## Conventions
 
 - Base path : `/api/v1`

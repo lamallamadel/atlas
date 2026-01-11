@@ -67,3 +67,13 @@ Note : ce module est juridiquement sensible ; il doit être cadré avant exposit
 
 
 > Note: la marque **Atlasia** est conservée en phase dev; le TLD final (ex: `.ma` / `.immo`) reste à figer. Voir : `docs/atlas-immobilier/01_cadrage/04_branding_domains.md`.
+
+
+## API Public (MVP)
+- `docs/atlas-immobilier/03_technique/15_api_public_portal_biz.md`
+## DB Schema (MVP)
+- `docs/atlas-immobilier/03_technique/16_db_mvp_schema.md`
+## Runbook (MVP)
+- `docs/atlas-immobilier/03_technique/17_runbook_dev_deploy_mvp.md`
+## Backlog exécutable (MVP)
+- `docs/atlas-immobilier/05_roadmap/02_backlog_mvp_execution.md`

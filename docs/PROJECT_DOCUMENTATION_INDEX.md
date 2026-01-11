@@ -43,7 +43,9 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 ## Technique
 
 - Arborescence & déploiement (MVP) : `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`
+- Runbook — Dev & Déploiement (MVP) : `docs/atlas-immobilier/03_technique/17_runbook_dev_deploy_mvp.md`
 - Modèle de données : `docs/atlas-immobilier/03_technique/02_modele_donnees_advanced.md`
+- Modèle de données — MVP (DB Schema) : `docs/atlas-immobilier/03_technique/16_db_mvp_schema.md`
 - API contracts (REST) : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
 - Audit (design + AOP) : `docs/atlas-immobilier/03_technique/05_audit_logging_design.md`
 - Workflow dossier : `docs/atlas-immobilier/03_technique/06_workflow_dossier_state_machine.md`
