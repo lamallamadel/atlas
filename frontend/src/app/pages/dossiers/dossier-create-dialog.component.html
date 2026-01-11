@@ -67,21 +67,24 @@
           <input
             matInput
             formControlName="leadSource"
-            placeholder="Saisir la source du prospect"
+            placeholder="Saisir la source du prospect (ex : site web, appel entrant, référence...)"
             [attr.aria-invalid]="isFieldInvalid('leadSource')"
+            [attr.aria-describedby]="'leadSource-hint'"
           />
+          <mat-hint id="leadSource-hint">Indiquez d'où provient le prospect (site web, téléphone, référence, etc.)</mat-hint>
           <mat-error *ngIf="getFieldError('leadSource')">
             {{ getFieldError('leadSource') }}
           </mat-error>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Annonce (optionnel)</mat-label>
+          <mat-label>Annonce liée (optionnel)</mat-label>
           <input
             matInput
             [formControl]="annonceSearchControl"
             [matAutocomplete]="auto"
-            placeholder="Rechercher une annonce..."
+            placeholder="Rechercher une annonce par titre, ville ou identifiant..."
+            aria-label="Rechercher et sélectionner une annonce liée"
           />
           <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
             <mat-option *ngFor="let annonce of filteredAnnonces | async" [value]="annonce">

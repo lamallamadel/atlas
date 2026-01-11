@@ -251,7 +251,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   }
 
   getVisibilityLabel(visibility: ActivityVisibility): string {
-    return visibility === ActivityVisibility.INTERNAL ? 'Interne' : 'Client';
+    return visibility === ActivityVisibility.INTERNAL ? 'Interne (équipe)' : 'Visible par le client';
   }
 
   getVisibilityIcon(visibility: ActivityVisibility): string {

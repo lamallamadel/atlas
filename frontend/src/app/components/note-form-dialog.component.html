@@ -16,28 +16,28 @@
   </mat-form-field>
 
   <mat-form-field appearance="outline" class="full-width">
-    <mat-label>Visibilité</mat-label>
-    <mat-select [(ngModel)]="noteVisibility">
+    <mat-label>Visibilité de la note</mat-label>
+    <mat-select [(ngModel)]="noteVisibility" aria-label="Sélectionner la visibilité de la note">
       <mat-option [value]="ActivityVisibility.INTERNAL">
         <div class="visibility-option">
-          <mat-icon class="option-icon">lock</mat-icon>
-          <span class="option-label">Interne (équipe)</span>
+          <mat-icon class="option-icon" aria-hidden="true">lock</mat-icon>
+          <span class="option-label">Interne (équipe uniquement)</span>
         </div>
       </mat-option>
       <mat-option [value]="ActivityVisibility.CLIENT_VISIBLE">
         <div class="visibility-option">
-          <mat-icon class="option-icon">visibility</mat-icon>
-          <span class="option-label">Visible client</span>
+          <mat-icon class="option-icon" aria-hidden="true">visibility</mat-icon>
+          <span class="option-label">Visible par le client</span>
         </div>
       </mat-option>
     </mat-select>
     <mat-hint>
-      <mat-icon class="hint-icon">info</mat-icon>
+      <mat-icon class="hint-icon" aria-hidden="true">info</mat-icon>
       <span *ngIf="noteVisibility === ActivityVisibility.CLIENT_VISIBLE">
-        Le client verra cette note dans l'espace client
+        Le client pourra consulter cette note dans son espace personnel
       </span>
       <span *ngIf="noteVisibility === ActivityVisibility.INTERNAL">
-        Cette note restera privée pour l'équipe
+        Cette note restera confidentielle et visible uniquement par l'équipe interne
       </span>
     </mat-hint>
   </mat-form-field>

@@ -89,11 +89,14 @@
             class="form-input"
             formControlName="leadSource"
             [class.invalid]="isFieldInvalid('leadSource')"
-            placeholder="Saisir la source du prospect"
+            placeholder="Saisir la source du prospect (ex : site web, appel entrant, référence...)"
             aria-required="false"
             [attr.aria-invalid]="isFieldInvalid('leadSource')"
-            [attr.aria-describedby]="getFieldError('leadSource') ? 'leadSource-error' : null"
+            [attr.aria-describedby]="getFieldError('leadSource') ? 'leadSource-error' : 'leadSource-hint'"
           />
+          <div *ngIf="!getFieldError('leadSource')" class="field-hint" id="leadSource-hint">
+            Indiquez d'où provient le prospect (site web, téléphone, référence, etc.)
+          </div>
           <div *ngIf="getFieldError('leadSource')" class="field-error" id="leadSource-error" role="alert">
             {{ getFieldError('leadSource') }}
           </div>
@@ -101,7 +104,7 @@
 
         <div class="form-group">
           <label for="annonceSearch" class="form-label">
-            Annonce (optionnel)
+            Annonce liée (optionnel)
           </label>
           <input
             id="annonceSearch"
@@ -109,8 +112,8 @@
             class="form-input"
             [formControl]="annonceSearchControl"
             [matAutocomplete]="auto"
-            placeholder="Rechercher une annonce..."
-            aria-label="Rechercher et sélectionner une annonce"
+            placeholder="Rechercher une annonce par titre, ville ou identifiant..."
+            aria-label="Rechercher et sélectionner une annonce liée"
             aria-autocomplete="list"
             [attr.aria-expanded]="auto.isOpen"
           />

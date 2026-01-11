@@ -30,15 +30,15 @@
         </div>
         <div class="header-line-2">
           <div class="metadata-item">
-            <span class="metadata-label">Téléphone :</span>
+            <span class="metadata-label">Téléphone du prospect :</span>
             <span class="metadata-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
           </div>
           <div class="metadata-item">
-            <span class="metadata-label">Source :</span>
+            <span class="metadata-label">Source du prospect :</span>
             <span class="metadata-value">{{ dossier.source || '—' }}</span>
           </div>
           <div class="metadata-item" *ngIf="dossier.annonceId">
-            <span class="metadata-label">Annonce :</span>
+            <span class="metadata-label">Annonce liée :</span>
             <span class="metadata-value">#{{ dossier.annonceId }}</span>
           </div>
           <div class="metadata-item">
@@ -108,8 +108,8 @@
         </div>
       </div>
 
-      <mat-tab-group class="tabs-container">
-        <mat-tab label="Informations">
+      <mat-tab-group class="tabs-container" aria-label="Onglets de détails du dossier">
+        <mat-tab label="Informations" aria-label="Informations générales du dossier">
           <div class="tab-content">
             <!-- Section Essentiel -->
             <mat-card class="info-section-essential">
@@ -126,12 +126,12 @@
                   </div>
 
                   <div class="essential-item">
-                    <span class="essential-label">Téléphone</span>
+                    <span class="essential-label">Téléphone du prospect</span>
                     <span class="essential-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
                   </div>
 
                   <div class="essential-item">
-                    <span class="essential-label">Source / Annonce</span>
+                    <span class="essential-label">Source du prospect / Annonce</span>
                     <span class="essential-value">
                       {{ dossier.source || '—' }}
                       <span *ngIf="dossier.annonceId" class="essential-annonce-ref"> / #{{ dossier.annonceId }}</span>
@@ -151,21 +151,22 @@
               </mat-card-content>
             </mat-card>
 
-            <!-- Grid 2 colonnes pour Lead et Annonce -->
+            <!-- Grid 2 colonnes pour Prospect et Annonce -->
             <div class="sections-container">
               <mat-card class="info-section">
                 <mat-card-header>
-                  <mat-card-title>Lead</mat-card-title>
+                  <mat-card-title>Prospect</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
                   <div *ngIf="isLeadEmpty()" class="lead-empty-state">
-                    <p class="lead-empty-message">Lead non renseigné</p>
+                    <p class="lead-empty-message">Informations du prospect non renseignées</p>
                     <button
                       class="btn-add-lead"
                       (click)="toggleLeadForm()"
                       *ngIf="!showLeadForm"
+                      aria-label="Ajouter les informations de contact du prospect"
                     >
-                      Ajouter un contact
+                      Ajouter les informations du prospect
                     </button>
 
                     <div *ngIf="showLeadForm" class="lead-form-section">
@@ -179,26 +180,28 @@
 
                       <div class="lead-form">
                         <div class="form-group">
-                          <label for="lead-name" class="form-label">Nom :</label>
+                          <label for="lead-name" class="form-label">Nom du prospect :</label>
                           <input
                             id="lead-name"
                             type="text"
                             class="form-input"
                             [(ngModel)]="leadFormName"
                             [disabled]="updatingLead"
-                            placeholder="Nom du contact"
+                            placeholder="Saisir le nom complet du prospect"
+                            aria-label="Nom du prospect"
                           />
                         </div>
 
                         <div class="form-group">
-                          <label for="lead-phone" class="form-label">Téléphone :</label>
+                          <label for="lead-phone" class="form-label">Téléphone du prospect :</label>
                           <input
                             id="lead-phone"
                             type="text"
                             class="form-input"
                             [(ngModel)]="leadFormPhone"
                             [disabled]="updatingLead"
-                            placeholder="Numéro de téléphone"
+                            placeholder="Saisir le numéro de téléphone du prospect"
+                            aria-label="Téléphone du prospect"
                           />
                         </div>
 
@@ -227,17 +230,17 @@
 
                   <div *ngIf="!isLeadEmpty()" class="field-group">
                     <div class="field-row" *ngIf="dossier.leadName">
-                      <span class="field-label">Nom :</span>
+                      <span class="field-label">Nom du prospect :</span>
                       <span class="field-value">{{ dossier.leadName }}</span>
                     </div>
 
                     <div class="field-row" *ngIf="dossier.leadPhone">
-                      <span class="field-label">Téléphone :</span>
+                      <span class="field-label">Téléphone du prospect :</span>
                       <span class="field-value">{{ dossier.leadPhone }}</span>
                     </div>
 
                     <div class="field-row" *ngIf="dossier.leadSource">
-                      <span class="field-label">Source lead :</span>
+                      <span class="field-label">Source du prospect :</span>
                       <span class="field-value">{{ dossier.leadSource }}</span>
                     </div>
                   </div>
@@ -246,17 +249,17 @@
 
               <mat-card class="info-section">
                 <mat-card-header>
-                  <mat-card-title>Annonce</mat-card-title>
+                  <mat-card-title>Annonce liée</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
                   <div class="field-group" *ngIf="dossier.annonceId">
                     <div class="field-row">
-                      <span class="field-label">Annonce ID :</span>
+                      <span class="field-label">Identifiant de l'annonce :</span>
                       <span class="field-value">#{{ dossier.annonceId }}</span>
                     </div>
                   </div>
                   <div class="empty-state-small" *ngIf="!dossier.annonceId">
-                    <p class="empty-state-text">Aucune annonce liée</p>
+                    <p class="empty-state-text">Aucune annonce liée à ce dossier</p>
                   </div>
                 </mat-card-content>
               </mat-card>
@@ -310,7 +313,7 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Parties prenantes">
+        <mat-tab label="Parties prenantes" aria-label="Gestion des parties prenantes du dossier">
           <div class="tab-content">
             <app-empty-state
               *ngIf="!dossier.parties || dossier.parties.length === 0"
@@ -324,22 +327,22 @@
 
             <div *ngIf="dossier.parties && dossier.parties.length > 0">
               <div class="tab-header-actions">
-                <button class="btn-add" (click)="togglePartieForm()">
-                  <span class="btn-icon">+</span>
+                <button class="btn-add" (click)="togglePartieForm()" aria-label="Ajouter une nouvelle partie prenante au dossier">
+                  <span class="btn-icon" aria-hidden="true">+</span>
                   Ajouter une partie prenante
                 </button>
               </div>
 
               <div class="data-table-wrapper">
-                <table class="data-table parties-table">
+                <table class="data-table parties-table" role="table" aria-label="Liste des parties prenantes">
                   <thead>
                     <tr>
-                      <th>Rôle</th>
-                      <th>Prénom</th>
-                      <th>Nom</th>
-                      <th>Téléphone</th>
-                      <th>Email</th>
-                      <th class="actions-column">Actions</th>
+                      <th scope="col">Rôle</th>
+                      <th scope="col">Prénom</th>
+                      <th scope="col">Nom</th>
+                      <th scope="col">Téléphone</th>
+                      <th scope="col">Email</th>
+                      <th scope="col" class="actions-column">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -358,9 +361,9 @@
                           <button 
                             class="btn-icon-action btn-edit" 
                             (click)="editPartie(partie)"
-                            title="Éditer"
-                            [attr.aria-label]="'Éditer ' + partie.firstName + ' ' + partie.lastName">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            title="Modifier"
+                            [attr.aria-label]="'Modifier ' + partie.firstName + ' ' + partie.lastName">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
@@ -370,7 +373,7 @@
                             (click)="deletePartie(partie)"
                             title="Supprimer"
                             [attr.aria-label]="'Supprimer ' + partie.firstName + ' ' + partie.lastName">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <polyline points="3 6 5 6 21 6"></polyline>
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                               <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -387,10 +390,11 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Messages">
+        <mat-tab label="Messages" aria-label="Historique des messages échangés">
           <div class="tab-content">
             <div class="tab-header-actions">
-              <button class="btn-add" (click)="openMessageDialog()">
+              <button class="btn-add" (click)="openMessageDialog()" aria-label="Créer un nouveau message">
+                <span class="btn-icon" aria-hidden="true">+</span>
                 Nouveau message
               </button>
             </div>
@@ -422,26 +426,27 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Rendez-vous">
+        <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
           <div class="tab-content">
             <div class="tab-header-actions">
-              <button class="btn-add" (click)="openAppointmentDialog()">
-                Planifier
+              <button class="btn-add" (click)="openAppointmentDialog()" aria-label="Planifier un nouveau rendez-vous">
+                <span class="btn-icon" aria-hidden="true">+</span>
+                Planifier un rendez-vous
               </button>
             </div>
 
             <app-loading-skeleton *ngIf="loadingAppointments" variant="table" [rows]="5" [columns]="6"></app-loading-skeleton>
 
             <div *ngIf="!loadingAppointments" class="data-table-wrapper">
-              <table class="data-table" *ngIf="appointments.length > 0">
+              <table class="data-table" *ngIf="appointments.length > 0" role="table" aria-label="Liste des rendez-vous">
                 <thead>
                   <tr>
-                    <th>Date/Heure</th>
-                    <th>Lieu</th>
-                    <th>Assigné à</th>
-                    <th>Statut</th>
-                    <th>Notes</th>
-                    <th>Actions</th>
+                    <th scope="col">Date et heure</th>
+                    <th scope="col">Lieu</th>
+                    <th scope="col">Assigné à</th>
+                    <th scope="col">Statut</th>
+                    <th scope="col">Notes</th>
+                    <th scope="col">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -462,15 +467,16 @@
                     <td>{{ appointment.notes || '—' }}</td>
                     <td>
                       <div class="action-buttons">
-                        <button class="btn-edit" (click)="editAppointment(appointment)">Éditer</button>
+                        <button class="btn-edit" (click)="editAppointment(appointment)" aria-label="Modifier ce rendez-vous">Modifier</button>
                         <button 
                           class="btn-complete" 
                           (click)="completeAppointment(appointment)"
                           *ngIf="appointment.status === 'SCHEDULED'"
+                          aria-label="Marquer ce rendez-vous comme terminé"
                         >
                           Terminer
                         </button>
-                        <button class="btn-delete" (click)="deleteAppointment(appointment)">Supprimer</button>
+                        <button class="btn-delete" (click)="deleteAppointment(appointment)" aria-label="Supprimer ce rendez-vous">Supprimer</button>
                       </div>
                     </td>
                   </tr>
@@ -483,9 +489,9 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Consentements">
+        <mat-tab label="Consentements" aria-label="Gestion des consentements RGPD">
           <div class="tab-content">
-            <app-loading-skeleton *ngIf="consentementsLoading" variant="card" [rows]="2"></app-loading-skeleton>
+            <app-loading-skeleton *ngIf="consentementsLoading" variant="card" [rows]="2" aria-label="Chargement des consentements"></app-loading-skeleton>
 
             <div *ngIf="!consentementsLoading">
               <div class="consent-cards-grid">
@@ -523,6 +529,7 @@
                         [class.active]="group.current?.status === ConsentementStatus.GRANTED"
                         (click)="toggleConsentement(group, ConsentementStatus.GRANTED)"
                         [disabled]="group.current?.status === ConsentementStatus.GRANTED"
+                        [attr.aria-label]="'Accorder le consentement pour ' + getChannelLabel(group.channel)"
                       >
                         Accorder
                       </button>
@@ -531,6 +538,7 @@
                         [class.active]="group.current?.status === ConsentementStatus.DENIED"
                         (click)="toggleConsentement(group, ConsentementStatus.DENIED)"
                         [disabled]="group.current?.status === ConsentementStatus.DENIED"
+                        [attr.aria-label]="'Refuser le consentement pour ' + getChannelLabel(group.channel)"
                       >
                         Refuser
                       </button>
@@ -539,6 +547,7 @@
                         [class.active]="group.current?.status === ConsentementStatus.REVOKED"
                         (click)="toggleConsentement(group, ConsentementStatus.REVOKED)"
                         [disabled]="group.current?.status === ConsentementStatus.REVOKED"
+                        [attr.aria-label]="'Révoquer le consentement pour ' + getChannelLabel(group.channel)"
                       >
                         Révoquer
                       </button>
@@ -559,13 +568,13 @@
                     Aucun historique de consentement.
                   </div>
                   <div *ngIf="getConsentementsHistory().length > 0" class="data-table-wrapper">
-                    <table class="data-table">
+                    <table class="data-table" role="table" aria-label="Historique des consentements">
                       <thead>
                         <tr>
-                          <th>Canal</th>
-                          <th>Statut</th>
-                          <th>Date</th>
-                          <th>Utilisateur</th>
+                          <th scope="col">Canal</th>
+                          <th scope="col">Statut</th>
+                          <th scope="col">Date</th>
+                          <th scope="col">Utilisateur</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -592,13 +601,13 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Chronologie">
+        <mat-tab label="Chronologie" aria-label="Chronologie des activités du dossier">
           <div class="tab-content">
             <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
           </div>
         </mat-tab>
 
-        <mat-tab label="Historique">
+        <mat-tab label="Historique" aria-label="Historique détaillé des modifications">
           <div class="tab-content">
             <div class="audit-filters">
               <div class="filter-group">
@@ -638,15 +647,15 @@
 
             <div *ngIf="!auditEventsLoading">
               <div class="data-table-wrapper" *ngIf="auditEvents.length > 0">
-                <table class="data-table audit-table">
+                <table class="data-table audit-table" role="table" aria-label="Historique des événements d'audit">
                   <thead>
                     <tr>
-                      <th>Date/Heure</th>
-                      <th>Action</th>
-                      <th>Type d'entité</th>
-                      <th>ID entité</th>
-                      <th>Utilisateur</th>
-                      <th>Changements</th>
+                      <th scope="col">Date et heure</th>
+                      <th scope="col">Action</th>
+                      <th scope="col">Type d'entité</th>
+                      <th scope="col">Identifiant de l'entité</th>
+                      <th scope="col">Utilisateur</th>
+                      <th scope="col">Changements</th>
                     </tr>
                   </thead>
                   <tbody>

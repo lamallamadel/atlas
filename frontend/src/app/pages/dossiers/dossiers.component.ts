@@ -61,7 +61,7 @@ export class DossiersComponent implements OnInit {
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
     { 
       key: 'annonceTitle', 
-      header: 'Annonce', 
+      header: 'Annonce liée', 
       sortable: true,
       format: (value: unknown) => (value as string) || '—'
     },
@@ -69,19 +69,19 @@ export class DossiersComponent implements OnInit {
       key: 'leadName', 
       header: 'Nom du prospect', 
       sortable: true,
-      format: (value: unknown) => (value as string) || '-'
+      format: (value: unknown) => (value as string) || '—'
     },
     { 
       key: 'leadPhone', 
       header: 'Téléphone du prospect', 
       sortable: true,
-      format: (value: unknown) => this.phoneFormatPipe.transform(value as string) || '-'
+      format: (value: unknown) => this.phoneFormatPipe.transform(value as string) || '—'
     },
     { 
       key: 'leadSource', 
       header: 'Source du prospect', 
       sortable: true,
-      format: (value: unknown) => (value as string) || '-'
+      format: (value: unknown) => (value as string) || '—'
     },
     { 
       key: 'status', 

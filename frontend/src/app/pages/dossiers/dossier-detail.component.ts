@@ -595,12 +595,12 @@ export class DossierDetailComponent implements OnInit {
     }
 
     if (!this.leadFormName || this.leadFormName.trim() === '') {
-      this.leadError = 'Le nom du lead est requis';
+      this.leadError = 'Le nom du prospect est requis';
       return;
     }
 
     if (!this.leadFormPhone || this.leadFormPhone.trim() === '') {
-      this.leadError = 'Le téléphone du lead est requis';
+      this.leadError = 'Le téléphone du prospect est requis';
       return;
     }
 
@@ -611,7 +611,7 @@ export class DossierDetailComponent implements OnInit {
     this.dossierApiService.patchLead(this.dossier.id, this.leadFormName, this.leadFormPhone).subscribe({
       next: () => {
         this.updatingLead = false;
-        this.snackBar.open('Informations du lead mises à jour avec succès !', 'Fermer', {
+        this.snackBar.open('Informations du prospect mises à jour avec succès', 'Fermer', {
           duration: 3000,
           horizontalPosition: 'center',
           verticalPosition: 'top',
@@ -626,7 +626,7 @@ export class DossierDetailComponent implements OnInit {
       },
       error: (err) => {
         this.updatingLead = false;
-        const errorMessage = err.error?.message || 'Échec de la mise à jour des informations du lead. Veuillez réessayer.';
+        const errorMessage = err.error?.message || 'Échec de la mise à jour des informations du prospect. Veuillez réessayer.';
         this.snackBar.open(errorMessage, 'Fermer', {
           duration: 5000,
           horizontalPosition: 'center',
@@ -1381,10 +1381,10 @@ export class DossierDetailComponent implements OnInit {
     const emptyFields = [];
     
     if (!this.dossier.leadName) {
-      emptyFields.push('Nom lead');
+      emptyFields.push('Nom du prospect');
     }
     if (!this.dossier.leadSource) {
-      emptyFields.push('Source lead');
+      emptyFields.push('Source du prospect');
     }
     
     return emptyFields.join(', ');

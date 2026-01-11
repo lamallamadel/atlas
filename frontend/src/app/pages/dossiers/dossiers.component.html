@@ -42,26 +42,26 @@
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Téléphone</mat-label>
+                  <mat-label>Téléphone du prospect</mat-label>
                   <input
                     matInput
-                    placeholder="Filtrer par numéro de téléphone"
+                    placeholder="Saisir le numéro de téléphone du prospect"
                     [(ngModel)]="phoneFilter"
                     (keyup.enter)="onFilterChange()"
-                    aria-label="Filtrer par numéro de téléphone"
+                    aria-label="Filtrer par numéro de téléphone du prospect"
                   />
                   <mat-icon matSuffix aria-hidden="true">search</mat-icon>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Annonce</mat-label>
+                  <mat-label>Annonce liée</mat-label>
                   <input
                     matInput
-                    placeholder="Rechercher une annonce (titre ou ID)"
+                    placeholder="Rechercher une annonce liée par titre ou identifiant"
                     [formControl]="annonceSearchControl"
                     [matAutocomplete]="annonceAuto"
                     (keyup.enter)="onFilterChange()"
-                    aria-label="Rechercher une annonce par titre ou ID"
+                    aria-label="Rechercher une annonce liée par titre ou identifiant"
                   />
                   <mat-icon matSuffix aria-hidden="true">search</mat-icon>
                   <mat-autocomplete 
