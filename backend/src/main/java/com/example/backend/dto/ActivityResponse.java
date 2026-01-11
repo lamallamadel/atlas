@@ -30,6 +30,9 @@ public class ActivityResponse {
     @Schema(description = "User who created the activity", example = "john.doe@example.com")
     private String createdBy;
 
+    @Schema(description = "Display name of the user who created the activity", example = "John Doe")
+    private String createdByName;
+
     public Long getId() {
         return id;
     }
@@ -84,5 +87,13 @@ public class ActivityResponse {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public String getCreatedByName() {
+        return createdByName;
+    }
+
+    public void setCreatedByName(String createdByName) {
+        this.createdByName = createdByName;
     }
 }

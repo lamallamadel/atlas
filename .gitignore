@@ -370,3 +370,8 @@ frontend-install.ps1
 run-setup-now.cmd
 setup-repo.cmd
 SETUP_STATUS.md
+
+# Agent-created setup files (current session)
+setup-backend-temp.cmd
+Run-BackendSetup.ps1
+run-maven-setup.js
