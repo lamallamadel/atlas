@@ -140,6 +140,63 @@
   padding: var(--spacing-3);
 }
 
+/* Form Group Styling */
+.form-group {
+  margin-bottom: var(--spacing-4);
+}
+
+.form-group label {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+  display: block;
+  margin-bottom: var(--spacing-2);
+}
+
+/* Token Input and Textarea Styling */
+.token-input,
+textarea {
+  width: 100%;
+  padding: var(--spacing-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-neutral-300);
+  font-size: var(--font-size-base);
+  font-family: inherit;
+  transition: all var(--duration-normal) ease;
+  box-sizing: border-box;
+}
+
+/* Focus State */
+.token-input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--color-primary-500);
+  box-shadow: 0 0 0 3px var(--color-primary-alpha-20);
+}
+
+/* Disabled State */
+.token-input:disabled,
+textarea:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background-color: var(--color-neutral-50);
+}
+
+/* Error State */
+.token-input.error,
+textarea.error,
+.token-input.ng-invalid.ng-touched,
+textarea.ng-invalid.ng-touched {
+  border-color: var(--color-error-500);
+}
+
+.token-input.error:focus,
+textarea.error:focus,
+.token-input.ng-invalid.ng-touched:focus,
+textarea.ng-invalid.ng-touched:focus {
+  box-shadow: 0 0 0 3px var(--color-error-alpha-20);
+}
+
 /* Section Divider */
 .section-divider {
   display: flex;
