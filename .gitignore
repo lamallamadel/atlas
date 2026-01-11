@@ -298,6 +298,9 @@ MANUAL_SETUP_REQUIRED.md
 run-initial-setup.ps1
 setup_backend_build.py
 setup-repo-install.ps1
+backend/install-backend-deps.js
+backend/setup-java-and-install.ps1
+backend/setup-and-install.cmd
 
 # Additional setup helper scripts (created during initial repo setup)
 setup-repo-build.cmd

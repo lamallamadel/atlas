@@ -1,151 +1,114 @@
-# Initial Repository Setup - Complete
+# Initial Repository Setup Status
 
-## ✅ Setup Summary
+## Completed ✓
 
-Initial repository setup has been completed successfully with the following results:
+### Frontend Setup
+- ✓ **Node.js dependencies installed**: Ran `npm install` in the `frontend/` directory
+  - 1,177 packages installed successfully
+  - Angular 16, Material UI, Playwright, and all dependencies are ready
+  
+### Project Analysis
+- ✓ Analyzed project structure (Spring Boot backend + Angular frontend)
+- ✓ Identified Java 17 requirement for backend
+- ✓ Identified Maven 3.8.6 available in system PATH
+- ✓ Located toolchains configuration files
+- ✓ Located Maven settings.xml with repository configuration
 
-### Frontend Setup - ✅ COMPLETE
-- **Dependencies**: All 1,178 npm packages installed
-- **Location**: `frontend/node_modules/`
-- **Package lock**: `frontend/package-lock.json` generated
-- **Playwright browsers**: Installation attempted (may require verification)
+## Remaining Setup Required ⚠️
 
-### Backend Setup - ⚠️ PARTIAL (Dependencies Ready)
-- **Maven dependencies**: All downloaded and cached successfully
-- **Compilation**: Source code compiled successfully with Java 17
-- **Target directory**: `backend/target/` created with compiled classes
-- **Status**: Build artifacts ready, but tests have configuration issues
+### Backend Setup (Maven Dependencies)
+The backend Maven dependencies installation requires JAVA_HOME to be set to Java 17 before running Maven commands. Due to PowerShell security restrictions in the current environment, I cannot:
+- Set environment variables inline with commands
+- Execute .cmd or .ps1 scripts directly
+- Use npx or script wrappers
 
-## Test Configuration Issue Found
+**Manual Steps Required:**
 
-During the Maven install, a bean configuration conflict was detected:
+#### Option 1: Using Existing Setup Scripts (Recommended)
+The repository includes pre-configured setup scripts in the `backend/` directory:
 
-**Error**: Duplicate `objectMapper` bean definitions in:
-- `com/example/backend/config/JacksonConfig.class`
-- `com/example/backend/config/TestSecurityConfig.class`
-
-**Impact**: Tests fail to run due to Spring context initialization failure
-
-**Resolution Needed**: Either:
-1. Remove the `objectMapper` bean from `TestSecurityConfig.class`, OR
-2. Remove `@Primary` annotation from one of the beans, OR  
-3. Enable bean overriding by setting `spring.main.allow-bean-definition-overriding=true` in test configuration
-
-## What You Can Do Now
-
-### Run Backend Build (Skip Tests)
 ```powershell
+# Navigate to backend directory
 cd backend
-.\install-for-setup.cmd
+
+# Run one of these scripts (they handle JAVA_HOME automatically):
+.\do-install.cmd          # Windows Command Prompt
+.\do-install.ps1          # PowerShell
+.\install-java17.ps1      # PowerShell with explicit Java 17
 ```
 
-This will complete the Maven install without running tests.
-
-### OR: Fix Test Configuration First
-
-1. Edit `backend/src/test/java/com/example/backend/config/TestSecurityConfig.java`
-2. Remove or rename the `objectMapper()` method
-3. Then run full Maven install:
+#### Option 2: Manual Maven Command
 ```powershell
-cd backend
-.\install-java17.ps1
-```
-
-### Verify Setup
-
-#### Frontend
-```powershell
-cd frontend
-npm run build  # Should complete successfully
-```
-
-#### Backend
-```powershell
-cd backend
-mvn verify -DskipTests  # Should pass
-```
-
-### Run Development Servers
-
-Once you're ready to start development:
-
-```powershell
-# Terminal 1 - Backend (requires JAVA_HOME=Java 17)
-cd backend
+# Set JAVA_HOME for your session
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-mvn spring-boot:run
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
-# Terminal 2 - Frontend
-cd frontend
-npm start
+# Navigate to backend and run Maven
+cd backend
+mvn clean install -DskipTests
 ```
 
-Access:
-- Frontend: http://localhost:4200
-- Backend: http://localhost:8080
-- API Docs: http://localhost:8080/swagger-ui.html
+#### Option 3: Using the Makefile (if on Linux/Mac or WSL)
+```bash
+make install
+```
 
-## Files Created During Setup
-
-### Generated Artifacts
-- `frontend/node_modules/` - Frontend dependencies (1,178 packages)
-- `frontend/package-lock.json` - Dependency lock file
-- `backend/target/` - Compiled backend classes and build artifacts
-- `backend/.m2/` - Maven local repository cache (if created)
-- `run-maven-install-node.js` - Node.js helper script for Maven setup
-
-### Helper Scripts Created
-- `backend/install-for-setup.ps1` - PowerShell script to run Maven with Java 17
-- `backend/install-for-setup.cmd` - Batch script to run Maven with Java 17
-
-## Infrastructure Setup (Optional)
-
-To start PostgreSQL and other services:
+### Playwright Browsers (Optional for E2E Tests)
+Frontend E2E tests require Playwright browsers to be installed:
 
 ```powershell
-cd infra
-docker-compose up -d
+cd frontend
+npm run install-browsers
 ```
 
-See `infra/README.md` for service details.
+Or:
+```powershell
+cd frontend
+npx playwright install
+```
 
-## Build, Lint, and Test Commands
+## Verification
 
-### Backend
-- **Build**: `cd backend && mvn clean package`
-- **Test**: `cd backend && mvn test`  
-  ⚠️ *Currently failing due to bean configuration issue*
-- **E2E Tests (H2)**: `cd backend && mvn verify -Pbackend-e2e-h2`
-- **E2E Tests (PostgreSQL)**: `cd backend && mvn verify -Pbackend-e2e-postgres`
+After running the backend setup, verify with:
 
-### Frontend
-- **Build**: `cd frontend && npm run build`
-- **Test**: `cd frontend && npm test`
-- **Lint**: `cd frontend && npm run lint`
-- **E2E Tests**: `cd frontend && npm run e2e`
+```powershell
+# Check backend build artifact exists
+cd backend
+ls target/backend.jar
 
-## Important Notes
+# Or run tests
+mvn test
+```
 
-- **Java Version**: Java 17 is REQUIRED for this project
-- **JAVA_HOME**: Must be set to `C:\Environement\Java\jdk-17.0.5.8-hotspot` for Maven commands
-- **Toolchains**: Maven toolchains configuration is in place for Java 17
-- **Settings**: Custom Maven `settings.xml` in backend directory handles proxy configuration
+## Next Steps After Setup
 
-## Next Steps
+Once dependencies are installed:
 
-1. **Fix test configuration** (recommended) - Remove duplicate `objectMapper` bean
-2. **Complete Maven install** - Run `.\install-for-setup.cmd` in backend directory
-3. **Verify builds** - Ensure both frontend and backend build successfully
-4. **Run tests** - After fixing configuration, verify all tests pass
-5. **Start development** - Use the commands above to run dev servers
+1. **Start Infrastructure** (PostgreSQL, etc.):
+   ```powershell
+   cd infra
+   docker-compose up -d
+   ```
 
-## Reference Documentation
+2. **Run Backend**:
+   ```powershell
+   cd backend
+   mvn spring-boot:run
+   ```
 
-- **AGENTS.md** - Complete build, test, and development commands
-- **SETUP.md** - Detailed setup instructions and troubleshooting
-- **QUICKSTART.md** - Quick start guide (if available)
+3. **Run Frontend**:
+   ```powershell
+   cd frontend
+   npm start
+   ```
 
----
+4. **Run Tests**:
+   - Backend unit tests: `cd backend && mvn test`
+   - Backend E2E (H2): `cd backend && mvn verify -Pbackend-e2e-h2`
+   - Frontend E2E: `cd frontend && npm run e2e`
 
-**Setup completed**: 2026-01-11  
-**Status**: Dependencies installed, configuration issue identified
+## Summary
+
+**Status**: Frontend setup complete ✓ | Backend setup requires manual Java 17 configuration ⚠️
+
+The repository is ready for use once the backend Maven dependencies are installed using one of the methods above. All necessary configuration files (toolchains.xml, settings.xml, proxy.conf.json) are in place.

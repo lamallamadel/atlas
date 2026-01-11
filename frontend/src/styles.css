@@ -186,11 +186,14 @@ a {
   }
 }
 
-/* Accessibility: Focus Indicators */
-*:focus,
+/* Accessibility: Focus Indicators - WCAG AA Compliant 2px solid primary */
+*:focus {
+  outline: none;
+}
+
 *:focus-visible {
-  outline: 2px solid #1976d2;
-  outline-offset: 2px;
+  outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
+  outline-offset: 2px !important;
 }
 
 button:focus-visible,
@@ -199,20 +202,40 @@ input:focus-visible,
 select:focus-visible,
 textarea:focus-visible,
 [tabindex]:focus-visible,
+[role="button"]:focus-visible,
 .mat-mdc-button:focus-visible,
 .mat-mdc-raised-button:focus-visible,
 .mat-mdc-icon-button:focus-visible,
 .mat-mdc-fab:focus-visible,
-.mat-mdc-mini-fab:focus-visible {
-  outline: 2px solid #1976d2 !important;
+.mat-mdc-mini-fab:focus-visible,
+.mat-mdc-card:focus-visible,
+.mat-mdc-chip:focus-visible,
+.clickable:focus-visible {
+  outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
   outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.2) !important;
 }
 
-.mat-mdc-menu-item:focus,
-.mat-mdc-list-item:focus,
-.mat-mdc-option:focus {
-  outline: 2px solid #1976d2 !important;
+.mat-mdc-menu-item:focus-visible,
+.mat-mdc-list-item:focus-visible,
+.mat-mdc-option:focus-visible,
+.mat-button-toggle:focus-visible {
+  outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
   outline-offset: -2px !important;
+}
+
+/* Minimum touch target size - WCAG AA 40x40px */
+button,
+a,
+.mat-mdc-button,
+.mat-mdc-icon-button,
+.mat-mdc-fab,
+.mat-mdc-mini-fab,
+.mat-button-toggle,
+[role="button"],
+.clickable {
+  min-width: 40px;
+  min-height: 40px;
 }
 
 /* Skip to content link */
@@ -291,7 +314,7 @@ textarea:disabled {
   }
 }
 
-/* Dark Theme Overrides */
+/* Dark Theme Overrides - WCAG AA Compliant */
 .dark-theme {
   color-scheme: dark;
 }
@@ -303,31 +326,38 @@ textarea:disabled {
 
 .dark-theme .skip-to-content {
   background: var(--color-primary-500);
-  color: var(--color-neutral-1000);
+  color: var(--color-neutral-0);
 }
 
 .dark-theme .skip-to-content:focus {
   outline: 2px solid var(--color-primary-400);
 }
 
+/* Dark theme focus indicators - 2px solid primary */
 .dark-theme button:focus-visible,
 .dark-theme a:focus-visible,
 .dark-theme input:focus-visible,
 .dark-theme select:focus-visible,
 .dark-theme textarea:focus-visible,
 .dark-theme [tabindex]:focus-visible,
+.dark-theme [role="button"]:focus-visible,
 .dark-theme .mat-mdc-button:focus-visible,
 .dark-theme .mat-mdc-raised-button:focus-visible,
 .dark-theme .mat-mdc-icon-button:focus-visible,
 .dark-theme .mat-mdc-fab:focus-visible,
-.dark-theme .mat-mdc-mini-fab:focus-visible {
+.dark-theme .mat-mdc-mini-fab:focus-visible,
+.dark-theme .mat-mdc-card:focus-visible,
+.dark-theme .mat-mdc-chip:focus-visible,
+.dark-theme .clickable:focus-visible {
   outline: 2px solid var(--color-primary-400) !important;
   outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(66, 136, 206, 0.2) !important;
 }
 
-.dark-theme .mat-mdc-menu-item:focus,
-.dark-theme .mat-mdc-list-item:focus,
-.dark-theme .mat-mdc-option:focus {
+.dark-theme .mat-mdc-menu-item:focus-visible,
+.dark-theme .mat-mdc-list-item:focus-visible,
+.dark-theme .mat-mdc-option:focus-visible,
+.dark-theme .mat-button-toggle:focus-visible {
   outline: 2px solid var(--color-primary-400) !important;
   outline-offset: -2px !important;
 }

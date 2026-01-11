@@ -398,9 +398,14 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onKpiCardClick(cardKey: string): void {
+  onKpiCardClick(cardKey: string, event?: Event): void {
     if (this.kpiCards[cardKey].loading || this.kpiCards[cardKey].error) {
       return;
+    }
+
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
     }
     
     if (cardKey === 'annoncesActives') {

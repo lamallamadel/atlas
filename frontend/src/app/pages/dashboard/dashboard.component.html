@@ -25,8 +25,12 @@
               [class.loading]="kpiCards[key].loading"
               [class.clickable]="!kpiCards[key].loading && !kpiCards[key].error"
               (click)="onKpiCardClick(key)"
-              role="listitem"
-              [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)">
+              (keydown.enter)="onKpiCardClick(key, $event)"
+              (keydown.space)="onKpiCardClick(key, $event)"
+              [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1"
+              role="button"
+              [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)"
+              [attr.aria-disabled]="kpiCards[key].loading || kpiCards[key].error ? 'true' : 'false'">
               <mat-card-header>
                 <div mat-card-avatar class="kpi-icon-container" [style.background-color]="kpiCards[key].color" aria-hidden="true">
                   <mat-icon class="kpi-icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
@@ -124,7 +128,14 @@
                 </app-empty-state>
                 
                 <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list" [@listStaggerAnimation]="recentDossiers.length">
-                  <mat-card *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" class="dossier-item" [@itemAnimation] appearance="outlined" role="listitem">
+                  <mat-card 
+                    *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" 
+                    class="dossier-item" 
+                    [@itemAnimation] 
+                    appearance="outlined" 
+                    role="listitem"
+                    tabindex="0"
+                    [attr.aria-label]="'Dossier ' + dossier.id + ', ' + (dossier.leadName || 'Sans nom')">
                     <mat-card-content>
                       <div class="dossier-info">
                         <div class="dossier-field">
