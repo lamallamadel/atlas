@@ -101,7 +101,11 @@ public class DossierController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "List dossiers", description = "Retrieves a paginated list of dossiers with optional filtering")
+    @Operation(
+        summary = "List dossiers", 
+        description = "Retrieves a paginated list of dossiers with optional filtering. " +
+                     "Example: GET /api/v1/dossiers?page=0&size=20&sort=id,desc&status=NEW"
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Dossiers retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class)))
@@ -115,7 +119,10 @@ public class DossierController {
             @RequestParam(required = false) Long annonceId,
             @Parameter(description = "Page number (0-indexed)")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size")
+            @Parameter(
+                description = "Page size (min=1, default=20)",
+                example = "20"
+            )
             @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is ascending. Multiple sort criteria are supported.")
             @RequestParam(defaultValue = "id,asc") String sort) {
@@ -172,7 +179,11 @@ public class DossierController {
 
     @GetMapping("/{id}/status-history")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Get dossier status history", description = "Retrieves the status transition history for a specific dossier")
+    @Operation(
+        summary = "Get dossier status history", 
+        description = "Retrieves the status transition history for a specific dossier. " +
+                     "Example: GET /api/v1/dossiers/123/status-history?page=0&size=20&sort=transitionedAt,desc"
+    )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Status history retrieved successfully",
                     content = @Content(schema = @Schema(implementation = Page.class))),
@@ -184,7 +195,10 @@ public class DossierController {
             @PathVariable Long id,
             @Parameter(description = "Page number (0-indexed)")
             @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size")
+            @Parameter(
+                description = "Page size (min=1, default=20)",
+                example = "20"
+            )
             @RequestParam(defaultValue = "20") int size,
             @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is descending by transitionedAt.")
             @RequestParam(defaultValue = "transitionedAt,desc") String sort) {

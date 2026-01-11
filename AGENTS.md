@@ -734,3 +734,55 @@ spring:
 - Use database-agnostic SQL in migrations
 - Avoid database-specific functions in queries
 - Use Hibernate's `@JdbcTypeCode` for portable type mapping
+
+#### Pagination Size Parameter Error (size=0)
+
+**Symptom:**
+```
+java.lang.IllegalArgumentException: Page size must be at least 1
+```
+or
+```
+400 Bad Request: Page size must be at least 1
+```
+
+**Cause:**
+
+The pagination `size` parameter must be a positive integer (minimum value is 1). Attempting to use `size=0` or negative values will result in a validation error.
+
+**Solution:**
+
+Use a valid page size when making paginated requests:
+
+**Correct Usage:**
+```bash
+# Default size (20)
+GET /api/v1/dossiers?page=0
+
+# Custom size
+GET /api/v1/dossiers?page=0&size=20
+
+# Smaller page
+GET /api/v1/dossiers?page=0&size=10
+
+# Larger page
+GET /api/v1/dossiers?page=0&size=50
+```
+
+**Incorrect Usage:**
+```bash
+# Will fail: size=0
+GET /api/v1/dossiers?page=0&size=0
+
+# Will fail: negative size
+GET /api/v1/dossiers?page=0&size=-1
+```
+
+**API Documentation:**
+
+All paginated endpoints enforce `size >= 1`:
+- **Default value**: 20
+- **Minimum value**: 1
+- **Maximum value**: Not enforced (but recommended to stay under 100 for performance)
+
+Refer to the Swagger/OpenAPI documentation for examples of proper pagination usage.
