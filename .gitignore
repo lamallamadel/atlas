@@ -362,3 +362,11 @@ START_HERE.md
 setup-env-and-build.ps1
 build-backend-java17.cmd
 run-maven-build.js
+
+# Initial repository setup artifacts
+setup-repo-env.ps1
+init-repo.ps1
+frontend-install.ps1
+run-setup-now.cmd
+setup-repo.cmd
+SETUP_STATUS.md

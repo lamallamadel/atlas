@@ -8,6 +8,16 @@ export interface KpiCardResponse {
   trend: string;
 }
 
+export interface TrendData {
+  currentValue: number;
+  previousValue: number;
+  percentageChange: number;
+}
+
+export interface TrendsResponse {
+  [key: string]: TrendData;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -25,6 +35,11 @@ export class DashboardKpiService {
   getDossiersATraiterCount(period?: string): Observable<KpiCardResponse> {
     const options = period ? { params: { period } } : {};
     return this.http.get<KpiCardResponse>(`${this.apiUrl}/kpis/dossiers-a-traiter`, options);
+  }
+
+  getTrends(period?: string): Observable<TrendsResponse> {
+    const options = period ? { params: { period } } : {};
+    return this.http.get<TrendsResponse>(`${this.apiUrl}/kpis/trends`, options);
   }
 
   getRecentDossiers(filter?: string): Observable<DossierResponse[]> {

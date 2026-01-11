@@ -2,6 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.KpiCardDto;
+import com.example.backend.dto.TrendData;
+import com.example.backend.service.DashboardKpiService;
 import com.example.backend.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -13,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/dashboard")
@@ -20,9 +23,11 @@ import java.util.List;
 public class DashboardController {
 
     private final DashboardService dashboardService;
+    private final DashboardKpiService dashboardKpiService;
 
-    public DashboardController(DashboardService dashboardService) {
+    public DashboardController(DashboardService dashboardService, DashboardKpiService dashboardKpiService) {
         this.dashboardService = dashboardService;
+        this.dashboardKpiService = dashboardKpiService;
     }
 
     @GetMapping("/kpis/annonces-actives")
@@ -56,5 +61,16 @@ public class DashboardController {
     public ResponseEntity<List<DossierResponse>> getRecentDossiers() {
         List<DossierResponse> recentDossiers = dashboardService.getRecentDossiers();
         return ResponseEntity.ok(recentDossiers);
+    }
+
+    @GetMapping("/kpis/trends")
+    @Operation(summary = "Get KPI trends", description = "Returns trend data for all KPIs with current value, previous value, and percentage change")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Trend data retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = Map.class)))
+    })
+    public ResponseEntity<Map<String, TrendData>> getTrends(@RequestParam(required = false) String period) {
+        Map<String, TrendData> trends = dashboardKpiService.getTrends(period);
+        return ResponseEntity.ok(trends);
     }
 }

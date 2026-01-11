@@ -160,53 +160,57 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   loadKpis(): void {
-    this.loadActiveAnnoncesCount();
-    this.loadDossiersATraiterCount();
+    this.loadTrends();
     this.loadRecentDossiers();
   }
 
-  loadActiveAnnoncesCount(): void {
+  loadTrends(): void {
     this.kpiCards['annoncesActives'].loading = true;
     this.kpiCards['annoncesActives'].error = '';
-
-    const period = this.selectedPeriod$.value;
-    this.dashboardKpiService.getActiveAnnoncesCount(period).subscribe({
-      next: (response) => {
-        this.kpiCards['annoncesActives'].value = response.value;
-        this.kpiCards['annoncesActives'].trend = response.trend;
-        this.kpiCards['annoncesActives'].loading = false;
-        this.animateCounter('annoncesActives', response.value);
-        this.updateChart('annoncesActives', response.value);
-        this.ariaAnnouncer.announcePolite(`${response.value} annonces actives chargées`);
-      },
-      error: () => {
-        this.kpiCards['annoncesActives'].loading = false;
-        this.kpiCards['annoncesActives'].error = 'Erreur lors du chargement des annonces actives';
-        this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des annonces actives');
-      }
-    });
-  }
-
-  loadDossiersATraiterCount(): void {
     this.kpiCards['dossiersATraiter'].loading = true;
     this.kpiCards['dossiersATraiter'].error = '';
 
     const period = this.selectedPeriod$.value;
-    this.dashboardKpiService.getDossiersATraiterCount(period).subscribe({
-      next: (response) => {
-        this.kpiCards['dossiersATraiter'].value = response.value;
-        this.kpiCards['dossiersATraiter'].trend = response.trend;
-        this.kpiCards['dossiersATraiter'].loading = false;
-        this.animateCounter('dossiersATraiter', response.value);
-        this.updateChart('dossiersATraiter', response.value);
-        this.ariaAnnouncer.announcePolite(`${response.value} dossiers à traiter chargés`);
+    this.dashboardKpiService.getTrends(period).subscribe({
+      next: (trends) => {
+        if (trends['annoncesActives']) {
+          const annoncesData = trends['annoncesActives'];
+          this.kpiCards['annoncesActives'].value = annoncesData.currentValue;
+          this.kpiCards['annoncesActives'].trend = this.formatTrend(annoncesData.percentageChange);
+          this.kpiCards['annoncesActives'].loading = false;
+          this.animateCounter('annoncesActives', annoncesData.currentValue);
+          this.updateChart('annoncesActives', annoncesData.currentValue);
+          this.ariaAnnouncer.announcePolite(`${annoncesData.currentValue} annonces actives chargées`);
+        }
+
+        if (trends['dossiersATraiter']) {
+          const dossiersData = trends['dossiersATraiter'];
+          this.kpiCards['dossiersATraiter'].value = dossiersData.currentValue;
+          this.kpiCards['dossiersATraiter'].trend = this.formatTrend(dossiersData.percentageChange);
+          this.kpiCards['dossiersATraiter'].loading = false;
+          this.animateCounter('dossiersATraiter', dossiersData.currentValue);
+          this.updateChart('dossiersATraiter', dossiersData.currentValue);
+          this.ariaAnnouncer.announcePolite(`${dossiersData.currentValue} dossiers à traiter chargés`);
+        }
       },
       error: () => {
+        this.kpiCards['annoncesActives'].loading = false;
+        this.kpiCards['annoncesActives'].error = 'Erreur lors du chargement des données';
         this.kpiCards['dossiersATraiter'].loading = false;
-        this.kpiCards['dossiersATraiter'].error = 'Erreur lors du chargement des dossiers à traiter';
-        this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des dossiers à traiter');
+        this.kpiCards['dossiersATraiter'].error = 'Erreur lors du chargement des données';
+        this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des données du tableau de bord');
       }
     });
+  }
+
+  formatTrend(percentageChange: number): string {
+    if (percentageChange > 0) {
+      return `+${Math.round(percentageChange)}%`;
+    } else if (percentageChange < 0) {
+      return `${Math.round(percentageChange)}%`;
+    } else {
+      return '0%';
+    }
   }
 
   loadRecentDossiers(): void {
