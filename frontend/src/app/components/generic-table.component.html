@@ -122,9 +122,9 @@
           (click)="onRowClick(row)"
           [attr.tabindex]="rowClickable ? '0' : null"
           [attr.role]="rowClickable ? 'button' : 'row'"
-          [attr.aria-label]="rowClickable ? 'Cliquer pour voir les détails' : null"
+          [attr.aria-label]="rowClickable ? 'Ligne de tableau cliquable, appuyez sur Entrée pour voir les détails' : null"
           (keydown.enter)="rowClickable && onRowClick(row)"
-          (keydown.space)="rowClickable && onRowClick(row)"></tr>
+          (keydown.space)="rowClickable && $event.preventDefault(); rowClickable && onRowClick(row)"></tr>
 
       <tr class="mat-row" *matNoDataRow role="row">
         <td class="mat-cell no-data" [attr.colspan]="displayedColumns.length" role="cell">
@@ -156,9 +156,9 @@
                 (click)="onRowClick(row)"
                 [attr.tabindex]="rowClickable ? '0' : null"
                 [attr.role]="rowClickable ? 'button' : 'article'"
-                [attr.aria-label]="'Élément ' + (i + 1)"
+                [attr.aria-label]="rowClickable ? 'Carte cliquable, élément ' + (i + 1) + ', appuyez sur Entrée pour voir les détails' : 'Élément ' + (i + 1)"
                 (keydown.enter)="rowClickable && onRowClick(row)"
-                (keydown.space)="rowClickable && onRowClick(row)">
+                (keydown.space)="rowClickable && $event.preventDefault(); rowClickable && onRowClick(row)">
         <!-- Selection Checkbox -->
         <div *ngIf="enableRowSelection" class="card-selection">
           <mat-checkbox
@@ -200,9 +200,9 @@
               (click)="onRowClick(row)"
               [attr.tabindex]="rowClickable ? '0' : null"
               [attr.role]="rowClickable ? 'button' : 'article'"
-              [attr.aria-label]="'Élément ' + (i + 1)"
+              [attr.aria-label]="rowClickable ? 'Carte cliquable, élément ' + (i + 1) + ', appuyez sur Entrée pour voir les détails' : 'Élément ' + (i + 1)"
               (keydown.enter)="rowClickable && onRowClick(row)"
-              (keydown.space)="rowClickable && onRowClick(row)">
+              (keydown.space)="rowClickable && $event.preventDefault(); rowClickable && onRowClick(row)">
       <!-- Selection Checkbox -->
       <div *ngIf="enableRowSelection" class="card-selection">
         <mat-checkbox

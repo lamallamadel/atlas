@@ -8,8 +8,15 @@
     </div>
 
     <div *ngIf="!loading && !error && dossier" class="detail-content">
-      <a class="link-back" (click)="goBack()" (keydown.enter)="goBack()" (keydown.space)="goBack()" tabindex="0" role="button">
-        <span class="arrow-left">←</span>
+      <a 
+        class="link-back" 
+        (click)="goBack()" 
+        (keydown.enter)="goBack()" 
+        (keydown.space)="$event.preventDefault(); goBack()" 
+        tabindex="0" 
+        role="button"
+        aria-label="Retourner à la liste des dossiers">
+        <span class="arrow-left" aria-hidden="true">←</span>
         Retour aux dossiers
       </a>
 
@@ -24,6 +31,9 @@
           <button
             class="btn-change-status-secondary"
             (click)="toggleStatusChange()"
+            aria-label="Ouvrir le formulaire de changement de statut du dossier"
+            (keydown.enter)="toggleStatusChange()"
+            (keydown.space)="$event.preventDefault(); toggleStatusChange()"
           >
             Changer statut
           </button>
@@ -92,6 +102,9 @@
             class="btn-update-status"
             (click)="updateStatus()"
             [disabled]="updatingStatus || !selectedStatus || isStatusChangeDisabled()"
+            aria-label="Enregistrer le nouveau statut du dossier"
+            (keydown.enter)="updateStatus()"
+            (keydown.space)="$event.preventDefault(); updateStatus()"
           >
             <span *ngIf="updatingStatus" class="spinner-small"></span>
             <span *ngIf="!updatingStatus">Mettre à jour le statut</span>
@@ -102,6 +115,9 @@
             class="btn-cancel"
             (click)="toggleStatusChange()"
             [disabled]="updatingStatus"
+            aria-label="Annuler le changement de statut"
+            (keydown.enter)="toggleStatusChange()"
+            (keydown.space)="$event.preventDefault(); toggleStatusChange()"
           >
             Annuler
           </button>
@@ -164,7 +180,9 @@
                       class="btn-add-lead"
                       (click)="toggleLeadForm()"
                       *ngIf="!showLeadForm"
-                      aria-label="Ajouter les informations de contact du prospect"
+                      aria-label="Ouvrir le formulaire pour ajouter les informations de contact du prospect"
+                      (keydown.enter)="toggleLeadForm()"
+                      (keydown.space)="$event.preventDefault(); toggleLeadForm()"
                     >
                       Ajouter les informations du prospect
                     </button>
@@ -210,6 +228,9 @@
                             class="btn-update-lead"
                             (click)="updateLead()"
                             [disabled]="updatingLead || !leadFormName || !leadFormPhone"
+                            aria-label="Enregistrer les informations du prospect"
+                            (keydown.enter)="updateLead()"
+                            (keydown.space)="$event.preventDefault(); updateLead()"
                           >
                             <span *ngIf="updatingLead" class="spinner-small"></span>
                             <span *ngIf="!updatingLead">Enregistrer</span>
@@ -220,6 +241,9 @@
                             class="btn-cancel"
                             (click)="toggleLeadForm()"
                             [disabled]="updatingLead"
+                            aria-label="Annuler la saisie des informations du prospect"
+                            (keydown.enter)="toggleLeadForm()"
+                            (keydown.space)="$event.preventDefault(); toggleLeadForm()"
                           >
                             Annuler
                           </button>
@@ -267,7 +291,10 @@
 
             <!-- Accordéon Détails système -->
             <mat-expansion-panel class="system-details-section">
-              <mat-expansion-panel-header>
+              <mat-expansion-panel-header
+                tabindex="0"
+                role="button"
+                aria-label="Afficher ou masquer les détails système du dossier">
                 <mat-panel-title>
                   Détails système
                 </mat-panel-title>
@@ -327,7 +354,12 @@
 
             <div *ngIf="dossier.parties && dossier.parties.length > 0">
               <div class="tab-header-actions">
-                <button class="btn-add" (click)="togglePartieForm()" aria-label="Ajouter une nouvelle partie prenante au dossier">
+                <button 
+                  class="btn-add" 
+                  (click)="togglePartieForm()" 
+                  aria-label="Ouvrir le formulaire pour ajouter une nouvelle partie prenante au dossier"
+                  (keydown.enter)="togglePartieForm()"
+                  (keydown.space)="$event.preventDefault(); togglePartieForm()">
                   <span class="btn-icon" aria-hidden="true">+</span>
                   Ajouter une partie prenante
                 </button>
@@ -361,9 +393,11 @@
                           <button 
                             class="btn-icon-action btn-edit" 
                             (click)="editPartie(partie)"
-                            title="Modifier"
-                            [attr.aria-label]="'Modifier ' + partie.firstName + ' ' + partie.lastName">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            [matTooltip]="'Modifier ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                            [attr.aria-label]="'Modifier la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                            (keydown.enter)="editPartie(partie)"
+                            (keydown.space)="$event.preventDefault(); editPartie(partie)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                             </svg>
@@ -371,9 +405,11 @@
                           <button 
                             class="btn-icon-action btn-delete" 
                             (click)="deletePartie(partie)"
-                            title="Supprimer"
-                            [attr.aria-label]="'Supprimer ' + partie.firstName + ' ' + partie.lastName">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            [matTooltip]="'Supprimer ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                            [attr.aria-label]="'Supprimer la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                            (keydown.enter)="deletePartie(partie)"
+                            (keydown.space)="$event.preventDefault(); deletePartie(partie)">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                               <polyline points="3 6 5 6 21 6"></polyline>
                               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                               <line x1="10" y1="11" x2="10" y2="17"></line>
@@ -393,7 +429,12 @@
         <mat-tab label="Messages" aria-label="Historique des messages échangés">
           <div class="tab-content">
             <div class="tab-header-actions">
-              <button class="btn-add" (click)="openMessageDialog()" aria-label="Créer un nouveau message">
+              <button 
+                class="btn-add" 
+                (click)="openMessageDialog()" 
+                aria-label="Ouvrir le formulaire pour créer un nouveau message"
+                (keydown.enter)="openMessageDialog()"
+                (keydown.space)="$event.preventDefault(); openMessageDialog()">
                 <span class="btn-icon" aria-hidden="true">+</span>
                 Nouveau message
               </button>
@@ -429,7 +470,12 @@
         <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
           <div class="tab-content">
             <div class="tab-header-actions">
-              <button class="btn-add" (click)="openAppointmentDialog()" aria-label="Planifier un nouveau rendez-vous">
+              <button 
+                class="btn-add" 
+                (click)="openAppointmentDialog()" 
+                aria-label="Ouvrir le formulaire pour planifier un nouveau rendez-vous"
+                (keydown.enter)="openAppointmentDialog()"
+                (keydown.space)="$event.preventDefault(); openAppointmentDialog()">
                 <span class="btn-icon" aria-hidden="true">+</span>
                 Planifier un rendez-vous
               </button>
@@ -467,16 +513,32 @@
                     <td>{{ appointment.notes || '—' }}</td>
                     <td>
                       <div class="action-buttons">
-                        <button class="btn-edit" (click)="editAppointment(appointment)" aria-label="Modifier ce rendez-vous">Modifier</button>
+                        <button 
+                          class="btn-edit" 
+                          (click)="editAppointment(appointment)" 
+                          [attr.aria-label]="'Modifier le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
+                          (keydown.enter)="editAppointment(appointment)"
+                          (keydown.space)="$event.preventDefault(); editAppointment(appointment)">
+                          Modifier
+                        </button>
                         <button 
                           class="btn-complete" 
                           (click)="completeAppointment(appointment)"
                           *ngIf="appointment.status === 'SCHEDULED'"
-                          aria-label="Marquer ce rendez-vous comme terminé"
+                          [attr.aria-label]="'Marquer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime) + ' comme terminé'"
+                          (keydown.enter)="completeAppointment(appointment)"
+                          (keydown.space)="$event.preventDefault(); completeAppointment(appointment)"
                         >
                           Terminer
                         </button>
-                        <button class="btn-delete" (click)="deleteAppointment(appointment)" aria-label="Supprimer ce rendez-vous">Supprimer</button>
+                        <button 
+                          class="btn-delete" 
+                          (click)="deleteAppointment(appointment)" 
+                          [attr.aria-label]="'Supprimer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
+                          (keydown.enter)="deleteAppointment(appointment)"
+                          (keydown.space)="$event.preventDefault(); deleteAppointment(appointment)">
+                          Supprimer
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -530,6 +592,9 @@
                         (click)="toggleConsentement(group, ConsentementStatus.GRANTED)"
                         [disabled]="group.current?.status === ConsentementStatus.GRANTED"
                         [attr.aria-label]="'Accorder le consentement pour ' + getChannelLabel(group.channel)"
+                        [attr.aria-pressed]="group.current?.status === ConsentementStatus.GRANTED"
+                        (keydown.enter)="toggleConsentement(group, ConsentementStatus.GRANTED)"
+                        (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.GRANTED)"
                       >
                         Accorder
                       </button>
@@ -539,6 +604,9 @@
                         (click)="toggleConsentement(group, ConsentementStatus.DENIED)"
                         [disabled]="group.current?.status === ConsentementStatus.DENIED"
                         [attr.aria-label]="'Refuser le consentement pour ' + getChannelLabel(group.channel)"
+                        [attr.aria-pressed]="group.current?.status === ConsentementStatus.DENIED"
+                        (keydown.enter)="toggleConsentement(group, ConsentementStatus.DENIED)"
+                        (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.DENIED)"
                       >
                         Refuser
                       </button>
@@ -548,6 +616,9 @@
                         (click)="toggleConsentement(group, ConsentementStatus.REVOKED)"
                         [disabled]="group.current?.status === ConsentementStatus.REVOKED"
                         [attr.aria-label]="'Révoquer le consentement pour ' + getChannelLabel(group.channel)"
+                        [attr.aria-pressed]="group.current?.status === ConsentementStatus.REVOKED"
+                        (keydown.enter)="toggleConsentement(group, ConsentementStatus.REVOKED)"
+                        (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.REVOKED)"
                       >
                         Révoquer
                       </button>
@@ -557,7 +628,10 @@
               </div>
 
               <mat-expansion-panel class="consent-history-section">
-                <mat-expansion-panel-header>
+                <mat-expansion-panel-header
+                  tabindex="0"
+                  role="button"
+                  aria-label="Afficher ou masquer l'historique complet des consentements">
                   <mat-panel-title>
                     Historique des consentements
                   </mat-panel-title>

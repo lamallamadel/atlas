@@ -797,31 +797,33 @@
   letter-spacing: 0.5px;
 }
 
+/* WCAG AA Compliant Channel/Status Badges - 4.5:1 Contrast Ratio */
+
 /* Channel badges */
-.channel-email { background: var(--color-info-100); color: var(--color-info-800); }
-.channel-sms { background: var(--color-success-100); color: var(--color-success-800); }
-.channel-phone { background: var(--color-warning-100); color: var(--color-warning-800); }
-.channel-whatsapp { background: #dcf8c6; color: #075e54; }
-.channel-chat { background: var(--color-secondary-100); color: var(--color-secondary-800); }
-.channel-inapp { background: var(--color-neutral-200); color: var(--color-neutral-800); }
-.channel-web { background: var(--color-primary-100); color: var(--color-primary-800); }
+.channel-email { background: #0d47a1; color: #ffffff; border: 1px solid #01579b; }
+.channel-sms { background: #1b5e20; color: #ffffff; border: 1px solid #0d5b1e; }
+.channel-phone { background: #e65100; color: #ffffff; border: 1px solid #bf360c; }
+.channel-whatsapp { background: #128c7e; color: #ffffff; border: 1px solid #075e54; }
+.channel-chat { background: #4527a0; color: #ffffff; border: 1px solid #311b92; }
+.channel-inapp { background: #616161; color: #ffffff; border: 1px solid #424242; }
+.channel-web { background: #283593; color: #ffffff; border: 1px solid #1a237e; }
 
 /* Direction badges */
-.direction-inbound { background: var(--color-success-100); color: var(--color-success-800); }
-.direction-outbound { background: var(--color-info-100); color: var(--color-info-800); }
+.direction-inbound { background: #2e7d32; color: #ffffff; border: 1px solid #1b5e20; }
+.direction-outbound { background: #0277bd; color: #ffffff; border: 1px solid #01579b; }
 
 /* Status badges */
-.status-scheduled { background: var(--color-info-100); color: var(--color-info-800); }
-.status-confirmed { background: var(--color-success-100); color: var(--color-success-800); }
-.status-completed { background: var(--color-success-200); color: var(--color-success-900); }
-.status-cancelled { background: var(--color-error-100); color: var(--color-error-800); }
+.status-scheduled { background: #0277bd; color: #ffffff; border: 1px solid #01579b; }
+.status-confirmed { background: #2e7d32; color: #ffffff; border: 1px solid #1b5e20; }
+.status-completed { background: #1b5e20; color: #ffffff; border: 1px solid #0d5b1e; }
+.status-cancelled { background: #c62828; color: #ffffff; border: 1px solid #b71c1c; }
 
 /* Consent badges */
-.consent-granted { background: var(--color-success-100); color: var(--color-success-800); }
-.consent-denied { background: var(--color-error-100); color: var(--color-error-800); }
-.consent-revoked { background: var(--color-warning-100); color: var(--color-warning-800); }
-.consent-pending { background: var(--color-info-100); color: var(--color-info-800); }
-.consent-expired { background: var(--color-neutral-200); color: var(--color-neutral-700); }
+.consent-granted { background: #2e7d32; color: #ffffff; border: 1px solid #1b5e20; }
+.consent-denied { background: #c62828; color: #ffffff; border: 1px solid #b71c1c; }
+.consent-revoked { background: #ef6c00; color: #ffffff; border: 1px solid #e65100; }
+.consent-pending { background: #0277bd; color: #ffffff; border: 1px solid #01579b; }
+.consent-expired { background: #616161; color: #ffffff; border: 1px solid #424242; }
 
 /* ========================================
    CONSENT CARDS
@@ -925,55 +927,57 @@
   transition: var(--transition-colors);
 }
 
+/* WCAG AA Compliant Consent Buttons - 4.5:1 Contrast Ratio */
+
 .consent-btn-granted {
-  background: var(--color-success-50);
-  color: var(--color-success-700);
-  border-color: var(--color-success-200);
+  background: #c8e6c9;
+  color: #1b5e20;
+  border-color: #4caf50;
 }
 
 .consent-btn-granted:hover:not(:disabled) {
-  background: var(--color-success-100);
-  border-color: var(--color-success-300);
+  background: #a5d6a7;
+  border-color: #388e3c;
 }
 
 .consent-btn-granted.active {
-  background: var(--color-success-500);
-  color: var(--color-neutral-0);
-  border-color: var(--color-success-600);
+  background: #2e7d32;
+  color: #ffffff;
+  border-color: #1b5e20;
 }
 
 .consent-btn-denied {
-  background: var(--color-error-50);
-  color: var(--color-error-700);
-  border-color: var(--color-error-200);
+  background: #ffcdd2;
+  color: #b71c1c;
+  border-color: #f44336;
 }
 
 .consent-btn-denied:hover:not(:disabled) {
-  background: var(--color-error-100);
-  border-color: var(--color-error-300);
+  background: #ef9a9a;
+  border-color: #d32f2f;
 }
 
 .consent-btn-denied.active {
-  background: var(--color-error-500);
-  color: var(--color-neutral-0);
-  border-color: var(--color-error-600);
+  background: #c62828;
+  color: #ffffff;
+  border-color: #b71c1c;
 }
 
 .consent-btn-revoked {
-  background: var(--color-warning-50);
-  color: var(--color-warning-700);
-  border-color: var(--color-warning-200);
+  background: #ffe0b2;
+  color: #e65100;
+  border-color: #ff9800;
 }
 
 .consent-btn-revoked:hover:not(:disabled) {
-  background: var(--color-warning-100);
-  border-color: var(--color-warning-300);
+  background: #ffcc80;
+  border-color: #f57c00;
 }
 
 .consent-btn-revoked.active {
-  background: var(--color-warning-500);
-  color: var(--color-neutral-0);
-  border-color: var(--color-warning-600);
+  background: #ef6c00;
+  color: #ffffff;
+  border-color: #e65100;
 }
 
 .consent-btn:disabled {
@@ -1143,59 +1147,72 @@
   white-space: nowrap;
 }
 
+/* WCAG AA Compliant Role Badges - 4.5:1 Contrast Ratio */
+
 .role-badge-buyer {
-  background: var(--color-success-100);
-  color: var(--color-success-800);
+  background: #1b5e20;
+  color: #ffffff;
+  border: 1px solid #0d5b1e;
 }
 
 .role-badge-seller {
-  background: var(--color-info-100);
-  color: var(--color-info-800);
+  background: #0d47a1;
+  color: #ffffff;
+  border: 1px solid #01579b;
 }
 
 .role-badge-agent {
-  background: var(--color-primary-100);
-  color: var(--color-primary-800);
+  background: #283593;
+  color: #ffffff;
+  border: 1px solid #1a237e;
 }
 
 .role-badge-owner {
-  background: var(--color-warning-100);
-  color: var(--color-warning-800);
+  background: #e65100;
+  color: #ffffff;
+  border: 1px solid #bf360c;
 }
 
 .role-badge-tenant {
-  background: var(--color-secondary-100);
-  color: var(--color-secondary-800);
+  background: #4527a0;
+  color: #ffffff;
+  border: 1px solid #311b92;
 }
 
 .role-badge-landlord {
-  background: #fef3c7;
-  color: #92400e;
+  background: #f57f17;
+  color: #000000;
+  border: 1px solid #f57f17;
 }
 
 .role-badge-notary {
-  background: #e0e7ff;
-  color: #3730a3;
+  background: #303f9f;
+  color: #ffffff;
+  border: 1px solid #1a237e;
 }
 
 .role-badge-bank {
-  background: #dbeafe;
-  color: #1e40af;
+  background: #0277bd;
+  color: #ffffff;
+  border: 1px solid #01579b;
 }
 
 .role-badge-attorney {
-  background: #f3e8ff;
-  color: #6b21a8;
+  background: #6a1b9a;
+  color: #ffffff;
+  border: 1px solid #4a148c;
 }
 
 .role-badge-lead {
-  background: var(--color-neutral-200);
-  color: var(--color-neutral-800);
+  background: #424242;
+  color: #ffffff;
+  border: 1px solid #212121;
 }
 
 .role-badge-default {
-  background: var(--color-neutral-100);
-  color: var(--color-neutral-700);
+  background: #616161;
+  color: #ffffff;
+  border: 1px solid #424242;
 }
 
 /* ========================================

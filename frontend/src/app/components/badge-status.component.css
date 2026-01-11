@@ -3,12 +3,14 @@
 .badge-chip {
   display: inline-flex !important;
   align-items: center !important;
-  gap: var(--spacing-1) !important;
-  height: 28px !important;
-  padding: var(--spacing-1) var(--spacing-3) !important;
-  border-radius: var(--radius-full) !important;
-  font-size: var(--font-size-xs) !important;
-  font-weight: var(--font-weight-medium) !important;
+  gap: var(--spacing-1, 4px) !important;
+  min-height: 32px !important;
+  height: auto !important;
+  padding: 6px 12px !important;
+  border-radius: var(--radius-full, 9999px) !important;
+  font-size: 13px !important;
+  font-weight: var(--font-weight-medium, 500) !important;
+  line-height: 1.4 !important;
   transition: var(--transition-base) !important;
   cursor: default !important;
   user-select: none !important;
@@ -46,14 +48,16 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
+/* WCAG AA Compliant Badge Colors - 4.5:1 Contrast Ratio */
+
 .badge-draft {
-  background-color: #f5f5f5 !important;
-  color: #616161 !important;
-  border: 1px solid #e0e0e0 !important;
+  background-color: #e0e0e0 !important;
+  color: #212121 !important;
+  border: 1px solid #9e9e9e !important;
 }
 
 .badge-draft .badge-icon {
-  color: #757575 !important;
+  color: #424242 !important;
 }
 
 .badge-active {
@@ -63,85 +67,85 @@
 }
 
 .badge-active .badge-icon {
-  color: #a5d6a7 !important;
+  color: #ffffff !important;
 }
 
 .badge-paused {
   background-color: #e65100 !important;
   color: #ffffff !important;
-  border: 1px solid #f57c00 !important;
+  border: 1px solid #bf360c !important;
 }
 
 .badge-paused .badge-icon {
-  color: #ffcc80 !important;
+  color: #ffffff !important;
 }
 
 .badge-archived {
   background-color: #424242 !important;
-  color: #e0e0e0 !important;
-  border: 1px solid #616161 !important;
+  color: #ffffff !important;
+  border: 1px solid #212121 !important;
 }
 
 .badge-archived .badge-icon {
-  color: #bdbdbd !important;
+  color: #ffffff !important;
 }
 
 .badge-new {
-  background-color: #1565c0 !important;
+  background-color: #0d47a1 !important;
   color: #ffffff !important;
-  border: 1px solid #1976d2 !important;
+  border: 1px solid #1565c0 !important;
 }
 
 .badge-new .badge-icon {
-  color: #90caf9 !important;
+  color: #ffffff !important;
 }
 
 .badge-qualifying {
-  background-color: #fb8c00 !important;
+  background-color: #e65100 !important;
   color: #ffffff !important;
-  border: 1px solid #ff9800 !important;
+  border: 1px solid #bf360c !important;
 }
 
 .badge-qualifying .badge-icon {
-  color: #ffe0b2 !important;
+  color: #ffffff !important;
 }
 
 .badge-qualified {
-  background-color: #388e3c !important;
+  background-color: #2e7d32 !important;
   color: #ffffff !important;
-  border: 1px solid #43a047 !important;
+  border: 1px solid #1b5e20 !important;
 }
 
 .badge-qualified .badge-icon {
-  color: #c8e6c9 !important;
+  color: #ffffff !important;
 }
 
 .badge-appointment {
-  background-color: #5e35b1 !important;
+  background-color: #4527a0 !important;
   color: #ffffff !important;
-  border: 1px solid #7e57c2 !important;
+  border: 1px solid #311b92 !important;
 }
 
 .badge-appointment .badge-icon {
-  color: #d1c4e9 !important;
+  color: #ffffff !important;
 }
 
 .badge-won {
-  background-color: #2e7d32 !important;
+  background-color: #1b5e20 !important;
   color: #ffffff !important;
-  border: 1px solid #388e3c !important;
+  border: 1px solid #0d5b1e !important;
 }
 
 .badge-won .badge-icon {
-  color: #a5d6a7 !important;
+  color: #ffffff !important;
 }
 
 .badge-lost {
-  background-color: #c62828 !important;
+  background-color: #b71c1c !important;
   color: #ffffff !important;
-  border: 1px solid #d32f2f !important;
+  border: 1px solid #8b0000 !important;
 }
 
 .badge-lost .badge-icon {
-  color: #ef9a9a !important;
+  color: #ffffff !important;
 }

@@ -1,8 +1,14 @@
 <div class="activity-timeline-container">
   <div class="timeline-header">
     <h3>Chronologie d'activité</h3>
-    <button mat-raised-button color="primary" (click)="openNoteDialog()">
-      <mat-icon>add</mat-icon>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="openNoteDialog()"
+      aria-label="Ajouter une nouvelle note à la chronologie"
+      (keydown.enter)="openNoteDialog()"
+      (keydown.space)="$event.preventDefault(); openNoteDialog()">
+      <mat-icon aria-hidden="true">add</mat-icon>
       Ajouter une note
     </button>
   </div>
@@ -46,16 +52,24 @@
                 *ngIf="activity.type === ActivityType.NOTE"
                 [matMenuTriggerFor]="actionsMenu"
                 class="actions-menu-button"
-                (click)="$event.stopPropagation()">
-                <mat-icon>more_vert</mat-icon>
+                (click)="$event.stopPropagation()"
+                [attr.aria-label]="'Actions pour la note du ' + formatDateTime(activity.createdAt)"
+                aria-haspopup="true">
+                <mat-icon aria-hidden="true">more_vert</mat-icon>
               </button>
-              <mat-menu #actionsMenu="matMenu">
-                <button mat-menu-item (click)="editActivity(activity)">
-                  <mat-icon>edit</mat-icon>
+              <mat-menu #actionsMenu="matMenu" aria-label="Menu des actions">
+                <button 
+                  mat-menu-item 
+                  (click)="editActivity(activity)"
+                  aria-label="Modifier cette note">
+                  <mat-icon aria-hidden="true">edit</mat-icon>
                   <span>Modifier</span>
                 </button>
-                <button mat-menu-item (click)="deleteActivity(activity)">
-                  <mat-icon color="warn">delete</mat-icon>
+                <button 
+                  mat-menu-item 
+                  (click)="deleteActivity(activity)"
+                  aria-label="Supprimer cette note">
+                  <mat-icon color="warn" aria-hidden="true">delete</mat-icon>
                   <span>Supprimer</span>
                 </button>
               </mat-menu>
@@ -79,8 +93,12 @@
                     mat-button 
                     color="primary" 
                     (click)="toggleExpanded(activity.id)"
-                    class="expand-button">
-              <mat-icon>{{ isExpanded(activity.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    class="expand-button"
+                    [attr.aria-label]="isExpanded(activity.id) ? 'Réduire le contenu de cette activité' : 'Développer le contenu de cette activité'"
+                    [attr.aria-expanded]="isExpanded(activity.id)"
+                    (keydown.enter)="toggleExpanded(activity.id)"
+                    (keydown.space)="$event.preventDefault(); toggleExpanded(activity.id)">
+              <mat-icon aria-hidden="true">{{ isExpanded(activity.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
               {{ isExpanded(activity.id) ? 'Voir moins' : 'Voir plus' }}
             </button>
           </div>

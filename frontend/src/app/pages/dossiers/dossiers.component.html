@@ -1,7 +1,12 @@
 <div class="page-container">
   <header class="page-header">
     <h1 class="page-title">Dossiers</h1>
-    <button class="btn-create" (click)="createDossier()" aria-label="Créer un nouveau dossier">
+    <button 
+      class="btn-create" 
+      (click)="createDossier()" 
+      aria-label="Ouvrir le formulaire pour créer un nouveau dossier"
+      (keydown.enter)="createDossier()"
+      (keydown.space)="$event.preventDefault(); createDossier()">
       <span class="btn-icon" aria-hidden="true">+</span>
       Créer un dossier
     </button>
@@ -15,7 +20,11 @@
           <mat-expansion-panel 
             [(expanded)]="filterPanelExpanded"
             class="filter-panel">
-            <mat-expansion-panel-header>
+            <mat-expansion-panel-header
+              tabindex="0"
+              role="button"
+              [attr.aria-expanded]="filterPanelExpanded"
+              aria-label="Afficher ou masquer les filtres de recherche">
               <mat-panel-title>
                 <mat-icon aria-hidden="true">filter_list</mat-icon>
                 <span>Filtres</span>
@@ -77,16 +86,31 @@
 
               <!-- Filter Actions -->
               <div class="filter-actions">
-                <button mat-raised-button color="primary" (click)="onFilterChange()" aria-label="Appliquer les filtres sélectionnés">
+                <button 
+                  mat-raised-button 
+                  color="primary" 
+                  (click)="onFilterChange()" 
+                  aria-label="Appliquer les filtres sélectionnés"
+                  (keydown.enter)="onFilterChange()"
+                  (keydown.space)="$event.preventDefault(); onFilterChange()">
                   <mat-icon aria-hidden="true">check</mat-icon>
                   Appliquer
                 </button>
-                <button mat-button (click)="clearFilters()" aria-label="Réinitialiser tous les filtres">
+                <button 
+                  mat-button 
+                  (click)="clearFilters()" 
+                  aria-label="Réinitialiser tous les filtres"
+                  (keydown.enter)="clearFilters()"
+                  (keydown.space)="$event.preventDefault(); clearFilters()">
                   <mat-icon aria-hidden="true">clear</mat-icon>
                   Réinitialiser
                 </button>
                 
-                <button mat-button [matMenuTriggerFor]="presetMenu" aria-label="Gérer les presets de filtres" aria-haspopup="true">
+                <button 
+                  mat-button 
+                  [matMenuTriggerFor]="presetMenu" 
+                  aria-label="Ouvrir le menu de gestion des presets de filtres" 
+                  aria-haspopup="true">
                   <mat-icon aria-hidden="true">bookmark</mat-icon>
                   Presets
                 </button>
@@ -202,8 +226,10 @@
             class="btn-page"
             [disabled]="page.first"
             (click)="previousPage()"
-            aria-label="Page précédente"
+            aria-label="Aller à la page précédente"
             [attr.aria-disabled]="page.first"
+            (keydown.enter)="!page.first && previousPage()"
+            (keydown.space)="$event.preventDefault(); !page.first && previousPage()"
           >
             Précédent
           </button>
@@ -217,6 +243,8 @@
             (click)="pageNum !== -1 && goToPage(pageNum)"
             [attr.aria-label]="pageNum === -1 ? null : 'Aller à la page ' + (pageNum + 1)"
             [attr.aria-current]="pageNum === currentPage ? 'page' : null"
+            (keydown.enter)="pageNum !== -1 && goToPage(pageNum)"
+            (keydown.space)="$event.preventDefault(); pageNum !== -1 && goToPage(pageNum)"
           >
             {{ pageNum === -1 ? '...' : pageNum + 1 }}
           </button>
@@ -225,8 +253,10 @@
             class="btn-page"
             [disabled]="page.last"
             (click)="nextPage()"
-            aria-label="Page suivante"
+            aria-label="Aller à la page suivante"
             [attr.aria-disabled]="page.last"
+            (keydown.enter)="!page.last && nextPage()"
+            (keydown.space)="$event.preventDefault(); !page.last && nextPage()"
           >
             Suivant
           </button>

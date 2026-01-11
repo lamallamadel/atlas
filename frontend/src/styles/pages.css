@@ -2,6 +2,10 @@
 
 .page-container {
   animation: fadeIn 400ms ease-out;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-4, 16px);
+  width: 100%;
 }
 
 .page-header {

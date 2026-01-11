@@ -210,7 +210,13 @@ textarea:focus-visible,
 .mat-mdc-mini-fab:focus-visible,
 .mat-mdc-card:focus-visible,
 .mat-mdc-chip:focus-visible,
-.clickable:focus-visible {
+.mat-mdc-tab:focus-visible,
+.clickable:focus-visible,
+.clickable-row:focus-visible,
+.btn-icon-action:focus-visible,
+.btn-edit:focus-visible,
+.btn-delete:focus-visible,
+.kebab-menu-button:focus-visible {
   outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.2) !important;
@@ -219,7 +225,8 @@ textarea:focus-visible,
 .mat-mdc-menu-item:focus-visible,
 .mat-mdc-list-item:focus-visible,
 .mat-mdc-option:focus-visible,
-.mat-button-toggle:focus-visible {
+.mat-button-toggle:focus-visible,
+.mat-expansion-panel-header:focus-visible {
   outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
   outline-offset: -2px !important;
 }
@@ -233,9 +240,50 @@ a,
 .mat-mdc-mini-fab,
 .mat-button-toggle,
 [role="button"],
-.clickable {
-  min-width: 40px;
-  min-height: 40px;
+.clickable,
+.btn-icon-action,
+.btn-edit,
+.btn-delete,
+.btn-create,
+.btn-retry,
+.btn-page,
+.btn-page-num,
+.btn-add,
+.btn-cancel,
+.btn-primary,
+.btn-update-status,
+.btn-update-lead,
+.btn-add-lead,
+.btn-change-status-secondary,
+.kebab-menu-button,
+.delete-preset-btn {
+  min-width: 40px !important;
+  min-height: 40px !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+}
+
+/* Icon buttons specific sizing */
+.mat-mdc-icon-button,
+.btn-icon-action,
+.kebab-menu-button {
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  min-height: 40px !important;
+  padding: 8px !important;
+}
+
+/* SVG icons within buttons should be visible */
+.btn-icon-action svg,
+.btn-edit svg,
+.btn-delete svg {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
 }
 
 /* Skip to content link */
@@ -348,7 +396,13 @@ textarea:disabled {
 .dark-theme .mat-mdc-mini-fab:focus-visible,
 .dark-theme .mat-mdc-card:focus-visible,
 .dark-theme .mat-mdc-chip:focus-visible,
-.dark-theme .clickable:focus-visible {
+.dark-theme .mat-mdc-tab:focus-visible,
+.dark-theme .clickable:focus-visible,
+.dark-theme .clickable-row:focus-visible,
+.dark-theme .btn-icon-action:focus-visible,
+.dark-theme .btn-edit:focus-visible,
+.dark-theme .btn-delete:focus-visible,
+.dark-theme .kebab-menu-button:focus-visible {
   outline: 2px solid var(--color-primary-400) !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(66, 136, 206, 0.2) !important;
@@ -357,7 +411,8 @@ textarea:disabled {
 .dark-theme .mat-mdc-menu-item:focus-visible,
 .dark-theme .mat-mdc-list-item:focus-visible,
 .dark-theme .mat-mdc-option:focus-visible,
-.dark-theme .mat-button-toggle:focus-visible {
+.dark-theme .mat-button-toggle:focus-visible,
+.dark-theme .mat-expansion-panel-header:focus-visible {
   outline: 2px solid var(--color-primary-400) !important;
   outline-offset: -2px !important;
 }
