@@ -7,13 +7,21 @@
   align-items: center;
 }
 
-.filters-container {
+.filters-card {
   margin-bottom: var(--spacing-4);
 }
 
+.filters-card ::ng-deep .mat-mdc-card-content {
+  padding: 0;
+}
+
+.filters-container {
+  width: 100%;
+}
+
 .filter-panel {
-  box-shadow: var(--shadow-1);
-  border-radius: var(--radius-lg);
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .filter-panel ::ng-deep .mat-expansion-panel-header {
@@ -62,11 +70,11 @@
   display: flex;
   gap: var(--spacing-3);
   align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
-}
-
-.preset-menu-container {
-  margin-left: auto;
+  margin-bottom: var(--spacing-4);
+  padding-bottom: var(--spacing-3);
+  border-bottom: 1px solid var(--color-neutral-200);
 }
 
 .delete-preset-btn {
@@ -121,16 +129,16 @@
   padding: 0 6px;
 }
 
-.applied-filters {
+.active-filters-row {
+  padding-top: var(--spacing-3);
+  border-top: 1px solid var(--color-neutral-200);
+}
+
+.active-filters-header {
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
-  margin-bottom: var(--spacing-4);
-  padding: var(--spacing-3);
-  background-color: var(--color-neutral-50);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-neutral-200);
-  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-3);
 }
 
 .filters-label {
@@ -140,19 +148,23 @@
   white-space: nowrap;
 }
 
-.applied-filters mat-chip-set {
+.clear-all-btn {
+  margin-left: auto;
+}
+
+.active-filters-row mat-chip-set {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-2);
 }
 
-.applied-filters mat-chip {
+.active-filters-row mat-chip {
   background-color: var(--color-primary-100);
   color: var(--color-primary-800);
   border-radius: var(--radius-lg);
 }
 
-.applied-filters mat-chip strong {
+.active-filters-row mat-chip strong {
   margin-right: var(--spacing-1);
 }
 
@@ -170,20 +182,22 @@
   .filter-actions {
     flex-direction: column;
     width: 100%;
+    align-items: stretch;
   }
   
   .filter-actions button {
     width: 100%;
   }
   
-  .preset-menu-container {
-    margin-left: 0;
-    width: 100%;
-  }
-  
-  .applied-filters {
+  .active-filters-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: var(--spacing-2);
+  }
+  
+  .clear-all-btn {
+    margin-left: 0;
+    align-self: flex-start;
   }
 }
 

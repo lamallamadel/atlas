@@ -9,113 +9,141 @@
 
   <!-- Desktop Filters -->
   <section *ngIf="!isMobile" aria-label="Filtres de recherche">
-    <div class="filters-container">
-      <mat-expansion-panel 
-        [(expanded)]="filterPanelExpanded"
-        class="filter-panel">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <mat-icon aria-hidden="true">filter_list</mat-icon>
-            <span>Filtres</span>
-            <span class="filter-count" *ngIf="appliedFilters.length > 0" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-              ({{ appliedFilters.length }})
-            </span>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
+    <mat-card class="filters-card">
+      <mat-card-content>
+        <div class="filters-container">
+          <mat-expansion-panel 
+            [(expanded)]="filterPanelExpanded"
+            class="filter-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>
+                <mat-icon aria-hidden="true">filter_list</mat-icon>
+                <span>Filtres</span>
+                <span class="filter-count" *ngIf="appliedFilters.length > 0" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
+                  ({{ appliedFilters.length }})
+                </span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
 
-        <div class="filter-content">
-          <div class="filter-row">
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Statut</mat-label>
-              <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()" aria-label="Filtrer par statut">
-                <mat-option value="">Tous</mat-option>
-                <mat-option [value]="DossierStatus.NEW">Nouveau</mat-option>
-                <mat-option [value]="DossierStatus.QUALIFIED">Qualifié</mat-option>
-                <mat-option [value]="DossierStatus.APPOINTMENT">Rendez-vous</mat-option>
-                <mat-option [value]="DossierStatus.WON">Gagné</mat-option>
-                <mat-option [value]="DossierStatus.LOST">Perdu</mat-option>
-              </mat-select>
-            </mat-form-field>
+            <div class="filter-content">
+              <!-- Filter Fields Grid -->
+              <div class="filter-row">
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Statut</mat-label>
+                  <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()" aria-label="Filtrer par statut">
+                    <mat-option value="">Tous</mat-option>
+                    <mat-option [value]="DossierStatus.NEW">Nouveau</mat-option>
+                    <mat-option [value]="DossierStatus.QUALIFIED">Qualifié</mat-option>
+                    <mat-option [value]="DossierStatus.APPOINTMENT">Rendez-vous</mat-option>
+                    <mat-option [value]="DossierStatus.WON">Gagné</mat-option>
+                    <mat-option [value]="DossierStatus.LOST">Perdu</mat-option>
+                  </mat-select>
+                  <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
+                </mat-form-field>
 
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Téléphone</mat-label>
-              <input
-                matInput
-                placeholder="Filtrer par téléphone..."
-                [(ngModel)]="phoneFilter"
-                (keyup.enter)="onFilterChange()"
-                aria-label="Filtrer par numéro de téléphone"
-              />
-              <mat-icon matSuffix aria-hidden="true">phone</mat-icon>
-            </mat-form-field>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Téléphone</mat-label>
+                  <input
+                    matInput
+                    placeholder="Filtrer par numéro de téléphone"
+                    [(ngModel)]="phoneFilter"
+                    (keyup.enter)="onFilterChange()"
+                    aria-label="Filtrer par numéro de téléphone"
+                  />
+                  <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+                </mat-form-field>
 
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Annonce</mat-label>
-              <input
-                matInput
-                placeholder="Rechercher une annonce (titre ou ID)..."
-                [formControl]="annonceSearchControl"
-                [matAutocomplete]="annonceAuto"
-                (keyup.enter)="onFilterChange()"
-                aria-label="Rechercher une annonce par titre ou ID"
-              />
-              <mat-icon matSuffix aria-hidden="true">business</mat-icon>
-              <mat-autocomplete 
-                #annonceAuto="matAutocomplete" 
-                [displayWith]="displayAnnonceFn.bind(this)"
-                (optionSelected)="onAnnonceSelected($event.option.value); onFilterChange()">
-                <mat-option *ngFor="let a of filteredAnnonces | async; trackBy: trackByAnnonce" [value]="a">
-                  {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
-                </mat-option>
-              </mat-autocomplete>
-            </mat-form-field>
-          </div>
+                <mat-form-field appearance="outline" class="filter-field">
+                  <mat-label>Annonce</mat-label>
+                  <input
+                    matInput
+                    placeholder="Rechercher une annonce (titre ou ID)"
+                    [formControl]="annonceSearchControl"
+                    [matAutocomplete]="annonceAuto"
+                    (keyup.enter)="onFilterChange()"
+                    aria-label="Rechercher une annonce par titre ou ID"
+                  />
+                  <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+                  <mat-autocomplete 
+                    #annonceAuto="matAutocomplete" 
+                    [displayWith]="displayAnnonceFn.bind(this)"
+                    (optionSelected)="onAnnonceSelected($event.option.value); onFilterChange()">
+                    <mat-option *ngFor="let a of filteredAnnonces | async; trackBy: trackByAnnonce" [value]="a">
+                      {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
+                    </mat-option>
+                  </mat-autocomplete>
+                </mat-form-field>
+              </div>
 
-          <div class="filter-actions">
-            <button mat-raised-button color="primary" (click)="onFilterChange()" aria-label="Appliquer les filtres sélectionnés">
-              <mat-icon aria-hidden="true">check</mat-icon>
-              Appliquer
-            </button>
-            <button mat-button (click)="clearFilters()" aria-label="Réinitialiser tous les filtres">
-              <mat-icon aria-hidden="true">clear</mat-icon>
-              Réinitialiser
-            </button>
-            
-            <div class="preset-menu-container">
-              <button mat-button [matMenuTriggerFor]="presetMenu" aria-label="Gérer les presets de filtres" aria-haspopup="true">
-                <mat-icon aria-hidden="true">bookmark</mat-icon>
-                Presets
-              </button>
-              <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
-                <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
-                  <mat-icon aria-hidden="true">save</mat-icon>
-                  <span>Sauvegarder les filtres actuels</span>
+              <!-- Filter Actions -->
+              <div class="filter-actions">
+                <button mat-raised-button color="primary" (click)="onFilterChange()" aria-label="Appliquer les filtres sélectionnés">
+                  <mat-icon aria-hidden="true">check</mat-icon>
+                  Appliquer
                 </button>
-                <mat-divider *ngIf="savedPresets.length > 0" role="separator"></mat-divider>
-                <button 
-                  mat-menu-item 
-                  *ngFor="let preset of savedPresets; trackBy: trackByPreset"
-                  (click)="loadPreset(preset)"
-                  [attr.aria-label]="'Charger le preset ' + preset.name">
-                  <mat-icon aria-hidden="true">folder</mat-icon>
-                  <span>{{ preset.name }}</span>
-                  <button 
-                    mat-icon-button 
-                    (click)="deletePreset(preset, $event)"
-                    class="delete-preset-btn"
-                    [attr.aria-label]="'Supprimer le preset ' + preset.name">
-                    <mat-icon aria-hidden="true">delete</mat-icon>
+                <button mat-button (click)="clearFilters()" aria-label="Réinitialiser tous les filtres">
+                  <mat-icon aria-hidden="true">clear</mat-icon>
+                  Réinitialiser
+                </button>
+                
+                <button mat-button [matMenuTriggerFor]="presetMenu" aria-label="Gérer les presets de filtres" aria-haspopup="true">
+                  <mat-icon aria-hidden="true">bookmark</mat-icon>
+                  Presets
+                </button>
+                <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
+                  <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
+                    <mat-icon aria-hidden="true">save</mat-icon>
+                    <span>Sauvegarder les filtres actuels</span>
                   </button>
-                </button>
-                <div *ngIf="savedPresets.length === 0" class="empty-presets" role="status">
-                  <span class="empty-text">Aucun preset sauvegardé</span>
+                  <mat-divider *ngIf="savedPresets.length > 0" role="separator"></mat-divider>
+                  <button 
+                    mat-menu-item 
+                    *ngFor="let preset of savedPresets; trackBy: trackByPreset"
+                    (click)="loadPreset(preset)"
+                    [attr.aria-label]="'Charger le preset ' + preset.name">
+                    <mat-icon aria-hidden="true">folder</mat-icon>
+                    <span>{{ preset.name }}</span>
+                    <button 
+                      mat-icon-button 
+                      (click)="deletePreset(preset, $event)"
+                      class="delete-preset-btn"
+                      [attr.aria-label]="'Supprimer le preset ' + preset.name">
+                      <mat-icon aria-hidden="true">delete</mat-icon>
+                    </button>
+                  </button>
+                  <div *ngIf="savedPresets.length === 0" class="empty-presets" role="status">
+                    <span class="empty-text">Aucun preset sauvegardé</span>
+                  </div>
+                </mat-menu>
+              </div>
+
+              <!-- Active Filter Chips -->
+              <div class="active-filters-row" *ngIf="appliedFilters.length > 0" role="region" aria-label="Filtres actifs">
+                <div class="active-filters-header">
+                  <span class="filters-label">Filtres actifs :</span>
+                  <button mat-button (click)="clearFilters()" class="clear-all-btn" aria-label="Effacer tous les filtres">
+                    <mat-icon aria-hidden="true">clear_all</mat-icon>
+                    Tout effacer
+                  </button>
                 </div>
-              </mat-menu>
+                <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
+                  <mat-chip
+                    *ngFor="let filter of appliedFilters; trackBy: trackByFilter"
+                    (removed)="removeFilter(filter)"
+                    [@itemAnimation]
+                    [attr.aria-label]="filter.label + ': ' + filter.displayValue">
+                    <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
+                    <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
+                      <mat-icon aria-hidden="true">cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
+              </div>
             </div>
-          </div>
+          </mat-expansion-panel>
         </div>
-      </mat-expansion-panel>
-    </div>
+      </mat-card-content>
+    </mat-card>
   </section>
 
   <!-- Mobile Filter Button -->
@@ -127,23 +155,6 @@
         {{ appliedFilters.length }}
       </span>
     </button>
-  </div>
-
-  <!-- Applied Filters Chips -->
-  <div class="applied-filters" *ngIf="appliedFilters.length > 0" role="region" aria-label="Filtres actifs">
-    <span class="filters-label">Filtres actifs:</span>
-    <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
-      <mat-chip
-        *ngFor="let filter of appliedFilters; trackBy: trackByFilter"
-        (removed)="removeFilter(filter)"
-        [@itemAnimation]
-        [attr.aria-label]="filter.label + ': ' + filter.displayValue">
-        <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
-        <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
-          <mat-icon aria-hidden="true">cancel</mat-icon>
-        </button>
-      </mat-chip>
-    </mat-chip-set>
   </div>
 
   <main class="page-content">
