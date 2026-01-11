@@ -733,21 +733,24 @@ textarea.ng-invalid.ng-touched:focus {
    DARK THEME SUPPORT
    ======================================== */
 
+/* Login Container - Gradient from primary-900 to neutral-900 */
 .dark-theme .login-container {
   background: linear-gradient(
     135deg,
-    var(--color-neutral-900) 0%,
-    var(--color-neutral-800) 100%
+    var(--color-primary-900) 0%,
+    var(--color-neutral-900) 100%
   );
 }
 
+/* Login Card - neutral-800 background with shadow-xl */
 .dark-theme .login-card {
   background-color: var(--color-neutral-800);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-xl);
 }
 
+/* Login Title - primary-300 color */
 .dark-theme .login-title {
-  color: var(--color-neutral-50);
+  color: var(--color-primary-300);
 }
 
 .dark-theme .login-subtitle {
@@ -756,6 +759,65 @@ textarea.ng-invalid.ng-touched:focus {
 
 .dark-theme .form-field mat-label {
   color: var(--color-neutral-300);
+}
+
+.dark-theme .form-group label {
+  color: var(--color-neutral-300);
+}
+
+/* Token Input and Form Elements - neutral-700 background, neutral-500 border, neutral-100 text */
+.dark-theme .token-input,
+.dark-theme textarea,
+.dark-theme input {
+  background-color: var(--color-neutral-700);
+  border-color: var(--color-neutral-500);
+  color: var(--color-neutral-100);
+}
+
+/* Focus States for Dark Mode */
+.dark-theme .token-input:focus,
+.dark-theme textarea:focus,
+.dark-theme input:focus {
+  border-color: var(--color-primary-400);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.3);
+}
+
+/* Hover States for Dark Mode */
+.dark-theme .token-input:hover:not(:disabled):not(:focus),
+.dark-theme textarea:hover:not(:disabled):not(:focus),
+.dark-theme input:hover:not(:disabled):not(:focus) {
+  border-color: var(--color-neutral-400);
+}
+
+/* Disabled State for Dark Mode */
+.dark-theme .token-input:disabled,
+.dark-theme textarea:disabled,
+.dark-theme input:disabled {
+  background-color: var(--color-neutral-800);
+  color: var(--color-neutral-500);
+  opacity: 0.6;
+}
+
+/* Placeholder Text for Dark Mode */
+.dark-theme .token-input::placeholder,
+.dark-theme textarea::placeholder,
+.dark-theme input::placeholder {
+  color: var(--color-neutral-500);
+}
+
+/* Error State for Dark Mode */
+.dark-theme .token-input.error,
+.dark-theme textarea.error,
+.dark-theme .token-input.ng-invalid.ng-touched,
+.dark-theme textarea.ng-invalid.ng-touched {
+  border-color: var(--color-error-400);
+}
+
+.dark-theme .token-input.error:focus,
+.dark-theme textarea.error:focus,
+.dark-theme .token-input.ng-invalid.ng-touched:focus,
+.dark-theme textarea.ng-invalid.ng-touched:focus {
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.3);
 }
 
 .dark-theme .section-divider::before,
@@ -772,6 +834,27 @@ textarea.ng-invalid.ng-touched:focus {
   color: var(--color-neutral-500);
 }
 
+.dark-theme .divider::before,
+.dark-theme .divider::after {
+  background: var(--color-neutral-700);
+}
+
+.dark-theme .divider span {
+  color: var(--color-neutral-500);
+}
+
+.dark-theme .login-section {
+  border-bottom-color: var(--color-neutral-700);
+}
+
+.dark-theme .section-title {
+  color: var(--color-neutral-200);
+}
+
+.dark-theme .section-description {
+  color: var(--color-neutral-500);
+}
+
 .dark-theme .btn-secondary {
   background-color: transparent;
   color: var(--color-primary-400);
@@ -785,7 +868,7 @@ textarea.ng-invalid.ng-touched:focus {
 
 .dark-theme .error-message {
   background-color: rgba(231, 76, 60, 0.15);
-  border-left-color: var(--color-error-500);
+  border-color: var(--color-error-500);
   color: var(--color-error-400);
 }
 
