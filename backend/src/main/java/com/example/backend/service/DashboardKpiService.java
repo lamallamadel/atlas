@@ -39,24 +39,29 @@ public class DashboardKpiService {
         Long currentCount;
         Long previousCount;
         
-        if (period == null) {
-            currentCount = annonceRepository.countByStatus(AnnonceStatus.ACTIVE);
+        if (period == null || period.isEmpty()) {
+            Long count = annonceRepository.countByStatus(AnnonceStatus.ACTIVE);
+            currentCount = (count != null) ? count : 0L;
             previousCount = currentCount;
         } else {
             LocalDateTime startDate = getStartDateForPeriod(period);
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
             
-            currentCount = annonceRepository.findAll().stream()
-                    .filter(annonce -> annonce.getStatus() == AnnonceStatus.ACTIVE)
-                    .filter(annonce -> annonce.getCreatedAt() != null && annonce.getCreatedAt().isAfter(startDate))
-                    .count();
-            
-            previousCount = annonceRepository.findAll().stream()
-                    .filter(annonce -> annonce.getStatus() == AnnonceStatus.ACTIVE)
-                    .filter(annonce -> annonce.getCreatedAt() != null 
-                            && annonce.getCreatedAt().isAfter(previousStartDate) 
-                            && annonce.getCreatedAt().isBefore(startDate))
-                    .count();
+            if (startDate == null || previousStartDate == null) {
+                Long count = annonceRepository.countByStatus(AnnonceStatus.ACTIVE);
+                currentCount = (count != null) ? count : 0L;
+                previousCount = currentCount;
+            } else {
+                Long current = annonceRepository.countByStatusAndCreatedAtAfter(AnnonceStatus.ACTIVE, startDate);
+                currentCount = (current != null) ? current : 0L;
+                
+                Long previous = annonceRepository.countByStatusAndCreatedAtBetween(
+                    AnnonceStatus.ACTIVE, 
+                    previousStartDate, 
+                    startDate
+                );
+                previousCount = (previous != null) ? previous : 0L;
+            }
         }
         
         Double percentageChange = calculatePercentageChange(currentCount, previousCount);
@@ -65,27 +70,37 @@ public class DashboardKpiService {
 
     private TrendData getDossiersATraiterTrend(String period) {
         List<DossierStatus> statusList = Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED);
+        
+        if (statusList.isEmpty()) {
+            return new TrendData(0L, 0L, 0.0);
+        }
+        
         Long currentCount;
         Long previousCount;
         
-        if (period == null) {
-            currentCount = dossierRepository.countByStatusIn(statusList);
+        if (period == null || period.isEmpty()) {
+            Long count = dossierRepository.countByStatusIn(statusList);
+            currentCount = (count != null) ? count : 0L;
             previousCount = currentCount;
         } else {
             LocalDateTime startDate = getStartDateForPeriod(period);
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
             
-            currentCount = dossierRepository.findAll().stream()
-                    .filter(dossier -> statusList.contains(dossier.getStatus()))
-                    .filter(dossier -> dossier.getCreatedAt() != null && dossier.getCreatedAt().isAfter(startDate))
-                    .count();
-            
-            previousCount = dossierRepository.findAll().stream()
-                    .filter(dossier -> statusList.contains(dossier.getStatus()))
-                    .filter(dossier -> dossier.getCreatedAt() != null 
-                            && dossier.getCreatedAt().isAfter(previousStartDate) 
-                            && dossier.getCreatedAt().isBefore(startDate))
-                    .count();
+            if (startDate == null || previousStartDate == null) {
+                Long count = dossierRepository.countByStatusIn(statusList);
+                currentCount = (count != null) ? count : 0L;
+                previousCount = currentCount;
+            } else {
+                Long current = dossierRepository.countByStatusInAndCreatedAtAfter(statusList, startDate);
+                currentCount = (current != null) ? current : 0L;
+                
+                Long previous = dossierRepository.countByStatusInAndCreatedAtBetween(
+                    statusList, 
+                    previousStartDate, 
+                    startDate
+                );
+                previousCount = (previous != null) ? previous : 0L;
+            }
         }
         
         Double percentageChange = calculatePercentageChange(currentCount, previousCount);
@@ -93,6 +108,10 @@ public class DashboardKpiService {
     }
 
     private LocalDateTime getStartDateForPeriod(String period) {
+        if (period == null || period.isEmpty()) {
+            return null;
+        }
+        
         LocalDateTime now = LocalDateTime.now();
         
         switch (period) {
@@ -108,6 +127,10 @@ public class DashboardKpiService {
     }
 
     private LocalDateTime getPreviousStartDateForPeriod(String period, LocalDateTime currentStartDate) {
+        if (period == null || period.isEmpty() || currentStartDate == null) {
+            return null;
+        }
+        
         switch (period) {
             case "TODAY":
                 return currentStartDate.minusDays(1);
@@ -121,6 +144,10 @@ public class DashboardKpiService {
     }
 
     private Double calculatePercentageChange(Long currentValue, Long previousValue) {
+        if (currentValue == null || previousValue == null) {
+            return 0.0;
+        }
+        
         if (previousValue == 0) {
             if (currentValue > 0) {
                 return 100.0;
