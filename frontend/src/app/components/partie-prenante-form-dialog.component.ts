@@ -33,10 +33,16 @@ export class PartiePrenanteFormDialogComponent implements OnInit {
   PartiePrenanteRole = PartiePrenanteRole;
 
   roleOptions = [
-    { value: PartiePrenanteRole.LEAD, label: 'Lead' },
+    { value: PartiePrenanteRole.OWNER, label: 'Propriétaire' },
     { value: PartiePrenanteRole.BUYER, label: 'Acheteur' },
     { value: PartiePrenanteRole.SELLER, label: 'Vendeur' },
-    { value: PartiePrenanteRole.AGENT, label: 'Agent' }
+    { value: PartiePrenanteRole.TENANT, label: 'Locataire' },
+    { value: PartiePrenanteRole.LANDLORD, label: 'Bailleur' },
+    { value: PartiePrenanteRole.AGENT, label: 'Agent' },
+    { value: PartiePrenanteRole.NOTARY, label: 'Notaire' },
+    { value: PartiePrenanteRole.BANK, label: 'Banque' },
+    { value: PartiePrenanteRole.ATTORNEY, label: 'Avocat' },
+    { value: PartiePrenanteRole.LEAD, label: 'Lead' }
   ];
 
   constructor(
@@ -52,8 +58,8 @@ export class PartiePrenanteFormDialogComponent implements OnInit {
       role: [this.data?.role || PartiePrenanteRole.BUYER, Validators.required],
       firstName: [this.data?.firstName || '', Validators.required],
       lastName: [this.data?.lastName || '', Validators.required],
-      phone: [this.data?.phone || '', [Validators.required, Validators.pattern(/^[0-9+\s()-]+$/)]],
-      email: [this.data?.email || '', [Validators.required, Validators.email]]
+      phone: [this.data?.phone || '', [Validators.pattern(/^[0-9+\s()-]+$/)]],
+      email: [this.data?.email || '', [Validators.email]]
     });
   }
 

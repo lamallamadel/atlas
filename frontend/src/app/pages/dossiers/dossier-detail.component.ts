@@ -1231,7 +1231,29 @@ export class DossierDetailComponent implements OnInit {
       case PartiePrenanteRole.BUYER: return 'Acheteur';
       case PartiePrenanteRole.SELLER: return 'Vendeur';
       case PartiePrenanteRole.AGENT: return 'Agent';
+      case PartiePrenanteRole.OWNER: return 'Propriétaire';
+      case PartiePrenanteRole.TENANT: return 'Locataire';
+      case PartiePrenanteRole.LANDLORD: return 'Bailleur';
+      case PartiePrenanteRole.NOTARY: return 'Notaire';
+      case PartiePrenanteRole.BANK: return 'Banque';
+      case PartiePrenanteRole.ATTORNEY: return 'Avocat';
       default: return role;
+    }
+  }
+
+  getRoleBadgeClass(role: PartiePrenanteRole): string {
+    switch (role) {
+      case PartiePrenanteRole.BUYER: return 'role-badge-buyer';
+      case PartiePrenanteRole.SELLER: return 'role-badge-seller';
+      case PartiePrenanteRole.AGENT: return 'role-badge-agent';
+      case PartiePrenanteRole.OWNER: return 'role-badge-owner';
+      case PartiePrenanteRole.TENANT: return 'role-badge-tenant';
+      case PartiePrenanteRole.LANDLORD: return 'role-badge-landlord';
+      case PartiePrenanteRole.NOTARY: return 'role-badge-notary';
+      case PartiePrenanteRole.BANK: return 'role-badge-bank';
+      case PartiePrenanteRole.ATTORNEY: return 'role-badge-attorney';
+      case PartiePrenanteRole.LEAD: return 'role-badge-lead';
+      default: return 'role-badge-default';
     }
   }
 

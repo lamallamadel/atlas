@@ -312,39 +312,77 @@
 
         <mat-tab label="Parties prenantes">
           <div class="tab-content">
-            <div class="tab-header-actions">
-              <button class="btn-add" (click)="togglePartieForm()">
-                Ajouter
-              </button>
-            </div>
+            <app-empty-state
+              *ngIf="!dossier.parties || dossier.parties.length === 0"
+              message="Aucune partie prenante enregistrée"
+              subtext="Ajoutez propriétaire, acheteur, notaire, etc."
+              [primaryAction]="{
+                label: 'Ajouter une partie prenante',
+                handler: togglePartieForm.bind(this)
+              }"
+            ></app-empty-state>
 
-            <div class="data-table-wrapper">
-              <table class="data-table" *ngIf="dossier.parties && dossier.parties.length > 0">
-                <thead>
-                  <tr>
-                    <th>Rôle</th>
-                    <th>Nom</th>
-                    <th>Téléphone</th>
-                    <th>Email</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let partie of dossier.parties">
-                    <td>{{ getRoleLabel(partie.role) }}</td>
-                    <td>{{ (partie.firstName || '') + (partie.lastName ? ' ' + partie.lastName : '') || '—' }}</td>
-                    <td>{{ partie.phone || '—' }}</td>
-                    <td>{{ partie.email || '—' }}</td>
-                    <td>
-                      <button class="btn-edit" (click)="editPartie(partie)">Éditer</button>
-                      <button class="btn-delete" (click)="deletePartie(partie)">Supprimer</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p *ngIf="!dossier.parties || dossier.parties.length === 0" class="empty-message">
-                Aucune partie prenante enregistrée.
-              </p>
+            <div *ngIf="dossier.parties && dossier.parties.length > 0">
+              <div class="tab-header-actions">
+                <button class="btn-add" (click)="togglePartieForm()">
+                  <span class="btn-icon">+</span>
+                  Ajouter une partie prenante
+                </button>
+              </div>
+
+              <div class="data-table-wrapper">
+                <table class="data-table parties-table">
+                  <thead>
+                    <tr>
+                      <th>Rôle</th>
+                      <th>Prénom</th>
+                      <th>Nom</th>
+                      <th>Téléphone</th>
+                      <th>Email</th>
+                      <th class="actions-column">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let partie of dossier.parties">
+                      <td>
+                        <span class="role-badge" [class]="getRoleBadgeClass(partie.role)">
+                          {{ getRoleLabel(partie.role) }}
+                        </span>
+                      </td>
+                      <td>{{ partie.firstName || '—' }}</td>
+                      <td>{{ partie.lastName || '—' }}</td>
+                      <td>{{ partie.phone || '—' }}</td>
+                      <td>{{ partie.email || '—' }}</td>
+                      <td class="actions-column">
+                        <div class="action-buttons">
+                          <button 
+                            class="btn-icon-action btn-edit" 
+                            (click)="editPartie(partie)"
+                            title="Éditer"
+                            [attr.aria-label]="'Éditer ' + partie.firstName + ' ' + partie.lastName">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                          </button>
+                          <button 
+                            class="btn-icon-action btn-delete" 
+                            (click)="deletePartie(partie)"
+                            title="Supprimer"
+                            [attr.aria-label]="'Supprimer ' + partie.firstName + ' ' + partie.lastName">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                              <polyline points="3 6 5 6 21 6"></polyline>
+                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                              <line x1="10" y1="11" x2="10" y2="17"></line>
+                              <line x1="14" y1="11" x2="14" y2="17"></line>
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </mat-tab>

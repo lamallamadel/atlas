@@ -375,3 +375,6 @@ SETUP_STATUS.md
 setup-backend-temp.cmd
 Run-BackendSetup.ps1
 run-maven-setup.js
+run-backend-maven.js
+package.json
+SETUP_STATUS_AFTER_CLONE.md

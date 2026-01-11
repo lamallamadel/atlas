@@ -25,7 +25,13 @@ export enum PartiePrenanteRole {
   LEAD = 'LEAD',
   BUYER = 'BUYER',
   SELLER = 'SELLER',
-  AGENT = 'AGENT'
+  AGENT = 'AGENT',
+  OWNER = 'OWNER',
+  TENANT = 'TENANT',
+  LANDLORD = 'LANDLORD',
+  NOTARY = 'NOTARY',
+  BANK = 'BANK',
+  ATTORNEY = 'ATTORNEY'
 }
 
 export interface PartiePrenanteResponse {

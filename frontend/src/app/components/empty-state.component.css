@@ -1,1 +1,85 @@
 @import '../../styles/variables.scss';
+
+.empty-state-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-12) var(--spacing-6);
+  min-height: 300px;
+}
+
+.empty-state-content {
+  text-align: center;
+  max-width: 400px;
+}
+
+.empty-state-icon {
+  margin-bottom: var(--spacing-4);
+  color: var(--color-neutral-400);
+}
+
+.empty-state-message {
+  margin: 0 0 var(--spacing-2) 0;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-neutral-700);
+}
+
+.empty-state-subtext {
+  margin: 0 0 var(--spacing-6) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-500);
+  line-height: var(--line-height-normal);
+}
+
+.empty-state-actions {
+  display: flex;
+  gap: var(--spacing-3);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-primary-action,
+.btn-secondary-action {
+  padding: var(--spacing-3) var(--spacing-6);
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  cursor: pointer;
+  transition: var(--transition-colors);
+}
+
+.btn-primary-action {
+  background: var(--color-primary-500);
+  color: var(--color-neutral-0);
+}
+
+.btn-primary-action:hover {
+  background: var(--color-primary-600);
+}
+
+.btn-secondary-action {
+  background: var(--color-neutral-200);
+  color: var(--color-neutral-700);
+}
+
+.btn-secondary-action:hover {
+  background: var(--color-neutral-300);
+}
+
+@media (max-width: 768px) {
+  .empty-state-container {
+    padding: var(--spacing-8) var(--spacing-4);
+  }
+
+  .empty-state-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btn-primary-action,
+  .btn-secondary-action {
+    width: 100%;
+  }
+}
