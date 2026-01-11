@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>Nouvelle note</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Contenu de la note</mat-label>
+    <textarea
+      matInput
+      [(ngModel)]="noteContent"
+      placeholder="Entrez le contenu de la note..."
+      rows="8"
+      class="note-textarea"
+      cdkTextareaAutosize
+      cdkAutosizeMinRows="8"
+      cdkAutosizeMaxRows="20"></textarea>
+    <mat-hint>Vous pouvez saisir du texte simple avec retours à la ligne</mat-hint>
+  </mat-form-field>
+
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Visibilité</mat-label>
+    <mat-select [(ngModel)]="noteVisibility">
+      <mat-option [value]="ActivityVisibility.INTERNAL">
+        <div class="visibility-option">
+          <mat-icon class="option-icon">lock</mat-icon>
+          <span class="option-label">Interne (équipe)</span>
+        </div>
+      </mat-option>
+      <mat-option [value]="ActivityVisibility.CLIENT_VISIBLE">
+        <div class="visibility-option">
+          <mat-icon class="option-icon">visibility</mat-icon>
+          <span class="option-label">Visible client</span>
+        </div>
+      </mat-option>
+    </mat-select>
+    <mat-hint>
+      <mat-icon class="hint-icon">info</mat-icon>
+      <span *ngIf="noteVisibility === ActivityVisibility.CLIENT_VISIBLE">
+        Le client verra cette note dans l'espace client
+      </span>
+      <span *ngIf="noteVisibility === ActivityVisibility.INTERNAL">
+        Cette note restera privée pour l'équipe
+      </span>
+    </mat-hint>
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Annuler</button>
+  <button 
+    mat-raised-button 
+    color="primary" 
+    (click)="onSave()" 
+    [disabled]="isContentEmpty()">
+    Enregistrer
+  </button>
+</mat-dialog-actions>

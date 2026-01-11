@@ -34,6 +34,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
+import { TextFieldModule } from '@angular/cdk/text-field';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
@@ -61,6 +62,7 @@ import { ReportsDashboardComponent } from './components/reports-dashboard.compon
 import { GlobalSearchBarComponent } from './components/global-search-bar.component';
 import { SearchComponent } from './pages/search/search.component';
 import { ActivityTimelineComponent } from './components/activity-timeline.component';
+import { NoteFormDialogComponent } from './components/note-form-dialog.component';
 import { MobileFilterSheetComponent } from './components/mobile-filter-sheet.component';
 import { EnhancedSnackbarComponent } from './components/enhanced-snackbar.component';
 import { SuccessAnimationComponent } from './components/success-animation.component';
@@ -111,6 +113,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     GlobalSearchBarComponent,
     SearchComponent,
     ActivityTimelineComponent,
+    NoteFormDialogComponent,
     MobileFilterSheetComponent,
     EnhancedSnackbarComponent,
     SuccessAnimationComponent,
@@ -158,6 +161,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     DragDropModule,
     LayoutModule,
     ScrollingModule,
+    TextFieldModule,
     NgChartsModule
   ],
   providers: [

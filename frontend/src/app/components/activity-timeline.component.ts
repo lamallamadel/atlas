@@ -1,8 +1,9 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivityApiService, ActivityResponse, ActivityType, ActivityVisibility, ActivityCreateRequest } from '../services/activity-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
+import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
 
 @Component({
   selector: 'app-activity-timeline',
@@ -11,16 +12,10 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component'
 })
 export class ActivityTimelineComponent implements OnInit, OnChanges {
   @Input() dossierId!: number;
-  @ViewChild('editorContent') editorContent!: ElementRef<HTMLDivElement>;
 
   activities: ActivityResponse[] = [];
   loading = false;
   expandedActivityIds = new Set<number>();
-
-  showNoteForm = false;
-  noteContent = '';
-  noteVisibility: ActivityVisibility = ActivityVisibility.INTERNAL;
-  savingNote = false;
 
   ActivityType = ActivityType;
   ActivityVisibility = ActivityVisibility;
@@ -71,48 +66,28 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     });
   }
 
-  toggleNoteForm(): void {
-    this.showNoteForm = !this.showNoteForm;
-    if (!this.showNoteForm) {
-      this.resetNoteForm();
-    }
+  openNoteDialog(): void {
+    const dialogRef = this.dialog.open(NoteFormDialogComponent, {
+      width: '600px',
+      maxWidth: '90vw',
+      data: {
+        dossierId: this.dossierId
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((result: NoteFormDialogResult | undefined) => {
+      if (result) {
+        this.saveNote(result.content, result.visibility);
+      }
+    });
   }
 
-  resetNoteForm(): void {
-    this.noteContent = '';
-    this.noteVisibility = ActivityVisibility.INTERNAL;
-    if (this.editorContent) {
-      this.editorContent.nativeElement.innerHTML = '';
-    }
-  }
-
-  formatText(command: string): void {
-    document.execCommand(command, false);
-  }
-
-  onEditorInput(event: Event): void {
-    const target = event.target as HTMLDivElement;
-    this.noteContent = target.innerHTML;
-  }
-
-  saveNote(): void {
-    if (!this.noteContent.trim()) {
-      this.snackBar.open('Le contenu de la note est requis', 'Fermer', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-        panelClass: ['error-snackbar']
-      });
-      return;
-    }
-
-    this.savingNote = true;
-
+  saveNote(content: string, visibility: ActivityVisibility): void {
     const request: ActivityCreateRequest = {
       type: ActivityType.NOTE,
-      content: this.noteContent,
+      content: content,
       dossierId: this.dossierId,
-      visibility: this.noteVisibility
+      visibility: visibility
     };
 
     this.activityApiService.create(request).subscribe({
@@ -124,13 +99,9 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
           panelClass: ['success-snackbar']
         });
         this.activities.unshift(activity);
-        this.savingNote = false;
-        this.showNoteForm = false;
-        this.resetNoteForm();
       },
       error: (err) => {
         console.error('Error creating note:', err);
-        this.savingNote = false;
         this.snackBar.open('Échec de l\'ajout de la note', 'Fermer', {
           duration: 3000,
           horizontalPosition: 'center',

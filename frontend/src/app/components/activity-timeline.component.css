@@ -26,120 +26,7 @@
   color: var(--color-neutral-900);
 }
 
-/* ========================================
-   NOTE FORM
-   ======================================== */
-.note-form {
-  margin-bottom: var(--spacing-6);
-  animation: slideDown var(--duration-moderate) var(--ease-out);
-}
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.note-form h4 {
-  margin: 0 0 var(--spacing-4) 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-800);
-}
-
-.full-width {
-  width: 100%;
-}
-
-/* ========================================
-   RICH TEXT EDITOR
-   ======================================== */
-.rich-text-editor {
-  border: var(--border-width-2) solid var(--color-neutral-300);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--spacing-4);
-  overflow: hidden;
-  transition: var(--transition-colors);
-  background: var(--color-neutral-0);
-}
-
-.rich-text-editor:focus-within {
-  border-color: var(--color-primary-500);
-  box-shadow: 0 0 0 3px var(--color-primary-alpha-10);
-}
-
-.editor-toolbar {
-  display: flex;
-  gap: var(--spacing-1);
-  padding: var(--spacing-2);
-  background: linear-gradient(to bottom, var(--color-neutral-50), var(--color-neutral-100));
-  border-bottom: var(--border-width-1) solid var(--color-neutral-300);
-}
-
-.toolbar-divider {
-  width: 1px;
-  background-color: var(--color-neutral-400);
-  margin: var(--spacing-1) var(--spacing-2);
-}
-
-.editor-content {
-  min-height: 150px;
-  max-height: 400px;
-  padding: var(--spacing-4);
-  outline: none;
-  background-color: var(--color-neutral-0);
-  overflow-y: auto;
-  font-size: var(--font-size-base);
-  line-height: var(--line-height-normal);
-  color: var(--color-neutral-900);
-}
-
-.editor-content:empty:before {
-  content: attr(data-placeholder);
-  color: var(--color-neutral-500);
-  font-style: italic;
-}
-
-.editor-content.disabled {
-  background-color: var(--color-neutral-100);
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.editor-content ul,
-.editor-content ol {
-  margin-left: var(--spacing-5);
-  padding-left: 0;
-}
-
-.editor-content b,
-.editor-content strong {
-  font-weight: var(--font-weight-bold);
-}
-
-.editor-content i,
-.editor-content em {
-  font-style: italic;
-}
-
-.editor-content u {
-  text-decoration: underline;
-}
-
-/* ========================================
-   FORM ACTIONS
-   ======================================== */
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-3);
-  margin-top: var(--spacing-4);
-}
 
 /* ========================================
    LOADING STATE
@@ -520,14 +407,6 @@
   .activity-type {
     font-size: var(--font-size-sm);
   }
-
-  .note-form {
-    margin-bottom: var(--spacing-5);
-  }
-
-  .editor-content {
-    min-height: 120px;
-  }
 }
 
 @media (max-width: 576px) {
@@ -576,14 +455,6 @@
 
   .activity-content {
     font-size: var(--font-size-sm);
-  }
-
-  .form-actions {
-    flex-direction: column;
-  }
-
-  .form-actions button {
-    width: 100%;
   }
 }
 

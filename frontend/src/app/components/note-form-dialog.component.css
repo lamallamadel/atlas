@@ -1,0 +1,103 @@
+@import '../../styles/variables.scss';
+
+/* ========================================
+   DIALOG CONTENT
+   ======================================== */
+mat-dialog-content {
+  min-width: 500px;
+  max-width: 600px;
+  padding: var(--spacing-5) var(--spacing-6) !important;
+}
+
+/* ========================================
+   FULL WIDTH FORM FIELDS
+   ======================================== */
+.full-width {
+  width: 100%;
+}
+
+/* ========================================
+   NOTE TEXTAREA
+   ======================================== */
+.note-textarea {
+  font-family: inherit;
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-relaxed);
+  resize: vertical;
+}
+
+/* ========================================
+   VISIBILITY OPTIONS
+   ======================================== */
+.visibility-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-3);
+}
+
+.option-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--color-neutral-600);
+}
+
+.option-label {
+  font-weight: var(--font-weight-medium);
+}
+
+/* ========================================
+   HINT WITH ICON
+   ======================================== */
+mat-hint {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  margin-top: var(--spacing-2);
+}
+
+.hint-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--color-info-500);
+}
+
+/* ========================================
+   DIALOG ACTIONS
+   ======================================== */
+mat-dialog-actions {
+  padding: var(--spacing-4) var(--spacing-6) !important;
+  gap: var(--spacing-3);
+}
+
+/* ========================================
+   RESPONSIVE LAYOUT - MOBILE
+   ======================================== */
+@media (max-width: 768px) {
+  mat-dialog-content {
+    min-width: unset;
+    max-width: unset;
+    width: 100%;
+    padding: var(--spacing-4) !important;
+  }
+
+  mat-dialog-actions {
+    padding: var(--spacing-3) var(--spacing-4) !important;
+  }
+}
+
+@media (max-width: 576px) {
+  mat-dialog-content {
+    padding: var(--spacing-3) !important;
+  }
+
+  mat-dialog-actions {
+    flex-direction: column;
+    padding: var(--spacing-3) !important;
+  }
+
+  mat-dialog-actions button {
+    width: 100%;
+  }
+}

@@ -1,63 +1,10 @@
 <div class="activity-timeline-container">
   <div class="timeline-header">
     <h3>Chronologie d'activité</h3>
-    <button mat-raised-button color="primary" (click)="toggleNoteForm()">
+    <button mat-raised-button color="primary" (click)="openNoteDialog()">
       <mat-icon>add</mat-icon>
       Ajouter une note
     </button>
-  </div>
-
-  <div *ngIf="showNoteForm" class="note-form">
-    <mat-card>
-      <mat-card-content>
-        <h4>Nouvelle note</h4>
-        
-        <div class="rich-text-editor">
-          <div class="editor-toolbar">
-            <button type="button" mat-icon-button (click)="formatText('bold')" [disabled]="savingNote" matTooltip="Gras">
-              <mat-icon>format_bold</mat-icon>
-            </button>
-            <button type="button" mat-icon-button (click)="formatText('italic')" [disabled]="savingNote" matTooltip="Italique">
-              <mat-icon>format_italic</mat-icon>
-            </button>
-            <button type="button" mat-icon-button (click)="formatText('underline')" [disabled]="savingNote" matTooltip="Souligné">
-              <mat-icon>format_underlined</mat-icon>
-            </button>
-            <span class="toolbar-divider"></span>
-            <button type="button" mat-icon-button (click)="formatText('insertUnorderedList')" [disabled]="savingNote" matTooltip="Liste à puces">
-              <mat-icon>format_list_bulleted</mat-icon>
-            </button>
-            <button type="button" mat-icon-button (click)="formatText('insertOrderedList')" [disabled]="savingNote" matTooltip="Liste numérotée">
-              <mat-icon>format_list_numbered</mat-icon>
-            </button>
-          </div>
-          <div 
-            #editorContent
-            class="editor-content"
-            contenteditable="true"
-            [attr.data-placeholder]="'Entrez le contenu de la note...'"
-            (input)="onEditorInput($event)"
-            [class.disabled]="savingNote">
-          </div>
-        </div>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Visibilité</mat-label>
-          <mat-select [(ngModel)]="noteVisibility" [disabled]="savingNote">
-            <mat-option [value]="ActivityVisibility.INTERNAL">Interne</mat-option>
-            <mat-option [value]="ActivityVisibility.CLIENT_VISIBLE">Visible par le client</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <div class="form-actions">
-          <button mat-button (click)="toggleNoteForm()" [disabled]="savingNote">Annuler</button>
-          <button mat-raised-button color="primary" (click)="saveNote()" [disabled]="savingNote">
-            <mat-spinner *ngIf="savingNote" diameter="20"></mat-spinner>
-            <span *ngIf="!savingNote">Enregistrer</span>
-          </button>
-        </div>
-      </mat-card-content>
-    </mat-card>
   </div>
 
   <div *ngIf="loading" class="loading-container">
