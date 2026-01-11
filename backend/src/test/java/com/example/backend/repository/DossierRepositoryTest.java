@@ -234,6 +234,108 @@ class DossierRepositoryTest {
         assertThat(result.getTotalPages()).isEqualTo(0);
     }
 
+    @Test
+    void testGetPendingCount() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.QUALIFYING));
+        dossierRepository.save(createDossier("org1", "+33612345682", DossierStatus.APPOINTMENT));
+        dossierRepository.save(createDossier("org1", "+33612345683", DossierStatus.WON));
+        dossierRepository.save(createDossier("org1", "+33612345684", DossierStatus.LOST));
+
+        Long pendingCount = dossierRepository.getPendingCount();
+
+        assertThat(pendingCount).isEqualTo(3);
+    }
+
+    @Test
+    void testGetPendingCount_EmptyDatabase() {
+        Long pendingCount = dossierRepository.getPendingCount();
+
+        assertThat(pendingCount).isEqualTo(0);
+    }
+
+    @Test
+    void testGetPendingCount_OnlyNonPendingStatuses() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.QUALIFYING));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.APPOINTMENT));
+        dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.WON));
+        dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.LOST));
+
+        Long pendingCount = dossierRepository.getPendingCount();
+
+        assertThat(pendingCount).isEqualTo(0);
+    }
+
+    @Test
+    void testGetPendingCount_OnlyPendingStatuses() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org1", "+33612345682", DossierStatus.QUALIFIED));
+
+        Long pendingCount = dossierRepository.getPendingCount();
+
+        assertThat(pendingCount).isEqualTo(5);
+    }
+
+    @Test
+    void testGetPendingCountByOrgId() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org2", "+33612345680", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org2", "+33612345681", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org2", "+33612345682", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org1", "+33612345683", DossierStatus.WON));
+
+        Long org1PendingCount = dossierRepository.getPendingCountByOrgId("org1");
+        Long org2PendingCount = dossierRepository.getPendingCountByOrgId("org2");
+
+        assertThat(org1PendingCount).isEqualTo(2);
+        assertThat(org2PendingCount).isEqualTo(3);
+    }
+
+    @Test
+    void testGetPendingCountByOrgId_NoMatchingOrg() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.QUALIFIED));
+
+        Long pendingCount = dossierRepository.getPendingCountByOrgId("org-nonexistent");
+
+        assertThat(pendingCount).isEqualTo(0);
+    }
+
+    @Test
+    void testCountByStatusIn() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.APPOINTMENT));
+        dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.WON));
+
+        Long count = dossierRepository.countByStatusIn(java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED));
+
+        assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    void testCountByStatusInAndOrgId() {
+        dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org2", "+33612345680", DossierStatus.NEW));
+        dossierRepository.save(createDossier("org2", "+33612345681", DossierStatus.QUALIFIED));
+        dossierRepository.save(createDossier("org1", "+33612345682", DossierStatus.APPOINTMENT));
+
+        Long org1Count = dossierRepository.countByStatusInAndOrgId(
+            java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED), "org1");
+        Long org2Count = dossierRepository.countByStatusInAndOrgId(
+            java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED), "org2");
+
+        assertThat(org1Count).isEqualTo(2);
+        assertThat(org2Count).isEqualTo(2);
+    }
+
     private Dossier createDossier(String orgId, String leadPhone, DossierStatus status) {
         Dossier dossier = new Dossier();
         dossier.setOrgId(orgId);

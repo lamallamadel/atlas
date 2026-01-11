@@ -44,17 +44,8 @@ public class DashboardService {
             LocalDateTime startDate = getStartDateForPeriod(period);
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
             
-            currentCount = annonceRepository.findAll().stream()
-                    .filter(annonce -> annonce.getStatus() == AnnonceStatus.ACTIVE)
-                    .filter(annonce -> annonce.getCreatedAt() != null && annonce.getCreatedAt().isAfter(startDate))
-                    .count();
-            
-            previousCount = annonceRepository.findAll().stream()
-                    .filter(annonce -> annonce.getStatus() == AnnonceStatus.ACTIVE)
-                    .filter(annonce -> annonce.getCreatedAt() != null 
-                            && annonce.getCreatedAt().isAfter(previousStartDate) 
-                            && annonce.getCreatedAt().isBefore(startDate))
-                    .count();
+            currentCount = annonceRepository.countByStatusAndCreatedAtAfter(AnnonceStatus.ACTIVE, startDate);
+            previousCount = annonceRepository.countByStatusAndCreatedAtBetween(AnnonceStatus.ACTIVE, previousStartDate, startDate);
         }
         
         String trend = calculateTrend(currentCount, previousCount);
@@ -74,17 +65,8 @@ public class DashboardService {
             LocalDateTime startDate = getStartDateForPeriod(period);
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
             
-            currentCount = dossierRepository.findAll().stream()
-                    .filter(dossier -> statusList.contains(dossier.getStatus()))
-                    .filter(dossier -> dossier.getCreatedAt() != null && dossier.getCreatedAt().isAfter(startDate))
-                    .count();
-            
-            previousCount = dossierRepository.findAll().stream()
-                    .filter(dossier -> statusList.contains(dossier.getStatus()))
-                    .filter(dossier -> dossier.getCreatedAt() != null 
-                            && dossier.getCreatedAt().isAfter(previousStartDate) 
-                            && dossier.getCreatedAt().isBefore(startDate))
-                    .count();
+            currentCount = dossierRepository.countByStatusInAndCreatedAtAfter(statusList, startDate);
+            previousCount = dossierRepository.countByStatusInAndCreatedAtBetween(statusList, previousStartDate, startDate);
         }
         
         String trend = calculateTrend(currentCount, previousCount);
