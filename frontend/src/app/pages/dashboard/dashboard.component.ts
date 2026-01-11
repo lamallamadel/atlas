@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { PingService } from '../../services/ping.service';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
@@ -33,6 +34,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   apiStatus: 'checking' | 'connected' | 'disconnected' = 'checking';
   lastChecked: Date | null = null;
   errorMessage = '';
+  
+  isHandset = false;
+  isTablet = false;
+  isDesktop = false;
 
   kpiCards: { [key: string]: KpiCard } = {
     annoncesActives: {
@@ -71,12 +76,25 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     private pingService: PingService,
     private dashboardKpiService: DashboardKpiService,
     private router: Router,
-    private ariaAnnouncer: AriaLiveAnnouncerService
+    private ariaAnnouncer: AriaLiveAnnouncerService,
+    private breakpointObserver: BreakpointObserver
   ) { }
 
   ngOnInit(): void {
+    this.observeBreakpoints();
     this.checkApiConnection();
     this.loadKpis();
+  }
+
+  observeBreakpoints(): void {
+    this.breakpointObserver
+      .observe([Breakpoints.Handset, Breakpoints.Tablet, Breakpoints.Web])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.isHandset = this.breakpointObserver.isMatched(Breakpoints.Handset);
+        this.isTablet = this.breakpointObserver.isMatched(Breakpoints.Tablet);
+        this.isDesktop = this.breakpointObserver.isMatched(Breakpoints.Web);
+      });
   }
 
   ngAfterViewInit(): void {
@@ -87,8 +105,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   private async loadChartJsAndInitCharts(): Promise<void> {
     try {
-      const chartModule = await import('chart.js/auto');
-      const Chart = chartModule.Chart;
+      await import('chart.js/auto');
       this.initCharts();
     } catch (error) {
       console.error('Failed to load Chart.js:', error);
