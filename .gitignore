@@ -158,6 +158,7 @@ setup-maven-only.ps1
 setup-backend-via-ps1.ps1
 install-backend-simple.cmd
 backend/run-mvn.cmd
+backend/run-mvn.ps1
 backend/setup-run.cmd
 backend/setup-maven.cmd
 run-maven-with-java17.cmd

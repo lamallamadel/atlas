@@ -98,6 +98,17 @@
               </mat-card-header>
               
               <mat-card-content class="scrollable-content">
+                <div class="dossiers-filters">
+                  <mat-button-toggle-group 
+                    [value]="selectedDossierFilter$ | async" 
+                    (change)="onDossierFilterChange($event.value)"
+                    aria-label="Filtre des dossiers">
+                    <mat-button-toggle value="A_TRAITER">À traiter</mat-button-toggle>
+                    <mat-button-toggle value="RECENTS">Récents</mat-button-toggle>
+                    <mat-button-toggle value="ASSIGNES">Assignés à moi</mat-button-toggle>
+                  </mat-button-toggle-group>
+                </div>
+
                 <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-loading-skeleton>
                 
                 <div *ngIf="!loadingRecent && errorRecent" class="kpi-error" role="alert" aria-live="assertive">
@@ -105,10 +116,12 @@
                   <span>{{errorRecent}}</span>
                 </div>
                 
-                <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0" class="kpi-empty" role="status">
-                  <mat-icon aria-hidden="true">info</mat-icon>
-                  <span>Aucun dossier</span>
-                </div>
+                <app-empty-state
+                  *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0"
+                  message="Aucun dossier récent"
+                  [primaryAction]="getEmptyStatePrimaryAction()"
+                  [secondaryAction]="getEmptyStateSecondaryAction()">
+                </app-empty-state>
                 
                 <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list" [@listStaggerAnimation]="recentDossiers.length">
                   <mat-card *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" class="dossier-item" [@itemAnimation] appearance="outlined" role="listitem">

@@ -27,7 +27,8 @@ export class DashboardKpiService {
     return this.http.get<KpiCardResponse>(`${this.apiUrl}/kpis/dossiers-a-traiter`, options);
   }
 
-  getRecentDossiers(): Observable<DossierResponse[]> {
-    return this.http.get<DossierResponse[]>(`${this.apiUrl}/dossiers/recent`);
+  getRecentDossiers(filter?: string): Observable<DossierResponse[]> {
+    const options = filter ? { params: { filter } } : {};
+    return this.http.get<DossierResponse[]>(`${this.apiUrl}/dossiers/recent`, options);
   }
 }

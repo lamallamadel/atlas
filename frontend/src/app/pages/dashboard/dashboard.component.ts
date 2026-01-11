@@ -5,6 +5,7 @@ import { PingService } from '../../services/ping.service';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
+import { ActionButtonConfig } from '../../components/empty-state.component';
 import { interval, Subject, takeUntil, takeWhile, BehaviorSubject, skip } from 'rxjs';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
@@ -33,6 +34,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
   
   selectedPeriod$ = new BehaviorSubject<string>('TODAY');
+  selectedDossierFilter$ = new BehaviorSubject<string>('A_TRAITER');
   
   apiStatus: 'checking' | 'connected' | 'disconnected' = 'checking';
   lastChecked: Date | null = null;
@@ -90,6 +92,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.checkApiConnection();
     this.loadKpis();
     this.observePeriodChanges();
+    this.observeDossierFilterChanges();
   }
 
   observePeriodChanges(): void {
@@ -103,8 +106,23 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       });
   }
 
+  observeDossierFilterChanges(): void {
+    this.selectedDossierFilter$
+      .pipe(
+        skip(1),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.loadRecentDossiers();
+      });
+  }
+
   onPeriodChange(period: string): void {
     this.selectedPeriod$.next(period);
+  }
+
+  onDossierFilterChange(filter: string): void {
+    this.selectedDossierFilter$.next(filter);
   }
 
   observeBreakpoints(): void {
@@ -221,7 +239,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.loadingRecent = true;
     this.errorRecent = '';
 
-    this.dashboardKpiService.getRecentDossiers().subscribe({
+    const filter = this.selectedDossierFilter$.value;
+    this.dashboardKpiService.getRecentDossiers(filter).subscribe({
       next: (dossiers) => {
         this.recentDossiers = dossiers;
         this.loadingRecent = false;
@@ -418,5 +437,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (cardKey === 'dossiersATraiter') {
       this.navigateToDossiersATraiter();
     }
+  }
+
+  getEmptyStatePrimaryAction(): ActionButtonConfig {
+    return {
+      label: 'Créer un dossier',
+      handler: () => this.router.navigate(['/dossiers/new'])
+    };
+  }
+
+  getEmptyStateSecondaryAction(): ActionButtonConfig {
+    return {
+      label: 'Importer des leads',
+      handler: () => this.router.navigate(['/dossiers/new'])
+    };
   }
 }

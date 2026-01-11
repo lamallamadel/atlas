@@ -399,6 +399,26 @@
   }
 }
 
+// Dossiers filters
+.dossiers-filters {
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
+
+  ::ng-deep mat-button-toggle-group {
+    box-shadow: var(--shadow-sm);
+  }
+
+  ::ng-deep .mat-button-toggle {
+    font-size: var(--font-size-sm);
+
+    @include mobile-only {
+      font-size: var(--font-size-xs);
+      padding: 0 8px;
+    }
+  }
+}
+
 // Dossiers list
 .dossiers-list {
   width: 100%;
