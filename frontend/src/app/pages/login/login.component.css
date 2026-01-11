@@ -140,6 +140,19 @@
   padding: var(--spacing-3);
 }
 
+/* Material Form Field Full Width */
+.full-width {
+  width: 100%;
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+mat-form-field.mat-form-field {
+  margin-bottom: var(--spacing-4);
+}
+
 /* Form Group Styling */
 .form-group {
   margin-bottom: var(--spacing-4);
@@ -364,6 +377,11 @@ textarea.ng-invalid.ng-touched:focus {
 .mock-buttons {
   display: flex;
   gap: var(--spacing-3);
+  flex-direction: column;
+}
+
+.mock-buttons button {
+  width: 100%;
 }
 
 /* Disabled State with Loading Support */

@@ -11,116 +11,153 @@
         <span>{{errorMessage}}</span>
       </div>
 
-      <section aria-labelledby="org-section-title">
-        <div class="login-section">
-          <h2 id="org-section-title" class="section-title">Organisation (Tenant)</h2>
-          <p class="section-description">ID d'organisation envoyé dans l'en-tête <strong>X-Org-Id</strong></p>
+      <form [formGroup]="loginForm">
+        <section aria-labelledby="org-section-title">
+          <div class="login-section">
+            <h2 id="org-section-title" class="section-title">Organisation (Tenant)</h2>
+            <p class="section-description">ID d'organisation envoyé dans l'en-tête <strong>X-Org-Id</strong></p>
 
-          <div class="form-group">
-            <label for="orgId">Org Id</label>
-            <input
-              id="orgId"
-              [(ngModel)]="orgId"
-              name="orgId"
-              class="token-input"
-              placeholder="ORG-001"
-              [disabled]="isLoading"
-              aria-describedby="org-id-description"
-            />
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Org Id</mat-label>
+              <input
+                matInput
+                formControlName="orgId"
+                placeholder="ORG-001"
+                [disabled]="isLoading"
+                aria-describedby="org-id-description"
+              />
+              <mat-error *ngIf="orgId?.hasError('required')">
+                L'ID d'organisation est requis
+              </mat-error>
+            </mat-form-field>
             <span id="org-id-description" class="sr-only">Identifiant d'organisation pour l'en-tête HTTP</span>
           </div>
+        </section>
+
+        <div class="divider" role="separator" aria-label="ou">
+          <span>OU</span>
         </div>
-      </section>
 
-      <div class="divider" role="separator" aria-label="ou">
-        <span>OU</span>
-      </div>
+        <section aria-labelledby="keycloak-section-title">
+          <div class="login-section">
+            <h2 id="keycloak-section-title" class="section-title">Keycloak (OIDC)</h2>
+            <p class="section-description">Connexion via Keycloak (Authorization Code + PKCE)</p>
 
-      <section aria-labelledby="keycloak-section-title">
-        <div class="login-section">
-          <h2 id="keycloak-section-title" class="section-title">Keycloak (OIDC)</h2>
-          <p class="section-description">Connexion via Keycloak (Authorization Code + PKCE)</p>
+            <button
+              mat-raised-button
+              color="primary"
+              type="button"
+              (click)="loginWithKeycloak()"
+              [disabled]="isLoading"
+              aria-label="Se connecter avec Keycloak OIDC"
+              class="full-width"
+            >
+              <mat-progress-spinner
+                *ngIf="isLoading"
+                mode="indeterminate"
+                diameter="20"
+                style="display: inline-block; margin-right: 8px;"
+              ></mat-progress-spinner>
+              <span>Se connecter avec Keycloak</span>
+            </button>
+          </div>
+        </section>
 
-          <button
-            type="button"
-            class="btn btn-primary"
-            (click)="loginWithKeycloak()"
-            [disabled]="isLoading"
-            aria-label="Se connecter avec Keycloak OIDC"
-          >
-            <span>Se connecter avec Keycloak</span>
-          </button>
+        <div class="divider" role="separator" aria-label="ou">
+          <span>OU</span>
         </div>
-      </section>
 
-      <div class="divider" role="separator" aria-label="ou">
-        <span>OU</span>
-      </div>
-
-      <section aria-labelledby="token-section-title">
-        <div class="login-section">
-          <h2 id="token-section-title" class="section-title">Token manuel (Développement)</h2>
-          <p class="section-description">Entrez un token JWT valide pour vous connecter</p>
-          
-          <form (ngSubmit)="login()" class="token-form">
-            <div class="form-group">
-              <label for="token">Token JWT</label>
-              <textarea 
-                id="token"
-                [(ngModel)]="token"
-                name="token"
-                class="token-input"
+        <section aria-labelledby="token-section-title">
+          <div class="login-section">
+            <h2 id="token-section-title" class="section-title">Token manuel (Développement)</h2>
+            <p class="section-description">Entrez un token JWT valide pour vous connecter</p>
+            
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Token JWT</mat-label>
+              <textarea
+                matInput
+                formControlName="token"
                 rows="4"
                 placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
                 [disabled]="isLoading"
                 aria-describedby="token-description"
               ></textarea>
-              <span id="token-description" class="sr-only">Token JWT pour authentification manuelle en développement</span>
-            </div>
+              <mat-error *ngIf="token?.hasError('required')">
+                Le token JWT est requis
+              </mat-error>
+            </mat-form-field>
+            <span id="token-description" class="sr-only">Token JWT pour authentification manuelle en développement</span>
             
-            <button 
-              type="submit" 
-              class="btn btn-primary"
-              [disabled]="isLoading"
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              (click)="login()"
+              [disabled]="isLoading || loginForm.invalid"
               [attr.aria-label]="isLoading ? 'Connexion en cours' : 'Se connecter avec le token JWT'"
+              class="full-width"
             >
+              <mat-progress-spinner
+                *ngIf="isLoading"
+                mode="indeterminate"
+                diameter="20"
+                style="display: inline-block; margin-right: 8px;"
+              ></mat-progress-spinner>
               <span *ngIf="!isLoading">Se connecter avec le token</span>
               <span *ngIf="isLoading" aria-live="polite">Connexion...</span>
             </button>
-          </form>
-        </div>
-      </section>
-
-      <div class="divider" role="separator" aria-label="ou">
-        <span>OU</span>
-      </div>
-
-      <section aria-labelledby="mock-section-title">
-        <div class="login-section">
-          <h2 id="mock-section-title" class="section-title">Mock OIDC (Développement)</h2>
-          <p class="section-description">Générer un token de test pour le développement</p>
-          
-          <div class="mock-buttons">
-            <button 
-              class="btn btn-secondary"
-              (click)="mockOidcLogin()"
-              [disabled]="isLoading"
-              aria-label="Se connecter en tant qu'utilisateur test"
-            >
-              <span>Mock User Login</span>
-            </button>
-            
-            <button 
-              class="btn btn-admin"
-              (click)="mockAdminLogin()"
-              [disabled]="isLoading"
-              aria-label="Se connecter en tant qu'administrateur test"
-            >
-              <span>Mock Admin Login</span>
-            </button>
           </div>
+        </section>
+
+        <div class="divider" role="separator" aria-label="ou">
+          <span>OU</span>
         </div>
-      </section>
+
+        <section aria-labelledby="mock-section-title">
+          <div class="login-section">
+            <h2 id="mock-section-title" class="section-title">Mock OIDC (Développement)</h2>
+            <p class="section-description">Générer un token de test pour le développement</p>
+            
+            <div class="mock-buttons">
+              <button
+                mat-raised-button
+                color="accent"
+                type="button"
+                (click)="mockOidcLogin()"
+                [disabled]="isLoading"
+                aria-label="Se connecter en tant qu'utilisateur test"
+                class="full-width"
+              >
+                <mat-progress-spinner
+                  *ngIf="isLoading"
+                  mode="indeterminate"
+                  diameter="20"
+                  style="display: inline-block; margin-right: 8px;"
+                ></mat-progress-spinner>
+                <span>Mock User Login</span>
+              </button>
+              
+              <button
+                mat-raised-button
+                color="warn"
+                type="button"
+                (click)="mockAdminLogin()"
+                [disabled]="isLoading"
+                aria-label="Se connecter en tant qu'administrateur test"
+                class="full-width"
+              >
+                <mat-progress-spinner
+                  *ngIf="isLoading"
+                  mode="indeterminate"
+                  diameter="20"
+                  style="display: inline-block; margin-right: 8px;"
+                ></mat-progress-spinner>
+                <span>Mock Admin Login</span>
+              </button>
+            </div>
+          </div>
+        </section>
+      </form>
     </div>
   </div>
 </div>

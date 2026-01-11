@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -8,22 +9,33 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./login.component.css']
 })
 export class LoginComponent implements OnInit {
-  token = '';
-  orgId = 'ORG-001';
+  loginForm: FormGroup;
   errorMessage = '';
   isLoading = false;
 
   constructor(
     private authService: AuthService,
-    private router: Router
-  ) {}
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    this.loginForm = this.fb.group({
+      orgId: ['ORG-001', [Validators.required]],
+      token: ['', [Validators.required]]
+    });
+  }
 
   ngOnInit(): void {
-    // If we land here after a successful OIDC redirect (or we still have a valid token),
-    // go straight to the dashboard.
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
+  }
+
+  get orgId() {
+    return this.loginForm.get('orgId');
+  }
+
+  get token() {
+    return this.loginForm.get('token');
   }
 
   loginWithKeycloak(): void {
@@ -31,7 +43,8 @@ export class LoginComponent implements OnInit {
     this.isLoading = true;
 
     try {
-      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
+      const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
+      localStorage.setItem('org_id', orgIdValue);
       this.authService.loginWithKeycloak();
     } catch {
       this.isLoading = false;
@@ -42,16 +55,19 @@ export class LoginComponent implements OnInit {
   login(): void {
     this.errorMessage = '';
     
-    if (!this.token.trim()) {
-      this.errorMessage = 'Veuillez entrer un token';
+    if (this.loginForm.invalid) {
+      this.loginForm.markAllAsTouched();
       return;
     }
 
     this.isLoading = true;
 
     try {
-      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
-      this.authService.login(this.token);
+      const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
+      const tokenValue = this.loginForm.get('token')?.value?.trim();
+      
+      localStorage.setItem('org_id', orgIdValue);
+      this.authService.login(tokenValue);
       this.router.navigate(['/dashboard']);
     } catch (error) {
       this.errorMessage = 'Token invalide';
@@ -66,7 +82,8 @@ export class LoginComponent implements OnInit {
     const mockToken = this.generateMockToken();
     
     try {
-      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
+      const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
+      localStorage.setItem('org_id', orgIdValue);
       this.authService.login(mockToken);
       this.router.navigate(['/dashboard']);
     } catch (error) {
@@ -82,7 +99,8 @@ export class LoginComponent implements OnInit {
     const mockAdminToken = this.generateMockToken(['ADMIN', 'USER']);
     
     try {
-      localStorage.setItem('org_id', this.orgId.trim() || 'ORG-001');
+      const orgIdValue = this.loginForm.get('orgId')?.value?.trim() || 'ORG-001';
+      localStorage.setItem('org_id', orgIdValue);
       this.authService.login(mockAdminToken);
       this.router.navigate(['/dashboard']);
     } catch (error) {
