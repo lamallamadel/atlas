@@ -1325,4 +1325,46 @@ export class DossierDetailComponent implements OnInit {
     }
     return this.formatDate(consent.updatedAt);
   }
+
+  getScoreDisplay(): string {
+    if (!this.dossier) {
+      return '—';
+    }
+    if (this.dossier.score !== undefined && this.dossier.score !== null) {
+      return String(this.dossier.score);
+    }
+    return '—';
+  }
+
+  hasEmptyFields(): boolean {
+    if (!this.dossier) {
+      return false;
+    }
+    const emptyFields = [];
+    
+    if (!this.dossier.leadName) {
+      emptyFields.push('leadName');
+    }
+    if (!this.dossier.leadSource) {
+      emptyFields.push('leadSource');
+    }
+    
+    return emptyFields.length > 0;
+  }
+
+  getEmptyFieldsList(): string {
+    if (!this.dossier) {
+      return '';
+    }
+    const emptyFields = [];
+    
+    if (!this.dossier.leadName) {
+      emptyFields.push('Nom lead');
+    }
+    if (!this.dossier.leadSource) {
+      emptyFields.push('Source lead');
+    }
+    
+    return emptyFields.join(', ');
+  }
 }

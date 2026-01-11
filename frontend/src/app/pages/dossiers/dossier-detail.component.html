@@ -111,6 +111,47 @@
       <mat-tab-group class="tabs-container">
         <mat-tab label="Informations">
           <div class="tab-content">
+            <!-- Section Essentiel -->
+            <mat-card class="info-section-essential">
+              <mat-card-header>
+                <mat-card-title>Essentiel</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="essential-grid">
+                  <div class="essential-item">
+                    <span class="essential-label">Statut</span>
+                    <div class="essential-value">
+                      <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
+                    </div>
+                  </div>
+
+                  <div class="essential-item">
+                    <span class="essential-label">Téléphone</span>
+                    <span class="essential-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
+                  </div>
+
+                  <div class="essential-item">
+                    <span class="essential-label">Source / Annonce</span>
+                    <span class="essential-value">
+                      {{ dossier.source || '—' }}
+                      <span *ngIf="dossier.annonceId" class="essential-annonce-ref"> / #{{ dossier.annonceId }}</span>
+                    </span>
+                  </div>
+
+                  <div class="essential-item">
+                    <span class="essential-label">Score</span>
+                    <span class="essential-value">{{ getScoreDisplay() }}</span>
+                  </div>
+
+                  <div class="essential-item" *ngIf="hasEmptyFields()">
+                    <span class="essential-label">Non renseigné</span>
+                    <span class="essential-value essential-empty">{{ getEmptyFieldsList() }}</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Grid 2 colonnes pour Lead et Annonce -->
             <div class="sections-container">
               <mat-card class="info-section">
                 <mat-card-header>
@@ -185,29 +226,19 @@
                   </div>
 
                   <div *ngIf="!isLeadEmpty()" class="field-group">
-                    <div class="field-row">
+                    <div class="field-row" *ngIf="dossier.leadName">
                       <span class="field-label">Nom :</span>
-                      <span class="field-value">{{ dossier.leadName || '—' }}</span>
+                      <span class="field-value">{{ dossier.leadName }}</span>
                     </div>
 
-                    <div class="field-row">
+                    <div class="field-row" *ngIf="dossier.leadPhone">
                       <span class="field-label">Téléphone :</span>
-                      <span class="field-value">{{ dossier.leadPhone || '—' }}</span>
+                      <span class="field-value">{{ dossier.leadPhone }}</span>
                     </div>
 
-                    <div class="field-row">
-                      <span class="field-label">Source :</span>
-                      <span class="field-value">{{ dossier.leadSource || '—' }}</span>
-                    </div>
-
-                    <div class="field-row">
-                      <span class="field-label">Origine dossier :</span>
-                      <span class="field-value">{{ dossier.source || '—' }}</span>
-                    </div>
-
-                    <div class="field-row">
-                      <span class="field-label">Score :</span>
-                      <span class="field-value">{{ (dossier.score !== undefined && dossier.score !== null) ? dossier.score : '—' }}</span>
+                    <div class="field-row" *ngIf="dossier.leadSource">
+                      <span class="field-label">Source lead :</span>
+                      <span class="field-value">{{ dossier.leadSource }}</span>
                     </div>
                   </div>
                 </mat-card-content>
@@ -218,60 +249,51 @@
                   <mat-card-title>Annonce</mat-card-title>
                 </mat-card-header>
                 <mat-card-content>
-                  <div class="field-group">
+                  <div class="field-group" *ngIf="dossier.annonceId">
                     <div class="field-row">
                       <span class="field-label">Annonce ID :</span>
-                      <span class="field-value">{{ dossier.annonceId || '—' }}</span>
+                      <span class="field-value">#{{ dossier.annonceId }}</span>
                     </div>
                   </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="info-section">
-                <mat-card-header>
-                  <mat-card-title>Système</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="field-group">
-                    <div class="field-row">
-                      <span class="field-label">Créé le :</span>
-                      <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
-                    </div>
-
-                    <div class="field-row">
-                      <span class="field-label">Créé par :</span>
-                      <span class="field-value">{{ dossier.createdBy || '—' }}</span>
-                    </div>
-
-                    <div class="field-row">
-                      <span class="field-label">Modifié le :</span>
-                      <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
-                    </div>
-
-                    <div class="field-row">
-                      <span class="field-label">Modifié par :</span>
-                      <span class="field-value">{{ dossier.updatedBy || '—' }}</span>
-                    </div>
+                  <div class="empty-state-small" *ngIf="!dossier.annonceId">
+                    <p class="empty-state-text">Aucune annonce liée</p>
                   </div>
                 </mat-card-content>
               </mat-card>
             </div>
 
-            <mat-expansion-panel class="advanced-section">
+            <!-- Accordéon Détails système -->
+            <mat-expansion-panel class="system-details-section">
               <mat-expansion-panel-header>
                 <mat-panel-title>
-                  Avancé
+                  Détails système
                 </mat-panel-title>
               </mat-expansion-panel-header>
               
-              <div class="advanced-content">
+              <div class="system-details-content">
+                <div class="field-row">
+                  <span class="field-label">Créé le :</span>
+                  <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
+                </div>
+
+                <div class="field-row" *ngIf="dossier.createdBy">
+                  <span class="field-label">Créé par :</span>
+                  <span class="field-value">{{ dossier.createdBy }}</span>
+                </div>
+
+                <div class="field-row">
+                  <span class="field-label">Modifié le :</span>
+                  <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
+                </div>
+
+                <div class="field-row" *ngIf="dossier.updatedBy">
+                  <span class="field-label">Modifié par :</span>
+                  <span class="field-value">{{ dossier.updatedBy }}</span>
+                </div>
+
                 <div class="field-row">
                   <span class="field-label">ID Dossier :</span>
                   <span class="field-value">{{ dossier.id }}</span>
-                </div>
-                <div class="field-row" *ngIf="dossier.annonceId">
-                  <span class="field-label">ID Annonce :</span>
-                  <span class="field-value">{{ dossier.annonceId }}</span>
                 </div>
 
                 <div class="field-row">
