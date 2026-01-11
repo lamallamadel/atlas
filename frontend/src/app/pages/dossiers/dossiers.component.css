@@ -205,3 +205,118 @@
 .filters-section {
   display: none;
 }
+
+/* Enhanced Status Badges */
+::ng-deep .badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 150ms ease;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+::ng-deep .badge-status .status-icon {
+  font-size: 16px !important;
+  width: 16px;
+  height: 16px;
+  line-height: 1;
+  margin: 0;
+}
+
+::ng-deep .badge-status .status-text {
+  display: inline-block;
+  line-height: 1;
+}
+
+::ng-deep .badge-new {
+  background: linear-gradient(135deg, var(--color-warning-50), var(--color-warning-100));
+  color: var(--color-warning-800);
+  border: 1px solid var(--color-warning-300);
+  box-shadow: 0 2px 4px rgba(255, 152, 0, 0.1);
+}
+
+::ng-deep .badge-new .status-icon {
+  color: var(--color-warning-600);
+}
+
+::ng-deep .badge-qualifying {
+  background: linear-gradient(135deg, var(--color-info-50), var(--color-info-100));
+  color: var(--color-info-800);
+  border: 1px solid var(--color-info-300);
+  box-shadow: 0 2px 4px rgba(33, 150, 243, 0.1);
+}
+
+::ng-deep .badge-qualifying .status-icon {
+  color: var(--color-info-600);
+}
+
+::ng-deep .badge-qualified {
+  background: linear-gradient(135deg, var(--color-success-50), var(--color-success-100));
+  color: var(--color-success-800);
+  border: 1px solid var(--color-success-300);
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
+}
+
+::ng-deep .badge-qualified .status-icon {
+  color: var(--color-success-600);
+}
+
+::ng-deep .badge-appointment {
+  background: linear-gradient(135deg, var(--color-primary-50), var(--color-primary-100));
+  color: var(--color-primary-800);
+  border: 1px solid var(--color-primary-300);
+  box-shadow: 0 2px 4px rgba(44, 90, 160, 0.1);
+}
+
+::ng-deep .badge-appointment .status-icon {
+  color: var(--color-primary-600);
+}
+
+::ng-deep .badge-won {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  color: #1b5e20;
+  border: 1px solid #4caf50;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.2);
+  font-weight: var(--font-weight-bold);
+}
+
+::ng-deep .badge-won .status-icon {
+  color: #2e7d32;
+}
+
+::ng-deep .badge-lost {
+  background: linear-gradient(135deg, var(--color-error-50), var(--color-error-100));
+  color: var(--color-error-800);
+  border: 1px solid var(--color-error-300);
+  box-shadow: 0 2px 4px rgba(231, 76, 60, 0.1);
+}
+
+::ng-deep .badge-lost .status-icon {
+  color: var(--color-error-600);
+}
+
+/* Badge hover effects */
+::ng-deep .badge-status:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}

@@ -26,6 +26,13 @@ export interface RowAction {
   show?: (row: unknown) => boolean;
 }
 
+export interface PaginationData {
+  number: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+}
+
 @Component({
   selector: 'app-generic-table',
   templateUrl: './generic-table.component.html',
@@ -50,10 +57,17 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   @Input() stickyHeader = true;
   @Input() enableVirtualScroll = false;
   @Input() virtualScrollItemSize = 48;
+  @Input() useKebabMenu = false;
+  @Input() showTableHeader = false;
+  @Input() showInlinePagination = false;
+  @Input() paginationData?: PaginationData;
+  @Input() counterSingular = 'élément';
+  @Input() counterPlural = 'éléments';
 
   @Output() rowAction = new EventEmitter<{ action: string; row: unknown }>();
   @Output() rowClick = new EventEmitter<unknown>();
   @Output() selectionChange = new EventEmitter<unknown[]>();
+  @Output() paginationChange = new EventEmitter<'previous' | 'next'>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -253,5 +267,21 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  onPaginationChange(direction: 'previous' | 'next'): void {
+    this.paginationChange.emit(direction);
+  }
+
+  getActionColor(color?: string): string {
+    const colorMap: { [key: string]: string } = {
+      'primary': '#2c5aa0',
+      'accent': '#e67e22',
+      'warn': '#e74c3c',
+      'success': '#4caf50',
+      'error': '#e74c3c',
+      'warning': '#ff9800'
+    };
+    return color ? (colorMap[color] || color) : colorMap['primary'];
   }
 }

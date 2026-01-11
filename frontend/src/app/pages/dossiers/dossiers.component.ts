@@ -5,7 +5,7 @@ import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
-import { ColumnConfig, RowAction } from '../../components/generic-table.component';
+import { ColumnConfig, RowAction, PaginationData } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
@@ -89,8 +89,9 @@ export class DossiersComponent implements OnInit {
       format: (value: unknown) => {
         const status = value as DossierStatus;
         const badgeClass = this.getStatusBadgeClass(status);
+        const icon = this.getStatusIcon(status);
         const label = this.getStatusLabel(status);
-        return `<span class="${badgeClass}">${label}</span>`;
+        return `<span class="${badgeClass}"><span class="material-icons status-icon">${icon}</span><span class="status-text">${label}</span></span>`;
       }
     },
     { 
@@ -110,8 +111,21 @@ export class DossiersComponent implements OnInit {
   ];
 
   actions: RowAction[] = [
-    { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' }
+    { icon: 'launch', tooltip: 'Ouvrir', action: 'view', color: 'primary' },
+    { icon: 'phone', tooltip: 'Appeler', action: 'call', color: 'success' },
+    { icon: 'message', tooltip: 'Envoyer message', action: 'message', color: 'accent' },
+    { icon: 'sync_alt', tooltip: 'Changer statut', action: 'change-status', color: 'warning' }
   ];
+
+  get paginationData(): PaginationData | undefined {
+    if (!this.page) return undefined;
+    return {
+      number: this.page.number,
+      totalPages: this.page.totalPages,
+      first: this.page.first,
+      last: this.page.last
+    };
+  }
 
   get emptyStateMessage(): string {
     return this.appliedFilters.length > 0
@@ -460,19 +474,54 @@ export class DossiersComponent implements OnInit {
     }
   }
 
+  onPaginationChange(direction: 'previous' | 'next'): void {
+    if (direction === 'previous') {
+      this.previousPage();
+    } else {
+      this.nextPage();
+    }
+  }
+
   createDossier(): void {
     this.router.navigate(['/dossiers/new']);
   }
 
   onRowAction(event: { action: string; row: unknown }): void {
     const dossier = event.row as DossierResponse;
-    if (event.action === 'view') {
-      this.viewDossier(dossier.id);
+    switch (event.action) {
+      case 'view':
+        this.viewDossier(dossier.id);
+        break;
+      case 'call':
+        this.callDossier(dossier);
+        break;
+      case 'message':
+        this.messageDossier(dossier);
+        break;
+      case 'change-status':
+        this.changeStatus(dossier);
+        break;
     }
   }
 
   viewDossier(id: number): void {
     this.router.navigate(['/dossiers', id]);
+  }
+
+  callDossier(dossier: DossierResponse): void {
+    if (dossier.leadPhone) {
+      window.location.href = `tel:${dossier.leadPhone}`;
+    }
+  }
+
+  messageDossier(dossier: DossierResponse): void {
+    if (dossier.leadPhone) {
+      window.location.href = `sms:${dossier.leadPhone}`;
+    }
+  }
+
+  changeStatus(dossier: DossierResponse): void {
+    console.log('Change status for dossier', dossier.id);
   }
 
   onRowClick(row: unknown): void {
@@ -496,6 +545,25 @@ export class DossiersComponent implements OnInit {
         return 'badge-status badge-lost';
       default:
         return 'badge-status';
+    }
+  }
+
+  getStatusIcon(status: DossierStatus): string {
+    switch (status) {
+      case DossierStatus.NEW:
+        return 'fiber_new';
+      case DossierStatus.QUALIFYING:
+        return 'hourglass_empty';
+      case DossierStatus.QUALIFIED:
+        return 'verified';
+      case DossierStatus.APPOINTMENT:
+        return 'event';
+      case DossierStatus.WON:
+        return 'emoji_events';
+      case DossierStatus.LOST:
+        return 'cancel';
+      default:
+        return 'label';
     }
   }
 

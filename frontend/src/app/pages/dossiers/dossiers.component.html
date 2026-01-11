@@ -182,8 +182,15 @@
         [showPagination]="false"
         [enableSort]="false"
         [rowClickable]="true"
+        [useKebabMenu]="true"
+        [showTableHeader]="true"
+        [showInlinePagination]="true"
+        [paginationData]="paginationData"
+        [counterSingular]="'dossier'"
+        [counterPlural]="'dossier(s)'"
         (rowAction)="onRowAction($event)"
-        (rowClick)="onRowClick($event)">
+        (rowClick)="onRowClick($event)"
+        (paginationChange)="onPaginationChange($event)">
       </app-generic-table>
 
       <nav class="pagination-section" *ngIf="page" aria-label="Pagination des dossiers">
