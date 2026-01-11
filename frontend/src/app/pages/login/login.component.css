@@ -299,6 +299,56 @@ textarea.ng-invalid.ng-touched:focus {
   gap: var(--spacing-3);
 }
 
+/* ========================================
+   NEW BUTTON STYLES
+   ======================================== */
+
+/* Base Button Class */
+.btn {
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--duration-normal) ease;
+  cursor: pointer;
+  border: none;
+}
+
+/* Primary Button */
+.btn.btn-primary {
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  color: var(--color-neutral-0);
+  box-shadow: var(--shadow-2);
+}
+
+.btn.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-3);
+}
+
+/* Secondary Button */
+.btn.btn-secondary {
+  background-color: var(--color-neutral-200);
+  color: var(--color-primary-700);
+}
+
+/* Admin Button */
+.btn.btn-admin {
+  background-color: var(--color-secondary-500);
+  color: var(--color-neutral-0);
+}
+
+/* Mock Buttons Container */
+.mock-buttons {
+  display: flex;
+  gap: var(--spacing-3);
+}
+
+/* Disabled State */
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Error Message */
 .error-message {
   padding: var(--spacing-4);
