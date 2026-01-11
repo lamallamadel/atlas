@@ -1,74 +1,134 @@
-# 🚀 Start Here - Initial Setup Required
+# 🚀 Start Here - Just Cloned the Repository
 
-This repository has been freshly cloned and needs initial setup before you can build, test, or run the application.
+Welcome! You've just cloned the repository. Here's what you need to do to get started.
 
-## Quick Start
+---
 
-### ✅ Step 1: Frontend (Already Complete)
+## Current Status
 
-The frontend dependencies have been installed automatically:
-- ✅ 1,178 npm packages installed
-- ✅ Ready to use
+✅ **Frontend**: Ready to use immediately (dependencies installed)  
+⚠️ **Backend**: Needs one command (2 minutes)
 
-### ⚠️ Step 2: Backend (Your Action Required)
+---
 
-Run the backend setup script:
+## Quick Setup (2 minutes)
 
+### Step 1: Backend Dependencies
+
+Open a terminal and run **ONE** of these commands:
+
+**Windows Command Prompt:**
 ```cmd
-run-backend-setup.bat
+cd backend
+setup.cmd
 ```
 
-**OR** if you prefer PowerShell:
+**PowerShell:**
+```powershell
+cd backend
+.\run-maven.ps1
+```
+
+**What happens:** Downloads Maven dependencies and builds the Spring Boot app (takes 2-3 minutes)
+
+### Step 2: Start Development
+
+**Option A - Start Everything:**
+```powershell
+.\dev.ps1 up
+```
+
+**Option B - Start Individually:**
+
+Terminal 1 (Backend):
+```powershell
+cd backend
+mvn spring-boot:run
+```
+
+Terminal 2 (Frontend):
+```powershell
+cd frontend
+npm start
+```
+
+### Step 3: Access the App
+
+- Frontend: http://localhost:4200
+- Backend API: http://localhost:8080
+- API Docs: http://localhost:8080/swagger-ui
+
+---
+
+## Optional: E2E Testing Setup
+
+If you want to run end-to-end tests, install Playwright browsers:
 
 ```powershell
-.\setup-repo-initial.ps1
+cd frontend
+npx playwright install
 ```
 
-This will:
-- Set up Java 17 environment
-- Configure Maven toolchains
-- Install all backend dependencies
-
-**Time required:** 2-5 minutes
+Takes 2-3 minutes. Skip this if you don't need E2E tests yet.
 
 ---
 
-## What If the Scripts Don't Work?
+## What's Already Done
 
-See **`INITIAL_REPO_SETUP_INSTRUCTIONS.md`** for:
-- Manual setup steps
-- Alternative setup options
-- Troubleshooting guide
-
----
-
-## After Setup
-
-See **`SETUP_STATUS_AUTOMATED_AGENT.md`** for:
-- Detailed status of what was done
-- How to verify setup completed successfully
-- Commands to run development servers, tests, and builds
+✅ Frontend npm packages installed (1,177 packages)  
+✅ All configuration files in place  
+✅ Helper scripts created  
+✅ Git repository ready  
 
 ---
 
-## Quick Reference
+## Common Commands
 
-| Document | Purpose |
-|----------|---------|
-| **`START_HERE_AFTER_CLONE.md`** (this file) | First stop after cloning |
-| **`SETUP_STATUS_AUTOMATED_AGENT.md`** | Detailed setup status and next steps |
-| **`INITIAL_REPO_SETUP_INSTRUCTIONS.md`** | Complete setup guide with all options |
-| **`AGENTS.md`** | Development commands reference |
-| **`SETUP.md`** | Technical setup details |
+### Development
+```powershell
+# Backend
+cd backend
+mvn spring-boot:run    # Start server
+mvn test              # Run tests
+
+# Frontend  
+cd frontend
+npm start             # Start dev server
+npm test              # Run tests
+npm run lint          # Lint code
+```
+
+### Testing
+```powershell
+# Backend E2E (H2)
+cd backend
+mvn verify -Pbackend-e2e-h2
+
+# Frontend E2E
+cd frontend
+npm run e2e           # Default config
+npm run e2e:fast      # Fast mode
+```
+
+### Build
+```powershell
+# Backend
+cd backend
+mvn clean package     # Creates backend/target/backend.jar
+
+# Frontend
+cd frontend
+npm run build         # Creates frontend/dist/
+```
 
 ---
 
 ## Need Help?
 
-1. Read `INITIAL_REPO_SETUP_INSTRUCTIONS.md` for detailed instructions
-2. Check `SETUP_STATUS_AUTOMATED_AGENT.md` for current status
-3. See `AGENTS.md` for all available commands
+- **Complete Guide**: See [AGENTS.md](AGENTS.md)
+- **Setup Details**: See [SETUP_STATUS.md](SETUP_STATUS.md)  
+- **Full README**: See [README.md](README.md)
 
 ---
 
-**TL;DR:** Run `run-backend-setup.bat` then you're ready to develop! 🎉
+**TL;DR:** Run `cd backend && setup.cmd` then you're ready to develop! 🎉

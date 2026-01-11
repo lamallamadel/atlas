@@ -374,24 +374,30 @@ textarea.ng-invalid.ng-touched:focus {
 
 /* Error Message */
 .error-message {
-  padding: var(--spacing-4);
   background-color: var(--color-error-50);
-  border-left: 4px solid var(--color-error-500);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--color-error-200);
   color: var(--color-error-700);
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-normal);
-  animation: slideUp 300ms ease-out;
+  padding: var(--spacing-4);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--spacing-4);
   display: flex;
   align-items: center;
-  gap: var(--spacing-3);
+  gap: var(--spacing-2);
+  animation: slideDown 300ms ease-out;
+}
+
+.error-icon {
+  color: var(--color-error-500);
+  font-size: var(--font-size-xl);
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .error-message mat-icon {
-  color: var(--color-error-600);
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
+  color: var(--color-error-500);
+  font-size: var(--font-size-xl);
+  width: 24px;
+  height: 24px;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 /* Loading State */
@@ -631,6 +637,30 @@ textarea.ng-invalid.ng-touched:focus {
   animation: shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
+/* Slide Down Animation for Error Messages */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pulse Animation for Error Icon */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
 /* ========================================
    ACCESSIBILITY & REDUCED MOTION
    ======================================== */
@@ -678,6 +708,11 @@ textarea.ng-invalid.ng-touched:focus {
   }
 
   .shake-animation {
+    animation: none !important;
+  }
+
+  .error-icon,
+  .error-message mat-icon {
     animation: none !important;
   }
 }

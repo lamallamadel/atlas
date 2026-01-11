@@ -8,6 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --browsers=ChromeHeadless",
     "lint": "ng lint",
+    "install-browsers": "playwright install",
     "e2e": "playwright test",
     "e2e:fast": "playwright test -c playwright.fast.config.ts",
     "e2e:fast:headed": "playwright test -c playwright.fast.config.ts --headed",
