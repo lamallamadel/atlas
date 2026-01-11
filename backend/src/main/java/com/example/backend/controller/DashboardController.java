@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.DossierResponse;
+import com.example.backend.dto.KpiCardDto;
 import com.example.backend.service.DashboardService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -25,25 +26,25 @@ public class DashboardController {
     }
 
     @GetMapping("/kpis/annonces-actives")
-    @Operation(summary = "Get count of active annonces", description = "Returns the count of annonces with ACTIVE status")
+    @Operation(summary = "Get count of active annonces", description = "Returns the count of annonces with ACTIVE status and trend comparison")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Count retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = Long.class)))
+            @ApiResponse(responseCode = "200", description = "KPI data retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = KpiCardDto.class)))
     })
-    public ResponseEntity<Long> getActiveAnnoncesCount(@RequestParam(required = false) String period) {
-        Long count = dashboardService.getActiveAnnoncesCount(period);
-        return ResponseEntity.ok(count);
+    public ResponseEntity<KpiCardDto> getActiveAnnoncesCount(@RequestParam(required = false) String period) {
+        KpiCardDto kpi = dashboardService.getActiveAnnoncesCount(period);
+        return ResponseEntity.ok(kpi);
     }
 
     @GetMapping("/kpis/dossiers-a-traiter")
-    @Operation(summary = "Get count of dossiers to process", description = "Returns the count of dossiers with NEW or QUALIFIED status")
+    @Operation(summary = "Get count of dossiers to process", description = "Returns the count of dossiers with NEW or QUALIFIED status and trend comparison")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Count retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = Long.class)))
+            @ApiResponse(responseCode = "200", description = "KPI data retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = KpiCardDto.class)))
     })
-    public ResponseEntity<Long> getDossiersATraiterCount(@RequestParam(required = false) String period) {
-        Long count = dashboardService.getDossiersATraiterCount(period);
-        return ResponseEntity.ok(count);
+    public ResponseEntity<KpiCardDto> getDossiersATraiterCount(@RequestParam(required = false) String period) {
+        KpiCardDto kpi = dashboardService.getDossiersATraiterCount(period);
+        return ResponseEntity.ok(kpi);
     }
 
     @GetMapping("/dossiers/recent")

@@ -23,6 +23,8 @@
             <mat-card 
               class="kpi-card"
               [class.loading]="kpiCards[key].loading"
+              [class.clickable]="!kpiCards[key].loading && !kpiCards[key].error"
+              (click)="onKpiCardClick(key)"
               role="listitem"
               [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)">
               <mat-card-header>
@@ -47,6 +49,12 @@
                     <div class="kpi-value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
                       {{kpiCards[key].displayValue}}
                     </div>
+                    <div class="kpi-period" *ngIf="selectedPeriod$ | async as period">
+                      sur {{getPeriodLabel(period)}}
+                    </div>
+                    <div class="kpi-trend" *ngIf="kpiCards[key].trend" [class.positive]="kpiCards[key].trend.startsWith('+')" [class.negative]="kpiCards[key].trend.startsWith('-')">
+                      {{kpiCards[key].trend}} vs période précédente
+                    </div>
                     <div class="kpi-chart-container" aria-hidden="true">
                       <canvas 
                         [id]="'chart-' + key"
@@ -66,16 +74,6 @@
                   </div>
                 </div>
               </mat-card-content>
-              
-              <mat-card-actions *ngIf="!kpiCards[key].loading && !kpiCards[key].error">
-                <button 
-                  mat-button 
-                  color="primary"
-                  (click)="key === 'annoncesActives' ? navigateToAnnoncesActives() : navigateToDossiersATraiter()"
-                  [attr.aria-label]="'Voir tous les ' + kpiCards[key].title.toLowerCase()">
-                  Voir tous
-                </button>
-              </mat-card-actions>
             </mat-card>
           </div>
         </div>

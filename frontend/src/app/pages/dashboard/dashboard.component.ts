@@ -20,6 +20,7 @@ interface KpiCard {
   icon: string;
   color: string;
   chartData: number[];
+  trend: string;
 }
 
 @Component({
@@ -50,7 +51,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       error: '',
       icon: 'home',
       color: '#2196f3',
-      chartData: [12, 19, 15, 22, 18, 25, 28]
+      chartData: [12, 19, 15, 22, 18, 25, 28],
+      trend: ''
     },
     dossiersATraiter: {
       title: 'Dossiers à traiter',
@@ -60,7 +62,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       error: '',
       icon: 'folder_open',
       color: '#ff9800',
-      chartData: [8, 12, 10, 15, 13, 18, 20]
+      chartData: [8, 12, 10, 15, 13, 18, 20],
+      trend: ''
     }
   };
 
@@ -176,12 +179,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const period = this.selectedPeriod$.value;
     this.dashboardKpiService.getActiveAnnoncesCount(period).subscribe({
-      next: (count) => {
-        this.kpiCards['annoncesActives'].value = count;
+      next: (response) => {
+        this.kpiCards['annoncesActives'].value = response.value;
+        this.kpiCards['annoncesActives'].trend = response.trend;
         this.kpiCards['annoncesActives'].loading = false;
-        this.animateCounter('annoncesActives', count);
-        this.updateChart('annoncesActives', count);
-        this.ariaAnnouncer.announcePolite(`${count} annonces actives chargées`);
+        this.animateCounter('annoncesActives', response.value);
+        this.updateChart('annoncesActives', response.value);
+        this.ariaAnnouncer.announcePolite(`${response.value} annonces actives chargées`);
       },
       error: () => {
         this.kpiCards['annoncesActives'].loading = false;
@@ -197,12 +201,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     const period = this.selectedPeriod$.value;
     this.dashboardKpiService.getDossiersATraiterCount(period).subscribe({
-      next: (count) => {
-        this.kpiCards['dossiersATraiter'].value = count;
+      next: (response) => {
+        this.kpiCards['dossiersATraiter'].value = response.value;
+        this.kpiCards['dossiersATraiter'].trend = response.trend;
         this.kpiCards['dossiersATraiter'].loading = false;
-        this.animateCounter('dossiersATraiter', count);
-        this.updateChart('dossiersATraiter', count);
-        this.ariaAnnouncer.announcePolite(`${count} dossiers à traiter chargés`);
+        this.animateCounter('dossiersATraiter', response.value);
+        this.updateChart('dossiersATraiter', response.value);
+        this.ariaAnnouncer.announcePolite(`${response.value} dossiers à traiter chargés`);
       },
       error: () => {
         this.kpiCards['dossiersATraiter'].loading = false;
@@ -388,5 +393,30 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   trackByDossierId(index: number, dossier: DossierResponse): number {
     return dossier.id;
+  }
+
+  getPeriodLabel(period: string): string {
+    switch (period) {
+      case 'TODAY':
+        return "aujourd'hui";
+      case 'LAST_7_DAYS':
+        return '7 derniers jours';
+      case 'LAST_30_DAYS':
+        return '30 derniers jours';
+      default:
+        return '';
+    }
+  }
+
+  onKpiCardClick(cardKey: string): void {
+    if (this.kpiCards[cardKey].loading || this.kpiCards[cardKey].error) {
+      return;
+    }
+    
+    if (cardKey === 'annoncesActives') {
+      this.navigateToAnnoncesActives();
+    } else if (cardKey === 'dossiersATraiter') {
+      this.navigateToDossiersATraiter();
+    }
   }
 }

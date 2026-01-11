@@ -3,6 +3,11 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { DossierResponse } from './dossier-api.service';
 
+export interface KpiCardResponse {
+  value: number;
+  trend: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -12,14 +17,14 @@ export class DashboardKpiService {
 
   constructor(private http: HttpClient) { }
 
-  getActiveAnnoncesCount(period?: string): Observable<number> {
+  getActiveAnnoncesCount(period?: string): Observable<KpiCardResponse> {
     const options = period ? { params: { period } } : {};
-    return this.http.get<number>(`${this.apiUrl}/kpis/annonces-actives`, options);
+    return this.http.get<KpiCardResponse>(`${this.apiUrl}/kpis/annonces-actives`, options);
   }
 
-  getDossiersATraiterCount(period?: string): Observable<number> {
+  getDossiersATraiterCount(period?: string): Observable<KpiCardResponse> {
     const options = period ? { params: { period } } : {};
-    return this.http.get<number>(`${this.apiUrl}/kpis/dossiers-a-traiter`, options);
+    return this.http.get<KpiCardResponse>(`${this.apiUrl}/kpis/dossiers-a-traiter`, options);
   }
 
   getRecentDossiers(): Observable<DossierResponse[]> {

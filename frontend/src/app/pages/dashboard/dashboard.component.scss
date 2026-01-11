@@ -133,11 +133,14 @@
 .kpi-card {
   height: 100%;
   transition: var(--transition-base);
-  cursor: pointer;
 
-  &:hover:not(.loading) {
-    transform: translateY(-4px);
-    box-shadow: var(--shadow-lg) !important;
+  &.clickable {
+    cursor: pointer;
+
+    &:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
   }
 
   &.loading {
@@ -173,20 +176,11 @@
 
   ::ng-deep .mat-mdc-card-content {
     padding: 16px;
-    min-height: 180px;
+    min-height: 200px;
 
     @include mobile-only {
       padding: 16px;
-      min-height: 150px;
-    }
-  }
-
-  ::ng-deep .mat-mdc-card-actions {
-    padding: 0 16px 16px;
-    margin: 0;
-
-    @include mobile-only {
-      padding: 0 16px 16px;
+      min-height: 170px;
     }
   }
 }
@@ -227,7 +221,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
 }
 
 .kpi-value {
@@ -249,6 +243,39 @@
   }
 }
 
+.kpi-period {
+  font-size: var(--font-size-sm);
+  color: var(--color-neutral-600);
+  text-align: center;
+  font-style: italic;
+
+  @include mobile-only {
+    font-size: var(--font-size-xs);
+  }
+}
+
+.kpi-trend {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  text-align: center;
+  padding: 4px 8px;
+  border-radius: var(--radius-base);
+  
+  @include mobile-only {
+    font-size: var(--font-size-xs);
+  }
+
+  &.positive {
+    color: var(--color-success-700);
+    background-color: var(--color-success-50);
+  }
+
+  &.negative {
+    color: var(--color-error-700);
+    background-color: var(--color-error-50);
+  }
+}
+
 @keyframes fadeInScale {
   from {
     opacity: 0;
@@ -262,11 +289,12 @@
 
 .kpi-chart-container {
   width: 100%;
-  height: 80px;
+  height: 60px;
   position: relative;
+  margin-top: 8px;
 
   @include mobile-only {
-    height: 60px;
+    height: 50px;
   }
 }
 
