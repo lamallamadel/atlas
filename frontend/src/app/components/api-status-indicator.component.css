@@ -1,0 +1,117 @@
+.api-status-indicator {
+  display: flex;
+  align-items: center;
+  margin-left: 16px;
+}
+
+.status-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 12px;
+  height: 36px;
+  border-radius: 18px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.status-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.status-connected .status-dot {
+  background-color: #4caf50;
+  box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+}
+
+.status-disconnected .status-dot {
+  background-color: #f44336;
+  box-shadow: 0 0 8px rgba(244, 67, 54, 0.6);
+}
+
+.status-checking .status-dot {
+  background-color: #ff9800;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.status-text {
+  color: white;
+  white-space: nowrap;
+}
+
+.status-menu-content {
+  padding: 16px;
+  cursor: default;
+}
+
+.status-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.status-info mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.status-info mat-icon.status-connected {
+  color: #4caf50;
+}
+
+.status-info mat-icon.status-disconnected {
+  color: #f44336;
+}
+
+.status-info mat-icon.status-checking {
+  color: #ff9800;
+}
+
+.status-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.status-label {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.status-timestamp {
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 768px) {
+  .status-text {
+    display: none;
+  }
+  
+  .api-status-indicator {
+    margin-left: 8px;
+  }
+  
+  .status-button {
+    padding: 0 8px;
+    min-width: auto;
+  }
+}

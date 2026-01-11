@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { PingService } from '../../services/ping.service';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
@@ -35,10 +34,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   
   selectedPeriod$ = new BehaviorSubject<string>('TODAY');
   selectedDossierFilter$ = new BehaviorSubject<string>('A_TRAITER');
-  
-  apiStatus: 'checking' | 'connected' | 'disconnected' = 'checking';
-  lastChecked: Date | null = null;
-  errorMessage = '';
   
   isHandset = false;
   isTablet = false;
@@ -80,7 +75,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private dossiersChart?: Chart;
 
   constructor(
-    private pingService: PingService,
     private dashboardKpiService: DashboardKpiService,
     private router: Router,
     private ariaAnnouncer: AriaLiveAnnouncerService,
@@ -89,7 +83,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnInit(): void {
     this.observeBreakpoints();
-    this.checkApiConnection();
     this.loadKpis();
     this.observePeriodChanges();
     this.observeDossierFilterChanges();
@@ -161,28 +154,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.dossiersChart) {
       this.dossiersChart.destroy();
     }
-  }
-
-  checkApiConnection(): void {
-    this.apiStatus = 'checking';
-    this.errorMessage = '';
-    this.ariaAnnouncer.announcePolite('Vérification de la connexion API en cours');
-
-    this.pingService.ping().subscribe({
-      next: () => {
-        this.apiStatus = 'connected';
-        this.lastChecked = new Date();
-        this.ariaAnnouncer.announcePolite('Connexion API établie avec succès');
-      },
-      error: (error) => {
-        this.apiStatus = 'disconnected';
-        this.lastChecked = new Date();
-        this.errorMessage = error.status ?
-          `HTTP ${error.status}: ${error.statusText}` :
-          'Unable to reach the API server';
-        this.ariaAnnouncer.announceAssertive('Échec de la connexion API: ' + this.errorMessage);
-      }
-    });
   }
 
   loadKpis(): void {

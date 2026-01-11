@@ -63,6 +63,7 @@ import { ActivityTimelineComponent } from './components/activity-timeline.compon
 import { MobileFilterSheetComponent } from './components/mobile-filter-sheet.component';
 import { EnhancedSnackbarComponent } from './components/enhanced-snackbar.component';
 import { SuccessAnimationComponent } from './components/success-animation.component';
+import { ApiStatusIndicatorComponent } from './components/api-status-indicator.component';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { FormValidationAnimationDirective } from './directives/form-validation-animation.directive';
@@ -111,6 +112,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MobileFilterSheetComponent,
     EnhancedSnackbarComponent,
     SuccessAnimationComponent,
+    ApiStatusIndicatorComponent,
     FormValidationAnimationDirective,
     DateFormatPipe,
     PriceFormatPipe,

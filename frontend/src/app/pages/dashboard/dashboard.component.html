@@ -80,13 +80,13 @@
       </div>
     </section>
 
-    <!-- Ligne 2: Liste dossiers + Section activité/qualité -->
-    <section aria-labelledby="dossiers-activity-section-title" class="dashboard-section">
-      <h2 id="dossiers-activity-section-title" class="sr-only">Dossiers et activité</h2>
+    <!-- Ligne 2: Liste dossiers récents -->
+    <section aria-labelledby="dossiers-section-title" class="dashboard-section">
+      <h2 id="dossiers-section-title" class="sr-only">Dossiers récents</h2>
       <div class="grid-container">
         <div class="grid-row">
           <!-- Liste des dossiers récents -->
-          <div class="grid-col-12 grid-col-lg-6">
+          <div class="grid-col-12">
             <mat-card class="section-card scrollable-card" aria-labelledby="recent-dossiers-title">
               <mat-card-header>
                 <div mat-card-avatar class="kpi-icon-container" style="background-color: #4caf50;" aria-hidden="true">
@@ -160,47 +160,7 @@
             </mat-card>
           </div>
 
-          <!-- Section activité/qualité -->
-          <div class="grid-col-12 grid-col-lg-6">
-            <mat-card class="section-card scrollable-card" aria-labelledby="api-status-title">
-              <mat-card-header>
-                <div mat-card-avatar class="status-icon-container" aria-hidden="true">
-                  <mat-icon class="status-icon" aria-hidden="true">
-                    {{apiStatus === 'connected' ? 'check_circle' : apiStatus === 'disconnected' ? 'error' : 'sync'}}
-                  </mat-icon>
-                </div>
-                <mat-card-title>
-                  <h3 id="api-status-title">État de la connexion API</h3>
-                </mat-card-title>
-                <mat-card-subtitle role="status" aria-live="polite">
-                  {{apiStatus === 'connected' ? 'Connecté' : apiStatus === 'disconnected' ? 'Déconnecté' : 'Vérification...'}}
-                </mat-card-subtitle>
-              </mat-card-header>
-              
-              <mat-card-content class="scrollable-content">
-                <div [class]="'status-indicator status-' + apiStatus">
-                  <div class="status-details" *ngIf="lastChecked">
-                    <p>Dernière vérification : {{lastChecked | date:'short'}}</p>
-                  </div>
-                  <div class="status-error" *ngIf="errorMessage" role="alert">
-                    <p class="error-message">{{errorMessage}}</p>
-                  </div>
-                </div>
-              </mat-card-content>
-              
-              <mat-card-actions>
-                <button 
-                  mat-raised-button 
-                  color="primary"
-                  (click)="checkApiConnection()" 
-                  [disabled]="apiStatus === 'checking'"
-                  [attr.aria-label]="apiStatus === 'checking' ? 'Vérification en cours' : 'Actualiser la connexion API'">
-                  <mat-icon aria-hidden="true">refresh</mat-icon>
-                  Actualiser
-                </button>
-              </mat-card-actions>
-            </mat-card>
-          </div>
+
         </div>
       </div>
     </section>
