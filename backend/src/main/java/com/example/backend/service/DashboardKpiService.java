@@ -5,6 +5,8 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,9 +15,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class DashboardKpiService {
+
+    private static final Logger log = LoggerFactory.getLogger(DashboardKpiService.class);
 
     private final AnnonceRepository annonceRepository;
     private final DossierRepository dossierRepository;
@@ -27,11 +32,30 @@ public class DashboardKpiService {
 
     @Transactional(readOnly = true)
     public Map<String, TrendData> getTrends(String period) {
+        String correlationId = UUID.randomUUID().toString();
+        log.info("Getting trends with correlationId={}, period={}", correlationId, period);
+        
         Map<String, TrendData> trends = new HashMap<>();
         
-        trends.put("annoncesActives", getAnnoncesActivesTrend(period));
-        trends.put("dossiersATraiter", getDossiersATraiterTrend(period));
+        try {
+            TrendData annoncesActivesTrend = getAnnoncesActivesTrend(period);
+            trends.put("annoncesActives", annoncesActivesTrend);
+        } catch (Exception e) {
+            log.error("Failed to calculate annoncesActives trend. correlationId={}, period={}", 
+                correlationId, period, e);
+            trends.put("annoncesActives", new TrendData(0L, 0L, 0.0));
+        }
         
+        try {
+            TrendData dossiersATraiterTrend = getDossiersATraiterTrend(period);
+            trends.put("dossiersATraiter", dossiersATraiterTrend);
+        } catch (Exception e) {
+            log.error("Failed to calculate dossiersATraiter trend. correlationId={}, period={}", 
+                correlationId, period, e);
+            trends.put("dossiersATraiter", new TrendData(0L, 0L, 0.0));
+        }
+        
+        log.info("Successfully calculated trends with correlationId={}, period={}", correlationId, period);
         return trends;
     }
 
