@@ -28,10 +28,54 @@
   animation: slideUp 500ms ease-out 100ms backwards;
 }
 
+/* Brand Section - Top of Login Card */
+.brand-section {
+  text-align: center;
+  padding-bottom: var(--spacing-6);
+  border-bottom: 2px solid var(--color-primary-100);
+  margin-bottom: var(--spacing-6);
+  animation: slideUp 500ms ease-out 100ms backwards;
+}
+
+.brand-logo {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto var(--spacing-4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+}
+
+.brand-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-name {
+  font-size: var(--font-size-3xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-primary-600);
+  margin: 0 0 var(--spacing-2) 0;
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.02em;
+}
+
+.brand-tagline {
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-600);
+  margin: 0;
+  line-height: var(--line-height-normal);
+  font-style: italic;
+}
+
 /* Card Header Section */
 .login-header {
   text-align: center;
   margin-bottom: var(--spacing-6);
+  margin-top: 0;
   animation: slideUp 500ms ease-out 150ms backwards;
 }
 
@@ -520,6 +564,19 @@ textarea.ng-invalid.ng-touched:focus {
     flex-direction: column;
   }
 
+  .brand-logo {
+    width: 64px;
+    height: 64px;
+  }
+
+  .brand-name {
+    font-size: var(--font-size-2xl);
+  }
+
+  .brand-tagline {
+    font-size: var(--font-size-sm);
+  }
+
   .login-logo {
     width: 64px;
     height: 64px;
@@ -561,6 +618,25 @@ textarea.ng-invalid.ng-touched:focus {
   .login-card {
     padding: var(--spacing-5);
     border-radius: var(--radius-xl);
+  }
+
+  .brand-section {
+    padding-bottom: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+  }
+
+  .brand-logo {
+    width: 56px;
+    height: 56px;
+    margin-bottom: var(--spacing-3);
+  }
+
+  .brand-name {
+    font-size: var(--font-size-xl);
+  }
+
+  .brand-tagline {
+    font-size: var(--font-size-xs);
   }
 
   .login-header {
@@ -622,6 +698,19 @@ textarea.ng-invalid.ng-touched:focus {
 @media (min-width: 1200px) {
   .login-card {
     padding: var(--spacing-10);
+  }
+
+  .brand-logo {
+    width: 96px;
+    height: 96px;
+  }
+
+  .brand-name {
+    font-size: var(--font-size-4xl);
+  }
+
+  .brand-tagline {
+    font-size: var(--font-size-lg);
   }
 
   .login-logo {
@@ -835,6 +924,19 @@ textarea.ng-invalid.ng-touched:focus {
 .dark-theme .login-card {
   background-color: var(--color-neutral-800);
   box-shadow: var(--shadow-xl);
+}
+
+/* Brand Section - Dark Theme */
+.dark-theme .brand-section {
+  border-bottom-color: var(--color-primary-900);
+}
+
+.dark-theme .brand-name {
+  color: var(--color-primary-300);
+}
+
+.dark-theme .brand-tagline {
+  color: var(--color-neutral-400);
 }
 
 /* Login Title - primary-300 color */

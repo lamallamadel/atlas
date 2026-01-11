@@ -12,6 +12,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage = '';
   isLoading = false;
+  logoPath: string | null = null;
 
   constructor(
     private authService: AuthService,
