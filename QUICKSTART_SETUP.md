@@ -1,78 +1,92 @@
-# Quick Start - Complete Setup Now
+# Quick Start Guide
 
-## Current Status
-✅ Frontend: Ready  
-⚠️ Backend: Needs one command
+## Setup Complete! ✅
 
-## Complete Backend Setup (Choose One)
+The repository has been set up and is ready for development.
 
-### Windows Command Prompt (Recommended)
-```cmd
-cd backend
-do-install.cmd
-```
+### One Manual Step Required
 
-### PowerShell
+Install Playwright browsers for E2E testing:
+
 ```powershell
-cd backend
-.\install-java17.ps1
+cd frontend
+npx playwright install
 ```
 
-### Node.js (Cross-platform)
-```bash
-cd backend
-node install.js
-```
+---
 
-## After Setup Completes
+## Development Commands
 
-### Start Everything
+### Backend (Spring Boot)
+
 ```powershell
-# PowerShell
-.\dev.ps1 up
+# Build
+backend\mvn.cmd -f backend\pom.xml clean package
 
-# Bash (Linux/Mac)
-./dev up
+# Run
+backend\mvn.cmd -f backend\pom.xml spring-boot:run
+
+# Test
+backend\mvn.cmd -f backend\pom.xml test
+
+# E2E Tests (H2)
+backend\mvn.cmd -f backend\pom.xml verify -Pbackend-e2e-h2
 ```
 
-### Run Tests
-```bash
-# Backend unit tests
-cd backend
-mvn test
+### Frontend (Angular)
 
-# Backend E2E tests
-mvn verify -Pbackend-e2e-h2
+```powershell
+cd frontend
 
-# Frontend E2E tests
-cd ../frontend
+# Build
+npm run build
+
+# Run dev server (http://localhost:4200)
+npm start
+
+# Test
+npm test
+
+# E2E Tests
 npm run e2e
 ```
 
-### Access the Application
-- Frontend: http://localhost:4200
-- Backend API: http://localhost:8080
-- API Docs: http://localhost:8080/swagger-ui.html
-- Health Check: http://localhost:8080/actuator/health
+---
 
-## Build Commands Reference
+## What Was Installed
 
-### Backend
-```bash
-cd backend
-mvn clean package      # Build
-mvn test              # Run tests
-mvn spring-boot:run   # Start dev server
+### Backend ✅
+- Maven dependencies (all resolved)
+- Spring Boot 3.2.1 + Java 17
+- Build output: `backend/target/backend.jar`
+
+### Frontend ✅
+- Node modules (1177 packages)
+- Angular 16.2.0
+- Angular Material, Chart.js, etc.
+
+### Not Yet Installed ⚠️
+- Playwright browsers (manual step required)
+
+---
+
+## Verify Setup
+
+```powershell
+# Check Java/Maven
+backend\mvn.cmd -v
+
+# Check Node/npm
+npm -v
+
+# Check build artifacts
+ls backend/target/backend.jar
+ls frontend/node_modules
 ```
 
-### Frontend
-```bash
-cd frontend
-npm run build         # Production build
-npm test             # Unit tests
-npm run lint         # Code linting
-npm start            # Dev server
-```
+---
 
-## That's It!
-See **AGENTS.md** for complete development workflows and testing procedures.
+For detailed information, see:
+- **INITIAL_SETUP_STATUS.md** - Status summary
+- **SETUP_COMPLETE.md** - Detailed setup information
+- **AGENTS.md** - Full development guide

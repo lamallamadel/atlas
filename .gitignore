@@ -338,3 +338,8 @@ maven-wrapper.cmd
 setup-java-maven.ps1
 run-maven-setup.js
 SETUP_STATUS_AFTER_CLONE.md
+
+# Setup scripts created during initial clone setup
+setup-backend-deps.ps1
+setup-frontend-deps.ps1
+SETUP_COMPLETE.md
