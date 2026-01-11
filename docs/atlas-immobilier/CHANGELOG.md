@@ -61,3 +61,6 @@ Ajouts post `docs_merged_normalized` :
 
 ## Documentation — 2026-01-11
 - Ajout de la spécification **Biz — SEO & Tracking (MVP)** : `docs/atlas-immobilier/02_fonctionnel/11_biz_seo_tracking.md`
+
+- Ajout du document **MVP — Scope Freeze** : `docs/atlas-immobilier/01_cadrage/05_mvp_scope_freeze.md`
+- Ajout du document **Référentiel — Freeze MVP** : `docs/atlas-immobilier/02_fonctionnel/12_referential_freeze_mvp.md`
