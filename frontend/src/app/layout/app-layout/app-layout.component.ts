@@ -3,6 +3,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatSidenav } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { DossierApiService } from '../../services/dossier-api.service';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { RouterOutlet } from '@angular/router';
@@ -21,11 +22,13 @@ export class AppLayoutComponent implements OnInit {
   isMobile$: Observable<boolean>;
   userMenuOpen = false;
   isDarkTheme$: Observable<boolean>;
+  dossiersPendingCount$: Observable<number>;
 
   constructor(
     private breakpointObserver: BreakpointObserver,
     private authService: AuthService,
-    public themeService: ThemeService
+    public themeService: ThemeService,
+    private dossierApiService: DossierApiService
   ) {
     this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
       .pipe(
@@ -42,6 +45,8 @@ export class AppLayoutComponent implements OnInit {
     this.isDarkTheme$ = this.themeService.currentTheme$.pipe(
       map(theme => theme === 'dark')
     );
+
+    this.dossiersPendingCount$ = this.dossierApiService.getPendingCount();
   }
 
   ngOnInit(): void {

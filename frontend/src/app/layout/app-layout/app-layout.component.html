@@ -26,9 +26,9 @@
            routerLink="/reports" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux rapports et KPI">
+           aria-label="Accéder aux rapports et KPIs">
           <mat-icon matListItemIcon aria-hidden="true">insights</mat-icon>
-          <span matListItemTitle>Rapports & KPI</span>
+          <span matListItemTitle>Rapports et KPIs</span>
         </a>
         <a mat-list-item 
            routerLink="/annonces" 
@@ -44,7 +44,7 @@
            (click)="closeSidenavOnMobile()"
            aria-label="Accéder aux dossiers">
           <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
-          <span matListItemTitle>Dossiers</span>
+          <span matListItemTitle>Dossiers <span *ngIf="dossiersPendingCount$ | async as count" class="badge-count">({{ count }})</span></span>
         </a>
       </mat-nav-list>
     </nav>

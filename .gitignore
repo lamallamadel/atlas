@@ -303,6 +303,10 @@ setup-repo-build.cmd
 backend/build-backend.js
 backend/run-maven-build.ps1
 
+# Agent-generated setup helpers
+backend/run-maven-build.js
+backend/setup-java17.cmd
+
 # Initial setup artifacts (created during repo clone setup)
 setup-backend-build.cmd
 backend/mavenrc_pre.cmd

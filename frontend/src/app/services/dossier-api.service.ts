@@ -204,4 +204,10 @@ export class DossierApiService {
   bulkAssign(request: DossierBulkAssignRequest): Observable<BulkOperationResponse> {
     return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-assign`, request);
   }
+
+  getPendingCount(): Observable<number> {
+    return this.list({ status: DossierStatus.NEW, size: 0 }).pipe(
+      map(page => page.totalElements)
+    );
+  }
 }
