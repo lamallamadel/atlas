@@ -1,7 +1,7 @@
 # Changelog — v0.4-week3-2026-01-04
 
 > **Statut**: Historique  
-> **Dernière vérification**: 2026-01-07  
+> **Dernière vérification**: 2026-01-10  
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/PROJECT_DOCUMENTATION_INDEX.md`
@@ -54,3 +54,6 @@ Ajouts post `docs_merged_normalized` :
 - Spécification UI Pro Publications / Listings.
 - Contrat API Pro Listings (CRUD, médias, transitions, trust, reports).
 - Acceptance Criteria E2E (Portail + Biz + Pro).
+
+## Documentation — 2026-01-10
+- Ajout de la page unique **Arborescence & déploiement (MVP)** : `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`

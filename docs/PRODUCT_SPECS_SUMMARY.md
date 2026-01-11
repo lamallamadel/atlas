@@ -1,12 +1,13 @@
 # Atlas Immobilier — Périmètre produit (résumé)
 
 > **Statut**: À jour (résumé produit)  
-> **Dernière vérification**: 2026-01-08  
+> **Dernière vérification**: 2026-01-10  
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`  
 - `docs/atlas-immobilier/02_fonctionnel/00_nomenclature_codes.md`  
 - `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`  
+- `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`
 - `docs/atlas-immobilier/03_technique/09_notifications.md`
 
 ## Vision
@@ -62,3 +63,6 @@ Note : ce module est juridiquement sensible ; il doit être cadré avant exposit
 - Portail annonces : `atlasia.ma` (spec: `docs/atlas-immobilier/02_fonctionnel/06_portail_annonces_mvp.md`)
 - Site vitrine corporate : `biz.atlasia.ma` (spec: `docs/atlas-immobilier/02_fonctionnel/07_site_vitrine_biz_mvp.md`)
 - Espace Pro/CRM : `pro.atlasia.ma` (B2B Demo + Listings)
+
+
+> Note: la marque **Atlasia** est conservée en phase dev; le TLD final (ex: `.ma` / `.immo`) reste à figer. Voir : `docs/atlas-immobilier/01_cadrage/04_branding_domains.md`.

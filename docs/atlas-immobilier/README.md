@@ -1,7 +1,7 @@
 # Atlas Immobilier — Documentation Produit & Spécifications (v0.4-week3-2026-01-04)
 
 > **Statut**: Stable  
-> **Dernière vérification**: 2026-01-07  
+> **Dernière vérification**: 2026-01-10  
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/PROJECT_DOCUMENTATION_INDEX.md`
@@ -64,3 +64,5 @@ Voir `02_fonctionnel/04_module_coop_habitat.md`.
   - Publications / Listings : `docs/atlas-immobilier/02_fonctionnel/10_ui_pro_listings_publication.md`
 
 > Convention domaines: `www.atlasia.ma` redirige en 301 vers `atlasia.ma`.
+- Arborescence du projet & déploiement (MVP) : `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`
+

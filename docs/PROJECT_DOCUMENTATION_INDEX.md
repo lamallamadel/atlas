@@ -1,7 +1,7 @@
 # Project Documentation Index
 
 > **Statut**: Stable  
-> **Dernière vérification**: 2026-01-07  
+> **Dernière vérification**: 2026-01-10  
 > **Source of truth**: Non  
 > **Dépendances**:  
 - `docs/PROJECT_STATUS.md`  
@@ -42,6 +42,7 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 
 ## Technique
 
+- Arborescence & déploiement (MVP) : `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`
 - Modèle de données : `docs/atlas-immobilier/03_technique/02_modele_donnees_advanced.md`
 - API contracts (REST) : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
 - Audit (design + AOP) : `docs/atlas-immobilier/03_technique/05_audit_logging_design.md`
@@ -68,6 +69,7 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 
 - Feature flags & plans (modules activables) : `docs/atlas-immobilier/02_fonctionnel/05_feature_flags_plans.md`
 - Glossaire : `docs/atlas-immobilier/01_cadrage/03_glossaire.md`
+- Branding & Domaines (phase dev) : `docs/atlas-immobilier/01_cadrage/04_branding_domains.md`
 
 ## Sécurité (contrats additionnels)
 
