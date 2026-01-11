@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>Nouvelle note</h2>
+<h2 mat-dialog-title>{{ isEdit ? 'Modifier la note' : 'Nouvelle note' }}</h2>
 
 <mat-dialog-content>
   <mat-form-field appearance="outline" class="full-width">
@@ -50,6 +50,6 @@
     color="primary" 
     (click)="onSave()" 
     [disabled]="isContentEmpty()">
-    Enregistrer
+    {{ isEdit ? 'Modifier' : 'Enregistrer' }}
   </button>
 </mat-dialog-actions>

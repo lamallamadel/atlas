@@ -228,45 +228,86 @@
   padding: var(--spacing-4);
   background: linear-gradient(135deg, var(--color-neutral-50), var(--color-neutral-100));
   border-bottom: var(--border-width-1) solid var(--color-neutral-200);
+  align-items: flex-start;
 }
 
-.activity-header {
-  width: 100%;
+.avatar-container {
+  margin-right: var(--spacing-3);
+  flex-shrink: 0;
+}
+
+.user-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-700));
+  color: var(--color-neutral-0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  text-transform: uppercase;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--color-neutral-0);
+}
+
+.activity-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.activity-header-top {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: var(--spacing-4);
+  gap: var(--spacing-2);
+  margin-bottom: var(--spacing-2);
 }
 
-.activity-info {
+.activity-title-row {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-2);
+  align-items: center;
+  gap: var(--spacing-3);
+  flex-wrap: wrap;
 }
 
 .activity-type {
   font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-lg);
   color: var(--color-neutral-900);
+}
+
+.actions-menu-button {
+  flex-shrink: 0;
+  margin: calc(-1 * var(--spacing-2)) calc(-1 * var(--spacing-2)) 0 0;
+  opacity: 0.7;
+  transition: opacity var(--duration-fast) var(--ease-out);
+}
+
+.actions-menu-button:hover {
+  opacity: 1;
 }
 
 .activity-meta {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--spacing-1);
-}
-
-.activity-time {
+  align-items: center;
+  gap: var(--spacing-2);
   font-size: var(--font-size-sm);
   color: var(--color-neutral-600);
-  font-weight: var(--font-weight-medium);
 }
 
 .activity-author {
-  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-neutral-700);
+}
+
+.meta-separator {
+  color: var(--color-neutral-400);
+}
+
+.activity-time {
   color: var(--color-neutral-500);
-  font-style: italic;
 }
 
 /* ========================================
@@ -280,6 +321,8 @@
   line-height: var(--line-height-relaxed);
   color: var(--color-neutral-800);
   font-size: var(--font-size-base);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .activity-content ::ng-deep p {
@@ -290,38 +333,12 @@
   margin-bottom: 0;
 }
 
-.activity-content ::ng-deep ul,
-.activity-content ::ng-deep ol {
-  margin: var(--spacing-3) 0;
-  padding-left: var(--spacing-6);
+.expand-button {
+  margin-top: var(--spacing-3);
 }
 
-.activity-content ::ng-deep li {
-  margin-bottom: var(--spacing-2);
-}
-
-.activity-content ::ng-deep strong,
-.activity-content ::ng-deep b {
-  font-weight: var(--font-weight-bold);
-  color: var(--color-neutral-900);
-}
-
-.activity-content ::ng-deep em,
-.activity-content ::ng-deep i {
-  font-style: italic;
-}
-
-/* ========================================
-   ACTIVITY CARD ACTIONS
-   ======================================== */
-::ng-deep mat-card-actions {
-  padding: var(--spacing-3) var(--spacing-4);
-  margin: 0;
-  border-top: var(--border-width-1) solid var(--color-neutral-200);
-  background: var(--color-neutral-50);
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-2);
+.expand-button mat-icon {
+  margin-right: var(--spacing-1);
 }
 
 /* ========================================
@@ -340,16 +357,30 @@
   border: var(--border-width-1) solid transparent;
 }
 
+.visibility-badge .badge-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
 .visibility-badge.visibility-internal {
   background-color: var(--color-info-50);
   color: var(--color-info-700);
   border-color: var(--color-info-200);
 }
 
+.visibility-badge.visibility-internal .badge-icon {
+  color: var(--color-info-600);
+}
+
 .visibility-badge.visibility-client {
   background-color: var(--color-warning-50);
   color: var(--color-warning-700);
   border-color: var(--color-warning-200);
+}
+
+.visibility-badge.visibility-client .badge-icon {
+  color: var(--color-warning-600);
 }
 
 /* ========================================
@@ -395,17 +426,32 @@
     margin-left: var(--spacing-3);
   }
 
-  .activity-header {
-    flex-direction: column;
-    gap: var(--spacing-3);
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: var(--font-size-base);
   }
 
-  .activity-meta {
-    align-items: flex-start;
+  .activity-header-top {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+
+  .activity-title-row {
+    width: 100%;
+  }
+
+  .actions-menu-button {
+    align-self: flex-end;
+    margin: 0;
   }
 
   .activity-type {
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
+  }
+
+  .activity-meta {
+    flex-wrap: wrap;
   }
 }
 
@@ -443,9 +489,18 @@
     margin-left: var(--spacing-2);
   }
 
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    font-size: var(--font-size-sm);
+  }
+
+  .avatar-container {
+    margin-right: var(--spacing-2);
+  }
+
   ::ng-deep .activity-card .mat-mdc-card-header,
-  ::ng-deep .activity-card .mat-mdc-card-content,
-  ::ng-deep mat-card-actions {
+  ::ng-deep .activity-card .mat-mdc-card-content {
     padding: var(--spacing-3);
   }
 
@@ -455,6 +510,12 @@
 
   .activity-content {
     font-size: var(--font-size-sm);
+  }
+
+  .activity-title-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-2);
   }
 }
 

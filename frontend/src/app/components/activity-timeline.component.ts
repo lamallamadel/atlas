@@ -1,7 +1,8 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { ActivityApiService, ActivityResponse, ActivityType, ActivityVisibility, ActivityCreateRequest } from '../services/activity-api.service';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { ActivityApiService, ActivityResponse, ActivityType, ActivityVisibility, ActivityCreateRequest, ActivityUpdateRequest } from '../services/activity-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
 
@@ -23,7 +24,8 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   constructor(
     private activityApiService: ActivityApiService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -66,18 +68,25 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     });
   }
 
-  openNoteDialog(): void {
+  openNoteDialog(activity?: ActivityResponse): void {
     const dialogRef = this.dialog.open(NoteFormDialogComponent, {
       width: '600px',
       maxWidth: '90vw',
       data: {
-        dossierId: this.dossierId
+        dossierId: this.dossierId,
+        content: activity?.content || '',
+        visibility: activity?.visibility || ActivityVisibility.INTERNAL,
+        isEdit: !!activity
       }
     });
 
     dialogRef.afterClosed().subscribe((result: NoteFormDialogResult | undefined) => {
       if (result) {
-        this.saveNote(result.content, result.visibility);
+        if (activity) {
+          this.updateNote(activity.id, result.content, result.visibility);
+        } else {
+          this.saveNote(result.content, result.visibility);
+        }
       }
     });
   }
@@ -112,6 +121,41 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     });
   }
 
+  updateNote(activityId: number, content: string, visibility: ActivityVisibility): void {
+    const request: ActivityUpdateRequest = {
+      content: content,
+      visibility: visibility
+    };
+
+    this.activityApiService.update(activityId, request).subscribe({
+      next: (updatedActivity) => {
+        this.snackBar.open('Note modifiée avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        const index = this.activities.findIndex(a => a.id === activityId);
+        if (index !== -1) {
+          this.activities[index] = updatedActivity;
+        }
+      },
+      error: (err) => {
+        console.error('Error updating note:', err);
+        this.snackBar.open('Échec de la modification de la note', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+      }
+    });
+  }
+
+  editActivity(activity: ActivityResponse): void {
+    this.openNoteDialog(activity);
+  }
+
   toggleExpanded(activityId: number): void {
     if (this.expandedActivityIds.has(activityId)) {
       this.expandedActivityIds.delete(activityId);
@@ -131,8 +175,8 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
       maxHeight: '100vh',
       panelClass: 'responsive-dialog',
       data: {
-        title: 'Supprimer l\'activité',
-        message: 'Êtes-vous sûr de vouloir supprimer cette activité ?'
+        title: 'Supprimer la note',
+        message: 'Êtes-vous sûr de vouloir supprimer cette note ? Cette action est irréversible.'
       }
     });
 
@@ -140,7 +184,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
       if (confirmed) {
         this.activityApiService.delete(activity.id).subscribe({
           next: () => {
-            this.snackBar.open('Activité supprimée avec succès', 'Fermer', {
+            this.snackBar.open('Note supprimée avec succès', 'Fermer', {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'top',
@@ -150,7 +194,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
           },
           error: (err) => {
             console.error('Error deleting activity:', err);
-            this.snackBar.open('Échec de la suppression de l\'activité', 'Fermer', {
+            this.snackBar.open('Échec de la suppression de la note', 'Fermer', {
               duration: 3000,
               horizontalPosition: 'center',
               verticalPosition: 'top',
@@ -160,6 +204,20 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
         });
       }
     });
+  }
+
+  getUserInitials(name: string | undefined): string {
+    if (!name) {
+      return 'SY';
+    }
+
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+    } else if (parts.length === 1) {
+      return parts[0].substring(0, 2).toUpperCase();
+    }
+    return 'U';
   }
 
   getActivityTypeLabel(type: ActivityType): string {
@@ -193,7 +251,11 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   }
 
   getVisibilityLabel(visibility: ActivityVisibility): string {
-    return visibility === ActivityVisibility.INTERNAL ? 'Interne' : 'Visible par le client';
+    return visibility === ActivityVisibility.INTERNAL ? 'Interne' : 'Client';
+  }
+
+  getVisibilityIcon(visibility: ActivityVisibility): string {
+    return visibility === ActivityVisibility.INTERNAL ? 'lock' : 'visibility';
   }
 
   getVisibilityBadgeClass(visibility: ActivityVisibility): string {
@@ -217,17 +279,28 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   }
 
   shouldShowExpand(content: string): boolean {
-    return !!(content && content.length > 200);
+    return !!(content && content.length > 300);
   }
 
   truncateContent(content: string): string {
     if (!content) {
       return '';
     }
-    if (content.length <= 200) {
+    if (content.length <= 300) {
       return content;
     }
-    return content.substring(0, 200) + '...';
+    return content.substring(0, 300) + '...';
+  }
+
+  sanitizeContent(content: string): SafeHtml {
+    const escaped = content
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+      .replace(/\n/g, '<br>');
+    return this.sanitizer.sanitize(1, escaped) || '';
   }
 
   trackByActivityId(index: number, activity: ActivityResponse): number {

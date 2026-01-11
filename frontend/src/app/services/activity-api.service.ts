@@ -22,6 +22,7 @@ export interface ActivityResponse {
   visibility: ActivityVisibility;
   createdAt: string;
   createdBy: string;
+  createdByName?: string;
 }
 
 export interface ActivityCreateRequest {

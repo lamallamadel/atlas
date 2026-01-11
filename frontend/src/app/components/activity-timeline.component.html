@@ -27,16 +27,43 @@
       
       <mat-card class="activity-card">
         <mat-card-header>
-          <div class="activity-header">
-            <div class="activity-info">
-              <span class="activity-type">{{ getActivityTypeLabel(activity.type) }}</span>
-              <span [class]="getVisibilityBadgeClass(activity.visibility)">
-                {{ getVisibilityLabel(activity.visibility) }}
-              </span>
+          <div class="avatar-container" mat-card-avatar>
+            <div class="user-avatar">
+              {{ getUserInitials(activity.createdByName || activity.createdBy) }}
+            </div>
+          </div>
+          <div class="activity-header-content">
+            <div class="activity-header-top">
+              <div class="activity-title-row">
+                <span class="activity-type">{{ getActivityTypeLabel(activity.type) }}</span>
+                <span [class]="getVisibilityBadgeClass(activity.visibility)">
+                  <mat-icon class="badge-icon">{{ getVisibilityIcon(activity.visibility) }}</mat-icon>
+                  {{ getVisibilityLabel(activity.visibility) }}
+                </span>
+              </div>
+              <button 
+                mat-icon-button 
+                *ngIf="activity.type === ActivityType.NOTE"
+                [matMenuTriggerFor]="actionsMenu"
+                class="actions-menu-button"
+                (click)="$event.stopPropagation()">
+                <mat-icon>more_vert</mat-icon>
+              </button>
+              <mat-menu #actionsMenu="matMenu">
+                <button mat-menu-item (click)="editActivity(activity)">
+                  <mat-icon>edit</mat-icon>
+                  <span>Modifier</span>
+                </button>
+                <button mat-menu-item (click)="deleteActivity(activity)">
+                  <mat-icon color="warn">delete</mat-icon>
+                  <span>Supprimer</span>
+                </button>
+              </mat-menu>
             </div>
             <div class="activity-meta">
+              <span class="activity-author">{{ activity.createdByName || activity.createdBy }}</span>
+              <span class="meta-separator">•</span>
               <span class="activity-time">{{ formatDateTime(activity.createdAt) }}</span>
-              <span class="activity-author" *ngIf="activity.createdBy">par {{ activity.createdBy }}</span>
             </div>
           </div>
         </mat-card-header>
@@ -44,24 +71,20 @@
         <mat-card-content>
           <div class="activity-content" *ngIf="activity.content">
             <div *ngIf="!isExpanded(activity.id) && shouldShowExpand(activity.content)" 
-                 [innerHTML]="truncateContent(activity.content)"></div>
+                 [innerHTML]="sanitizeContent(truncateContent(activity.content))"></div>
             <div *ngIf="isExpanded(activity.id) || !shouldShowExpand(activity.content)" 
-                 [innerHTML]="activity.content"></div>
+                 [innerHTML]="sanitizeContent(activity.content)"></div>
             
             <button *ngIf="shouldShowExpand(activity.content)" 
                     mat-button 
                     color="primary" 
-                    (click)="toggleExpanded(activity.id)">
+                    (click)="toggleExpanded(activity.id)"
+                    class="expand-button">
+              <mat-icon>{{ isExpanded(activity.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
               {{ isExpanded(activity.id) ? 'Voir moins' : 'Voir plus' }}
             </button>
           </div>
         </mat-card-content>
-
-        <mat-card-actions *ngIf="activity.type === ActivityType.NOTE">
-          <button mat-icon-button color="warn" (click)="deleteActivity(activity)" matTooltip="Supprimer">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </mat-card-actions>
       </mat-card>
     </div>
   </div>

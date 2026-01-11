@@ -4,6 +4,9 @@ import { ActivityVisibility } from '../services/activity-api.service';
 
 export interface NoteFormDialogData {
   dossierId: number;
+  content?: string;
+  visibility?: ActivityVisibility;
+  isEdit?: boolean;
 }
 
 export interface NoteFormDialogResult {
@@ -20,11 +23,16 @@ export class NoteFormDialogComponent {
   noteContent = '';
   noteVisibility: ActivityVisibility = ActivityVisibility.INTERNAL;
   ActivityVisibility = ActivityVisibility;
+  isEdit = false;
 
   constructor(
     public dialogRef: MatDialogRef<NoteFormDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: NoteFormDialogData
-  ) {}
+  ) {
+    this.isEdit = data.isEdit || false;
+    this.noteContent = data.content || '';
+    this.noteVisibility = data.visibility || ActivityVisibility.INTERNAL;
+  }
 
   onCancel(): void {
     this.dialogRef.close();
