@@ -100,6 +100,7 @@ public class ConsentementService {
         meta.put("changedAt", LocalDateTime.now().toString());
         consentement.setMeta(meta);
 
+        consentement.setUpdatedAt(LocalDateTime.now());
         ConsentementEntity updated = consentementRepository.save(consentement);
         return consentementMapper.toResponse(updated);
     }

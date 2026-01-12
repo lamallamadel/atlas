@@ -110,6 +110,7 @@ public class AnnonceService {
         
         validateActiveAnnonce(annonce);
         
+        annonce.setUpdatedAt(LocalDateTime.now());
         Annonce updated = annonceRepository.save(annonce);
         searchService.indexAnnonce(updated);
         return annonceMapper.toResponse(updated);
@@ -217,6 +218,7 @@ public class AnnonceService {
 
                 validateActiveAnnonce(annonce);
 
+                annonce.setUpdatedAt(LocalDateTime.now());
                 annonceRepository.save(annonce);
                 successCount++;
             } catch (Exception e) {

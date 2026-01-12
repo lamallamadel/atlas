@@ -157,6 +157,7 @@ public class DossierService {
         transitionService.validateTransition(currentStatus, newStatus);
         
         dossier.setStatus(newStatus);
+        dossier.setUpdatedAt(LocalDateTime.now());
         Dossier updated = dossierRepository.save(dossier);
         
         transitionService.recordTransition(dossier, currentStatus, newStatus, request.getUserId(), request.getReason());
@@ -182,6 +183,7 @@ public class DossierService {
         
         dossier.setLeadName(request.getLeadName());
         dossier.setLeadPhone(request.getLeadPhone());
+        dossier.setUpdatedAt(LocalDateTime.now());
         Dossier updated = dossierRepository.save(dossier);
         searchService.indexDossier(updated);
         return dossierMapper.toResponse(updated);
@@ -237,6 +239,7 @@ public class DossierService {
                 transitionService.validateTransition(currentStatus, newStatus);
 
                 dossier.setStatus(newStatus);
+                dossier.setUpdatedAt(LocalDateTime.now());
                 dossierRepository.save(dossier);
 
                 transitionService.recordTransition(dossier, currentStatus, newStatus, 

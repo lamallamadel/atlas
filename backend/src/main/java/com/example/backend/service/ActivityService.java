@@ -172,6 +172,7 @@ public class ActivityService {
             activity.setVisibility(request.getVisibility());
         }
 
+        activity.setUpdatedAt(LocalDateTime.now());
         ActivityEntity updated = activityRepository.save(activity);
         ActivityResponse response = activityMapper.toResponse(updated);
         response.setCreatedByName(userService.getUserDisplayName(updated.getCreatedBy()));

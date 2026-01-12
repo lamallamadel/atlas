@@ -138,6 +138,7 @@ public class WhatsAppMessageProcessingService {
             
             if (contactName != null && (dossier.getLeadName() == null || dossier.getLeadName().isEmpty())) {
                 dossier.setLeadName(contactName);
+                dossier.setUpdatedAt(LocalDateTime.now());
                 dossierRepository.save(dossier);
             }
             

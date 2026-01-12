@@ -89,6 +89,7 @@ public class PartiePrenanteService {
         }
 
         partiePrenanteMapper.updateEntity(entity, request);
+        entity.setUpdatedAt(LocalDateTime.now());
         PartiePrenanteEntity updated = partiePrenanteRepository.save(entity);
         return partiePrenanteMapper.toResponse(updated);
     }

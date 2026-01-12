@@ -97,6 +97,7 @@ public class NotificationService {
                 log.error("No provider found for notification type: {}", notification.getType());
                 notification.setStatus(NotificationStatus.FAILED);
                 notification.setErrorMessage("No provider found for type: " + notification.getType());
+                notification.setUpdatedAt(LocalDateTime.now());
                 notificationRepository.save(notification);
                 return;
             }
@@ -106,6 +107,7 @@ public class NotificationService {
             notification.setStatus(NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
             notification.setErrorMessage(null);
+            notification.setUpdatedAt(LocalDateTime.now());
             notificationRepository.save(notification);
             
             log.info("Successfully sent notification ID: {}", notification.getId());
@@ -132,6 +134,7 @@ public class NotificationService {
                     notification.getId(), notification.getRetryCount());
             }
             
+            notification.setUpdatedAt(LocalDateTime.now());
             notificationRepository.save(notification);
         }
     }

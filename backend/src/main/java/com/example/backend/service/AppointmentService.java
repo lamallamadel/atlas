@@ -99,6 +99,7 @@ public class AppointmentService {
 
         List<String> warnings = checkOverlappingAppointments(assignedTo, startTime, endTime, id);
 
+        appointment.setUpdatedAt(LocalDateTime.now());
         AppointmentEntity updated = appointmentRepository.save(appointment);
         AppointmentResponse response = appointmentMapper.toResponse(updated);
         
