@@ -58,10 +58,14 @@ public class ConsentementService {
         consentement.setOrgId(orgId);
         consentement.setDossier(dossier);
 
+        LocalDateTime now = LocalDateTime.now();
+        consentement.setCreatedAt(now);
+        consentement.setUpdatedAt(now);
+
         Map<String, Object> meta = consentement.getMeta() != null ? new HashMap<>(consentement.getMeta()) : new HashMap<>();
         meta.put("previousStatus", null);
         meta.put("changedBy", orgId);
-        meta.put("changedAt", LocalDateTime.now().toString());
+        meta.put("changedAt", now.toString());
         consentement.setMeta(meta);
 
         ConsentementEntity saved = consentementRepository.save(consentement);

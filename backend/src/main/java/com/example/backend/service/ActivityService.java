@@ -60,6 +60,10 @@ public class ActivityService {
         activity.setDossier(dossier);
         activity.setVisibility(request.getVisibility());
 
+        LocalDateTime now = LocalDateTime.now();
+        activity.setCreatedAt(now);
+        activity.setUpdatedAt(now);
+
         ActivityEntity saved = activityRepository.save(activity);
         ActivityResponse response = activityMapper.toResponse(saved);
         response.setCreatedByName(userService.getUserDisplayName(saved.getCreatedBy()));

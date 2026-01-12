@@ -39,6 +39,10 @@ public class AppointmentService {
 
         AppointmentEntity appointment = appointmentMapper.toEntity(request);
         
+        LocalDateTime now = LocalDateTime.now();
+        appointment.setCreatedAt(now);
+        appointment.setUpdatedAt(now);
+        
         List<String> warnings = checkOverlappingAppointments(
                 appointment.getAssignedTo(),
                 appointment.getStartTime(),

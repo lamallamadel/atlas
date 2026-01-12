@@ -67,6 +67,10 @@ public class NotificationService {
         notification.setRetryCount(0);
         notification.setMaxRetries(3);
 
+        LocalDateTime now = LocalDateTime.now();
+        notification.setCreatedAt(now);
+        notification.setUpdatedAt(now);
+
         return notificationRepository.save(notification);
     }
 

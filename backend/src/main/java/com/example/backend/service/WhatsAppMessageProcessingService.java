@@ -93,6 +93,10 @@ public class WhatsAppMessageProcessingService {
         messageEntity.setTimestamp(timestamp);
         messageEntity.setProviderMessageId(providerMessageId);
 
+        LocalDateTime now = LocalDateTime.now();
+        messageEntity.setCreatedAt(now);
+        messageEntity.setUpdatedAt(now);
+
         messageRepository.save(messageEntity);
 
         log.info("Processed WhatsApp message {} for dossier {} in org {}", providerMessageId, dossier.getId(), orgId);
@@ -146,6 +150,10 @@ public class WhatsAppMessageProcessingService {
         newDossier.setLeadName(contactName);
         newDossier.setLeadSource("WhatsApp");
         newDossier.setStatus(DossierStatus.NEW);
+
+        LocalDateTime now = LocalDateTime.now();
+        newDossier.setCreatedAt(now);
+        newDossier.setUpdatedAt(now);
 
         return dossierRepository.save(newDossier);
     }

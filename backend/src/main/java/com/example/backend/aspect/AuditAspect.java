@@ -17,12 +17,12 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.lang.reflect.Method;
 
 
 @Aspect
@@ -83,6 +83,10 @@ public class AuditAspect {
                 auditEvent.setUserId(userId);
                 auditEvent.setOrgId(orgId);
                 auditEvent.setDiff(diff);
+
+                LocalDateTime now = LocalDateTime.now();
+                auditEvent.setCreatedAt(now);
+                auditEvent.setUpdatedAt(now);
 
                 auditEventRepository.save(auditEvent);
 
@@ -294,6 +298,10 @@ if (action == AuditAction.CREATED && entityType == AuditEntityType.DOSSIER) {
                 Map<String, Object> diff = new LinkedHashMap<>();
                 diff.put("after", normalizeIds(safeConvertToMap(party)));
                 partyEvent.setDiff(diff);
+
+                LocalDateTime now = LocalDateTime.now();
+                partyEvent.setCreatedAt(now);
+                partyEvent.setUpdatedAt(now);
 
                 auditEventRepository.save(partyEvent);
             }

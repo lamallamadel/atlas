@@ -21,6 +21,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -72,9 +73,15 @@ public class DossierService {
         Dossier dossier = dossierMapper.toEntity(request);
         dossier.setOrgId(orgId);
         
+        LocalDateTime now = LocalDateTime.now();
+        dossier.setCreatedAt(now);
+        dossier.setUpdatedAt(now);
+        
         if (dossier.getParties() != null && !dossier.getParties().isEmpty()) {
             dossier.getParties().forEach(party -> {
                 party.setOrgId(orgId);
+                party.setCreatedAt(now);
+                party.setUpdatedAt(now);
                 if (party.getName() == null && party.getFirstName() != null && party.getLastName() != null) {
                     party.setName(party.getFirstName() + " " + party.getLastName());
                 }

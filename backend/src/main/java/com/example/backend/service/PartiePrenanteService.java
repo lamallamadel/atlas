@@ -13,6 +13,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,10 @@ public class PartiePrenanteService {
         PartiePrenanteEntity entity = partiePrenanteMapper.toEntity(request);
         entity.setOrgId(orgId);
         entity.setDossier(dossier);
+
+        LocalDateTime now = LocalDateTime.now();
+        entity.setCreatedAt(now);
+        entity.setUpdatedAt(now);
 
         if (entity.getName() == null && entity.getFirstName() != null && entity.getLastName() != null) {
             entity.setName(entity.getFirstName() + " " + entity.getLastName());

@@ -9,6 +9,7 @@ import com.example.backend.util.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -87,6 +88,10 @@ public class DossierStatusTransitionService {
         history.setUserId(userId);
         history.setReason(reason);
         history.setOrgId(orgId);
+        
+        LocalDateTime now = LocalDateTime.now();
+        history.setCreatedAt(now);
+        history.setUpdatedAt(now);
         
         historyRepository.save(history);
     }

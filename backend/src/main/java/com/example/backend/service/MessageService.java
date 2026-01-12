@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 public class MessageService {
 
@@ -44,6 +46,11 @@ public class MessageService {
         }
 
         MessageEntity message = messageMapper.toEntity(request, dossier, orgId);
+        
+        LocalDateTime now = LocalDateTime.now();
+        message.setCreatedAt(now);
+        message.setUpdatedAt(now);
+        
         MessageEntity saved = messageRepository.save(message);
         return messageMapper.toResponse(saved);
     }
