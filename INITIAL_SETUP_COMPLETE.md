@@ -1,205 +1,191 @@
-# Initial Repository Setup - Completion Report
+# Initial Setup - Completion Report
 
 ## Overview
 
-This document summarizes the initial setup process for the newly cloned repository. Due to security restrictions preventing environment variable modification and script execution, the setup was partially completed.
+This document reports the status of the initial repository setup after cloning.
 
-## ✅ Successfully Completed
+## What Was Done Automatically
 
-### 1. Frontend Dependencies Installation
-- **Command**: `npm install` 
-- **Status**: ✅ Complete
-- **Result**: 1,177 packages installed successfully
+### ✅ Frontend Dependencies Installed
+- **Package Manager**: npm
+- **Packages Installed**: 1,178 packages
+- **Node Modules**: 684 directories created
 - **Location**: `frontend/node_modules/`
+- **Command Used**: `npm --prefix frontend install`
 - **Duration**: ~1 minute
+- **Status**: **COMPLETE** ✅
 
-### 2. Helper Files Created
-The following helper files were created to facilitate future setup:
-- `backend/.mavenrc` - Maven RC file for Unix/Linux systems
-- `backend/mavenrc_pre.bat` - Maven pre-execution batch file for Windows
-- `mvn-build.cmd` - Wrapper script for Maven with Java 17
-- `setup-backend-deps.ps1` - PowerShell script for backend setup
+### ✅ Setup Scripts Created
+The following helper scripts were created to assist with remaining setup:
 
-All helper files are properly ignored by `.gitignore`.
+1. **`backend/do-install.bat`** - Backend Maven install wrapper
+   - Sets JAVA_HOME to Java 17
+   - Runs Maven install with appropriate settings
+   
+2. **`setup-repo.bat`** - Complete repository setup
+   - One-command setup for the entire repository
+   - Handles backend, frontend, and Playwright browsers
 
-## ⚠️ Requires Manual Completion
+## What Requires Manual Action
 
-### 1. Backend Maven Dependencies
-**Status**: ⚠️ Blocked - requires JAVA_HOME configuration
+### ⚠️ Backend Dependencies (Maven)
 
-**Issue**: The system's security policy prevents:
-- Setting environment variables (JAVA_HOME)
-- Executing .cmd/.bat/.ps1 scripts
-- Using `npx` commands
+**Why Manual**: Requires setting JAVA_HOME environment variable to Java 17, which cannot be done programmatically in this security-restricted environment.
 
-**Current State**:
-- Java 17 is installed at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- Current JAVA_HOME points to Java 8 (1.8.0_401)
-- Maven requires JAVA_HOME to be set to Java 17
+**How to Complete**:
+```cmd
+backend\do-install.bat
+```
 
-**Manual Fix Required**:
+Or if you prefer PowerShell:
 ```powershell
-# Option 1: Use the comprehensive setup script
-.\SETUP.ps1
-
-# Option 2: Manual commands
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 cd backend
 mvn clean install -DskipTests
-cd ..
 ```
 
-### 2. Playwright Browsers
-**Status**: ⚠️ Blocked - npx command execution prevented
+**Expected Result**: Maven will download dependencies (~200-300 MB) and build the backend
 
-**Manual Fix Required**:
-```powershell
-cd frontend
-npx playwright install
-```
-or
-```powershell
+### ⚠️ Playwright Browsers
+
+**Why Manual**: The `npx` command and npm scripts that execute external binaries are blocked in this environment for security.
+
+**How to Complete**:
+```cmd
 cd frontend
 npm run install-browsers
 ```
 
-## Project Structure
-
-```
-/
-├── backend/          # Spring Boot application (Java 17 + Maven)
-│   ├── src/
-│   ├── pom.xml
-│   ├── settings.xml
-│   └── toolchains.xml
-├── frontend/         # Angular application (Node.js + npm)
-│   ├── src/
-│   ├── e2e/         # Playwright E2E tests
-│   ├── package.json
-│   └── node_modules/  ✅ INSTALLED
-├── infra/           # Docker Compose infrastructure
-└── toolchains.xml   # Maven toolchains for Java 17
-
-```
-
-## Available Commands (After Manual Setup)
-
-### Backend
-```bash
-cd backend
-
-# Build
-mvn clean package
-
-# Run tests
-mvn test
-
-# Run application
-mvn spring-boot:run
-
-# E2E tests with H2
-mvn verify -Pbackend-e2e-h2
-
-# E2E tests with PostgreSQL
-mvn verify -Pbackend-e2e-postgres
-```
-
-### Frontend
-```bash
+Or directly:
+```cmd
 cd frontend
-
-# Run application
-npm start
-
-# Run tests
-npm test
-
-# E2E tests (default - H2 + mock auth)
-npm run e2e
-
-# E2E tests (fast mode)
-npm run e2e:fast
-
-# E2E tests (PostgreSQL)
-npm run e2e:postgres
-
-# E2E tests (all configurations)
-npm run e2e:full
+npx playwright install
 ```
 
-### Infrastructure
-```bash
-cd infra
+**Expected Result**: Chromium, Firefox, and WebKit browsers will be downloaded (~300-400 MB)
 
-# Start services
-docker-compose up -d
+## Quick Setup (Recommended)
 
-# Stop services
-docker-compose down
+To complete everything in one command:
+
+```cmd
+setup-repo.bat
 ```
+
+This will:
+1. Verify Java 17 is available
+2. Install backend dependencies via Maven ⚠️
+3. Verify frontend dependencies (already installed ✅)
+4. Install Playwright browsers ⚠️
+
+## Verification
+
+After completing the manual steps, verify your setup:
+
+### Verify Backend
+```cmd
+cd backend
+mvn --version          # Should show Java 17
+mvn clean package      # Should build successfully
+mvn test              # Should run tests
+```
+
+### Verify Frontend
+```cmd
+cd frontend
+npm run build         # Should build successfully
+npm test             # Should run unit tests
+```
+
+### Verify E2E Tests
+```cmd
+cd frontend
+npm run e2e:fast     # Should run Playwright tests
+```
+
+## File Structure
+
+```
+Repository Root/
+│
+├── backend/
+│   ├── src/                    # Java source code
+│   ├── target/                 # ⚠️ Will be created after Maven install
+│   ├── pom.xml                # Maven configuration
+│   ├── settings.xml           # Maven settings (no proxy)
+│   ├── toolchains.xml         # Maven Java 17 toolchains
+│   └── do-install.bat         # ✅ Helper script created
+│
+├── frontend/
+│   ├── src/                   # Angular source code
+│   ├── node_modules/          # ✅ 684 directories, 1,178 packages
+│   ├── e2e/                   # Playwright E2E tests
+│   ├── package.json
+│   └── package-lock.json
+│
+├── infra/                     # Docker Compose infrastructure
+│   ├── docker-compose.yml
+│   └── .env.example
+│
+├── setup-repo.bat             # ✅ Complete setup script created
+├── COMPLETE_INITIAL_SETUP.ps1 # PowerShell setup script (existing)
+├── AGENTS.md                  # Commands reference
+└── SETUP.md                   # Setup instructions
+
+```
+
+## Environment Requirements
+
+- ✅ **Node.js**: Version 25.2.1 (confirmed working)
+- ✅ **npm**: Version 11.6.2 (confirmed working)
+- ✅ **Maven**: Version 3.8.6 (available at C:\Environement\maven-3.8.6)
+- ✅ **Java 17**: Available at C:\Environement\Java\jdk-17.0.5.8-hotspot
+- ℹ️ **Docker**: Required only for E2E tests with PostgreSQL (optional)
+
+## Summary
+
+| Task | Status | Time |
+|------|--------|------|
+| Frontend npm install | ✅ Complete | 1 min |
+| Setup scripts creation | ✅ Complete | - |
+| Backend Maven install | ⚠️ Needs manual action | ~3-5 min |
+| Playwright browsers | ⚠️ Needs manual action | ~2-3 min |
+
+**Total Estimated Time to Complete**: 5-8 minutes
 
 ## Next Steps
 
-1. **Complete Manual Setup**: Run the commands in the "Requires Manual Completion" section above
+1. **Run** `backend\do-install.bat` to install backend dependencies
+2. **Run** `cd frontend && npm run install-browsers` to install Playwright browsers
+3. **Verify** setup with the commands in the Verification section above
+4. **Start developing** - See `AGENTS.md` for all available commands
 
-2. **Verify Setup**: After manual completion, verify everything works:
-   ```powershell
-   # Verify Java 17
-   java -version
-   
-   # Test backend build
-   cd backend
-   mvn clean package
-   
-   # Test frontend
-   cd ../frontend
-   npm run e2e:fast
-   ```
+## Troubleshooting
 
-3. **Start Development**:
-   - Backend: `cd backend && mvn spring-boot:run`
-   - Frontend: `cd frontend && npm start`
+### Maven: "JAVA_HOME not defined"
+```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+```
 
-## Technical Details
+### Maven: "toolchain not found"
+The toolchains.xml file is in the backend directory. Maven will find it automatically when run from there.
 
-### Java Environment
-- **Required**: Java 17 (JDK 17.0.5.8 or later)
-- **Installed**: Java 17 at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
-- **Current Default**: Java 8 (1.8.0_401)
-- **Toolchains**: Configured in `toolchains.xml` and `backend/toolchains.xml`
+### Playwright: "Executable doesn't exist"
+Run the install-browsers command:
+```cmd
+cd frontend
+npm run install-browsers
+```
 
-### Maven Configuration
-- **Version**: 3.8.6
-- **Location**: `C:\Environement\maven-3.8.6`
-- **Settings**: Custom settings.xml in backend directory (disables proxies, uses Maven Central)
-- **Toolchains Plugin**: Configured in backend/pom.xml to use Java 17
+## Additional Resources
 
-### Security Restrictions Encountered
-The following operations were blocked during automated setup:
-- Setting environment variables via PowerShell (`$env:VAR = value`)
-- Executing .cmd, .bat, and .ps1 scripts
-- Using `npx` command
-- Accessing user profile paths directly
-- Using `cmd /c` with environment variable modifications
-
-## References
-
-- `AGENTS.md` - Complete development guide with all commands
-- `SETUP.md` - Detailed setup instructions
-- `README.md` - Project overview
-- `toolchains.xml` - Maven toolchains configuration
-
-## Support
-
-If you encounter issues:
-1. Ensure Java 17 is properly installed and accessible
-2. Verify Maven can access the Java 17 installation
-3. Check that all prerequisites are met (see AGENTS.md)
-4. Review error messages carefully - they often indicate missing configuration
+- **Build Commands**: See `AGENTS.md` section "Commands > Backend"
+- **Test Commands**: See `AGENTS.md` section "End-to-End Testing"
+- **Infrastructure**: See `infra/README.md` for Docker setup
+- **Frontend**: See `frontend/README.md` for Angular-specific info
 
 ---
 
-**Setup Date**: $(Get-Date)
-**Partial Completion**: Frontend dependencies installed
-**Manual Steps Required**: Backend Maven install + Playwright browsers
+**Setup Progress**: 50% Complete (1 of 2 major components installed)
+**Action Required**: Run manual commands above to reach 100%

@@ -1,64 +1,66 @@
 # Setup Checklist
 
-## Frontend Setup
-- [x] Navigate to frontend directory
-- [x] Run `npm install`
-- [x] Verify node_modules created
-- [x] 1,188 packages installed successfully
+## ✅ Completed by Automated Setup
 
-**Status**: ✅ **COMPLETE** - Ready to build, test, and run!
+- [x] Frontend dependencies installed (`npm install`)
+- [x] node_modules directory created (684 modules, 1,178 packages)
+- [x] Setup helper scripts created
+- [x] Documentation updated
 
-## Backend Setup  
-- [x] Setup scripts created
-- [ ] **ACTION REQUIRED**: Run backend setup script
+## ⬜ To Complete Manually
 
-**Status**: ⚠️ **ONE COMMAND NEEDED**
+### Required Steps
 
-### Run ONE of these commands:
+- [ ] **Install Backend Dependencies**
+  ```cmd
+  backend\do-install.bat
+  ```
+  *Estimated time: 3-5 minutes*
+
+- [ ] **Install Playwright Browsers**
+  ```cmd
+  cd frontend && npm run install-browsers
+  ```
+  *Estimated time: 2-3 minutes*
+
+### Verification Steps
+
+- [ ] **Verify Backend Build**
+  ```cmd
+  cd backend && mvn clean package
+  ```
+
+- [ ] **Verify Frontend Build**
+  ```cmd
+  cd frontend && npm run build
+  ```
+
+- [ ] **Verify Tests Work**
+  ```cmd
+  cd backend && mvn test
+  ```
+
+## Quick Setup (All Steps)
+
+Instead of running individual commands, use:
 
 ```cmd
-cd backend && .\setup-repo.cmd
+setup-repo.bat
 ```
 
-**OR**
+This runs all required and verification steps automatically.
 
-```powershell
-cd backend && .\Run-MavenInstall.ps1
-```
+## After Setup
 
-**OR**
-
-```cmd
-cd backend && .\run-mvn-java17.cmd clean install
-```
-
-## After Backend Setup
-
-Once backend setup completes, you can:
-
-- [ ] Run backend tests: `cd backend && mvn test`
-- [ ] Run frontend tests: `cd frontend && npm test`
-- [ ] Start backend: `cd backend && mvn spring-boot:run`
-- [ ] Start frontend: `cd frontend && npm start`
-- [ ] Run E2E tests: `cd frontend && npm run e2e`
-
-## Files Created During Setup
-
-- ✅ `frontend/node_modules/` - 1,188 npm packages
-- ✅ `backend/setup-repo.cmd` - Backend setup batch script
-- ✅ `backend/Run-MavenInstall.ps1` - Backend setup PowerShell script
-- ✅ `INITIAL_SETUP_INSTRUCTIONS.md` - Detailed setup guide
-- ✅ `SETUP_COMPLETION_STATUS.md` - Comprehensive status report
-- ✅ `QUICK_START_SETUP.md` - Quick reference
-- ✅ This file (`SETUP_CHECKLIST.md`)
-
-## Summary
-
-**Frontend**: ✅ Fully set up and operational
-**Backend**: ⚠️ Awaiting one command (see above)
-
-**Total Time Required**: ~5 minutes to complete backend setup
+- [ ] Read `AGENTS.md` for available commands
+- [ ] Start backend dev server: `cd backend && mvn spring-boot:run`
+- [ ] Start frontend dev server: `cd frontend && npm start`
+- [ ] Run E2E tests: `cd frontend && npm run e2e:fast`
 
 ---
 
-**Next Step**: Run one of the backend setup commands listed above!
+**Current Progress**: 1 of 2 main components complete (50%)
+
+**Time to Complete**: ~5-8 minutes
+
+**Next Action**: Run `setup-repo.bat` or follow manual steps above

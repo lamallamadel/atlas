@@ -91,6 +91,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce1.setPrice(BigDecimal.valueOf(100000));
         annonce1.setCurrency("EUR");
         annonce1.setCreatedAt(today.plusHours(2));
+        annonce1.setUpdatedAt(today.plusHours(2));
         annonceRepository.save(annonce1);
 
         Annonce annonce2 = new Annonce();
@@ -101,6 +102,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce2.setPrice(BigDecimal.valueOf(1000));
         annonce2.setCurrency("EUR");
         annonce2.setCreatedAt(today.plusHours(5));
+        annonce2.setUpdatedAt(today.plusHours(5));
         annonceRepository.save(annonce2);
 
         Annonce annonce3 = new Annonce();
@@ -111,6 +113,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce3.setPrice(BigDecimal.valueOf(200000));
         annonce3.setCurrency("EUR");
         annonce3.setCreatedAt(yesterday.plusHours(10));
+        annonce3.setUpdatedAt(yesterday.plusHours(10));
         annonceRepository.save(annonce3);
 
         Dossier dossier1 = new Dossier();
@@ -119,6 +122,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier1.setLeadPhone("+33600000001");
         dossier1.setStatus(DossierStatus.NEW);
         dossier1.setCreatedAt(today.plusHours(3));
+        dossier1.setUpdatedAt(today.plusHours(3));
         dossierRepository.save(dossier1);
 
         Dossier dossier2 = new Dossier();
@@ -127,6 +131,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier2.setLeadPhone("+33600000002");
         dossier2.setStatus(DossierStatus.QUALIFIED);
         dossier2.setCreatedAt(today.plusHours(4));
+        dossier2.setUpdatedAt(today.plusHours(4));
         dossierRepository.save(dossier2);
 
         Dossier dossier3 = new Dossier();
@@ -135,6 +140,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier3.setLeadPhone("+33600000003");
         dossier3.setStatus(DossierStatus.NEW);
         dossier3.setCreatedAt(yesterday.plusHours(8));
+        dossier3.setUpdatedAt(yesterday.plusHours(8));
         dossierRepository.save(dossier3);
 
         Dossier dossier4 = new Dossier();
@@ -143,6 +149,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier4.setLeadPhone("+33600000004");
         dossier4.setStatus(DossierStatus.QUALIFIED);
         dossier4.setCreatedAt(yesterday.plusHours(12));
+        dossier4.setUpdatedAt(yesterday.plusHours(12));
         dossierRepository.save(dossier4);
 
         mockMvc.perform(get(BASE_URL)
@@ -172,6 +179,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         todayAnnonce.setPrice(BigDecimal.valueOf(100000));
         todayAnnonce.setCurrency("EUR");
         todayAnnonce.setCreatedAt(today.plusHours(1));
+        todayAnnonce.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(todayAnnonce);
 
         Annonce yesterdayAnnonce = new Annonce();
@@ -182,6 +190,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         yesterdayAnnonce.setPrice(BigDecimal.valueOf(1000));
         yesterdayAnnonce.setCurrency("EUR");
         yesterdayAnnonce.setCreatedAt(yesterday.plusHours(1));
+        yesterdayAnnonce.setUpdatedAt(yesterday.plusHours(1));
         annonceRepository.save(yesterdayAnnonce);
 
         Annonce twoDaysAgoAnnonce = new Annonce();
@@ -192,6 +201,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         twoDaysAgoAnnonce.setPrice(BigDecimal.valueOf(150000));
         twoDaysAgoAnnonce.setCurrency("EUR");
         twoDaysAgoAnnonce.setCreatedAt(twoDaysAgo.plusHours(1));
+        twoDaysAgoAnnonce.setUpdatedAt(twoDaysAgo.plusHours(1));
         annonceRepository.save(twoDaysAgoAnnonce);
 
         mockMvc.perform(get(BASE_URL)
@@ -218,6 +228,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recent.setPrice(BigDecimal.valueOf(100000));
         recent.setCurrency("EUR");
         recent.setCreatedAt(fiveDaysAgo);
+        recent.setUpdatedAt(fiveDaysAgo);
         annonceRepository.save(recent);
 
         Annonce previous = new Annonce();
@@ -228,6 +239,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         previous.setPrice(BigDecimal.valueOf(1000));
         previous.setCurrency("EUR");
         previous.setCreatedAt(tenDaysAgo);
+        previous.setUpdatedAt(tenDaysAgo);
         annonceRepository.save(previous);
 
         Annonce old = new Annonce();
@@ -238,6 +250,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         old.setPrice(BigDecimal.valueOf(150000));
         old.setCurrency("EUR");
         old.setCreatedAt(fifteenDaysAgo);
+        old.setUpdatedAt(fifteenDaysAgo);
         annonceRepository.save(old);
 
         Dossier recentDossier = new Dossier();
@@ -246,6 +259,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recentDossier.setLeadPhone("+33600000001");
         recentDossier.setStatus(DossierStatus.NEW);
         recentDossier.setCreatedAt(fiveDaysAgo);
+        recentDossier.setUpdatedAt(fiveDaysAgo);
         dossierRepository.save(recentDossier);
 
         Dossier previousDossier = new Dossier();
@@ -254,6 +268,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         previousDossier.setLeadPhone("+33600000002");
         previousDossier.setStatus(DossierStatus.QUALIFIED);
         previousDossier.setCreatedAt(tenDaysAgo);
+        previousDossier.setUpdatedAt(tenDaysAgo);
         dossierRepository.save(previousDossier);
 
         mockMvc.perform(get(BASE_URL)
@@ -283,6 +298,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recent.setPrice(BigDecimal.valueOf(100000));
         recent.setCurrency("EUR");
         recent.setCreatedAt(twentyDaysAgo);
+        recent.setUpdatedAt(twentyDaysAgo);
         annonceRepository.save(recent);
 
         Annonce recent2 = new Annonce();
@@ -293,6 +309,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recent2.setPrice(BigDecimal.valueOf(1500));
         recent2.setCurrency("EUR");
         recent2.setCreatedAt(twentyDaysAgo.plusDays(5));
+        recent2.setUpdatedAt(twentyDaysAgo.plusDays(5));
         annonceRepository.save(recent2);
 
         Annonce previous = new Annonce();
@@ -303,6 +320,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         previous.setPrice(BigDecimal.valueOf(120000));
         previous.setCurrency("EUR");
         previous.setCreatedAt(fortyDaysAgo);
+        previous.setUpdatedAt(fortyDaysAgo);
         annonceRepository.save(previous);
 
         Annonce old = new Annonce();
@@ -313,6 +331,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         old.setPrice(BigDecimal.valueOf(150000));
         old.setCurrency("EUR");
         old.setCreatedAt(sixtyDaysAgo);
+        old.setUpdatedAt(sixtyDaysAgo);
         annonceRepository.save(old);
 
         Dossier recentDossier1 = new Dossier();
@@ -321,6 +340,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recentDossier1.setLeadPhone("+33600000001");
         recentDossier1.setStatus(DossierStatus.NEW);
         recentDossier1.setCreatedAt(twentyDaysAgo);
+        recentDossier1.setUpdatedAt(twentyDaysAgo);
         dossierRepository.save(recentDossier1);
 
         Dossier recentDossier2 = new Dossier();
@@ -329,6 +349,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recentDossier2.setLeadPhone("+33600000002");
         recentDossier2.setStatus(DossierStatus.QUALIFIED);
         recentDossier2.setCreatedAt(twentyDaysAgo.plusDays(3));
+        recentDossier2.setUpdatedAt(twentyDaysAgo.plusDays(3));
         dossierRepository.save(recentDossier2);
 
         Dossier recentDossier3 = new Dossier();
@@ -337,6 +358,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         recentDossier3.setLeadPhone("+33600000003");
         recentDossier3.setStatus(DossierStatus.NEW);
         recentDossier3.setCreatedAt(twentyDaysAgo.plusDays(7));
+        recentDossier3.setUpdatedAt(twentyDaysAgo.plusDays(7));
         dossierRepository.save(recentDossier3);
 
         mockMvc.perform(get(BASE_URL)
@@ -364,6 +386,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce1.setPrice(BigDecimal.valueOf(100000));
         annonce1.setCurrency("EUR");
         annonce1.setCreatedAt(today.plusHours(1));
+        annonce1.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(annonce1);
 
         Annonce annonce2 = new Annonce();
@@ -374,6 +397,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce2.setPrice(BigDecimal.valueOf(1000));
         annonce2.setCurrency("EUR");
         annonce2.setCreatedAt(today.plusHours(2));
+        annonce2.setUpdatedAt(today.plusHours(2));
         annonceRepository.save(annonce2);
 
         Dossier dossier1 = new Dossier();
@@ -382,6 +406,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier1.setLeadPhone("+33600000001");
         dossier1.setStatus(DossierStatus.NEW);
         dossier1.setCreatedAt(today.plusHours(1));
+        dossier1.setUpdatedAt(today.plusHours(1));
         dossierRepository.save(dossier1);
 
         Dossier dossier2 = new Dossier();
@@ -390,6 +415,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier2.setLeadPhone("+33600000002");
         dossier2.setStatus(DossierStatus.QUALIFIED);
         dossier2.setCreatedAt(today.plusHours(2));
+        dossier2.setUpdatedAt(today.plusHours(2));
         dossierRepository.save(dossier2);
 
         mockMvc.perform(get(BASE_URL)
@@ -413,6 +439,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce1.setPrice(BigDecimal.valueOf(100000));
         annonce1.setCurrency("EUR");
         annonce1.setCreatedAt(today.plusHours(1));
+        annonce1.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(annonce1);
 
         Annonce annonce2 = new Annonce();
@@ -423,6 +450,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce2.setPrice(BigDecimal.valueOf(1000));
         annonce2.setCurrency("EUR");
         annonce2.setCreatedAt(today.plusHours(2));
+        annonce2.setUpdatedAt(today.plusHours(2));
         annonceRepository.save(annonce2);
 
         Dossier dossier1 = new Dossier();
@@ -431,6 +459,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier1.setLeadPhone("+33600000001");
         dossier1.setStatus(DossierStatus.NEW);
         dossier1.setCreatedAt(today.plusHours(1));
+        dossier1.setUpdatedAt(today.plusHours(1));
         dossierRepository.save(dossier1);
 
         Dossier dossier2 = new Dossier();
@@ -439,6 +468,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossier2.setLeadPhone("+33600000002");
         dossier2.setStatus(DossierStatus.QUALIFIED);
         dossier2.setCreatedAt(today.plusHours(2));
+        dossier2.setUpdatedAt(today.plusHours(2));
         dossierRepository.save(dossier2);
 
         mockMvc.perform(get(BASE_URL)
@@ -471,6 +501,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonce.setPrice(BigDecimal.valueOf(100000));
         annonce.setCurrency("EUR");
         annonce.setCreatedAt(today.plusHours(1));
+        annonce.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(annonce);
 
         mockMvc.perform(get(BASE_URL)
@@ -494,6 +525,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         todayAnnonce1.setPrice(BigDecimal.valueOf(100000));
         todayAnnonce1.setCurrency("EUR");
         todayAnnonce1.setCreatedAt(today.plusHours(1));
+        todayAnnonce1.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(todayAnnonce1);
 
         Annonce todayAnnonce2 = new Annonce();
@@ -504,6 +536,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         todayAnnonce2.setPrice(BigDecimal.valueOf(1000));
         todayAnnonce2.setCurrency("EUR");
         todayAnnonce2.setCreatedAt(today.plusHours(2));
+        todayAnnonce2.setUpdatedAt(today.plusHours(2));
         annonceRepository.save(todayAnnonce2);
 
         Annonce todayAnnonce3 = new Annonce();
@@ -514,6 +547,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         todayAnnonce3.setPrice(BigDecimal.valueOf(150000));
         todayAnnonce3.setCurrency("EUR");
         todayAnnonce3.setCreatedAt(today.plusHours(3));
+        todayAnnonce3.setUpdatedAt(today.plusHours(3));
         annonceRepository.save(todayAnnonce3);
 
         Annonce yesterdayAnnonce = new Annonce();
@@ -524,6 +558,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         yesterdayAnnonce.setPrice(BigDecimal.valueOf(120000));
         yesterdayAnnonce.setCurrency("EUR");
         yesterdayAnnonce.setCreatedAt(yesterday.plusHours(1));
+        yesterdayAnnonce.setUpdatedAt(yesterday.plusHours(1));
         annonceRepository.save(yesterdayAnnonce);
 
         mockMvc.perform(get(BASE_URL)
@@ -549,6 +584,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         todayAnnonce.setPrice(BigDecimal.valueOf(100000));
         todayAnnonce.setCurrency("EUR");
         todayAnnonce.setCreatedAt(today.plusHours(1));
+        todayAnnonce.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(todayAnnonce);
 
         Annonce yesterdayAnnonce1 = new Annonce();
@@ -559,6 +595,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         yesterdayAnnonce1.setPrice(BigDecimal.valueOf(1000));
         yesterdayAnnonce1.setCurrency("EUR");
         yesterdayAnnonce1.setCreatedAt(yesterday.plusHours(1));
+        yesterdayAnnonce1.setUpdatedAt(yesterday.plusHours(1));
         annonceRepository.save(yesterdayAnnonce1);
 
         Annonce yesterdayAnnonce2 = new Annonce();
@@ -569,6 +606,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         yesterdayAnnonce2.setPrice(BigDecimal.valueOf(120000));
         yesterdayAnnonce2.setCurrency("EUR");
         yesterdayAnnonce2.setCreatedAt(yesterday.plusHours(2));
+        yesterdayAnnonce2.setUpdatedAt(yesterday.plusHours(2));
         annonceRepository.save(yesterdayAnnonce2);
 
         mockMvc.perform(get(BASE_URL)
@@ -593,6 +631,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         todayAnnonce.setPrice(BigDecimal.valueOf(100000));
         todayAnnonce.setCurrency("EUR");
         todayAnnonce.setCreatedAt(today.plusHours(1));
+        todayAnnonce.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(todayAnnonce);
 
         mockMvc.perform(get(BASE_URL)
@@ -617,6 +656,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         activeAnnonce.setPrice(BigDecimal.valueOf(100000));
         activeAnnonce.setCurrency("EUR");
         activeAnnonce.setCreatedAt(today.plusHours(1));
+        activeAnnonce.setUpdatedAt(today.plusHours(1));
         annonceRepository.save(activeAnnonce);
 
         Annonce publishedAnnonce = new Annonce();
@@ -627,6 +667,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         publishedAnnonce.setPrice(BigDecimal.valueOf(1000));
         publishedAnnonce.setCurrency("EUR");
         publishedAnnonce.setCreatedAt(today.plusHours(2));
+        publishedAnnonce.setUpdatedAt(today.plusHours(2));
         annonceRepository.save(publishedAnnonce);
 
         Annonce archivedAnnonce = new Annonce();
@@ -637,6 +678,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         archivedAnnonce.setPrice(BigDecimal.valueOf(150000));
         archivedAnnonce.setCurrency("EUR");
         archivedAnnonce.setCreatedAt(today.plusHours(3));
+        archivedAnnonce.setUpdatedAt(today.plusHours(3));
         annonceRepository.save(archivedAnnonce);
 
         mockMvc.perform(get(BASE_URL)
@@ -657,6 +699,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         newDossier.setLeadPhone("+33600000001");
         newDossier.setStatus(DossierStatus.NEW);
         newDossier.setCreatedAt(today.plusHours(1));
+        newDossier.setUpdatedAt(today.plusHours(1));
         dossierRepository.save(newDossier);
 
         Dossier qualifiedDossier = new Dossier();
@@ -665,6 +708,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         qualifiedDossier.setLeadPhone("+33600000002");
         qualifiedDossier.setStatus(DossierStatus.QUALIFIED);
         qualifiedDossier.setCreatedAt(today.plusHours(2));
+        qualifiedDossier.setUpdatedAt(today.plusHours(2));
         dossierRepository.save(qualifiedDossier);
 
         Dossier qualifyingDossier = new Dossier();
@@ -673,6 +717,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         qualifyingDossier.setLeadPhone("+33600000003");
         qualifyingDossier.setStatus(DossierStatus.QUALIFYING);
         qualifyingDossier.setCreatedAt(today.plusHours(3));
+        qualifyingDossier.setUpdatedAt(today.plusHours(3));
         dossierRepository.save(qualifyingDossier);
 
         Dossier wonDossier = new Dossier();
@@ -681,6 +726,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         wonDossier.setLeadPhone("+33600000004");
         wonDossier.setStatus(DossierStatus.WON);
         wonDossier.setCreatedAt(today.plusHours(4));
+        wonDossier.setUpdatedAt(today.plusHours(4));
         dossierRepository.save(wonDossier);
 
         mockMvc.perform(get(BASE_URL)
