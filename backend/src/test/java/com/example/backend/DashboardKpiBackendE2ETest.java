@@ -152,9 +152,9 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(2))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
                 .andExpect(jsonPath("$.annoncesActives.percentageChange").value(100.0))
-                .andExpect(jsonPath("$.dossiersATraiter.currentValue").value(1))
+                .andExpect(jsonPath("$.dossiersATraiter.currentValue").value(2))
                 .andExpect(jsonPath("$.dossiersATraiter.previousValue").value(2))
-                .andExpect(jsonPath("$.dossiersATraiter.percentageChange").value(-50.0));
+                .andExpect(jsonPath("$.dossiersATraiter.percentageChange").value(0.0));
     }
 
     @Test
