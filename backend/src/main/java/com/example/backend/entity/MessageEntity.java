@@ -3,7 +3,6 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.MessageDirection;
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
@@ -44,7 +43,6 @@ public class MessageEntity extends BaseEntity {
     @Column(name = "provider_message_id", unique = true, length = 255)
     private String providerMessageId;
 
-    @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
