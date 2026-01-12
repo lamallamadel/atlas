@@ -7,7 +7,7 @@
             <vendor>openjdk</vendor>
         </provides>
         <configuration>
-            <jdkHome>C:\Environement\Java\jdk-17.0.5.8-hotspot</jdkHome>
+                <jdkHome>${env.JAVA_HOME}</jdkHome>
         </configuration>
     </toolchain>
 </toolchains>
