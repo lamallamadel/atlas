@@ -38,8 +38,14 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status IN :statuses AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) > :startDate")
     Long countByStatusInAndCreatedAtAfter(@Param("statuses") List<DossierStatus> statuses, @Param("startDate") LocalDateTime startDate);
     
+    @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status IN :statuses AND d.orgId = :orgId AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) > :startDate")
+    Long countByStatusInAndCreatedAtAfter(@Param("statuses") List<DossierStatus> statuses, @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate);
+    
     @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status IN :statuses AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) > :startDate AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) < :endDate")
     Long countByStatusInAndCreatedAtBetween(@Param("statuses") List<DossierStatus> statuses, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+    
+    @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status IN :statuses AND d.orgId = :orgId AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) > :startDate AND COALESCE(d.createdAt, CURRENT_TIMESTAMP) < :endDate")
+    Long countByStatusInAndCreatedAtBetween(@Param("statuses") List<DossierStatus> statuses, @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
     
     @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status IN :statuses AND d.orgId = :orgId")
     Long countByStatusInAndOrgId(@Param("statuses") List<DossierStatus> statuses, @Param("orgId") String orgId);
