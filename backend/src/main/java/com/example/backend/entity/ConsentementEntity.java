@@ -5,12 +5,9 @@ import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.ParamDef;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
 import java.util.Map;
 
 @Entity
@@ -22,9 +19,6 @@ public class ConsentementEntity extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-
-    @Column(name = "org_id", nullable = false)
-    private String orgId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_id", nullable = false)
@@ -45,12 +39,6 @@ public class ConsentementEntity extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "meta_json")
     private Map<String, Object> meta;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
 
     public Long getId() {
         return id;
@@ -83,7 +71,7 @@ public class ConsentementEntity extends BaseEntity {
     public void setConsentType(ConsentementType consentType) {
         this.consentType = consentType;
     }
-    
+
     public ConsentementStatus getStatus() {
         return status;
     }
@@ -100,27 +88,4 @@ public class ConsentementEntity extends BaseEntity {
         this.meta = meta;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
-    }
 }

@@ -23,9 +23,6 @@ public class AuditEventEntity extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "org_id", nullable = false)
-    private String orgId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "entity_type", nullable = false, length = 50)
     private AuditEntityType entityType;
@@ -43,10 +40,6 @@ public class AuditEventEntity extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "diff_json")
     private Map<String, Object> diff;
-
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
 
     public Long getId() {
         return id;
@@ -96,19 +89,4 @@ public class AuditEventEntity extends BaseEntity {
         this.diff = diff;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
-    }
 }

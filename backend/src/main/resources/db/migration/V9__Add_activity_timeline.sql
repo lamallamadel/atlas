@@ -6,7 +6,9 @@ CREATE TABLE activity (
     dossier_id BIGINT NOT NULL,
     visibility VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT fk_activity_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE
 );
 

@@ -44,6 +44,8 @@ CREATE TABLE partie_prenante (
     email VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT fk_partie_prenante_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE
 );
 
@@ -59,6 +61,8 @@ CREATE TABLE consentement (
     revoked_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT fk_consentement_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE,
     CONSTRAINT fk_consentement_partie_prenante FOREIGN KEY (partie_prenante_id) REFERENCES partie_prenante(id) ON DELETE SET NULL
 );
@@ -74,6 +78,9 @@ CREATE TABLE message (
     message_type VARCHAR(50),
     status VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT fk_message_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE
 );
 
@@ -102,7 +109,10 @@ CREATE TABLE audit_event (
     action VARCHAR(50) NOT NULL,
     user_id VARCHAR(255),
     changes TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
 );
 
 -- Indexes on annonce

@@ -14,6 +14,8 @@ CREATE TABLE notification (
     sent_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT chk_notification_type CHECK (type IN ('EMAIL', 'SMS', 'WHATSAPP', 'IN_APP')),
     CONSTRAINT chk_notification_status CHECK (status IN ('PENDING', 'SENT', 'FAILED'))
 );

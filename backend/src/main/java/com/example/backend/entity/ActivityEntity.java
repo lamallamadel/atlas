@@ -21,9 +21,6 @@ public class ActivityEntity extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "org_id", nullable = false)
-    private String orgId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false, length = 50)
     private ActivityType type;
@@ -39,10 +36,6 @@ public class ActivityEntity extends BaseEntity {
     @Column(name = "visibility", nullable = false, length = 50)
     private ActivityVisibility visibility;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
@@ -53,14 +46,6 @@ public class ActivityEntity extends BaseEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
     }
 
     public ActivityType getType() {
@@ -93,14 +78,6 @@ public class ActivityEntity extends BaseEntity {
 
     public void setVisibility(ActivityVisibility visibility) {
         this.visibility = visibility;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
     }
 
     public String getCreatedBy() {

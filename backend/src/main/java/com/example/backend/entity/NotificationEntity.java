@@ -20,9 +20,6 @@ public class NotificationEntity extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "org_id", nullable = false)
-    private String orgId;
-
     @Column(name = "dossier_id")
     private Long dossierId;
 
@@ -59,26 +56,12 @@ public class NotificationEntity extends BaseEntity {
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
     }
 
     public Long getDossierId() {
@@ -167,21 +150,5 @@ public class NotificationEntity extends BaseEntity {
 
     public void setSentAt(LocalDateTime sentAt) {
         this.sentAt = sentAt;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 }

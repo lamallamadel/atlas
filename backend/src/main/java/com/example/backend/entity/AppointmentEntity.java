@@ -20,9 +20,6 @@ public class AppointmentEntity extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "org_id", nullable = false)
-    private String orgId;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_id", nullable = false)
     private Dossier dossier;
@@ -46,12 +43,6 @@ public class AppointmentEntity extends BaseEntity {
     @Column(name = "notes", columnDefinition = "text")
     private String notes;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
@@ -66,14 +57,6 @@ public class AppointmentEntity extends BaseEntity {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
     }
 
     public Dossier getDossier() {
@@ -130,22 +113,6 @@ public class AppointmentEntity extends BaseEntity {
 
     public void setNotes(String notes) {
         this.notes = notes;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public String getCreatedBy() {

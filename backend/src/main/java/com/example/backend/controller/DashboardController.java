@@ -33,8 +33,7 @@ public class DashboardController {
     @GetMapping("/kpis/annonces-actives")
     @Operation(summary = "Get count of active annonces", description = "Returns the count of annonces with ACTIVE status and trend comparison")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "KPI data retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = KpiCardDto.class)))
+            @ApiResponse(responseCode = "200", description = "KPI data retrieved successfully", content = @Content(schema = @Schema(implementation = KpiCardDto.class)))
     })
     public ResponseEntity<KpiCardDto> getActiveAnnoncesCount(@RequestParam(required = false) String period) {
         KpiCardDto kpi = dashboardService.getActiveAnnoncesCount(period);
@@ -44,8 +43,7 @@ public class DashboardController {
     @GetMapping("/kpis/dossiers-a-traiter")
     @Operation(summary = "Get count of dossiers to process", description = "Returns the count of dossiers with NEW or QUALIFIED status and trend comparison")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "KPI data retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = KpiCardDto.class)))
+            @ApiResponse(responseCode = "200", description = "KPI data retrieved successfully", content = @Content(schema = @Schema(implementation = KpiCardDto.class)))
     })
     public ResponseEntity<KpiCardDto> getDossiersATraiterCount(@RequestParam(required = false) String period) {
         KpiCardDto kpi = dashboardService.getDossiersATraiterCount(period);
@@ -55,8 +53,7 @@ public class DashboardController {
     @GetMapping("/dossiers/recent")
     @Operation(summary = "Get recent dossiers", description = "Returns the 5 most recently created dossiers ordered by created_at descending")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Recent dossiers retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = List.class)))
+            @ApiResponse(responseCode = "200", description = "Recent dossiers retrieved successfully", content = @Content(schema = @Schema(implementation = List.class)))
     })
     public ResponseEntity<List<DossierResponse>> getRecentDossiers() {
         List<DossierResponse> recentDossiers = dashboardService.getRecentDossiers();
@@ -66,8 +63,7 @@ public class DashboardController {
     @GetMapping("/kpis/trends")
     @Operation(summary = "Get KPI trends", description = "Returns trend data for all KPIs with current value, previous value, and percentage change")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Trend data retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = Map.class)))
+            @ApiResponse(responseCode = "200", description = "Trend data retrieved successfully", content = @Content(schema = @Schema(implementation = Map.class)))
     })
     public ResponseEntity<Map<String, TrendData>> getTrends(@RequestParam(required = false) String period) {
         Map<String, TrendData> trends = dashboardKpiService.getTrends(period);

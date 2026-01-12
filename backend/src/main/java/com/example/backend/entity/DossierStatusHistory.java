@@ -3,6 +3,7 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.DossierStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.Filter;
 
 import java.time.LocalDateTime;
@@ -10,12 +11,15 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "dossier_status_history")
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
-public class DossierStatusHistory extends BaseEntity {
+public class DossierStatusHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
+
+    @Column(name = "org_id", nullable = false, updatable = false)
+    private String orgId;
 
     @Column(name = "dossier_id", nullable = false)
     private Long dossierId;
@@ -38,12 +42,24 @@ public class DossierStatusHistory extends BaseEntity {
     @Column(name = "transitioned_at", nullable = false, updatable = false)
     private LocalDateTime transitionedAt;
 
+    @UpdateTimestamp
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
+
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
     }
 
     public Long getDossierId() {
@@ -92,5 +108,13 @@ public class DossierStatusHistory extends BaseEntity {
 
     public void setTransitionedAt(LocalDateTime transitionedAt) {
         this.transitionedAt = transitionedAt;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

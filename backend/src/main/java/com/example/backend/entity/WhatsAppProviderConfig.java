@@ -1,11 +1,7 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "whatsapp_provider_config")
@@ -16,9 +12,6 @@ public class WhatsAppProviderConfig extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
-
-    @Column(name = "org_id", nullable = false, unique = true)
-    private String orgId;
 
     @Column(name = "api_key_encrypted", nullable = false, columnDefinition = "text")
     private String apiKeyEncrypted;
@@ -38,28 +31,12 @@ public class WhatsAppProviderConfig extends BaseEntity {
     @Column(name = "enabled", nullable = false)
     private Boolean enabled = true;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
-
     public Long getId() {
         return id;
     }
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public String getOrgId() {
-        return orgId;
-    }
-
-    public void setOrgId(String orgId) {
-        this.orgId = orgId;
     }
 
     public String getApiKeyEncrypted() {
@@ -110,19 +87,4 @@ public class WhatsAppProviderConfig extends BaseEntity {
         this.enabled = enabled;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
 }

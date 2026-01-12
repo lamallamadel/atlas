@@ -18,12 +18,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @BackendE2ETest
-@WithMockUser(roles = {"PRO", "ADMIN"})
+@WithMockUser(roles = { "PRO", "ADMIN" })
 public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String ORG_ID_1 = "test-org-dashboard-1";
@@ -50,8 +49,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testGetTrends_Returns200WithValidStructure() throws Exception {
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives").exists())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").isNumber())
@@ -66,8 +65,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testGetTrends_EmptyDatabase_ReturnsZeroCounts() throws Exception {
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(0))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(0))
@@ -153,8 +152,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(dossier4);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(2))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -205,8 +204,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(twoDaysAgoAnnonce);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -272,8 +271,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(previousDossier);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "LAST_7_DAYS"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "LAST_7_DAYS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -362,8 +361,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(recentDossier3);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "LAST_30_DAYS"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "LAST_30_DAYS"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(2))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -419,8 +418,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(dossier2);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.dossiersATraiter.currentValue").value(1));
@@ -472,8 +471,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(dossier2);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_2)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_2)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.dossiersATraiter.currentValue").value(1));
@@ -482,7 +481,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testGetTrends_MissingOrgIdHeader_Returns400() throws Exception {
         mockMvc.perform(get(BASE_URL)
-                        .param("period", "TODAY"))
+                .param("period", "TODAY"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("Missing required header: X-Org-Id"));
@@ -505,7 +504,7 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(annonce);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1))
+                .header(TENANT_HEADER, ORG_ID_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives").exists())
                 .andExpect(jsonPath("$.dossiersATraiter").exists());
@@ -562,8 +561,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(yesterdayAnnonce);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(3))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(1))
@@ -610,8 +609,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(yesterdayAnnonce2);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(2))
@@ -635,8 +634,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(todayAnnonce);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1))
                 .andExpect(jsonPath("$.annoncesActives.previousValue").value(0))
@@ -682,8 +681,8 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(archivedAnnonce);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.annoncesActives.currentValue").value(1));
     }
@@ -730,20 +729,20 @@ public class DashboardKpiBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.save(wonDossier);
 
         mockMvc.perform(get(BASE_URL)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .param("period", "TODAY"))
+                .header(TENANT_HEADER, ORG_ID_1)
+                .param("period", "TODAY"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dossiersATraiter.currentValue").value(2));
     }
 
     @Test
     void testGetTrends_AllPeriods_ReturnValidData() throws Exception {
-        String[] periods = {"TODAY", "LAST_7_DAYS", "LAST_30_DAYS"};
+        String[] periods = { "TODAY", "LAST_7_DAYS", "LAST_30_DAYS" };
 
         for (String period : periods) {
             mockMvc.perform(get(BASE_URL)
-                            .header(TENANT_HEADER, ORG_ID_1)
-                            .param("period", period))
+                    .header(TENANT_HEADER, ORG_ID_1)
+                    .param("period", period))
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.annoncesActives").exists())
                     .andExpect(jsonPath("$.annoncesActives.currentValue").isNumber())

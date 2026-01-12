@@ -29,26 +29,22 @@ public class DossierStatusTransitionService {
         Map<DossierStatus, Set<DossierStatus>> transitions = new HashMap<>();
 
         transitions.put(DossierStatus.NEW, Set.of(
-            DossierStatus.QUALIFYING,
-            DossierStatus.QUALIFIED,
-            DossierStatus.APPOINTMENT,
-            DossierStatus.LOST
-        ));
+                DossierStatus.QUALIFYING,
+                DossierStatus.QUALIFIED,
+                DossierStatus.APPOINTMENT,
+                DossierStatus.LOST));
 
         transitions.put(DossierStatus.QUALIFYING, Set.of(
-            DossierStatus.QUALIFIED,
-            DossierStatus.LOST
-        ));
+                DossierStatus.QUALIFIED,
+                DossierStatus.LOST));
 
         transitions.put(DossierStatus.QUALIFIED, Set.of(
-            DossierStatus.APPOINTMENT,
-            DossierStatus.LOST
-        ));
+                DossierStatus.APPOINTMENT,
+                DossierStatus.LOST));
 
         transitions.put(DossierStatus.APPOINTMENT, Set.of(
-            DossierStatus.WON,
-            DossierStatus.LOST
-        ));
+                DossierStatus.WON,
+                DossierStatus.LOST));
 
         transitions.put(DossierStatus.WON, Set.of());
         transitions.put(DossierStatus.LOST, Set.of());
@@ -56,12 +52,11 @@ public class DossierStatusTransitionService {
         return transitions;
     }
 
-
     public boolean isTransitionAllowed(DossierStatus fromStatus, DossierStatus toStatus) {
         if (fromStatus == null || toStatus == null) {
             return false;
         }
-        
+
         Set<DossierStatus> allowed = allowedTransitions.get(fromStatus);
         return allowed != null && allowed.contains(toStatus);
     }
@@ -69,13 +64,13 @@ public class DossierStatusTransitionService {
     public void validateTransition(DossierStatus fromStatus, DossierStatus toStatus) {
         if (!isTransitionAllowed(fromStatus, toStatus)) {
             throw new InvalidStatusTransitionException(
-                String.format("Invalid status transition from %s to %s", fromStatus, toStatus)
-            );
+                    String.format("Invalid status transition from %s to %s", fromStatus, toStatus));
         }
     }
 
     @Transactional
-    public void recordTransition(Dossier dossier, DossierStatus fromStatus, DossierStatus toStatus, String userId, String reason) {
+    public void recordTransition(Dossier dossier, DossierStatus fromStatus, DossierStatus toStatus, String userId,
+            String reason) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
@@ -88,11 +83,10 @@ public class DossierStatusTransitionService {
         history.setUserId(userId);
         history.setReason(reason);
         history.setOrgId(orgId);
-        
+
         LocalDateTime now = LocalDateTime.now();
         history.setCreatedAt(now);
-        history.setUpdatedAt(now);
-        
+
         historyRepository.save(history);
     }
 

@@ -19,6 +19,8 @@ CREATE TABLE whatsapp_provider_config (
     enabled BOOLEAN NOT NULL DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT uk_whatsapp_provider_config_org_id UNIQUE (org_id)
 );
 
