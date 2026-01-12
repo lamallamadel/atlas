@@ -5,6 +5,7 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
+import com.example.backend.util.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -60,6 +61,7 @@ public class DashboardKpiService {
     }
 
     private TrendData getAnnoncesActivesTrend(String period) {
+        String orgId = TenantContext.getOrgId();
         Long currentCount;
         Long previousCount;
         
@@ -76,11 +78,12 @@ public class DashboardKpiService {
                 currentCount = (count != null) ? count : 0L;
                 previousCount = currentCount;
             } else {
-                Long current = annonceRepository.countByStatusAndCreatedAtAfter(AnnonceStatus.ACTIVE, startDate);
+                Long current = annonceRepository.countByStatusAndCreatedAtAfter(AnnonceStatus.ACTIVE, orgId, startDate);
                 currentCount = (current != null) ? current : 0L;
                 
                 Long previous = annonceRepository.countByStatusAndCreatedAtBetween(
-                    AnnonceStatus.ACTIVE, 
+                    AnnonceStatus.ACTIVE,
+                    orgId,
                     previousStartDate, 
                     startDate
                 );
