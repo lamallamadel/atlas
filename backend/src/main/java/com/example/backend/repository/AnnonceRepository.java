@@ -21,6 +21,9 @@ public interface AnnonceRepository extends JpaRepository<Annonce, Long>, JpaSpec
     
     Long countByStatus(AnnonceStatus status);
     
+    @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId")
+    Long countByStatusAndOrgId(@Param("status") AnnonceStatus status, @Param("orgId") String orgId);
+    
     @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) > :startDate")
     Long countByStatusAndCreatedAtAfter(@Param("status") AnnonceStatus status, @Param("startDate") LocalDateTime startDate);
     
