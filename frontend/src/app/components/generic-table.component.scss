@@ -2,17 +2,51 @@
 
 .table-container {
   width: 100%;
-  overflow-x: auto;
+  /* Important:
+     Keep a single scroll container for the table (the wrapper).
+     Having both the container and wrapper scroll horizontally can
+     create header/body desynchronization and duplicate scrollbars. */
+  overflow-x: hidden;
 }
 
 .table-wrapper {
   position: relative;
   overflow: auto;
+  overflow-x: auto;
+  overflow-y: auto;
   max-height: 70vh;
 
   @include mobile-only {
     max-height: none;
   }
+}
+
+/*
+  Column sizing + header/body alignment (Angular Material MDC)
+  -----------------------------------------------------------
+  MDC tables render rows/cells with flex by default. In practice this can
+  desynchronize header/body columns (especially with sticky header + horizontal
+  scrolling + auto widths).
+
+  We force a real table layout so both header and body share the same column
+  algorithm. Column widths set via [ngStyle] then apply consistently.
+*/
+.mat-mdc-table {
+  width: 100%;
+  min-width: 100%;
+  table-layout: auto;
+  border-collapse: separate;
+}
+
+.mat-mdc-header-row,
+.mat-mdc-row {
+  display: table-row;
+}
+
+.mat-mdc-header-cell,
+.mat-mdc-cell {
+  display: table-cell;
+  box-sizing: border-box;
 }
 
 /* Table Header with Counter and Pagination */
@@ -105,15 +139,17 @@ table {
 
 /* Sticky Header */
 table.sticky-header {
-  .mat-header-row {
+  /* Sticky must be applied to header cells for reliable behavior with table layout. */
+  .mat-mdc-header-cell {
     position: sticky;
     top: 0;
     z-index: var(--z-index-sticky);
-    background: var(--color-neutral-0);
+    background: var(--color-neutral-50);
   }
 }
 
 /* Header Styles */
+.mat-mdc-header-cell,
 .mat-header-cell {
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-700);
@@ -215,6 +251,7 @@ table.sticky-header {
 }
 
 /* Cell Styles */
+.mat-mdc-cell,
 .mat-cell {
   color: var(--color-neutral-800);
   font-size: var(--font-size-sm);
@@ -239,8 +276,16 @@ table.sticky-header {
 }
 
 .actions-header {
-  width: auto;
+  width: 120px;
   min-width: 120px;
+  max-width: 120px;
+
+  /* Keep the Actions column visible when horizontally scrolling */
+  position: sticky;
+  right: 0;
+  z-index: calc(var(--z-index-sticky) + 1);
+  background: var(--color-neutral-50);
+  border-left: 1px solid var(--color-neutral-200);
 
   @include mobile-only {
     min-width: 80px;
@@ -250,6 +295,16 @@ table.sticky-header {
 .actions-cell {
   text-align: right;
   white-space: nowrap;
+  width: 120px;
+  max-width: 120px;
+
+  /* Keep actions always discoverable */
+  position: sticky;
+  right: 0;
+  z-index: 2;
+  background-color: inherit;
+  border-left: 1px solid var(--color-neutral-200);
+  padding-right: var(--spacing-2);
 
   button {
     margin-left: var(--spacing-1);
@@ -265,10 +320,20 @@ table.sticky-header {
 .kebab-menu-button {
   transition: var(--transition-base);
 
+  /* Larger target + clearer affordance */
+  width: 40px;
+  height: 40px;
+
   &:hover {
     background-color: var(--color-neutral-100);
     transform: scale(1.1);
   }
+}
+
+/* When hovering a row, ensure the sticky Actions cell matches the row highlight */
+.mat-row:hover .actions-cell,
+.mat-mdc-row:hover .actions-cell {
+  background-color: inherit;
 }
 
 /* Empty State */

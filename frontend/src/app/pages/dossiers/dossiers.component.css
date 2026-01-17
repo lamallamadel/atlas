@@ -3,8 +3,18 @@
 .page-content {
   min-height: 400px;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  /* List pages should start at the top and use the full width.
+     Centering the content creates large empty areas and can visually
+     desync the table header/body when horizontal scrolling appears. */
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Ensure the results section stretches to the full available width */
+.page-content > section {
+  width: 100%;
 }
 
 .filters-card {
