@@ -22,19 +22,16 @@ help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  $(CYAN)%-15s$(NC) %s\n", $$1, $$2}'
 	@echo ""
 	@echo "$(YELLOW)Prerequisites:$(NC)"
-	@echo "  - Java 17 (JAVA_HOME must be set)"
-	@echo "  - Maven 3.6+"
+	@echo "  - Java 17 + Maven (only required for local backend builds/tests)"
 	@echo "  - Node.js 18+ and npm"
 	@echo "  - Docker & Docker Compose"
 	@echo ""
 
-up: check-java ## Start the full development stack
+up: ## Start the full development stack (backend runs in Docker)
 	@echo "$(GREEN)Starting development stack...$(NC)"
 	@echo "$(CYAN)1. Starting infrastructure...$(NC)"
 	@cd $(INFRA_DIR) && docker-compose up -d
-	@echo "$(CYAN)2. Building and starting backend...$(NC)"
-	@cd $(BACKEND_DIR) && mvn clean install -DskipTests && mvn spring-boot:run &
-	@echo "$(CYAN)3. Installing frontend dependencies and starting...$(NC)"
+	@echo "$(CYAN)2. Installing frontend dependencies and starting...$(NC)"
 	@cd $(FRONTEND_DIR) && npm install && npm start &
 	@echo "$(GREEN)✓ Stack started!$(NC)"
 	@echo ""
@@ -46,7 +43,6 @@ up: check-java ## Start the full development stack
 
 down: ## Stop all services
 	@echo "$(YELLOW)Stopping development stack...$(NC)"
-	@-pkill -f "spring-boot:run" 2>/dev/null || true
 	@-pkill -f "ng serve" 2>/dev/null || true
 	@cd $(INFRA_DIR) && docker-compose down
 	@echo "$(GREEN)✓ Stack stopped$(NC)"
@@ -69,7 +65,7 @@ logs: ## View logs from all services
 	@cd $(INFRA_DIR) && docker-compose logs -f
 
 logs-backend: ## View backend logs
-	@cd $(BACKEND_DIR) && tail -f target/spring-boot.log 2>/dev/null || echo "$(YELLOW)Backend not running or log file not found$(NC)"
+	@cd $(INFRA_DIR) && docker-compose logs -f backend
 
 logs-frontend: ## View frontend logs
 	@echo "$(YELLOW)Frontend logs are displayed in the terminal where 'npm start' is running$(NC)"

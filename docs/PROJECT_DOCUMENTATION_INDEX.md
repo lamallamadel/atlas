@@ -44,6 +44,7 @@ Ce document est l’index de navigation de la documentation. Il référence les 
 
 - Arborescence & déploiement (MVP) : `docs/atlas-immobilier/03_technique/14_repo_layout_deploiement.md`
 - Runbook — Dev & Déploiement (MVP) : `docs/atlas-immobilier/03_technique/17_runbook_dev_deploy_mvp.md`
+- Runbook — Observability (ELK + Prometheus/Grafana) : `docs/RUNBOOK_OBSERVABILITY.md`
 - Modèle de données : `docs/atlas-immobilier/03_technique/02_modele_donnees_advanced.md`
 - Modèle de données — MVP (DB Schema) : `docs/atlas-immobilier/03_technique/16_db_mvp_schema.md`
 - API contracts (REST) : `docs/atlas-immobilier/03_technique/03_api_contracts.md`
