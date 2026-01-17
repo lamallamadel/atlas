@@ -14,6 +14,7 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,15 +36,17 @@ public class DossierService {
     private final AnnonceRepository annonceRepository;
     private final DossierStatusTransitionService transitionService;
     private final SearchService searchService;
+    private final MetricsService metricsService;
 
-    public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper, 
+    public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
-                         SearchService searchService) {
+                         SearchService searchService, MetricsService metricsService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
         this.transitionService = transitionService;
         this.searchService = searchService;
+        this.metricsService = metricsService;
     }
 
     @Transactional
@@ -56,27 +59,27 @@ public class DossierService {
         if (request.getAnnonceId() != null) {
             Annonce annonce = annonceRepository.findById(request.getAnnonceId())
                     .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId()));
-            
+
             if (!orgId.equals(annonce.getOrgId())) {
                 throw new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId());
             }
-            
+
             if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {
                 throw new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce");
             }
-            
+
             if (annonce.getStatus() == AnnonceStatus.DRAFT) {
                 throw new IllegalArgumentException("Cannot create dossier with DRAFT annonce");
             }
         }
-        
+
         Dossier dossier = dossierMapper.toEntity(request);
         dossier.setOrgId(orgId);
-        
+
         LocalDateTime now = LocalDateTime.now();
         dossier.setCreatedAt(now);
         dossier.setUpdatedAt(now);
-        
+
         if (dossier.getParties() != null && !dossier.getParties().isEmpty()) {
             dossier.getParties().forEach(party -> {
                 party.setOrgId(orgId);
@@ -87,13 +90,16 @@ public class DossierService {
                 }
             });
         }
-        
+
         Dossier saved = dossierRepository.save(dossier);
-        
-        transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
-        
+
+        // Observability: business metric
+        metricsService.incrementDossierCreated(request.getSource().getValue());
+
+        transitionService.recordTransition(saved, DossierStatus.DRAFT, saved.getStatus(), null, "Initial dossier creation");
+
         searchService.indexDossier(saved);
-        
+
         return dossierMapper.toResponse(saved);
     }
 
@@ -106,11 +112,11 @@ public class DossierService {
 
         Dossier dossier = dossierRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
-        
+
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
-        
+
         return dossierMapper.toResponse(dossier);
     }
 
@@ -146,24 +152,24 @@ public class DossierService {
 
         Dossier dossier = dossierRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
-        
+
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
-        
+
         DossierStatus currentStatus = dossier.getStatus();
         DossierStatus newStatus = request.getStatus();
-        
+
         transitionService.validateTransition(currentStatus, newStatus);
-        
+
         dossier.setStatus(newStatus);
         dossier.setUpdatedAt(LocalDateTime.now());
         Dossier updated = dossierRepository.save(dossier);
-        
+
         transitionService.recordTransition(dossier, currentStatus, newStatus, request.getUserId(), request.getReason());
-        
+
         searchService.indexDossier(updated);
-        
+
         return dossierMapper.toResponse(updated);
     }
 
@@ -176,11 +182,11 @@ public class DossierService {
 
         Dossier dossier = dossierRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
-        
+
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
-        
+
         dossier.setLeadName(request.getLeadName());
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setUpdatedAt(LocalDateTime.now());
@@ -194,20 +200,20 @@ public class DossierService {
         if (phone == null || phone.trim().isEmpty()) {
             return List.of();
         }
-        
+
         List<DossierStatus> excludedStatuses = Arrays.asList(DossierStatus.WON, DossierStatus.LOST);
         List<Dossier> leadPhoneDuplicates = dossierRepository.findByLeadPhoneAndStatusNotIn(phone, excludedStatuses);
         List<Dossier> partyPhoneDuplicates = dossierRepository.findByPartiesPhoneAndStatusNotIn(phone, excludedStatuses);
-        
+
         List<Dossier> allDuplicates = new ArrayList<>();
         allDuplicates.addAll(leadPhoneDuplicates);
-        
+
         for (Dossier partyDuplicate : partyPhoneDuplicates) {
             if (!allDuplicates.stream().anyMatch(d -> d.getId().equals(partyDuplicate.getId()))) {
                 allDuplicates.add(partyDuplicate);
             }
         }
-        
+
         return allDuplicates.stream()
                 .map(dossierMapper::toResponse)
                 .collect(Collectors.toList());
@@ -242,7 +248,7 @@ public class DossierService {
                 dossier.setUpdatedAt(LocalDateTime.now());
                 dossierRepository.save(dossier);
 
-                transitionService.recordTransition(dossier, currentStatus, newStatus, 
+                transitionService.recordTransition(dossier, currentStatus, newStatus,
                         request.getUserId(), request.getReason());
 
                 successCount++;
@@ -265,11 +271,11 @@ public class DossierService {
 
         Dossier dossier = dossierRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
-        
+
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
-        
+
         dossierRepository.delete(dossier);
         searchService.deleteDossierIndex(id);
     }

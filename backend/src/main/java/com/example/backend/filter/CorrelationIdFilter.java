@@ -19,7 +19,7 @@ import java.util.UUID;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CorrelationIdFilter extends OncePerRequestFilter {
 
-    private static final Logger log = LoggerFactory.getLogger(CorrelationIdFilter.class);
+    private static final Logger log = LoggerFactory.getLogger("com.example.backend");
 
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     private static final String CORRELATION_ID_MDC_KEY = "correlationId";

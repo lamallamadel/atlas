@@ -34,7 +34,7 @@ public class DossierCreateRequest {
     @Max(value = 100, message = "Score must be between 0 and 100")
     private Integer score;
 
-    @Schema(description = "Dossier source", example = "WEB", nullable = true)
+    @Schema(description = "Dossier source", example = "WEB", nullable = true, defaultValue = "UNKNOWN")
     private DossierSource source;
 
     @Schema(description = "Initial party to create with the dossier", nullable = true)

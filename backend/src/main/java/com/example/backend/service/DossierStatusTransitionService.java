@@ -6,6 +6,7 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.InvalidStatusTransitionException;
 import com.example.backend.repository.DossierStatusHistoryRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.observability.MetricsService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +19,12 @@ import java.util.Set;
 public class DossierStatusTransitionService {
 
     private final DossierStatusHistoryRepository historyRepository;
+    private final MetricsService metricsService;
     private final Map<DossierStatus, Set<DossierStatus>> allowedTransitions;
 
-    public DossierStatusTransitionService(DossierStatusHistoryRepository historyRepository) {
+    public DossierStatusTransitionService(DossierStatusHistoryRepository historyRepository, MetricsService metricsService) {
         this.historyRepository = historyRepository;
+        this.metricsService = metricsService;
         this.allowedTransitions = initializeTransitions();
     }
 
@@ -88,6 +91,8 @@ public class DossierStatusTransitionService {
         history.setCreatedAt(now);
 
         historyRepository.save(history);
+
+        metricsService.incrementDossierStatusTransition(fromStatus.name(), toStatus.name());
     }
 
     public boolean isTerminalState(DossierStatus status) {

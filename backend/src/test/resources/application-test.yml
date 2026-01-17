@@ -4,7 +4,7 @@ spring:
   datasource:
     url: jdbc:h2:mem:testdb
     username: sa
-    password: 
+    password:
     driver-class-name: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
@@ -21,14 +21,17 @@ spring:
     locations: classpath:db/migration
     placeholders:
       json_type: JSON
-    
+
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: mock
 
-          
+  output:
+    ansi:
+      enabled: ALWAYS
+
 
   task:
     scheduling:
@@ -51,4 +54,4 @@ management:
     elasticsearch:
       enabled: false
     mail:
-      enabled: false    
+      enabled: false

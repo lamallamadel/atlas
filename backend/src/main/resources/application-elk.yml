@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: elk
+
+# In Docker/ELK mode, write JSON logs to /var/log/atlas/application.json
+logging:
+  file:
+    name: /var/log/atlas/application.json
+
+elasticsearch:
+  enabled: ${ELASTICSEARCH_ENABLED:true}
+  uris: ${ELASTICSEARCH_URIS:http://elasticsearch:9200}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

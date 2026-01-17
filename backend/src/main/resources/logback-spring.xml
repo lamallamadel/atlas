@@ -1,16 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} [%X{correlationId:-}] - %msg%n"/>
-    
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+
+    <!-- Spring Boot color + pretty stacktraces -->
+    <conversionRule conversionWord="clr" converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
+    <conversionRule conversionWord="wex" converterClass="org.springframework.boot.logging.logback.WhitespaceThrowableProxyConverter"/>
+    <conversionRule conversionWord="wEx" converterClass="org.springframework.boot.logging.logback.ExtendedWhitespaceThrowableProxyConverter"/>
+
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="backend"/>
+    <springProperty scope="context" name="APP_ENV"  source="app.env" defaultValue="local"/>
+
+    <!-- Root (framework/tests): clean, no MDC noise -->
+    <property name="ROOT_PATTERN"
+              value="%clr(%d{HH:mm:ss.SSS}){faint} %clr(%-5level) %clr(%logger{40}){faint} %clr(-){faint} %msg%n%wEx"/>
+
+    <!-- App (your code): vibrant + MDC -->
+    <property name="APP_PATTERN"
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%-5level){cyan} %clr([%thread]){magenta} %clr(%logger{36}){green} %clr(›){yellow} %clr([corr=%X{correlationId:-NONE}]){blue} %clr([org=%X{orgId:-NONE}]){yellow} %clr([user=%X{userId:-ANON}]){magenta} %msg%n%wEx"/>
+
+    <!-- Console appenders -->
+    <appender name="CONSOLE_ROOT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+            <pattern>${ROOT_PATTERN}</pattern>
         </encoder>
     </appender>
-    
+
+    <appender name="CONSOLE_APP" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${APP_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- Defaults (fallback): sane output even if profiles mismatch -->
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="CONSOLE_ROOT"/>
     </root>
+
+    <logger name="com.example.backend" level="INFO" additivity="false">
+        <appender-ref ref="CONSOLE_APP"/>
+    </logger>
+
+    <!-- Human-readable console logging for local/dev/test/e2e -->
+    <springProfile name="default,local,dev,test,e2e,backend-e2e,e2e-h2,e2e-h2-mock,e2e-h2-keycloak,e2e-postgres-mock,e2e-postgres-keycloak">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE_ROOT"/>
+        </root>
+
+        <logger name="com.example.backend" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE_APP"/>
+        </logger>
+    </springProfile>
+
+    <!-- JSON logging for elk/prod/staging -->
+    <springProfile name="elk,prod,staging">
+        <appender name="JSON_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"service":"${APP_NAME}","env":"${APP_ENV}"}</customFields>
+            </encoder>
+        </appender>
+
+        <appender name="JSON_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+            <file>/var/log/atlas/application.json</file>
+            <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                <fileNamePattern>/var/log/atlas/application.%d{yyyy-MM-dd}.json.gz</fileNamePattern>
+                <maxHistory>14</maxHistory>
+                <totalSizeCap>2GB</totalSizeCap>
+            </rollingPolicy>
+            <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+                <customFields>{"service":"${APP_NAME}","env":"${APP_ENV}"}</customFields>
+            </encoder>
+        </appender>
+
+        <root level="INFO">
+            <appender-ref ref="JSON_CONSOLE"/>
+            <appender-ref ref="JSON_FILE"/>
+        </root>
+    </springProfile>
 </configuration>

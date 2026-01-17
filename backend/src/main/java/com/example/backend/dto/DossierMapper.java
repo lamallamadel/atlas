@@ -3,6 +3,7 @@ package com.example.backend.dto;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.PartiePrenanteEntity;
+import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
 import org.springframework.stereotype.Component;
@@ -22,13 +23,14 @@ public class DossierMapper {
 
     public Dossier toEntity(DossierCreateRequest request) {
         Dossier dossier = new Dossier();
+        if ( request.getSource() == null ) request.setSource( DossierSource.UNKNOWN ) ;
         dossier.setAnnonceId(request.getAnnonceId());
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setLeadName(request.getLeadName());
         dossier.setLeadSource(request.getLeadSource());
         dossier.setNotes(request.getNotes());
         dossier.setStatus(DossierStatus.NEW);
-        dossier.setScore(request.getScore());
+        dossier.setSource(request.getSource() );
         dossier.setSource(request.getSource());
 
         if (request.getInitialParty() != null) {
@@ -47,12 +49,12 @@ public class DossierMapper {
         response.setId(dossier.getId());
         response.setOrgId(dossier.getOrgId());
         response.setAnnonceId(dossier.getAnnonceId());
-        
+
         if (dossier.getAnnonceId() != null) {
             annonceRepository.findById(dossier.getAnnonceId())
                 .ifPresent(annonce -> response.setAnnonceTitle(annonce.getTitle()));
         }
-        
+
         response.setLeadPhone(dossier.getLeadPhone());
         response.setLeadName(dossier.getLeadName());
         response.setLeadSource(dossier.getLeadSource());

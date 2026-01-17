@@ -5,7 +5,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8080/realms/myrealm}
+          issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8081/realms/myrealm}
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}
@@ -24,19 +24,22 @@ spring:
     mode: HTML
     encoding: UTF-8
     cache: false
-  spring:
-  elasticsearch:
-    enabled: ${ELASTICSEARCH_ENABLED:false}
-    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
-    username: ${ELASTICSEARCH_USERNAME:}
-    password: ${ELASTICSEARCH_PASSWORD:}
-
-  # Disable Spring Data Elasticsearch repositories unless explicitly enabled.
   data:
     elasticsearch:
       repositories:
         enabled: ${ELASTICSEARCH_ENABLED:false}
 
+
+  output:
+    ansi:
+      enabled: ALWAYS
+
+# Optional: enable Spring Elasticsearch client only when desired
+elasticsearch:
+  enabled: ${ELASTICSEARCH_ENABLED:false}
+  uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+  username: ${ELASTICSEARCH_USERNAME:}
+  password: ${ELASTICSEARCH_PASSWORD:}
 
 springdoc:
   api-docs:
@@ -48,16 +51,33 @@ notification:
   processor:
     interval: ${NOTIFICATION_PROCESSOR_INTERVAL:10000}
 
+# App metadata (surfaced in /actuator/info when enabled)
+app:
+  env: ${APP_ENV:local}
+  version: ${APP_VERSION:@project.version@}
+
+atlas:
+  slow-request:
+    threshold-ms: ${ATLAS_SLOW_REQUEST_THRESHOLD_MS:1500}
+  metrics:
+    include-org-id: ${ATLAS_METRICS_INCLUDE_ORG_ID:false}
+
 management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
     info:
       enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
   info:
     build:
       enabled: true
@@ -72,4 +92,4 @@ info:
   app:
     name: ${spring.application.name}
     description: Spring Boot Backend Application
-    version: @project.version@
+    version: ${app.version}

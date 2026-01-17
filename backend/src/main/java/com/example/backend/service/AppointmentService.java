@@ -8,6 +8,7 @@ import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.enums.AppointmentStatus;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,10 +25,12 @@ public class AppointmentService {
 
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
+    private final MetricsService metricsService;
 
-    public AppointmentService(AppointmentRepository appointmentRepository, AppointmentMapper appointmentMapper) {
+    public AppointmentService(AppointmentRepository appointmentRepository, AppointmentMapper appointmentMapper, MetricsService metricsService) {
         this.appointmentRepository = appointmentRepository;
         this.appointmentMapper = appointmentMapper;
+        this.metricsService = metricsService;
     }
 
     @Transactional
@@ -38,11 +41,11 @@ public class AppointmentService {
         }
 
         AppointmentEntity appointment = appointmentMapper.toEntity(request);
-        
+
         LocalDateTime now = LocalDateTime.now();
         appointment.setCreatedAt(now);
         appointment.setUpdatedAt(now);
-        
+
         List<String> warnings = checkOverlappingAppointments(
                 appointment.getAssignedTo(),
                 appointment.getStartTime(),
@@ -51,12 +54,13 @@ public class AppointmentService {
         );
 
         AppointmentEntity saved = appointmentRepository.save(appointment);
+        metricsService.incrementAppointmentsCreated();
         AppointmentResponse response = appointmentMapper.toResponse(saved);
-        
+
         if (!warnings.isEmpty()) {
             response.setWarnings(warnings);
         }
-        
+
         return response;
     }
 
@@ -69,11 +73,11 @@ public class AppointmentService {
 
         AppointmentEntity appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + id));
-        
+
         if (!orgId.equals(appointment.getOrgId())) {
             throw new EntityNotFoundException("Appointment not found with id: " + id);
         }
-        
+
         return appointmentMapper.toResponse(appointment);
     }
 
@@ -86,10 +90,12 @@ public class AppointmentService {
 
         AppointmentEntity appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + id));
-        
+
         if (!orgId.equals(appointment.getOrgId())) {
             throw new EntityNotFoundException("Appointment not found with id: " + id);
         }
+
+        AppointmentStatus oldStatus = appointment.getStatus();
 
         appointmentMapper.updateEntity(appointment, request);
 
@@ -102,11 +108,17 @@ public class AppointmentService {
         appointment.setUpdatedAt(LocalDateTime.now());
         AppointmentEntity updated = appointmentRepository.save(appointment);
         AppointmentResponse response = appointmentMapper.toResponse(updated);
-        
+
+        // Business metrics: completion & duration
+        if (oldStatus != AppointmentStatus.COMPLETED && updated.getStatus() == AppointmentStatus.COMPLETED) {
+            metricsService.incrementAppointmentsCompleted();
+            metricsService.recordAppointmentDurationSeconds( -updated.getStartTime().getSecond() + updated.getEndTime().getSecond());
+        }
+
         if (!warnings.isEmpty()) {
             response.setWarnings(warnings);
         }
-        
+
         return response;
     }
 
@@ -119,11 +131,11 @@ public class AppointmentService {
 
         AppointmentEntity appointment = appointmentRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + id));
-        
+
         if (!orgId.equals(appointment.getOrgId())) {
             throw new EntityNotFoundException("Appointment not found with id: " + id);
         }
-        
+
         appointmentRepository.delete(appointment);
     }
 
@@ -182,13 +194,13 @@ public Page<AppointmentResponse> listByDossier(
             Long excludeId
     ) {
         List<String> warnings = new ArrayList<>();
-        
+
         if (assignedTo == null || assignedTo.trim().isEmpty()) {
             return warnings;
         }
 
         Long excludeIdToUse = excludeId != null ? excludeId : -1L;
-        
+
         List<AppointmentEntity> overlapping = appointmentRepository.findOverlappingAppointments(
                 assignedTo,
                 startTime,
@@ -197,7 +209,7 @@ public Page<AppointmentResponse> listByDossier(
         );
 
         if (!overlapping.isEmpty()) {
-            warnings.add("This appointment overlaps with " + overlapping.size() + 
+            warnings.add("This appointment overlaps with " + overlapping.size() +
                     " existing appointment(s) for " + assignedTo);
         }
 

@@ -9,16 +9,18 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.example.backend.repository.search")
-@ConditionalOnProperty(name = "spring.elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
+// The project drives ES enablement via the top-level `elasticsearch.enabled` property
+// (mapped from ELASTICSEARCH_ENABLED in docker-compose).
+@ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
-    @Value("${spring.elasticsearch.uris:http://localhost:9200}")
+    @Value("${elasticsearch.uris:http://localhost:9200}")
     private String elasticsearchUris;
 
-    @Value("${spring.elasticsearch.username:}")
+    @Value("${elasticsearch.username:}")
     private String username;
 
-    @Value("${spring.elasticsearch.password:}")
+    @Value("${elasticsearch.password:}")
     private String password;
 
     @Override

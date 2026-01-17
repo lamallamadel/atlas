@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import com.example.backend.filter.CorrelationIdFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,16 +10,13 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.JwtValidators;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
-import org.springframework.security.oauth2.jwt.JwtTimestampValidator;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
@@ -29,6 +27,7 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -43,16 +42,25 @@ public class SecurityConfig {
     @Value("${app.security.jwt.jwk-set-uri:}")
     private String jwkSetUri;
 
+    @Value("${cors.allowed-origins:}")
+    private String corsAllowedOrigins;
+
+    @Value("${spring.profiles.active:}")
+    private String activeProfiles;
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CorrelationIdFilter correlationIdFilter) throws Exception {
+
+
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .csrf(csrf -> csrf.disable())
+            .csrf(AbstractHttpConfigurer::disable)
             .anonymous(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
+                .requestMatchers("/actuator/**").denyAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/v1/webhooks/**").permitAll()
@@ -72,11 +80,23 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*"));
+
+        List<String> origins = parseAllowedOrigins(corsAllowedOrigins, activeProfiles);
+
+        boolean wildcard = origins.stream().anyMatch(o -> "*".equals(o));
+        if (wildcard) {
+            // Wildcard is incompatible with allowCredentials=true.
+            // We keep it only for local experimentation and disable credentials.
+            configuration.setAllowedOriginPatterns(List.of("*"));
+            configuration.setAllowCredentials(false);
+        } else {
+            configuration.setAllowedOrigins(origins);
+            configuration.setAllowCredentials(true);
+        }
+
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Org-Id", "X-Correlation-Id"));
         configuration.setExposedHeaders(List.of("Authorization", "X-Org-Id", "X-Correlation-Id"));
-        configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -84,9 +104,35 @@ public class SecurityConfig {
         return source;
     }
 
+    private static List<String> parseAllowedOrigins(String raw, String activeProfiles) {
+        boolean isProd = activeProfiles != null && Arrays.stream(activeProfiles.split(","))
+                .map(String::trim)
+                .anyMatch(p -> p.equalsIgnoreCase("prod"));
+
+        if (raw == null || raw.isBlank()) {
+            // In prod we do NOT assume defaults.
+            if (isProd) {
+                return List.of();
+            }
+            // Default dev origins.
+            return List.of(
+                    "http://localhost:4200",
+                    "http://127.0.0.1:4200",
+                    "http://localhost:3000",
+                    "http://127.0.0.1:3000"
+            );
+        }
+
+        return Arrays.stream(raw.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isBlank())
+                .distinct()
+                .toList();
+    }
+
     /**
      * JWT decoder bean that supports both mock mode (for tests) and real OAuth2 JWT validation.
-     * 
+     *
      * <p><strong>Mock Mode:</strong> Activated when issuer-uri is null, blank, or "mock".</p>
      * <p>In mock mode, the decoder:</p>
      * <ul>
@@ -96,7 +142,7 @@ public class SecurityConfig {
      *   <li>Always accepts tokens starting with "mock-" regardless of other patterns</li>
      *   <li>Extracts org_id from token format "mock-token-{orgId}" and includes it in JWT claims</li>
      * </ul>
-     * 
+     *
      * <p><strong>Real Mode:</strong> When issuer-uri is set to a real IdP URL.</p>
      * <p>Uses NimbusJwtDecoder with full JWT signature validation and issuer/timestamp checks.</p>
      */
@@ -109,14 +155,14 @@ public class SecurityConfig {
                 if (token == null || token.isBlank()) {
                     throw new org.springframework.security.oauth2.jwt.BadJwtException("Token cannot be blank");
                 }
-                
+
                 // Handle expired tokens by returning a JWT with past expiration time
                 // This allows Spring Security's JwtTimestampValidator to reject with 401
                 if (token.contains("expired")) {
                     throw new org.springframework.security.oauth2.jwt.BadJwtException("JWT expired");
                 }
 
-                
+
                 // Reject tokens that start with "eyJ" (base64 encoded JWT header) but are not from our mock
                 // This simulates rejection of real JWT tokens with invalid signatures
                 try {
@@ -126,7 +172,7 @@ public class SecurityConfig {
                 } catch (Exception e) {
                     throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT: " + e.getMessage(), e);
                 }
-                
+
                 // Reject tokens explicitly marked as invalid
                 try {
                     if (token.contains("invalid") && !token.startsWith("mock-")) {
@@ -135,7 +181,7 @@ public class SecurityConfig {
                 } catch (Exception e) {
                     throw new org.springframework.security.oauth2.jwt.BadJwtException("Invalid JWT: " + e.getMessage(), e);
                 }
-                
+
                 // Extract org_id from token if present (format: "mock-token-ORG-XXX")
                 String orgId = null;
                 if (token.startsWith("mock-token-")) {
@@ -144,7 +190,7 @@ public class SecurityConfig {
                         orgId = parts[2];
                     }
                 }
-                
+
                 // Accept valid mock tokens
                 var jwtBuilder = Jwt.withTokenValue(token)
                     .header("alg", "none")
@@ -154,12 +200,12 @@ public class SecurityConfig {
                     .claim("realm_access", Map.of("roles", List.of("ADMIN")))
                     .issuedAt(Instant.now())
                     .expiresAt(Instant.now().plusSeconds(3600));
-                
+
                 // Add org_id claim if extracted from token
                 if (orgId != null) {
                     jwtBuilder.claim("org_id", orgId);
                 }
-                
+
                 return jwtBuilder.build();
             };
         }
@@ -226,4 +272,5 @@ public class SecurityConfig {
 
         return Collections.emptyList();
     }
+
 }

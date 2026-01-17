@@ -4,6 +4,7 @@ import com.example.backend.entity.NotificationEntity;
 import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
 import com.example.backend.repository.NotificationRepository;
+import com.example.backend.observability.MetricsService;
 import jakarta.mail.MessagingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,12 +24,15 @@ public class NotificationService {
     private final NotificationRepository notificationRepository;
     private final EmailProvider emailProvider;
     private final Map<NotificationType, NotificationProvider> providerMap;
+    private final MetricsService metricsService;
 
     public NotificationService(
             NotificationRepository notificationRepository,
-            EmailProvider emailProvider) {
+            EmailProvider emailProvider,
+            MetricsService metricsService) {
         this.notificationRepository = notificationRepository;
         this.emailProvider = emailProvider;
+        this.metricsService = metricsService;
         this.providerMap = Map.of(
                 NotificationType.EMAIL, emailProvider
         );
@@ -54,7 +58,7 @@ public class NotificationService {
             String subject,
             String templateId,
             Map<String, Object> variables) {
-        
+
         NotificationEntity notification = new NotificationEntity();
         notification.setOrgId(orgId);
         notification.setDossierId(dossierId);
@@ -79,7 +83,7 @@ public class NotificationService {
     public void processPendingNotifications() {
         log.debug("Processing pending notifications");
 
-        List<NotificationEntity> pendingNotifications = 
+        List<NotificationEntity> pendingNotifications =
             notificationRepository.findPendingNotifications(NotificationStatus.PENDING);
 
         for (NotificationEntity notification : pendingNotifications) {
@@ -92,10 +96,12 @@ public class NotificationService {
     private void processNotification(NotificationEntity notification) {
         try {
             NotificationProvider provider = providerMap.get(notification.getType());
-            
+
             if (provider == null) {
                 log.error("No provider found for notification type: {}", notification.getType());
+                metricsService.incrementNotificationSent(notification.getType().name(), "NO_PROVIDER");
                 notification.setStatus(NotificationStatus.FAILED);
+                metricsService.incrementNotificationSent(notification.getType().name(), "FAILED");
                 notification.setErrorMessage("No provider found for type: " + notification.getType());
                 notification.setUpdatedAt(LocalDateTime.now());
                 notificationRepository.save(notification);
@@ -103,37 +109,39 @@ public class NotificationService {
             }
 
             provider.send(notification);
-            
+
             notification.setStatus(NotificationStatus.SENT);
             notification.setSentAt(LocalDateTime.now());
             notification.setErrorMessage(null);
             notification.setUpdatedAt(LocalDateTime.now());
             notificationRepository.save(notification);
-            
+
+            metricsService.incrementNotificationSent(notification.getType().name(), notification.getStatus().name());
             log.info("Successfully sent notification ID: {}", notification.getId());
-            
+
         } catch (Exception e) {
             log.error("Failed to send notification ID: {}", notification.getId(), e);
-            
+
             notification.setRetryCount(notification.getRetryCount() + 1);
-            
+
             // Check if the exception or its cause is a MessagingException (JavaMailException)
             String errorMessage;
             if (e instanceof MessagingException || (e.getCause() instanceof MessagingException)) {
-                MessagingException mailException = e instanceof MessagingException ? 
+                MessagingException mailException = e instanceof MessagingException ?
                     (MessagingException) e : (MessagingException) e.getCause();
                 errorMessage = "Failed to send email: " + mailException.getMessage();
             } else {
                 errorMessage = e.getMessage();
             }
             notification.setErrorMessage(errorMessage);
-            
+
             if (notification.getRetryCount() >= notification.getMaxRetries()) {
                 notification.setStatus(NotificationStatus.FAILED);
-                log.error("Notification ID {} failed after {} retries", 
+                metricsService.incrementNotificationSent(notification.getType().name(), "FAILED");
+                log.error("Notification ID {} failed after {} retries",
                     notification.getId(), notification.getRetryCount());
             }
-            
+
             notification.setUpdatedAt(LocalDateTime.now());
             notificationRepository.save(notification);
         }

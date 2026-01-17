@@ -1,0 +1,68 @@
+{
+  "uid": "atlas-business-kpis",
+  "title": "Atlas Business KPIs",
+  "tags": ["atlas", "business"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Dossiers Created (5m)",
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(dossier_created_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Appointments Created (5m)",
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(appointments_created_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Appointments Completed (5m)",
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 6},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(increase(appointments_completed_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Dossier Status Transitions (rate)",
+      "gridPos": {"x": 0, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(dossier_status_transitions_total[1m])) by (from, to)",
+          "legendFormat": "{{from}} -> {{to}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Notifications (rate)",
+      "gridPos": {"x": 12, "y": 6, "w": 12, "h": 8},
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(notification_sent_total[1m])) by (type, status)",
+          "legendFormat": "{{type}} / {{status}}"
+        }
+      ]
+    }
+  ]
+}

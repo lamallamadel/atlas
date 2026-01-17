@@ -1,70 +1,85 @@
-# Infrastructure Setup
+# Infrastructure (Docker-first)
 
-This directory contains the Docker Compose configuration for running PostgreSQL database locally.
+Ce dossier fournit un environnement local complet via **Docker Compose**. Le backend est exécuté **dans Docker** (profil `elk` par défaut) et les outils d’observabilité (logs + métriques) sont inclus.
 
-## Quick Start
-
-1. Copy the example environment file:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. (Optional) Edit `.env` to customize database credentials and ports
-
-3. Start the database:
-   ```bash
-   docker-compose up -d
-   ```
-
-4. Check the status:
-   ```bash
-   docker-compose ps
-   ```
-
-## Database Reset
-
-To drop and recreate the database volume (this will delete all data):
-
-### Linux/macOS:
-```bash
-chmod +x reset-db.sh
-./reset-db.sh
-```
-
-### Windows (PowerShell):
-```powershell
-.\reset-db.ps1
-```
-
-## Configuration
-
-The following environment variables can be configured in `.env`:
-
-- `POSTGRES_USER`: Database username (default: postgres)
-- `POSTGRES_PASSWORD`: Database password (default: postgres)
-- `POSTGRES_DB`: Database name (default: myapp)
-- `POSTGRES_PORT`: Host port to expose PostgreSQL (default: 5432)
+Pour le dépannage et la vérification (Kibana/Grafana/Prometheus), voir : `docs/RUNBOOK_OBSERVABILITY.md`.
 
 ## Services
 
-### PostgreSQL
-- **Image**: postgres:16-alpine
-- **Port**: 5432 (configurable via POSTGRES_PORT)
-- **Volume**: postgres_data (named volume for data persistence)
-- **Health Check**: Automatically checks database readiness every 10 seconds
+- **PostgreSQL** : base de données
+- **Keycloak** : IAM / OIDC (realm importé au démarrage)
+- **Backend** : Spring Boot
+- **Logs** : Elasticsearch + Kibana + Logstash + Filebeat
+- **Metrics** : Prometheus + Grafana
+- **Adminer** : UI DB
 
-## Connection
+## Démarrage
 
-Connect to the database using:
-```
-Host: localhost
-Port: 5432 (or your configured POSTGRES_PORT)
-Database: myapp (or your configured POSTGRES_DB)
-Username: postgres (or your configured POSTGRES_USER)
-Password: postgres (or your configured POSTGRES_PASSWORD)
+1) Copier le fichier d’environnement :
+
+```bash
+cp .env.example .env
 ```
 
-Connection string format:
+2) Démarrer la stack :
+
+```bash
+docker compose up -d
 ```
-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost:${POSTGRES_PORT}/${POSTGRES_DB}
+
+3) Vérifier l’état :
+
+```bash
+docker compose ps
 ```
+
+## URLs et ports (par défaut)
+
+- Backend API: http://localhost:8080
+  - Swagger UI: http://localhost:8080/swagger-ui
+  - Health: http://localhost:8080/actuator/health
+  - Prometheus metrics: http://localhost:8080/actuator/prometheus
+- Keycloak: http://localhost:8081
+- Adminer: http://localhost:8082
+- Elasticsearch: http://localhost:9200
+- Kibana: http://localhost:5601
+- Prometheus: http://localhost:9090
+- Grafana: http://localhost:3000
+
+## OIDC / Keycloak (important)
+
+- **Dans Docker** (backend), l’issuer doit pointer vers le service Docker :
+  - `OAUTH2_ISSUER_URI=http://keycloak:8080/realms/myrealm`
+- **Dans le navigateur** (frontend), l’issuer doit pointer vers l’hôte :
+  - `http://localhost:8081/realms/myrealm`
+
+## Logs (ELK)
+
+- Le backend (profil `elk`) écrit des logs JSON dans : `/var/log/atlas/application.json` (volume `backend_logs`).
+- **Filebeat** lit ce fichier et expédie vers **Logstash**.
+- **Logstash** indexe dans Elasticsearch : `atlas-logs-YYYY.MM.dd`.
+
+Dans Kibana, créer une *Data View* :
+- Pattern: `atlas-logs-*`
+- Time field: `@timestamp`
+
+## Metrics (Prometheus / Grafana)
+
+- Prometheus scrappe le backend sur `/actuator/prometheus`.
+- Grafana est provisionné (datasource Prometheus + dashboards).
+
+Identifiants Grafana (par défaut) :
+- user: `admin`
+- password: `admin`
+
+## Reset (attention: destructif)
+
+- Reset total (supprime les volumes) :
+
+```bash
+docker compose down -v
+```
+
+- Reset DB uniquement :
+  - Linux/macOS: `./reset-db.sh`
+  - Windows: `./reset-db.ps1`

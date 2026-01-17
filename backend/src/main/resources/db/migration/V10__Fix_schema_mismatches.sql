@@ -19,7 +19,7 @@ ALTER TABLE consentement ADD COLUMN status VARCHAR(50) DEFAULT 'GRANTED';
 
 -- 6. UPDATE existing data to ensure consistency
 -- Update consentement status based on granted field
-UPDATE consentement SET status = CASE 
+UPDATE consentement SET status = CASE
     WHEN granted = true AND revoked_at IS NULL THEN 'GRANTED'
     WHEN granted = true AND revoked_at IS NOT NULL THEN 'REVOKED'
     ELSE 'PENDING'
@@ -28,6 +28,5 @@ END WHERE status IS NULL;
 -- Make status NOT NULL after setting defaults
 ALTER TABLE consentement ALTER COLUMN status SET NOT NULL;
 
-ALTER TABLE annonce ALTER COLUMN surface DOUBLE;
 
 

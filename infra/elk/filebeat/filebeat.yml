@@ -1,0 +1,23 @@
+filebeat.inputs:
+  - type: filestream
+    id: atlas-backend-json
+    enabled: true
+    paths:
+      - /var/log/atlas/application*.json
+    parsers:
+      - ndjson:
+          target: ""
+          overwrite_keys: true
+
+processors:
+  - add_host_metadata: {}
+  - add_docker_metadata: {}
+  - add_fields:
+      target: ""
+      fields:
+        service: "atlas-backend"
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: info

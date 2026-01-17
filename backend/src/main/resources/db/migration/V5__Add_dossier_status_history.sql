@@ -1,6 +1,6 @@
 -- Add QUALIFYING status to the existing dossier status check constraint
 ALTER TABLE dossier DROP CONSTRAINT IF EXISTS chk_dossier_status;
-ALTER TABLE dossier ADD CONSTRAINT chk_dossier_status 
+ALTER TABLE dossier ADD CONSTRAINT chk_dossier_status
     CHECK (status IN ('NEW', 'QUALIFYING', 'QUALIFIED', 'APPOINTMENT', 'WON', 'LOST'));
 
 -- Create dossier_status_history table
@@ -15,7 +15,7 @@ CREATE TABLE dossier_status_history (
     transitioned_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_dossier_status_history_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE,
-    CONSTRAINT chk_from_status CHECK (from_status IN ('NEW', 'QUALIFYING', 'QUALIFIED', 'APPOINTMENT', 'WON', 'LOST')),
+    CONSTRAINT chk_from_status CHECK (from_status IN ('DRAFT','NEW', 'QUALIFYING', 'QUALIFIED', 'APPOINTMENT', 'WON', 'LOST')),
     CONSTRAINT chk_to_status CHECK (to_status IN ('NEW', 'QUALIFYING', 'QUALIFIED', 'APPOINTMENT', 'WON', 'LOST'))
 );
 

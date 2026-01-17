@@ -13,6 +13,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.MDC;
 
 import java.io.IOException;
 
@@ -72,8 +73,10 @@ public class TenantFilter extends OncePerRequestFilter {
 
             try {
                 TenantContext.setOrgId(orgId);
+                MDC.put("orgId", orgId);
                 filterChain.doFilter(request, response);
             } finally {
+                MDC.remove("orgId");
                 TenantContext.clear();
             }
             return;

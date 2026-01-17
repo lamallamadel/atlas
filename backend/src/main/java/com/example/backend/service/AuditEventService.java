@@ -26,8 +26,8 @@ public class AuditEventService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Page<AuditEventEntity> auditEvents =
-                auditEventRepository.findByOrgIdAndEntityTypeAndEntityId(orgId, entityType, entityId, pageable);
+        Page<AuditEventEntity> auditEvents = auditEventRepository.findByOrgIdAndEntityTypeAndEntityId(orgId, entityType,
+                entityId, pageable);
 
         return auditEvents.map(this::toResponse);
     }
@@ -39,8 +39,7 @@ public class AuditEventService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Page<AuditEventEntity> auditEvents =
-                auditEventRepository.findByOrgIdAndDossierId(orgId, dossierId, pageable);
+        Page<AuditEventEntity> auditEvents = auditEventRepository.findByOrgIdAndDossierId(orgId, dossierId, pageable);
 
         return auditEvents.map(this::toResponse);
     }

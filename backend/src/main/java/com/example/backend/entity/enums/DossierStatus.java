@@ -6,5 +6,5 @@ public enum DossierStatus {
     QUALIFIED,
     APPOINTMENT,
     WON,
-    LOST
+    DRAFT, LOST
 }

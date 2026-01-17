@@ -7,7 +7,7 @@ public enum DossierSource {
     EMAIL("email"),
     REFERRAL("referral"),
     WALK_IN("walk_in"),
-    SOCIAL_MEDIA("social_media");
+    SOCIAL_MEDIA("social_media"), UNKNOWN("unknown");
 
     private final String value;
 
