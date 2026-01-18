@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 
 import { AppointmentFormDialogComponent } from './appointment-form-dialog.component';
+import { DatetimePickerComponent } from './datetime-picker.component';
 import { AppointmentStatus } from '../services/appointment-api.service';
 import { MaterialTestingModule } from '../testing/material-testing.module';
 
@@ -14,7 +15,7 @@ describe('AppointmentFormDialogComponent', () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
-      declarations: [AppointmentFormDialogComponent],
+      declarations: [AppointmentFormDialogComponent, DatetimePickerComponent],
       imports: [MaterialTestingModule],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
