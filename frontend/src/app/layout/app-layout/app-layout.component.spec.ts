@@ -85,13 +85,17 @@ describe('AppLayoutComponent', () => {
   });
 
   it('should close sidenav on mobile when closeSidenavOnMobile is called', async () => {
-    component.drawer = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    // Set up a fresh component with isHandset matching true
     mockBreakpointObserver.observe.and.returnValue(of({ matches: true, breakpoints: {} }));
+    const testFixture = TestBed.createComponent(AppLayoutComponent);
+    const testComponent = testFixture.componentInstance;
+    testComponent.drawer = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    testFixture.detectChanges();
     
-    component.closeSidenavOnMobile();
-    await fixture.whenStable();
+    testComponent.closeSidenavOnMobile();
+    await testFixture.whenStable();
     
-    expect(component.drawer.close).toHaveBeenCalled();
+    expect(testComponent.drawer.close).toHaveBeenCalled();
   });
 
   it('should toggle theme when toggleTheme is called', () => {
