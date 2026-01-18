@@ -1,0 +1,24 @@
+<div class="whatsapp-container">
+  <div class="sync-indicator" *ngIf="isSyncing">
+    <mat-progress-bar mode="indeterminate" color="accent"></mat-progress-bar>
+    <span class="sync-text">Synchronisation...</span>
+  </div>
+
+  <app-whatsapp-thread
+    class="thread-area"
+    [messages]="messages"
+    [loading]="loading"
+    [isOnline]="isOnline"
+    (messageAction)="onMessageAction($event)">
+  </app-whatsapp-thread>
+
+  <app-whatsapp-message-input
+    class="input-area"
+    [templates]="getEnrichedTemplates()"
+    [disabled]="!consentGranted"
+    [sending]="sending"
+    [isOnline]="isOnline"
+    [queuedMessagesCount]="queuedMessagesCount"
+    (sendMessage)="onSendMessage($event)">
+  </app-whatsapp-message-input>
+</div>

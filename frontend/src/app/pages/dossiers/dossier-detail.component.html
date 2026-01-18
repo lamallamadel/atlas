@@ -469,124 +469,23 @@
 
         <mat-tab label="WhatsApp" aria-label="Messagerie WhatsApp">
           <div class="tab-content whatsapp-tab">
-            <div class="whatsapp-container">
-              <div class="whatsapp-thread">
-                <app-loading-skeleton *ngIf="loadingWhatsAppMessages" variant="list" [rows]="5"></app-loading-skeleton>
+            <!-- Mobile-optimized messaging interface -->
+            <app-whatsapp-messaging-container
+              *ngIf="dossier"
+              [dossierId]="dossier.id"
+              [consentGranted]="isWhatsAppConsentGranted()"
+              [leadName]="dossier.leadName"
+              [templates]="whatsappTemplates">
+            </app-whatsapp-messaging-container>
 
-                <div *ngIf="!loadingWhatsAppMessages" class="chat-messages">
-                  <div *ngIf="whatsappMessages.length === 0" class="empty-chat-state">
-                    <div class="empty-chat-icon">💬</div>
-                    <p class="empty-chat-text">Aucun message WhatsApp échangé</p>
-                    <p class="empty-chat-subtext">Envoyez votre premier message pour démarrer la conversation</p>
-                  </div>
-
-                  <div *ngFor="let message of whatsappMessages" 
-                       class="chat-bubble"
-                       [class.chat-bubble-inbound]="message.direction === 'INBOUND'"
-                       [class.chat-bubble-outbound]="message.direction === 'OUTBOUND'">
-                    <div class="chat-bubble-content">
-                      <p class="chat-bubble-text">{{ message.content }}</p>
-                      <div class="chat-bubble-meta">
-                        <span class="chat-bubble-time">{{ formatWhatsAppTimestamp(message.timestamp) }}</span>
-                        <span *ngIf="message.direction === 'OUTBOUND' && message.deliveryStatus" 
-                              class="chat-bubble-status"
-                              [class]="getDeliveryStatusClass(message.deliveryStatus)"
-                              [matTooltip]="getDeliveryStatusLabel(message.deliveryStatus)">
-                          {{ getDeliveryStatusIcon(message.deliveryStatus) }}
-                        </span>
-                      </div>
-                    </div>
-                    <button *ngIf="message.direction === 'OUTBOUND' && message.deliveryStatus === MessageDeliveryStatus.FAILED"
-                            class="chat-bubble-retry"
-                            (click)="retryWhatsAppMessage(message)"
-                            matTooltip="Réessayer l'envoi"
-                            aria-label="Réessayer l'envoi du message">
-                      ↻ Réessayer
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="whatsapp-composer">
-                <div *ngIf="!isWhatsAppConsentGranted()" class="consent-warning">
-                  <span class="consent-warning-icon">⚠️</span>
-                  <span class="consent-warning-text">
-                    Le consentement WhatsApp n'est pas accordé. 
-                    <a [routerLink]="[]" fragment="consentements" class="consent-link">Gérer les consentements</a>
-                  </span>
-                </div>
-
-                <div class="template-selector">
-                  <label for="whatsapp-template" class="template-label">Modèle de message :</label>
-                  <select 
-                    id="whatsapp-template"
-                    class="template-select"
-                    [(ngModel)]="selectedTemplate"
-                    (change)="onTemplateSelect()"
-                    [disabled]="sendingWhatsAppMessage">
-                    <option [ngValue]="null">Aucun modèle (message libre)</option>
-                    <option *ngFor="let template of whatsappTemplates" [ngValue]="template">
-                      {{ template.name }} - {{ template.description }}
-                    </option>
-                  </select>
-                </div>
-
-                <div *ngIf="selectedTemplate" class="template-variables">
-                  <h4 class="template-variables-title">Variables du modèle :</h4>
-                  <div class="template-variables-grid">
-                    <div *ngFor="let variable of selectedTemplate.variables" class="template-variable-field">
-                      <label [for]="'var-' + variable" class="variable-label">{{ variable }} :</label>
-                      <input 
-                        [id]="'var-' + variable"
-                        type="text"
-                        class="variable-input"
-                        [(ngModel)]="templateVariables[variable]"
-                        (input)="onVariableChange()"
-                        [disabled]="sendingWhatsAppMessage"
-                        [placeholder]="'Entrer ' + variable"
-                        [attr.aria-label]="'Variable ' + variable">
-                    </div>
-                  </div>
-                </div>
-
-                <div class="message-preview">
-                  <h4 class="preview-title">Aperçu du message :</h4>
-                  <div class="preview-bubble">
-                    <p class="preview-text">{{ whatsappMessageContent || 'Votre message apparaîtra ici...' }}</p>
-                  </div>
-                </div>
-
-                <div *ngIf="!selectedTemplate" class="custom-message-editor">
-                  <label for="custom-message" class="custom-message-label">Message personnalisé :</label>
-                  <textarea 
-                    id="custom-message"
-                    class="custom-message-textarea"
-                    [(ngModel)]="whatsappMessageContent"
-                    [disabled]="sendingWhatsAppMessage"
-                    placeholder="Tapez votre message ici..."
-                    rows="4"
-                    aria-label="Message personnalisé WhatsApp"></textarea>
-                </div>
-
-                <div class="composer-actions">
-                  <button 
-                    class="btn-send-whatsapp"
-                    (click)="sendWhatsAppMessage()"
-                    [disabled]="!canSendWhatsAppMessage() || sendingWhatsAppMessage || !isWhatsAppConsentGranted()"
-                    aria-label="Envoyer le message WhatsApp">
-                    <span *ngIf="sendingWhatsAppMessage" class="spinner-small"></span>
-                    <span *ngIf="!sendingWhatsAppMessage">📤 Envoyer</span>
-                    <span *ngIf="sendingWhatsAppMessage">Envoi...</span>
-                  </button>
-                  <button 
-                    class="btn-reset"
-                    (click)="resetWhatsAppForm()"
-                    [disabled]="sendingWhatsAppMessage"
-                    aria-label="Réinitialiser le formulaire">
-                    Réinitialiser
-                  </button>
-                </div>
-              </div>
+            <!-- Fallback: consent warning if not granted -->
+            <div *ngIf="!isWhatsAppConsentGranted()" class="consent-warning-overlay">
+              <mat-icon class="warning-icon">warning</mat-icon>
+              <h3>Consentement WhatsApp requis</h3>
+              <p>Le consentement WhatsApp n'est pas accordé pour ce dossier.</p>
+              <a mat-raised-button color="primary" [routerLink]="[]" fragment="consentements">
+                Gérer les consentements
+              </a>
             </div>
           </div>
         </mat-tab>

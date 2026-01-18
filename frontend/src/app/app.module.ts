@@ -81,6 +81,10 @@ import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import { NgChartsModule } from 'ng2-charts';
+import { WhatsappThreadComponent } from './components/whatsapp-thread.component';
+import { WhatsappMessageInputComponent } from './components/whatsapp-message-input.component';
+import { TemplateSelectionSheetComponent } from './components/template-selection-sheet.component';
+import { WhatsappMessagingContainerComponent } from './components/whatsapp-messaging-container.component';
 
 registerLocaleData(localeFr);
 
@@ -125,7 +129,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     FormValidationAnimationDirective,
     DateFormatPipe,
     PriceFormatPipe,
-    PhoneFormatPipe
+    PhoneFormatPipe,
+    WhatsappThreadComponent,
+    WhatsappMessageInputComponent,
+    TemplateSelectionSheetComponent,
+    WhatsappMessagingContainerComponent
   ],
   imports: [
     BrowserModule,

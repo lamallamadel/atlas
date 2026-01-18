@@ -1,0 +1,54 @@
+.whatsapp-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  position: relative;
+  background: #e5ddd5;
+}
+
+.sync-indicator {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sync-indicator mat-progress-bar {
+  height: 3px;
+}
+
+.sync-text {
+  display: block;
+  padding: 8px 16px;
+  font-size: 12px;
+  color: #666;
+  text-align: center;
+}
+
+.thread-area {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.input-area {
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .whatsapp-container {
+    height: calc(100vh - 56px);
+    height: calc(100dvh - 56px);
+  }
+}
+
+@media (max-width: 480px) {
+  .sync-text {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+}

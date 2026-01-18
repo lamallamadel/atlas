@@ -496,3 +496,31 @@ textarea:disabled {
   background-color: var(--color-info-600) !important;
   box-shadow: 0 4px 12px rgba(125, 184, 238, 0.3) !important;
 }
+
+/* Bottom Sheet Overrides for Mobile */
+.template-bottom-sheet .mat-bottom-sheet-container {
+  padding: 0;
+  max-height: 85vh;
+  border-radius: 16px 16px 0 0;
+}
+
+.template-bottom-sheet-backdrop {
+  background-color: rgba(0, 0, 0, 0.5);
+}
+
+@media (max-width: 599px) {
+  .template-bottom-sheet .mat-bottom-sheet-container {
+    max-height: 90vh;
+  }
+}
+
+/* Mat Chip Listbox Styles for Message Input */
+mat-chip-listbox {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+mat-chip.template-chip button[matChipRemove] {
+  opacity: 1;
+}

@@ -1,0 +1,68 @@
+<div class="message-input-container" [class.offline]="!isOnline">
+  <!-- Queue indicator -->
+  <div class="queue-indicator" *ngIf="queuedMessagesCount > 0">
+    <mat-icon>schedule</mat-icon>
+    <span>{{ queuedMessagesCount }} message(s) en file d'attente</span>
+  </div>
+
+  <!-- Template chip (if selected) -->
+  <div class="template-chip-container" *ngIf="selectedTemplate">
+    <mat-chip-listbox>
+      <mat-chip class="template-chip">
+        <mat-icon matChipAvatar>description</mat-icon>
+        <span>{{ selectedTemplate.name }}</span>
+        <button matChipRemove (click)="removeTemplate()">
+          <mat-icon>cancel</mat-icon>
+        </button>
+      </mat-chip>
+    </mat-chip-listbox>
+  </div>
+
+  <!-- Template variables form -->
+  <div class="template-variables" *ngIf="selectedTemplate && selectedTemplate.variables.length > 0">
+    <div class="variable-input" *ngFor="let variable of selectedTemplate.variables">
+      <mat-form-field appearance="outline" class="variable-field">
+        <mat-label>{{ variable }}</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="templateVariables[variable]"
+          (ngModelChange)="onVariableChange()"
+          [placeholder]="'Valeur pour ' + variable">
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Message input area -->
+  <div class="input-wrapper">
+    <button 
+      mat-icon-button 
+      class="template-button"
+      [disabled]="disabled"
+      (click)="openTemplateSelector()"
+      matTooltip="Sélectionner un modèle">
+      <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
+    </button>
+
+    <textarea
+      #messageInput
+      class="message-textarea"
+      [placeholder]="getPlaceholder()"
+      [(ngModel)]="messageContent"
+      [disabled]="disabled || selectedTemplate !== null"
+      (input)="autoGrow($event)"
+      (keydown.enter)="onEnterKey($any($event))"
+      rows="1"
+      maxlength="4096"></textarea>
+
+    <button 
+      mat-fab 
+      color="primary"
+      class="send-button"
+      [disabled]="!canSend()"
+      (click)="onSend()"
+      [class.sending]="sending">
+      <mat-icon *ngIf="!sending">send</mat-icon>
+      <mat-spinner *ngIf="sending" diameter="24"></mat-spinner>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,170 @@
+.message-input-container {
+  background: #f0f0f0;
+  border-top: 1px solid #d1d7db;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.message-input-container.offline {
+  background: #fff3e0;
+}
+
+.queue-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: #fff8e1;
+  border-bottom: 1px solid #ffeb3b;
+  font-size: 13px;
+  color: #f57c00;
+}
+
+.queue-indicator mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.template-chip-container {
+  padding: 12px 16px 0;
+}
+
+.template-chip {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.template-variables {
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.variable-input {
+  width: 100%;
+}
+
+.variable-field {
+  width: 100%;
+  margin: 0;
+}
+
+.variable-field .mat-mdc-text-field-wrapper {
+  padding-bottom: 0;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  background: white;
+}
+
+.template-button {
+  flex-shrink: 0;
+  margin-bottom: 4px;
+}
+
+.message-textarea {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  padding: 10px 12px;
+  border: 1px solid #d1d7db;
+  border-radius: 20px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.5;
+  background: white;
+  transition: border-color 0.2s;
+}
+
+.message-textarea:focus {
+  outline: none;
+  border-color: #00a884;
+}
+
+.message-textarea:disabled {
+  background: #f5f5f5;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.send-button {
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  min-height: 48px;
+  background: #00a884;
+  transition: all 0.2s;
+}
+
+.send-button:not(:disabled):hover {
+  background: #008c6f;
+  transform: scale(1.05);
+}
+
+.send-button:disabled {
+  background: #d1d7db;
+  cursor: not-allowed;
+}
+
+.send-button.sending {
+  pointer-events: none;
+}
+
+.send-button mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 768px) {
+  .input-wrapper {
+    padding: 8px 12px;
+  }
+
+  .template-button {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+  }
+
+  .send-button {
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+  }
+
+  .message-textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 8px 12px;
+  }
+
+  .template-variables {
+    max-height: 150px;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .queue-indicator {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .template-chip-container {
+    padding: 8px 12px 0;
+  }
+}

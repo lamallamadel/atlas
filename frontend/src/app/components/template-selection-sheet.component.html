@@ -1,0 +1,86 @@
+<div class="template-sheet-container">
+  <div class="sheet-header">
+    <h2>Sélectionner un modèle</h2>
+    <button mat-icon-button (click)="cancel()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="search-container">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Rechercher un modèle</mat-label>
+      <input 
+        matInput 
+        [(ngModel)]="searchQuery"
+        placeholder="Nom, description ou contenu..."
+        autocomplete="off">
+      <mat-icon matPrefix>search</mat-icon>
+      <button 
+        mat-icon-button 
+        matSuffix 
+        *ngIf="searchQuery"
+        (click)="searchQuery = ''"
+        aria-label="Effacer">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+  </div>
+
+  <div class="templates-list">
+    <div class="empty-state" *ngIf="filteredTemplates.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <p>Aucun modèle trouvé</p>
+    </div>
+
+    <mat-selection-list 
+      #templateList 
+      [multiple]="false"
+      [(ngModel)]="selectedTemplate"
+      (selectionChange)="selectTemplate($event.options[0]?.value)">
+      <mat-list-option 
+        *ngFor="let template of filteredTemplates"
+        [value]="template"
+        [selected]="selectedTemplate?.id === template.id"
+        class="template-option">
+        <div class="template-card">
+          <div class="template-header">
+            <mat-icon class="template-icon">description</mat-icon>
+            <div class="template-title">
+              <h3>{{ template.name }}</h3>
+              <p class="template-description">{{ template.description }}</p>
+            </div>
+            <mat-icon class="check-icon" *ngIf="selectedTemplate?.id === template.id">
+              check_circle
+            </mat-icon>
+          </div>
+          
+          <div class="template-preview">
+            <div class="preview-label">Aperçu:</div>
+            <div class="preview-content">{{ template.content }}</div>
+          </div>
+
+          <div class="template-variables" *ngIf="template.variables.length > 0">
+            <mat-icon class="variables-icon">code</mat-icon>
+            <span class="variables-text">{{ getVariablesText(template.variables) }}</span>
+          </div>
+        </div>
+      </mat-list-option>
+    </mat-selection-list>
+  </div>
+
+  <div class="sheet-actions">
+    <button 
+      mat-stroked-button 
+      (click)="clear()"
+      class="clear-button">
+      Aucun modèle
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="apply()"
+      [disabled]="!selectedTemplate">
+      Appliquer
+    </button>
+  </div>
+</div>
