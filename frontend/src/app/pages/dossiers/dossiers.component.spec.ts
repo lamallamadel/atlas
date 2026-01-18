@@ -9,6 +9,7 @@ import { DossierApiService, DossierStatus } from '../../services/dossier-api.ser
 import { AnnonceApiService } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -103,7 +104,8 @@ describe('DossiersComponent', () => {
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
         { provide: MatBottomSheet, useValue: bottomSheetSpy },
-        { provide: BreakpointObserver, useValue: breakpointObserverSpy }
+        { provide: BreakpointObserver, useValue: breakpointObserverSpy },
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
