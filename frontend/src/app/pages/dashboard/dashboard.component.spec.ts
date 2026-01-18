@@ -5,9 +5,9 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
 import { of } from 'rxjs';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
-import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 describe('DashboardComponent', () => {
   let component: DashboardComponent;
@@ -36,9 +36,9 @@ describe('DashboardComponent', () => {
       ],
       declarations: [DashboardComponent],
       providers: [
-        { provide: DashboardKpiService, useValue: mockDashboardKpiService }
-      ],
-      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+        { provide: DashboardKpiService, useValue: mockDashboardKpiService },
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) }
+      ]
     })
       .compileComponents();
 
