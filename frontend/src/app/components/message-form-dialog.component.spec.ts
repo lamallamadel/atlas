@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageFormDialogComponent } from './message-form-dialog.component';
+import { DatetimePickerComponent } from './datetime-picker.component';
 import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('MessageFormDialogComponent', () => {
@@ -9,7 +10,7 @@ describe('MessageFormDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MessageFormDialogComponent],
+      declarations: [MessageFormDialogComponent, DatetimePickerComponent],
       imports: [MaterialTestingModule],
       providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
