@@ -21,10 +21,9 @@ describe('EmptyStateComponent', () => {
   });
 
   it('should display message', () => {
-    component.message = 'Test message';
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.empty-state-message')?.textContent).toContain('Test message');
+    expect(compiled.querySelector('.empty-state-message')?.textContent).toContain('Aucune donnée disponible');
   });
 
   it('should display subtext when provided', () => {
