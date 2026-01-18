@@ -32,6 +32,10 @@ spring:
 server:
   port: ${SERVER_PORT:8084}
 
+outbound:
+  worker:
+    enabled: false
+
 logging:
   level:
     root: INFO

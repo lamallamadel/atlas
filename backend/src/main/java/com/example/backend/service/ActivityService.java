@@ -195,4 +195,32 @@ public class ActivityService {
 
         activityRepository.delete(activity);
     }
+
+    @Transactional
+    public void logActivity(Long dossierId, String activityType, String description, Map<String, Object> metadata) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(dossierId)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
+        }
+
+        ActivityEntity activity = new ActivityEntity();
+        activity.setOrgId(orgId);
+        activity.setType(activityType);
+        activity.setContent(description);
+        activity.setDossier(dossier);
+        activity.setVisibility(ActivityVisibility.INTERNAL);
+
+        LocalDateTime now = LocalDateTime.now();
+        activity.setCreatedAt(now);
+        activity.setUpdatedAt(now);
+
+        activityRepository.save(activity);
+    }
 }

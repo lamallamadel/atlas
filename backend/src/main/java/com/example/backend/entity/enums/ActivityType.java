@@ -4,5 +4,6 @@ public enum ActivityType {
     NOTE,
     STATUS_CHANGE,
     APPOINTMENT_CREATED,
-    MESSAGE_SENT
+    MESSAGE_SENT,
+    MESSAGE_FAILED
 }

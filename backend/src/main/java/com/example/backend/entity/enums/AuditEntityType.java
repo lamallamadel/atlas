@@ -10,7 +10,8 @@ public enum AuditEntityType {
     USER("user"),
     ORGANIZATION("organization"),
     NOTIFICATION("notification"),
-    ACTIVITY("activity");
+    ACTIVITY("activity"),
+    OUTBOUND_MESSAGE("outbound_message");
     private final String value;
 
     AuditEntityType(String value) {

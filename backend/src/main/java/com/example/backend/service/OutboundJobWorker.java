@@ -1,0 +1,241 @@
+package com.example.backend.service;
+
+import com.example.backend.entity.OutboundAttemptEntity;
+import com.example.backend.entity.OutboundMessageEntity;
+import com.example.backend.entity.enums.OutboundAttemptStatus;
+import com.example.backend.entity.enums.OutboundMessageStatus;
+import com.example.backend.repository.OutboundAttemptRepository;
+import com.example.backend.repository.OutboundMessageRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
+@Service
+public class OutboundJobWorker {
+    
+    private static final Logger logger = LoggerFactory.getLogger(OutboundJobWorker.class);
+    private static final int[] BACKOFF_MINUTES = {1, 5, 15, 60, 360};
+    
+    private final OutboundMessageRepository outboundMessageRepository;
+    private final OutboundAttemptRepository outboundAttemptRepository;
+    private final List<OutboundMessageProvider> providers;
+    private final AuditEventService auditEventService;
+    private final ActivityService activityService;
+    
+    @Value("${outbound.worker.batch-size:10}")
+    private int batchSize;
+    
+    @Value("${outbound.worker.enabled:true}")
+    private boolean enabled;
+    
+    public OutboundJobWorker(
+            OutboundMessageRepository outboundMessageRepository,
+            OutboundAttemptRepository outboundAttemptRepository,
+            List<OutboundMessageProvider> providers,
+            AuditEventService auditEventService,
+            ActivityService activityService) {
+        this.outboundMessageRepository = outboundMessageRepository;
+        this.outboundAttemptRepository = outboundAttemptRepository;
+        this.providers = providers;
+        this.auditEventService = auditEventService;
+        this.activityService = activityService;
+    }
+    
+    @Scheduled(fixedDelayString = "${outbound.worker.poll-interval-ms:5000}")
+    @Transactional
+    public void processPendingMessages() {
+        if (!enabled) {
+            return;
+        }
+        
+        try {
+            List<OutboundMessageEntity> messages = outboundMessageRepository.findPendingMessages(
+                OutboundMessageStatus.QUEUED,
+                PageRequest.of(0, batchSize)
+            );
+            
+            if (messages.isEmpty()) {
+                return;
+            }
+            
+            logger.info("Processing {} pending outbound messages", messages.size());
+            
+            for (OutboundMessageEntity message : messages) {
+                try {
+                    processMessage(message);
+                } catch (Exception e) {
+                    logger.error("Error processing message {}: {}", message.getId(), e.getMessage(), e);
+                }
+            }
+            
+        } catch (Exception e) {
+            logger.error("Error in outbound job worker: {}", e.getMessage(), e);
+        }
+    }
+    
+    @Transactional
+    public void processMessage(OutboundMessageEntity message) {
+        logger.debug("Processing outbound message: id={}, attempt={}/{}", 
+            message.getId(), message.getAttemptCount() + 1, message.getMaxAttempts());
+        
+        message.setStatus(OutboundMessageStatus.SENDING);
+        message.setAttemptCount(message.getAttemptCount() + 1);
+        message.setUpdatedAt(LocalDateTime.now());
+        outboundMessageRepository.save(message);
+        
+        OutboundAttemptEntity attempt = createAttempt(message, OutboundAttemptStatus.TRYING);
+        
+        try {
+            OutboundMessageProvider provider = findProvider(message.getChannel().name());
+            
+            if (provider == null) {
+                String errorMsg = "No provider found for channel: " + message.getChannel();
+                logger.error(errorMsg);
+                handleFailure(message, attempt, "NO_PROVIDER", errorMsg, false);
+                return;
+            }
+            
+            ProviderSendResult result = provider.send(message);
+            
+            if (result.isSuccess()) {
+                handleSuccess(message, attempt, result);
+            } else {
+                handleFailure(message, attempt, result.getErrorCode(), result.getErrorMessage(), result.isRetryable());
+            }
+            
+        } catch (Exception e) {
+            logger.error("Unexpected error processing message {}: {}", message.getId(), e.getMessage(), e);
+            handleFailure(message, attempt, "WORKER_ERROR", e.getMessage(), true);
+        }
+    }
+    
+    private void handleSuccess(OutboundMessageEntity message, OutboundAttemptEntity attempt, ProviderSendResult result) {
+        logger.info("Outbound message sent successfully: id={}, providerMessageId={}", 
+            message.getId(), result.getProviderMessageId());
+        
+        message.setStatus(OutboundMessageStatus.SENT);
+        message.setProviderMessageId(result.getProviderMessageId());
+        message.setErrorCode(null);
+        message.setErrorMessage(null);
+        message.setUpdatedAt(LocalDateTime.now());
+        outboundMessageRepository.save(message);
+        
+        attempt.setStatus(OutboundAttemptStatus.SUCCESS);
+        attempt.setProviderResponseJson(result.getResponseData());
+        attempt.setUpdatedAt(LocalDateTime.now());
+        outboundAttemptRepository.save(attempt);
+        
+        logAuditEvent(message, "SENT", "Message sent successfully");
+        logActivity(message, "MESSAGE_SENT", String.format("Outbound %s message sent to %s", 
+            message.getChannel(), message.getTo()));
+    }
+    
+    private void handleFailure(OutboundMessageEntity message, OutboundAttemptEntity attempt, 
+                               String errorCode, String errorMessage, boolean retryable) {
+        
+        logger.warn("Outbound message failed: id={}, attempt={}/{}, errorCode={}, retryable={}", 
+            message.getId(), message.getAttemptCount(), message.getMaxAttempts(), errorCode, retryable);
+        
+        attempt.setStatus(OutboundAttemptStatus.FAILED);
+        attempt.setErrorCode(errorCode);
+        attempt.setErrorMessage(errorMessage);
+        
+        boolean canRetry = retryable && message.getAttemptCount() < message.getMaxAttempts();
+        
+        if (canRetry) {
+            LocalDateTime nextRetryAt = calculateNextRetry(message.getAttemptCount());
+            attempt.setNextRetryAt(nextRetryAt);
+            
+            message.setStatus(OutboundMessageStatus.QUEUED);
+            message.setErrorCode(errorCode);
+            message.setErrorMessage(errorMessage);
+            
+            logger.info("Scheduling retry for message {}: nextRetryAt={}, attempt={}/{}", 
+                message.getId(), nextRetryAt, message.getAttemptCount(), message.getMaxAttempts());
+        } else {
+            message.setStatus(OutboundMessageStatus.FAILED);
+            message.setErrorCode(errorCode);
+            message.setErrorMessage(errorMessage);
+            
+            String reason = !retryable ? "non-retryable error" : "max attempts reached";
+            logger.warn("Message {} moved to FAILED: {}", message.getId(), reason);
+            
+            logAuditEvent(message, "FAILED", String.format("Message failed: %s (%s)", errorMessage, reason));
+            logActivity(message, "MESSAGE_FAILED", String.format("Outbound %s message failed: %s", 
+                message.getChannel(), errorCode));
+        }
+        
+        message.setUpdatedAt(LocalDateTime.now());
+        outboundMessageRepository.save(message);
+        
+        attempt.setUpdatedAt(LocalDateTime.now());
+        outboundAttemptRepository.save(attempt);
+    }
+    
+    private OutboundAttemptEntity createAttempt(OutboundMessageEntity message, OutboundAttemptStatus status) {
+        OutboundAttemptEntity attempt = new OutboundAttemptEntity();
+        attempt.setOrgId(message.getOrgId());
+        attempt.setOutboundMessage(message);
+        attempt.setAttemptNo(message.getAttemptCount());
+        attempt.setStatus(status);
+        
+        LocalDateTime now = LocalDateTime.now();
+        attempt.setCreatedAt(now);
+        attempt.setUpdatedAt(now);
+        
+        return outboundAttemptRepository.save(attempt);
+    }
+    
+    private LocalDateTime calculateNextRetry(int attemptCount) {
+        int index = Math.min(attemptCount - 1, BACKOFF_MINUTES.length - 1);
+        int delayMinutes = BACKOFF_MINUTES[index];
+        return LocalDateTime.now().plusMinutes(delayMinutes);
+    }
+    
+    private OutboundMessageProvider findProvider(String channel) {
+        for (OutboundMessageProvider provider : providers) {
+            if (provider.supports(channel)) {
+                return provider;
+            }
+        }
+        return null;
+    }
+    
+    private void logAuditEvent(OutboundMessageEntity message, String action, String details) {
+        if (auditEventService != null) {
+            try {
+                auditEventService.logEvent("OUTBOUND_MESSAGE", message.getId(), action, details);
+            } catch (Exception e) {
+                logger.warn("Failed to log audit event", e);
+            }
+        }
+    }
+    
+    private void logActivity(OutboundMessageEntity message, String activityType, String description) {
+        if (activityService != null && message.getDossierId() != null) {
+            try {
+                activityService.logActivity(
+                    message.getDossierId(),
+                    activityType,
+                    description,
+                    Map.of(
+                        "outboundMessageId", message.getId(),
+                        "channel", message.getChannel().name(),
+                        "to", message.getTo(),
+                        "status", message.getStatus().name()
+                    )
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log activity", e);
+            }
+        }
+    }
+}

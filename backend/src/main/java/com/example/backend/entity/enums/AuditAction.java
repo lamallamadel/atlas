@@ -10,7 +10,10 @@ public enum AuditAction {
     APPROVED("approved"),
     REJECTED("rejected"),
     ARCHIVED("archived"),
-    RESTORED("restored");
+    RESTORED("restored"),
+    SENT("sent"),
+    FAILED("failed"),
+    BLOCKED_BY_POLICY("blocked_by_policy");
 
     private final String value;
 
