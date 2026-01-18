@@ -45,12 +45,8 @@ describe('FormValidationAnimationDirective', () => {
   });
 
   it('should create an instance', () => {
-    const directive = new FormValidationAnimationDirective(
-      inputEl,
-      fixture.componentRef.injector.get('Renderer2' as any),
-      { control: component.testForm.get('email') } as any
-    );
-    expect(directive).toBeTruthy();
+    const directiveInstance = inputEl.injector.get(FormValidationAnimationDirective);
+    expect(directiveInstance).toBeTruthy();
   });
 
   it('should add validation-error class when field is invalid and touched', () => {
