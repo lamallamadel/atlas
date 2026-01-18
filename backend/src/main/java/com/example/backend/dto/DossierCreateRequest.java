@@ -37,6 +37,22 @@ public class DossierCreateRequest {
     @Schema(description = "Dossier source", example = "WEB", nullable = true, defaultValue = "UNKNOWN")
     private DossierSource source;
 
+    @Schema(description = "Case type code", example = "CRM_LEAD_BUY", nullable = true)
+    @Size(max = 100, message = "Case type must not exceed 100 characters")
+    private String caseType;
+
+    @Schema(description = "Status code", example = "CRM_NEW", nullable = true)
+    @Size(max = 100, message = "Status code must not exceed 100 characters")
+    private String statusCode;
+
+    @Schema(description = "Loss reason code", example = "PRICE_TOO_HIGH", nullable = true)
+    @Size(max = 100, message = "Loss reason must not exceed 100 characters")
+    private String lossReason;
+
+    @Schema(description = "Won reason code", example = "SIGNED", nullable = true)
+    @Size(max = 100, message = "Won reason must not exceed 100 characters")
+    private String wonReason;
+
     @Schema(description = "Initial party to create with the dossier", nullable = true)
     @Valid
     private PartiePrenanteRequest initialParty;
@@ -106,5 +122,37 @@ public class DossierCreateRequest {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getLossReason() {
+        return lossReason;
+    }
+
+    public void setLossReason(String lossReason) {
+        this.lossReason = lossReason;
+    }
+
+    public String getWonReason() {
+        return wonReason;
+    }
+
+    public void setWonReason(String wonReason) {
+        this.wonReason = wonReason;
     }
 }

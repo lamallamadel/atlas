@@ -27,6 +27,10 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     List<Dossier> findByLeadPhoneAndOrgIdAndStatusNotIn(@Param("phone") String phone, @Param("orgId") String orgId,
             @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
 
+    List<Dossier> findByCaseType(String caseType);
+
+    List<Dossier> findByStatusCode(String statusCode);
+
     Long countByStatusIn(List<DossierStatus> statuses);
 
     @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status = :status AND d.createdAt >= :startDate")

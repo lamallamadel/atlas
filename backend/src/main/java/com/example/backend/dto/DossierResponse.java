@@ -38,6 +38,18 @@ public class DossierResponse {
     @Schema(description = "Current status of the dossier", example = "NEW")
     private DossierStatus status;
 
+    @Schema(description = "Case type code", example = "CRM_LEAD_BUY", nullable = true)
+    private String caseType;
+
+    @Schema(description = "Status code", example = "CRM_NEW", nullable = true)
+    private String statusCode;
+
+    @Schema(description = "Loss reason code", example = "PRICE_TOO_HIGH", nullable = true)
+    private String lossReason;
+
+    @Schema(description = "Won reason code", example = "SIGNED", nullable = true)
+    private String wonReason;
+
     @Schema(description = "Dossier score (0-100)", example = "75", nullable = true)
     private Integer score;
 
@@ -199,5 +211,37 @@ public class DossierResponse {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getLossReason() {
+        return lossReason;
+    }
+
+    public void setLossReason(String lossReason) {
+        this.lossReason = lossReason;
+    }
+
+    public String getWonReason() {
+        return wonReason;
+    }
+
+    public void setWonReason(String wonReason) {
+        this.wonReason = wonReason;
     }
 }

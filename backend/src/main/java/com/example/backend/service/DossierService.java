@@ -163,6 +163,17 @@ public class DossierService {
         transitionService.validateTransition(currentStatus, newStatus);
 
         dossier.setStatus(newStatus);
+        
+        if (request.getStatusCode() != null) {
+            dossier.setStatusCode(request.getStatusCode());
+        }
+        if (request.getLossReason() != null) {
+            dossier.setLossReason(request.getLossReason());
+        }
+        if (request.getWonReason() != null) {
+            dossier.setWonReason(request.getWonReason());
+        }
+        
         dossier.setUpdatedAt(LocalDateTime.now());
         Dossier updated = dossierRepository.save(dossier);
 

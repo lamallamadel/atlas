@@ -95,6 +95,23 @@ public class GlobalExceptionHandler {
                 .body(problemDetail);
     }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleResourceNotFoundException(
+            ResourceNotFoundException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "about:blank",
+                "Not Found",
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(problemDetail);
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ProblemDetail> handleAccessDeniedException(
             AccessDeniedException ex, HttpServletRequest request) {

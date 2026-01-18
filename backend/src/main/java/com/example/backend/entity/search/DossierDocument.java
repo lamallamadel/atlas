@@ -29,6 +29,18 @@ public class DossierDocument {
     private String status;
 
     @Field(type = FieldType.Keyword)
+    private String caseType;
+
+    @Field(type = FieldType.Keyword)
+    private String statusCode;
+
+    @Field(type = FieldType.Keyword)
+    private String lossReason;
+
+    @Field(type = FieldType.Keyword)
+    private String wonReason;
+
+    @Field(type = FieldType.Keyword)
     private String source;
 
     @Field(type = FieldType.Keyword)
@@ -140,5 +152,37 @@ public class DossierDocument {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getLossReason() {
+        return lossReason;
+    }
+
+    public void setLossReason(String lossReason) {
+        this.lossReason = lossReason;
+    }
+
+    public String getWonReason() {
+        return wonReason;
+    }
+
+    public void setWonReason(String wonReason) {
+        this.wonReason = wonReason;
     }
 }

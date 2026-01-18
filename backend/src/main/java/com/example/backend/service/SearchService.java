@@ -380,6 +380,10 @@ public class SearchService {
             doc.setLeadPhone(dossier.getLeadPhone());
             doc.setNotes(dossier.getNotes());
             doc.setStatus(dossier.getStatus() != null ? dossier.getStatus().name() : null);
+            doc.setCaseType(dossier.getCaseType());
+            doc.setStatusCode(dossier.getStatusCode());
+            doc.setLossReason(dossier.getLossReason());
+            doc.setWonReason(dossier.getWonReason());
             doc.setSource(dossier.getSource() != null ? dossier.getSource().name() : null);
             doc.setLeadSource(dossier.getLeadSource());
             doc.setScore(dossier.getScore());

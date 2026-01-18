@@ -39,6 +39,18 @@ public class Dossier extends BaseEntity {
     @Column(name = "status", nullable = false, length = 50)
     private DossierStatus status;
 
+    @Column(name = "case_type", length = 100)
+    private String caseType;
+
+    @Column(name = "status_code", length = 100)
+    private String statusCode;
+
+    @Column(name = "loss_reason", length = 100)
+    private String lossReason;
+
+    @Column(name = "won_reason", length = 100)
+    private String wonReason;
+
     @Column(name = "score")
     private Integer score;
 
@@ -158,5 +170,37 @@ public class Dossier extends BaseEntity {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getCaseType() {
+        return caseType;
+    }
+
+    public void setCaseType(String caseType) {
+        this.caseType = caseType;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getLossReason() {
+        return lossReason;
+    }
+
+    public void setLossReason(String lossReason) {
+        this.lossReason = lossReason;
+    }
+
+    public String getWonReason() {
+        return wonReason;
+    }
+
+    public void setWonReason(String wonReason) {
+        this.wonReason = wonReason;
     }
 }

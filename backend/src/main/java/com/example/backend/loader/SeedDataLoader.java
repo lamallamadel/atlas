@@ -3,10 +3,12 @@ package com.example.backend.loader;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.PartiePrenanteEntity;
+import com.example.backend.entity.ReferentialEntity;
 import com.example.backend.entity.enums.*;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
+import com.example.backend.repository.ReferentialRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -27,13 +29,16 @@ public class SeedDataLoader implements CommandLineRunner {
     private final AnnonceRepository annonceRepository;
     private final DossierRepository dossierRepository;
     private final PartiePrenanteRepository partiePrenanteRepository;
+    private final ReferentialRepository referentialRepository;
 
     public SeedDataLoader(AnnonceRepository annonceRepository,
                           DossierRepository dossierRepository,
-                          PartiePrenanteRepository partiePrenanteRepository) {
+                          PartiePrenanteRepository partiePrenanteRepository,
+                          ReferentialRepository referentialRepository) {
         this.annonceRepository = annonceRepository;
         this.dossierRepository = dossierRepository;
         this.partiePrenanteRepository = partiePrenanteRepository;
+        this.referentialRepository = referentialRepository;
     }
 
     @Override
@@ -45,10 +50,103 @@ public class SeedDataLoader implements CommandLineRunner {
             return;
         }
 
+        loadReferentials();
         loadAnnonces();
         loadDossiers();
 
         logger.info("Seed data loading completed successfully.");
+    }
+
+    private void loadReferentials() {
+        logger.info("Loading referentials for ORG-001 and ORG-002...");
+        
+        List<ReferentialEntity> referentials = new ArrayList<>();
+        
+        for (String orgId : Arrays.asList(ORG_001, ORG_002)) {
+            referentials.addAll(createReferentialsForOrg(orgId));
+        }
+        
+        referentialRepository.saveAll(referentials);
+        logger.info("Loaded {} referentials ({} per org)", referentials.size(), referentials.size() / 2);
+    }
+
+    private List<ReferentialEntity> createReferentialsForOrg(String orgId) {
+        List<ReferentialEntity> referentials = new ArrayList<>();
+        int order = 1;
+        
+        // CASE_TYPE
+        referentials.add(createReferential(orgId, "CASE_TYPE", "CRM_LEAD_BUY", "Prospect Achat", "Lead for property purchase", order++, true));
+        referentials.add(createReferential(orgId, "CASE_TYPE", "CRM_LEAD_RENT", "Prospect Location", "Lead for property rental", order++, true));
+        referentials.add(createReferential(orgId, "CASE_TYPE", "CRM_OWNER_LEAD", "Prospect Propriétaire", "Owner lead (sell/rent)", order++, true));
+        referentials.add(createReferential(orgId, "CASE_TYPE", "CRM_SALE_TRANSACTION", "Transaction Vente", "Sale transaction", order++, true));
+        referentials.add(createReferential(orgId, "CASE_TYPE", "CRM_RENTAL_TRANSACTION", "Transaction Location", "Rental transaction", order++, true));
+        
+        order = 1;
+        // CASE_STATUS
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_NEW", "Nouveau", "New case", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_CONTACTED", "Contacté", "Contacted", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_QUALIFIED", "Qualifié", "Qualified", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_VISIT_PLANNED", "Visite planifiée", "Visit planned", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_VISIT_DONE", "Visite effectuée", "Visit done", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_OFFER_RECEIVED", "Offre reçue", "Offer received", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_NEGOTIATION", "Négociation", "Negotiation", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_SIGNING_SCHEDULED", "Signature planifiée", "Signing scheduled", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_CLOSED_WON", "Gagné", "Closed won", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_CLOSED_LOST", "Perdu", "Closed lost", order++, true));
+        
+        // Legacy status codes for backward compatibility
+        referentials.add(createReferential(orgId, "CASE_STATUS", "NEW", "Nouveau (Legacy)", "Legacy NEW status", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "QUALIFYING", "Qualification (Legacy)", "Legacy QUALIFYING status", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "QUALIFIED", "Qualifié (Legacy)", "Legacy QUALIFIED status", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "APPOINTMENT", "Rendez-vous (Legacy)", "Legacy APPOINTMENT status", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "WON", "Gagné (Legacy)", "Legacy WON status", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "LOST", "Perdu (Legacy)", "Legacy LOST status", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "DRAFT", "Brouillon (Legacy)", "Legacy DRAFT status", order++, true));
+        
+        order = 1;
+        // LEAD_SOURCE
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "WHATSAPP", "WhatsApp", "Lead from WhatsApp", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "PHONE_CALL", "Appel téléphonique", "Lead from phone call", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "SMS", "SMS", "Lead from SMS", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "EMAIL", "Email", "Lead from email", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "WEBSITE", "Site web", "Lead from website", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "WALK_IN", "Visite directe", "Walk-in lead", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "REFERRAL", "Recommandation", "Lead from referral", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "OTHER", "Autre", "Other lead source", order++, true));
+        
+        order = 1;
+        // LOSS_REASON
+        referentials.add(createReferential(orgId, "LOSS_REASON", "PRICE_TOO_HIGH", "Prix trop élevé", "Price too high", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "NOT_INTERESTED", "Pas intéressé", "Not interested", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "COMPETITOR", "Concurrence", "Competitor", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "NO_RESPONSE", "Sans réponse", "No response", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "OTHER", "Autre", "Other reason", order++, true));
+        
+        order = 1;
+        // WON_REASON
+        referentials.add(createReferential(orgId, "WON_REASON", "SIGNED", "Signé", "Signed", order++, true));
+        referentials.add(createReferential(orgId, "WON_REASON", "RESERVED", "Réservé", "Reserved", order++, true));
+        referentials.add(createReferential(orgId, "WON_REASON", "SOLD", "Vendu", "Sold", order++, true));
+        referentials.add(createReferential(orgId, "WON_REASON", "RENTED", "Loué", "Rented", order++, true));
+        referentials.add(createReferential(orgId, "WON_REASON", "OTHER", "Autre", "Other reason", order++, true));
+        
+        return referentials;
+    }
+
+    private ReferentialEntity createReferential(String orgId, String category, String code, 
+                                                 String label, String description, int order, boolean isSystem) {
+        ReferentialEntity ref = new ReferentialEntity();
+        ref.setOrgId(orgId);
+        ref.setCategory(category);
+        ref.setCode(code);
+        ref.setLabel(label);
+        ref.setDescription(description);
+        ref.setDisplayOrder(order);
+        ref.setIsActive(true);
+        ref.setIsSystem(isSystem);
+        ref.setCreatedBy("system-seed");
+        ref.setUpdatedBy("system-seed");
+        return ref;
     }
 
     private void loadAnnonces() {
@@ -208,6 +306,17 @@ public class SeedDataLoader implements CommandLineRunner {
         dossier.setSource(source);
         dossier.setCreatedBy("system-seed");
         dossier.setUpdatedBy("system-seed");
+        
+        // Set new referential fields
+        dossier.setCaseType("CRM_LEAD_BUY");
+        dossier.setStatusCode(status.name());
+        
+        if (status == DossierStatus.LOST) {
+            dossier.setLossReason("NOT_INTERESTED");
+        } else if (status == DossierStatus.WON) {
+            dossier.setWonReason("SIGNED");
+        }
+        
         return dossier;
     }
 

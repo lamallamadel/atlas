@@ -32,6 +32,11 @@ public class DossierMapper {
         dossier.setStatus(DossierStatus.NEW);
         dossier.setSource(request.getSource() );
         dossier.setSource(request.getSource());
+        
+        dossier.setCaseType(request.getCaseType() != null ? request.getCaseType() : "CRM_LEAD_BUY");
+        dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : "NEW");
+        dossier.setLossReason(request.getLossReason());
+        dossier.setWonReason(request.getWonReason());
 
         if (request.getInitialParty() != null) {
             PartiePrenanteEntity party = partiePrenanteMapper.toEntity(request.getInitialParty());
@@ -60,6 +65,10 @@ public class DossierMapper {
         response.setLeadSource(dossier.getLeadSource());
         response.setNotes(dossier.getNotes());
         response.setStatus(dossier.getStatus());
+        response.setCaseType(dossier.getCaseType());
+        response.setStatusCode(dossier.getStatusCode());
+        response.setLossReason(dossier.getLossReason());
+        response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());
         response.setSource(dossier.getSource());
         response.setCreatedAt(dossier.getCreatedAt());

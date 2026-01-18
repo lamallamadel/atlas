@@ -11,6 +11,15 @@ public class DossierStatusPatchRequest {
     @NotNull(message = "Status is required")
     private DossierStatus status;
 
+    @Schema(description = "New status code (referential)", example = "CRM_QUALIFIED")
+    private String statusCode;
+
+    @Schema(description = "Loss reason code", example = "PRICE_TOO_HIGH")
+    private String lossReason;
+
+    @Schema(description = "Won reason code", example = "SIGNED")
+    private String wonReason;
+
     @Schema(description = "User ID performing the status change", example = "user123")
     private String userId;
 
@@ -42,5 +51,29 @@ public class DossierStatusPatchRequest {
 
     public void setReason(String reason) {
         this.reason = reason;
+    }
+
+    public String getStatusCode() {
+        return statusCode;
+    }
+
+    public void setStatusCode(String statusCode) {
+        this.statusCode = statusCode;
+    }
+
+    public String getLossReason() {
+        return lossReason;
+    }
+
+    public void setLossReason(String lossReason) {
+        this.lossReason = lossReason;
+    }
+
+    public String getWonReason() {
+        return wonReason;
+    }
+
+    public void setWonReason(String wonReason) {
+        this.wonReason = wonReason;
     }
 }
