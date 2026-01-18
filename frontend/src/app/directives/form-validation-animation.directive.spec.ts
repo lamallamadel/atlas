@@ -1,5 +1,5 @@
 import { Component, DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -8,7 +8,9 @@ import { FormValidationAnimationDirective } from './form-validation-animation.di
 @Component({
   template: `
     <form [formGroup]="testForm">
-      <input formControlName="email" appFormValidationAnimation>
+      <div class="form-field">
+        <input formControlName="email" appFormValidationAnimation>
+      </div>
     </form>
   `
 })
@@ -44,40 +46,154 @@ describe('FormValidationAnimationDirective', () => {
     fixture.detectChanges();
   });
 
-  it('should add validation-error class when field is invalid and touched', async () => {
+  it('should add validation-error class when field is invalid and touched', fakeAsync(async () => {
     const emailControl = component.testForm.get('email')!;
+    
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
 
     await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
-  });
+    expect(emailControl.invalid).toBeTruthy();
+    expect(emailControl.touched).toBeTruthy();
+  }));
 
-  it('should not add validation-error class when field is untouched', async () => {
+  it('should not add validation-error class when field is untouched', fakeAsync(async () => {
     const emailControl = component.testForm.get('email')!;
+    
     emailControl.setValue('');
     fixture.detectChanges();
 
     await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
-  });
+    expect(emailControl.invalid).toBeTruthy();
+    expect(emailControl.touched).toBeFalsy();
+  }));
 
-  it('should remove validation-error class when field becomes valid', async () => {
+  it('should remove validation-error class when field becomes valid', fakeAsync(async () => {
     const emailControl = component.testForm.get('email')!;
+    
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
 
     await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
+
+    expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
 
     emailControl.setValue('test@example.com');
     fixture.detectChanges();
 
     await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
-  });
+    expect(emailControl.valid).toBeTruthy();
+  }));
+
+  it('should add validation-error class when field is invalid and dirty', fakeAsync(async () => {
+    const emailControl = component.testForm.get('email')!;
+    
+    emailControl.markAsDirty();
+    emailControl.setValue('invalid-email');
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
+
+    expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
+    expect(emailControl.invalid).toBeTruthy();
+    expect(emailControl.dirty).toBeTruthy();
+  }));
+
+  it('should create error container within form field wrapper', fakeAsync(async () => {
+    const emailControl = component.testForm.get('email')!;
+    
+    emailControl.markAsTouched();
+    emailControl.setValue('');
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
+
+    const formField = fixture.debugElement.query(By.css('.form-field'));
+    const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
+    
+    expect(errorContainer).toBeTruthy();
+  }));
+
+  it('should display error message when validation fails', fakeAsync(async () => {
+    const emailControl = component.testForm.get('email')!;
+    
+    emailControl.markAsTouched();
+    emailControl.setValue('');
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
+
+    const formField = fixture.debugElement.query(By.css('.form-field'));
+    const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
+    const errorMessage = errorContainer?.querySelector('.error-message');
+    
+    expect(errorMessage).toBeTruthy();
+    expect(errorMessage?.textContent).toContain('Ce champ est requis');
+  }));
+
+  it('should clear error message when field becomes valid', fakeAsync(async () => {
+    const emailControl = component.testForm.get('email')!;
+    
+    emailControl.markAsTouched();
+    emailControl.setValue('');
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
+
+    const formField = fixture.debugElement.query(By.css('.form-field'));
+    let errorContainer = formField.nativeElement.querySelector('.validation-error-container');
+    expect(errorContainer?.querySelector('.error-message')).toBeTruthy();
+
+    emailControl.setValue('test@example.com');
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+    tick(300);
+    fixture.detectChanges();
+
+    errorContainer = formField.nativeElement.querySelector('.validation-error-container');
+    expect(errorContainer?.innerHTML).toBe('');
+  }));
+
+  it('should display email validation error message', fakeAsync(async () => {
+    const emailControl = component.testForm.get('email')!;
+    
+    emailControl.markAsTouched();
+    emailControl.setValue('invalid-email');
+    fixture.detectChanges();
+
+    await fixture.whenStable();
+    tick();
+    fixture.detectChanges();
+
+    const formField = fixture.debugElement.query(By.css('.form-field'));
+    const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
+    const errorMessage = errorContainer?.querySelector('.error-message');
+    
+    expect(errorMessage?.textContent).toContain('Email invalide');
+  }));
 });
