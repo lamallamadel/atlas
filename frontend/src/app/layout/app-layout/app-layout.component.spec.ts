@@ -85,8 +85,8 @@ describe('AppLayoutComponent', () => {
   });
 
   it('should close sidenav on mobile when closeSidenavOnMobile is called', async () => {
-    mockBreakpointObserver.observe.and.returnValue(of({ matches: true, breakpoints: {} }));
     component.drawer = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    mockBreakpointObserver.observe.and.returnValue(of({ matches: true, breakpoints: {} }));
     
     component.closeSidenavOnMobile();
     await fixture.whenStable();
