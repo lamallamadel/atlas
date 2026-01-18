@@ -27,6 +27,10 @@ module.exports = function(config) {
     },
     reporters: ['progress', 'kjhtml'],
     browsers: ['Chrome'],
-    restartOnFileChange: true
+    restartOnFileChange: true,
+    captureTimeout: 60000,
+    browserDisconnectTimeout: 10000,
+    browserNoActivityTimeout: 60000,
+    concurrency: 2
   });
 };
