@@ -44,41 +44,40 @@ describe('FormValidationAnimationDirective', () => {
     fixture.detectChanges();
   });
 
-  it('should create an instance', () => {
-    const directiveInstance = inputEl.injector.get(FormValidationAnimationDirective);
-    expect(directiveInstance).toBeTruthy();
-  });
-
-  it('should add validation-error class when field is invalid and touched', () => {
+  it('should add validation-error class when field is invalid and touched', async () => {
     const emailControl = component.testForm.get('email')!;
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
-    }, 100);
+    await fixture.whenStable();
+
+    expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
   });
 
-  it('should not add validation-error class when field is untouched', () => {
+  it('should not add validation-error class when field is untouched', async () => {
     const emailControl = component.testForm.get('email')!;
     emailControl.setValue('');
     fixture.detectChanges();
+
+    await fixture.whenStable();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
   });
 
-  it('should remove validation-error class when field becomes valid', () => {
+  it('should remove validation-error class when field becomes valid', async () => {
     const emailControl = component.testForm.get('email')!;
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
 
+    await fixture.whenStable();
+
     emailControl.setValue('test@example.com');
     fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
-    }, 100);
+    await fixture.whenStable();
+
+    expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
   });
 });
