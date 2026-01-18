@@ -4,6 +4,7 @@ import com.example.backend.entity.OutboundAttemptEntity;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.enums.OutboundAttemptStatus;
 import com.example.backend.entity.enums.OutboundMessageStatus;
+import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
 import org.slf4j.Logger;
@@ -14,6 +15,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +31,7 @@ public class OutboundJobWorker {
     private final List<OutboundMessageProvider> providers;
     private final AuditEventService auditEventService;
     private final ActivityService activityService;
+    private final MetricsService metricsService;
     
     @Value("${outbound.worker.batch-size:10}")
     private int batchSize;
@@ -41,12 +44,14 @@ public class OutboundJobWorker {
             OutboundAttemptRepository outboundAttemptRepository,
             List<OutboundMessageProvider> providers,
             AuditEventService auditEventService,
-            ActivityService activityService) {
+            ActivityService activityService,
+            MetricsService metricsService) {
         this.outboundMessageRepository = outboundMessageRepository;
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.providers = providers;
         this.auditEventService = auditEventService;
         this.activityService = activityService;
+        this.metricsService = metricsService;
     }
     
     @Scheduled(fixedDelayString = "${outbound.worker.poll-interval-ms:5000}")
@@ -165,17 +170,24 @@ public class OutboundJobWorker {
         logger.info("Outbound message sent successfully: id={}, providerMessageId={}", 
             message.getId(), result.getProviderMessageId());
         
+        LocalDateTime now = LocalDateTime.now();
         message.setStatus(OutboundMessageStatus.SENT);
         message.setProviderMessageId(result.getProviderMessageId());
         message.setErrorCode(null);
         message.setErrorMessage(null);
-        message.setUpdatedAt(LocalDateTime.now());
+        message.setUpdatedAt(now);
         outboundMessageRepository.save(message);
         
         attempt.setStatus(OutboundAttemptStatus.SUCCESS);
         attempt.setProviderResponseJson(result.getResponseData());
-        attempt.setUpdatedAt(LocalDateTime.now());
+        attempt.setUpdatedAt(now);
         outboundAttemptRepository.save(attempt);
+        
+        String channelName = message.getChannel().name().toLowerCase();
+        metricsService.incrementOutboundMessageSendSuccess(channelName);
+        
+        Duration deliveryLatency = Duration.between(message.getCreatedAt(), now);
+        metricsService.recordOutboundMessageDeliveryLatency(channelName, deliveryLatency);
         
         logAuditEvent(message, "SENT", "Message sent successfully");
         logActivity(message, "MESSAGE_SENT", String.format("Outbound %s message sent to %s", 
@@ -187,6 +199,8 @@ public class OutboundJobWorker {
         
         logger.warn("Outbound message failed: id={}, attempt={}/{}, errorCode={}, retryable={}", 
             message.getId(), message.getAttemptCount(), message.getMaxAttempts(), errorCode, retryable);
+        
+        String channelName = message.getChannel().name().toLowerCase();
         
         attempt.setStatus(OutboundAttemptStatus.FAILED);
         attempt.setErrorCode(errorCode);
@@ -202,12 +216,17 @@ public class OutboundJobWorker {
             message.setErrorCode(errorCode);
             message.setErrorMessage(errorMessage);
             
+            metricsService.incrementOutboundMessageRetry(channelName);
+            
             logger.info("Scheduling retry for message {}: nextRetryAt={}, attempt={}/{}", 
                 message.getId(), nextRetryAt, message.getAttemptCount(), message.getMaxAttempts());
         } else {
             message.setStatus(OutboundMessageStatus.FAILED);
             message.setErrorCode(errorCode);
             message.setErrorMessage(errorMessage);
+            
+            metricsService.incrementOutboundMessageSendFailure(channelName, errorCode != null ? errorCode : "UNKNOWN");
+            metricsService.incrementOutboundMessageDeadLetter(channelName);
             
             String reason = !retryable ? "non-retryable error" : "max attempts reached";
             logger.warn("Message {} moved to FAILED: {}", message.getId(), reason);

@@ -7,6 +7,7 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
+import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.OutboundMessageRepository;
@@ -35,16 +36,19 @@ public class OutboundMessageService {
     private final ConsentementRepository consentementRepository;
     private final DossierRepository dossierRepository;
     private final AuditEventService auditEventService;
+    private final MetricsService metricsService;
     
     public OutboundMessageService(
             OutboundMessageRepository outboundMessageRepository,
             ConsentementRepository consentementRepository,
             DossierRepository dossierRepository,
-            AuditEventService auditEventService) {
+            AuditEventService auditEventService,
+            MetricsService metricsService) {
         this.outboundMessageRepository = outboundMessageRepository;
         this.consentementRepository = consentementRepository;
         this.dossierRepository = dossierRepository;
         this.auditEventService = auditEventService;
+        this.metricsService = metricsService;
     }
     
     @Transactional
@@ -107,6 +111,8 @@ public class OutboundMessageService {
         
         logger.info("Created outbound message: id={}, orgId={}, dossierId={}, channel={}, to={}", 
             saved.getId(), orgId, dossierId, channel, to);
+        
+        metricsService.incrementOutboundMessageQueued(channel.name().toLowerCase());
         
         if (auditEventService != null) {
             try {

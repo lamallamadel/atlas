@@ -1,6 +1,7 @@
 package com.example.backend.repository;
 
 import com.example.backend.entity.OutboundMessageEntity;
+import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,4 +32,13 @@ public interface OutboundMessageRepository extends JpaRepository<OutboundMessage
     Optional<OutboundMessageEntity> findByProviderMessageId(String providerMessageId);
     
     long countByStatusAndOrgId(OutboundMessageStatus status, String orgId);
+    
+    long countByStatus(OutboundMessageStatus status);
+    
+    long countByStatusAndChannel(OutboundMessageStatus status, MessageChannel channel);
+    
+    long countByChannelAndAttemptCountGreaterThan(MessageChannel channel, Integer attemptCount);
+    
+    @Query("SELECT om FROM OutboundMessageEntity om WHERE om.status = :status AND om.attemptCount >= :minAttempts AND om.updatedAt < :beforeTime ORDER BY om.attemptCount DESC, om.updatedAt ASC")
+    List<OutboundMessageEntity> findStuckMessages(@Param("status") OutboundMessageStatus status, @Param("minAttempts") Integer minAttempts, @Param("beforeTime") LocalDateTime beforeTime, Pageable pageable);
 }

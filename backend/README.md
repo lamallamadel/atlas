@@ -97,6 +97,8 @@ java -jar target/backend.jar
 
 - **Health**: `/actuator/health` - Application health status
 - **Info**: `/actuator/info` - Application build metadata
+- **Metrics**: `/actuator/metrics` - Application metrics
+- **Prometheus**: `/actuator/prometheus` - Prometheus-formatted metrics
 
 ### Health Endpoint
 
@@ -113,6 +115,32 @@ Returns build information including version, build time, and application metadat
 ```bash
 curl http://localhost:8080/actuator/info
 ```
+
+### Metrics Endpoint
+
+Returns available metrics. To see a specific metric:
+
+```bash
+curl http://localhost:8080/actuator/metrics/outbound_message_queue_depth
+```
+
+### Prometheus Endpoint
+
+Returns all metrics in Prometheus format for scraping:
+
+```bash
+curl http://localhost:8080/actuator/prometheus
+```
+
+## Observability
+
+The application includes comprehensive observability for outbound messaging. See [OUTBOUND_MESSAGING_OBSERVABILITY.md](OUTBOUND_MESSAGING_OBSERVABILITY.md) for detailed documentation on:
+
+- Available metrics (counters, timers, gauges)
+- Scheduled alert jobs for stuck messages and queue health
+- Configuration options
+- Prometheus/Grafana integration examples
+- Troubleshooting guides
 
 ## Environment Variables
 

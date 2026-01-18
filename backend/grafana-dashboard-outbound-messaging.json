@@ -1,0 +1,186 @@
+{
+  "dashboard": {
+    "title": "Outbound Messaging Observability",
+    "tags": ["outbound", "messaging", "observability"],
+    "timezone": "browser",
+    "panels": [
+      {
+        "title": "Queue Depth by Status",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [
+          {
+            "expr": "outbound_message_queue_depth",
+            "legendFormat": "{{status}}"
+          }
+        ]
+      },
+      {
+        "title": "Total Queued Messages",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [
+          {
+            "expr": "outbound_message_total_queued"
+          }
+        ]
+      },
+      {
+        "title": "Dead Letter Queue Size",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 0},
+        "targets": [
+          {
+            "expr": "outbound_message_dead_letter_queue_size"
+          }
+        ],
+        "thresholds": {
+          "mode": "absolute",
+          "steps": [
+            {"value": 0, "color": "green"},
+            {"value": 50, "color": "yellow"},
+            {"value": 100, "color": "red"}
+          ]
+        }
+      },
+      {
+        "title": "Send Success Rate by Channel",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 4},
+        "targets": [
+          {
+            "expr": "rate(outbound_message_send_success_total[5m]) / (rate(outbound_message_send_success_total[5m]) + rate(outbound_message_send_failure_total[5m]))",
+            "legendFormat": "{{channel}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "percentunit",
+            "max": 1,
+            "min": 0
+          }
+        ]
+      },
+      {
+        "title": "Message Send Rate by Channel",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "targets": [
+          {
+            "expr": "rate(outbound_message_queued_total[5m])",
+            "legendFormat": "Queued - {{channel}}"
+          },
+          {
+            "expr": "rate(outbound_message_send_success_total[5m])",
+            "legendFormat": "Sent - {{channel}}"
+          }
+        ]
+      },
+      {
+        "title": "Delivery Latency P95 by Channel",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, sum by (channel, le) (rate(outbound_message_delivery_latency_bucket[5m])))",
+            "legendFormat": "p95 - {{channel}}"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s"
+          }
+        ]
+      },
+      {
+        "title": "Retry Rate by Channel",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "targets": [
+          {
+            "expr": "rate(outbound_message_retry_total[5m])",
+            "legendFormat": "{{channel}}"
+          }
+        ]
+      },
+      {
+        "title": "Failure Rate by Error Code",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "targets": [
+          {
+            "expr": "sum by (error_code) (rate(outbound_message_send_failure_total[5m]))",
+            "legendFormat": "{{error_code}}"
+          }
+        ]
+      },
+      {
+        "title": "Messages with Retry Attempts",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 24},
+        "targets": [
+          {
+            "expr": "outbound_message_retry_count",
+            "legendFormat": "{{channel}}"
+          }
+        ]
+      },
+      {
+        "title": "Alert Counts",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 24},
+        "targets": [
+          {
+            "expr": "rate(outbound_message_stuck_alert_total[1h])",
+            "legendFormat": "Stuck Messages - {{channel}}/{{status}}"
+          },
+          {
+            "expr": "rate(outbound_message_high_queue_depth_alert_total[1h])",
+            "legendFormat": "High Queue Depth"
+          },
+          {
+            "expr": "rate(outbound_message_dead_letter_alert_total[1h])",
+            "legendFormat": "Dead Letter Growth"
+          }
+        ]
+      },
+      {
+        "title": "Delivery Latency Percentiles (All Channels)",
+        "type": "graph",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 32},
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, sum(rate(outbound_message_delivery_latency_bucket[5m])) by (le))",
+            "legendFormat": "p50"
+          },
+          {
+            "expr": "histogram_quantile(0.75, sum(rate(outbound_message_delivery_latency_bucket[5m])) by (le))",
+            "legendFormat": "p75"
+          },
+          {
+            "expr": "histogram_quantile(0.90, sum(rate(outbound_message_delivery_latency_bucket[5m])) by (le))",
+            "legendFormat": "p90"
+          },
+          {
+            "expr": "histogram_quantile(0.95, sum(rate(outbound_message_delivery_latency_bucket[5m])) by (le))",
+            "legendFormat": "p95"
+          },
+          {
+            "expr": "histogram_quantile(0.99, sum(rate(outbound_message_delivery_latency_bucket[5m])) by (le))",
+            "legendFormat": "p99"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s"
+          }
+        ]
+      }
+    ],
+    "refresh": "30s",
+    "time": {
+      "from": "now-1h",
+      "to": "now"
+    }
+  }
+}
