@@ -6,6 +6,7 @@ import com.example.backend.dto.ActivityResponse;
 import com.example.backend.dto.ActivityUpdateRequest;
 import com.example.backend.entity.ActivityEntity;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.ActivityVisibility;
 import com.example.backend.repository.ActivityRepository;
 import com.example.backend.repository.DossierRepository;
@@ -212,7 +213,7 @@ public class ActivityService {
 
         ActivityEntity activity = new ActivityEntity();
         activity.setOrgId(orgId);
-        activity.setType(activityType);
+        activity.setType(ActivityType.valueOf(activityType));
         activity.setContent(description);
         activity.setDossier(dossier);
         activity.setVisibility(ActivityVisibility.INTERNAL);

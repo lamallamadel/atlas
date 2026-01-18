@@ -83,6 +83,10 @@ public class WhatsAppProviderConfig extends BaseEntity {
         return enabled;
     }
 
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
     public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
