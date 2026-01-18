@@ -2,18 +2,26 @@
 
 .table-container {
   width: 100%;
-  overflow-x: auto;
+  /* Avoid page-level horizontal scrolling; keep content constrained. */
+  overflow-x: hidden;
 }
 
 .table-wrapper {
   position: relative;
-  overflow: auto;
+  /*
+   * UX: keep vertical scrolling for large result sets while preventing
+   * a permanent horizontal scrollbar. Column widths are managed via
+   * table-layout: fixed + ellipsis.
+   */
+  overflow-y: auto;
+  overflow-x: hidden;
   max-height: 70vh;
 }
 
 /* Table Base Styles */
 table {
   width: 100%;
+  table-layout: fixed;
   background: var(--color-neutral-0);
   transition: var(--transition-shadow);
 }
@@ -196,6 +204,29 @@ table.sticky-header {
 .virtual-scroll-viewport {
   height: 600px;
   width: 100%;
+}
+
+/* Shared utility for multi-line custom cells (rendered via [innerHTML]) */
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.cell-primary {
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cell-secondary {
+  font-size: var(--font-size-xs);
+  color: var(--color-neutral-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .virtual-scroll-viewport .cdk-virtual-scroll-content-wrapper {

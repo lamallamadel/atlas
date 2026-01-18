@@ -193,6 +193,25 @@ export class ReportsDashboardComponent implements OnInit {
     this.loadReports();
   }
 
+  /**
+   * Helper used by the Material datepicker inputs.
+   * The reporting API expects dates in ISO format (yyyy-MM-dd).
+   */
+  parseDate(value: string): Date | null {
+    if (!value) {
+      return null;
+    }
+
+    // Parse yyyy-MM-dd without timezone surprises.
+    const parts = value.split('-').map(v => Number(v));
+    if (parts.length !== 3 || parts.some(n => Number.isNaN(n))) {
+      const fallback = new Date(value);
+      return Number.isNaN(fallback.getTime()) ? null : fallback;
+    }
+    const [year, month, day] = parts;
+    return new Date(year, month - 1, day);
+  }
+
   private updateConversionBySourceChart(data: KpiReportResponse): void {
     const sources = data.conversionRateBySource.map(s => s.source);
     const conversionRates = data.conversionRateBySource.map(s => s.conversionRate);
@@ -281,7 +300,10 @@ export class ReportsDashboardComponent implements OnInit {
     };
   }
 
-  private formatDate(date: Date): string {
+  formatDate(date: Date | null): string {
+    if (!date) {
+      return '';
+    }
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');

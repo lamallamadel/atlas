@@ -10,6 +10,8 @@
   background-color: var(--color-neutral-0);
   box-shadow: var(--shadow-md);
   transition: var(--transition-transform);
+  /* Prevent horizontal scrollbar caused by hover transforms / long labels */
+  overflow-x: hidden;
 
   @include tablet {
     width: 240px;
@@ -22,7 +24,13 @@
 }
 
 .sidenav-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  /* Brand-aligned header: real-estate primary palette (blue) */
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-800, #193d72) 0%,
+    var(--color-primary-600, #265192) 55%,
+    var(--color-primary-500, #2c5aa0) 100%
+  );
   color: var(--color-neutral-0);
   min-height: 64px;
   padding: 0 var(--spacing-4);
@@ -43,6 +51,7 @@
 
 .nav-list {
   padding-top: var(--spacing-4);
+  overflow-x: hidden;
 }
 
 .nav-list a {
@@ -51,13 +60,11 @@
   transition: var(--transition-base);
   color: var(--color-neutral-800);
   position: relative;
+  max-width: 100%;
 
   &:hover {
-    background-color: rgba(103, 58, 183, 0.08);
-    
-    @media (hover: hover) and (pointer: fine) {
-      transform: translateX(4px);
-    }
+    background-color: rgba(44, 90, 160, 0.08);
+    /* Keep hover feedback without shifting layout (prevents horizontal scrollbars) */
   }
 
   &.active {
@@ -79,11 +86,22 @@
   }
 }
 
+/* Ensure long nav labels never force horizontal scrolling */
+:host ::ng-deep .nav-list .mdc-list-item__primary-text,
+:host ::ng-deep .nav-list .mat-mdc-list-item-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .sidenav-content {
   display: flex;
   flex-direction: column;
   height: 100%;
   background-color: var(--color-neutral-100);
+  /* Prevent child layouts (tables/cards) from forcing a page-level horizontal scrollbar */
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .top-toolbar {
@@ -91,13 +109,46 @@
   top: 0;
   z-index: var(--z-index-sticky);
   box-shadow: var(--shadow-md);
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-primary-800, #193d72) 0%,
+    var(--color-primary-600, #265192) 55%,
+    var(--color-primary-500, #2c5aa0) 100%
+  );
   color: var(--color-neutral-0);
   min-height: 64px;
   padding: 0 var(--spacing-4);
+  overflow-x: hidden;
+  /* Allow toolbar children (search bar) to shrink without forcing horizontal scrolling */
+  min-width: 0;
 
   @include mobile-only {
     padding: 0 var(--spacing-2);
+  }
+}
+
+/* Dark mode: avoid light/pastel gradient on the top bar (keep it deep & premium) */
+:host-context(.dark-theme) .top-toolbar,
+:host-context(.dark-theme) .sidenav-header {
+  background: linear-gradient(135deg, #0b1220 0%, #111827 60%, #0b1220 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+:host-context(.dark-theme) .nav-list a {
+  color: var(--color-neutral-800);
+
+  &:hover {
+    background-color: rgba(137, 167, 224, 0.10);
+  }
+
+  &.active {
+    background-color: rgba(137, 167, 224, 0.14);
+    color: var(--color-primary-600);
+    border-left-color: var(--color-primary-600);
+
+    mat-icon {
+      color: var(--color-primary-600);
+    }
   }
 }
 
@@ -197,10 +248,10 @@
     transition: var(--transition-colors);
 
     &:hover {
-      background-color: rgba(103, 58, 183, 0.08);
+      background-color: rgba(44, 90, 160, 0.08);
 
       mat-icon {
-        color: #673ab7;
+        color: var(--color-primary-600, #265192);
       }
     }
 
@@ -231,7 +282,7 @@
   font-size: 48px;
   width: 48px;
   height: 48px;
-  color: #667eea;
+  color: var(--color-primary-400, #476da8);
 
   @include mobile-only {
     font-size: 40px;
@@ -269,6 +320,8 @@
   flex: 1;
   padding: var(--spacing-6);
   overflow-y: auto;
+  min-width: 0;
+  overflow-x: hidden;
 
   @include mobile-only {
     padding: var(--spacing-4);

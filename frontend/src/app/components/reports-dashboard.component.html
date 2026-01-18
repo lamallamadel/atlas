@@ -5,12 +5,28 @@
     <div class="date-filter" role="group" aria-label="Filtres de date">
       <mat-form-field appearance="outline">
         <mat-label>From Date</mat-label>
-        <input matInput type="date" [(ngModel)]="dateFrom" aria-label="Date de début pour le filtre">
+        <input
+          matInput
+          [matDatepicker]="fromPicker"
+          [ngModel]="parseDate(dateFrom)"
+          (ngModelChange)="dateFrom = formatDate($event)"
+          aria-label="Date de début pour le filtre"
+        >
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
       </mat-form-field>
       
       <mat-form-field appearance="outline">
         <mat-label>To Date</mat-label>
-        <input matInput type="date" [(ngModel)]="dateTo" aria-label="Date de fin pour le filtre">
+        <input
+          matInput
+          [matDatepicker]="toPicker"
+          [ngModel]="parseDate(dateTo)"
+          (ngModelChange)="dateTo = formatDate($event)"
+          aria-label="Date de fin pour le filtre"
+        >
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
       </mat-form-field>
       
       <button mat-raised-button color="primary" (click)="applyDateFilter()" aria-label="Appliquer les filtres de date">

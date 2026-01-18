@@ -7,31 +7,21 @@
         {{ getFormErrorMessage() }}
       </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Date et heure de début <span class="required" aria-label="obligatoire">*</span></mat-label>
-        <input matInput 
-               type="datetime-local" 
-               formControlName="startTime" 
-               placeholder="jj/mm/aaaa hh:mm"
-               aria-required="true"
-               [attr.aria-invalid]="appointmentForm.get('startTime')?.invalid && appointmentForm.get('startTime')?.touched">
-        <mat-error *ngIf="appointmentForm.get('startTime')?.invalid" role="alert">
-          {{ getErrorMessage('startTime') }}
-        </mat-error>
-      </mat-form-field>
+      <div class="full-width">
+        <app-datetime-picker
+          formControlName="startTime"
+          [required]="true"
+          label="Date et heure de début"
+        ></app-datetime-picker>
+      </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Date et heure de fin <span class="required" aria-label="obligatoire">*</span></mat-label>
-        <input matInput 
-               type="datetime-local" 
-               formControlName="endTime" 
-               placeholder="jj/mm/aaaa hh:mm"
-               aria-required="true"
-               [attr.aria-invalid]="appointmentForm.get('endTime')?.invalid && appointmentForm.get('endTime')?.touched">
-        <mat-error *ngIf="appointmentForm.get('endTime')?.invalid" role="alert">
-          {{ getErrorMessage('endTime') }}
-        </mat-error>
-      </mat-form-field>
+      <div class="full-width">
+        <app-datetime-picker
+          formControlName="endTime"
+          [required]="true"
+          label="Date et heure de fin"
+        ></app-datetime-picker>
+      </div>
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Lieu</mat-label>

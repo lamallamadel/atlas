@@ -2,6 +2,8 @@
 
 .table-container {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   /* Important:
      Keep a single scroll container for the table (the wrapper).
      Having both the container and wrapper scroll horizontally can
@@ -11,14 +13,48 @@
 
 .table-wrapper {
   position: relative;
-  overflow: auto;
+  width: 100%;
+  min-width: 0;
+  /*
+    UX decision (Ergo P1):
+    - On Desktop, we avoid the permanent horizontal scrollbar that appears even
+      when the table is visually fitting.
+    - If a screen truly needs horizontal navigation later, we should treat it
+      as a dedicated UX pattern (column chooser / responsive columns), not a
+      generic always-on scrollbar.
+  */
+  overflow-y: visible;
+  /*
+    Scroll horizontal géré par le wrapper:
+    - auto: pas de scrollbar si le tableau « fit »
+    - garde l'accès à la colonne Actions si l'espace devient insuffisant
+  */
   overflow-x: auto;
-  overflow-y: auto;
-  max-height: 70vh;
+  max-height: none;
 
   @include mobile-only {
     max-height: none;
   }
+}
+
+/*
+  Text wrapping policy
+  -------------------
+  - Header: never break inside words/letters (prevents "I\nD" and "T\nE\nL..." in narrow columns)
+  - Cells: allow wrapping but avoid breaking words/letters arbitrarily.
+*/
+.mat-mdc-header-cell {
+  white-space: normal;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
+}
+
+.mat-mdc-cell {
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+  hyphens: auto;
 }
 
 /*
@@ -35,7 +71,7 @@
   width: 100%;
   min-width: 100%;
   table-layout: auto;
-  border-collapse: separate;
+  border-collapse: collapse;
 }
 
 .mat-mdc-header-row,
@@ -90,7 +126,7 @@
     }
     
     .counter-label {
-      font-size: var(--font-size-sm);
+      font-size: 12px;
     }
   }
 }
@@ -101,15 +137,15 @@
   gap: var(--spacing-3);
 
   .pagination-range {
-    font-size: var(--font-size-sm);
+    font-size: 12px;
     font-weight: var(--font-weight-medium);
     color: var(--color-neutral-700);
-    min-width: 120px;
+    min-width: 96px;
     text-align: center;
 
     @include mobile-only {
       min-width: 90px;
-      font-size: var(--font-size-xs);
+      font-size: 11px;
     }
   }
 
@@ -153,16 +189,16 @@ table.sticky-header {
 .mat-header-cell {
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-700);
-  font-size: var(--font-size-sm);
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: var(--color-neutral-50);
   border-bottom: 2px solid var(--color-primary-500);
-  padding: var(--spacing-4) var(--spacing-3);
+  padding: var(--spacing-2, 8px) var(--spacing-3, 12px);
 
   @include mobile-only {
-    font-size: var(--font-size-xs);
-    padding: var(--spacing-3) var(--spacing-2);
+    font-size: 11px;
+    padding: var(--spacing-2, 8px) var(--spacing-2, 8px);
   }
 }
 
@@ -254,12 +290,12 @@ table.sticky-header {
 .mat-mdc-cell,
 .mat-cell {
   color: var(--color-neutral-800);
-  font-size: var(--font-size-sm);
-  padding: var(--spacing-4) var(--spacing-3);
+  font-size: 12px;
+  padding: var(--spacing-2, 8px) var(--spacing-3, 12px);
 
   @include mobile-only {
-    font-size: var(--font-size-xs);
-    padding: var(--spacing-3) var(--spacing-2);
+    font-size: 11px;
+    padding: var(--spacing-2, 8px) var(--spacing-2, 8px);
   }
 }
 
@@ -276,9 +312,9 @@ table.sticky-header {
 }
 
 .actions-header {
-  width: 120px;
-  min-width: 120px;
-  max-width: 120px;
+  width: 96px;
+  min-width: 96px;
+  max-width: 96px;
 
   /* Keep the Actions column visible when horizontally scrolling */
   position: sticky;
@@ -295,8 +331,8 @@ table.sticky-header {
 .actions-cell {
   text-align: right;
   white-space: nowrap;
-  width: 120px;
-  max-width: 120px;
+  width: 96px;
+  max-width: 96px;
 
   /* Keep actions always discoverable */
   position: sticky;
@@ -391,7 +427,7 @@ table.sticky-header {
   max-width: 400px;
 
   @include mobile-only {
-    font-size: var(--font-size-sm);
+    font-size: 12px;
     max-width: 300px;
   }
 }
@@ -474,7 +510,7 @@ table.sticky-header {
 }
 
 .field-label {
-  font-size: var(--font-size-xs);
+  font-size: 11px;
   font-weight: var(--font-weight-semibold);
   color: var(--color-neutral-600);
   text-transform: uppercase;
@@ -487,7 +523,7 @@ table.sticky-header {
   word-break: break-word;
 
   @include mobile-only {
-    font-size: var(--font-size-sm);
+    font-size: 12px;
   }
 }
 
@@ -529,7 +565,7 @@ mat-paginator {
   // Responsive paginator adjustments
   @include mobile-only {
     .mat-mdc-paginator {
-      font-size: var(--font-size-xs);
+      font-size: 11px;
     }
 
     .mat-mdc-paginator-container {

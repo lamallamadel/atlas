@@ -7,7 +7,7 @@ describe('ToastNotificationService', () => {
   let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('MatSnackBar', ['openFromComponent']);
+    const spy = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -26,47 +26,50 @@ describe('ToastNotificationService', () => {
 
   it('should show success notification', () => {
     const mockSnackBarRef = {
+      onAction: () => ({ subscribe: () => ({}) }),
       afterDismissed: () => ({
         subscribe: (callback: () => void) => {
           setTimeout(callback, 100);
         }
       })
     };
-    snackBarSpy.openFromComponent.and.returnValue(mockSnackBarRef as any);
+    snackBarSpy.open.and.returnValue(mockSnackBarRef as any);
 
     service.success('Test success message');
 
-    expect(snackBarSpy.openFromComponent).toHaveBeenCalled();
+    expect(snackBarSpy.open).toHaveBeenCalled();
   });
 
   it('should show error notification', () => {
     const mockSnackBarRef = {
+      onAction: () => ({ subscribe: () => ({}) }),
       afterDismissed: () => ({
         subscribe: (callback: () => void) => {
           setTimeout(callback, 100);
         }
       })
     };
-    snackBarSpy.openFromComponent.and.returnValue(mockSnackBarRef as any);
+    snackBarSpy.open.and.returnValue(mockSnackBarRef as any);
 
     service.error('Test error message');
 
-    expect(snackBarSpy.openFromComponent).toHaveBeenCalled();
+    expect(snackBarSpy.open).toHaveBeenCalled();
   });
 
   it('should queue notifications', () => {
     const mockSnackBarRef = {
+      onAction: () => ({ subscribe: () => ({}) }),
       afterDismissed: () => ({
         subscribe: (callback: () => void) => {
           setTimeout(callback, 100);
         }
       })
     };
-    snackBarSpy.openFromComponent.and.returnValue(mockSnackBarRef as any);
+    snackBarSpy.open.and.returnValue(mockSnackBarRef as any);
 
     service.success('Message 1');
     service.success('Message 2');
 
-    expect(snackBarSpy.openFromComponent).toHaveBeenCalledTimes(1);
+    expect(snackBarSpy.open).toHaveBeenCalledTimes(1);
   });
 });

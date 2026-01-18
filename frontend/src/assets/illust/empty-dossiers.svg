@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="320" viewBox="0 0 520 320" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="64" y1="40" x2="456" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2c5aa0" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#e67e22" stop-opacity="0.10"/>
+    </linearGradient>
+    <linearGradient id="stroke" x1="120" y1="90" x2="400" y2="240" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2c5aa0"/>
+      <stop offset="1" stop-color="#e67e22"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="24" y="24" width="472" height="272" rx="24" fill="url(#bg)"/>
+
+  <!-- Folder -->
+  <path d="M156 118c0-10 8-18 18-18h64l18 18h90c10 0 18 8 18 18v104c0 10-8 18-18 18H174c-10 0-18-8-18-18V118Z" fill="#fff"/>
+  <path d="M156 118c0-10 8-18 18-18h64l18 18h90c10 0 18 8 18 18v104c0 10-8 18-18 18H174c-10 0-18-8-18-18V118Z" stroke="url(#stroke)" stroke-width="3"/>
+
+  <!-- Lines -->
+  <path d="M190 160h160" stroke="#2c5aa0" stroke-opacity="0.35" stroke-width="10" stroke-linecap="round"/>
+  <path d="M190 190h210" stroke="#2c5aa0" stroke-opacity="0.25" stroke-width="10" stroke-linecap="round"/>
+  <path d="M190 220h130" stroke="#2c5aa0" stroke-opacity="0.20" stroke-width="10" stroke-linecap="round"/>
+
+  <!-- Magnifier -->
+  <circle cx="370" cy="222" r="26" fill="#fff" stroke="url(#stroke)" stroke-width="3"/>
+  <path d="M388 240l18 18" stroke="url(#stroke)" stroke-width="6" stroke-linecap="round"/>
+</svg>

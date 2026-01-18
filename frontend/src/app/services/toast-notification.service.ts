@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { MatSnackBar, MatSnackBarRef } from '@angular/material/snack-bar';
-import { EnhancedSnackbarComponent } from '../components/enhanced-snackbar.component';
 
 export interface ToastNotification {
   message: string;
@@ -17,7 +16,7 @@ export interface ToastNotification {
 export class ToastNotificationService {
   private queue: ToastNotification[] = [];
   private isShowing = false;
-  private currentSnackBarRef: MatSnackBarRef<EnhancedSnackbarComponent> | null = null;
+  private currentSnackBarRef: MatSnackBarRef<any> | null = null;
 
   constructor(private snackBar: MatSnackBar) {}
 
@@ -84,12 +83,22 @@ export class ToastNotificationService {
       return;
     }
 
-    this.currentSnackBarRef = this.snackBar.openFromComponent(EnhancedSnackbarComponent, {
-      data: notification,
+    // Unify notifications with the application's centered top snackbar style
+    // (preferred UX: consistent feedback location, no top-right red toast).
+    const actionLabel = notification.action ?? 'Fermer';
+    this.currentSnackBarRef = this.snackBar.open(notification.message, actionLabel, {
       duration: notification.duration,
-      horizontalPosition: 'right',
+      horizontalPosition: 'center',
       verticalPosition: 'top',
-      panelClass: [`${notification.type}-snackbar`, 'enhanced-snackbar']
+      panelClass: [`${notification.type}-snackbar`]
+    });
+
+    this.currentSnackBarRef.onAction().subscribe(() => {
+      try {
+        notification.onAction?.();
+      } catch {
+        // no-op: avoid breaking the UI if a consumer callback throws
+      }
     });
 
     this.currentSnackBarRef.afterDismissed().subscribe(() => {

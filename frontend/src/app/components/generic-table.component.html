@@ -57,7 +57,7 @@
         <th mat-header-cell *matHeaderCellDef 
             [mat-sort-header]="column.sortable !== false && enableSort ? column.key : ''"
             [ngStyle]="getColumnStyle(column)"
-            class="resizable-header"
+            [class.resizable-header]="column.resizable !== false"
             role="columnheader"
             [attr.aria-sort]="column.sortable !== false && enableSort ? 'none' : null">
           <div class="header-content">

@@ -1,5 +1,12 @@
 @use '@angular/material' as mat;
 
+/*
+  Make sure the design tokens (CSS custom properties) are always present.
+  theme.scss is loaded as a global style, so this avoids regressions where
+  components/pages rely on var(--*) but variables.scss isn't included.
+*/
+@use './variables';
+
 @include mat.core();
 
 $custom-typography: mat.define-typography-config(

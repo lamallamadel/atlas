@@ -2,7 +2,8 @@
 
 .page-container {
   animation: fadeIn 400ms ease-out;
-  max-width: 1200px;
+  /* Wider containers help tables fit without forcing layout scrollbars. */
+  max-width: 1320px;
   margin: 0 auto;
   padding: 0 var(--spacing-4, 16px);
   width: 100%;
@@ -43,7 +44,7 @@
 }
 
 .btn-create {
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  background: linear-gradient(135deg, var(--color-primary-500, #2c5aa0), var(--color-primary-600, #265192));
   color: white;
   box-shadow: 0 2px 8px rgba(44, 90, 160, 0.3);
 }
@@ -58,12 +59,12 @@
 }
 
 .btn-retry {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-500, #2c5aa0);
   color: white;
 }
 
 .btn-retry:hover {
-  background-color: var(--color-primary-600);
+  background-color: var(--color-primary-600, #265192);
   transform: translateY(-2px);
 }
 
@@ -85,8 +86,8 @@
 
 .btn-page:hover:not(:disabled),
 .btn-page-num:hover:not(:disabled) {
-  background-color: var(--color-primary-50);
-  border-color: var(--color-primary-500);
+  background-color: var(--color-primary-50, #e5eaf3);
+  border-color: var(--color-primary-500, #2c5aa0);
   transform: translateY(-1px);
 }
 
@@ -96,9 +97,9 @@
 }
 
 .btn-page-num.active {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-500, #2c5aa0);
   color: white;
-  border-color: var(--color-primary-500);
+  border-color: var(--color-primary-500, #2c5aa0);
   font-weight: var(--font-weight-semibold);
 }
 
@@ -267,7 +268,7 @@
 }
 
 .dark-theme .btn-create {
-  background: linear-gradient(135deg, var(--color-primary-500), var(--color-primary-600));
+  background: linear-gradient(135deg, var(--color-primary-500, #2c5aa0), var(--color-primary-600, #265192));
   box-shadow: 0 2px 8px rgba(137, 167, 224, 0.3);
 }
 
@@ -276,11 +277,11 @@
 }
 
 .dark-theme .btn-retry {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-500, #2c5aa0);
 }
 
 .dark-theme .btn-retry:hover {
-  background-color: var(--color-primary-600);
+  background-color: var(--color-primary-600, #265192);
 }
 
 .dark-theme .btn-page,
@@ -293,13 +294,13 @@
 .dark-theme .btn-page:hover:not(:disabled),
 .dark-theme .btn-page-num:hover:not(:disabled) {
   background-color: var(--color-primary-alpha-10);
-  border-color: var(--color-primary-500);
+  border-color: var(--color-primary-500, #2c5aa0);
 }
 
 .dark-theme .btn-page-num.active {
-  background-color: var(--color-primary-500);
+  background-color: var(--color-primary-500, #2c5aa0);
   color: var(--color-neutral-1000);
-  border-color: var(--color-primary-500);
+  border-color: var(--color-primary-500, #2c5aa0);
 }
 
 .dark-theme .page-card:hover {

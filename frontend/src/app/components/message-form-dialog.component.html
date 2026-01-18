@@ -42,19 +42,13 @@
         </mat-error>
       </mat-form-field>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Date et heure</mat-label>
-        <input 
-          matInput 
-          type="datetime-local" 
+      <div class="full-width">
+        <app-datetime-picker
           formControlName="timestamp"
-          aria-required="true"
-          [attr.aria-invalid]="messageForm.get('timestamp')?.hasError('required') && messageForm.get('timestamp')?.touched"
-        >
-        <mat-error *ngIf="messageForm.get('timestamp')?.hasError('required')" role="alert">
-          {{ getErrorMessage('timestamp') }}
-        </mat-error>
-      </mat-form-field>
+          [required]="true"
+          label="Date et heure"
+        ></app-datetime-picker>
+      </div>
     </form>
   </mat-dialog-content>
 

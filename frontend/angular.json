@@ -35,6 +35,7 @@
               "src/assets"
             ],
             "styles": [
+              "src/styles/variables.scss",
               "src/styles/theme.scss",
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
@@ -107,6 +108,7 @@
               "src/assets"
             ],
             "styles": [
+              "src/styles/variables.scss",
               "src/styles/theme.scss",
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",

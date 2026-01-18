@@ -31,6 +31,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -59,6 +61,7 @@ import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog
 import { AppointmentFormDialogComponent } from './components/appointment-form-dialog.component';
 import { BulkOperationDialogComponent } from './components/bulk-operation-dialog.component';
 import { ReportsDashboardComponent } from './components/reports-dashboard.component';
+import { DatetimePickerComponent } from './components/datetime-picker.component';
 import { GlobalSearchBarComponent } from './components/global-search-bar.component';
 import { SearchComponent } from './pages/search/search.component';
 import { ActivityTimelineComponent } from './components/activity-timeline.component';
@@ -110,6 +113,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AppointmentFormDialogComponent,
     BulkOperationDialogComponent,
     ReportsDashboardComponent,
+    DatetimePickerComponent,
     GlobalSearchBarComponent,
     SearchComponent,
     ActivityTimelineComponent,
@@ -158,6 +162,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatChipsModule,
     MatBottomSheetModule,
     MatButtonToggleModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,
@@ -166,6 +172,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },
+    { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
 
     {
       provide: APP_INITIALIZER,
@@ -183,7 +190,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
       useClass: CorrelationIdInterceptor,
       multi: true
     },
-    { provide: LOCALE_ID, useValue: 'fr-FR' }
+    
   ],
   bootstrap: [AppComponent]
 })

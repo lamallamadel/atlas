@@ -57,35 +57,93 @@ export class DossiersComponent implements OnInit {
   private phoneFormatPipe = new PhoneFormatPipe();
   private readonly FILTER_CONTEXT = 'dossiers';
 
-  columns: ColumnConfig[] = [
-    { key: 'id', header: 'ID', sortable: true, type: 'number' },
-    { 
-      key: 'annonceTitle', 
-      header: 'Annonce liée', 
+  /**
+   * Important UX:
+   * - Sur desktop, on garde les colonnes métier "complètes" (comme avant) pour éviter l'effet "salade".
+   * - Le tableau doit rester lisible (cellules ellipsis + header multi-ligne).
+   * - Sur mobile, on réduit naturellement le nombre de colonnes.
+   */
+  columns: ColumnConfig[] = [];
+
+  private readonly desktopColumns: ColumnConfig[] = [
+    // Ajustements de largeur (desktop) pour éviter un scroll horizontal permanent,
+    // sans retirer de colonnes.
+    { key: 'id', header: 'ID', sortable: true, type: 'number', width: '60px' },
+    {
+      key: 'annonceTitle',
+      header: 'Annonce liée',
       sortable: true,
-      format: (value: unknown) => (value as string) || '—'
+      width: '160px',
+      format: (value: unknown) => this.escapeHtml((value as string) || '—')
     },
-    { 
-      key: 'leadName', 
-      header: 'Nom du prospect', 
+    {
+      key: 'leadName',
+      header: 'Nom du prospect',
       sortable: true,
-      format: (value: unknown) => (value as string) || '—'
+      width: '150px',
+      format: (value: unknown) => this.escapeHtml((value as string) || '—')
     },
-    { 
-      key: 'leadPhone', 
-      header: 'Téléphone du prospect', 
+    {
+      key: 'leadPhone',
+      header: 'Téléphone du prospect',
       sortable: true,
-      format: (value: unknown) => this.phoneFormatPipe.transform(value as string) || '—'
+      width: '150px',
+      format: (value: unknown) => this.escapeHtml(this.phoneFormatPipe.transform((value as string) || '') || '—')
     },
-    { 
-      key: 'leadSource', 
-      header: 'Source du prospect', 
+    {
+      key: 'leadSource',
+      header: 'Source du prospect',
       sortable: true,
-      format: (value: unknown) => (value as string) || '—'
+      width: '120px',
+      format: (_: unknown, row: unknown) => {
+        const dossier = row as DossierResponse | undefined | null;
+        return this.escapeHtml(dossier?.leadSource || dossier?.source || '—');
+      }
     },
-    { 
-      key: 'status', 
-      header: 'Statut', 
+    {
+      key: 'status',
+      header: 'Statut',
+      sortable: true,
+      type: 'custom',
+      width: '130px',
+      format: (value: unknown) => {
+        const status = value as DossierStatus;
+        const badgeClass = this.getStatusBadgeClass(status);
+        const icon = this.getStatusIcon(status);
+        const label = this.getStatusLabel(status);
+        return `<span class="${badgeClass}"><span class="material-icons status-icon">${icon}</span><span class="status-text">${this.escapeHtml(label)}</span></span>`;
+      }
+    },
+    {
+      key: 'createdAt',
+      header: 'Créé le',
+      sortable: true,
+      type: 'custom',
+      width: '120px',
+      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
+    },
+    {
+      key: 'updatedAt',
+      header: 'Modifié le',
+      sortable: true,
+      type: 'custom',
+      width: '120px',
+      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
+    }
+  ];
+
+  private readonly mobileColumns: ColumnConfig[] = [
+    { key: 'id', header: 'ID', sortable: true, type: 'number', width: '70px' },
+    {
+      key: 'leadName',
+      header: 'Prospect',
+      sortable: true,
+      width: '180px',
+      format: (value: unknown) => this.escapeHtml((value as string) || '—')
+    },
+    {
+      key: 'status',
+      header: 'Statut',
       sortable: true,
       type: 'custom',
       format: (value: unknown) => {
@@ -93,19 +151,12 @@ export class DossiersComponent implements OnInit {
         const badgeClass = this.getStatusBadgeClass(status);
         const icon = this.getStatusIcon(status);
         const label = this.getStatusLabel(status);
-        return `<span class="${badgeClass}"><span class="material-icons status-icon">${icon}</span><span class="status-text">${label}</span></span>`;
+        return `<span class="${badgeClass}"><span class="material-icons status-icon">${icon}</span><span class="status-text">${this.escapeHtml(label)}</span></span>`;
       }
     },
-    { 
-      key: 'createdAt', 
-      header: 'Créé le', 
-      sortable: true,
-      type: 'custom',
-      format: (value: unknown) => this.dateFormatPipe.transform(value as string)
-    },
-    { 
-      key: 'updatedAt', 
-      header: 'Modifié le', 
+    {
+      key: 'updatedAt',
+      header: 'Modifié',
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.dateFormatPipe.transform(value as string)
@@ -171,10 +222,14 @@ export class DossiersComponent implements OnInit {
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
     this.loadSavedPresets();
+
+    // Default columns before the first breakpoint emission.
+    this.configureColumns();
     
     this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => {
         this.isMobile = result.matches;
+        this.configureColumns();
       });
     
     this.route.queryParams.subscribe(params => {
@@ -184,6 +239,22 @@ export class DossiersComponent implements OnInit {
       this.loadDossiers();
       this.updateAppliedFilters();
     });
+  }
+
+  private configureColumns(): void {
+    this.columns = this.isMobile ? [...this.mobileColumns] : [...this.desktopColumns];
+  }
+
+  /**
+   * Minimal HTML escaping for values rendered via [innerHTML] in GenericTable.
+   */
+  private escapeHtml(value: string): string {
+    return (value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
   }
 
   setupAnnonceAutocomplete(): void {
