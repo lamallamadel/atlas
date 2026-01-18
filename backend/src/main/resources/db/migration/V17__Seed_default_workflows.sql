@@ -1,0 +1,40 @@
+-- Seed default workflow definitions for common case types
+
+-- CRM_LEAD_BUY workflow
+INSERT INTO workflow_definition (org_id, case_type, from_status, to_status, is_active, created_at, updated_at)
+VALUES 
+    ('default', 'CRM_LEAD_BUY', 'NEW', 'QUALIFYING', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'NEW', 'QUALIFIED', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'NEW', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'QUALIFYING', 'QUALIFIED', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'QUALIFYING', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'QUALIFIED', 'APPOINTMENT', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'QUALIFIED', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'APPOINTMENT', 'WON', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_BUY', 'APPOINTMENT', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- CRM_LEAD_SELL workflow
+INSERT INTO workflow_definition (org_id, case_type, from_status, to_status, is_active, created_at, updated_at)
+VALUES 
+    ('default', 'CRM_LEAD_SELL', 'NEW', 'QUALIFYING', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'NEW', 'QUALIFIED', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'NEW', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'QUALIFYING', 'QUALIFIED', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'QUALIFYING', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'QUALIFIED', 'APPOINTMENT', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'QUALIFIED', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'APPOINTMENT', 'WON', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_SELL', 'APPOINTMENT', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- CRM_LEAD_RENT workflow
+INSERT INTO workflow_definition (org_id, case_type, from_status, to_status, is_active, created_at, updated_at)
+VALUES 
+    ('default', 'CRM_LEAD_RENT', 'NEW', 'QUALIFYING', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'NEW', 'QUALIFIED', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'NEW', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'QUALIFYING', 'QUALIFIED', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'QUALIFYING', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'QUALIFIED', 'APPOINTMENT', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'QUALIFIED', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'APPOINTMENT', 'WON', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
+    ('default', 'CRM_LEAD_RENT', 'APPOINTMENT', 'LOST', true, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);

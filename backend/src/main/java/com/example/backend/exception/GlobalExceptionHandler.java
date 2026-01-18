@@ -180,6 +180,27 @@ public class GlobalExceptionHandler {
                 .body(problemDetail);
     }
 
+    @ExceptionHandler(WorkflowValidationException.class)
+    public ResponseEntity<ProblemDetail> handleWorkflowValidationException(
+            WorkflowValidationException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "about:blank",
+                "Bad Request",
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        if (ex.getValidationErrors() != null) {
+            problemDetail.addProperty("validationErrors", ex.getValidationErrors());
+        }
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(problemDetail);
+    }
+
     @ExceptionHandler(TenantHeaderMissingException.class)
     public ResponseEntity<ProblemDetail> handleTenantHeaderMissingException(
             TenantHeaderMissingException ex, HttpServletRequest request) {

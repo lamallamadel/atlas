@@ -37,16 +37,19 @@ public class DossierService {
     private final DossierStatusTransitionService transitionService;
     private final SearchService searchService;
     private final MetricsService metricsService;
+    private final WorkflowValidationService workflowValidationService;
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
-                         SearchService searchService, MetricsService metricsService) {
+                         SearchService searchService, MetricsService metricsService,
+                         WorkflowValidationService workflowValidationService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
         this.transitionService = transitionService;
         this.searchService = searchService;
         this.metricsService = metricsService;
+        this.workflowValidationService = workflowValidationService;
     }
 
     @Transactional
@@ -162,6 +165,15 @@ public class DossierService {
 
         transitionService.validateTransition(currentStatus, newStatus);
 
+        if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
+            workflowValidationService.validateAndRecordTransition(
+                    dossier, 
+                    currentStatus.name(), 
+                    newStatus.name(), 
+                    request.getUserId(), 
+                    request.getReason());
+        }
+
         dossier.setStatus(newStatus);
         
         if (request.getStatusCode() != null) {
@@ -254,6 +266,15 @@ public class DossierService {
                 DossierStatus newStatus = request.getStatus();
 
                 transitionService.validateTransition(currentStatus, newStatus);
+
+                if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
+                    workflowValidationService.validateAndRecordTransition(
+                            dossier, 
+                            currentStatus.name(), 
+                            newStatus.name(), 
+                            request.getUserId(), 
+                            request.getReason());
+                }
 
                 dossier.setStatus(newStatus);
                 dossier.setUpdatedAt(LocalDateTime.now());
