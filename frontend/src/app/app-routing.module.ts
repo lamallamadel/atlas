@@ -34,7 +34,12 @@ const routes: Routes = [
       { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
       { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
       { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
-      { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } }
+      { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } },
+      { 
+        path: 'workflow-admin', 
+        loadChildren: () => import('./pages/workflow-admin/workflow-admin.module').then(m => m.WorkflowAdminModule),
+        data: { animation: 'WorkflowAdminPage' }
+      }
     ]
   }
 ];

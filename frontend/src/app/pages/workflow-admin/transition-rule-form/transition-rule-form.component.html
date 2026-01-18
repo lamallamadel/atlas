@@ -1,0 +1,198 @@
+<div class="transition-rule-form">
+  <div class="form-layout">
+    <div class="transitions-list-panel">
+      <h3>Transitions Disponibles</h3>
+      <mat-accordion>
+        <mat-expansion-panel 
+          *ngFor="let node of workflow?.nodes"
+          [expanded]="false">
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon [style.color]="node.color">{{ node.icon }}</mat-icon>
+              <span>{{ node.label }}</span>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+
+          <div class="transition-list">
+            <div 
+              *ngFor="let transition of getTransitionsForNode(node)"
+              class="transition-item"
+              [class.selected]="selectedTransition?.id === transition.id"
+              (click)="selectTransition(transition)"
+              (keyup.enter)="selectTransition(transition)"
+              (keyup.space)="selectTransition(transition)"
+              tabindex="0"
+              role="button"
+              [attr.aria-label]="'Sélectionner la transition ' + (transition.label || 'vers ' + transition.toStatus)">
+              <div class="transition-summary">
+                <mat-icon>arrow_forward</mat-icon>
+                <div class="transition-details">
+                  <div class="transition-label">{{ transition.label || 'Sans titre' }}</div>
+                  <div class="transition-target">Vers: {{ transition.toStatus }}</div>
+                </div>
+              </div>
+              <div class="transition-badges">
+                <mat-icon 
+                  *ngIf="transition.requiresApproval"
+                  class="approval-badge"
+                  matTooltip="Nécessite une approbation">
+                  verified_user
+                </mat-icon>
+                <span 
+                  *ngIf="transition.requiredFields && transition.requiredFields.length > 0"
+                  class="fields-badge"
+                  [matTooltip]="'Champs requis: ' + transition.requiredFields.join(', ')">
+                  {{ transition.requiredFields.length }} champs
+                </span>
+              </div>
+            </div>
+            <div *ngIf="getTransitionsForNode(node).length === 0" class="empty-state">
+              Aucune transition
+            </div>
+          </div>
+        </mat-expansion-panel>
+      </mat-accordion>
+    </div>
+
+    <div class="form-panel">
+      <div *ngIf="!selectedTransition" class="no-selection">
+        <mat-icon>rule</mat-icon>
+        <h3>Sélectionnez une transition</h3>
+        <p>Choisissez une transition dans la liste pour configurer ses règles</p>
+      </div>
+
+      <form *ngIf="selectedTransition" [formGroup]="transitionForm" class="rule-form">
+        <h3>Configuration de la Transition</h3>
+
+        <mat-card class="form-section">
+          <mat-card-header>
+            <mat-card-title>Informations de base</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>De (statut)</mat-label>
+              <input matInput formControlName="fromStatus" readonly>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Vers (statut)</mat-label>
+              <input matInput formControlName="toStatus" readonly>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Label de la transition</mat-label>
+              <input matInput formControlName="label" placeholder="Ex: Approuver le dossier">
+              <mat-icon matSuffix>label</mat-icon>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="form-section">
+          <mat-card-header>
+            <mat-card-title>Champs Requis</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chips-container">
+              <mat-chip-listbox>
+                <mat-chip 
+                  *ngFor="let field of requiredFieldsArray.controls; let i = index"
+                  [removable]="true"
+                  (removed)="removeRequiredField(i)">
+                  {{ field.value }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              </mat-chip-listbox>
+            </div>
+
+            <div class="add-field-section">
+              <mat-form-field appearance="outline" class="field-select">
+                <mat-label>Ajouter un champ requis</mat-label>
+                <mat-select (selectionChange)="addRequiredField($event.value)">
+                  <mat-option *ngFor="let field of availableFields" [value]="field">
+                    {{ field }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <p class="hint">Les champs requis doivent être remplis avant d'effectuer cette transition.</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="form-section">
+          <mat-card-header>
+            <mat-card-title>Permissions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="chips-container">
+              <mat-chip-listbox>
+                <mat-chip 
+                  *ngFor="let role of allowedRolesArray.controls; let i = index"
+                  [removable]="true"
+                  (removed)="removeAllowedRole(i)">
+                  {{ role.value }}
+                  <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+              </mat-chip-listbox>
+            </div>
+
+            <div class="add-field-section">
+              <mat-form-field appearance="outline" class="field-select">
+                <mat-label>Ajouter un rôle autorisé</mat-label>
+                <mat-select (selectionChange)="addAllowedRole($event.value)">
+                  <mat-option *ngFor="let role of availableRoles" [value]="role">
+                    {{ role }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <p class="hint">Seuls les utilisateurs avec ces rôles pourront effectuer cette transition.</p>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="form-section">
+          <mat-card-header>
+            <mat-card-title>Options Avancées</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-slide-toggle formControlName="requiresApproval" color="primary">
+              <div class="toggle-label">
+                <span>Nécessite une approbation</span>
+                <p class="toggle-hint">Cette transition devra être approuvée par un superviseur</p>
+              </div>
+            </mat-slide-toggle>
+
+            <mat-form-field appearance="outline" class="full-width" style="margin-top: 16px;">
+              <mat-label>Conditions supplémentaires (optionnel)</mat-label>
+              <textarea 
+                matInput 
+                formControlName="conditions"
+                rows="3"
+                placeholder="Ex: score >= 80 AND leadSource === 'REFERRAL'"></textarea>
+              <mat-icon matSuffix>code</mat-icon>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="form-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="onSaveTransition()"
+            [disabled]="!transitionForm.valid">
+            <mat-icon>save</mat-icon>
+            Enregistrer
+          </button>
+          <button 
+            mat-raised-button 
+            color="warn" 
+            (click)="onDeleteTransition()">
+            <mat-icon>delete</mat-icon>
+            Supprimer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

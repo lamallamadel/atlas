@@ -1,0 +1,66 @@
+<div class="workflow-admin-container">
+  <div class="page-header">
+    <h1>Configuration des Workflows</h1>
+    <p class="page-description">Gérez les workflows pour les dossiers et les annonces</p>
+  </div>
+
+  <mat-card class="config-card">
+    <mat-card-header>
+      <div class="card-header-content">
+        <div class="header-left">
+          <mat-button-toggle-group 
+            [value]="workflow?.caseType" 
+            (change)="onCaseTypeChange($event.value)"
+            aria-label="Type de workflow">
+            <mat-button-toggle [value]="CaseType.DOSSIER">
+              <mat-icon>folder</mat-icon>
+              Dossiers
+            </mat-button-toggle>
+            <mat-button-toggle [value]="CaseType.ANNONCE">
+              <mat-icon>description</mat-icon>
+              Annonces
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+        <div class="header-right">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            (click)="onSaveWorkflow()"
+            [disabled]="!workflow">
+            <mat-icon>save</mat-icon>
+            Sauvegarder
+          </button>
+        </div>
+      </div>
+    </mat-card-header>
+
+    <mat-card-content>
+      <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms">
+        <mat-tab label="Éditeur Visuel">
+          <ng-template matTabContent>
+            <div class="tab-content">
+              <app-workflow-editor *ngIf="workflow"></app-workflow-editor>
+            </div>
+          </ng-template>
+        </mat-tab>
+
+        <mat-tab label="Règles de Transition">
+          <ng-template matTabContent>
+            <div class="tab-content">
+              <app-transition-rule-form *ngIf="workflow"></app-transition-rule-form>
+            </div>
+          </ng-template>
+        </mat-tab>
+
+        <mat-tab label="Prévisualisation">
+          <ng-template matTabContent>
+            <div class="tab-content">
+              <app-workflow-preview *ngIf="workflow"></app-workflow-preview>
+            </div>
+          </ng-template>
+        </mat-tab>
+      </mat-tab-group>
+    </mat-card-content>
+  </mat-card>
+</div>

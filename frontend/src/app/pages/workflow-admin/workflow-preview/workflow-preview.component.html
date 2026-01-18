@@ -1,0 +1,151 @@
+<div class="workflow-preview">
+  <div class="preview-header">
+    <div class="header-content">
+      <h3>Prévisualisation du Workflow</h3>
+      <p class="hint">Testez la progression à travers les différents statuts</p>
+    </div>
+    <button mat-raised-button (click)="resetPreview()">
+      <mat-icon>refresh</mat-icon>
+      Réinitialiser
+    </button>
+  </div>
+
+  <div class="preview-container" *ngIf="previewState && workflow">
+    <div class="preview-layout">
+      <div class="current-state-panel">
+        <mat-card class="current-state-card">
+          <mat-card-header>
+            <mat-card-title>État Actuel</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="current-node" *ngIf="getCurrentNode() as currentNode">
+              <div class="node-visual" [style.background-color]="currentNode.color">
+                <mat-icon class="large-icon">{{ currentNode.icon }}</mat-icon>
+              </div>
+              <h2>{{ currentNode.label }}</h2>
+              <p class="status-text">{{ currentNode.status }}</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="transitions-card">
+          <mat-card-header>
+            <mat-card-title>Transitions Disponibles</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="previewState.availableTransitions.length === 0" class="no-transitions">
+              <mat-icon>lock</mat-icon>
+              <p>Aucune transition disponible depuis cet état</p>
+            </div>
+
+            <div class="transitions-grid">
+              <button
+                *ngFor="let transition of previewState.availableTransitions"
+                mat-raised-button
+                class="transition-button"
+                [style.border-left-color]="getTransitionColor(transition)"
+                [disabled]="!canExecuteTransition(transition)"
+                (click)="executeTransition(transition)">
+                <div class="transition-button-content">
+                  <div class="transition-header">
+                    <mat-icon>{{ getTransitionIcon(transition) }}</mat-icon>
+                    <span class="transition-label">{{ transition.label || 'Transition' }}</span>
+                  </div>
+                  <div class="transition-target">
+                    → {{ getNodeByStatus(transition.toStatus)?.label || transition.toStatus }}
+                  </div>
+                  <div class="transition-meta" *ngIf="transition.requiredFields && transition.requiredFields.length > 0">
+                    <mat-icon class="small-icon">assignment</mat-icon>
+                    <span>{{ transition.requiredFields.length }} champ(s) requis</span>
+                  </div>
+                  <div class="transition-meta" *ngIf="transition.allowedRoles && transition.allowedRoles.length > 0">
+                    <mat-icon class="small-icon">people</mat-icon>
+                    <span>{{ transition.allowedRoles.join(', ') }}</span>
+                  </div>
+                  <div class="transition-meta approval" *ngIf="transition.requiresApproval">
+                    <mat-icon class="small-icon">verified_user</mat-icon>
+                    <span>Approbation requise</span>
+                  </div>
+                </div>
+              </button>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="history-panel">
+        <mat-card class="history-card">
+          <mat-card-header>
+            <mat-card-title>Historique des Transitions</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div *ngIf="previewState.history.length === 0" class="empty-history">
+              <mat-icon>history</mat-icon>
+              <p>Aucune transition effectuée</p>
+              <p class="hint">Cliquez sur une transition pour commencer</p>
+            </div>
+
+            <div class="timeline" *ngIf="previewState.history.length > 0">
+              <div 
+                *ngFor="let entry of previewState.history; let i = index"
+                class="timeline-entry">
+                <div class="timeline-marker">
+                  <div class="marker-dot"></div>
+                  <div class="marker-line" *ngIf="i < previewState.history.length - 1"></div>
+                </div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <div class="transition-flow">
+                      <span class="status-badge from" [style.background-color]="getNodeByStatus(entry.fromStatus)?.color">
+                        {{ getNodeByStatus(entry.fromStatus)?.label || entry.fromStatus }}
+                      </span>
+                      <mat-icon>arrow_forward</mat-icon>
+                      <span class="status-badge to" [style.background-color]="getNodeByStatus(entry.toStatus)?.color">
+                        {{ getNodeByStatus(entry.toStatus)?.label || entry.toStatus }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="timeline-meta">
+                    <span class="timestamp">{{ entry.timestamp | date:'short' }}</span>
+                    <span class="user" *ngIf="entry.user">{{ entry.user }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="workflow-summary">
+          <mat-card-header>
+            <mat-card-title>Résumé du Workflow</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="summary-stats">
+              <div class="stat-item">
+                <mat-icon>account_tree</mat-icon>
+                <div class="stat-content">
+                  <span class="stat-value">{{ workflow.nodes.length }}</span>
+                  <span class="stat-label">Statuts</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <mat-icon>swap_horiz</mat-icon>
+                <div class="stat-content">
+                  <span class="stat-value">{{ workflow.transitions.length }}</span>
+                  <span class="stat-label">Transitions</span>
+                </div>
+              </div>
+              <div class="stat-item">
+                <mat-icon>history</mat-icon>
+                <div class="stat-content">
+                  <span class="stat-value">{{ previewState.history.length }}</span>
+                  <span class="stat-label">Étapes effectuées</span>
+                </div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

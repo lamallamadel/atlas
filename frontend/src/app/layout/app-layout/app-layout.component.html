@@ -46,6 +46,15 @@
           <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
           <span matListItemTitle>Dossiers <span *ngIf="dossiersPendingCount$ | async as count" class="badge-count">({{ count }})</span></span>
         </a>
+        <mat-divider></mat-divider>
+        <a mat-list-item 
+           routerLink="/workflow-admin" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Configuration des workflows">
+          <mat-icon matListItemIcon aria-hidden="true">settings</mat-icon>
+          <span matListItemTitle>Workflows</span>
+        </a>
       </mat-nav-list>
     </nav>
   </mat-sidenav>

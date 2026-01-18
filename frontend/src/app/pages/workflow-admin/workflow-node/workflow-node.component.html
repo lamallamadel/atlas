@@ -1,0 +1,42 @@
+<div 
+  class="workflow-node"
+  [class.selected]="selected"
+  [class.transition-mode]="isTransitionMode"
+  [class.transition-start]="isTransitionStart"
+  [style.left.px]="node.x"
+  [style.top.px]="node.y"
+  [style.border-color]="node.color"
+  cdkDrag
+  cdkDragBoundary=".nodes-container"
+  (cdkDragStarted)="onDragStarted($event)"
+  (cdkDragEnded)="onDragEnded($event)"
+  (click)="onNodeClick()"
+  (keyup.enter)="onNodeClick()"
+  (keyup.space)="onNodeClick()"
+  tabindex="0"
+  role="button"
+  [attr.aria-label]="'Nœud de workflow: ' + node.label">
+  
+  <div class="node-header" [style.background-color]="node.color">
+    <mat-icon class="node-icon">{{ node.icon || 'radio_button_unchecked' }}</mat-icon>
+  </div>
+  
+  <div class="node-body">
+    <div class="node-label">{{ node.label }}</div>
+    <div class="node-status">{{ node.status }}</div>
+  </div>
+
+  <div class="node-actions" *ngIf="!isTransitionMode">
+    <button 
+      mat-icon-button 
+      class="add-transition-btn"
+      (click)="onAddTransition($event)"
+      matTooltip="Ajouter une transition">
+      <mat-icon>add_link</mat-icon>
+    </button>
+  </div>
+
+  <div class="drag-handle" cdkDragHandle>
+    <mat-icon>drag_indicator</mat-icon>
+  </div>
+</div>

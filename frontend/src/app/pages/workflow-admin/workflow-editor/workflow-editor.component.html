@@ -1,0 +1,137 @@
+<div class="workflow-editor">
+  <div class="editor-toolbar">
+    <div class="toolbar-section">
+      <h3>Éditeur de Workflow</h3>
+      <p class="hint">Glissez-déposez les nœuds pour réorganiser. Cliquez sur "Ajouter transition" pour créer des liens.</p>
+    </div>
+    <div class="toolbar-actions" *ngIf="isAddingTransition">
+      <span class="adding-transition-hint">
+        <mat-icon>link</mat-icon>
+        Cliquez sur un nœud de destination
+      </span>
+      <button mat-button (click)="cancelAddingTransition()">
+        <mat-icon>close</mat-icon>
+        Annuler
+      </button>
+    </div>
+  </div>
+
+  <div class="editor-container">
+    <div class="canvas-wrapper">
+      <canvas #canvas class="workflow-canvas"></canvas>
+      
+      <div class="nodes-container">
+        <app-workflow-node
+          *ngFor="let node of workflow?.nodes"
+          [node]="node"
+          [selected]="selectedNode?.id === node.id"
+          [isTransitionMode]="isAddingTransition"
+          [isTransitionStart]="transitionStartNode?.id === node.id"
+          (nodeClicked)="selectNode($event)"
+          (addTransitionClicked)="startAddingTransition($event)"
+          (transitionTargetClicked)="completeAddingTransition($event)"
+          (nodeDragStarted)="onNodeDragStarted($event.dragEvent, $event.node)"
+          (nodeDragEnded)="onNodeDragEnded($event.dragEvent, $event.node)">
+        </app-workflow-node>
+      </div>
+    </div>
+
+    <div class="properties-panel" *ngIf="selectedNode || selectedTransition">
+      <div class="panel-header">
+        <h3>Propriétés</h3>
+        <button mat-icon-button (click)="selectedNode = null; selectedTransition = null">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="panel-content" *ngIf="selectedNode">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Nœud: {{ selectedNode.label }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="property-item">
+              <strong>Statut:</strong> {{ selectedNode.status }}
+            </div>
+            <div class="property-item">
+              <strong>Position:</strong> ({{ selectedNode.x | number:'1.0-0' }}, {{ selectedNode.y | number:'1.0-0' }})
+            </div>
+            <div class="property-item">
+              <strong>Icône:</strong> 
+              <mat-icon [style.color]="selectedNode.color">{{ selectedNode.icon }}</mat-icon>
+            </div>
+
+            <mat-divider style="margin: 16px 0;"></mat-divider>
+
+            <h4>Transitions sortantes</h4>
+            <div class="transitions-list">
+              <div 
+                *ngFor="let transition of getTransitionsForNode(selectedNode)" 
+                class="transition-item"
+                (click)="selectedTransition = transition"
+                (keyup.enter)="selectedTransition = transition"
+                (keyup.space)="selectedTransition = transition"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'Sélectionner la transition ' + (transition.label || 'vers ' + transition.toStatus)">
+                <div class="transition-info">
+                  <mat-icon>arrow_forward</mat-icon>
+                  <span>{{ transition.label || 'Vers ' + transition.toStatus }}</span>
+                </div>
+                <button 
+                  mat-icon-button 
+                  color="warn"
+                  (click)="deleteTransition(transition, $event)"
+                  matTooltip="Supprimer la transition">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <div *ngIf="getTransitionsForNode(selectedNode).length === 0" class="empty-state">
+                Aucune transition sortante
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="panel-content" *ngIf="selectedTransition">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Transition</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="property-item">
+              <strong>De:</strong> {{ selectedTransition.fromStatus }}
+            </div>
+            <div class="property-item">
+              <strong>Vers:</strong> {{ selectedTransition.toStatus }}
+            </div>
+            <div class="property-item">
+              <strong>Label:</strong> {{ selectedTransition.label }}
+            </div>
+            <div class="property-item" *ngIf="selectedTransition.requiredFields && selectedTransition.requiredFields.length > 0">
+              <strong>Champs requis:</strong>
+              <mat-chip-listbox>
+                <mat-chip *ngFor="let field of selectedTransition.requiredFields">
+                  {{ field }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </div>
+            <div class="property-item" *ngIf="selectedTransition.allowedRoles && selectedTransition.allowedRoles.length > 0">
+              <strong>Rôles autorisés:</strong>
+              <mat-chip-listbox>
+                <mat-chip *ngFor="let role of selectedTransition.allowedRoles">
+                  {{ role }}
+                </mat-chip>
+              </mat-chip-listbox>
+            </div>
+            <div class="property-item" *ngIf="selectedTransition.requiresApproval">
+              <mat-icon color="warn">verified_user</mat-icon>
+              Nécessite une approbation
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>
