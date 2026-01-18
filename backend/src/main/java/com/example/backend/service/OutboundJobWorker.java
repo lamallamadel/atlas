@@ -57,6 +57,8 @@ public class OutboundJobWorker {
         }
         
         try {
+            recoverStaleMessages();
+            
             List<OutboundMessageEntity> messages = outboundMessageRepository.findPendingMessages(
                 OutboundMessageStatus.QUEUED,
                 PageRequest.of(0, batchSize)
@@ -70,7 +72,11 @@ public class OutboundJobWorker {
             
             for (OutboundMessageEntity message : messages) {
                 try {
-                    processMessage(message);
+                    if (isReadyForProcessing(message)) {
+                        processMessage(message);
+                    } else {
+                        logger.debug("Message {} not ready for processing yet (waiting for retry window)", message.getId());
+                    }
                 } catch (Exception e) {
                     logger.error("Error processing message {}: {}", message.getId(), e.getMessage(), e);
                 }
@@ -79,6 +85,44 @@ public class OutboundJobWorker {
         } catch (Exception e) {
             logger.error("Error in outbound job worker: {}", e.getMessage(), e);
         }
+    }
+
+    private void recoverStaleMessages() {
+        LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(10);
+        List<OutboundMessageEntity> staleMessages = outboundMessageRepository.findStaleMessages(
+            OutboundMessageStatus.SENDING,
+            staleThreshold,
+            PageRequest.of(0, batchSize)
+        );
+        
+        if (!staleMessages.isEmpty()) {
+            logger.warn("Recovering {} stale messages stuck in SENDING state", staleMessages.size());
+            for (OutboundMessageEntity message : staleMessages) {
+                message.setStatus(OutboundMessageStatus.QUEUED);
+                message.setUpdatedAt(LocalDateTime.now());
+                outboundMessageRepository.save(message);
+                logger.info("Recovered stale message {} back to QUEUED", message.getId());
+            }
+        }
+    }
+
+    private boolean isReadyForProcessing(OutboundMessageEntity message) {
+        if (message.getAttemptCount() == 0) {
+            return true;
+        }
+        
+        List<OutboundAttemptEntity> attempts = outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(message.getId());
+        if (attempts.isEmpty()) {
+            return true;
+        }
+        
+        OutboundAttemptEntity lastAttempt = attempts.get(attempts.size() - 1);
+        if (lastAttempt.getNextRetryAt() == null) {
+            return true;
+        }
+        
+        return LocalDateTime.now().isAfter(lastAttempt.getNextRetryAt()) || 
+               LocalDateTime.now().isEqual(lastAttempt.getNextRetryAt());
     }
     
     @Transactional

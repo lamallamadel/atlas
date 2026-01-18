@@ -89,6 +89,9 @@ public class WhatsAppWebhookPayload {
         @JsonProperty("messages")
         private List<Message> messages;
 
+        @JsonProperty("statuses")
+        private List<Status> statuses;
+
         public String getMessagingProduct() {
             return messagingProduct;
         }
@@ -119,6 +122,14 @@ public class WhatsAppWebhookPayload {
 
         public void setMessages(List<Message> messages) {
             this.messages = messages;
+        }
+
+        public List<Status> getStatuses() {
+            return statuses;
+        }
+
+        public void setStatuses(List<Status> statuses) {
+            this.statuses = statuses;
         }
     }
 
@@ -250,6 +261,216 @@ public class WhatsAppWebhookPayload {
 
         public void setBody(String body) {
             this.body = body;
+        }
+    }
+
+    public static class Status {
+        @JsonProperty("id")
+        private String id;
+
+        @JsonProperty("status")
+        private String status;
+
+        @JsonProperty("timestamp")
+        private String timestamp;
+
+        @JsonProperty("recipient_id")
+        private String recipientId;
+
+        @JsonProperty("conversation")
+        private Conversation conversation;
+
+        @JsonProperty("pricing")
+        private Pricing pricing;
+
+        @JsonProperty("errors")
+        private List<StatusError> errors;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public String getStatus() {
+            return status;
+        }
+
+        public void setStatus(String status) {
+            this.status = status;
+        }
+
+        public String getTimestamp() {
+            return timestamp;
+        }
+
+        public void setTimestamp(String timestamp) {
+            this.timestamp = timestamp;
+        }
+
+        public String getRecipientId() {
+            return recipientId;
+        }
+
+        public void setRecipientId(String recipientId) {
+            this.recipientId = recipientId;
+        }
+
+        public Conversation getConversation() {
+            return conversation;
+        }
+
+        public void setConversation(Conversation conversation) {
+            this.conversation = conversation;
+        }
+
+        public Pricing getPricing() {
+            return pricing;
+        }
+
+        public void setPricing(Pricing pricing) {
+            this.pricing = pricing;
+        }
+
+        public List<StatusError> getErrors() {
+            return errors;
+        }
+
+        public void setErrors(List<StatusError> errors) {
+            this.errors = errors;
+        }
+    }
+
+    public static class Conversation {
+        @JsonProperty("id")
+        private String id;
+
+        @JsonProperty("origin")
+        private Origin origin;
+
+        public String getId() {
+            return id;
+        }
+
+        public void setId(String id) {
+            this.id = id;
+        }
+
+        public Origin getOrigin() {
+            return origin;
+        }
+
+        public void setOrigin(Origin origin) {
+            this.origin = origin;
+        }
+    }
+
+    public static class Origin {
+        @JsonProperty("type")
+        private String type;
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType(String type) {
+            this.type = type;
+        }
+    }
+
+    public static class Pricing {
+        @JsonProperty("billable")
+        private Boolean billable;
+
+        @JsonProperty("pricing_model")
+        private String pricingModel;
+
+        @JsonProperty("category")
+        private String category;
+
+        public Boolean getBillable() {
+            return billable;
+        }
+
+        public void setBillable(Boolean billable) {
+            this.billable = billable;
+        }
+
+        public String getPricingModel() {
+            return pricingModel;
+        }
+
+        public void setPricingModel(String pricingModel) {
+            this.pricingModel = pricingModel;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
+        }
+    }
+
+    public static class StatusError {
+        @JsonProperty("code")
+        private Integer code;
+
+        @JsonProperty("title")
+        private String title;
+
+        @JsonProperty("message")
+        private String message;
+
+        @JsonProperty("error_data")
+        private ErrorData errorData;
+
+        public Integer getCode() {
+            return code;
+        }
+
+        public void setCode(Integer code) {
+            this.code = code;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public void setTitle(String title) {
+            this.title = title;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public ErrorData getErrorData() {
+            return errorData;
+        }
+
+        public void setErrorData(ErrorData errorData) {
+            this.errorData = errorData;
+        }
+    }
+
+    public static class ErrorData {
+        @JsonProperty("details")
+        private String details;
+
+        public String getDetails() {
+            return details;
+        }
+
+        public void setDetails(String details) {
+            this.details = details;
         }
     }
 }

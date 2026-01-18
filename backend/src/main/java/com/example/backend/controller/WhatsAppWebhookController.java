@@ -54,29 +54,27 @@ public class WhatsAppWebhookController {
     }
 
     @PostMapping("/inbound")
-@Operation(summary = "Receive inbound WhatsApp messages", description = "Handles incoming WhatsApp webhook events with HMAC signature validation")
-public ResponseEntity<String> receiveInboundMessage(
-        @RequestHeader(value = "X-Org-Id", required = false) String orgIdHeader,
-        @RequestHeader(value = "X-Hub-Signature-256", required = false) String signature,
-        @RequestBody String rawPayload) {
+    @Operation(
+        summary = "Receive inbound WhatsApp messages and delivery status", 
+        description = "Handles incoming WhatsApp webhook events including messages and delivery status updates with HMAC signature validation"
+    )
+    public ResponseEntity<String> receiveWebhook(
+            @RequestHeader(value = "X-Org-Id", required = false) String orgIdHeader,
+            @RequestHeader(value = "X-Hub-Signature-256", required = false) String signature,
+            @RequestBody String rawPayload) {
 
-        // Webhooks bypass TenantFilter, so orgId must come from header here.
         String orgId = (orgIdHeader != null && !orgIdHeader.isBlank())
                 ? orgIdHeader
                 : TenantContext.getOrgId();
 
         if (orgId == null || orgId.isBlank()) {
             log.error("Organization ID not found for webhook call");
-            // Tests expect plain text body
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing organization context");
         }
 
         try {
             TenantContext.setOrgId(orgId);
 
-            // Signature is optional in tests:
-            // - if provided and invalid -> 401
-            // - if missing -> accept and process
             if (signature != null && !signature.isBlank()) {
                 if (!validateSignature(rawPayload, signature, orgId)) {
                     log.warn("Invalid signature for webhook from org: {}", orgId);
@@ -95,7 +93,6 @@ public ResponseEntity<String> receiveInboundMessage(
             TenantContext.clear();
         }
     }
-
 
     private boolean validateSignature(String payload, String signature, String orgId) {
         String webhookSecret = processingService.getWebhookSecret(orgId);
