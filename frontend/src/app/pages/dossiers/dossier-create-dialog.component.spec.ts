@@ -32,6 +32,7 @@ describe('DossierCreateDialogComponent', () => {
       declarations: [ DossierCreateDialogComponent ],
       imports: [
         ReactiveFormsModule,
+        NoopAnimationsModule,
         MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
@@ -39,8 +40,7 @@ describe('DossierCreateDialogComponent', () => {
         MatExpansionModule,
         MatIconModule,
         MatButtonModule,
-        MatProgressSpinnerModule,
-        NoopAnimationsModule
+        MatProgressSpinnerModule
       ],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
