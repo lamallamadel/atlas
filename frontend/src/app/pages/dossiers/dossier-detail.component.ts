@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { DossierApiService, DossierResponse, DossierStatus, PartiePrenanteResponse, PartiePrenanteRole } from '../../services/dossier-api.service';
 import { PartiePrenanteApiService, PartiePrenanteCreateRequest, PartiePrenanteUpdateRequest } from '../../services/partie-prenante-api.service';
-import { MessageApiService, MessageResponse, MessageCreateRequest } from '../../services/message-api.service';
+import { MessageApiService, MessageResponse, MessageCreateRequest, MessageChannel, MessageDirection, MessageDeliveryStatus } from '../../services/message-api.service';
 import { AppointmentApiService, AppointmentResponse, AppointmentCreateRequest, AppointmentUpdateRequest, AppointmentStatus } from '../../services/appointment-api.service';
 import { ConsentementApiService, ConsentementResponse, ConsentementChannel, ConsentementStatus, ConsentementUpdateRequest, ConsentementCreateRequest } from '../../services/consentement-api.service';
 import { AuditEventApiService, AuditEventResponse, AuditEntityType, AuditAction, Page } from '../../services/audit-event-api.service';
@@ -34,6 +34,14 @@ export interface DiffChange {
   field: string;
   oldValue: any;
   newValue: any;
+}
+
+export interface WhatsAppTemplate {
+  id: string;
+  name: string;
+  content: string;
+  variables: string[];
+  description: string;
 }
 
 @Component({
@@ -89,6 +97,46 @@ export class DossierDetailComponent implements OnInit {
   ConsentementStatus = ConsentementStatus;
   AuditEntityType = AuditEntityType;
   AuditAction = AuditAction;
+
+  whatsappMessages: MessageResponse[] = [];
+  loadingWhatsAppMessages = false;
+  selectedTemplate: WhatsAppTemplate | null = null;
+  templateVariables: Record<string, string> = {};
+  whatsappMessageContent = '';
+  sendingWhatsAppMessage = false;
+  whatsappConsentStatus: ConsentementStatus | null = null;
+  MessageDeliveryStatus = MessageDeliveryStatus;
+  
+  whatsappTemplates: WhatsAppTemplate[] = [
+    {
+      id: 'greeting',
+      name: 'Salutation',
+      content: 'Bonjour {{name}}, merci de votre intérêt pour notre propriété.',
+      variables: ['name'],
+      description: 'Message de bienvenue personnalisé'
+    },
+    {
+      id: 'appointment_confirmation',
+      name: 'Confirmation de rendez-vous',
+      content: 'Bonjour {{name}}, votre rendez-vous est confirmé pour le {{date}} à {{time}} au {{location}}.',
+      variables: ['name', 'date', 'time', 'location'],
+      description: 'Confirmation de rendez-vous avec détails'
+    },
+    {
+      id: 'followup',
+      name: 'Suivi',
+      content: 'Bonjour {{name}}, je reviens vers vous concernant le bien {{property}}. Êtes-vous toujours intéressé(e) ?',
+      variables: ['name', 'property'],
+      description: 'Message de suivi pour relancer le prospect'
+    },
+    {
+      id: 'document_request',
+      name: 'Demande de documents',
+      content: 'Bonjour {{name}}, pourriez-vous nous transmettre les documents suivants : {{documents}} ?',
+      variables: ['name', 'documents'],
+      description: 'Demande de documents au client'
+    }
+  ];
 
   @ViewChild('auditPaginator') auditPaginator: MatPaginator | undefined;
 
@@ -211,6 +259,7 @@ export class DossierDetailComponent implements OnInit {
     this.loadConsentements();
     this.loadAuditEvents();
     this.loadMockData();
+    this.loadWhatsAppMessages();
   }
 
   loadDossier(): void {
@@ -321,7 +370,7 @@ export class DossierDetailComponent implements OnInit {
   }
 
   buildConsentementGroups(): void {
-    const channelsToShow = [ConsentementChannel.EMAIL, ConsentementChannel.SMS];
+    const channelsToShow = [ConsentementChannel.EMAIL, ConsentementChannel.SMS, ConsentementChannel.WHATSAPP];
     this.consentementGroups = channelsToShow.map(channel => {
       const channelConsents = this.consentements.filter(c => c.channel === channel);
       const current = channelConsents.length > 0 ? channelConsents[0] : null;
@@ -1388,5 +1437,257 @@ export class DossierDetailComponent implements OnInit {
     }
     
     return emptyFields.join(', ');
+  }
+
+  loadWhatsAppMessages(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      return;
+    }
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) {
+      return;
+    }
+
+    this.loadingWhatsAppMessages = true;
+    this.messageApiService.list({ 
+      dossierId, 
+      channel: MessageChannel.WHATSAPP,
+      size: 100, 
+      sort: 'timestamp,asc' 
+    }).subscribe({
+      next: (response) => {
+        this.whatsappMessages = response.content;
+        this.loadingWhatsAppMessages = false;
+      },
+      error: (err) => {
+        console.error('Error loading WhatsApp messages:', err);
+        this.loadingWhatsAppMessages = false;
+      }
+    });
+  }
+
+  onTemplateSelect(): void {
+    if (this.selectedTemplate) {
+      this.initializeTemplateVariables();
+      this.updateWhatsAppPreview();
+    } else {
+      this.templateVariables = {};
+      this.whatsappMessageContent = '';
+    }
+  }
+
+  initializeTemplateVariables(): void {
+    if (!this.selectedTemplate) {
+      return;
+    }
+
+    this.templateVariables = {};
+    this.selectedTemplate.variables.forEach(variable => {
+      if (variable === 'name' && this.dossier?.leadName) {
+        this.templateVariables[variable] = this.dossier.leadName;
+      } else {
+        this.templateVariables[variable] = '';
+      }
+    });
+  }
+
+  updateWhatsAppPreview(): void {
+    if (!this.selectedTemplate) {
+      this.whatsappMessageContent = '';
+      return;
+    }
+
+    let preview = this.selectedTemplate.content;
+    this.selectedTemplate.variables.forEach(variable => {
+      const value = this.templateVariables[variable] || `{{${variable}}}`;
+      preview = preview.replace(`{{${variable}}}`, value);
+    });
+    this.whatsappMessageContent = preview;
+  }
+
+  onVariableChange(): void {
+    this.updateWhatsAppPreview();
+  }
+
+  canSendWhatsAppMessage(): boolean {
+    if (!this.whatsappMessageContent || this.whatsappMessageContent.trim() === '') {
+      return false;
+    }
+
+    if (this.selectedTemplate) {
+      const hasEmptyVariables = this.selectedTemplate.variables.some(
+        variable => !this.templateVariables[variable] || this.templateVariables[variable].trim() === ''
+      );
+      if (hasEmptyVariables) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  getWhatsAppConsentStatus(): ConsentementStatus | null {
+    const whatsappConsent = this.consentements.find(
+      c => c.channel === ConsentementChannel.WHATSAPP
+    );
+    return whatsappConsent?.status || null;
+  }
+
+  isWhatsAppConsentGranted(): boolean {
+    return this.getWhatsAppConsentStatus() === ConsentementStatus.GRANTED;
+  }
+
+  sendWhatsAppMessage(): void {
+    if (!this.dossier || !this.canSendWhatsAppMessage()) {
+      return;
+    }
+
+    if (!this.isWhatsAppConsentGranted()) {
+      this.snackBar.open(
+        '⚠️ Le consentement WhatsApp n\'est pas accordé. Veuillez obtenir le consentement avant d\'envoyer un message.',
+        'Fermer',
+        {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['warning-snackbar']
+        }
+      );
+      return;
+    }
+
+    this.sendingWhatsAppMessage = true;
+
+    const request: MessageCreateRequest = {
+      dossierId: this.dossier.id,
+      channel: MessageChannel.WHATSAPP,
+      direction: MessageDirection.OUTBOUND,
+      content: this.whatsappMessageContent,
+      timestamp: new Date().toISOString(),
+      templateId: this.selectedTemplate?.id,
+      templateVariables: this.selectedTemplate ? this.templateVariables : undefined
+    };
+
+    this.messageApiService.create(request).subscribe({
+      next: (newMessage) => {
+        this.snackBar.open('Message WhatsApp envoyé avec succès', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        this.whatsappMessages.push(newMessage);
+        this.resetWhatsAppForm();
+        this.sendingWhatsAppMessage = false;
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec de l\'envoi du message WhatsApp';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error sending WhatsApp message:', err);
+        this.sendingWhatsAppMessage = false;
+      }
+    });
+  }
+
+  resetWhatsAppForm(): void {
+    this.selectedTemplate = null;
+    this.templateVariables = {};
+    this.whatsappMessageContent = '';
+  }
+
+  retryWhatsAppMessage(message: MessageResponse): void {
+    if (message.deliveryStatus !== MessageDeliveryStatus.FAILED) {
+      return;
+    }
+
+    this.messageApiService.retry(message.id).subscribe({
+      next: (updatedMessage) => {
+        this.snackBar.open('Message en cours de renvoi...', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+        const index = this.whatsappMessages.findIndex(m => m.id === message.id);
+        if (index !== -1) {
+          this.whatsappMessages[index] = updatedMessage;
+        }
+      },
+      error: (err) => {
+        const errorMessage = err.error?.message || 'Échec du renvoi du message';
+        this.snackBar.open(errorMessage, 'Fermer', {
+          duration: 5000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['error-snackbar']
+        });
+        console.error('Error retrying message:', err);
+      }
+    });
+  }
+
+  getDeliveryStatusLabel(status: MessageDeliveryStatus): string {
+    switch (status) {
+      case MessageDeliveryStatus.PENDING: return 'En attente';
+      case MessageDeliveryStatus.SENT: return 'Envoyé';
+      case MessageDeliveryStatus.DELIVERED: return 'Délivré';
+      case MessageDeliveryStatus.FAILED: return 'Échec';
+      case MessageDeliveryStatus.READ: return 'Lu';
+      default: return 'Inconnu';
+    }
+  }
+
+  getDeliveryStatusClass(status: MessageDeliveryStatus): string {
+    switch (status) {
+      case MessageDeliveryStatus.PENDING: return 'delivery-status-pending';
+      case MessageDeliveryStatus.SENT: return 'delivery-status-sent';
+      case MessageDeliveryStatus.DELIVERED: return 'delivery-status-delivered';
+      case MessageDeliveryStatus.FAILED: return 'delivery-status-failed';
+      case MessageDeliveryStatus.READ: return 'delivery-status-read';
+      default: return '';
+    }
+  }
+
+  getDeliveryStatusIcon(status: MessageDeliveryStatus): string {
+    switch (status) {
+      case MessageDeliveryStatus.PENDING: return '⏳';
+      case MessageDeliveryStatus.SENT: return '✓';
+      case MessageDeliveryStatus.DELIVERED: return '✓✓';
+      case MessageDeliveryStatus.FAILED: return '✗';
+      case MessageDeliveryStatus.READ: return '✓✓';
+      default: return '';
+    }
+  }
+
+  formatWhatsAppTimestamp(timestamp: string): string {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) {
+      return 'À l\'instant';
+    } else if (diffMins < 60) {
+      return `Il y a ${diffMins} min`;
+    } else if (diffHours < 24) {
+      return `Il y a ${diffHours}h`;
+    } else if (diffDays < 7) {
+      return `Il y a ${diffDays}j`;
+    } else {
+      return date.toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    }
   }
 }

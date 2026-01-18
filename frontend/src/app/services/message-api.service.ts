@@ -16,12 +16,22 @@ export enum MessageDirection {
   OUTBOUND = 'OUTBOUND'
 }
 
+export enum MessageDeliveryStatus {
+  PENDING = 'PENDING',
+  SENT = 'SENT',
+  DELIVERED = 'DELIVERED',
+  FAILED = 'FAILED',
+  READ = 'READ'
+}
+
 export interface MessageCreateRequest {
   dossierId: number;
   channel: MessageChannel;
   direction: MessageDirection;
   content: string;
   timestamp: string;
+  templateId?: string;
+  templateVariables?: Record<string, string>;
 }
 
 export interface MessageResponse {
@@ -33,6 +43,9 @@ export interface MessageResponse {
   content: string;
   timestamp: string;
   createdAt: string;
+  deliveryStatus?: MessageDeliveryStatus;
+  templateId?: string;
+  templateVariables?: Record<string, string>;
 }
 
 export interface Page<T> {
@@ -110,5 +123,9 @@ export class MessageApiService {
 
   create(request: MessageCreateRequest): Observable<MessageResponse> {
     return this.http.post<MessageResponse>(this.apiUrl, request);
+  }
+
+  retry(id: number): Observable<MessageResponse> {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/${id}/retry`, {});
   }
 }
