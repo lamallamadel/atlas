@@ -13,6 +13,7 @@ import { AppointmentApiService } from '../../services/appointment-api.service';
 import { ConsentementApiService } from '../../services/consentement-api.service';
 import { AuditEventApiService } from '../../services/audit-event-api.service';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
+import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
 @Component({ selector: 'app-badge-status', template: '' })
 class BadgeStatusStubComponent {
@@ -156,7 +157,7 @@ describe('DossierDetailComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      declarations: [DossierDetailComponent, BadgeStatusStubComponent],
+      declarations: [DossierDetailComponent, BadgeStatusStubComponent, PhoneFormatPipe],
       imports: [
         MaterialTestingModule // centralized: animations + forms + material + http testing
       ],
