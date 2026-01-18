@@ -7,6 +7,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NgChartsModule } from 'ng2-charts';
 
@@ -28,6 +30,8 @@ describe('ReportsDashboardComponent', () => {
         MatButtonModule,
         MatProgressSpinnerModule,
         MatTableModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
         BrowserAnimationsModule,
         NgChartsModule
       ]
