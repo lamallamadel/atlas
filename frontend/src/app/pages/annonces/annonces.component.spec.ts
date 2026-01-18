@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatCardModule } from '@angular/material/card';
 import { of } from 'rxjs';
 
 import { AnnoncesComponent } from './annonces.component';
@@ -116,7 +117,8 @@ describe('AnnoncesComponent', () => {
         MatIconModule,
         MatButtonModule,
         MatChipsModule,
-        MatMenuModule
+        MatMenuModule,
+        MatCardModule
       ],
       providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
