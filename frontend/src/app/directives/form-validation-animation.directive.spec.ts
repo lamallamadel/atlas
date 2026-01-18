@@ -37,13 +37,12 @@ describe('FormValidationAnimationDirective', () => {
       ]
     })
     .compileComponents();
-  });
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
     inputEl = fixture.debugElement.query(By.css('input'));
     fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should add validation-error class when field is invalid and touched', fakeAsync(async () => {
@@ -132,6 +131,7 @@ describe('FormValidationAnimationDirective', () => {
     const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
     
     expect(errorContainer).toBeTruthy();
+    expect(errorContainer).not.toBeNull();
   }));
 
   it('should display error message when validation fails', fakeAsync(async () => {
@@ -150,6 +150,7 @@ describe('FormValidationAnimationDirective', () => {
     const errorMessage = errorContainer?.querySelector('.error-message');
     
     expect(errorMessage).toBeTruthy();
+    expect(errorMessage).not.toBeNull();
     expect(errorMessage?.textContent).toContain('Ce champ est requis');
   }));
 
@@ -166,7 +167,10 @@ describe('FormValidationAnimationDirective', () => {
 
     const formField = fixture.debugElement.query(By.css('.form-field'));
     let errorContainer = formField.nativeElement.querySelector('.validation-error-container');
-    expect(errorContainer?.querySelector('.error-message')).toBeTruthy();
+    const initialErrorMessage = errorContainer?.querySelector('.error-message');
+    
+    expect(initialErrorMessage).toBeTruthy();
+    expect(initialErrorMessage?.textContent).toContain('Ce champ est requis');
 
     emailControl.setValue('test@example.com');
     fixture.detectChanges();
@@ -176,7 +180,10 @@ describe('FormValidationAnimationDirective', () => {
     fixture.detectChanges();
 
     errorContainer = formField.nativeElement.querySelector('.validation-error-container');
+    const clearedErrorMessage = errorContainer?.querySelector('.error-message');
+    
     expect(errorContainer?.innerHTML).toBe('');
+    expect(clearedErrorMessage).toBeNull();
   }));
 
   it('should display email validation error message', fakeAsync(async () => {
@@ -194,6 +201,8 @@ describe('FormValidationAnimationDirective', () => {
     const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
     const errorMessage = errorContainer?.querySelector('.error-message');
     
+    expect(errorMessage).toBeTruthy();
+    expect(errorMessage).not.toBeNull();
     expect(errorMessage?.textContent).toContain('Email invalide');
   }));
 });
