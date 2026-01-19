@@ -51,7 +51,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -66,7 +65,6 @@ describe('FormValidationAnimationDirective', () => {
     
     emailControl.setValue('');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -82,7 +80,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -91,7 +88,6 @@ describe('FormValidationAnimationDirective', () => {
 
     emailControl.setValue('test@example.com');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -106,7 +102,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsDirty();
     emailControl.setValue('invalid-email');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -122,7 +117,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -140,7 +134,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -160,7 +153,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsTouched();
     emailControl.setValue('');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
@@ -174,7 +166,6 @@ describe('FormValidationAnimationDirective', () => {
 
     emailControl.setValue('test@example.com');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick(300);
     fixture.detectChanges();
@@ -192,7 +183,6 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.markAsTouched();
     emailControl.setValue('invalid-email');
     fixture.detectChanges();
-
     await fixture.whenStable();
     tick();
     fixture.detectChanges();
