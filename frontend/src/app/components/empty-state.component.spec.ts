@@ -41,6 +41,7 @@ describe('EmptyStateComponent', () => {
     component.primaryAction = { label: 'Primary', handler: mockHandler };
     fixture.detectChanges();
     const button = fixture.nativeElement.querySelector('.btn-primary-action') as HTMLButtonElement;
+    expect(button).toBeTruthy();
     button.click();
     expect(mockHandler).toHaveBeenCalled();
   });
@@ -50,6 +51,7 @@ describe('EmptyStateComponent', () => {
     component.secondaryAction = { label: 'Secondary', handler: mockHandler };
     fixture.detectChanges();
     const button = fixture.nativeElement.querySelector('.btn-secondary-action') as HTMLButtonElement;
+    expect(button).toBeTruthy();
     button.click();
     expect(mockHandler).toHaveBeenCalled();
   });
