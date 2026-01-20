@@ -490,6 +490,17 @@
           </div>
         </mat-tab>
 
+        <mat-tab label="Messages sortants" aria-label="Gestion des messages sortants WhatsApp">
+          <div class="tab-content">
+            <app-messaging-tab
+              *ngIf="dossier"
+              [dossierId]="dossier.id"
+              [recipientPhone]="dossier.leadPhone"
+              [leadName]="dossier.leadName">
+            </app-messaging-tab>
+          </div>
+        </mat-tab>
+
         <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
           <div class="tab-content">
             <div class="tab-header-actions">

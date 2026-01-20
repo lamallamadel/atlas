@@ -1,0 +1,19 @@
+<div class="messaging-tab-container">
+  <div class="messaging-layout">
+    <div class="messaging-form-section">
+      <app-outbound-message-form
+        [dossierId]="dossierId"
+        [recipientPhone]="recipientPhone"
+        [leadName]="leadName"
+        (messageSent)="onMessageSent()"
+      ></app-outbound-message-form>
+    </div>
+
+    <div class="messaging-list-section">
+      <app-outbound-message-list
+        [dossierId]="dossierId"
+        (retryMessage)="onRetryMessage($event)"
+      ></app-outbound-message-list>
+    </div>
+  </div>
+</div>

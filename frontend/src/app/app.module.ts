@@ -85,6 +85,9 @@ import { WhatsappThreadComponent } from './components/whatsapp-thread.component'
 import { WhatsappMessageInputComponent } from './components/whatsapp-message-input.component';
 import { TemplateSelectionSheetComponent } from './components/template-selection-sheet.component';
 import { WhatsappMessagingContainerComponent } from './components/whatsapp-messaging-container.component';
+import { MessagingTabComponent } from './pages/dossiers/messaging-tab.component';
+import { OutboundMessageListComponent } from './pages/dossiers/outbound-message-list.component';
+import { OutboundMessageFormComponent } from './pages/dossiers/outbound-message-form.component';
 
 registerLocaleData(localeFr);
 
@@ -133,7 +136,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     WhatsappThreadComponent,
     WhatsappMessageInputComponent,
     TemplateSelectionSheetComponent,
-    WhatsappMessagingContainerComponent
+    WhatsappMessagingContainerComponent,
+    MessagingTabComponent,
+    OutboundMessageListComponent,
+    OutboundMessageFormComponent
   ],
   imports: [
     BrowserModule,

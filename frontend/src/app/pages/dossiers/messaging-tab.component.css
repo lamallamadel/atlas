@@ -1,0 +1,42 @@
+.messaging-tab-container {
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.messaging-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.messaging-form-section {
+  position: sticky;
+  top: 1rem;
+}
+
+.messaging-list-section {
+  min-height: 400px;
+}
+
+@media (max-width: 1024px) {
+  .messaging-layout {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .messaging-form-section {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .messaging-tab-container {
+    padding: 0.5rem;
+  }
+
+  .messaging-layout {
+    gap: 1rem;
+  }
+}
