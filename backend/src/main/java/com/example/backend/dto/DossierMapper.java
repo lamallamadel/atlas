@@ -33,7 +33,7 @@ public class DossierMapper {
         dossier.setSource(request.getSource() );
         dossier.setSource(request.getSource());
         
-        dossier.setCaseType(request.getCaseType() != null ? request.getCaseType() : "CRM_LEAD_BUY");
+        dossier.setCaseType(request.getCaseType());
         dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : "NEW");
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
