@@ -99,7 +99,7 @@ describe('AppLayoutComponent', () => {
     testComponent.closeSidenavOnMobile();
     await testFixture.whenStable();
     
-    expect(testComponent.drawer.close).toHaveBeenCalled();
+    expect(drawerSpy.close).toHaveBeenCalled();
   });
 
   it('should toggle theme when toggleTheme is called', () => {
