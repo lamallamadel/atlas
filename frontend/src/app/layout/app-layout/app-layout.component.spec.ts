@@ -89,7 +89,11 @@ describe('AppLayoutComponent', () => {
     mockBreakpointObserver.observe.and.returnValue(of({ matches: true, breakpoints: {} }));
     const testFixture = TestBed.createComponent(AppLayoutComponent);
     const testComponent = testFixture.componentInstance;
-    testComponent.drawer = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    
+    // Create and assign drawer spy BEFORE detectChanges to ensure ngOnInit subscription references the spy
+    const drawerSpy = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    testComponent.drawer = drawerSpy;
+    
     testFixture.detectChanges();
     
     testComponent.closeSidenavOnMobile();
