@@ -4,11 +4,13 @@ import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.PartiePrenanteEntity;
 import com.example.backend.entity.ReferentialEntity;
+import com.example.backend.entity.WorkflowDefinition;
 import com.example.backend.entity.enums.*;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
 import com.example.backend.repository.ReferentialRepository;
+import com.example.backend.repository.WorkflowDefinitionRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;
@@ -30,15 +32,18 @@ public class SeedDataLoader implements CommandLineRunner {
     private final DossierRepository dossierRepository;
     private final PartiePrenanteRepository partiePrenanteRepository;
     private final ReferentialRepository referentialRepository;
+    private final WorkflowDefinitionRepository workflowDefinitionRepository;
 
     public SeedDataLoader(AnnonceRepository annonceRepository,
                           DossierRepository dossierRepository,
                           PartiePrenanteRepository partiePrenanteRepository,
-                          ReferentialRepository referentialRepository) {
+                          ReferentialRepository referentialRepository,
+                          WorkflowDefinitionRepository workflowDefinitionRepository) {
         this.annonceRepository = annonceRepository;
         this.dossierRepository = dossierRepository;
         this.partiePrenanteRepository = partiePrenanteRepository;
         this.referentialRepository = referentialRepository;
+        this.workflowDefinitionRepository = workflowDefinitionRepository;
     }
 
     @Override
@@ -51,6 +56,7 @@ public class SeedDataLoader implements CommandLineRunner {
         }
 
         loadReferentials();
+        loadWorkflowDefinitions();
         loadAnnonces();
         loadDossiers();
 
@@ -168,6 +174,51 @@ public class SeedDataLoader implements CommandLineRunner {
         ref.setCreatedBy("system-seed");
         ref.setUpdatedBy("system-seed");
         return ref;
+    }
+
+    private void loadWorkflowDefinitions() {
+        logger.info("Loading workflow definitions for ORG-001 and ORG-002...");
+        
+        List<WorkflowDefinition> workflowDefinitions = new ArrayList<>();
+        
+        for (String orgId : Arrays.asList(ORG_001, ORG_002)) {
+            workflowDefinitions.addAll(createWorkflowDefinitionsForOrg(orgId));
+        }
+        
+        workflowDefinitionRepository.saveAll(workflowDefinitions);
+        logger.info("Loaded {} workflow definitions ({} per org)", workflowDefinitions.size(), workflowDefinitions.size() / 2);
+    }
+
+    private List<WorkflowDefinition> createWorkflowDefinitionsForOrg(String orgId) {
+        List<WorkflowDefinition> definitions = new ArrayList<>();
+        String caseType = "CRM_LEAD_BUY";
+        
+        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "QUALIFYING"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "QUALIFIED"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "APPOINTMENT"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "LOST"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFYING", "QUALIFIED"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFYING", "LOST"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFIED", "APPOINTMENT"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFIED", "LOST"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "APPOINTMENT", "WON"));
+        definitions.add(createWorkflowDefinition(orgId, caseType, "APPOINTMENT", "LOST"));
+        
+        return definitions;
+    }
+
+    private WorkflowDefinition createWorkflowDefinition(String orgId, String caseType, String fromStatus, String toStatus) {
+        WorkflowDefinition definition = new WorkflowDefinition();
+        definition.setOrgId(orgId);
+        definition.setCaseType(caseType);
+        definition.setFromStatus(fromStatus);
+        definition.setToStatus(toStatus);
+        definition.setIsActive(true);
+        definition.setConditionsJson(null);
+        definition.setRequiredFieldsJson(null);
+        definition.setCreatedBy("system-seed");
+        definition.setUpdatedBy("system-seed");
+        return definition;
     }
 
     private void loadAnnonces() {
