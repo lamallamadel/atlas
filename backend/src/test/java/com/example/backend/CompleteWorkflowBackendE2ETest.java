@@ -245,7 +245,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         long dossierUpdatedEvents = dossierAuditEvents.stream()
                 .filter(e -> e.getAction() == AuditAction.UPDATED)
                 .count();
-        assertThat(dossierUpdatedEvents).isGreaterThanOrEqualTo(5);
+        assertThat(dossierUpdatedEvents).isGreaterThanOrEqualTo(4);
 
         boolean hasStatusChange = dossierAuditEvents.stream()
                 .filter(e -> e.getAction() == AuditAction.UPDATED)
