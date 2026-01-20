@@ -27,6 +27,9 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     List<Dossier> findByLeadPhoneAndOrgIdAndStatusNotIn(@Param("phone") String phone, @Param("orgId") String orgId,
             @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
 
+    @Query("SELECT d FROM Dossier d LEFT JOIN FETCH d.parties WHERE d.id = :id")
+    java.util.Optional<Dossier> findByIdWithParties(@Param("id") Long id);
+
     List<Dossier> findByCaseType(String caseType);
 
     List<Dossier> findByStatusCode(String statusCode);

@@ -104,7 +104,7 @@ public class DossierService {
             partiePrenanteService.create(partyRequest);
             
             final Long savedId = saved.getId();
-            saved = dossierRepository.findById(savedId)
+            saved = dossierRepository.findByIdWithParties(savedId)
                     .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + savedId));
         }
 
