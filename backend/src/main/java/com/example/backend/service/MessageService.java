@@ -10,7 +10,9 @@ import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.example.backend.util.TenantContext;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,11 +26,13 @@ public class MessageService {
     private final MessageRepository messageRepository;
     private final DossierRepository dossierRepository;
     private final MessageMapper messageMapper;
+    private final EntityManager entityManager;
 
-    public MessageService(MessageRepository messageRepository, DossierRepository dossierRepository, MessageMapper messageMapper) {
+    public MessageService(MessageRepository messageRepository, DossierRepository dossierRepository, MessageMapper messageMapper, EntityManager entityManager) {
         this.messageRepository = messageRepository;
         this.dossierRepository = dossierRepository;
         this.messageMapper = messageMapper;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -85,6 +89,11 @@ public class MessageService {
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
         }
+
+        // Explicitly enable Hibernate filter for multi-tenant filtering
+        entityManager.unwrap(Session.class)
+                .enableFilter("orgIdFilter")
+                .setParameter("orgId", orgId);
 
         Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
         return messages.map(messageMapper::toResponse);
