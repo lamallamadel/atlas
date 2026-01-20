@@ -88,6 +88,9 @@ import { WhatsappMessagingContainerComponent } from './components/whatsapp-messa
 import { MessagingTabComponent } from './pages/dossiers/messaging-tab.component';
 import { OutboundMessageListComponent } from './pages/dossiers/outbound-message-list.component';
 import { OutboundMessageFormComponent } from './pages/dossiers/outbound-message-form.component';
+import { DocumentListComponent } from './components/document-list.component';
+import { DocumentUploadComponent } from './components/document-upload.component';
+import { DocumentPreviewDialogComponent } from './components/document-preview-dialog.component';
 
 registerLocaleData(localeFr);
 
@@ -139,7 +142,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     WhatsappMessagingContainerComponent,
     MessagingTabComponent,
     OutboundMessageListComponent,
-    OutboundMessageFormComponent
+    OutboundMessageFormComponent,
+    DocumentListComponent,
+    DocumentUploadComponent,
+    DocumentPreviewDialogComponent
   ],
   imports: [
     BrowserModule,

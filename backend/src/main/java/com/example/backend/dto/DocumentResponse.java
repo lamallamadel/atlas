@@ -13,6 +13,7 @@ public class DocumentResponse {
     private String storagePath;
     private String uploadedBy;
     private String contentType;
+    private String category;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -102,5 +103,13 @@ public class DocumentResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

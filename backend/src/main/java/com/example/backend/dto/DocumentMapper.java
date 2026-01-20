@@ -21,6 +21,7 @@ public class DocumentMapper {
         response.setStoragePath(entity.getStoragePath());
         response.setUploadedBy(entity.getUploadedBy());
         response.setContentType(entity.getContentType());
+        response.setCategory(entity.getCategory());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
 

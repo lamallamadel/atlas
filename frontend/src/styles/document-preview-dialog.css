@@ -1,0 +1,10 @@
+/* Global styles for document preview dialog */
+.document-preview-dialog .mat-mdc-dialog-container {
+  padding: 0;
+  overflow: hidden;
+}
+
+.document-preview-dialog .mat-mdc-dialog-surface {
+  border-radius: 8px;
+  overflow: hidden;
+}

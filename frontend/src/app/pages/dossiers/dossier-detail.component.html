@@ -709,6 +709,12 @@
           </div>
         </mat-tab>
 
+        <mat-tab label="Documents" aria-label="Gestion des documents du dossier">
+          <div class="tab-content">
+            <app-document-list [dossierId]="dossier.id"></app-document-list>
+          </div>
+        </mat-tab>
+
         <mat-tab label="Chronologie" aria-label="Chronologie des activités du dossier">
           <div class="tab-content">
             <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>

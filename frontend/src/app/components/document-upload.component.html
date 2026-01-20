@@ -1,0 +1,95 @@
+<div class="document-upload-container">
+  <div class="upload-section">
+    <div class="category-selector">
+      <label for="category-select" class="category-label">Catégorie du document :</label>
+      <select 
+        id="category-select" 
+        [(ngModel)]="selectedCategory" 
+        class="category-select"
+        [disabled]="isUploading()">
+        <option *ngFor="let cat of categories" [value]="cat.value">{{ cat.label }}</option>
+      </select>
+    </div>
+
+    <div 
+      class="drop-zone"
+      [class.dragging]="isDragging"
+      (dragover)="onDragOver($event)"
+      (dragleave)="onDragLeave($event)"
+      (drop)="onDrop($event)">
+      <mat-icon class="upload-icon">cloud_upload</mat-icon>
+      <p class="drop-zone-text">Glissez-déposez vos fichiers ici</p>
+      <p class="drop-zone-subtext">ou</p>
+      <label class="file-input-label">
+        <input 
+          type="file" 
+          multiple 
+          (change)="onFileSelected($event)"
+          class="file-input"
+          [disabled]="isUploading()"
+          accept="application/pdf,image/*,.doc,.docx,.xls,.xlsx,.txt,.csv">
+        <button mat-raised-button color="primary" [disabled]="isUploading()">
+          Sélectionner des fichiers
+        </button>
+      </label>
+    </div>
+
+    <div class="selected-files" *ngIf="hasSelectedFiles()">
+      <h4 class="selected-files-title">Fichiers sélectionnés</h4>
+      <div class="file-list">
+        <div class="file-item" *ngFor="let file of selectedFiles; let i = index">
+          <mat-icon class="file-icon">{{ getFileIcon(file) }}</mat-icon>
+          <div class="file-info">
+            <span class="file-name">{{ file.name }}</span>
+            <span class="file-size">{{ formatFileSize(file.size) }}</span>
+          </div>
+          <button 
+            mat-icon-button 
+            (click)="removeFile(i)"
+            [disabled]="isUploading()"
+            class="remove-btn"
+            aria-label="Supprimer le fichier">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+
+      <button 
+        mat-raised-button 
+        color="accent" 
+        (click)="uploadFiles()"
+        [disabled]="!hasSelectedFiles() || isUploading()"
+        class="upload-btn">
+        <mat-icon>upload</mat-icon>
+        Télécharger {{ selectedFiles.length }} fichier(s)
+      </button>
+    </div>
+
+    <div class="upload-progress-list" *ngIf="getUploadProgressArray().length > 0">
+      <h4 class="progress-title">Téléchargements en cours</h4>
+      <div class="progress-item" *ngFor="let progress of getUploadProgressArray()">
+        <div class="progress-header">
+          <mat-icon class="progress-icon">{{ getFileIcon(progress.file) }}</mat-icon>
+          <span class="progress-filename">{{ progress.file.name }}</span>
+          <span class="progress-percentage">{{ progress.progress }}%</span>
+        </div>
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="progress.progress"
+          [color]="progress.error ? 'warn' : 'primary'">
+        </mat-progress-bar>
+        <div class="progress-status">
+          <span *ngIf="progress.uploading" class="status-uploading">En cours...</span>
+          <span *ngIf="progress.completed" class="status-completed">
+            <mat-icon class="status-icon">check_circle</mat-icon>
+            Terminé
+          </span>
+          <span *ngIf="progress.error" class="status-error">
+            <mat-icon class="status-icon">error</mat-icon>
+            {{ progress.error }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -67,7 +67,7 @@ public class DocumentService {
     }
 
     @Transactional
-    public DocumentResponse upload(Long dossierId, MultipartFile file) {
+    public DocumentResponse upload(Long dossierId, MultipartFile file, String category) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
@@ -100,6 +100,7 @@ public class DocumentService {
             document.setFileSize(size);
             document.setStoragePath(storagePath);
             document.setContentType(contentType);
+            document.setCategory(category);
             document.setUploadedBy(getCurrentUserId());
 
             LocalDateTime now = LocalDateTime.now();
@@ -108,8 +109,8 @@ public class DocumentService {
 
             DocumentEntity saved = documentRepository.save(document);
 
-            logger.info("Document uploaded successfully: id={}, fileName={}, dossierId={}", 
-                    saved.getId(), fileName, dossierId);
+            logger.info("Document uploaded successfully: id={}, fileName={}, dossierId={}, category={}", 
+                    saved.getId(), fileName, dossierId, category);
 
             return documentMapper.toResponse(saved);
         } catch (Exception e) {

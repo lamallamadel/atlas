@@ -51,8 +51,10 @@ public class DocumentController {
             @Parameter(description = "ID of the dossier to associate the document with", required = true)
             @RequestParam("dossierId") Long dossierId,
             @Parameter(description = "File to upload", required = true)
-            @RequestParam("file") MultipartFile file) {
-        DocumentResponse response = documentService.upload(dossierId, file);
+            @RequestParam("file") MultipartFile file,
+            @Parameter(description = "Document category (Contract, Invoice, ID, Photo, Other)")
+            @RequestParam(value = "category", required = false) String category) {
+        DocumentResponse response = documentService.upload(dossierId, file, category);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

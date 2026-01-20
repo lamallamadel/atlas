@@ -36,6 +36,9 @@ public class DocumentEntity extends BaseEntity {
     @Column(name = "content_type", length = 255)
     private String contentType;
 
+    @Column(name = "category", length = 100)
+    private String category;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "dossier_id", insertable = false, updatable = false)
     private Dossier dossier;
@@ -110,5 +113,13 @@ public class DocumentEntity extends BaseEntity {
 
     public void setDossier(Dossier dossier) {
         this.dossier = dossier;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }
