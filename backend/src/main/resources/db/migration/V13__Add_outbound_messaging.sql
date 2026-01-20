@@ -50,9 +50,9 @@ CREATE INDEX idx_outbound_message_dossier_id ON outbound_message(dossier_id);
 CREATE INDEX idx_outbound_message_status ON outbound_message(status);
 CREATE INDEX idx_outbound_message_created_at ON outbound_message(created_at);
 CREATE INDEX idx_outbound_message_provider_id ON outbound_message(provider_message_id);
-CREATE INDEX idx_outbound_message_status_attempts ON outbound_message(status, attempt_count) WHERE status = 'QUEUED';
+CREATE INDEX idx_outbound_message_status_attempts ON outbound_message(status, attempt_count);
 
 -- Indexes for outbound_attempt
 CREATE INDEX idx_outbound_attempt_org_id ON outbound_attempt(org_id);
 CREATE INDEX idx_outbound_attempt_message_id ON outbound_attempt(outbound_message_id);
-CREATE INDEX idx_outbound_attempt_next_retry ON outbound_attempt(next_retry_at) WHERE next_retry_at IS NOT NULL;
+CREATE INDEX idx_outbound_attempt_next_retry ON outbound_attempt(next_retry_at);
