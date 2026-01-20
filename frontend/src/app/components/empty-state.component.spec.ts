@@ -31,7 +31,9 @@ describe('EmptyStateComponent', () => {
     component.subtext = 'Test subtext';
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('.empty-state-subtext')?.textContent).toContain('Test subtext');
+    const subtextElement = compiled.querySelector('.empty-state-subtext');
+    expect(subtextElement).toBeTruthy();
+    expect(subtextElement?.textContent).toContain('Test subtext');
   });
 
   it('should call primary action handler when primary button clicked', () => {

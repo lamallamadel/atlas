@@ -384,3 +384,7 @@ run-mvn-install.ps1
 setup-maven-toolchains.cmd
 mvn-java17-wrapper.ps1
 SETUP_STATUS_INITIAL.md
+setup-initial.ps1
+setup-backend.js
+mvn17.cmd
+mavenrc_pre.bat
