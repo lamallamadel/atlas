@@ -28,29 +28,50 @@ public class DossierStatusTransitionService {
         this.allowedTransitions = initializeTransitions();
     }
 
+    /**
+     * Initializes basic status transition rules that apply to all dossiers.
+     * These rules are always enforced, regardless of whether caseType is set.
+     * 
+     * When caseType is null, ONLY these rules apply (workflow validation bypassed).
+     * When caseType is set, these rules AND custom workflow rules both apply.
+     * 
+     * Transition Map:
+     * - NEW: Can go to QUALIFYING (start qualification), QUALIFIED (pre-qualified client),
+     *        APPOINTMENT (direct scheduling), or LOST (client not interested)
+     * - QUALIFYING: Can go to QUALIFIED (passed qualification) or LOST (failed qualification)
+     * - QUALIFIED: Can go to APPOINTMENT (schedule visit) or LOST (client changed mind)
+     * - APPOINTMENT: Can go to WON (deal closed) or LOST (client rejected offer)
+     * - WON: Terminal state - no transitions allowed
+     * - LOST: Terminal state - no transitions allowed
+     */
     private Map<DossierStatus, Set<DossierStatus>> initializeTransitions() {
         Map<DossierStatus, Set<DossierStatus>> transitions = new HashMap<>();
 
+        // NEW: Multiple paths to accommodate different sales velocities
         transitions.put(DossierStatus.NEW, Set.of(
-                DossierStatus.QUALIFYING,
-                DossierStatus.QUALIFIED,
-                DossierStatus.APPOINTMENT,
-                DossierStatus.LOST));
+                DossierStatus.QUALIFYING,   // Standard path: start qualification process
+                DossierStatus.QUALIFIED,     // Shortcut: pre-qualified client
+                DossierStatus.APPOINTMENT,   // Shortcut: direct appointment booking
+                DossierStatus.LOST));        // Early rejection
 
+        // QUALIFYING: Binary outcome of qualification
         transitions.put(DossierStatus.QUALIFYING, Set.of(
-                DossierStatus.QUALIFIED,
-                DossierStatus.LOST));
+                DossierStatus.QUALIFIED,     // Qualification succeeded
+                DossierStatus.LOST));        // Qualification failed
 
+        // QUALIFIED: Ready for appointment or client withdrew
         transitions.put(DossierStatus.QUALIFIED, Set.of(
-                DossierStatus.APPOINTMENT,
-                DossierStatus.LOST));
+                DossierStatus.APPOINTMENT,   // Schedule property viewing
+                DossierStatus.LOST));        // Client lost interest
 
+        // APPOINTMENT: Final outcome after viewing
         transitions.put(DossierStatus.APPOINTMENT, Set.of(
-                DossierStatus.WON,
-                DossierStatus.LOST));
+                DossierStatus.WON,           // Deal successfully closed
+                DossierStatus.LOST));        // Client rejected after viewing
 
-        transitions.put(DossierStatus.WON, Set.of());
-        transitions.put(DossierStatus.LOST, Set.of());
+        // Terminal states: no outbound transitions allowed
+        transitions.put(DossierStatus.WON, Set.of());   // Cannot reopen won deals
+        transitions.put(DossierStatus.LOST, Set.of());  // Cannot reopen lost deals
 
         return transitions;
     }

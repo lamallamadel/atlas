@@ -36,6 +36,23 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * End-to-end tests for Dossier API with workflow validation.
+ * 
+ * WORKFLOW VALIDATION STRATEGY:
+ * All tests use .withCaseType(null) to bypass custom workflow validation.
+ * This tests the BASIC transition rules only (DossierStatusTransitionService).
+ * 
+ * VALIDATION BEHAVIOR:
+ * - caseType=null: Only basic transition rules apply (flexible transitions)
+ * - caseType set: Both basic AND custom workflow rules apply (stricter)
+ * 
+ * These tests verify that when caseType=null:
+ * 1. Terminal states (WON, LOST) still cannot transition
+ * 2. Invalid transitions are still blocked (e.g., NEW->WON)
+ * 3. Valid shortcuts are allowed (e.g., NEW->QUALIFIED, NEW->APPOINTMENT)
+ * 4. Multi-step transitions work (NEW->QUALIFYING->QUALIFIED->APPOINTMENT->WON)
+ */
 @BackendE2ETest
 @WithMockUser(roles = {"PRO", "ADMIN"})
 public class DossierBackendE2ETest extends BaseBackendE2ETest {
@@ -199,12 +216,15 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatusWithValidTransitions_Success() throws Exception {
+        // Test validates multi-step workflow transitions with caseType=null
+        // When caseType is null, workflow validation is bypassed, allowing transitions
+        // to follow only basic transition rules from DossierStatusTransitionService
         testDataBuilder.withOrgId(ORG_ID);
         Dossier dossier = testDataBuilder.dossierBuilder()
             .withLeadPhone("+33612345678")
             .withLeadName("John Doe")
             .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
+            .withCaseType(null)  // Bypass workflow validation, use basic transitions only
             .persist();
 
         statusHistoryRepository.deleteAll();
@@ -293,12 +313,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatus_TerminalStatePreventsTransition() throws Exception {
+        // Test validates that terminal state (WON) prevents transitions
+        // Even with caseType=null (workflow bypass), basic transition rules still apply
         testDataBuilder.withOrgId(ORG_ID);
         Dossier dossier = testDataBuilder.dossierBuilder()
             .withLeadPhone("+33612345678")
             .withLeadName("John Doe")
             .withStatus(DossierStatus.WON)
-            .withCaseType(null)
+            .withCaseType(null)  // Workflow bypass, but terminal state rules still enforced
             .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
@@ -321,12 +343,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatus_LostTerminalState() throws Exception {
+        // Test validates that terminal state (LOST) prevents transitions
+        // caseType=null bypasses workflow validation but not basic terminal state rules
         testDataBuilder.withOrgId(ORG_ID);
         Dossier dossier = testDataBuilder.dossierBuilder()
             .withLeadPhone("+33612345678")
             .withLeadName("John Doe")
             .withStatus(DossierStatus.LOST)
-            .withCaseType(null)
+            .withCaseType(null)  // Workflow bypass, but terminal state rules still enforced
             .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
@@ -349,12 +373,15 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatus_InvalidTransition() throws Exception {
+        // Test validates that even with caseType=null, invalid transitions are blocked
+        // NEW cannot directly transition to WON - requires intermediate steps
+        // (e.g., NEW -> QUALIFYING -> QUALIFIED -> APPOINTMENT -> WON)
         testDataBuilder.withOrgId(ORG_ID);
         Dossier dossier = testDataBuilder.dossierBuilder()
             .withLeadPhone("+33612345678")
             .withLeadName("John Doe")
             .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
+            .withCaseType(null)  // Workflow bypass, but basic transition rules still apply
             .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
@@ -789,12 +816,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testNewDirectToQualifiedTransition() throws Exception {
+        // Test validates shortcut transition: NEW -> QUALIFIED (skipping QUALIFYING)
+        // This is allowed by basic transition rules when caseType=null
         testDataBuilder.withOrgId(ORG_ID);
         Dossier dossier = testDataBuilder.dossierBuilder()
             .withLeadPhone("+33612345678")
             .withLeadName("John Doe")
             .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
+            .withCaseType(null)  // Allows flexible transitions per basic rules
             .persist();
 
         statusHistoryRepository.deleteAll();
@@ -818,12 +847,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testNewDirectToAppointmentTransition() throws Exception {
+        // Test validates shortcut transition: NEW -> APPOINTMENT (skipping QUALIFYING and QUALIFIED)
+        // This is allowed by basic transition rules when caseType=null
         testDataBuilder.withOrgId(ORG_ID);
         Dossier dossier = testDataBuilder.dossierBuilder()
             .withLeadPhone("+33612345678")
             .withLeadName("John Doe")
             .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
+            .withCaseType(null)  // Allows flexible transitions per basic rules
             .persist();
 
         statusHistoryRepository.deleteAll();

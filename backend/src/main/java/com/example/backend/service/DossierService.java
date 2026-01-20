@@ -163,8 +163,16 @@ public class DossierService {
         DossierStatus currentStatus = dossier.getStatus();
         DossierStatus newStatus = request.getStatus();
 
+        // Step 1: Basic transition validation - always enforced regardless of caseType
+        // Validates terminal states (WON, LOST cannot transition) and basic allowed transitions
+        // For example: NEW can go to QUALIFYING, QUALIFIED, APPOINTMENT, or LOST
         transitionService.validateTransition(currentStatus, newStatus);
 
+        // Step 2: Workflow validation - only when caseType is set
+        // When caseType is null or blank, workflow validation is bypassed, allowing flexible transitions
+        // that only need to satisfy the basic transition rules above.
+        // When caseType is set (e.g., "SALE", "RENTAL"), custom workflow rules are enforced,
+        // which may require additional fields or impose stricter transition constraints.
         if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
             workflowValidationService.validateAndRecordTransition(
                     dossier, 
@@ -265,8 +273,10 @@ public class DossierService {
                 DossierStatus currentStatus = dossier.getStatus();
                 DossierStatus newStatus = request.getStatus();
 
+                // Basic transition validation - always enforced
                 transitionService.validateTransition(currentStatus, newStatus);
 
+                // Workflow validation - only when caseType is set (bypassed when null)
                 if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
                     workflowValidationService.validateAndRecordTransition(
                             dossier, 

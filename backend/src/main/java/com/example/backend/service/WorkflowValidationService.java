@@ -13,6 +13,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.*;
 
+/**
+ * Validates dossier status transitions against custom workflow rules defined per case type.
+ * 
+ * TWO-TIER VALIDATION ARCHITECTURE:
+ * 
+ * 1. BASIC VALIDATION (DossierStatusTransitionService) - ALWAYS APPLIED
+ *    - Enforces terminal states (WON, LOST cannot transition)
+ *    - Validates allowed transitions (e.g., NEW can go to QUALIFYING, QUALIFIED, APPOINTMENT, LOST)
+ *    - Applied to ALL dossiers regardless of caseType
+ * 
+ * 2. WORKFLOW VALIDATION (This Service) - CONDITIONAL
+ *    - Only applied when dossier.caseType is set (not null/blank)
+ *    - Enforces custom rules per case type (e.g., "SALE", "RENTAL")
+ *    - Can require specific fields, validate conditions, or impose stricter transitions
+ *    - Records all transition attempts in workflow_transition table for audit
+ * 
+ * BYPASS MECHANISM:
+ * When caseType is null or blank, this validation is skipped, allowing:
+ * - Generic dossiers without workflow constraints
+ * - Legacy data migration without workflow setup
+ * - Flexible transitions that only need basic validation
+ */
 @Service
 public class WorkflowValidationService {
 
@@ -35,6 +57,7 @@ public class WorkflowValidationService {
 
         String caseType = dossier.getCaseType();
         
+        // Record all workflow transitions for audit trail
         WorkflowTransition transition = new WorkflowTransition();
         transition.setOrgId(orgId);
         transition.setDossierId(dossier.getId());
@@ -45,6 +68,10 @@ public class WorkflowValidationService {
         transition.setReason(reason);
         transition.setTransitionedAt(LocalDateTime.now());
 
+        // BYPASS: When caseType is null or blank, skip custom workflow validation
+        // This allows dossiers without a specific case type to use only the basic
+        // transition rules (from DossierStatusTransitionService).
+        // Use case: Generic dossiers or legacy data that doesn't require workflow constraints.
         if (caseType == null || caseType.isBlank()) {
             transition.setIsAllowed(true);
             transition.setValidationErrorsJson(null);
