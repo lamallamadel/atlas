@@ -1,5 +1,5 @@
 import { Component, DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -58,6 +58,8 @@ describe('FormValidationAnimationDirective', () => {
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
     expect(emailControl.invalid).toBeTruthy();
     expect(emailControl.touched).toBeTruthy();
+    
+    flush();
   }));
 
   it('should not add validation-error class when field is untouched', fakeAsync(async () => {
@@ -72,6 +74,8 @@ describe('FormValidationAnimationDirective', () => {
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
     expect(emailControl.invalid).toBeTruthy();
     expect(emailControl.touched).toBeFalsy();
+    
+    flush();
   }));
 
   it('should remove validation-error class when field becomes valid', fakeAsync(async () => {
@@ -94,6 +98,8 @@ describe('FormValidationAnimationDirective', () => {
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
     expect(emailControl.valid).toBeTruthy();
+    
+    flush();
   }));
 
   it('should add validation-error class when field is invalid and dirty', fakeAsync(async () => {
@@ -109,6 +115,8 @@ describe('FormValidationAnimationDirective', () => {
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
     expect(emailControl.invalid).toBeTruthy();
     expect(emailControl.dirty).toBeTruthy();
+    
+    flush();
   }));
 
   it('should create error container within form field wrapper', fakeAsync(async () => {
@@ -126,6 +134,8 @@ describe('FormValidationAnimationDirective', () => {
     
     expect(errorContainer).toBeTruthy();
     expect(errorContainer).not.toBeNull();
+    
+    flush();
   }));
 
   it('should display error message when validation fails', fakeAsync(async () => {
@@ -145,6 +155,8 @@ describe('FormValidationAnimationDirective', () => {
     expect(errorMessage).toBeTruthy();
     expect(errorMessage).not.toBeNull();
     expect(errorMessage?.textContent).toContain('Ce champ est requis');
+    
+    flush();
   }));
 
   it('should clear error message when field becomes valid', fakeAsync(async () => {
@@ -175,6 +187,8 @@ describe('FormValidationAnimationDirective', () => {
     
     expect(errorContainer?.innerHTML).toBe('');
     expect(clearedErrorMessage).toBeNull();
+    
+    flush();
   }));
 
   it('should display email validation error message', fakeAsync(async () => {
@@ -194,5 +208,7 @@ describe('FormValidationAnimationDirective', () => {
     expect(errorMessage).toBeTruthy();
     expect(errorMessage).not.toBeNull();
     expect(errorMessage?.textContent).toContain('Email invalide');
+    
+    flush();
   }));
 });
