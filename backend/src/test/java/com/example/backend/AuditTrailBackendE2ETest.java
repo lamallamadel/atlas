@@ -535,16 +535,18 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     void getAuditEvents_FilterByEntityTypeAndId_ReturnsPaginatedResults() throws Exception {
         TenantContext.setOrgId(ORG_1);
         testDataBuilder.withOrgId(ORG_1);
-        com.example.backend.entity.Dossier dossier = testDataBuilder.createDossierWithoutWorkflow();
+        DossierCreateRequest createRequest = new DossierCreateRequest();
+        createRequest.setLeadName("Test Dossier");
+        DossierResponse dossierResponse = dossierService.create(createRequest);
 
         DossierStatusPatchRequest statusPatch = new DossierStatusPatchRequest();
         statusPatch.setStatus(DossierStatus.QUALIFIED);
         statusPatch.setStatusCode("CRM_QUALIFIED");
-        dossierService.patchStatus(dossier.getId(), statusPatch);
+        dossierService.patchStatus(dossierResponse.getId(), statusPatch);
 
         MvcResult result = mockMvc.perform(withTenantHeaders(get("/api/v1/audit-events")
                                 .param("entityType", "DOSSIER")
-                                .param("entityId", dossier.getId().toString())
+                                .param("entityId", dossierResponse.getId().toString())
                                 .param("page", "0")
                                 .param("size", "10") , ORG_1  ) )
                 .andExpect(status().isOk())
