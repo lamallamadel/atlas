@@ -207,6 +207,29 @@ describe('DossiersComponent', () => {
   });
 
   it('should remove filter when chip is removed', () => {
+    const mockPage = {
+      content: [],
+      pageable: {
+        sort: { empty: true, sorted: false, unsorted: true },
+        offset: 0,
+        pageNumber: 0,
+        pageSize: 10,
+        paged: true,
+        unpaged: false
+      },
+      last: true,
+      totalPages: 0,
+      totalElements: 0,
+      size: 10,
+      number: 0,
+      sort: { empty: true, sorted: false, unsorted: true },
+      first: true,
+      numberOfElements: 0,
+      empty: true
+    };
+
+    dossierApiService.list.and.returnValue(of(mockPage));
+
     component.selectedStatus = DossierStatus.QUALIFIED;
     component.phoneFilter = '+33612345678';
     component.updateAppliedFilters();
