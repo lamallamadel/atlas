@@ -40,12 +40,14 @@ public class DossierService {
     private final MetricsService metricsService;
     private final WorkflowValidationService workflowValidationService;
     private final PartiePrenanteService partiePrenanteService;
+    private final jakarta.persistence.EntityManager entityManager;
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
                          SearchService searchService, MetricsService metricsService,
                          WorkflowValidationService workflowValidationService,
-                         PartiePrenanteService partiePrenanteService) {
+                         PartiePrenanteService partiePrenanteService,
+                         jakarta.persistence.EntityManager entityManager) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
@@ -54,6 +56,7 @@ public class DossierService {
         this.metricsService = metricsService;
         this.workflowValidationService = workflowValidationService;
         this.partiePrenanteService = partiePrenanteService;
+        this.entityManager = entityManager;
     }
 
     @Transactional
@@ -102,6 +105,11 @@ public class DossierService {
             partyRequest.setMeta(request.getInitialParty().getMeta());
             
             partiePrenanteService.create(partyRequest);
+            
+            // Flush to ensure the party is persisted and visible in the next query
+            entityManager.flush();
+            // Clear the persistence context to force a fresh fetch from database
+            entityManager.clear();
             
             final Long savedId = saved.getId();
             saved = dossierRepository.findByIdWithParties(savedId)
