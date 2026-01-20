@@ -144,8 +144,37 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.dossierId").value(dossierId));
 
+        DossierStatusPatchRequest statusPatchToQualifying = new DossierStatusPatchRequest();
+        statusPatchToQualifying.setStatus(DossierStatus.QUALIFYING);
+        statusPatchToQualifying.setStatusCode("CRM_QUALIFYING");
+        statusPatchToQualifying.setUserId("agent-001");
+        statusPatchToQualifying.setReason("Starting qualification process");
+
+        mockMvc.perform(
+                withTenantHeaders(patch("/api/v1/dossiers/" + dossierId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statusPatchToQualifying)), TENANT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(dossierId))
+                .andExpect(jsonPath("$.status").value("QUALIFYING"));
+
+        DossierStatusPatchRequest statusPatchToQualified = new DossierStatusPatchRequest();
+        statusPatchToQualified.setStatus(DossierStatus.QUALIFIED);
+        statusPatchToQualified.setStatusCode("CRM_QUALIFIED");
+        statusPatchToQualified.setUserId("agent-001");
+        statusPatchToQualified.setReason("Lead qualified");
+
+        mockMvc.perform(
+                withTenantHeaders(patch("/api/v1/dossiers/" + dossierId + "/status")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(statusPatchToQualified)), TENANT_ID))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(dossierId))
+                .andExpect(jsonPath("$.status").value("QUALIFIED"));
+
         DossierStatusPatchRequest statusPatchToAppointment = new DossierStatusPatchRequest();
         statusPatchToAppointment.setStatus(DossierStatus.APPOINTMENT);
+        statusPatchToAppointment.setStatusCode("CRM_APPOINTMENT");
         statusPatchToAppointment.setUserId("agent-001");
         statusPatchToAppointment.setReason("Appointment scheduled");
 
@@ -206,7 +235,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
                 objectMapper.readTree(dossierAuditContent).get("content").toString(),
                 new TypeReference<List<AuditEventResponse>>() {});
 
-        assertThat(dossierAuditEvents).hasSizeGreaterThanOrEqualTo(3);
+        assertThat(dossierAuditEvents).hasSizeGreaterThanOrEqualTo(6);
 
         long dossierCreatedEvents = dossierAuditEvents.stream()
                 .filter(e -> e.getAction() == AuditAction.CREATED)
@@ -216,7 +245,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         long dossierUpdatedEvents = dossierAuditEvents.stream()
                 .filter(e -> e.getAction() == AuditAction.UPDATED)
                 .count();
-        assertThat(dossierUpdatedEvents).isGreaterThanOrEqualTo(2);
+        assertThat(dossierUpdatedEvents).isGreaterThanOrEqualTo(5);
 
         boolean hasStatusChange = dossierAuditEvents.stream()
                 .filter(e -> e.getAction() == AuditAction.UPDATED)

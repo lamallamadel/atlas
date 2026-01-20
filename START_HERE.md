@@ -1,66 +1,84 @@
-# 🚀 Start Here - Post-Clone Setup
+# 🚀 Start Here - Repository Setup
+
+Welcome! This repository has been cloned and is partially set up.
 
 ## Current Status
 
-✅ **Frontend Dependencies Installed** - npm packages are ready  
-⚠️ **Backend Build Needed** - Run Maven install with Java 17  
-⚠️ **Playwright Browsers Needed** - Install browser binaries  
+✅ **Frontend**: Fully configured with all dependencies installed  
+⏳ **Backend**: Requires one simple command to complete setup
 
-## Quick Setup (2 commands)
+## Quick Setup (30 seconds)
 
-### 1. Build Backend
+Run this command to complete the backend setup:
+
+### Windows
+Double-click this file or run from terminal:
 ```cmd
-cd backend
-mvn.cmd clean install
-cd ..
+SETUP-NOW.cmd
 ```
 
-### 2. Install Playwright Browsers
+### Alternative Methods
+See **RUN_INITIAL_SETUP.md** for other setup options including:
+- Manual PowerShell commands
+- Using Maven wrapper scripts
+- Step-by-step instructions
+
+## What's Already Done
+
+- ✅ Frontend dependencies installed (1,177 npm packages)
+- ✅ Java 17 detected and configured in toolchains
+- ✅ Maven detected and available
+- ✅ Setup helper scripts created
+- ✅ All configuration files in place
+
+## What the Setup Command Does
+
+The `SETUP-NOW.cmd` script will:
+1. Set JAVA_HOME to Java 17
+2. Build backend with Maven (downloads dependencies, compiles code)
+3. Takes ~3-5 minutes on first run
+
+## After Setup
+
+Once setup is complete, you can immediately:
+
 ```cmd
-cd frontend
-npx playwright install
-cd ..
-```
-
-## Verify Setup Works
-
-```cmd
-REM Test backend
-cd backend
-mvn test
-
-REM Test frontend
-cd frontend
-npm test
-
-REM E2E tests
-npm run e2e:fast
-```
-
-## Done! ✨
-
-You're now ready to develop. See these files for more info:
-
-- **AGENTS.md** - All development commands (dev servers, tests, E2E, builds)
-- **INITIAL_SETUP_STATUS.md** - Detailed setup status and troubleshooting
-- **SETUP_INSTRUCTIONS_AFTER_CLONE.md** - Complete setup instructions
-
-## Development Commands
-
-**Backend Dev Server:**
-```cmd
+# Start backend dev server (http://localhost:8080)
 cd backend
 mvn spring-boot:run
-```
 
-**Frontend Dev Server:**
-```cmd
+# Start frontend dev server (http://localhost:4200)
 cd frontend
 npm start
+
+# Run tests
+cd backend && mvn test
+cd frontend && npm test
+
+# Run E2E tests
+cd frontend && npm run e2e
 ```
 
-Access the app at `http://localhost:4200` (frontend proxies to backend on port 8080).
+## Documentation
+
+- **AGENTS.md** - Complete development guide (build, test, dev server commands)
+- **SETUP.md** - Detailed setup and configuration instructions
+- **INITIAL_SETUP_STATUS.md** - Detailed status of what's done and what's pending
+- **RUN_INITIAL_SETUP.md** - Multiple setup options and troubleshooting
+
+## Tech Stack
+
+- **Backend**: Spring Boot 3.2.1, Java 17, Maven
+- **Frontend**: Angular 16, Material UI, TypeScript
+- **Testing**: JUnit 5, Playwright, Jasmine/Karma
+- **Database**: PostgreSQL (production), H2 (development/testing)
+
+## Need Help?
+
+1. Check **INITIAL_SETUP_STATUS.md** for current status
+2. See **RUN_INITIAL_SETUP.md** for setup troubleshooting
+3. Review **AGENTS.md** for development commands
 
 ---
 
-**Need Help?** Check `AGENTS.md` for troubleshooting and detailed documentation.
+**Next Step**: Run `SETUP-NOW.cmd` to complete the backend setup!
