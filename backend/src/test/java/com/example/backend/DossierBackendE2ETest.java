@@ -18,6 +18,7 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.DossierStatusHistoryRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
+import com.example.backend.utils.BackendE2ETestDataBuilder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Autowired
     private PartiePrenanteRepository partiePrenanteRepository;
 
+    @Autowired
+    private BackendE2ETestDataBuilder testDataBuilder;
+
     @BeforeEach
     void setUp() {
         // Delete all seed data and test data for fresh state
@@ -61,12 +65,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         statusHistoryRepository.deleteAll();
         partiePrenanteRepository.deleteAll();
         annonceRepository.deleteAll();
+        testDataBuilder.deleteAllTestData();
     }
 
     @AfterEach
     void tearDown() {
         // Clear tenant context to prevent tenant ID leakage between tests
         com.example.backend.util.TenantContext.clear();
+        testDataBuilder.deleteAllTestData();
     }
 
     @Test
@@ -126,12 +132,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testCreateDossierWithInitialParty_DetectsDuplicate() throws Exception {
-        Dossier existingDossier = new Dossier();
-        existingDossier.setOrgId(ORG_ID);
-        existingDossier.setLeadPhone("+33612345678");
-        existingDossier.setLeadName("Jane Doe");
-        existingDossier.setStatus(DossierStatus.NEW);
-        existingDossier = dossierRepository.save(existingDossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier existingDossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("Jane Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         DossierCreateRequest request = new DossierCreateRequest();
         request.setLeadPhone("+33699999999");
@@ -192,12 +199,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatusWithValidTransitions_Success() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.NEW);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -285,12 +293,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatus_TerminalStatePreventsTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.WON);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.WON)
+            .withCaseType(null)
+            .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
         request.setStatus(DossierStatus.QUALIFYING);
@@ -312,12 +321,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatus_LostTerminalState() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.LOST);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.LOST)
+            .withCaseType(null)
+            .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
         request.setStatus(DossierStatus.NEW);
@@ -339,12 +349,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testPatchStatus_InvalidTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.NEW);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
         request.setStatus(DossierStatus.WON);
@@ -366,19 +377,20 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testGetDossiersWithPhoneFilter() throws Exception {
-        Dossier dossier1 = new Dossier();
-        dossier1.setOrgId(ORG_ID);
-        dossier1.setLeadPhone("+33612345678");
-        dossier1.setLeadName("John Doe");
-        dossier1.setStatus(DossierStatus.NEW);
-        dossierRepository.save(dossier1);
+        testDataBuilder.withOrgId(ORG_ID);
+        testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
-        Dossier dossier2 = new Dossier();
-        dossier2.setOrgId(ORG_ID);
-        dossier2.setLeadPhone("+33699999999");
-        dossier2.setLeadName("Jane Smith");
-        dossier2.setStatus(DossierStatus.QUALIFYING);
-        dossierRepository.save(dossier2);
+        testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33699999999")
+            .withLeadName("Jane Smith")
+            .withStatus(DossierStatus.QUALIFYING)
+            .withCaseType(null)
+            .persist();
 
         mockMvc.perform(get(BASE_URL)
 
@@ -394,26 +406,27 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testGetDossiersWithStatusFilter() throws Exception {
-        Dossier dossier1 = new Dossier();
-        dossier1.setOrgId(ORG_ID);
-        dossier1.setLeadPhone("+33612345678");
-        dossier1.setLeadName("John Doe");
-        dossier1.setStatus(DossierStatus.NEW);
-        dossierRepository.save(dossier1);
+        testDataBuilder.withOrgId(ORG_ID);
+        testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
-        Dossier dossier2 = new Dossier();
-        dossier2.setOrgId(ORG_ID);
-        dossier2.setLeadPhone("+33699999999");
-        dossier2.setLeadName("Jane Smith");
-        dossier2.setStatus(DossierStatus.QUALIFYING);
-        dossierRepository.save(dossier2);
+        testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33699999999")
+            .withLeadName("Jane Smith")
+            .withStatus(DossierStatus.QUALIFYING)
+            .withCaseType(null)
+            .persist();
 
-        Dossier dossier3 = new Dossier();
-        dossier3.setOrgId(ORG_ID);
-        dossier3.setLeadPhone("+33611111111");
-        dossier3.setLeadName("Bob Johnson");
-        dossier3.setStatus(DossierStatus.QUALIFYING);
-        dossierRepository.save(dossier3);
+        testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33611111111")
+            .withLeadName("Bob Johnson")
+            .withStatus(DossierStatus.QUALIFYING)
+            .withCaseType(null)
+            .persist();
 
         mockMvc.perform(get(BASE_URL)
 
@@ -447,29 +460,30 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         annonce2.setCurrency("EUR");
         annonce2 = annonceRepository.save(annonce2);
 
-        Dossier dossier1 = new Dossier();
-        dossier1.setOrgId(ORG_ID);
-        dossier1.setAnnonceId(annonce1.getId());
-        dossier1.setLeadPhone("+33612345678");
-        dossier1.setLeadName("John Doe");
-        dossier1.setStatus(DossierStatus.NEW);
-        dossierRepository.save(dossier1);
+        testDataBuilder.withOrgId(ORG_ID);
+        testDataBuilder.dossierBuilder()
+            .withAnnonceId(annonce1.getId())
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
-        Dossier dossier2 = new Dossier();
-        dossier2.setOrgId(ORG_ID);
-        dossier2.setAnnonceId(annonce2.getId());
-        dossier2.setLeadPhone("+33699999999");
-        dossier2.setLeadName("Jane Smith");
-        dossier2.setStatus(DossierStatus.QUALIFYING);
-        dossierRepository.save(dossier2);
+        testDataBuilder.dossierBuilder()
+            .withAnnonceId(annonce2.getId())
+            .withLeadPhone("+33699999999")
+            .withLeadName("Jane Smith")
+            .withStatus(DossierStatus.QUALIFYING)
+            .withCaseType(null)
+            .persist();
 
-        Dossier dossier3 = new Dossier();
-        dossier3.setOrgId(ORG_ID);
-        dossier3.setAnnonceId(annonce1.getId());
-        dossier3.setLeadPhone("+33611111111");
-        dossier3.setLeadName("Bob Johnson");
-        dossier3.setStatus(DossierStatus.QUALIFIED);
-        dossierRepository.save(dossier3);
+        testDataBuilder.dossierBuilder()
+            .withAnnonceId(annonce1.getId())
+            .withLeadPhone("+33611111111")
+            .withLeadName("Bob Johnson")
+            .withStatus(DossierStatus.QUALIFIED)
+            .withCaseType(null)
+            .persist();
 
         mockMvc.perform(get(BASE_URL)
 
@@ -485,13 +499,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testGetDossiersWithPagination() throws Exception {
+        testDataBuilder.withOrgId(ORG_ID);
         for (int i = 0; i < 25; i++) {
-            Dossier dossier = new Dossier();
-            dossier.setOrgId(ORG_ID);
-            dossier.setLeadPhone("+3361234567" + i);
-            dossier.setLeadName("User " + i);
-            dossier.setStatus(DossierStatus.NEW);
-            dossierRepository.save(dossier);
+            testDataBuilder.dossierBuilder()
+                .withLeadPhone("+3361234567" + i)
+                .withLeadName("User " + i)
+                .withStatus(DossierStatus.NEW)
+                .withCaseType(null)
+                .persist();
         }
 
         mockMvc.perform(get(BASE_URL)
@@ -527,12 +542,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testStatusHistoryVerification() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.NEW);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -652,12 +668,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testAlternativePathToLost() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.NEW);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -685,12 +702,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testQualifyingToLostTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.QUALIFYING);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.QUALIFYING)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -713,12 +731,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testQualifiedToLostTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.QUALIFIED);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.QUALIFIED)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -741,12 +760,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testAppointmentToLostTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.APPOINTMENT);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.APPOINTMENT)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -769,12 +789,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testNewDirectToQualifiedTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.NEW);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -797,12 +818,13 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testNewDirectToAppointmentTransition() throws Exception {
-        Dossier dossier = new Dossier();
-        dossier.setOrgId(ORG_ID);
-        dossier.setLeadPhone("+33612345678");
-        dossier.setLeadName("John Doe");
-        dossier.setStatus(DossierStatus.NEW);
-        dossier = dossierRepository.save(dossier);
+        testDataBuilder.withOrgId(ORG_ID);
+        Dossier dossier = testDataBuilder.dossierBuilder()
+            .withLeadPhone("+33612345678")
+            .withLeadName("John Doe")
+            .withStatus(DossierStatus.NEW)
+            .withCaseType(null)
+            .persist();
 
         statusHistoryRepository.deleteAll();
 

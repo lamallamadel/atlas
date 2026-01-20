@@ -62,6 +62,10 @@ public class BackendE2ETestDataBuilder {
         return new DossierBuilder();
     }
 
+    public Dossier createDossierWithoutWorkflow() {
+        return dossierBuilder().withCaseType(null).persist();
+    }
+
     public PartiePrenanteBuilder partiePrenanteBuilder() {
         return new PartiePrenanteBuilder();
     }
@@ -385,6 +389,11 @@ public class BackendE2ETestDataBuilder {
         public DossierBuilder withInitialParty(PartiePrenanteRole role) {
             this.withInitialParty = true;
             this.initialPartyRole = role;
+            return this;
+        }
+
+        public DossierBuilder withCaseType(String caseType) {
+            dossier.setCaseType(caseType);
             return this;
         }
 

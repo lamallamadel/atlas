@@ -8,6 +8,7 @@ import com.example.backend.entity.enums.*;
 import com.example.backend.repository.*;
 import com.example.backend.service.*;
 import com.example.backend.util.TenantContext;
+import com.example.backend.utils.BackendE2ETestDataBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -88,6 +89,9 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     @Autowired
     private jakarta.persistence.EntityManager entityManager;
 
+    @Autowired
+    private BackendE2ETestDataBuilder testDataBuilder;
+
     @BeforeEach
     void setUp() {
         // Delete all seed data and test data for fresh state
@@ -99,12 +103,14 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         partiePrenanteRepository.deleteAll();
         annonceRepository.deleteAll();
         dossierRepository.deleteAll();
+        testDataBuilder.deleteAllTestData();
     }
 
     @AfterEach
     void tearDown() {
         // Clear tenant context to prevent tenant ID leakage between tests
         TenantContext.clear();
+        testDataBuilder.deleteAllTestData();
     }
 
     // ========== Dossier CRUD Tests ==========
@@ -528,10 +534,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void getAuditEvents_FilterByEntityTypeAndId_ReturnsPaginatedResults() throws Exception {
         TenantContext.setOrgId(ORG_1);
-        DossierCreateRequest createRequest = new DossierCreateRequest();
-        createRequest.setLeadName("Test Dossier");
-        createRequest.setCaseType(null);
-        DossierResponse dossier = dossierService.create(createRequest);
+        testDataBuilder.withOrgId(ORG_1);
+        com.example.backend.entity.Dossier dossier = testDataBuilder.createDossierWithoutWorkflow();
 
         DossierStatusPatchRequest statusPatch = new DossierStatusPatchRequest();
         statusPatch.setStatus(DossierStatus.QUALIFIED);
