@@ -389,3 +389,8 @@ setup-initial.ps1
 setup-backend.js
 mvn17.cmd
 mavenrc_pre.bat
+
+# Automated setup artifacts
+run-maven-clean-install.ps1
+setup-backend-build.js
+SETUP_STATUS_AUTOMATED.md

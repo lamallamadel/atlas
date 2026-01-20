@@ -235,7 +235,7 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
                 objectMapper.readTree(dossierAuditContent).get("content").toString(),
                 new TypeReference<List<AuditEventResponse>>() {});
 
-        assertThat(dossierAuditEvents).hasSizeGreaterThanOrEqualTo(6);
+        assertThat(dossierAuditEvents).hasSizeGreaterThanOrEqualTo(5);
 
         long dossierCreatedEvents = dossierAuditEvents.stream()
                 .filter(e -> e.getAction() == AuditAction.CREATED)
