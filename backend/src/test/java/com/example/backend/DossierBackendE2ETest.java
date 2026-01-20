@@ -162,8 +162,10 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadName("John Doe");
 
         PartiePrenanteRequest partyRequest = new PartiePrenanteRequest();
-        partyRequest.setRole(PartiePrenanteRole.BUYER);
+        partyRequest.setFirstName("Jane");
+        partyRequest.setLastName("Doe");
         partyRequest.setPhone("+33612345678");
+        partyRequest.setRole(PartiePrenanteRole.BUYER);
         request.setInitialParty(partyRequest);
 
         String responseJson = mockMvc.perform(post(BASE_URL)
