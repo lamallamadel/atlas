@@ -103,8 +103,9 @@ public class DossierService {
             
             partiePrenanteService.create(partyRequest);
             
-            saved = dossierRepository.findById(saved.getId())
-                    .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + saved.getId()));
+            final Long savedId = saved.getId();
+            saved = dossierRepository.findById(savedId)
+                    .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + savedId));
         }
 
         metricsService.incrementDossierCreated(request.getSource().getValue());
