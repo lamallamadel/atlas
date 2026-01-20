@@ -187,12 +187,12 @@ describe('WorkflowStepperComponent', () => {
 
     it('should return correct hint for LOST status', () => {
       component.status = DossierStatus.LOST;
-      expect(component.hint).toBe('Dossier perdu : indiquez la raison et gardez une trace pour l'analyse.');
+      expect(component.hint).toBe('Dossier perdu : indiquez la raison et gardez une trace pour l\'analyse.');
     });
 
     it('should return default hint for null status', () => {
       component.status = null;
-      expect(component.hint).toBe('Suivez l'avancement du dossier et documentez chaque étape.');
+      expect(component.hint).toBe('Suivez l\'avancement du dossier et documentez chaque étape.');
     });
   });
 
