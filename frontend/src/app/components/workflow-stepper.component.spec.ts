@@ -192,7 +192,7 @@ describe('WorkflowStepperComponent', () => {
 
     it('should return default hint for null status', () => {
       component.status = null;
-      expect(component.hint).toBe(`Suivez l'avancement du dossier et documentez chaque étape.`);
+      expect(component.hint).toBe('Suivez l\'avancement du dossier et documentez chaque étape.');
     });
   });
 
