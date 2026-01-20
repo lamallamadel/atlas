@@ -530,6 +530,7 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         TenantContext.setOrgId(ORG_1);
         DossierCreateRequest createRequest = new DossierCreateRequest();
         createRequest.setLeadName("Test Dossier");
+        createRequest.setCaseType(null);
         DossierResponse dossier = dossierService.create(createRequest);
 
         DossierStatusPatchRequest statusPatch = new DossierStatusPatchRequest();
