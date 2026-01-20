@@ -539,6 +539,7 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest statusPatch = new DossierStatusPatchRequest();
         statusPatch.setStatus(DossierStatus.QUALIFIED);
+        statusPatch.setStatusCode("CRM_QUALIFIED");
         dossierService.patchStatus(dossier.getId(), statusPatch);
 
         MvcResult result = mockMvc.perform(withTenantHeaders(get("/api/v1/audit-events")
