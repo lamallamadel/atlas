@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            border-bottom: 3px solid #4CAF50;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            color: #4CAF50;
+            font-size: 24px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .content p {
+            margin: 10px 0;
+        }
+        .info-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-left: 4px solid #4CAF50;
+            margin: 20px 0;
+        }
+        .footer {
+            border-top: 1px solid #eeeeee;
+            padding-top: 20px;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 th:text="${title ?: 'Notification'}">Notification</h1>
+        </div>
+        
+        <div class="content">
+            <p th:if="${greeting}" th:text="${greeting}">Hello,</p>
+            
+            <p th:if="${message}" th:utext="${message}">
+                This is a notification message.
+            </p>
+            
+            <div th:if="${infoBox}" class="info-box">
+                <p th:utext="${infoBox}"></p>
+            </div>
+            
+            <div th:if="${details}">
+                <div th:each="detail : ${details}">
+                    <p><strong th:text="${detail.key}">Key:</strong> <span th:text="${detail.value}">Value</span></p>
+                </div>
+            </div>
+            
+            <div th:if="${actionUrl}" style="text-align: center; margin: 30px 0;">
+                <a th:href="${actionUrl}" class="button" th:text="${actionText ?: 'View Details'}">View Details</a>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p th:text="${footerText ?: 'This email was sent automatically. Please do not reply.'}">
+                This email was sent automatically. Please do not reply.
+            </p>
+            <p th:if="${companyName}">
+                © 2024 <span th:text="${companyName}">Company Name</span>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

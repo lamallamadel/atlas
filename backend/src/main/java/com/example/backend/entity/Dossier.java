@@ -26,6 +26,9 @@ public class Dossier extends BaseEntity {
     @Column(name = "lead_phone", length = 50)
     private String leadPhone;
 
+    @Column(name = "lead_email", length = 255)
+    private String leadEmail;
+
     @Column(name = "lead_name", length = 255)
     private String leadName;
 
@@ -86,6 +89,14 @@ public class Dossier extends BaseEntity {
 
     public void setLeadPhone(String leadPhone) {
         this.leadPhone = leadPhone;
+    }
+
+    public String getLeadEmail() {
+        return leadEmail;
+    }
+
+    public void setLeadEmail(String leadEmail) {
+        this.leadEmail = leadEmail;
     }
 
     public String getLeadName() {
