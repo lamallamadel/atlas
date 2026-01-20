@@ -7,6 +7,7 @@ import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierMapper;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
+import com.example.backend.dto.PartiePrenanteCreateRequest;
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.AnnonceStatus;
@@ -38,11 +39,13 @@ public class DossierService {
     private final SearchService searchService;
     private final MetricsService metricsService;
     private final WorkflowValidationService workflowValidationService;
+    private final PartiePrenanteService partiePrenanteService;
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
                          SearchService searchService, MetricsService metricsService,
-                         WorkflowValidationService workflowValidationService) {
+                         WorkflowValidationService workflowValidationService,
+                         PartiePrenanteService partiePrenanteService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
@@ -50,6 +53,7 @@ public class DossierService {
         this.searchService = searchService;
         this.metricsService = metricsService;
         this.workflowValidationService = workflowValidationService;
+        this.partiePrenanteService = partiePrenanteService;
     }
 
     @Transactional
@@ -76,27 +80,33 @@ public class DossierService {
             }
         }
 
-        Dossier dossier = dossierMapper.toEntity(request);
+        Dossier dossier = dossierMapper.toEntityWithoutParties(request);
         dossier.setOrgId(orgId);
 
         LocalDateTime now = LocalDateTime.now();
         dossier.setCreatedAt(now);
         dossier.setUpdatedAt(now);
 
-        if (dossier.getParties() != null && !dossier.getParties().isEmpty()) {
-            dossier.getParties().forEach(party -> {
-                party.setOrgId(orgId);
-                party.setCreatedAt(now);
-                party.setUpdatedAt(now);
-                if (party.getName() == null && party.getFirstName() != null && party.getLastName() != null) {
-                    party.setName(party.getFirstName() + " " + party.getLastName());
-                }
-            });
-        }
-
         Dossier saved = dossierRepository.save(dossier);
 
-        // Observability: business metric
+        if (request.getInitialParty() != null) {
+            PartiePrenanteCreateRequest partyRequest = new PartiePrenanteCreateRequest();
+            partyRequest.setDossierId(saved.getId());
+            partyRequest.setRole(request.getInitialParty().getRole().name());
+            partyRequest.setName(request.getInitialParty().getName());
+            partyRequest.setFirstName(request.getInitialParty().getFirstName());
+            partyRequest.setLastName(request.getInitialParty().getLastName());
+            partyRequest.setEmail(request.getInitialParty().getEmail());
+            partyRequest.setPhone(request.getInitialParty().getPhone());
+            partyRequest.setAddress(request.getInitialParty().getAddress());
+            partyRequest.setMeta(request.getInitialParty().getMeta());
+            
+            partiePrenanteService.create(partyRequest);
+            
+            saved = dossierRepository.findById(saved.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + saved.getId()));
+        }
+
         metricsService.incrementDossierCreated(request.getSource().getValue());
 
         transitionService.recordTransition(saved, DossierStatus.DRAFT, saved.getStatus(), null, "Initial dossier creation");

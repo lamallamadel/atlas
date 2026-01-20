@@ -49,6 +49,26 @@ public class DossierMapper {
         return dossier;
     }
 
+    public Dossier toEntityWithoutParties(DossierCreateRequest request) {
+        Dossier dossier = new Dossier();
+        if ( request.getSource() == null ) request.setSource( DossierSource.UNKNOWN ) ;
+        dossier.setAnnonceId(request.getAnnonceId());
+        dossier.setLeadPhone(request.getLeadPhone());
+        dossier.setLeadName(request.getLeadName());
+        dossier.setLeadSource(request.getLeadSource());
+        dossier.setNotes(request.getNotes());
+        dossier.setStatus(DossierStatus.NEW);
+        dossier.setSource(request.getSource() );
+        dossier.setSource(request.getSource());
+        
+        dossier.setCaseType(request.getCaseType());
+        dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : dossier.getStatus().name());
+        dossier.setLossReason(request.getLossReason());
+        dossier.setWonReason(request.getWonReason());
+
+        return dossier;
+    }
+
     public DossierResponse toResponse(Dossier dossier) {
         DossierResponse response = new DossierResponse();
         response.setId(dossier.getId());
