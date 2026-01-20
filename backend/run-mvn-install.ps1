@@ -1,2 +1,3 @@
-# Run Maven install with Java 17
-& 'C:\Environement\maven-3.8.6\bin\mvn.cmd' clean install -s settings.xml -Djava.home='C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+& mvn clean install -DskipTests --toolchains toolchains.xml
