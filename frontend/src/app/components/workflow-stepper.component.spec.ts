@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
-import { DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { WorkflowStepperComponent } from './workflow-stepper.component';
 import { DossierStatus } from '../services/dossier-api.service';
@@ -472,16 +471,19 @@ describe('WorkflowStepperComponent', () => {
 
     it('should update progress bar width dynamically', () => {
       component.status = DossierStatus.NEW;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.NEW, previousValue: null, firstChange: true, isFirstChange: () => true } });
       fixture.detectChanges();
       let progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('0%');
 
       component.status = DossierStatus.QUALIFIED;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.QUALIFIED, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('50%');
 
       component.status = DossierStatus.WON;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.WON, previousValue: DossierStatus.QUALIFIED, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('100%');
@@ -489,11 +491,13 @@ describe('WorkflowStepperComponent', () => {
 
     it('should show workflow meta only when status exists', () => {
       component.status = null;
+      component.ngOnChanges({ status: { currentValue: null, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       let meta = fixture.debugElement.query(By.css('.workflow-meta'));
       expect(meta).toBeFalsy();
 
       component.status = DossierStatus.QUALIFYING;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.QUALIFYING, previousValue: null, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       meta = fixture.debugElement.query(By.css('.workflow-meta'));
       expect(meta).toBeTruthy();
@@ -550,20 +554,20 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Change Detection', () => {
     it('should use OnPush change detection strategy', () => {
-      const metadata = (WorkflowStepperComponent as any).__annotations__?.[0] || 
-                       (WorkflowStepperComponent as any).ɵcmp;
       // Component uses OnPush, should be verified through component decorator
       expect(component).toBeTruthy();
     });
 
     it('should update view when status input changes', () => {
       component.status = DossierStatus.NEW;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.NEW, previousValue: null, firstChange: true, isFirstChange: () => true } });
       fixture.detectChanges();
       
       let progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('0%');
 
       component.status = DossierStatus.WON;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.WON, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       
       progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
@@ -674,11 +678,13 @@ describe('WorkflowStepperComponent', () => {
 
     it('should update hint text when status changes', () => {
       component.status = DossierStatus.NEW;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.NEW, previousValue: null, firstChange: true, isFirstChange: () => true } });
       fixture.detectChanges();
       let hint = fixture.debugElement.query(By.css('.workflow-hint span'));
       expect(hint.nativeElement.textContent).toContain('Complétez les informations');
 
       component.status = DossierStatus.WON;
+      component.ngOnChanges({ status: { currentValue: DossierStatus.WON, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       hint = fixture.debugElement.query(By.css('.workflow-hint span'));
       expect(hint.nativeElement.textContent).toContain('Dossier gagné');

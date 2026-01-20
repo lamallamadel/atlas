@@ -82,9 +82,9 @@ export class WorkflowStepperComponent implements OnChanges {
       case DossierStatus.WON:
         return 'Dossier gagné : préparez les documents et passez en phase contractualisation.';
       case DossierStatus.LOST:
-        return 'Dossier perdu : indiquez la raison et gardez une trace pour l’analyse.';
+        return 'Dossier perdu : indiquez la raison et gardez une trace pour l\'analyse.';
       default:
-        return 'Suivez l’avancement du dossier et documentez chaque étape.';
+        return 'Suivez l\'avancement du dossier et documentez chaque étape.';
     }
   }
 
