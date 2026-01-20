@@ -34,7 +34,7 @@ public class DossierMapper {
         dossier.setSource(request.getSource());
         
         dossier.setCaseType(request.getCaseType());
-        dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : "NEW");
+        dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : dossier.getStatus().name());
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
 
