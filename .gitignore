@@ -85,6 +85,11 @@ Desktop.ini
 *.sqlite
 *.db
 
+# File storage
+storage/
+test-storage/
+*.uploaded
+
 # Testing
 coverage/
 *.cover

@@ -55,3 +55,8 @@ management:
       enabled: false
     mail:
       enabled: false
+
+storage:
+  strategy: localFileStorage
+  local:
+    base-path: ./test-storage
