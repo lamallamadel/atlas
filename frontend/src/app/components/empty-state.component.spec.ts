@@ -28,7 +28,7 @@ describe('EmptyStateComponent', () => {
   });
 
   it('should display subtext when provided', () => {
-    component.subtext = 'Test subtext';
+    fixture.componentRef.setInput('subtext', 'Test subtext');
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
     const subtextElement = compiled.querySelector('.empty-state-subtext');

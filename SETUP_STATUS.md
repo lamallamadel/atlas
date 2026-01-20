@@ -1,147 +1,95 @@
-# Repository Setup Status
+# Initial Setup Status
 
-## Completed Steps
+## Completed ✓
 
-### ✅ Frontend Dependencies Installed
-- **Status**: Complete
-- **Action**: Ran `npm install` in frontend directory
-- **Result**: All 1178 npm packages installed successfully
-- **Location**: `frontend/node_modules/`
-
-### ⚠️ Playwright Browsers - Manual Action Required
-- **Status**: Needs manual installation
-- **Reason**: Security restrictions prevent automated installation
-- **Command**: Run one of the following from the repository root:
+### Frontend Setup
+- **Status:** ✅ COMPLETE
+- **Dependencies:** All npm packages installed successfully
+- **Location:** `frontend/node_modules/`
+- **Verification:**
   ```powershell
-  # Windows PowerShell
   cd frontend
-  npx playwright install
-  ```
-  Or:
-  ```cmd
-  # Command Prompt
-  cd frontend
-  npm run install-browsers
+  npm --version  # Should show 11.6.2 or similar
   ```
 
-### ⚠️ Backend Dependencies - Manual Action Required  
-- **Status**: Needs manual installation
-- **Reason**: Requires JAVA_HOME environment variable to be set to Java 17
-- **Solution**: A setup script has been created at `backend/do-install.bat`
-- **Command**: Run from the repository root:
-  ```cmd
-  # Windows Command Prompt
-  backend\do-install.bat
-  ```
-  
-  Or manually:
-  ```cmd
-  set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-  set PATH=%JAVA_HOME%\bin;%PATH%
-  cd backend
-  mvn clean install -DskipTests
-  ```
+## Requires Manual Action ⚠️
 
-  Or use PowerShell:
-  ```powershell
-  $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-  $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
-  cd backend
-  mvn clean install -DskipTests
-  ```
+### Backend Setup  
+- **Status:** ⏳ PENDING - Requires manual execution
+- **Reason:** Security restrictions prevent automated environment variable modification
+- **Current Issue:** JAVA_HOME is set to Java 8 (C:\Environement\Java\jdk1.8.0_202) which doesn't exist
+- **Required:** JAVA_HOME must be set to Java 17 (C:\Environement\Java\jdk-17.0.5.8-hotspot)
 
-## Setup Scripts Created
+### How to Complete Backend Setup
 
-### `backend/do-install.bat`
-A wrapper script that:
-- Sets JAVA_HOME to Java 17 (`C:\Environement\Java\jdk-17.0.5.8-hotspot`)
-- Adds Java 17 to PATH
-- Runs `mvn clean install -DskipTests` with custom settings and toolchains
-
-### `setup-repo.bat`
-A complete setup script that:
-1. Verifies Java 17 installation
-2. Installs backend dependencies (Maven)
-3. Installs frontend dependencies (npm) - **Already done**
-4. Installs Playwright browsers - **Needs to run**
-
-## Next Steps
-
-To complete the setup, run **ONE** of the following:
-
-### Option 1: Use the Complete Setup Script (Recommended)
-```cmd
-setup-repo.bat
+**Option 1: Run the setup script (Recommended)**
+```powershell
+.\SETUP_AFTER_CLONE.ps1
 ```
 
-### Option 2: Manual Setup (Individual Commands)
-```cmd
-# 1. Install backend dependencies
-backend\do-install.bat
+**Option 2: Manual commands**
+```powershell
+# Set environment for this session
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
-# 2. Install Playwright browsers
+# Install backend dependencies
+cd backend
+mvn clean install -DskipTests
+cd ..
+
+# Install Playwright browsers (optional, for E2E tests)
 cd frontend
 npm run install-browsers
 cd ..
 ```
 
-### Option 3: PowerShell Script
+**Option 3: Use the Maven wrapper scripts**
 ```powershell
-.\COMPLETE_INITIAL_SETUP.ps1
+cd backend
+.\mvn17.cmd clean install -DskipTests
+cd ..
 ```
 
-## Verification Commands
+### Playwright Browsers (Optional)
+- **Status:** ⏳ PENDING
+- **Purpose:** Required for frontend E2E tests
+- **Install command:**
+  ```powershell
+  cd frontend
+  npm run install-browsers
+  ```
+- **Note:** Can be installed later when needed
 
-After setup is complete, verify with:
+## Verification
 
-```cmd
-# Check backend build
+After completing the backend setup, verify with:
+
+```powershell
+# Verify backend build
 cd backend
-mvn clean package -DskipTests
+.\mvn17.cmd --version  # Should show Maven with Java 17
 
-# Check frontend build  
-cd frontend
+# Run backend tests (optional)
+.\mvn17.cmd test
+
+# Verify frontend
+cd ../frontend
 npm run build
-
-# Check tests can run
-cd backend
-mvn test
 ```
 
-## Directory Structure
+## Next Steps
 
-```
-/
-├── backend/              # Spring Boot backend (Java 17)
-│   ├── src/
-│   ├── pom.xml
-│   ├── do-install.bat   # Backend setup script (created)
-│   ├── settings.xml     # Maven settings
-│   └── toolchains.xml   # Maven toolchains for Java 17
-├── frontend/            # Angular frontend
-│   ├── node_modules/    # ✅ Installed (1178 packages)
-│   ├── package.json
-│   └── e2e/             # Playwright E2E tests
-├── infra/               # Docker infrastructure
-├── setup-repo.bat       # Complete setup script (created)
-└── COMPLETE_INITIAL_SETUP.ps1  # PowerShell setup script
-```
+Once setup is complete, see `AGENTS.md` for:
+- Build commands
+- Test commands  
+- Development server commands
+- E2E testing configurations
 
-## Status Summary
+## Technical Details
 
-| Component | Status | Action |
-|-----------|--------|--------|
-| Frontend dependencies | ✅ Installed | None - complete |
-| Playwright browsers | ⚠️ Pending | Run `npm run install-browsers` in frontend/ |
-| Backend dependencies | ⚠️ Pending | Run `backend\do-install.bat` |
-| Infrastructure (Docker) | ℹ️ Optional | See AGENTS.md |
-
-## Security Note
-
-Some commands were blocked due to security restrictions in the automated environment. The setup scripts and commands above are safe to run manually in your terminal.
-
-## Additional Information
-
-- See `AGENTS.md` for detailed build, lint, and test commands
-- See `SETUP.md` for environment configuration details
-- See `README.md` for project overview
+- **Java Version Required:** 17
+- **Java Location:** C:\Environement\Java\jdk-17.0.5.8-hotspot
+- **Maven Version:** 3.6+ (3.8.6 installed at C:\Environement\maven-3.8.6)
+- **Node Version:** 11.6.2
+- **Toolchains:** Configured in `toolchains.xml` and `backend/toolchains.xml`
