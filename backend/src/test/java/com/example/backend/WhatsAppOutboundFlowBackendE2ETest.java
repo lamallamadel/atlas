@@ -102,7 +102,7 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
         } catch (org.springframework.web.server.ResponseStatusException e) {
             assertThat(e.getStatusCode().value()).isEqualTo(422);
             assertThat(e.getReason()).contains("Consent required");
-            assertThat(e.getReason()).contains("no consent");
+            assertThat(e.getReason()).contains("No consent found for channel WHATSAPP");
         }
 
         assertThat(outboundMessageRepository.findAll()).isEmpty();
