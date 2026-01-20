@@ -73,7 +73,7 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
         dossierRepository.deleteAll();
 
         when(mockWhatsAppProvider.supports("WHATSAPP")).thenReturn(true);
-        when(mockWhatsAppProvider.supports(anyString())).thenCallRealMethod();
+        when(mockWhatsAppProvider.supports(argThat(channel -> !"WHATSAPP".equals(channel)))).thenReturn(false);
     }
 
     @AfterEach

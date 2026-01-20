@@ -1,75 +1,89 @@
-# 🚀 Start Here - Complete Your Setup
+# 🚀 Start Here - Initial Setup Complete!
 
-## What's Already Done ✅
+## ✅ Frontend Setup Complete
 
-- ✅ Frontend dependencies installed (1,178 npm packages)
-- ✅ Setup helper scripts created
+All frontend dependencies have been successfully installed:
+- ✅ 1,177 npm packages installed
+- ✅ Playwright test framework ready
+- ✅ Browser binaries downloaded (Chromium, Firefox)
 
-## Complete Setup Now (2 Steps)
+## ⚠️ One Step Remaining: Backend Setup
 
-### Step 1: Install Backend Dependencies
-```cmd
-backend\do-install.bat
+To complete the setup, run **ONE** of the following commands:
+
+### Option 1: PowerShell (Recommended)
+```powershell
+.\mvn17.ps1 clean install -DskipTests
 ```
-*This installs Maven dependencies using Java 17 (~3-5 minutes)*
 
-### Step 2: Install Playwright Browsers
+### Option 2: Command Prompt
 ```cmd
-cd frontend
-npm run install-browsers
+backend\mvn17.cmd clean install -DskipTests
 ```
-*This downloads test browsers (~2-3 minutes)*
 
----
-
-## Alternative: One-Command Setup
-
-```cmd
-setup-repo.bat
+### Option 3: Complete Setup Script
+```powershell
+.\COMPLETE_INITIAL_SETUP.ps1
 ```
-*Runs both steps above automatically*
 
----
+**Time Required:** ~5 minutes (downloads dependencies on first run)
 
-## Then Start Developing! 🎉
+## 📋 After Backend Setup
 
-### Run Backend
-```cmd
+Once the backend Maven install completes, you're ready to:
+
+### Start Development Servers
+```powershell
+# Terminal 1: Start backend (http://localhost:8080)
 cd backend
 mvn spring-boot:run
-```
-*Backend runs on http://localhost:8080*
 
-### Run Frontend
-```cmd
+# Terminal 2: Start frontend (http://localhost:4200)
 cd frontend
 npm start
 ```
-*Frontend runs on http://localhost:4200*
 
 ### Run Tests
-```cmd
-# Backend tests
+```powershell
+# Backend unit tests
 cd backend
 mvn test
 
-# Frontend tests
-cd frontend
-npm test
-
-# E2E tests
+# Frontend E2E tests
 cd frontend
 npm run e2e:fast
 ```
 
+### Build for Production
+```powershell
+# Build backend
+cd backend
+mvn clean package
+
+# Build frontend
+cd frontend
+npm run build
+```
+
+## 📚 More Information
+
+- **SETUP_COMPLETE_SUMMARY.md** - Full setup details and all available commands
+- **INITIAL_SETUP_STATUS.md** - Alternative setup methods and troubleshooting
+- **AGENTS.md** - Complete command reference (build, test, lint, E2E tests)
+
+## 🎯 Quick Commands Reference
+
+| Task | Command |
+|------|---------|
+| Build backend | `cd backend && mvn clean package` |
+| Run backend | `cd backend && mvn spring-boot:run` |
+| Test backend | `cd backend && mvn test` |
+| Build frontend | `cd frontend && npm run build` |
+| Run frontend | `cd frontend && npm start` |
+| Test frontend | `cd frontend && npm test` |
+| E2E tests (fast) | `cd frontend && npm run e2e:fast` |
+| E2E tests (all) | `cd frontend && npm run e2e:full` |
+
 ---
 
-## More Information
-
-- **📋 Detailed setup status**: See `INITIAL_SETUP_COMPLETE.md`
-- **📚 All commands**: See `AGENTS.md`
-- **🔧 Environment setup**: See `SETUP.md`
-
----
-
-**Quick Link**: [INITIAL_SETUP_COMPLETE.md](./INITIAL_SETUP_COMPLETE.md) for full details
+**Need Help?** See SETUP.md or AGENTS.md for detailed instructions.

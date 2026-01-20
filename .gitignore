@@ -185,6 +185,7 @@ run-maven-install.ps1
 backend-install.cmd
 copy-toolchains.js
 backend/temp-toolchains.xml
+backend/run-maven-install-simple.cmd
 
 # Node.js
 package-lock.json
