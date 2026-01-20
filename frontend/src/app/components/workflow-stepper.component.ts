@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { DossierStatus } from '../services/dossier-api.service';
 
 type UiStep = {
@@ -13,8 +13,10 @@ type UiStep = {
   styleUrls: ['./workflow-stepper.component.css'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class WorkflowStepperComponent {
+export class WorkflowStepperComponent implements OnChanges {
   @Input() status: DossierStatus | null = null;
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   readonly steps: UiStep[] = [
     { key: DossierStatus.NEW, label: 'Nouveau', icon: 'fiber_new' },
@@ -23,6 +25,12 @@ export class WorkflowStepperComponent {
     { key: DossierStatus.APPOINTMENT, label: 'Rendez-vous', icon: 'event' },
     { key: 'CLOSE', label: 'Clôture', icon: 'flag' }
   ];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['status']) {
+      this.cdr.markForCheck();
+    }
+  }
 
   get currentIndex(): number {
     const s = this.status;
