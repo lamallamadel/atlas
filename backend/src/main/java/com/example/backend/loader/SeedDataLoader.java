@@ -84,10 +84,17 @@ public class SeedDataLoader implements CommandLineRunner {
         order = 1;
         // CASE_STATUS
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_NEW", "Nouveau", "New case", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_TRIAGED", "Trié", "Triaged", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_CONTACTED", "Contacté", "Contacted", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_UNREACHABLE", "Injoignable", "Unreachable", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_QUALIFIED", "Qualifié", "Qualified", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_DISQUALIFIED", "Disqualifié", "Disqualified", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_ON_HOLD", "En attente", "On hold", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_VISIT_PLANNED", "Visite planifiée", "Visit planned", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_VISIT_DONE", "Visite effectuée", "Visit done", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_NO_SHOW", "Absent", "No show", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_FOLLOW_UP", "Relance", "Follow up", order++, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_OFFER_REQUESTED", "Offre demandée", "Offer requested", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_OFFER_RECEIVED", "Offre reçue", "Offer received", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_NEGOTIATION", "Négociation", "Negotiation", order++, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_SIGNING_SCHEDULED", "Signature planifiée", "Signing scheduled", order++, true));
@@ -109,9 +116,14 @@ public class SeedDataLoader implements CommandLineRunner {
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "PHONE_CALL", "Appel téléphonique", "Lead from phone call", order++, true));
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "SMS", "SMS", "Lead from SMS", order++, true));
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "EMAIL", "Email", "Lead from email", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "FACEBOOK", "Facebook", "Lead from Facebook", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "INSTAGRAM", "Instagram", "Lead from Instagram", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "AVITO", "Avito", "Lead from Avito", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "MUBAWAB", "Mubawab", "Lead from Mubawab", order++, true));
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "WEBSITE", "Site web", "Lead from website", order++, true));
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "WALK_IN", "Visite directe", "Walk-in lead", order++, true));
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "REFERRAL", "Recommandation", "Lead from referral", order++, true));
+        referentials.add(createReferential(orgId, "LEAD_SOURCE", "PARTNER", "Partenaire", "Lead from partner", order++, true));
         referentials.add(createReferential(orgId, "LEAD_SOURCE", "OTHER", "Autre", "Other lead source", order++, true));
         
         order = 1;
@@ -120,14 +132,23 @@ public class SeedDataLoader implements CommandLineRunner {
         referentials.add(createReferential(orgId, "LOSS_REASON", "NOT_INTERESTED", "Pas intéressé", "Not interested", order++, true));
         referentials.add(createReferential(orgId, "LOSS_REASON", "COMPETITOR", "Concurrence", "Competitor", order++, true));
         referentials.add(createReferential(orgId, "LOSS_REASON", "NO_RESPONSE", "Sans réponse", "No response", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "FINANCING_ISSUE", "Problème de financement", "Financing issue", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "DOCS_INCOMPLETE", "Documents incomplets", "Documents incomplete", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "OWNER_CHANGED_MIND", "Propriétaire a changé d'avis", "Owner changed mind", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "PROPERTY_UNAVAILABLE", "Bien indisponible", "Property unavailable", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "REQUIREMENTS_MISMATCH", "Besoin non correspondant", "Requirements mismatch", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "TIMELINE_TOO_LONG", "Délai trop long", "Timeline too long", order++, true));
+        referentials.add(createReferential(orgId, "LOSS_REASON", "FRAUD_RISK", "Risque de fraude", "Fraud risk", order++, true));
         referentials.add(createReferential(orgId, "LOSS_REASON", "OTHER", "Autre", "Other reason", order++, true));
         
         order = 1;
         // WON_REASON
         referentials.add(createReferential(orgId, "WON_REASON", "SIGNED", "Signé", "Signed", order++, true));
         referentials.add(createReferential(orgId, "WON_REASON", "RESERVED", "Réservé", "Reserved", order++, true));
+        referentials.add(createReferential(orgId, "WON_REASON", "DEPOSIT_PAID", "Acompte versé", "Deposit paid", order++, true));
         referentials.add(createReferential(orgId, "WON_REASON", "SOLD", "Vendu", "Sold", order++, true));
         referentials.add(createReferential(orgId, "WON_REASON", "RENTED", "Loué", "Rented", order++, true));
+        referentials.add(createReferential(orgId, "WON_REASON", "PROJECT_DELIVERED", "Projet livré", "Project delivered", order++, true));
         referentials.add(createReferential(orgId, "WON_REASON", "OTHER", "Autre", "Other reason", order++, true));
         
         return referentials;
