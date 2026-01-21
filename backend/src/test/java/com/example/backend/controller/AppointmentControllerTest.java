@@ -296,7 +296,7 @@ class AppointmentControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
+    @WithMockUser(roles = {"ADMIN"})
     void delete_ExistingAppointment_Returns204() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
         AppointmentEntity appointment = createAppointment(dossier,
