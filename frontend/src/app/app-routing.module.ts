@@ -11,6 +11,7 @@ import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
 import { ReportsDashboardComponent } from './components/reports-dashboard.component';
+import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
 import { SearchComponent } from './pages/search/search.component';
 import { TaskListComponent } from './components/task-list.component';
 import { AuthGuard } from './guards/auth.guard';
@@ -29,6 +30,7 @@ const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       { path: 'dashboard', component: DashboardComponent, data: { animation: 'DashboardPage' } },
       { path: 'reports', component: ReportsDashboardComponent, data: { animation: 'ReportsPage' } },
+      { path: 'observability', component: ObservabilityDashboardComponent, data: { animation: 'ObservabilityPage' } },
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
       { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
       { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },

@@ -20,4 +20,10 @@ public interface OutboundAttemptRepository extends JpaRepository<OutboundAttempt
            "JOIN oa.outboundMessage om " +
            "WHERE om.channel = :channel AND oa.status = 'SUCCESS' AND oa.createdAt >= :afterTime")
     Double calculateAverageDeliveryLatency(@Param("channel") MessageChannel channel, @Param("afterTime") LocalDateTime afterTime);
+    
+    @Query("SELECT EXTRACT(EPOCH FROM (oa.updatedAt - oa.createdAt)) FROM OutboundAttemptEntity oa " +
+           "JOIN oa.outboundMessage om " +
+           "WHERE om.channel = :channel AND oa.status = 'SUCCESS' AND oa.createdAt >= :afterTime " +
+           "ORDER BY EXTRACT(EPOCH FROM (oa.updatedAt - oa.createdAt))")
+    List<Double> findDeliveryLatencies(@Param("channel") MessageChannel channel, @Param("afterTime") LocalDateTime afterTime);
 }

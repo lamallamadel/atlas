@@ -97,6 +97,7 @@ import { LeadExportDialogComponent } from './components/lead-export-dialog.compo
 import { TaskListComponent } from './components/task-list.component';
 import { TaskCardComponent } from './components/task-card.component';
 import { TaskFormDialogComponent } from './components/task-form-dialog.component';
+import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 
 registerLocaleData(localeFr);
@@ -157,7 +158,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LeadExportDialogComponent,
     TaskListComponent,
     TaskCardComponent,
-    TaskFormDialogComponent
+    TaskFormDialogComponent,
+    ObservabilityDashboardComponent
   ],
   imports: [
     BrowserModule,
