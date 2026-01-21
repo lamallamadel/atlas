@@ -43,13 +43,15 @@ public class DossierService {
     private final WorkflowValidationService workflowValidationService;
     private final PartiePrenanteService partiePrenanteService;
     private final jakarta.persistence.EntityManager entityManager;
+    private final DossierStatusCodeValidationService statusCodeValidationService;
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
                          SearchService searchService, MetricsService metricsService,
                          WorkflowValidationService workflowValidationService,
                          PartiePrenanteService partiePrenanteService,
-                         jakarta.persistence.EntityManager entityManager) {
+                         jakarta.persistence.EntityManager entityManager,
+                         DossierStatusCodeValidationService statusCodeValidationService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
@@ -59,6 +61,7 @@ public class DossierService {
         this.workflowValidationService = workflowValidationService;
         this.partiePrenanteService = partiePrenanteService;
         this.entityManager = entityManager;
+        this.statusCodeValidationService = statusCodeValidationService;
     }
 
     @Transactional
@@ -87,6 +90,11 @@ public class DossierService {
 
         Dossier dossier = dossierMapper.toEntityWithoutParties(request);
         dossier.setOrgId(orgId);
+
+        statusCodeValidationService.validateCaseType(dossier.getCaseType());
+        statusCodeValidationService.validateStatusCodeForCaseType(
+                dossier.getCaseType(), 
+                dossier.getStatusCode());
 
         LocalDateTime now = LocalDateTime.now();
         dossier.setCreatedAt(now);
@@ -198,8 +206,15 @@ public class DossierService {
         dossier.setStatus(newStatus);
         
         if (request.getStatusCode() != null) {
+            statusCodeValidationService.validateStatusCodeForCaseType(
+                    dossier.getCaseType(), 
+                    request.getStatusCode());
             dossier.setStatusCode(request.getStatusCode());
+        } else {
+            String derivedStatusCode = statusCodeValidationService.deriveStatusCodeFromEnumStatus(newStatus);
+            dossier.setStatusCode(derivedStatusCode);
         }
+        
         if (request.getLossReason() != null) {
             dossier.setLossReason(request.getLossReason());
         }

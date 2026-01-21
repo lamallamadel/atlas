@@ -31,10 +31,14 @@ public class DossierControllerV2 {
 
     private final DossierService dossierService;
     private final DossierMapperV2 dossierMapperV2;
+    private final com.example.backend.service.DossierStatusCodeValidationService statusCodeValidationService;
 
-    public DossierControllerV2(DossierService dossierService, DossierMapperV2 dossierMapperV2) {
+    public DossierControllerV2(DossierService dossierService, 
+                               DossierMapperV2 dossierMapperV2,
+                               com.example.backend.service.DossierStatusCodeValidationService statusCodeValidationService) {
         this.dossierService = dossierService;
         this.dossierMapperV2 = dossierMapperV2;
+        this.statusCodeValidationService = statusCodeValidationService;
     }
 
     @PostMapping
@@ -139,6 +143,21 @@ public class DossierControllerV2 {
             @PathVariable Long id) {
         dossierService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/allowed-status-codes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get allowed status codes for a case type", 
+               description = "Retrieves the list of valid status codes for a specific case type based on workflow definitions")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status codes retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = java.util.List.class)))
+    })
+    public ResponseEntity<java.util.List<String>> getAllowedStatusCodes(
+            @Parameter(description = "Case type code (optional, returns all active status codes if not specified)")
+            @RequestParam(required = false) String caseType) {
+        java.util.List<String> allowedStatusCodes = statusCodeValidationService.getAllowedStatusCodesForCaseType(caseType);
+        return ResponseEntity.ok(allowedStatusCodes);
     }
 
     private Pageable createPageable(int page, int size, String sort) {
