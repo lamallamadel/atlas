@@ -1,89 +1,112 @@
-# 🚀 Start Here - Initial Setup Complete!
+# 🚀 Start Here - Repository Setup
 
-## ✅ Frontend Setup Complete
+Welcome! This repository has been cloned and is ready for initial setup.
 
-All frontend dependencies have been successfully installed:
-- ✅ 1,177 npm packages installed
-- ✅ Playwright test framework ready
-- ✅ Browser binaries downloaded (Chromium, Firefox)
+## ⚡ Quick Start (< 5 minutes)
 
-## ⚠️ One Step Remaining: Backend Setup
+### Status Check
 
-To complete the setup, run **ONE** of the following commands:
+- ✅ Frontend dependencies installed (`npm install` complete)
+- ⚠️ Backend setup required (Maven install needed)
 
-### Option 1: PowerShell (Recommended)
+### Complete Backend Setup Now
+
+Open PowerShell in the repository root and run:
+
 ```powershell
-.\mvn17.ps1 clean install -DskipTests
-```
-
-### Option 2: Command Prompt
-```cmd
-backend\mvn17.cmd clean install -DskipTests
-```
-
-### Option 3: Complete Setup Script
-```powershell
-.\COMPLETE_INITIAL_SETUP.ps1
-```
-
-**Time Required:** ~5 minutes (downloads dependencies on first run)
-
-## 📋 After Backend Setup
-
-Once the backend Maven install completes, you're ready to:
-
-### Start Development Servers
-```powershell
-# Terminal 1: Start backend (http://localhost:8080)
 cd backend
-mvn spring-boot:run
+..\mvn17.ps1 clean install -DskipTests
+```
 
-# Terminal 2: Start frontend (http://localhost:4200)
+**That's it!** This will download all Java dependencies and compile the Spring Boot application.
+
+## 🎯 Alternative Setup Methods
+
+### Option 1: Automated Script
+
+```powershell
+.\Initialize-Repository.ps1
+```
+
+### Option 2: Using Batch File
+
+```cmd
+cd backend
+..\mvn17.cmd clean install -DskipTests
+```
+
+### Option 3: Manual JAVA_HOME
+
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+cd backend
+mvn clean install -DskipTests
+```
+
+## ✅ Verify Setup
+
+After backend setup completes, verify:
+
+```powershell
+# Test backend
+cd backend
+..\mvn17.ps1 test
+
+# Test frontend (already set up)
+cd frontend
+npm test
+```
+
+## 🏃 Run the Application
+
+### Start Backend
+
+```powershell
+cd backend
+..\mvn17.ps1 spring-boot:run
+```
+
+Runs on: `http://localhost:8080`
+
+### Start Frontend
+
+```powershell
 cd frontend
 npm start
 ```
 
-### Run Tests
-```powershell
-# Backend unit tests
-cd backend
-mvn test
-
-# Frontend E2E tests
-cd frontend
-npm run e2e:fast
-```
-
-### Build for Production
-```powershell
-# Build backend
-cd backend
-mvn clean package
-
-# Build frontend
-cd frontend
-npm run build
-```
+Runs on: `http://localhost:4200`
 
 ## 📚 More Information
 
-- **SETUP_COMPLETE_SUMMARY.md** - Full setup details and all available commands
-- **INITIAL_SETUP_STATUS.md** - Alternative setup methods and troubleshooting
-- **AGENTS.md** - Complete command reference (build, test, lint, E2E tests)
+- **`SETUP_STATUS.md`**: Current setup status and detailed steps
+- **`INITIAL_SETUP_INSTRUCTIONS.md`**: Complete setup guide with troubleshooting
+- **`AGENTS.md`**: All development commands (build, test, lint, e2e)
+- **`README.md`**: Project overview and architecture
 
-## 🎯 Quick Commands Reference
+## 🆘 Having Issues?
 
-| Task | Command |
-|------|---------|
-| Build backend | `cd backend && mvn clean package` |
-| Run backend | `cd backend && mvn spring-boot:run` |
-| Test backend | `cd backend && mvn test` |
-| Build frontend | `cd frontend && npm run build` |
-| Run frontend | `cd frontend && npm start` |
-| Test frontend | `cd frontend && npm test` |
-| E2E tests (fast) | `cd frontend && npm run e2e:fast` |
-| E2E tests (all) | `cd frontend && npm run e2e:full` |
+### "JAVA_HOME not defined correctly"
+
+Use the provided wrappers:
+- `mvn17.ps1` (PowerShell)
+- `mvn17.cmd` (Command Prompt)
+
+These automatically set JAVA_HOME to Java 17.
+
+### "Cannot find mvn command"
+
+Maven is installed at: `C:\Environement\maven-3.8.6`
+
+Check it's in your PATH, or use the full path in mvn17.ps1 wrapper.
+
+### Need More Help?
+
+See `INITIAL_SETUP_INSTRUCTIONS.md` for:
+- Detailed troubleshooting
+- Alternative setup methods
+- Common issues and solutions
 
 ---
 
-**Need Help?** See SETUP.md or AGENTS.md for detailed instructions.
+**Ready to code!** Once backend setup is complete, you're all set for development.
