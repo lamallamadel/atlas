@@ -13,6 +13,8 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
+import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
+import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -739,5 +741,33 @@ export class DossiersComponent implements OnInit {
 
   trackByPageNum(index: number, pageNum: number): number {
     return pageNum;
+  }
+
+  openImportDialog(): void {
+    const dialogRef = this.dialog.open(LeadImportDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(success => {
+      if (success) {
+        this.loadDossiers();
+      }
+    });
+  }
+
+  openExportDialog(): void {
+    const dialogRef = this.dialog.open(LeadExportDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe(success => {
+      if (success) {
+        console.log('Export completed successfully');
+      }
+    });
   }
 }

@@ -33,6 +33,7 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatRadioModule } from '@angular/material/radio';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -91,6 +92,8 @@ import { OutboundMessageFormComponent } from './pages/dossiers/outbound-message-
 import { DocumentListComponent } from './components/document-list.component';
 import { DocumentUploadComponent } from './components/document-upload.component';
 import { DocumentPreviewDialogComponent } from './components/document-preview-dialog.component';
+import { LeadImportDialogComponent } from './components/lead-import-dialog.component';
+import { LeadExportDialogComponent } from './components/lead-export-dialog.component';
 
 registerLocaleData(localeFr);
 
@@ -145,7 +148,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     OutboundMessageFormComponent,
     DocumentListComponent,
     DocumentUploadComponent,
-    DocumentPreviewDialogComponent
+    DocumentPreviewDialogComponent,
+    LeadImportDialogComponent,
+    LeadExportDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -184,6 +189,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatButtonToggleModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatRadioModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,

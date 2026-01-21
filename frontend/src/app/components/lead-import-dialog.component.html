@@ -1,0 +1,174 @@
+<div class="lead-import-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon class="title-icon">upload_file</mat-icon>
+    Importer des prospects
+  </h2>
+
+  <mat-dialog-content>
+    <div class="import-section">
+      <!-- File Upload Zone -->
+      <div class="upload-zone" *ngIf="!jobId">
+        <div 
+          class="drop-zone"
+          [class.dragging]="isDragging"
+          [class.has-file]="selectedFile"
+          (dragover)="onDragOver($event)"
+          (dragleave)="onDragLeave($event)"
+          (drop)="onDrop($event)">
+          
+          <div *ngIf="!selectedFile" class="drop-zone-empty">
+            <mat-icon class="upload-icon">cloud_upload</mat-icon>
+            <p class="drop-zone-text">Glissez-déposez votre fichier CSV ici</p>
+            <p class="drop-zone-subtext">ou</p>
+            <label class="file-input-label">
+              <input 
+                type="file" 
+                accept=".csv"
+                (change)="onFileSelected($event)"
+                class="file-input"
+                [disabled]="isUploading">
+              <button mat-raised-button color="primary" [disabled]="isUploading">
+                <mat-icon>folder_open</mat-icon>
+                Sélectionner un fichier
+              </button>
+            </label>
+            <p class="file-hint">Format: CSV • Taille max: 10 Mo</p>
+          </div>
+
+          <div *ngIf="selectedFile" class="drop-zone-file">
+            <mat-icon class="file-icon">description</mat-icon>
+            <div class="file-info">
+              <span class="file-name">{{ selectedFile.name }}</span>
+              <span class="file-size">{{ formatFileSize(selectedFile.size) }}</span>
+            </div>
+            <button 
+              mat-icon-button 
+              (click)="removeFile()"
+              [disabled]="isUploading"
+              class="remove-btn"
+              aria-label="Supprimer le fichier">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <!-- Duplicate Strategy Selection -->
+        <div class="strategy-section" *ngIf="selectedFile">
+          <h3 class="strategy-title">Stratégie de gestion des doublons</h3>
+          <mat-radio-group [(ngModel)]="duplicateStrategy" class="strategy-options">
+            <mat-radio-button value="SKIP" class="strategy-option">
+              <div class="option-content">
+                <span class="option-label">Ignorer</span>
+                <span class="option-description">Les doublons seront ignorés</span>
+              </div>
+            </mat-radio-button>
+            <mat-radio-button value="OVERWRITE" class="strategy-option">
+              <div class="option-content">
+                <span class="option-label">Écraser</span>
+                <span class="option-description">Les doublons seront mis à jour</span>
+              </div>
+            </mat-radio-button>
+            <mat-radio-button value="CREATE_NEW" class="strategy-option">
+              <div class="option-content">
+                <span class="option-label">Créer nouveau</span>
+                <span class="option-description">Créer de nouveaux enregistrements</span>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+        </div>
+      </div>
+
+      <!-- Import Progress -->
+      <div class="progress-section" *ngIf="jobId && importStatus">
+        <div class="progress-header">
+          <h3 class="progress-title">Import en cours...</h3>
+          <span class="progress-percentage">{{ getProgressPercentage() }}%</span>
+        </div>
+        
+        <mat-progress-bar 
+          mode="determinate" 
+          [value]="getProgressPercentage()"
+          [color]="importStatus.status === 'FAILED' ? 'warn' : 'primary'">
+        </mat-progress-bar>
+
+        <div class="progress-stats">
+          <div class="stat">
+            <mat-icon class="stat-icon">check_circle</mat-icon>
+            <span>{{ importStatus.successCount }} réussi(s)</span>
+          </div>
+          <div class="stat" *ngIf="importStatus.failureCount > 0">
+            <mat-icon class="stat-icon error">error</mat-icon>
+            <span>{{ importStatus.failureCount }} échoué(s)</span>
+          </div>
+          <div class="stat">
+            <mat-icon class="stat-icon">pie_chart</mat-icon>
+            <span>{{ importStatus.processedRows }} / {{ importStatus.totalRows }} lignes</span>
+          </div>
+        </div>
+
+        <div class="status-message">
+          <mat-icon *ngIf="importStatus.status === 'COMPLETED'" class="status-icon success">check_circle</mat-icon>
+          <mat-icon *ngIf="importStatus.status === 'FAILED'" class="status-icon error">error</mat-icon>
+          <mat-icon *ngIf="importStatus.status === 'PROCESSING'" class="status-icon processing">autorenew</mat-icon>
+          <span *ngIf="importStatus.status === 'COMPLETED'">Import terminé avec succès</span>
+          <span *ngIf="importStatus.status === 'FAILED'">L'import a échoué</span>
+          <span *ngIf="importStatus.status === 'PROCESSING'">Traitement en cours...</span>
+          <span *ngIf="importStatus.status === 'PENDING'">En attente...</span>
+        </div>
+      </div>
+
+      <!-- Error Report -->
+      <div class="error-section" *ngIf="errors.length > 0">
+        <button 
+          mat-button 
+          (click)="toggleErrorsView()"
+          class="error-toggle">
+          <mat-icon>{{ showErrors ? 'expand_less' : 'expand_more' }}</mat-icon>
+          Voir les erreurs ({{ errors.length }})
+        </button>
+
+        <div class="error-table" *ngIf="showErrors">
+          <table mat-table [dataSource]="errors" class="errors-table">
+            <ng-container matColumnDef="rowNumber">
+              <th mat-header-cell *matHeaderCellDef>Ligne</th>
+              <td mat-cell *matCellDef="let error">{{ error.rowNumber }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="leadName">
+              <th mat-header-cell *matHeaderCellDef>Nom</th>
+              <td mat-cell *matCellDef="let error">{{ error.leadName || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="leadPhone">
+              <th mat-header-cell *matHeaderCellDef>Téléphone</th>
+              <td mat-cell *matCellDef="let error">{{ error.leadPhone || '—' }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="reason">
+              <th mat-header-cell *matHeaderCellDef>Raison</th>
+              <td mat-cell *matCellDef="let error" class="error-reason">{{ error.reason }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="['rowNumber', 'leadName', 'leadPhone', 'reason']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['rowNumber', 'leadName', 'leadPhone', 'reason'];"></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()" [disabled]="!canClose()">
+      Fermer
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="startImport()"
+      [disabled]="!canStartImport()"
+      *ngIf="!jobId">
+      <mat-icon>upload</mat-icon>
+      Démarrer l'import
+    </button>
+  </mat-dialog-actions>
+</div>
