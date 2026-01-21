@@ -98,6 +98,7 @@ import { TaskListComponent } from './components/task-list.component';
 import { TaskCardComponent } from './components/task-card.component';
 import { TaskFormDialogComponent } from './components/task-form-dialog.component';
 import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
+import { WhatsappMessagingUiComponent } from './components/whatsapp-messaging-ui.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 
 registerLocaleData(localeFr);
@@ -159,7 +160,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     TaskListComponent,
     TaskCardComponent,
     TaskFormDialogComponent,
-    ObservabilityDashboardComponent
+    ObservabilityDashboardComponent,
+    WhatsappMessagingUiComponent
   ],
   imports: [
     BrowserModule,
