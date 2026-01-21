@@ -308,7 +308,7 @@ class AppointmentControllerTest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
+    @WithMockUser(roles = {"ADMIN"})
     void delete_NonExistentAppointment_Returns404() throws Exception {
         mockMvc.perform(withHeaders(delete("/api/v1/appointments/99999")))
                 .andExpect(status().isNotFound());
