@@ -13,6 +13,8 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -72,6 +74,7 @@ public class AnnonceService {
         return annonceMapper.toResponse(saved);
     }
 
+    @Cacheable(value = "annonce", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional(readOnly = true)
     public AnnonceResponse getById(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -90,6 +93,7 @@ public class AnnonceService {
         return annonceMapper.toResponse(annonce);
     }
 
+    @CacheEvict(value = "annonce", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public AnnonceResponse update(Long id, AnnonceUpdateRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -170,6 +174,7 @@ public class AnnonceService {
         return annonceRepository.findDistinctCities();
     }
 
+    @CacheEvict(value = "annonce", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public void delete(Long id) {
         String orgId = TenantContext.getOrgId();

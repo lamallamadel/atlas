@@ -57,6 +57,7 @@ public class ReportingService {
         return response;
     }
 
+    @Cacheable(value = "pipelineSummary", key = "#orgId")
     @Transactional(readOnly = true)
     public PipelineSummaryResponse generatePipelineSummary(String orgId) {
         PipelineSummaryResponse response = new PipelineSummaryResponse();

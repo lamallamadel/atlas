@@ -17,6 +17,8 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -125,6 +127,7 @@ public class DossierService {
         return dossierMapper.toResponse(saved);
     }
 
+    @Cacheable(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional(readOnly = true)
     public DossierResponse getById(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -132,7 +135,7 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(id)
+        Dossier dossier = dossierRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
@@ -165,6 +168,7 @@ public class DossierService {
         return dossiers.map(dossierMapper::toResponse);
     }
 
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public DossierResponse patchStatus(Long id, DossierStatusPatchRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -223,6 +227,7 @@ public class DossierService {
         return dossierMapper.toResponse(updated);
     }
 
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public DossierResponse patchLead(Long id, DossierLeadPatchRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -323,6 +328,7 @@ public class DossierService {
         return new BulkOperationResponse(successCount, failureCount, errors);
     }
 
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public void delete(Long id) {
         String orgId = TenantContext.getOrgId();
