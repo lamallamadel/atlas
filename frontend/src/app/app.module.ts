@@ -94,6 +94,10 @@ import { DocumentUploadComponent } from './components/document-upload.component'
 import { DocumentPreviewDialogComponent } from './components/document-preview-dialog.component';
 import { LeadImportDialogComponent } from './components/lead-import-dialog.component';
 import { LeadExportDialogComponent } from './components/lead-export-dialog.component';
+import { TaskListComponent } from './components/task-list.component';
+import { TaskCardComponent } from './components/task-card.component';
+import { TaskFormDialogComponent } from './components/task-form-dialog.component';
+import { FullCalendarModule } from '@fullcalendar/angular';
 
 registerLocaleData(localeFr);
 
@@ -150,7 +154,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     DocumentUploadComponent,
     DocumentPreviewDialogComponent,
     LeadImportDialogComponent,
-    LeadExportDialogComponent
+    LeadExportDialogComponent,
+    TaskListComponent,
+    TaskCardComponent,
+    TaskFormDialogComponent
   ],
   imports: [
     BrowserModule,
@@ -194,7 +201,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LayoutModule,
     ScrollingModule,
     TextFieldModule,
-    NgChartsModule
+    NgChartsModule,
+    FullCalendarModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },

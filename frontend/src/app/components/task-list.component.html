@@ -1,0 +1,81 @@
+<div class="task-list-container">
+  <div class="header">
+    <h1>Task Management</h1>
+    <button mat-raised-button color="primary" (click)="openCreateDialog()">
+      <mat-icon>add</mat-icon>
+      New Task
+    </button>
+  </div>
+
+  <div class="toolbar">
+    <div class="filters">
+      <mat-button-toggle-group [(ngModel)]="filterType" (change)="onFilterTypeChange()">
+        <mat-button-toggle [value]="FilterType.ALL">
+          All Tasks
+        </mat-button-toggle>
+        <mat-button-toggle [value]="FilterType.ASSIGNED_TO_ME">
+          Assigned to Me
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
+      <mat-form-field appearance="outline" class="status-filter">
+        <mat-label>Status</mat-label>
+        <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusFilterChange()">
+          <mat-option [value]="StatusFilter.ALL">All</mat-option>
+          <mat-option [value]="StatusFilter.OVERDUE">
+            Overdue ({{ overdueCount }})
+          </mat-option>
+          <mat-option [value]="StatusFilter.UPCOMING">
+            Upcoming ({{ upcomingCount }})
+          </mat-option>
+          <mat-option [value]="StatusFilter.COMPLETED">
+            Completed ({{ completedCount }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <div class="view-toggle">
+      <mat-button-toggle-group [(ngModel)]="viewMode">
+        <mat-button-toggle [value]="ViewMode.LIST">
+          <mat-icon>view_list</mat-icon>
+          List
+        </mat-button-toggle>
+        <mat-button-toggle [value]="ViewMode.CALENDAR">
+          <mat-icon>calendar_month</mat-icon>
+          Calendar
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+  </div>
+
+  <div class="content" *ngIf="!loading">
+    <div class="list-view" *ngIf="viewMode === ViewMode.LIST">
+      <div class="tasks-grid" *ngIf="filteredTasks.length > 0">
+        <app-task-card
+          *ngFor="let task of filteredTasks"
+          [task]="task"
+          (taskEdit)="onTaskEdit($event)"
+          (taskDeleted)="onTaskDelete($event)"
+          (taskCompleted)="onTaskCompleted($event)">
+        </app-task-card>
+      </div>
+      
+      <app-empty-state
+        *ngIf="filteredTasks.length === 0"
+        icon="task"
+        title="No tasks found"
+        message="Create a new task to get started or adjust your filters">
+      </app-empty-state>
+    </div>
+
+    <div class="calendar-view" *ngIf="viewMode === ViewMode.CALENDAR">
+      <full-calendar [options]="calendarOptions"></full-calendar>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+    <p>Loading tasks...</p>
+  </div>
+</div>

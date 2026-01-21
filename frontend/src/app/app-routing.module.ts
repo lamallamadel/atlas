@@ -12,6 +12,7 @@ import { AccessDeniedComponent } from './pages/access-denied/access-denied.compo
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
 import { ReportsDashboardComponent } from './components/reports-dashboard.component';
 import { SearchComponent } from './pages/search/search.component';
+import { TaskListComponent } from './components/task-list.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -29,6 +30,7 @@ const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent, data: { animation: 'DashboardPage' } },
       { path: 'reports', component: ReportsDashboardComponent, data: { animation: 'ReportsPage' } },
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
+      { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
       { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
       { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
       { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },

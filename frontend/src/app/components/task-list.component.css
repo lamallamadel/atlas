@@ -1,0 +1,195 @@
+.task-list-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
+  color: #333;
+}
+
+.header button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.filters {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-filter {
+  min-width: 200px;
+}
+
+.view-toggle mat-button-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.content {
+  margin-top: 24px;
+}
+
+.tasks-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 16px;
+}
+
+.calendar-view {
+  background-color: #fff;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  gap: 16px;
+}
+
+.loading-state p {
+  color: #666;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .task-list-container {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .header button {
+    width: 100%;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filters mat-button-toggle-group {
+    width: 100%;
+  }
+
+  .status-filter {
+    width: 100%;
+  }
+
+  .view-toggle {
+    width: 100%;
+  }
+
+  .view-toggle mat-button-toggle-group {
+    width: 100%;
+  }
+
+  .tasks-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-view {
+    padding: 12px;
+  }
+}
+
+@media (max-width: 599px) {
+  .header h1 {
+    font-size: 24px;
+  }
+
+  .tasks-grid {
+    gap: 12px;
+  }
+}
+
+::ng-deep .fc {
+  font-family: 'Roboto', 'Open Sans', sans-serif;
+}
+
+::ng-deep .fc-button {
+  background-color: #2c5aa0 !important;
+  border-color: #2c5aa0 !important;
+  text-transform: capitalize;
+}
+
+::ng-deep .fc-button:hover {
+  background-color: #1f4782 !important;
+  border-color: #1f4782 !important;
+}
+
+::ng-deep .fc-button:disabled {
+  opacity: 0.6;
+}
+
+::ng-deep .fc-event {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+
+::ng-deep .fc-event:hover {
+  opacity: 0.8;
+}
+
+::ng-deep .fc-daygrid-day-number {
+  padding: 4px;
+  font-weight: 500;
+}
+
+::ng-deep .fc-col-header-cell {
+  background-color: #f5f5f5;
+  font-weight: 600;
+}
+
+::ng-deep .fc-daygrid-day.fc-day-today {
+  background-color: rgba(44, 90, 160, 0.05) !important;
+}
+
+::ng-deep .fc-toolbar-title {
+  font-size: 20px !important;
+  font-weight: 600;
+}
