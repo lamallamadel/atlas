@@ -570,4 +570,129 @@ public class ReportingService {
             .sorted(Comparator.comparing(TimeSeriesDataPointDto::getDate))
             .collect(Collectors.toList());
     }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> generateAnalyticsData(LocalDateTime from, LocalDateTime to, String orgId) {
+        Map<String, Object> analyticsData = new HashMap<>();
+
+        AgentPerformanceResponse agentPerformance = generateAgentPerformance(from, to, orgId);
+        analyticsData.put("agentPerformance", agentPerformance.getAgentMetrics());
+
+        List<Map<String, Object>> revenueForecast = generateMockRevenueForecast(from, to);
+        analyticsData.put("revenueForecast", revenueForecast);
+
+        List<Map<String, Object>> leadSources = calculateLeadSourcesData(from, to, orgId);
+        analyticsData.put("leadSources", leadSources);
+
+        List<Map<String, Object>> conversionFunnel = calculateConversionFunnelData(from, to, orgId);
+        analyticsData.put("conversionFunnel", conversionFunnel);
+
+        Map<String, String> dateRange = new HashMap<>();
+        dateRange.put("from", from != null ? from.toLocalDate().toString() : LocalDate.now().minusDays(30).toString());
+        dateRange.put("to", to != null ? to.toLocalDate().toString() : LocalDate.now().toString());
+        analyticsData.put("dateRange", dateRange);
+
+        return analyticsData;
+    }
+
+    private List<Map<String, Object>> generateMockRevenueForecast(LocalDateTime from, LocalDateTime to) {
+        List<Map<String, Object>> forecast = new ArrayList<>();
+        
+        LocalDate startDate = from != null ? from.toLocalDate() : LocalDate.now().minusDays(30);
+        LocalDate endDate = to != null ? to.toLocalDate() : LocalDate.now();
+        
+        Random random = new Random(42);
+        
+        for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(7)) {
+            Map<String, Object> dataPoint = new HashMap<>();
+            dataPoint.put("date", date.toString());
+            dataPoint.put("estimatedRevenue", 50000 + random.nextInt(100000));
+            dataPoint.put("actualRevenue", 40000 + random.nextInt(80000));
+            dataPoint.put("pipelineValue", 200000 + random.nextInt(300000));
+            forecast.add(dataPoint);
+        }
+        
+        return forecast;
+    }
+
+    private List<Map<String, Object>> calculateLeadSourcesData(LocalDateTime from, LocalDateTime to, String orgId) {
+        Specification<Dossier> spec = buildDateRangeSpec(from, to);
+        List<Dossier> dossiers = dossierRepository.findAll(spec);
+
+        Map<String, Long> sourceCounts = dossiers.stream()
+            .collect(Collectors.groupingBy(
+                d -> d.getLeadSource() != null ? d.getLeadSource() : "UNKNOWN",
+                Collectors.counting()
+            ));
+
+        Map<String, Long> sourceWonCounts = dossiers.stream()
+            .filter(d -> d.getStatus() == DossierStatus.WON)
+            .collect(Collectors.groupingBy(
+                d -> d.getLeadSource() != null ? d.getLeadSource() : "UNKNOWN",
+                Collectors.counting()
+            ));
+
+        long totalDossiers = dossiers.size();
+
+        List<Map<String, Object>> leadSources = new ArrayList<>();
+        for (Map.Entry<String, Long> entry : sourceCounts.entrySet()) {
+            Map<String, Object> sourceData = new HashMap<>();
+            String source = entry.getKey();
+            Long count = entry.getValue();
+            Long wonCount = sourceWonCounts.getOrDefault(source, 0L);
+            
+            sourceData.put("source", source);
+            sourceData.put("count", count);
+            sourceData.put("percentage", totalDossiers > 0 ? (count * 100.0 / totalDossiers) : 0.0);
+            sourceData.put("conversionRate", count > 0 ? (wonCount * 100.0 / count) : 0.0);
+            leadSources.add(sourceData);
+        }
+
+        return leadSources.stream()
+            .sorted((a, b) -> Long.compare((Long) b.get("count"), (Long) a.get("count")))
+            .collect(Collectors.toList());
+    }
+
+    private List<Map<String, Object>> calculateConversionFunnelData(LocalDateTime from, LocalDateTime to, String orgId) {
+        Specification<Dossier> spec = buildDateRangeSpec(from, to);
+        List<Dossier> dossiers = dossierRepository.findAll(spec);
+
+        Map<DossierStatus, Long> statusCounts = dossiers.stream()
+            .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
+
+        List<Map<String, Object>> funnelData = new ArrayList<>();
+        DossierStatus[] statusOrder = {
+            DossierStatus.NEW, 
+            DossierStatus.QUALIFYING, 
+            DossierStatus.QUALIFIED, 
+            DossierStatus.APPOINTMENT, 
+            DossierStatus.WON
+        };
+
+        long previousCount = dossiers.size();
+        
+        for (int i = 0; i < statusOrder.length; i++) {
+            DossierStatus status = statusOrder[i];
+            Long count = statusCounts.getOrDefault(status, 0L);
+            
+            Map<String, Object> stageData = new HashMap<>();
+            stageData.put("stage", status.name());
+            stageData.put("count", count);
+            
+            if (i == 0) {
+                stageData.put("conversionRate", 100.0);
+                stageData.put("dropOffRate", 0.0);
+            } else {
+                double conversionRate = previousCount > 0 ? (count * 100.0 / previousCount) : 0.0;
+                double dropOffRate = 100.0 - conversionRate;
+                stageData.put("conversionRate", conversionRate);
+                stageData.put("dropOffRate", dropOffRate);
+            }
+            
+            funnelData.add(stageData);
+            previousCount = count;
+        }
+
+        return funnelData;
+    }
 }

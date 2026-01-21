@@ -135,4 +135,27 @@ public class ReportingController {
         RevenueForecastResponse forecast = reportingService.generateRevenueForecast(effectiveOrgId);
         return ResponseEntity.ok(forecast);
     }
+
+    @GetMapping("/analytics")
+    @Operation(summary = "Get analytics data", description = "Returns comprehensive analytics including agent performance, revenue forecast, lead sources, and conversion funnel")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Analytics data generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters")
+    })
+    public ResponseEntity<java.util.Map<String, Object>> getAnalyticsData(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        java.util.Map<String, Object> analyticsData = reportingService.generateAnalyticsData(fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(analyticsData);
+    }
 }

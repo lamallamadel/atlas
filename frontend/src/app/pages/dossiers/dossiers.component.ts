@@ -38,6 +38,7 @@ export class DossiersComponent implements OnInit {
 
   selectedStatus: DossierStatus | '' = '';
   phoneFilter = '';
+  sourceFilter = '';
   annonceIdFilter = '';
   annonceSearchControl = new FormControl<string | AnnonceResponse>('');
   filteredAnnonces!: Observable<AnnonceResponse[]>;
@@ -236,6 +237,9 @@ export class DossiersComponent implements OnInit {
       if (params['status']) {
         this.selectedStatus = params['status'] as DossierStatus;
       }
+      if (params['source']) {
+        this.sourceFilter = params['source'];
+      }
       this.loadDossiers();
       this.updateAppliedFilters();
     });
@@ -317,6 +321,7 @@ export class DossiersComponent implements OnInit {
       size: number;
       status?: DossierStatus;
       leadPhone?: string;
+      leadSource?: string;
       annonceId?: number;
     } = {
       page: this.currentPage,
@@ -329,6 +334,10 @@ export class DossiersComponent implements OnInit {
 
     if (this.phoneFilter.trim()) {
       params.leadPhone = this.phoneFilter.trim();
+    }
+
+    if (this.sourceFilter.trim()) {
+      params.leadSource = this.sourceFilter.trim();
     }
 
     if (this.selectedAnnonceId !== null) {
@@ -364,6 +373,7 @@ export class DossiersComponent implements OnInit {
   clearFilters(): void {
     this.selectedStatus = '';
     this.phoneFilter = '';
+    this.sourceFilter = '';
     this.clearAnnonceSelection();
     this.currentPage = 0;
     this.updateAppliedFilters();
@@ -379,6 +389,15 @@ export class DossiersComponent implements OnInit {
         label: 'Statut',
         value: this.selectedStatus,
         displayValue: this.getStatusLabel(this.selectedStatus)
+      });
+    }
+
+    if (this.sourceFilter.trim()) {
+      this.appliedFilters.push({
+        key: 'sourceFilter',
+        label: 'Source',
+        value: this.sourceFilter,
+        displayValue: this.sourceFilter
       });
     }
 

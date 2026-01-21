@@ -35,6 +35,46 @@ export interface PipelineSummaryResponse {
   overallConversionRate: number;
 }
 
+export interface AgentPerformance {
+  agentName: string;
+  totalDossiers: number;
+  closedDossiers: number;
+  conversionRate: number;
+  averageResponseTimeHours: number;
+}
+
+export interface RevenueForecast {
+  date: string;
+  estimatedRevenue: number;
+  actualRevenue: number;
+  pipelineValue: number;
+}
+
+export interface LeadSourceData {
+  source: string;
+  count: number;
+  percentage: number;
+  conversionRate: number;
+}
+
+export interface ConversionFunnel {
+  stage: string;
+  count: number;
+  conversionRate: number;
+  dropOffRate: number;
+}
+
+export interface AnalyticsData {
+  agentPerformance: AgentPerformance[];
+  revenueForecast: RevenueForecast[];
+  leadSources: LeadSourceData[];
+  conversionFunnel: ConversionFunnel[];
+  dateRange: {
+    from: string;
+    to: string;
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -63,5 +103,19 @@ export class ReportingApiService {
       params = params.set('orgId', orgId);
     }
     return this.http.get<PipelineSummaryResponse>(`${this.apiUrl}/pipeline-summary`, { params });
+  }
+
+  getAnalyticsData(from?: string, to?: string, orgId?: string): Observable<AnalyticsData> {
+    let params = new HttpParams();
+    if (from) {
+      params = params.set('from', from);
+    }
+    if (to) {
+      params = params.set('to', to);
+    }
+    if (orgId) {
+      params = params.set('orgId', orgId);
+    }
+    return this.http.get<AnalyticsData>(`${this.apiUrl}/analytics`, { params });
   }
 }
