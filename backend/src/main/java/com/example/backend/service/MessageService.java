@@ -96,6 +96,14 @@ public class MessageService {
                 .setParameter("orgId", orgId);
 
         Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
+        
+        // Force initialization of dossier associations within the transaction
+        messages.forEach(message -> {
+            if (message.getDossier() != null) {
+                message.getDossier().getId(); // Force lazy load
+            }
+        });
+        
         return messages.map(messageMapper::toResponse);
     }
 
