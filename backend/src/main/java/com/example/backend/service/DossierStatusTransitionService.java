@@ -113,7 +113,7 @@ public class DossierStatusTransitionService {
 
         historyRepository.save(history);
 
-        metricsService.incrementDossierStatusTransition(fromStatus.name(), toStatus.name());
+        metricsService.incrementDossierStatusTransition(fromStatus != null ? fromStatus.name() : "NONE", toStatus.name());
     }
 
     public boolean isTerminalState(DossierStatus status) {
