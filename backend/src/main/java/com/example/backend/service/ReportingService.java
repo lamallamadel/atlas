@@ -238,7 +238,7 @@ public class ReportingService {
         metrics.setQualifiedToAppointmentRate(qualifiedCount > 0 ? (appointmentCount * 100.0 / qualifiedCount) : 0.0);
         metrics.setAppointmentToWonRate(appointmentCount > 0 ? (wonCount * 100.0 / appointmentCount) : 0.0);
 
-        Long totalDossiers = dossiers.size();
+        Long totalDossiers = (long) dossiers.size();
         metrics.setOverallConversionRate(totalDossiers > 0 ? (wonCount * 100.0 / totalDossiers) : 0.0);
 
         return metrics;

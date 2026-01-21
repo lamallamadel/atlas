@@ -1,0 +1,209 @@
+{
+  "examples": [
+    {
+      "name": "order_confirmation",
+      "language": "en",
+      "category": "TRANSACTIONAL",
+      "description": "Order confirmation message with customer name and order number",
+      "components": [
+        {
+          "type": "HEADER",
+          "format": "TEXT",
+          "text": "Order Confirmed"
+        },
+        {
+          "type": "BODY",
+          "text": "Hi {{1}}, your order {{2}} has been confirmed. You will receive it within 3-5 business days."
+        },
+        {
+          "type": "FOOTER",
+          "text": "Thank you for shopping with us!"
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "QUICK_REPLY",
+              "text": "Track Order"
+            },
+            {
+              "type": "URL",
+              "text": "View Details",
+              "url": "https://example.com/orders/{{1}}"
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "variableName": "customer_name",
+          "componentType": "BODY",
+          "position": 1,
+          "exampleValue": "John Doe",
+          "description": "Customer's full name",
+          "isRequired": true
+        },
+        {
+          "variableName": "order_number",
+          "componentType": "BODY",
+          "position": 2,
+          "exampleValue": "#12345",
+          "description": "Order number",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "name": "appointment_reminder",
+      "language": "en",
+      "category": "UTILITY",
+      "description": "Property viewing appointment reminder",
+      "components": [
+        {
+          "type": "HEADER",
+          "format": "TEXT",
+          "text": "Appointment Reminder - {{1}}"
+        },
+        {
+          "type": "BODY",
+          "text": "Hello {{1}}, this is a reminder of your property viewing appointment on {{2}} at {{3}}. Location: {{4}}."
+        },
+        {
+          "type": "FOOTER",
+          "text": "Reply CONFIRM or CANCEL"
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "QUICK_REPLY",
+              "text": "Confirm"
+            },
+            {
+              "type": "QUICK_REPLY",
+              "text": "Cancel"
+            },
+            {
+              "type": "PHONE_NUMBER",
+              "text": "Call Agent",
+              "phone_number": "+1234567890"
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "variableName": "property_address",
+          "componentType": "HEADER",
+          "position": 1,
+          "exampleValue": "123 Main St",
+          "description": "Property address",
+          "isRequired": true
+        },
+        {
+          "variableName": "client_name",
+          "componentType": "BODY",
+          "position": 1,
+          "exampleValue": "Jane Smith",
+          "description": "Client's name",
+          "isRequired": true
+        },
+        {
+          "variableName": "appointment_date",
+          "componentType": "BODY",
+          "position": 2,
+          "exampleValue": "March 15, 2024",
+          "description": "Appointment date",
+          "isRequired": true
+        },
+        {
+          "variableName": "appointment_time",
+          "componentType": "BODY",
+          "position": 3,
+          "exampleValue": "2:00 PM",
+          "description": "Appointment time",
+          "isRequired": true
+        },
+        {
+          "variableName": "location",
+          "componentType": "BODY",
+          "position": 4,
+          "exampleValue": "123 Main Street, City",
+          "description": "Appointment location",
+          "isRequired": true
+        }
+      ]
+    },
+    {
+      "name": "welcome_message",
+      "language": "en",
+      "category": "MARKETING",
+      "description": "Welcome message for new leads",
+      "components": [
+        {
+          "type": "HEADER",
+          "format": "IMAGE"
+        },
+        {
+          "type": "BODY",
+          "text": "Welcome to {{1}}! We're excited to help you find your dream property. Our team is ready to assist you 24/7."
+        },
+        {
+          "type": "BUTTONS",
+          "buttons": [
+            {
+              "type": "QUICK_REPLY",
+              "text": "Get Started"
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "variableName": "company_name",
+          "componentType": "BODY",
+          "position": 1,
+          "exampleValue": "Real Estate Pro",
+          "description": "Company name",
+          "isRequired": true
+        }
+      ]
+    }
+  ],
+  "validation_rules": {
+    "template_name": {
+      "pattern": "^[a-z0-9_]+$",
+      "max_length": 512,
+      "description": "Lowercase letters, numbers, and underscores only"
+    },
+    "language_code": {
+      "pattern": "^[a-z]{2}(_[A-Z]{2})?$",
+      "examples": ["en", "en_US", "fr", "es"]
+    },
+    "header": {
+      "max_length": 60,
+      "formats": ["TEXT", "IMAGE", "VIDEO", "DOCUMENT"],
+      "variables_allowed": true
+    },
+    "body": {
+      "max_length": 1024,
+      "required": true,
+      "variables_allowed": true
+    },
+    "footer": {
+      "max_length": 60,
+      "variables_allowed": false
+    },
+    "buttons": {
+      "max_count": 10,
+      "max_quick_reply": 3,
+      "max_call_to_action": 2,
+      "button_text_max_length": 25
+    },
+    "variables": {
+      "format": "{{1}}, {{2}}, {{3}}, etc.",
+      "must_be_sequential": true,
+      "start_from": 1
+    }
+  }
+}
