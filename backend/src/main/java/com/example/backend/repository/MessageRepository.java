@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, Long>, JpaSpecificationExecutor<MessageEntity> {
     
-    @Query("SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
+    @Query("SELECT m FROM MessageEntity m JOIN FETCH m.dossier WHERE m.dossier.id = :dossierId " +
            "AND (:channel IS NULL OR m.channel = :channel) " +
            "AND (:direction IS NULL OR m.direction = :direction) " +
            "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
