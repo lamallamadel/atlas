@@ -18,12 +18,20 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { WorkflowAdminComponent } from './workflow-admin.component';
 import { WorkflowEditorComponent } from './workflow-editor/workflow-editor.component';
 import { WorkflowNodeComponent } from './workflow-node/workflow-node.component';
 import { TransitionRuleFormComponent } from './transition-rule-form/transition-rule-form.component';
 import { WorkflowPreviewComponent } from './workflow-preview/workflow-preview.component';
+import { TemplateLibraryComponent } from './template-library/template-library.component';
+import { TemplateEditorComponent } from './template-editor/template-editor.component';
+import { TemplatePreviewComponent } from './template-preview/template-preview.component';
+import { VariableManagerComponent } from './variable-manager/variable-manager.component';
+import { LineBreakPipe } from './pipes/line-break.pipe';
 import { AuthGuard } from '../../guards/auth.guard';
 
 const routes: Routes = [
@@ -32,6 +40,30 @@ const routes: Routes = [
     component: WorkflowAdminComponent,
     canActivate: [AuthGuard],
     data: { animation: 'WorkflowAdminPage' }
+  },
+  {
+    path: 'templates',
+    component: TemplateLibraryComponent,
+    canActivate: [AuthGuard],
+    data: { animation: 'TemplateLibraryPage' }
+  },
+  {
+    path: 'templates/new',
+    component: TemplateEditorComponent,
+    canActivate: [AuthGuard],
+    data: { animation: 'TemplateEditorPage' }
+  },
+  {
+    path: 'templates/:id',
+    component: TemplateEditorComponent,
+    canActivate: [AuthGuard],
+    data: { animation: 'TemplateViewPage' }
+  },
+  {
+    path: 'templates/:id/edit',
+    component: TemplateEditorComponent,
+    canActivate: [AuthGuard],
+    data: { animation: 'TemplateEditPage' }
   }
 ];
 
@@ -41,7 +73,12 @@ const routes: Routes = [
     WorkflowEditorComponent,
     WorkflowNodeComponent,
     TransitionRuleFormComponent,
-    WorkflowPreviewComponent
+    WorkflowPreviewComponent,
+    TemplateLibraryComponent,
+    TemplateEditorComponent,
+    TemplatePreviewComponent,
+    VariableManagerComponent,
+    LineBreakPipe
   ],
   imports: [
     CommonModule,
@@ -63,7 +100,10 @@ const routes: Routes = [
     MatDividerModule,
     MatExpansionModule,
     MatButtonToggleModule,
-    MatSlideToggleModule
+    MatSlideToggleModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ]
 })
 export class WorkflowAdminModule { }

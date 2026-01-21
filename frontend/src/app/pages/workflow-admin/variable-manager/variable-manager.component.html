@@ -1,0 +1,71 @@
+<div class="variable-manager">
+  <div class="manager-header">
+    <h3>Template Variables</h3>
+    <button mat-icon-button (click)="onAddVariable()" matTooltip="Add Variable">
+      <mat-icon>add_circle</mat-icon>
+    </button>
+  </div>
+
+  <div class="variables-container" cdkDropList (cdkDropListDropped)="drop($event)">
+    <div *ngFor="let variable of variables; let i = index" 
+         cdkDrag 
+         class="variable-card">
+      <div class="drag-indicator" cdkDragHandle>
+        <mat-icon>drag_indicator</mat-icon>
+      </div>
+
+      <div class="variable-content">
+        <div class="variable-header">
+          <div class="variable-name">
+            <mat-icon [matTooltip]="variable.componentType">
+              {{ getComponentTypeIcon(variable.componentType) }}
+            </mat-icon>
+            <strong>{{ variable.variableName }}</strong>
+            <mat-chip *ngIf="variable.isRequired" class="required-chip">Required</mat-chip>
+          </div>
+          <button mat-icon-button (click)="onRemoveVariable(i)" color="warn">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <div class="variable-details">
+          <div class="detail-item" *ngIf="variable.description">
+            <mat-icon>description</mat-icon>
+            <span>{{ variable.description }}</span>
+          </div>
+          <div class="detail-item" *ngIf="variable.exampleValue">
+            <mat-icon>lightbulb</mat-icon>
+            <span>Example: {{ variable.exampleValue }}</span>
+          </div>
+          <div class="detail-item">
+            <mat-icon>pin</mat-icon>
+            <span>Position: {{ variable.position }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="variables.length === 0">
+      <mat-icon>variables</mat-icon>
+      <p>No variables added yet</p>
+      <small>Variables make your templates dynamic</small>
+    </div>
+  </div>
+
+  <div class="variable-tips">
+    <mat-expansion-panel>
+      <mat-expansion-panel-header>
+        <mat-panel-title>
+          <mat-icon>help</mat-icon>
+          Variable Tips
+        </mat-panel-title>
+      </mat-expansion-panel-header>
+      <ul>
+        <li>Use clear, descriptive variable names (e.g., customer_name, order_id)</li>
+        <li>Drag variables to reorder them</li>
+        <li>Provide example values to help preview the message</li>
+        <li>Mark critical fields as required</li>
+      </ul>
+    </mat-expansion-panel>
+  </div>
+</div>

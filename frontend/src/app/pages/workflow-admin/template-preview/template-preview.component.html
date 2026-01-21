@@ -1,0 +1,86 @@
+<mat-card class="preview-card">
+  <mat-card-header>
+    <mat-card-title>Live Preview</mat-card-title>
+    <mat-icon matTooltip="Preview how your message will appear in WhatsApp">info</mat-icon>
+  </mat-card-header>
+
+  <mat-card-content>
+    <div class="whatsapp-preview">
+      <div class="whatsapp-header">
+        <mat-icon>chat</mat-icon>
+        <span>WhatsApp Message Preview</span>
+      </div>
+
+      <div class="whatsapp-body" *ngIf="template">
+        <div class="message-bubble">
+          <div class="header-section" *ngIf="headerComponent?.text">
+            <strong>{{ formatTextWithVariables(headerComponent!.text!) }}</strong>
+          </div>
+
+          <div class="body-section" *ngIf="bodyComponent?.text">
+            <p [innerHTML]="formatTextWithVariables(bodyComponent!.text!) | lineBreak"></p>
+          </div>
+
+          <div class="footer-section" *ngIf="footerComponent?.text">
+            <small>{{ formatTextWithVariables(footerComponent!.text!) }}</small>
+          </div>
+
+          <div class="message-time">
+            {{ 'Now' }}
+          </div>
+        </div>
+
+        <div class="buttons-section" *ngIf="buttonsComponent?.buttons && buttonsComponent!.buttons!.length > 0">
+          <button 
+            mat-stroked-button 
+            *ngFor="let button of buttonsComponent!.buttons"
+            class="whatsapp-button"
+            [class.url-button]="button.type === ButtonType.URL"
+            [class.phone-button]="button.type === ButtonType.PHONE_NUMBER">
+            <mat-icon>{{ getButtonIcon(button.type) }}</mat-icon>
+            {{ button.text }}
+          </button>
+        </div>
+
+        <div class="variable-info" *ngIf="template.variables && template.variables.length > 0">
+          <mat-divider></mat-divider>
+          <div class="info-header">
+            <mat-icon>code</mat-icon>
+            <strong>Variables ({{ template.variables.length }})</strong>
+          </div>
+          <div class="variables-list">
+            <mat-chip-listbox>
+              <mat-chip *ngFor="let variable of template.variables">
+                <strong>{{variable.variableName}}</strong>
+                <span *ngIf="variable.exampleValue">: {{ variable.exampleValue }}</span>
+              </mat-chip>
+            </mat-chip-listbox>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-preview" *ngIf="!template">
+        <mat-icon>preview</mat-icon>
+        <p>Start creating your template to see a preview</p>
+      </div>
+    </div>
+
+    <div class="preview-meta" *ngIf="template">
+      <mat-divider></mat-divider>
+      <div class="meta-info">
+        <div class="meta-item">
+          <mat-icon>translate</mat-icon>
+          <span>{{ template.language }}</span>
+        </div>
+        <div class="meta-item">
+          <mat-icon>category</mat-icon>
+          <span>{{ template.category }}</span>
+        </div>
+        <div class="meta-item" *ngIf="template.status">
+          <mat-icon>info</mat-icon>
+          <span>{{ template.status }}</span>
+        </div>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>

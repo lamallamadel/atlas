@@ -1,0 +1,197 @@
+<div class="template-editor-container">
+  <div class="editor-header">
+    <button mat-icon-button (click)="cancel()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h2>{{ isEditMode ? 'Edit Template' : isViewMode ? 'View Template' : 'Create Template' }}</h2>
+  </div>
+
+  <div class="editor-content">
+    <div class="form-section">
+      <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Basic Information</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="form-row">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Template Name</mat-label>
+                <input matInput formControlName="name" placeholder="e.g., order_confirmation">
+                <mat-hint>Use lowercase letters, numbers, and underscores only</mat-hint>
+                <mat-error *ngIf="templateForm.get('name')?.hasError('required')">
+                  Template name is required
+                </mat-error>
+                <mat-error *ngIf="templateForm.get('name')?.hasError('pattern')">
+                  Only lowercase letters, numbers, and underscores allowed
+                </mat-error>
+              </mat-form-field>
+            </div>
+
+            <div class="form-row">
+              <mat-form-field appearance="outline">
+                <mat-label>Language</mat-label>
+                <input matInput formControlName="language" placeholder="en">
+                <mat-hint>ISO 639-1 format (e.g., en, fr, en_US)</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Category</mat-label>
+                <mat-select formControlName="category">
+                  <mat-option *ngFor="let cat of categories" [value]="cat">
+                    {{ cat }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Description</mat-label>
+              <textarea matInput formControlName="description" rows="2" 
+                        placeholder="Internal description of this template"></textarea>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Template Content</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Header (Optional)</mat-label>
+              <input matInput formControlName="headerText" placeholder="Welcome to our service!">
+              <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('headerText')"
+                      matTooltip="Insert variable">
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Body *</mat-label>
+              <textarea matInput formControlName="bodyText" rows="5" 
+                        placeholder="Hello, your order has been confirmed."></textarea>
+              <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('bodyText')"
+                      matTooltip="Insert variable">
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
+              <mat-hint>Use double curly braces for placeholders</mat-hint>
+              <mat-error *ngIf="templateForm.get('bodyText')?.hasError('required')">
+                Body text is required
+              </mat-error>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Footer (Optional)</mat-label>
+              <input matInput formControlName="footerText" placeholder="Thank you for your business">
+              <button mat-icon-button matSuffix type="button" (click)="insertVariablePlaceholder('footerText')"
+                      matTooltip="Insert variable">
+                <mat-icon>add_circle_outline</mat-icon>
+              </button>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Buttons (Optional)</mat-card-title>
+            <button mat-icon-button type="button" (click)="addButton()" [disabled]="isViewMode">
+              <mat-icon>add</mat-icon>
+            </button>
+          </mat-card-header>
+          <mat-card-content>
+            <div formArrayName="buttons" class="buttons-list">
+              <div *ngFor="let button of buttons.controls; let i = index" [formGroupName]="i" class="button-item">
+                <mat-form-field appearance="outline">
+                  <mat-label>Type</mat-label>
+                  <mat-select formControlName="type">
+                    <mat-option *ngFor="let type of buttonTypes" [value]="type">
+                      {{ type }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Button Text</mat-label>
+                  <input matInput formControlName="text" placeholder="Click here">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" *ngIf="button.get('type')?.value === ButtonType.URL">
+                  <mat-label>URL</mat-label>
+                  <input matInput formControlName="url" placeholder="https://example.com">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" *ngIf="button.get('type')?.value === ButtonType.PHONE_NUMBER">
+                  <mat-label>Phone Number</mat-label>
+                  <input matInput formControlName="phoneNumber" placeholder="+1234567890">
+                </mat-form-field>
+
+                <button mat-icon-button type="button" (click)="removeButton(i)" color="warn" [disabled]="isViewMode">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card>
+          <mat-card-header>
+            <mat-card-title>Variables</mat-card-title>
+            <button mat-icon-button type="button" (click)="addVariable()" [disabled]="isViewMode">
+              <mat-icon>add</mat-icon>
+            </button>
+          </mat-card-header>
+          <mat-card-content>
+            <div formArrayName="variables" cdkDropList (cdkDropListDropped)="onVariableDrop($event)" class="variables-list">
+              <div *ngFor="let variable of variables.controls; let i = index" 
+                   [formGroupName]="i" 
+                   cdkDrag 
+                   class="variable-item">
+                <mat-icon cdkDragHandle class="drag-handle">drag_indicator</mat-icon>
+                
+                <mat-form-field appearance="outline">
+                  <mat-label>Variable Name</mat-label>
+                  <input matInput formControlName="variableName" placeholder="customer_name">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Component</mat-label>
+                  <mat-select formControlName="componentType">
+                    <mat-option *ngFor="let type of componentTypes" [value]="type">
+                      {{ type }}
+                    </mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Example Value</mat-label>
+                  <input matInput formControlName="exampleValue" placeholder="John Doe">
+                </mat-form-field>
+
+                <mat-checkbox formControlName="isRequired">Required</mat-checkbox>
+
+                <button mat-icon-button type="button" (click)="removeVariable(i)" color="warn" [disabled]="isViewMode">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+              <div class="empty-variables" *ngIf="variables.length === 0">
+                <p>No variables defined. Add variables to make your template dynamic.</p>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <div class="form-actions">
+          <button mat-button type="button" (click)="cancel()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" [disabled]="loading || isViewMode">
+            {{ isEditMode ? 'Update' : 'Create' }} Template
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview-section">
+      <app-template-preview [template]="previewTemplate"></app-template-preview>
+    </div>
+  </div>
+</div>
