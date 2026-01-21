@@ -158,8 +158,8 @@ public class ObservabilityService {
             LocalDate date = (LocalDate) row[0];
             Long count = (Long) row[1];
             TimeSeriesDataPointDto point = new TimeSeriesDataPointDto();
-            point.setDate(date.toString());
-            point.setValue(count.doubleValue());
+            point.setDate(LocalDate.parse(date.toString()));
+            point.setValue((long) count.doubleValue());
             trendData.add(point);
         }
         metrics.setFailureTrend(trendData);
