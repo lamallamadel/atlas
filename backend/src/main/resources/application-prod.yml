@@ -50,3 +50,17 @@ management:
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:}
+
+# Production overrides for outbound alerting
+outbound:
+  alert:
+    enabled: true
+    dlq-threshold: 50
+    high-queue-threshold: 500
+    failure-rate-threshold: 0.20
+    slack:
+      enabled: ${OUTBOUND_ALERT_SLACK_ENABLED:false}
+      webhook-url: ${OUTBOUND_ALERT_SLACK_WEBHOOK_URL:}
+    email:
+      enabled: ${OUTBOUND_ALERT_EMAIL_ENABLED:false}
+      recipients: ${OUTBOUND_ALERT_EMAIL_RECIPIENTS:}

@@ -117,10 +117,26 @@ outbound:
     stuck-message-threshold-attempts: ${OUTBOUND_ALERT_STUCK_THRESHOLD_ATTEMPTS:3}
     stuck-message-age-hours: ${OUTBOUND_ALERT_STUCK_AGE_HOURS:2}
     max-results: ${OUTBOUND_ALERT_MAX_RESULTS:100}
+    dlq-threshold: ${OUTBOUND_ALERT_DLQ_THRESHOLD:100}
+    high-queue-threshold: ${OUTBOUND_ALERT_HIGH_QUEUE_THRESHOLD:1000}
+    failure-rate-threshold: ${OUTBOUND_ALERT_FAILURE_RATE_THRESHOLD:0.30}
+    time-window-minutes: ${OUTBOUND_ALERT_TIME_WINDOW_MINUTES:60}
+    escalation-attempts: ${OUTBOUND_ALERT_ESCALATION_ATTEMPTS:5}
+    health-metrics-update-ms: ${OUTBOUND_ALERT_HEALTH_METRICS_UPDATE_MS:30000}
+    email:
+      enabled: ${OUTBOUND_ALERT_EMAIL_ENABLED:false}
+      recipients: ${OUTBOUND_ALERT_EMAIL_RECIPIENTS:}
+    slack:
+      enabled: ${OUTBOUND_ALERT_SLACK_ENABLED:false}
+      webhook-url: ${OUTBOUND_ALERT_SLACK_WEBHOOK_URL:}
     high-queue-depth:
       cron: ${OUTBOUND_ALERT_HIGH_QUEUE_CRON:0 */10 * * * *}
     dead-letter:
       cron: ${OUTBOUND_ALERT_DEAD_LETTER_CRON:0 0 * * * *}
+    failure-rate:
+      cron: ${OUTBOUND_ALERT_FAILURE_RATE_CRON:0 */5 * * * *}
+    escalation:
+      cron: ${OUTBOUND_ALERT_ESCALATION_CRON:0 */20 * * * *}
 
 whatsapp:
   cloud:

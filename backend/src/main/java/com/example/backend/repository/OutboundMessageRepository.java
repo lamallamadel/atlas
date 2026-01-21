@@ -41,4 +41,11 @@ public interface OutboundMessageRepository extends JpaRepository<OutboundMessage
     
     @Query("SELECT om FROM OutboundMessageEntity om WHERE om.status = :status AND om.attemptCount >= :minAttempts AND om.updatedAt < :beforeTime ORDER BY om.attemptCount DESC, om.updatedAt ASC")
     List<OutboundMessageEntity> findStuckMessages(@Param("status") OutboundMessageStatus status, @Param("minAttempts") Integer minAttempts, @Param("beforeTime") LocalDateTime beforeTime, Pageable pageable);
+    
+    @Query("SELECT om FROM OutboundMessageEntity om WHERE om.status = :status AND om.attemptCount >= :minAttempts ORDER BY om.attemptCount DESC, om.updatedAt ASC")
+    List<OutboundMessageEntity> findMessagesNeedingEscalation(@Param("status") OutboundMessageStatus status, @Param("minAttempts") Integer minAttempts, Pageable pageable);
+    
+    long countByChannelAndCreatedAtAfter(MessageChannel channel, LocalDateTime afterTime);
+    
+    long countByChannelAndStatusAndCreatedAtAfter(MessageChannel channel, OutboundMessageStatus status, LocalDateTime afterTime);
 }
