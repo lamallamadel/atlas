@@ -115,6 +115,7 @@ export interface Page<T> {
 export interface DossierListParams {
   status?: DossierStatus;
   leadPhone?: string;
+  leadSource?: string;
   annonceId?: number;
   page?: number;
   size?: number;
@@ -156,6 +157,9 @@ export class DossierApiService {
     }
     if (params.leadPhone !== undefined) {
       httpParams = httpParams.set('leadPhone', params.leadPhone);
+    }
+    if (params.leadSource !== undefined) {
+      httpParams = httpParams.set('leadSource', params.leadSource);
     }
     if (params.annonceId !== undefined) {
       httpParams = httpParams.set('annonceId', params.annonceId.toString());

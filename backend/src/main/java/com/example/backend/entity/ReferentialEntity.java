@@ -37,6 +37,12 @@ public class ReferentialEntity extends BaseEntity {
     @Column(name = "is_system", nullable = false)
     private Boolean isSystem = false;
 
+    @Column(name = "version")
+    private Long version = 1L;
+
+    @Column(name = "last_change_type", length = 50)
+    private String lastChangeType;
+
     public Long getId() {
         return id;
     }
@@ -99,5 +105,21 @@ public class ReferentialEntity extends BaseEntity {
 
     public void setIsSystem(Boolean isSystem) {
         this.isSystem = isSystem;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public String getLastChangeType() {
+        return lastChangeType;
+    }
+
+    public void setLastChangeType(String lastChangeType) {
+        this.lastChangeType = lastChangeType;
     }
 }

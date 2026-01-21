@@ -5,8 +5,12 @@ import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
 import com.example.backend.dto.BulkOperationResponse;
+import com.example.backend.dto.CursorPageRequest;
+import com.example.backend.dto.CursorPageResponse;
+import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.service.AnnonceService;
+import com.example.backend.service.CursorPaginationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -27,15 +31,20 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.example.backend.config.Deprecated;
+
 @RestController
 @RequestMapping("/api/v1/annonces")
-@Tag(name = "Annonces", description = "API for managing annonces")
+@Tag(name = "Annonces", description = "API for managing annonces (deprecated, use v2)")
+@Deprecated(sunsetDate = "2025-12-31", deprecationMessage = "API v1 is deprecated. Please migrate to /api/v2/annonces which provides structured responses with nested location, pricing, and audit information.")
 public class AnnonceController {
 
     private final AnnonceService annonceService;
+    private final CursorPaginationService cursorPaginationService;
 
-    public AnnonceController(AnnonceService annonceService) {
+    public AnnonceController(AnnonceService annonceService, CursorPaginationService cursorPaginationService) {
         this.annonceService = annonceService;
+        this.cursorPaginationService = cursorPaginationService;
     }
 
     @PostMapping
@@ -169,6 +178,29 @@ public class AnnonceController {
     public ResponseEntity<BulkOperationResponse> bulkUpdate(
             @Valid @RequestBody AnnonceBulkUpdateRequest request) {
         BulkOperationResponse response = annonceService.bulkUpdate(request);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/cursor")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "List annonces with cursor pagination", description = "Retrieves annonces using cursor-based pagination for better performance on large datasets")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Annonces retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = CursorPageResponse.class)))
+    })
+    public ResponseEntity<CursorPageResponse<Annonce>> listWithCursor(
+            @Parameter(description = "Cursor from previous page")
+            @RequestParam(required = false) String cursor,
+            @Parameter(description = "Number of items per page")
+            @RequestParam(defaultValue = "20") Integer limit,
+            @Parameter(description = "Sort direction")
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @Parameter(description = "Field to sort by")
+            @RequestParam(defaultValue = "id") String sortField) {
+        
+        CursorPageRequest pageRequest = new CursorPageRequest(cursor, limit, direction, sortField);
+        CursorPageResponse<Annonce> response = cursorPaginationService.findWithCursor(
+                Annonce.class, pageRequest, null);
         return ResponseEntity.ok(response);
     }
 

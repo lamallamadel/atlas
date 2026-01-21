@@ -1,7 +1,12 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.AgentPerformanceResponse;
+import com.example.backend.dto.FunnelAnalysisResponse;
 import com.example.backend.dto.KpiReportResponse;
+import com.example.backend.dto.ObservabilityMetricsResponse;
 import com.example.backend.dto.PipelineSummaryResponse;
+import com.example.backend.dto.RevenueForecastResponse;
+import com.example.backend.service.ObservabilityService;
 import com.example.backend.service.ReportingService;
 import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,9 +29,11 @@ import java.time.LocalDateTime;
 public class ReportingController {
 
     private final ReportingService reportingService;
+    private final ObservabilityService observabilityService;
 
-    public ReportingController(ReportingService reportingService) {
+    public ReportingController(ReportingService reportingService, ObservabilityService observabilityService) {
         this.reportingService = reportingService;
+        this.observabilityService = observabilityService;
     }
 
     @GetMapping("/kpi")
@@ -43,12 +50,12 @@ public class ReportingController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
             @Parameter(description = "Organization ID")
             @RequestParam(required = false) String orgId) {
-        
+
         LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
         LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
-        
+
         String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
-        
+
         KpiReportResponse report = reportingService.generateKpiReport(fromDateTime, toDateTime, effectiveOrgId);
         return ResponseEntity.ok(report);
     }
@@ -62,10 +69,221 @@ public class ReportingController {
     public ResponseEntity<PipelineSummaryResponse> getPipelineSummary(
             @Parameter(description = "Organization ID")
             @RequestParam(required = false) String orgId) {
-        
+
         String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
-        
+
         PipelineSummaryResponse summary = reportingService.generatePipelineSummary(effectiveOrgId);
         return ResponseEntity.ok(summary);
+    }
+
+    @GetMapping("/funnel-analysis")
+    @Operation(summary = "Get funnel analysis", description = "Returns conversion funnel analysis with NEW→WON rates by source and stage-by-stage conversion metrics")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Funnel analysis generated successfully",
+                    content = @Content(schema = @Schema(implementation = FunnelAnalysisResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters")
+    })
+    public ResponseEntity<FunnelAnalysisResponse> getFunnelAnalysis(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        FunnelAnalysisResponse analysis = reportingService.generateFunnelAnalysis(fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(analysis);
+    }
+
+    @GetMapping("/agent-performance")
+    @Operation(summary = "Get agent performance metrics", description = "Returns detailed agent performance metrics including response time, messages sent, appointments scheduled, and win rates")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agent performance metrics generated successfully",
+                    content = @Content(schema = @Schema(implementation = AgentPerformanceResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters")
+    })
+    public ResponseEntity<AgentPerformanceResponse> getAgentPerformance(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        AgentPerformanceResponse performance = reportingService.generateAgentPerformance(fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(performance);
+    }
+
+    @GetMapping("/revenue-forecast")
+    @Operation(summary = "Get revenue forecast", description = "Returns revenue forecast based on pipeline value and historical conversion rates, with breakdown by stage and source")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Revenue forecast generated successfully",
+                    content = @Content(schema = @Schema(implementation = RevenueForecastResponse.class)))
+    })
+    public ResponseEntity<RevenueForecastResponse> getRevenueForecast(
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        RevenueForecastResponse forecast = reportingService.generateRevenueForecast(effectiveOrgId);
+        return ResponseEntity.ok(forecast);
+    }
+
+    @GetMapping("/analytics")
+    @Operation(summary = "Get analytics data", description = "Returns comprehensive analytics including agent performance, revenue forecast, lead sources, and conversion funnel")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Analytics data generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters")
+    })
+    public ResponseEntity<java.util.Map<String, Object>> getAnalyticsData(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        java.util.Map<String, Object> analyticsData = reportingService.generateAnalyticsData(fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(analyticsData);
+    }
+
+    @GetMapping("/observability/metrics")
+    @Operation(summary = "Get observability metrics", description = "Returns comprehensive observability metrics including queue depth, latency percentiles, failure rates, DLQ monitoring, and quota tracking")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Observability metrics generated successfully",
+                    content = @Content(schema = @Schema(implementation = ObservabilityMetricsResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters")
+    })
+    public ResponseEntity<ObservabilityMetricsResponse> getObservabilityMetrics(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        ObservabilityMetricsResponse metrics = observabilityService.getObservabilityMetrics(fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(metrics);
+    }
+
+    @GetMapping("/observability/metrics/export")
+    @Operation(summary = "Export observability metrics", description = "Exports observability metrics in CSV or JSON format")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Metrics exported successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid parameters")
+    })
+    public ResponseEntity<String> exportObservabilityMetrics(
+            @Parameter(description = "Export format (csv or json)")
+            @RequestParam(defaultValue = "json") String format,
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        ObservabilityMetricsResponse metrics = observabilityService.getObservabilityMetrics(fromDateTime, toDateTime, effectiveOrgId);
+
+        if ("csv".equalsIgnoreCase(format)) {
+            String csv = convertMetricsToCsv(metrics);
+            return ResponseEntity.ok()
+                    .header("Content-Type", "text/csv")
+                    .header("Content-Disposition", "attachment; filename=\"observability-metrics.csv\"")
+                    .body(csv);
+        } else {
+            return ResponseEntity.ok()
+                    .header("Content-Type", "application/json")
+                    .header("Content-Disposition", "attachment; filename=\"observability-metrics.json\"")
+                    .body(convertMetricsToJson(metrics));
+        }
+    }
+
+    private String convertMetricsToCsv(ObservabilityMetricsResponse metrics) {
+        StringBuilder csv = new StringBuilder();
+        
+        csv.append("Metric Type,Channel/Category,Metric Name,Value\n");
+        
+        if (metrics.getQueueMetrics() != null) {
+            metrics.getQueueMetrics().getQueueDepthByChannel().forEach((channel, depth) ->
+                csv.append("Queue,").append(channel).append(",Depth,").append(depth).append("\n")
+            );
+            csv.append("Queue,Total,Total Queued,").append(metrics.getQueueMetrics().getTotalQueued()).append("\n");
+        }
+        
+        if (metrics.getLatencyMetrics() != null) {
+            metrics.getLatencyMetrics().getLatencyByChannel().forEach((channel, percentiles) -> {
+                csv.append("Latency,").append(channel).append(",P50,").append(percentiles.getP50()).append("\n");
+                csv.append("Latency,").append(channel).append(",P95,").append(percentiles.getP95()).append("\n");
+                csv.append("Latency,").append(channel).append(",P99,").append(percentiles.getP99()).append("\n");
+                csv.append("Latency,").append(channel).append(",Average,").append(percentiles.getAverage()).append("\n");
+            });
+        }
+        
+        if (metrics.getFailureMetrics() != null) {
+            metrics.getFailureMetrics().getFailuresByChannel().forEach((channel, count) ->
+                csv.append("Failure,").append(channel).append(",Count,").append(count).append("\n")
+            );
+            csv.append("Failure,Overall,Failure Rate %,").append(metrics.getFailureMetrics().getOverallFailureRate()).append("\n");
+            
+            metrics.getFailureMetrics().getFailuresByErrorCode().forEach((errorCode, count) ->
+                csv.append("Failure,").append(errorCode).append(",Count,").append(count).append("\n")
+            );
+        }
+        
+        if (metrics.getDlqMetrics() != null) {
+            csv.append("DLQ,Total,Size,").append(metrics.getDlqMetrics().getDlqSize()).append("\n");
+            csv.append("DLQ,Alert,Threshold Exceeded,").append(metrics.getDlqMetrics().getAlertThresholdExceeded()).append("\n");
+            
+            metrics.getDlqMetrics().getDlqSizeByChannel().forEach((channel, size) ->
+                csv.append("DLQ,").append(channel).append(",Size,").append(size).append("\n")
+            );
+        }
+        
+        if (metrics.getQuotaMetrics() != null) {
+            metrics.getQuotaMetrics().getQuotaByChannel().forEach((channel, usage) -> {
+                csv.append("Quota,").append(channel).append(",Used,").append(usage.getUsed()).append("\n");
+                csv.append("Quota,").append(channel).append(",Limit,").append(usage.getLimit()).append("\n");
+                csv.append("Quota,").append(channel).append(",Usage %,").append(usage.getUsagePercentage()).append("\n");
+            });
+        }
+        
+        return csv.toString();
+    }
+
+    private String convertMetricsToJson(ObservabilityMetricsResponse metrics) {
+        try {
+            return new com.fasterxml.jackson.databind.ObjectMapper()
+                    .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule())
+                    .writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(metrics);
+        } catch (Exception e) {
+            return "{\"error\": \"Failed to serialize metrics\"}";
+        }
     }
 }

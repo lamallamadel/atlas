@@ -28,6 +28,14 @@ spring:
         jwt:
           issuer-uri: mock
 
+keycloak:
+  admin:
+    server-url: http://localhost:8081
+    realm: test-realm
+    client-id: admin-cli
+    username: test-admin
+    password: test-password
+
   output:
     ansi:
       enabled: ALWAYS
@@ -55,3 +63,11 @@ management:
       enabled: false
     mail:
       enabled: false
+
+storage:
+  strategy: localFileStorage
+  local:
+    base-path: ./test-storage
+
+rate-limit:
+  enabled: false

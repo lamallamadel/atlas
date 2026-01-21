@@ -185,7 +185,7 @@ public class GlobalExceptionHandler {
             WorkflowValidationException ex, HttpServletRequest request) {
         ProblemDetail problemDetail = new ProblemDetail(
                 "about:blank",
-                "Bad Request",
+                "Workflow Validation Failed",
                 HttpStatus.BAD_REQUEST.value(),
                 ex.getMessage(),
                 request.getRequestURI()
@@ -193,6 +193,19 @@ public class GlobalExceptionHandler {
 
         if (ex.getValidationErrors() != null) {
             problemDetail.addProperty("validationErrors", ex.getValidationErrors());
+            
+            Map<String, Object> errors = ex.getValidationErrors();
+            if (errors.containsKey("missingRequiredFields")) {
+                problemDetail.addProperty("errorType", "MISSING_REQUIRED_FIELDS");
+            } else if (errors.containsKey("roleAuthorizationError")) {
+                problemDetail.addProperty("errorType", "ROLE_AUTHORIZATION_FAILED");
+            } else if (errors.containsKey("preConditionError")) {
+                problemDetail.addProperty("errorType", "PRE_CONDITION_NOT_MET");
+            } else if (errors.containsKey("failedConditions")) {
+                problemDetail.addProperty("errorType", "CUSTOM_CONDITION_FAILED");
+            } else if (errors.containsKey("transition")) {
+                problemDetail.addProperty("errorType", "INVALID_TRANSITION");
+            }
         }
 
         return ResponseEntity
@@ -231,6 +244,23 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
+                .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
+                .body(problemDetail);
+    }
+
+    @ExceptionHandler(FileValidationException.class)
+    public ResponseEntity<ProblemDetail> handleFileValidationException(
+            FileValidationException ex, HttpServletRequest request) {
+        ProblemDetail problemDetail = new ProblemDetail(
+                "about:blank",
+                "Bad Request",
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }

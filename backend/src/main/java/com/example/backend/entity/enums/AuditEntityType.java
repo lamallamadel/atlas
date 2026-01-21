@@ -11,7 +11,10 @@ public enum AuditEntityType {
     ORGANIZATION("organization"),
     NOTIFICATION("notification"),
     ACTIVITY("activity"),
-    OUTBOUND_MESSAGE("outbound_message");
+    OUTBOUND_MESSAGE("outbound_message"),
+    TASK("task"),
+    WHATSAPP_TEMPLATE("whatsapp_template"),
+    REFERENTIAL("referential");
     private final String value;
 
     AuditEntityType(String value) {

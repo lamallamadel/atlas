@@ -6,11 +6,14 @@ import com.example.backend.dto.ConsentementResponse;
 import com.example.backend.dto.ConsentementUpdateRequest;
 import com.example.backend.entity.ConsentementEntity;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -27,17 +30,22 @@ import java.util.stream.Collectors;
 @Service
 public class ConsentementService {
 
+    private static final Logger logger = LoggerFactory.getLogger(ConsentementService.class);
+
     private final ConsentementRepository consentementRepository;
     private final DossierRepository dossierRepository;
     private final ConsentementMapper consentementMapper;
+    private final ActivityService activityService;
 
     public ConsentementService(
             ConsentementRepository consentementRepository,
             DossierRepository dossierRepository,
-            ConsentementMapper consentementMapper) {
+            ConsentementMapper consentementMapper,
+            ActivityService activityService) {
         this.consentementRepository = consentementRepository;
         this.dossierRepository = dossierRepository;
         this.consentementMapper = consentementMapper;
+        this.activityService = activityService;
     }
 
     @Transactional
@@ -69,6 +77,11 @@ public class ConsentementService {
         consentement.setMeta(meta);
 
         ConsentementEntity saved = consentementRepository.save(consentement);
+        
+        if (saved.getStatus() == ConsentementStatus.GRANTED) {
+            logConsentGrantedActivity(saved);
+        }
+        
         return consentementMapper.toResponse(saved);
     }
 
@@ -102,6 +115,13 @@ public class ConsentementService {
 
         consentement.setUpdatedAt(LocalDateTime.now());
         ConsentementEntity updated = consentementRepository.save(consentement);
+        
+        if (previousStatus != ConsentementStatus.GRANTED && updated.getStatus() == ConsentementStatus.GRANTED) {
+            logConsentGrantedActivity(updated);
+        } else if (previousStatus == ConsentementStatus.GRANTED && updated.getStatus() == ConsentementStatus.REVOKED) {
+            logConsentRevokedActivity(updated, previousStatus);
+        }
+        
         return consentementMapper.toResponse(updated);
     }
 
@@ -193,5 +213,64 @@ public class ConsentementService {
         }
 
         return consentements.map(consentementMapper::toResponse);
+    }
+
+    private void logConsentGrantedActivity(ConsentementEntity consentement) {
+        if (activityService != null && consentement.getDossier() != null) {
+            try {
+                String description = String.format("Consent granted for %s via %s", 
+                    consentement.getConsentType(), consentement.getChannel());
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("consentementId", consentement.getId());
+                metadata.put("channel", consentement.getChannel().name());
+                metadata.put("consentType", consentement.getConsentType().name());
+                metadata.put("status", consentement.getStatus().name());
+                if (consentement.getMeta() != null) {
+                    metadata.put("consentMeta", consentement.getMeta());
+                }
+                metadata.put("timestamp", LocalDateTime.now().toString());
+                
+                activityService.logActivity(
+                    consentement.getDossier().getId(),
+                    ActivityType.CONSENT_GRANTED,
+                    description,
+                    metadata
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log CONSENT_GRANTED activity for consentement {}: {}", 
+                    consentement.getId(), e.getMessage(), e);
+            }
+        }
+    }
+
+    private void logConsentRevokedActivity(ConsentementEntity consentement, ConsentementStatus previousStatus) {
+        if (activityService != null && consentement.getDossier() != null) {
+            try {
+                String description = String.format("Consent revoked for %s via %s", 
+                    consentement.getConsentType(), consentement.getChannel());
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("consentementId", consentement.getId());
+                metadata.put("channel", consentement.getChannel().name());
+                metadata.put("consentType", consentement.getConsentType().name());
+                metadata.put("status", consentement.getStatus().name());
+                metadata.put("previousStatus", previousStatus.name());
+                if (consentement.getMeta() != null) {
+                    metadata.put("consentMeta", consentement.getMeta());
+                }
+                metadata.put("timestamp", LocalDateTime.now().toString());
+                
+                activityService.logActivity(
+                    consentement.getDossier().getId(),
+                    ActivityType.CONSENT_REVOKED,
+                    description,
+                    metadata
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log CONSENT_REVOKED activity for consentement {}: {}", 
+                    consentement.getId(), e.getMessage(), e);
+            }
+        }
     }
 }

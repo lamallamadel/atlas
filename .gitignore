@@ -85,6 +85,17 @@ Desktop.ini
 *.sqlite
 *.db
 
+# Redis
+dump.rdb
+appendonly.aof
+*.rdb
+redis-data/
+
+# File storage
+storage/
+test-storage/
+*.uploaded
+
 # Testing
 coverage/
 *.cover

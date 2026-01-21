@@ -1,0 +1,206 @@
+<div class="observability-dashboard">
+  <div class="dashboard-header">
+    <h1>Outbound Message Observability Dashboard</h1>
+    <div class="header-actions">
+      <div class="date-range">
+        <label for="dateFrom">From:</label>
+        <input id="dateFrom" type="date" [(ngModel)]="dateFrom" (change)="onDateChange()" />
+        <label for="dateTo">To:</label>
+        <input id="dateTo" type="date" [(ngModel)]="dateTo" (change)="onDateChange()" />
+      </div>
+      <button class="refresh-btn" (click)="toggleAutoRefresh()" [class.active]="autoRefresh">
+        <span class="material-icons">{{ autoRefresh ? 'pause' : 'play_arrow' }}</span>
+        Auto-refresh
+      </button>
+      <button class="export-btn" (click)="exportMetrics('csv')">
+        <span class="material-icons">download</span>
+        Export CSV
+      </button>
+      <button class="export-btn" (click)="exportMetrics('json')">
+        <span class="material-icons">download</span>
+        Export JSON
+      </button>
+    </div>
+  </div>
+
+  <div class="last-updated" *ngIf="lastUpdated">
+    Last updated: {{ lastUpdated | date:'medium' }}
+  </div>
+
+  <div class="error-message" *ngIf="error">
+    <span class="material-icons">error</span>
+    {{ error }}
+  </div>
+
+  <div class="loading-spinner" *ngIf="loading">
+    <span class="material-icons rotating">refresh</span>
+    Loading metrics...
+  </div>
+
+  <div class="metrics-container" *ngIf="metrics && !loading">
+    <!-- Queue Metrics -->
+    <div class="metrics-section">
+      <h2>Queue Depth by Channel</h2>
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="card-icon queue-icon">
+            <span class="material-icons">inbox</span>
+          </div>
+          <div class="card-content">
+            <div class="card-value">{{ metrics.queueMetrics.totalQueued }}</div>
+            <div class="card-label">Total Queued</div>
+          </div>
+        </div>
+        <div class="summary-card" *ngFor="let channel of getChannelNames()">
+          <div class="card-content">
+            <div class="card-value">{{ getQueueDepth(channel) }}</div>
+            <div class="card-label">{{ channel }}</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="queueChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Latency Metrics -->
+    <div class="metrics-section">
+      <h2>Delivery Latency Percentiles</h2>
+      <div class="latency-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Channel</th>
+              <th>P50 (ms)</th>
+              <th>P95 (ms)</th>
+              <th>P99 (ms)</th>
+              <th>Average (ms)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let channel of getChannelNames()">
+              <td>{{ channel }}</td>
+              <td>{{ getLatency(channel)?.p50 | number:'1.2-2' }}</td>
+              <td>{{ getLatency(channel)?.p95 | number:'1.2-2' }}</td>
+              <td>{{ getLatency(channel)?.p99 | number:'1.2-2' }}</td>
+              <td>{{ getLatency(channel)?.average | number:'1.2-2' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="chart-container">
+        <canvas id="latencyChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Failure Metrics -->
+    <div class="metrics-section">
+      <h2>Failure Rate & Error Analysis</h2>
+      <div class="summary-cards">
+        <div class="summary-card failure-card">
+          <div class="card-icon failure-icon">
+            <span class="material-icons">error_outline</span>
+          </div>
+          <div class="card-content">
+            <div class="card-value">{{ metrics.failureMetrics.overallFailureRate | number:'1.2-2' }}%</div>
+            <div class="card-label">Overall Failure Rate</div>
+          </div>
+        </div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-container">
+          <h3>Failures by Channel</h3>
+          <canvas id="failureChart"></canvas>
+        </div>
+        <div class="chart-container">
+          <h3>Failure Trend</h3>
+          <canvas id="failureTrendChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>Error Code Breakdown</h3>
+        <canvas id="errorCodeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- DLQ Metrics -->
+    <div class="metrics-section dlq-section" [class.alert]="metrics.dlqMetrics.alertThresholdExceeded">
+      <h2>Dead Letter Queue (DLQ) Monitoring</h2>
+      <div class="alert-banner" *ngIf="metrics.dlqMetrics.alertThresholdExceeded">
+        <span class="material-icons">warning</span>
+        DLQ size has exceeded alert threshold ({{ metrics.dlqMetrics.alertThreshold }})!
+      </div>
+      <div class="summary-cards">
+        <div class="summary-card dlq-card">
+          <div class="card-icon dlq-icon">
+            <span class="material-icons">report_problem</span>
+          </div>
+          <div class="card-content">
+            <div class="card-value">{{ metrics.dlqMetrics.dlqSize }}</div>
+            <div class="card-label">Total DLQ Messages</div>
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h3>DLQ Size by Channel</h3>
+        <canvas id="dlqChart"></canvas>
+      </div>
+      <div class="dlq-messages">
+        <h3>Recent DLQ Messages</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Message ID</th>
+              <th>Channel</th>
+              <th>Error Code</th>
+              <th>Error Message</th>
+              <th>Attempts</th>
+              <th>Last Attempt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let msg of metrics.dlqMetrics.recentDlqMessages">
+              <td>{{ msg.messageId }}</td>
+              <td>{{ msg.channel }}</td>
+              <td>{{ msg.errorCode }}</td>
+              <td class="error-text">{{ msg.errorMessage }}</td>
+              <td>{{ msg.attemptCount }}</td>
+              <td>{{ msg.lastAttemptAt | date:'short' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Quota Metrics -->
+    <div class="metrics-section">
+      <h2>Provider Quota Consumption</h2>
+      <div class="quota-cards">
+        <div class="quota-card" *ngFor="let channel of getChannelNames()" 
+             [ngClass]="getQuotaStatusClass(getQuotaUsage(channel)?.usagePercentage)">
+          <div class="quota-header">
+            <h3>{{ channel }}</h3>
+            <div class="quota-percentage">
+              {{ getQuotaUsage(channel)?.usagePercentage | number:'1.0-0' }}%
+            </div>
+          </div>
+          <div class="quota-bar">
+            <div class="quota-fill" 
+                 [style.width.%]="getQuotaUsage(channel)?.usagePercentage">
+            </div>
+          </div>
+          <div class="quota-details">
+            <span>Used: {{ getQuotaUsage(channel)?.used }}</span>
+            <span>Limit: {{ getQuotaUsage(channel)?.limit }}</span>
+          </div>
+          <div class="quota-period">
+            Period: {{ getQuotaUsage(channel)?.period }}
+          </div>
+        </div>
+      </div>
+      <div class="chart-container">
+        <canvas id="quotaChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>

@@ -33,6 +33,7 @@ import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
+import { MatRadioModule } from '@angular/material/radio';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -85,6 +86,20 @@ import { WhatsappThreadComponent } from './components/whatsapp-thread.component'
 import { WhatsappMessageInputComponent } from './components/whatsapp-message-input.component';
 import { TemplateSelectionSheetComponent } from './components/template-selection-sheet.component';
 import { WhatsappMessagingContainerComponent } from './components/whatsapp-messaging-container.component';
+import { MessagingTabComponent } from './pages/dossiers/messaging-tab.component';
+import { OutboundMessageListComponent } from './pages/dossiers/outbound-message-list.component';
+import { OutboundMessageFormComponent } from './pages/dossiers/outbound-message-form.component';
+import { DocumentListComponent } from './components/document-list.component';
+import { DocumentUploadComponent } from './components/document-upload.component';
+import { DocumentPreviewDialogComponent } from './components/document-preview-dialog.component';
+import { LeadImportDialogComponent } from './components/lead-import-dialog.component';
+import { LeadExportDialogComponent } from './components/lead-export-dialog.component';
+import { TaskListComponent } from './components/task-list.component';
+import { TaskCardComponent } from './components/task-card.component';
+import { TaskFormDialogComponent } from './components/task-form-dialog.component';
+import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
+import { WhatsappMessagingUiComponent } from './components/whatsapp-messaging-ui.component';
+import { FullCalendarModule } from '@fullcalendar/angular';
 
 registerLocaleData(localeFr);
 
@@ -133,7 +148,20 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     WhatsappThreadComponent,
     WhatsappMessageInputComponent,
     TemplateSelectionSheetComponent,
-    WhatsappMessagingContainerComponent
+    WhatsappMessagingContainerComponent,
+    MessagingTabComponent,
+    OutboundMessageListComponent,
+    OutboundMessageFormComponent,
+    DocumentListComponent,
+    DocumentUploadComponent,
+    DocumentPreviewDialogComponent,
+    LeadImportDialogComponent,
+    LeadExportDialogComponent,
+    TaskListComponent,
+    TaskCardComponent,
+    TaskFormDialogComponent,
+    ObservabilityDashboardComponent,
+    WhatsappMessagingUiComponent
   ],
   imports: [
     BrowserModule,
@@ -172,11 +200,13 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatButtonToggleModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatRadioModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,
     TextFieldModule,
-    NgChartsModule
+    NgChartsModule,
+    FullCalendarModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },

@@ -1,0 +1,107 @@
+<div class="lead-export-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon class="title-icon">download</mat-icon>
+    Exporter des prospects
+  </h2>
+
+  <mat-dialog-content>
+    <div class="export-section">
+      <!-- Column Selection -->
+      <div class="columns-section">
+        <div class="section-header">
+          <h3 class="section-title">Colonnes à exporter</h3>
+          <div class="column-actions">
+            <button mat-button (click)="selectAllColumns()" class="action-btn">
+              <mat-icon>check_box</mat-icon>
+              Tout sélectionner
+            </button>
+            <button mat-button (click)="deselectAllColumns()" class="action-btn">
+              <mat-icon>check_box_outline_blank</mat-icon>
+              Tout désélectionner
+            </button>
+          </div>
+        </div>
+        
+        <div class="columns-grid">
+          <mat-checkbox 
+            *ngFor="let column of columns"
+            [(ngModel)]="column.selected"
+            class="column-checkbox">
+            {{ column.label }}
+          </mat-checkbox>
+        </div>
+
+        <div class="selection-info">
+          <mat-icon class="info-icon">info</mat-icon>
+          <span>{{ getSelectedColumnsCount() }} colonne(s) sélectionnée(s)</span>
+        </div>
+      </div>
+
+      <mat-divider></mat-divider>
+
+      <!-- Filters -->
+      <div class="filters-section">
+        <h3 class="section-title">Filtres (optionnel)</h3>
+        
+        <div class="filter-grid">
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Statut</mat-label>
+            <mat-select [(ngModel)]="statusFilter">
+              <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Source</mat-label>
+            <input matInput [(ngModel)]="sourceFilter" placeholder="Ex: WEB, PHONE">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Date de début</mat-label>
+            <input 
+              matInput 
+              type="date" 
+              [(ngModel)]="dateFrom"
+              [max]="dateTo || null">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Date de fin</mat-label>
+            <input 
+              matInput 
+              type="date" 
+              [(ngModel)]="dateTo"
+              [min]="dateFrom || null">
+          </mat-form-field>
+        </div>
+
+        <div class="filter-info">
+          <mat-icon class="info-icon">info</mat-icon>
+          <span>Les filtres sont appliqués uniquement si renseignés</span>
+        </div>
+      </div>
+
+      <!-- Export Progress -->
+      <div class="export-progress" *ngIf="isExporting">
+        <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
+        <p class="progress-text">Préparation de l'export en cours...</p>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="close()" [disabled]="isExporting">
+      Annuler
+    </button>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      (click)="exportLeads()"
+      [disabled]="!canExport()">
+      <mat-icon>download</mat-icon>
+      Exporter {{ getSelectedColumnsCount() > 0 ? '(' + getSelectedColumnsCount() + ' colonnes)' : '' }}
+    </button>
+  </mat-dialog-actions>
+</div>

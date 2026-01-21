@@ -17,6 +17,8 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,13 +43,15 @@ public class DossierService {
     private final WorkflowValidationService workflowValidationService;
     private final PartiePrenanteService partiePrenanteService;
     private final jakarta.persistence.EntityManager entityManager;
+    private final DossierStatusCodeValidationService statusCodeValidationService;
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
                          SearchService searchService, MetricsService metricsService,
                          WorkflowValidationService workflowValidationService,
                          PartiePrenanteService partiePrenanteService,
-                         jakarta.persistence.EntityManager entityManager) {
+                         jakarta.persistence.EntityManager entityManager,
+                         DossierStatusCodeValidationService statusCodeValidationService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
@@ -57,6 +61,7 @@ public class DossierService {
         this.workflowValidationService = workflowValidationService;
         this.partiePrenanteService = partiePrenanteService;
         this.entityManager = entityManager;
+        this.statusCodeValidationService = statusCodeValidationService;
     }
 
     @Transactional
@@ -86,6 +91,11 @@ public class DossierService {
         Dossier dossier = dossierMapper.toEntityWithoutParties(request);
         dossier.setOrgId(orgId);
 
+        statusCodeValidationService.validateCaseType(dossier.getCaseType());
+        statusCodeValidationService.validateStatusCodeForCaseType(
+                dossier.getCaseType(), 
+                dossier.getStatusCode());
+
         LocalDateTime now = LocalDateTime.now();
         dossier.setCreatedAt(now);
         dossier.setUpdatedAt(now);
@@ -106,9 +116,7 @@ public class DossierService {
             
             partiePrenanteService.create(partyRequest);
             
-            // Flush to ensure the party is persisted and visible in the next query
             entityManager.flush();
-            // Clear the persistence context to force a fresh fetch from database
             entityManager.clear();
             
             final Long savedId = saved.getId();
@@ -127,6 +135,7 @@ public class DossierService {
         return dossierMapper.toResponse(saved);
     }
 
+    @Cacheable(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional(readOnly = true)
     public DossierResponse getById(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -134,7 +143,7 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(id)
+        Dossier dossier = dossierRepository.findByIdWithRelations(id)
                 .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
@@ -167,6 +176,7 @@ public class DossierService {
         return dossiers.map(dossierMapper::toResponse);
     }
 
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public DossierResponse patchStatus(Long id, DossierStatusPatchRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -184,16 +194,8 @@ public class DossierService {
         DossierStatus currentStatus = dossier.getStatus();
         DossierStatus newStatus = request.getStatus();
 
-        // Step 1: Basic transition validation - always enforced regardless of caseType
-        // Validates terminal states (WON, LOST cannot transition) and basic allowed transitions
-        // For example: NEW can go to QUALIFYING, QUALIFIED, APPOINTMENT, or LOST
         transitionService.validateTransition(currentStatus, newStatus);
 
-        // Step 2: Workflow validation - only when caseType is set
-        // When caseType is null or blank, workflow validation is bypassed, allowing flexible transitions
-        // that only need to satisfy the basic transition rules above.
-        // When caseType is set (e.g., "SALE", "RENTAL"), custom workflow rules are enforced,
-        // which may require additional fields or impose stricter transition constraints.
         if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
             workflowValidationService.validateAndRecordTransition(
                     dossier, 
@@ -206,8 +208,15 @@ public class DossierService {
         dossier.setStatus(newStatus);
         
         if (request.getStatusCode() != null) {
+            statusCodeValidationService.validateStatusCodeForCaseType(
+                    dossier.getCaseType(), 
+                    request.getStatusCode());
             dossier.setStatusCode(request.getStatusCode());
+        } else {
+            String derivedStatusCode = statusCodeValidationService.deriveStatusCodeFromEnumStatus(newStatus);
+            dossier.setStatusCode(derivedStatusCode);
         }
+        
         if (request.getLossReason() != null) {
             dossier.setLossReason(request.getLossReason());
         }
@@ -225,6 +234,7 @@ public class DossierService {
         return dossierMapper.toResponse(updated);
     }
 
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public DossierResponse patchLead(Long id, DossierLeadPatchRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -294,10 +304,8 @@ public class DossierService {
                 DossierStatus currentStatus = dossier.getStatus();
                 DossierStatus newStatus = request.getStatus();
 
-                // Basic transition validation - always enforced
                 transitionService.validateTransition(currentStatus, newStatus);
 
-                // Workflow validation - only when caseType is set (bypassed when null)
                 if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
                     workflowValidationService.validateAndRecordTransition(
                             dossier, 
@@ -325,6 +333,7 @@ public class DossierService {
         return new BulkOperationResponse(successCount, failureCount, errors);
     }
 
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public void delete(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -341,5 +350,44 @@ public class DossierService {
 
         dossierRepository.delete(dossier);
         searchService.deleteDossierIndex(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Dossier findEntityById(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findByIdWithRelations(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + id);
+        }
+
+        return dossier;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Dossier> findAll(DossierStatus status, String leadPhone, Long annonceId, Pageable pageable) {
+        Specification<Dossier> spec = Specification.where(null);
+
+        if (status != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("status"), status));
+        }
+
+        if (leadPhone != null && !leadPhone.trim().isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("leadPhone"), leadPhone));
+        }
+
+        if (annonceId != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("annonceId"), annonceId));
+        }
+
+        return dossierRepository.findAll(spec, pageable);
     }
 }

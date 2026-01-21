@@ -13,6 +13,14 @@ spring:
         jwt:
           issuer-uri: mock
 
+keycloak:
+  admin:
+    server-url: http://localhost:8081
+    realm: test-realm
+    client-id: admin-cli
+    username: test-admin
+    password: test-password
+
   task:
     scheduling:
       enabled: false
@@ -40,3 +48,6 @@ logging:
 # This is intentionally broad for test scope only.
 cors:
   allowed-origins: "*"
+
+rate-limit:
+  enabled: false

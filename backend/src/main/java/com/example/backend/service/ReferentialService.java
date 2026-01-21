@@ -1,8 +1,10 @@
 package com.example.backend.service;
 
 import com.example.backend.entity.ReferentialEntity;
+import com.example.backend.entity.ReferentialVersionEntity;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ReferentialRepository;
+import com.example.backend.repository.ReferentialVersionRepository;
 import com.example.backend.util.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,9 +15,12 @@ import java.util.List;
 public class ReferentialService {
 
     private final ReferentialRepository referentialRepository;
+    private final ReferentialVersionRepository versionRepository;
 
-    public ReferentialService(ReferentialRepository referentialRepository) {
+    public ReferentialService(ReferentialRepository referentialRepository,
+                             ReferentialVersionRepository versionRepository) {
         this.referentialRepository = referentialRepository;
+        this.versionRepository = versionRepository;
     }
 
     @Transactional(readOnly = true)
@@ -55,32 +60,69 @@ public class ReferentialService {
         }
 
         entity.setOrgId(orgId);
-        return referentialRepository.save(entity);
+        entity.setVersion(1L);
+        entity.setLastChangeType("CREATED");
+        
+        ReferentialEntity saved = referentialRepository.save(entity);
+        
+        createVersion(saved, ReferentialVersionEntity.ReferentialChangeType.CREATED, null);
+        
+        return saved;
     }
 
     @Transactional
     public ReferentialEntity update(Long id, ReferentialEntity updatedEntity) {
+        return update(id, updatedEntity, null);
+    }
+
+    @Transactional
+    public ReferentialEntity update(Long id, ReferentialEntity updatedEntity, String changeReason) {
         ReferentialEntity existing = getById(id);
 
         if (existing.getIsSystem()) {
             throw new IllegalStateException("Cannot modify system-defined referential items");
         }
 
+        boolean activeChanged = !existing.getIsActive().equals(updatedEntity.getIsActive());
+        
         existing.setLabel(updatedEntity.getLabel());
         existing.setDescription(updatedEntity.getDescription());
         existing.setDisplayOrder(updatedEntity.getDisplayOrder());
         existing.setIsActive(updatedEntity.getIsActive());
-
-        return referentialRepository.save(existing);
+        existing.setVersion(existing.getVersion() + 1);
+        
+        ReferentialVersionEntity.ReferentialChangeType changeType;
+        if (activeChanged) {
+            changeType = updatedEntity.getIsActive() 
+                ? ReferentialVersionEntity.ReferentialChangeType.ACTIVATED 
+                : ReferentialVersionEntity.ReferentialChangeType.DEACTIVATED;
+        } else {
+            changeType = ReferentialVersionEntity.ReferentialChangeType.UPDATED;
+        }
+        
+        existing.setLastChangeType(changeType.name());
+        
+        ReferentialEntity saved = referentialRepository.save(existing);
+        
+        createVersion(saved, changeType, changeReason);
+        
+        return saved;
     }
 
     @Transactional
     public void delete(Long id) {
+        delete(id, null);
+    }
+
+    @Transactional
+    public void delete(Long id, String changeReason) {
         ReferentialEntity existing = getById(id);
 
         if (existing.getIsSystem()) {
             throw new IllegalStateException("Cannot delete system-defined referential items");
         }
+
+        createVersion(existing, ReferentialVersionEntity.ReferentialChangeType.DELETED, changeReason);
 
         referentialRepository.delete(existing);
     }
@@ -88,5 +130,32 @@ public class ReferentialService {
     @Transactional(readOnly = true)
     public boolean exists(String category, String code) {
         return referentialRepository.existsByCategoryAndCode(category, code);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReferentialVersionEntity> getVersionHistory(Long referentialId) {
+        return versionRepository.findByReferentialIdOrderByCreatedAtDesc(referentialId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReferentialVersionEntity> getCategoryVersionHistory(String category) {
+        return versionRepository.findByCategoryOrderByCreatedAtDesc(category);
+    }
+
+    private void createVersion(ReferentialEntity entity, ReferentialVersionEntity.ReferentialChangeType changeType, String changeReason) {
+        ReferentialVersionEntity version = new ReferentialVersionEntity();
+        version.setOrgId(entity.getOrgId());
+        version.setReferentialId(entity.getId());
+        version.setCategory(entity.getCategory());
+        version.setCode(entity.getCode());
+        version.setLabel(entity.getLabel());
+        version.setDescription(entity.getDescription());
+        version.setDisplayOrder(entity.getDisplayOrder());
+        version.setIsActive(entity.getIsActive());
+        version.setIsSystem(entity.getIsSystem());
+        version.setChangeType(changeType);
+        version.setChangeReason(changeReason);
+        
+        versionRepository.save(version);
     }
 }

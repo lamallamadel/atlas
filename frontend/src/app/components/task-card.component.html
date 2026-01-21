@@ -1,0 +1,53 @@
+<mat-card class="task-card" [class.overdue]="isOverdue" [class.completed]="task.status === TaskStatus.COMPLETED">
+  <mat-card-header>
+    <div class="task-header">
+      <mat-checkbox
+        [checked]="task.status === TaskStatus.COMPLETED"
+        (change)="onCheckboxChange($event)"
+        [disabled]="false"
+        color="primary">
+      </mat-checkbox>
+      <span class="task-title" [class.completed-text]="task.status === TaskStatus.COMPLETED">
+        {{ task.title }}
+      </span>
+      <span class="priority-badge" [class]="'priority-' + priorityColor">
+        {{ priorityLabel }}
+      </span>
+    </div>
+  </mat-card-header>
+  
+  <mat-card-content>
+    <p class="task-description" *ngIf="task.description">
+      {{ task.description }}
+    </p>
+    
+    <div class="task-meta">
+      <div class="meta-item" *ngIf="task.assignedToName">
+        <mat-icon>person</mat-icon>
+        <span>{{ task.assignedToName }}</span>
+      </div>
+      
+      <div class="meta-item due-date" [class.overdue-text]="isOverdue" [class.approaching-text]="isApproaching">
+        <mat-icon>event</mat-icon>
+        <span>{{ dueDateLabel }}</span>
+        <mat-icon class="warning-icon" *ngIf="isApproaching && !isOverdue">warning</mat-icon>
+      </div>
+      
+      <div class="meta-item" *ngIf="task.completedAt">
+        <mat-icon>check_circle</mat-icon>
+        <span>Completed {{ task.completedAt | date:'short':'':'fr-FR' }}</span>
+      </div>
+    </div>
+  </mat-card-content>
+  
+  <mat-card-actions>
+    <button mat-button (click)="onEdit()">
+      <mat-icon>edit</mat-icon>
+      Edit
+    </button>
+    <button mat-button color="warn" (click)="onDelete()">
+      <mat-icon>delete</mat-icon>
+      Delete
+    </button>
+  </mat-card-actions>
+</mat-card>

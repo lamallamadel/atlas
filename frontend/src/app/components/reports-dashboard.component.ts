@@ -1,6 +1,19 @@
-import { Component, OnInit } from '@angular/core';
-import { ReportingApiService, KpiReportResponse, PipelineSummaryResponse } from '../services/reporting-api.service';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Router } from '@angular/router';
+import { 
+  ReportingApiService, 
+  KpiReportResponse, 
+  PipelineSummaryResponse,
+  AnalyticsData,
+  AgentPerformance,
+  RevenueForecast,
+  LeadSourceData,
+  ConversionFunnel
+} from '../services/reporting-api.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
+import * as Papa from 'papaparse';
 
 @Component({
   selector: 'app-reports-dashboard',
@@ -8,48 +21,25 @@ import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
   styleUrls: ['./reports-dashboard.component.css']
 })
 export class ReportsDashboardComponent implements OnInit {
+  @ViewChild('conversionFunnelCanvas') conversionFunnelCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('agentPerformanceCanvas') agentPerformanceCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('revenueForecastCanvas') revenueForecastCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('leadSourceCanvas') leadSourceCanvas!: ElementRef<HTMLCanvasElement>;
+
   kpiReport: KpiReportResponse | null = null;
   pipelineSummary: PipelineSummaryResponse | null = null;
+  analyticsData: AnalyticsData | null = null;
   loading = true;
   error: string | null = null;
 
   dateFrom = '';
   dateTo = '';
 
-  conversionBySourceChartData: ChartData<'bar'> = {
+  conversionFunnelChartData: ChartData<'bar'> = {
     labels: [],
     datasets: []
   };
-  conversionBySourceChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top'
-      },
-      title: {
-        display: true,
-        text: 'Conversion Rate by Source'
-      }
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-        title: {
-          display: true,
-          text: 'Conversion Rate (%)'
-        }
-      }
-    }
-  };
-  conversionBySourceChartType: ChartType = 'bar';
-
-  pipelineFunnelChartData: ChartData<'bar'> = {
-    labels: [],
-    datasets: []
-  };
-  pipelineFunnelChartOptions: ChartConfiguration['options'] = {
+  conversionFunnelChartOptions: ChartConfiguration['options'] = {
     indexAxis: 'y',
     responsive: true,
     maintainAspectRatio: false,
@@ -59,7 +49,20 @@ export class ReportsDashboardComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Pipeline Funnel'
+        text: 'Conversion Funnel by Stage',
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = context.parsed.x;
+            return `${label}: ${value}`;
+          }
+        }
       }
     },
     scales: {
@@ -70,15 +73,24 @@ export class ReportsDashboardComponent implements OnInit {
           text: 'Number of Dossiers'
         }
       }
+    },
+    onClick: (_event, elements) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const stage = this.analyticsData?.conversionFunnel[index]?.stage;
+        if (stage) {
+          this.drillDownToStage(stage);
+        }
+      }
     }
   };
-  pipelineFunnelChartType: ChartType = 'bar';
+  conversionFunnelChartType: ChartType = 'bar';
 
-  dossierTimeSeriesChartData: ChartData<'line'> = {
+  agentPerformanceChartData: ChartData<'bar'> = {
     labels: [],
     datasets: []
   };
-  dossierTimeSeriesChartOptions: ChartConfiguration['options'] = {
+  agentPerformanceChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -88,7 +100,15 @@ export class ReportsDashboardComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Dossier Creation Over Time'
+        text: 'Agent Performance Comparison',
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false
       }
     },
     scales: {
@@ -98,22 +118,16 @@ export class ReportsDashboardComponent implements OnInit {
           display: true,
           text: 'Count'
         }
-      },
-      x: {
-        title: {
-          display: true,
-          text: 'Date'
-        }
       }
     }
   };
-  dossierTimeSeriesChartType: ChartType = 'line';
+  agentPerformanceChartType: ChartType = 'bar';
 
-  conversionTimeSeriesChartData: ChartData<'line'> = {
+  revenueForecastChartData: ChartData<'line'> = {
     labels: [],
     datasets: []
   };
-  conversionTimeSeriesChartOptions: ChartConfiguration['options'] = {
+  revenueForecastChartOptions: ChartConfiguration['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -123,7 +137,22 @@ export class ReportsDashboardComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Conversions Over Time'
+        text: 'Revenue Forecast Over Time',
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        callbacks: {
+          label: (context) => {
+            const label = context.dataset.label || '';
+            const value = context.parsed.y;
+            return `${label}: €${(value || 0).toLocaleString()}`;
+          }
+        }
       }
     },
     scales: {
@@ -131,7 +160,10 @@ export class ReportsDashboardComponent implements OnInit {
         beginAtZero: true,
         title: {
           display: true,
-          text: 'Conversions'
+          text: 'Revenue (€)'
+        },
+        ticks: {
+          callback: (value) => '€' + value.toLocaleString()
         }
       },
       x: {
@@ -142,9 +174,56 @@ export class ReportsDashboardComponent implements OnInit {
       }
     }
   };
-  conversionTimeSeriesChartType: ChartType = 'line';
+  revenueForecastChartType: ChartType = 'line';
 
-  constructor(private reportingService: ReportingApiService) { }
+  leadSourceChartData: ChartData<'pie'> = {
+    labels: [],
+    datasets: []
+  };
+  leadSourceChartOptions: ChartConfiguration['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'right'
+      },
+      title: {
+        display: true,
+        text: 'Lead Sources Distribution',
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: (context) => {
+            const label = context.label || '';
+            const value = context.parsed;
+            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${label}: ${value} (${percentage}%)`;
+          }
+        }
+      }
+    },
+    onClick: (_event, elements) => {
+      if (elements.length > 0) {
+        const index = elements[0].index;
+        const source = this.analyticsData?.leadSources[index]?.source;
+        if (source) {
+          this.drillDownToSource(source);
+        }
+      }
+    }
+  };
+  leadSourceChartType: ChartType = 'pie';
+
+  constructor(
+    private reportingService: ReportingApiService,
+    private router: Router
+  ) { }
 
   ngOnInit(): void {
     const today = new Date();
@@ -164,9 +243,6 @@ export class ReportsDashboardComponent implements OnInit {
     this.reportingService.getKpiReport(this.dateFrom, this.dateTo).subscribe({
       next: (data) => {
         this.kpiReport = data;
-        this.updateConversionBySourceChart(data);
-        this.updateDossierTimeSeriesChart(data);
-        this.updateConversionTimeSeriesChart(data);
       },
       error: (err) => {
         this.error = 'Failed to load KPI report';
@@ -178,11 +254,25 @@ export class ReportsDashboardComponent implements OnInit {
     this.reportingService.getPipelineSummary().subscribe({
       next: (data) => {
         this.pipelineSummary = data;
-        this.updatePipelineFunnelChart(data);
-        this.loading = false;
       },
       error: (err) => {
         this.error = 'Failed to load pipeline summary';
+        console.error(err);
+        this.loading = false;
+      }
+    });
+
+    this.reportingService.getAnalyticsData(this.dateFrom, this.dateTo).subscribe({
+      next: (data) => {
+        this.analyticsData = data;
+        this.updateConversionFunnelChart(data.conversionFunnel);
+        this.updateAgentPerformanceChart(data.agentPerformance);
+        this.updateRevenueForecastChart(data.revenueForecast);
+        this.updateLeadSourceChart(data.leadSources);
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Failed to load analytics data';
         console.error(err);
         this.loading = false;
       }
@@ -193,16 +283,11 @@ export class ReportsDashboardComponent implements OnInit {
     this.loadReports();
   }
 
-  /**
-   * Helper used by the Material datepicker inputs.
-   * The reporting API expects dates in ISO format (yyyy-MM-dd).
-   */
   parseDate(value: string): Date | null {
     if (!value) {
       return null;
     }
 
-    // Parse yyyy-MM-dd without timezone surprises.
     const parts = value.split('-').map(v => Number(v));
     if (parts.length !== 3 || parts.some(n => Number.isNaN(n))) {
       const fallback = new Date(value);
@@ -212,92 +297,352 @@ export class ReportsDashboardComponent implements OnInit {
     return new Date(year, month - 1, day);
   }
 
-  private updateConversionBySourceChart(data: KpiReportResponse): void {
-    const sources = data.conversionRateBySource.map(s => s.source);
-    const conversionRates = data.conversionRateBySource.map(s => s.conversionRate);
+  private updateConversionFunnelChart(data: ConversionFunnel[]): void {
+    const stages = data.map(s => s.stage);
+    const counts = data.map(s => s.count);
+    const colors = [
+      'rgba(255, 99, 132, 0.8)',
+      'rgba(54, 162, 235, 0.8)',
+      'rgba(255, 206, 86, 0.8)',
+      'rgba(75, 192, 192, 0.8)',
+      'rgba(153, 102, 255, 0.8)',
+      'rgba(255, 159, 64, 0.8)',
+      'rgba(199, 199, 199, 0.8)'
+    ];
 
-    this.conversionBySourceChartData = {
-      labels: sources,
-      datasets: [
-        {
-          label: 'Conversion Rate (%)',
-          data: conversionRates,
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: 'rgba(54, 162, 235, 1)',
-          borderWidth: 1
-        }
-      ]
-    };
-  }
-
-  private updatePipelineFunnelChart(data: PipelineSummaryResponse): void {
-    const stages = data.stageMetrics.map(s => s.stage);
-    const counts = data.stageMetrics.map(s => s.count);
-
-    this.pipelineFunnelChartData = {
+    this.conversionFunnelChartData = {
       labels: stages,
       datasets: [
         {
           label: 'Dossiers',
           data: counts,
-          backgroundColor: [
-            'rgba(255, 99, 132, 0.6)',
-            'rgba(54, 162, 235, 0.6)',
-            'rgba(255, 206, 86, 0.6)',
-            'rgba(75, 192, 192, 0.6)',
-            'rgba(153, 102, 255, 0.6)',
-            'rgba(255, 159, 64, 0.6)'
-          ],
-          borderColor: [
-            'rgba(255, 99, 132, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)'
-          ],
+          backgroundColor: colors.slice(0, stages.length),
+          borderColor: colors.slice(0, stages.length).map(c => c.replace('0.8', '1')),
           borderWidth: 1
         }
       ]
     };
   }
 
-  private updateDossierTimeSeriesChart(data: KpiReportResponse): void {
-    const dates = data.dossierCreationTimeSeries.map(d => d.date);
-    const values = data.dossierCreationTimeSeries.map(d => d.value);
+  private updateAgentPerformanceChart(data: AgentPerformance[]): void {
+    const agents = data.map(a => a.agentName);
+    const totalDossiers = data.map(a => a.totalDossiers);
+    const closedDossiers = data.map(a => a.closedDossiers);
 
-    this.dossierTimeSeriesChartData = {
-      labels: dates,
+    this.agentPerformanceChartData = {
+      labels: agents,
       datasets: [
         {
-          label: 'Dossiers Created',
-          data: values,
-          fill: false,
+          label: 'Total Dossiers',
+          data: totalDossiers,
+          backgroundColor: 'rgba(54, 162, 235, 0.7)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 1
+        },
+        {
+          label: 'Closed Dossiers',
+          data: closedDossiers,
+          backgroundColor: 'rgba(75, 192, 192, 0.7)',
           borderColor: 'rgba(75, 192, 192, 1)',
-          backgroundColor: 'rgba(75, 192, 192, 0.2)',
-          tension: 0.1
+          borderWidth: 1
         }
       ]
     };
   }
 
-  private updateConversionTimeSeriesChart(data: KpiReportResponse): void {
-    const dates = data.conversionTimeSeries.map(d => d.date);
-    const values = data.conversionTimeSeries.map(d => d.value);
+  private updateRevenueForecastChart(data: RevenueForecast[]): void {
+    const dates = data.map(d => d.date);
+    const estimated = data.map(d => d.estimatedRevenue);
+    const actual = data.map(d => d.actualRevenue);
+    const pipeline = data.map(d => d.pipelineValue);
 
-    this.conversionTimeSeriesChartData = {
+    this.revenueForecastChartData = {
       labels: dates,
       datasets: [
         {
-          label: 'Conversions',
-          data: values,
+          label: 'Estimated Revenue',
+          data: estimated,
+          fill: false,
+          borderColor: 'rgba(255, 206, 86, 1)',
+          backgroundColor: 'rgba(255, 206, 86, 0.2)',
+          tension: 0.4,
+          borderWidth: 2
+        },
+        {
+          label: 'Actual Revenue',
+          data: actual,
+          fill: false,
+          borderColor: 'rgba(75, 192, 192, 1)',
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          tension: 0.4,
+          borderWidth: 2
+        },
+        {
+          label: 'Pipeline Value',
+          data: pipeline,
           fill: false,
           borderColor: 'rgba(153, 102, 255, 1)',
           backgroundColor: 'rgba(153, 102, 255, 0.2)',
-          tension: 0.1
+          tension: 0.4,
+          borderWidth: 2,
+          borderDash: [5, 5]
         }
       ]
     };
+  }
+
+  private updateLeadSourceChart(data: LeadSourceData[]): void {
+    const sources = data.map(s => s.source);
+    const counts = data.map(s => s.count);
+    const colors = [
+      'rgba(255, 99, 132, 0.8)',
+      'rgba(54, 162, 235, 0.8)',
+      'rgba(255, 206, 86, 0.8)',
+      'rgba(75, 192, 192, 0.8)',
+      'rgba(153, 102, 255, 0.8)',
+      'rgba(255, 159, 64, 0.8)',
+      'rgba(199, 199, 199, 0.8)',
+      'rgba(83, 102, 255, 0.8)',
+      'rgba(255, 102, 196, 0.8)',
+      'rgba(102, 255, 178, 0.8)'
+    ];
+
+    this.leadSourceChartData = {
+      labels: sources,
+      datasets: [
+        {
+          label: 'Lead Count',
+          data: counts,
+          backgroundColor: colors.slice(0, sources.length),
+          borderColor: colors.slice(0, sources.length).map(c => c.replace('0.8', '1')),
+          borderWidth: 1
+        }
+      ]
+    };
+  }
+
+  exportToCSV(): void {
+    if (!this.analyticsData) {
+      return;
+    }
+
+    const csvData = this.prepareCSVData();
+    const csv = Papa.unparse(csvData);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', `analytics-report-${this.dateFrom}-to-${this.dateTo}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  exportToPDF(): void {
+    if (!this.analyticsData) {
+      return;
+    }
+
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    
+    doc.setFontSize(18);
+    doc.text('Analytics Dashboard Report', pageWidth / 2, 15, { align: 'center' });
+    
+    doc.setFontSize(10);
+    doc.text(`Date Range: ${this.dateFrom} to ${this.dateTo}`, pageWidth / 2, 22, { align: 'center' });
+    
+    let yPos = 30;
+
+    doc.setFontSize(14);
+    doc.text('Key Performance Indicators', 14, yPos);
+    yPos += 5;
+
+    if (this.kpiReport) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Metric', 'Value']],
+        body: [
+          ['Average Response Time', `${this.kpiReport.averageResponseTimeHours.toFixed(2)} hours`],
+          ['Appointment Show Rate', `${this.kpiReport.appointmentShowRate.toFixed(1)}%`],
+          ['Pipeline Velocity', `${this.kpiReport.pipelineVelocityDays.toFixed(1)} days`],
+          ['Overall Conversion Rate', `${this.pipelineSummary?.overallConversionRate.toFixed(1)}%`]
+        ],
+        theme: 'grid',
+        headStyles: { fillColor: [54, 162, 235] }
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.text('Agent Performance', 14, yPos);
+    yPos += 5;
+
+    if (this.analyticsData.agentPerformance.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Agent', 'Total Dossiers', 'Closed', 'Conversion Rate', 'Avg Response Time']],
+        body: this.analyticsData.agentPerformance.map(agent => [
+          agent.agentName,
+          agent.totalDossiers.toString(),
+          agent.closedDossiers.toString(),
+          `${agent.conversionRate.toFixed(1)}%`,
+          `${agent.averageResponseTimeHours.toFixed(1)}h`
+        ]),
+        theme: 'grid',
+        headStyles: { fillColor: [75, 192, 192] }
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.text('Lead Sources', 14, yPos);
+    yPos += 5;
+
+    if (this.analyticsData.leadSources.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Source', 'Count', 'Percentage', 'Conversion Rate']],
+        body: this.analyticsData.leadSources.map(source => [
+          source.source,
+          source.count.toString(),
+          `${source.percentage.toFixed(1)}%`,
+          `${source.conversionRate.toFixed(1)}%`
+        ]),
+        theme: 'grid',
+        headStyles: { fillColor: [153, 102, 255] }
+      });
+      yPos = (doc as any).lastAutoTable.finalY + 10;
+    }
+
+    if (yPos > 250) {
+      doc.addPage();
+      yPos = 20;
+    }
+
+    doc.setFontSize(14);
+    doc.text('Conversion Funnel', 14, yPos);
+    yPos += 5;
+
+    if (this.analyticsData.conversionFunnel.length > 0) {
+      autoTable(doc, {
+        startY: yPos,
+        head: [['Stage', 'Count', 'Conversion Rate', 'Drop-off Rate']],
+        body: this.analyticsData.conversionFunnel.map(stage => [
+          stage.stage,
+          stage.count.toString(),
+          `${stage.conversionRate.toFixed(1)}%`,
+          `${stage.dropOffRate.toFixed(1)}%`
+        ]),
+        theme: 'grid',
+        headStyles: { fillColor: [255, 159, 64] }
+      });
+    }
+
+    doc.save(`analytics-report-${this.dateFrom}-to-${this.dateTo}.pdf`);
+  }
+
+  private prepareCSVData(): any[] {
+    const data: any[] = [];
+
+    data.push({ Section: 'KEY PERFORMANCE INDICATORS' });
+    if (this.kpiReport) {
+      data.push({
+        Metric: 'Average Response Time',
+        Value: `${this.kpiReport.averageResponseTimeHours.toFixed(2)} hours`
+      });
+      data.push({
+        Metric: 'Appointment Show Rate',
+        Value: `${this.kpiReport.appointmentShowRate.toFixed(1)}%`
+      });
+      data.push({
+        Metric: 'Pipeline Velocity',
+        Value: `${this.kpiReport.pipelineVelocityDays.toFixed(1)} days`
+      });
+      data.push({
+        Metric: 'Overall Conversion Rate',
+        Value: `${this.pipelineSummary?.overallConversionRate.toFixed(1)}%`
+      });
+    }
+    data.push({});
+
+    data.push({ Section: 'AGENT PERFORMANCE' });
+    if (this.analyticsData?.agentPerformance) {
+      this.analyticsData.agentPerformance.forEach(agent => {
+        data.push({
+          Agent: agent.agentName,
+          'Total Dossiers': agent.totalDossiers,
+          'Closed Dossiers': agent.closedDossiers,
+          'Conversion Rate': `${agent.conversionRate.toFixed(1)}%`,
+          'Avg Response Time': `${agent.averageResponseTimeHours.toFixed(1)}h`
+        });
+      });
+    }
+    data.push({});
+
+    data.push({ Section: 'LEAD SOURCES' });
+    if (this.analyticsData?.leadSources) {
+      this.analyticsData.leadSources.forEach(source => {
+        data.push({
+          Source: source.source,
+          Count: source.count,
+          Percentage: `${source.percentage.toFixed(1)}%`,
+          'Conversion Rate': `${source.conversionRate.toFixed(1)}%`
+        });
+      });
+    }
+    data.push({});
+
+    data.push({ Section: 'CONVERSION FUNNEL' });
+    if (this.analyticsData?.conversionFunnel) {
+      this.analyticsData.conversionFunnel.forEach(stage => {
+        data.push({
+          Stage: stage.stage,
+          Count: stage.count,
+          'Conversion Rate': `${stage.conversionRate.toFixed(1)}%`,
+          'Drop-off Rate': `${stage.dropOffRate.toFixed(1)}%`
+        });
+      });
+    }
+    data.push({});
+
+    data.push({ Section: 'REVENUE FORECAST' });
+    if (this.analyticsData?.revenueForecast) {
+      this.analyticsData.revenueForecast.forEach(forecast => {
+        data.push({
+          Date: forecast.date,
+          'Estimated Revenue': `€${forecast.estimatedRevenue.toLocaleString()}`,
+          'Actual Revenue': `€${forecast.actualRevenue.toLocaleString()}`,
+          'Pipeline Value': `€${forecast.pipelineValue.toLocaleString()}`
+        });
+      });
+    }
+
+    return data;
+  }
+
+  drillDownToStage(stage: string): void {
+    this.router.navigate(['/dossiers'], {
+      queryParams: { status: stage }
+    });
+  }
+
+  drillDownToSource(source: string): void {
+    this.router.navigate(['/dossiers'], {
+      queryParams: { source: source }
+    });
   }
 
   formatDate(date: Date | null): string {

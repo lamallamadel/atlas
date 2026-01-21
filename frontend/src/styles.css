@@ -2,6 +2,7 @@
 @import './styles/animations.css';
 @import './styles/pages.css';
 @import './styles/material-overrides.css';
+@import './styles/document-preview-dialog.css';
 
 * {
   margin: 0;

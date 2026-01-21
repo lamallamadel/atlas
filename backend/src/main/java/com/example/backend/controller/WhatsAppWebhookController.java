@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.WhatsAppWebhookPayload;
 import com.example.backend.service.WhatsAppMessageProcessingService;
+import com.example.backend.service.WhatsAppWebhookSignatureValidator;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,28 +14,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HexFormat;
-
 @RestController
 @RequestMapping("/api/v1/webhooks/whatsapp")
 @Tag(name = "WhatsApp Webhooks", description = "API for receiving WhatsApp webhook events")
 public class WhatsAppWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(WhatsAppWebhookController.class);
-    private static final String HMAC_SHA256 = "HmacSHA256";
 
     private final WhatsAppMessageProcessingService processingService;
+    private final WhatsAppWebhookSignatureValidator signatureValidator;
     private final ObjectMapper objectMapper;
 
     public WhatsAppWebhookController(
             WhatsAppMessageProcessingService processingService,
+            WhatsAppWebhookSignatureValidator signatureValidator,
             ObjectMapper objectMapper) {
         this.processingService = processingService;
+        this.signatureValidator = signatureValidator;
         this.objectMapper = objectMapper;
     }
 
@@ -76,7 +72,7 @@ public class WhatsAppWebhookController {
             TenantContext.setOrgId(orgId);
 
             if (signature != null && !signature.isBlank()) {
-                if (!validateSignature(rawPayload, signature, orgId)) {
+                if (!signatureValidator.validateSignature(rawPayload, signature, orgId)) {
                     log.warn("Invalid signature for webhook from org: {}", orgId);
                     return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid signature");
                 }
@@ -91,27 +87,6 @@ public class WhatsAppWebhookController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Processing error");
         } finally {
             TenantContext.clear();
-        }
-    }
-
-    private boolean validateSignature(String payload, String signature, String orgId) {
-        String webhookSecret = processingService.getWebhookSecret(orgId);
-        if (webhookSecret == null || webhookSecret.isEmpty()) {
-            log.warn("No webhook secret configured for org: {}", orgId);
-            return false;
-        }
-
-        try {
-            Mac mac = Mac.getInstance(HMAC_SHA256);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(webhookSecret.getBytes(StandardCharsets.UTF_8), HMAC_SHA256);
-            mac.init(secretKeySpec);
-            byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
-            String expectedSignature = "sha256=" + HexFormat.of().formatHex(hash);
-
-            return expectedSignature.equals(signature);
-        } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-            log.error("Error validating signature for org {}: {}", orgId, e.getMessage(), e);
-            return false;
         }
     }
 }

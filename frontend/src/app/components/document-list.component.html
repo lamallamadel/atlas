@@ -1,0 +1,85 @@
+<div class="document-list-container">
+  <div class="document-list-header">
+    <h3 class="section-title">Documents</h3>
+  </div>
+
+  <app-document-upload 
+    [dossierId]="dossierId"
+    (uploadComplete)="onUploadComplete($event)">
+  </app-document-upload>
+
+  <div class="documents-section">
+    <app-loading-skeleton *ngIf="loading" variant="list" [rows]="5"></app-loading-skeleton>
+
+    <div *ngIf="error && !loading" class="error-message">
+      {{ error }}
+      <button mat-button (click)="loadDocuments()">Réessayer</button>
+    </div>
+
+    <div *ngIf="!loading && !error && !hasDocuments()" class="empty-state">
+      <mat-icon class="empty-icon">folder_open</mat-icon>
+      <p class="empty-text">Aucun document disponible</p>
+      <p class="empty-subtext">Utilisez la zone de téléchargement ci-dessus pour ajouter des documents</p>
+    </div>
+
+    <div *ngIf="!loading && !error && hasDocuments()" class="documents-grid">
+      <div class="document-card" *ngFor="let document of documents">
+        <div class="document-card-header">
+          <div class="document-icon-wrapper">
+            <mat-icon class="document-icon">{{ getFileIcon(document) }}</mat-icon>
+          </div>
+          <div class="document-actions">
+            <button 
+              mat-icon-button 
+              [matTooltip]="isPreviewable(document) ? 'Aperçu' : 'Aperçu non disponible'"
+              [disabled]="!isPreviewable(document)"
+              (click)="previewDocument(document)"
+              aria-label="Aperçu du document">
+              <mat-icon>visibility</mat-icon>
+            </button>
+            <button 
+              mat-icon-button 
+              matTooltip="Télécharger"
+              (click)="downloadDocument(document)"
+              aria-label="Télécharger le document">
+              <mat-icon>download</mat-icon>
+            </button>
+            <button 
+              mat-icon-button 
+              matTooltip="Supprimer"
+              (click)="deleteDocument(document)"
+              aria-label="Supprimer le document"
+              class="delete-btn">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="document-card-body">
+          <h4 class="document-name" [title]="document.fileName">{{ document.fileName }}</h4>
+          
+          <div class="document-meta">
+            <div class="meta-item">
+              <mat-icon class="meta-icon">storage</mat-icon>
+              <span class="meta-text">{{ formatFileSize(document.fileSize) }}</span>
+            </div>
+            <div class="meta-item">
+              <mat-icon class="meta-icon">schedule</mat-icon>
+              <span class="meta-text">{{ formatDate(document.createdAt) }}</span>
+            </div>
+            <div class="meta-item" *ngIf="document.uploadedBy">
+              <mat-icon class="meta-icon">person</mat-icon>
+              <span class="meta-text">{{ document.uploadedBy }}</span>
+            </div>
+          </div>
+
+          <div class="document-category" *ngIf="document.category">
+            <span [class]="getCategoryBadgeClass(document.category)">
+              {{ getCategoryLabel(document.category) }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

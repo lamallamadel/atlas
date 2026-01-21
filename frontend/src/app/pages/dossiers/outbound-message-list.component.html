@@ -1,0 +1,84 @@
+<div class="outbound-message-list">
+  <div class="list-header">
+    <h3 class="list-title">Messages envoyés</h3>
+    <button 
+      class="btn-refresh" 
+      (click)="loadMessages()"
+      [disabled]="loading"
+      aria-label="Actualiser la liste des messages">
+      <span class="refresh-icon" [class.spinning]="loading">⟳</span>
+    </button>
+  </div>
+
+  <div *ngIf="loading && messages.length === 0" class="loading-state">
+    <div class="spinner"></div>
+    <p>Chargement des messages...</p>
+  </div>
+
+  <div *ngIf="error && messages.length === 0" class="error-state">
+    <p class="error-message">{{ error }}</p>
+    <button class="btn-retry" (click)="loadMessages()">Réessayer</button>
+  </div>
+
+  <div *ngIf="!loading && messages.length === 0 && !error" class="empty-state">
+    <p class="empty-message">Aucun message envoyé pour le moment</p>
+  </div>
+
+  <div *ngIf="messages.length > 0" class="timeline">
+    <div *ngFor="let message of messages" class="timeline-item">
+      <div class="timeline-marker" [class]="'marker-' + message.status.toLowerCase()"></div>
+      <div class="timeline-content">
+        <div class="message-card">
+          <div class="message-header">
+            <div class="message-info">
+              <span class="message-timestamp">{{ formatTimestamp(message.createdAt) }}</span>
+              <span class="message-recipient">{{ message.recipientPhone }}</span>
+            </div>
+            <div class="message-status">
+              <span [class]="getStatusBadgeClass(message.status)">
+                <span class="status-icon">{{ getStatusIcon(message.status) }}</span>
+                <span class="status-label">{{ getStatusLabel(message.status) }}</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="message-body">
+            <p class="message-content">{{ message.content }}</p>
+            
+            <div *ngIf="message.templateId" class="message-template-info">
+              <span class="template-badge">Template: {{ message.templateId }}</span>
+            </div>
+          </div>
+
+          <div class="message-footer">
+            <div class="message-meta">
+              <span *ngIf="message.attemptCount > 0" class="meta-item">
+                Tentatives: {{ message.attemptCount }}
+              </span>
+              <span *ngIf="message.sentAt" class="meta-item">
+                Envoyé: {{ formatTimestamp(message.sentAt) }}
+              </span>
+              <span *ngIf="message.lastAttemptAt" class="meta-item">
+                Dernière tentative: {{ formatTimestamp(message.lastAttemptAt) }}
+              </span>
+            </div>
+
+            <div *ngIf="message.status === OutboundMessageStatus.FAILED" class="failure-info">
+              <div *ngIf="message.failureReason" class="failure-reason">
+                <span class="failure-icon">⚠️</span>
+                <span class="failure-text">{{ message.failureReason }}</span>
+              </div>
+              <button 
+                class="btn-retry-message" 
+                (click)="onRetry(message)"
+                [disabled]="!canRetry(message)"
+                aria-label="Réessayer l'envoi du message">
+                Réessayer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

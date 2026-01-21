@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.config.Deprecated;
 import com.example.backend.dto.BulkOperationResponse;
 import com.example.backend.dto.DossierBulkAssignRequest;
 import com.example.backend.dto.DossierCreateRequest;
@@ -10,6 +11,7 @@ import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.ErrorResponse;
 import com.example.backend.service.DossierService;
+import com.example.backend.service.DossierStatusCodeValidationService;
 import com.example.backend.service.DossierStatusHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -32,15 +34,20 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/dossiers")
-@Tag(name = "Dossiers", description = "API for managing dossiers")
+@Tag(name = "Dossiers", description = "API for managing dossiers (deprecated, use v2)")
+@Deprecated(sunsetDate = "2025-12-31", deprecationMessage = "API v1 is deprecated. Please migrate to /api/v2/dossiers which provides structured responses with nested objects.")
 public class DossierController {
 
     private final DossierService dossierService;
     private final DossierStatusHistoryService statusHistoryService;
+    private final DossierStatusCodeValidationService statusCodeValidationService;
 
-    public DossierController(DossierService dossierService, DossierStatusHistoryService statusHistoryService) {
+    public DossierController(DossierService dossierService, 
+                            DossierStatusHistoryService statusHistoryService,
+                            DossierStatusCodeValidationService statusCodeValidationService) {
         this.dossierService = dossierService;
         this.statusHistoryService = statusHistoryService;
+        this.statusCodeValidationService = statusCodeValidationService;
     }
 
     @PostMapping
@@ -238,6 +245,21 @@ public class DossierController {
             @PathVariable Long id) {
         dossierService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/allowed-status-codes")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get allowed status codes for a case type", 
+               description = "Retrieves the list of valid status codes for a specific case type based on workflow definitions")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Status codes retrieved successfully",
+                    content = @Content(schema = @Schema(implementation = List.class)))
+    })
+    public ResponseEntity<List<String>> getAllowedStatusCodes(
+            @Parameter(description = "Case type code (optional, returns all active status codes if not specified)")
+            @RequestParam(required = false) String caseType) {
+        List<String> allowedStatusCodes = statusCodeValidationService.getAllowedStatusCodesForCaseType(caseType);
+        return ResponseEntity.ok(allowedStatusCodes);
     }
 
     private Pageable createPageable(int page, int size, String sort) {

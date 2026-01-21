@@ -1,0 +1,112 @@
+<div class="outbound-message-form">
+  <div class="form-header">
+    <h3 class="form-title">Envoyer un message WhatsApp</h3>
+  </div>
+
+  <div *ngIf="error" class="error-alert">
+    <span class="error-icon">⚠️</span>
+    <span class="error-text">{{ error }}</span>
+  </div>
+
+  <div class="form-body">
+    <div class="form-group">
+      <label for="recipient-phone" class="form-label">Numéro du destinataire</label>
+      <input
+        id="recipient-phone"
+        type="text"
+        class="form-input"
+        [(ngModel)]="recipientPhone"
+        [disabled]="true"
+        placeholder="+33612345678"
+        aria-label="Numéro de téléphone du destinataire"
+      />
+    </div>
+
+    <div class="form-group">
+      <label for="template-select" class="form-label">
+        Template (optionnel)
+        <span class="form-label-hint">Sélectionnez un modèle prédéfini</span>
+      </label>
+      <select
+        id="template-select"
+        class="form-select"
+        [(ngModel)]="selectedTemplate"
+        (change)="onTemplateSelect()"
+        [disabled]="sending || loadingTemplates"
+        aria-label="Sélectionner un template de message"
+      >
+        <option [ngValue]="null">-- Aucun template --</option>
+        <option *ngFor="let template of templates" [ngValue]="template">
+          {{ template.name }}
+        </option>
+      </select>
+      <p *ngIf="selectedTemplate" class="template-description">
+        {{ selectedTemplate.name }}
+      </p>
+    </div>
+
+    <div *ngIf="selectedTemplate && selectedTemplate.variables.length > 0" class="variables-section">
+      <h4 class="variables-title">Variables du template</h4>
+      <div class="variables-grid">
+        <div *ngFor="let variable of selectedTemplate.variables" class="form-group">
+          <label [for]="'var-' + variable" class="form-label">
+            {{ getVariableLabel(variable) }}
+          </label>
+          <input
+            [id]="'var-' + variable"
+            type="text"
+            class="form-input"
+            [(ngModel)]="templateVariables[variable]"
+            (ngModelChange)="onVariableChange()"
+            [disabled]="sending"
+            [placeholder]="getVariablePlaceholder(variable)"
+            [attr.aria-label]="'Variable: ' + getVariableLabel(variable)"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="message-content" class="form-label">
+        Aperçu du message
+        <span class="form-label-hint">{{ messageContent.length }} caractères</span>
+      </label>
+      <textarea
+        id="message-content"
+        class="form-textarea"
+        [(ngModel)]="messageContent"
+        [disabled]="sending || selectedTemplate !== null"
+        rows="6"
+        placeholder="Votre message sera affiché ici..."
+        aria-label="Contenu du message"
+      ></textarea>
+      <p class="field-hint">
+        <span *ngIf="selectedTemplate">Le message est généré automatiquement à partir du template sélectionné.</span>
+        <span *ngIf="!selectedTemplate">Saisissez votre message personnalisé ou sélectionnez un template.</span>
+      </p>
+    </div>
+  </div>
+
+  <div class="form-footer">
+    <button
+      class="btn-send"
+      (click)="sendMessage()"
+      [disabled]="!canSendMessage() || sending"
+      aria-label="Envoyer le message WhatsApp"
+    >
+      <span *ngIf="!sending">📤 Envoyer</span>
+      <span *ngIf="sending" class="sending-text">
+        <span class="spinner-small"></span>
+        Envoi en cours...
+      </span>
+    </button>
+    <button
+      class="btn-reset"
+      (click)="resetForm()"
+      [disabled]="sending"
+      aria-label="Réinitialiser le formulaire"
+    >
+      Réinitialiser
+    </button>
+  </div>
+</div>

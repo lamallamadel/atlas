@@ -205,6 +205,20 @@ export class AuthService {
     return this.getUserRoles().includes(role);
   }
 
+  getUserId(): string | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const payload = this.decodeToken(token);
+      return payload.sub || null;
+    } catch {
+      return null;
+    }
+  }
+
   private decodeToken(token: string): JwtPayload {
     const parts = token.split('.');
     if (parts.length !== 3) {

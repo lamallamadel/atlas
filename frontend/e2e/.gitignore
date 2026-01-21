@@ -6,6 +6,9 @@ playwright/.cache/
 # Videos and screenshots
 videos/
 screenshots/
+test-results/screenshots/
+test-results/artifacts/
+test-results/html-report/
 
 # Traces
 traces/
@@ -13,3 +16,8 @@ traces/
 
 # Test artifacts
 test-results.json
+results.json
+junit.xml
+
+# Auth storage state
+.auth/storageState.json

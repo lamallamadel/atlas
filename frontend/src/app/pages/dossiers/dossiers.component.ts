@@ -13,6 +13,8 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
+import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
+import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -38,6 +40,7 @@ export class DossiersComponent implements OnInit {
 
   selectedStatus: DossierStatus | '' = '';
   phoneFilter = '';
+  sourceFilter = '';
   annonceIdFilter = '';
   annonceSearchControl = new FormControl<string | AnnonceResponse>('');
   filteredAnnonces!: Observable<AnnonceResponse[]>;
@@ -236,6 +239,9 @@ export class DossiersComponent implements OnInit {
       if (params['status']) {
         this.selectedStatus = params['status'] as DossierStatus;
       }
+      if (params['source']) {
+        this.sourceFilter = params['source'];
+      }
       this.loadDossiers();
       this.updateAppliedFilters();
     });
@@ -317,6 +323,7 @@ export class DossiersComponent implements OnInit {
       size: number;
       status?: DossierStatus;
       leadPhone?: string;
+      leadSource?: string;
       annonceId?: number;
     } = {
       page: this.currentPage,
@@ -329,6 +336,10 @@ export class DossiersComponent implements OnInit {
 
     if (this.phoneFilter.trim()) {
       params.leadPhone = this.phoneFilter.trim();
+    }
+
+    if (this.sourceFilter.trim()) {
+      params.leadSource = this.sourceFilter.trim();
     }
 
     if (this.selectedAnnonceId !== null) {
@@ -364,6 +375,7 @@ export class DossiersComponent implements OnInit {
   clearFilters(): void {
     this.selectedStatus = '';
     this.phoneFilter = '';
+    this.sourceFilter = '';
     this.clearAnnonceSelection();
     this.currentPage = 0;
     this.updateAppliedFilters();
@@ -379,6 +391,15 @@ export class DossiersComponent implements OnInit {
         label: 'Statut',
         value: this.selectedStatus,
         displayValue: this.getStatusLabel(this.selectedStatus)
+      });
+    }
+
+    if (this.sourceFilter.trim()) {
+      this.appliedFilters.push({
+        key: 'sourceFilter',
+        label: 'Source',
+        value: this.sourceFilter,
+        displayValue: this.sourceFilter
       });
     }
 
@@ -720,5 +741,33 @@ export class DossiersComponent implements OnInit {
 
   trackByPageNum(index: number, pageNum: number): number {
     return pageNum;
+  }
+
+  openImportDialog(): void {
+    const dialogRef = this.dialog.open(LeadImportDialogComponent, {
+      width: '700px',
+      maxWidth: '90vw',
+      disableClose: true
+    });
+
+    dialogRef.afterClosed().subscribe(success => {
+      if (success) {
+        this.loadDossiers();
+      }
+    });
+  }
+
+  openExportDialog(): void {
+    const dialogRef = this.dialog.open(LeadExportDialogComponent, {
+      width: '800px',
+      maxWidth: '90vw',
+      disableClose: false
+    });
+
+    dialogRef.afterClosed().subscribe(success => {
+      if (success) {
+        console.log('Export completed successfully');
+      }
+    });
   }
 }

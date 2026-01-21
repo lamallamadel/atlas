@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Appointment Reminder</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #FF9800;
+        }
+        .header h1 {
+            margin: 0;
+            color: #FF9800;
+            font-size: 24px;
+        }
+        .appointment-box {
+            background-color: #fff3e0;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #FF9800;
+            margin: 20px 0;
+        }
+        .appointment-box .detail {
+            display: flex;
+            margin: 10px 0;
+            align-items: center;
+        }
+        .appointment-box .detail .icon {
+            width: 30px;
+            font-size: 20px;
+            color: #FF9800;
+        }
+        .appointment-box .detail .text {
+            flex: 1;
+        }
+        .appointment-box .detail .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .content {
+            margin-bottom: 30px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #FF9800;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .button:hover {
+            background-color: #F57C00;
+        }
+        .footer {
+            border-top: 1px solid #eeeeee;
+            padding-top: 20px;
+            margin-top: 30px;
+            font-size: 12px;
+            color: #666666;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Appointment Reminder</h1>
+        </div>
+        
+        <div class="content">
+            <p th:text="'Hello ' + ${name ?: 'there'} + ','">Hello there,</p>
+            
+            <p>This is a friendly reminder about your upcoming appointment:</p>
+            
+            <div class="appointment-box">
+                <div class="detail" th:if="${appointmentDate}">
+                    <span class="icon">📅</span>
+                    <span class="text">
+                        <span class="label">Date:</span>
+                        <span th:text="${appointmentDate}">January 15, 2024</span>
+                    </span>
+                </div>
+                <div class="detail" th:if="${appointmentTime}">
+                    <span class="icon">🕐</span>
+                    <span class="text">
+                        <span class="label">Time:</span>
+                        <span th:text="${appointmentTime}">10:00 AM</span>
+                    </span>
+                </div>
+                <div class="detail" th:if="${location}">
+                    <span class="icon">📍</span>
+                    <span class="text">
+                        <span class="label">Location:</span>
+                        <span th:text="${location}">123 Main Street</span>
+                    </span>
+                </div>
+                <div class="detail" th:if="${duration}">
+                    <span class="icon">⏱</span>
+                    <span class="text">
+                        <span class="label">Duration:</span>
+                        <span th:text="${duration}">60 minutes</span>
+                    </span>
+                </div>
+            </div>
+            
+            <p th:if="${notes}" th:text="'Notes: ' + ${notes}">
+                Notes: Please arrive 10 minutes early.
+            </p>
+            
+            <div th:if="${actionUrl}" style="text-align: center; margin: 30px 0;">
+                <a th:href="${actionUrl}" class="button">View Appointment Details</a>
+            </div>
+            
+            <p style="margin-top: 20px;">
+                If you need to reschedule or cancel, please contact us as soon as possible.
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p>This email was sent automatically. Please do not reply.</p>
+            <p th:if="${companyName}">
+                © 2024 <span th:text="${companyName}">Company Name</span>
+            </p>
+        </div>
+    </div>
+</body>
+</html>

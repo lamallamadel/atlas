@@ -13,7 +13,15 @@ public enum AuditAction {
     RESTORED("restored"),
     SENT("sent"),
     FAILED("failed"),
-    BLOCKED_BY_POLICY("blocked_by_policy");
+    BLOCKED_BY_POLICY("blocked_by_policy"),
+    ACTIVATE("activate"),
+    DEACTIVATE("deactivate"),
+    SUBMIT_FOR_APPROVAL("submit_for_approval"),
+    CREATE("create"),
+    UPDATE("update"),
+    DELETE("delete"),
+    APPROVE("approve"),
+    REJECT("reject");
 
     private final String value;
 

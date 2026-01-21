@@ -1,12 +1,18 @@
 package com.example.backend.service;
 
+import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.WorkflowDefinition;
 import com.example.backend.entity.WorkflowTransition;
+import com.example.backend.entity.enums.AppointmentStatus;
 import com.example.backend.exception.WorkflowValidationException;
+import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.repository.WorkflowTransitionRepository;
 import com.example.backend.util.TenantContext;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +34,8 @@ import java.util.*;
  *    - Enforces custom rules per case type (e.g., "SALE", "RENTAL")
  *    - Can require specific fields, validate conditions, or impose stricter transitions
  *    - Records all transition attempts in workflow_transition table for audit
+ *    - Enforces role-based authorization for transitions
+ *    - Validates pre-conditions (e.g., appointments) before allowing transitions
  * 
  * BYPASS MECHANISM:
  * When caseType is null or blank, this validation is skipped, allowing:
@@ -40,12 +48,18 @@ public class WorkflowValidationService {
 
     private final WorkflowDefinitionRepository workflowDefinitionRepository;
     private final WorkflowTransitionRepository workflowTransitionRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final DossierStatusTransitionService dossierStatusTransitionService;
 
     public WorkflowValidationService(
             WorkflowDefinitionRepository workflowDefinitionRepository,
-            WorkflowTransitionRepository workflowTransitionRepository) {
+            WorkflowTransitionRepository workflowTransitionRepository,
+            AppointmentRepository appointmentRepository,
+            DossierStatusTransitionService dossierStatusTransitionService) {
         this.workflowDefinitionRepository = workflowDefinitionRepository;
         this.workflowTransitionRepository = workflowTransitionRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.dossierStatusTransitionService = dossierStatusTransitionService;
     }
 
     @Transactional
@@ -57,7 +71,6 @@ public class WorkflowValidationService {
 
         String caseType = dossier.getCaseType();
         
-        // Record all workflow transitions for audit trail
         WorkflowTransition transition = new WorkflowTransition();
         transition.setOrgId(orgId);
         transition.setDossierId(dossier.getId());
@@ -68,10 +81,6 @@ public class WorkflowValidationService {
         transition.setReason(reason);
         transition.setTransitionedAt(LocalDateTime.now());
 
-        // BYPASS: When caseType is null or blank, skip custom workflow validation
-        // This allows dossiers without a specific case type to use only the basic
-        // transition rules (from DossierStatusTransitionService).
-        // Use case: Generic dossiers or legacy data that doesn't require workflow constraints.
         if (caseType == null || caseType.isBlank()) {
             transition.setIsAllowed(true);
             transition.setValidationErrorsJson(null);
@@ -87,6 +96,10 @@ public class WorkflowValidationService {
             errors.put("transition", String.format("Transition from %s to %s is not allowed for case type %s", 
                     fromStatus, toStatus, caseType));
             errors.put("allowedTransitions", getAllowedTransitions(orgId, caseType, fromStatus));
+            errors.put("actionableMessage", String.format(
+                    "The status transition from '%s' to '%s' is not configured in your workflow. " +
+                    "Please configure this transition in the workflow definition or choose from the allowed transitions: %s",
+                    fromStatus, toStatus, String.join(", ", getAllowedTransitions(orgId, caseType, fromStatus))));
             
             transition.setIsAllowed(false);
             transition.setValidationErrorsJson(errors);
@@ -99,9 +112,17 @@ public class WorkflowValidationService {
         }
 
         WorkflowDefinition definition = workflowDef.get();
-        Map<String, Object> validationErrors = validateConditionsAndRequiredFields(dossier, definition);
+        Map<String, Object> validationErrors = new HashMap<>();
 
-        if (validationErrors != null && !validationErrors.isEmpty()) {
+        validateRequiredFields(dossier, definition, toStatus, validationErrors);
+        
+        validateRoleBasedAuthorization(toStatus, validationErrors);
+        
+        validatePreConditions(dossier, definition, toStatus, validationErrors);
+        
+        validateCustomConditions(dossier, definition, validationErrors);
+
+        if (!validationErrors.isEmpty()) {
             transition.setIsAllowed(false);
             transition.setValidationErrorsJson(validationErrors);
             workflowTransitionRepository.save(transition);
@@ -116,21 +137,31 @@ public class WorkflowValidationService {
         workflowTransitionRepository.save(transition);
     }
 
-    private List<String> getAllowedTransitions(String orgId, String caseType, String fromStatus) {
-        List<WorkflowDefinition> allowed = workflowDefinitionRepository.findAllowedTransitionsFrom(
-                orgId, caseType, fromStatus);
-        return allowed.stream()
-                .map(WorkflowDefinition::getToStatus)
-                .toList();
-    }
+    private void validateRequiredFields(Dossier dossier, WorkflowDefinition definition, String toStatus, Map<String, Object> errors) {
+        List<String> missingFields = new ArrayList<>();
+        List<String> actionableMessages = new ArrayList<>();
 
-    private Map<String, Object> validateConditionsAndRequiredFields(Dossier dossier, WorkflowDefinition definition) {
-        Map<String, Object> errors = new HashMap<>();
+        boolean isTerminalState = "LOST".equalsIgnoreCase(toStatus) || "WON".equalsIgnoreCase(toStatus);
+        
+        if (isTerminalState && "LOST".equalsIgnoreCase(toStatus)) {
+            if (dossier.getLossReason() == null || dossier.getLossReason().isBlank()) {
+                missingFields.add("lossReason");
+                actionableMessages.add("Loss reason is required when marking a dossier as LOST. " +
+                        "Please provide a reason such as 'Client not interested', 'Budget constraints', " +
+                        "'Competitor chosen', etc.");
+            }
+        }
+        
+        if (isTerminalState && "WON".equalsIgnoreCase(toStatus)) {
+            if (dossier.getWonReason() == null || dossier.getWonReason().isBlank()) {
+                missingFields.add("wonReason");
+                actionableMessages.add("Won reason is required when marking a dossier as WON. " +
+                        "Please provide a reason such as 'Deal closed', 'Contract signed', etc.");
+            }
+        }
 
         Map<String, Object> requiredFields = definition.getRequiredFieldsJson();
         if (requiredFields != null && !requiredFields.isEmpty()) {
-            List<String> missingFields = new ArrayList<>();
-            
             for (Map.Entry<String, Object> entry : requiredFields.entrySet()) {
                 String fieldName = entry.getKey();
                 Boolean isRequired = (Boolean) entry.getValue();
@@ -139,32 +170,111 @@ public class WorkflowValidationService {
                     Object fieldValue = getFieldValue(dossier, fieldName);
                     if (fieldValue == null || (fieldValue instanceof String && ((String) fieldValue).isBlank())) {
                         missingFields.add(fieldName);
+                        actionableMessages.add(String.format(
+                                "Field '%s' is required for this transition. Please provide a valid value.",
+                                fieldName));
                     }
                 }
             }
+        }
+        
+        if (!missingFields.isEmpty()) {
+            errors.put("missingRequiredFields", missingFields);
+            errors.put("requiredFieldsActionableMessages", actionableMessages);
+        }
+    }
+
+    private void validateRoleBasedAuthorization(String toStatus, Map<String, Object> errors) {
+        if ("CRM_QUALIFIED".equalsIgnoreCase(toStatus)) {
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            if (authentication == null || !authentication.isAuthenticated()) {
+                errors.put("roleAuthorizationError", "Authentication required for this transition");
+                errors.put("roleActionableMessage", 
+                        "You must be authenticated to perform this transition. Please log in and try again.");
+                return;
+            }
+
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            boolean hasAgentRole = authorities.stream()
+                    .anyMatch(auth -> auth.getAuthority().equalsIgnoreCase("ROLE_AGENT") || 
+                                     auth.getAuthority().equalsIgnoreCase("AGENT"));
             
-            if (!missingFields.isEmpty()) {
-                errors.put("missingRequiredFields", missingFields);
+            if (!hasAgentRole) {
+                errors.put("roleAuthorizationError", 
+                        String.format("Transition to %s requires AGENT role", toStatus));
+                errors.put("roleActionableMessage", 
+                        String.format("Only users with the AGENT role can move dossiers to '%s' status. " +
+                        "Your current roles are: %s. Please contact your administrator to request the appropriate role.",
+                        toStatus, authorities.stream()
+                                .map(GrantedAuthority::getAuthority)
+                                .toList()));
+            }
+        }
+    }
+
+    private void validatePreConditions(Dossier dossier, WorkflowDefinition definition, String toStatus, Map<String, Object> errors) {
+        if ("CRM_VISIT_DONE".equalsIgnoreCase(toStatus)) {
+            List<AppointmentEntity> appointments = dossier.getAppointments();
+            boolean hasCompletedAppointment = appointments.stream()
+                    .anyMatch(apt -> apt.getStatus() == AppointmentStatus.COMPLETED);
+            
+            if (!hasCompletedAppointment) {
+                errors.put("preConditionError", "At least one completed appointment is required");
+                errors.put("preConditionActionableMessage", 
+                        String.format("Before moving to '%s' status, you must have at least one completed appointment. " +
+                        "Please create and mark an appointment as completed, or if an appointment has already occurred, " +
+                        "update its status to COMPLETED.", toStatus));
             }
         }
 
         Map<String, Object> conditions = definition.getConditionsJson();
-        if (conditions != null && !conditions.isEmpty()) {
-            List<String> failedConditions = validateConditions(dossier, conditions);
-            if (!failedConditions.isEmpty()) {
-                errors.put("failedConditions", failedConditions);
+        if (conditions != null && conditions.containsKey("requiresAppointment")) {
+            Object requiresAppointment = conditions.get("requiresAppointment");
+            if (Boolean.TRUE.equals(requiresAppointment)) {
+                List<AppointmentEntity> appointments = dossier.getAppointments();
+                if (appointments == null || appointments.isEmpty()) {
+                    errors.put("preConditionError", "At least one appointment is required for this transition");
+                    errors.put("preConditionActionableMessage", 
+                            "This transition requires scheduling at least one appointment with the client. " +
+                            "Please create an appointment before proceeding.");
+                }
             }
         }
-
-        return errors.isEmpty() ? null : errors;
+        
+        if (conditions != null && conditions.containsKey("requiresCompletedAppointment")) {
+            Object requiresCompleted = conditions.get("requiresCompletedAppointment");
+            if (Boolean.TRUE.equals(requiresCompleted)) {
+                List<AppointmentEntity> appointments = dossier.getAppointments();
+                boolean hasCompleted = appointments != null && appointments.stream()
+                        .anyMatch(apt -> apt.getStatus() == AppointmentStatus.COMPLETED);
+                
+                if (!hasCompleted) {
+                    errors.put("preConditionError", "At least one completed appointment is required");
+                    errors.put("preConditionActionableMessage", 
+                            "This transition requires at least one completed appointment. " +
+                            "Please ensure an appointment has been marked as COMPLETED.");
+                }
+            }
+        }
     }
 
-    private List<String> validateConditions(Dossier dossier, Map<String, Object> conditions) {
-        List<String> failed = new ArrayList<>();
+    private void validateCustomConditions(Dossier dossier, WorkflowDefinition definition, Map<String, Object> errors) {
+        Map<String, Object> conditions = definition.getConditionsJson();
+        if (conditions == null || conditions.isEmpty()) {
+            return;
+        }
+        
+        List<String> failedConditions = new ArrayList<>();
+        List<String> actionableMessages = new ArrayList<>();
         
         for (Map.Entry<String, Object> entry : conditions.entrySet()) {
             String conditionName = entry.getKey();
             Object conditionValue = entry.getValue();
+            
+            if (conditionName.equals("requiresAppointment") || 
+                conditionName.equals("requiresCompletedAppointment")) {
+                continue;
+            }
             
             if (conditionValue instanceof Map) {
                 @SuppressWarnings("unchecked")
@@ -177,13 +287,78 @@ public class WorkflowValidationService {
                 if (field != null && operator != null) {
                     Object actualValue = getFieldValue(dossier, field);
                     if (!evaluateCondition(actualValue, operator, expectedValue)) {
-                        failed.add(conditionName + ": " + field + " " + operator + " " + expectedValue);
+                        String conditionDesc = String.format("%s: %s %s %s", 
+                                conditionName, field, operator, expectedValue);
+                        failedConditions.add(conditionDesc);
+                        
+                        String actionableMessage = buildActionableMessageForCondition(
+                                field, operator, expectedValue, actualValue);
+                        actionableMessages.add(actionableMessage);
                     }
                 }
             }
         }
         
-        return failed;
+        if (!failedConditions.isEmpty()) {
+            errors.put("failedConditions", failedConditions);
+            errors.put("conditionsActionableMessages", actionableMessages);
+        }
+    }
+
+    private String buildActionableMessageForCondition(String field, String operator, Object expectedValue, Object actualValue) {
+        String actualValueStr = actualValue == null ? "not set" : actualValue.toString();
+        
+        switch (operator) {
+            case "equals":
+                return String.format("Field '%s' must equal '%s', but current value is '%s'. " +
+                        "Please update this field to the required value.", 
+                        field, expectedValue, actualValueStr);
+            case "notEquals":
+                return String.format("Field '%s' must not equal '%s', but current value is '%s'. " +
+                        "Please change this field to a different value.", 
+                        field, expectedValue, actualValueStr);
+            case "greaterThan":
+                return String.format("Field '%s' must be greater than '%s', but current value is '%s'. " +
+                        "Please increase the value of this field.", 
+                        field, expectedValue, actualValueStr);
+            case "lessThan":
+                return String.format("Field '%s' must be less than '%s', but current value is '%s'. " +
+                        "Please decrease the value of this field.", 
+                        field, expectedValue, actualValueStr);
+            case "greaterThanOrEqual":
+                return String.format("Field '%s' must be greater than or equal to '%s', but current value is '%s'. " +
+                        "Please ensure the value meets the minimum requirement.", 
+                        field, expectedValue, actualValueStr);
+            case "lessThanOrEqual":
+                return String.format("Field '%s' must be less than or equal to '%s', but current value is '%s'. " +
+                        "Please ensure the value does not exceed the maximum.", 
+                        field, expectedValue, actualValueStr);
+            case "isNull":
+                return String.format("Field '%s' must be empty/null, but current value is '%s'. " +
+                        "Please clear this field.", 
+                        field, actualValueStr);
+            case "isNotNull":
+                return String.format("Field '%s' must have a value, but it is currently empty. " +
+                        "Please provide a value for this field.", field);
+            case "isEmpty":
+                return String.format("Field '%s' must be empty, but current value is '%s'. " +
+                        "Please clear this field.", 
+                        field, actualValueStr);
+            case "isNotEmpty":
+                return String.format("Field '%s' must have a value, but it is currently empty. " +
+                        "Please provide a value for this field.", field);
+            default:
+                return String.format("Field '%s' does not meet the condition: %s %s. Current value: '%s'", 
+                        field, operator, expectedValue, actualValueStr);
+        }
+    }
+
+    private List<String> getAllowedTransitions(String orgId, String caseType, String fromStatus) {
+        List<WorkflowDefinition> allowed = workflowDefinitionRepository.findAllowedTransitionsFrom(
+                orgId, caseType, fromStatus);
+        return allowed.stream()
+                .map(WorkflowDefinition::getToStatus)
+                .toList();
     }
 
     private boolean evaluateCondition(Object actualValue, String operator, Object expectedValue) {
@@ -230,6 +405,7 @@ public class WorkflowValidationService {
         return switch (fieldName) {
             case "leadName" -> dossier.getLeadName();
             case "leadPhone" -> dossier.getLeadPhone();
+            case "leadEmail" -> dossier.getLeadEmail();
             case "leadSource" -> dossier.getLeadSource();
             case "notes" -> dossier.getNotes();
             case "score" -> dossier.getScore();
@@ -253,5 +429,46 @@ public class WorkflowValidationService {
         }
 
         return getAllowedTransitions(orgId, caseType, currentStatus);
+    }
+
+    public Map<String, Object> checkTransitionValidity(Dossier dossier, String fromStatus, String toStatus) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        String caseType = dossier.getCaseType();
+        Map<String, Object> result = new HashMap<>();
+        result.put("isValid", true);
+
+        if (caseType == null || caseType.isBlank()) {
+            result.put("reason", "No workflow validation (caseType not set)");
+            return result;
+        }
+
+        Optional<WorkflowDefinition> workflowDef = workflowDefinitionRepository.findActiveTransition(
+                orgId, caseType, fromStatus, toStatus);
+
+        if (workflowDef.isEmpty()) {
+            result.put("isValid", false);
+            result.put("error", String.format("Transition from %s to %s is not allowed", fromStatus, toStatus));
+            result.put("allowedTransitions", getAllowedTransitions(orgId, caseType, fromStatus));
+            return result;
+        }
+
+        WorkflowDefinition definition = workflowDef.get();
+        Map<String, Object> validationErrors = new HashMap<>();
+
+        validateRequiredFields(dossier, definition, toStatus, validationErrors);
+        validateRoleBasedAuthorization(toStatus, validationErrors);
+        validatePreConditions(dossier, definition, toStatus, validationErrors);
+        validateCustomConditions(dossier, definition, validationErrors);
+
+        if (!validationErrors.isEmpty()) {
+            result.put("isValid", false);
+            result.put("validationErrors", validationErrors);
+        }
+
+        return result;
     }
 }

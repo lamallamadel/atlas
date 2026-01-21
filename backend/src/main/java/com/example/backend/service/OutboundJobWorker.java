@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.OutboundAttemptEntity;
 import com.example.backend.entity.OutboundMessageEntity;
+import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.OutboundAttemptStatus;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -190,8 +192,7 @@ public class OutboundJobWorker {
         metricsService.recordOutboundMessageDeliveryLatency(channelName, deliveryLatency);
         
         logAuditEvent(message, "SENT", "Message sent successfully");
-        logActivity(message, "MESSAGE_SENT", String.format("Outbound %s message sent to %s", 
-            message.getChannel(), message.getTo()));
+        logMessageSentActivity(message, result);
     }
     
     private void handleFailure(OutboundMessageEntity message, OutboundAttemptEntity attempt, 
@@ -232,8 +233,7 @@ public class OutboundJobWorker {
             logger.warn("Message {} moved to FAILED: {}", message.getId(), reason);
             
             logAuditEvent(message, "FAILED", String.format("Message failed: %s (%s)", errorMessage, reason));
-            logActivity(message, "MESSAGE_FAILED", String.format("Outbound %s message failed: %s", 
-                message.getChannel(), errorCode));
+            logMessageFailedActivity(message, errorCode, errorMessage, reason);
         }
         
         message.setUpdatedAt(LocalDateTime.now());
@@ -282,22 +282,66 @@ public class OutboundJobWorker {
         }
     }
     
-    private void logActivity(OutboundMessageEntity message, String activityType, String description) {
+    private void logMessageSentActivity(OutboundMessageEntity message, ProviderSendResult result) {
         if (activityService != null && message.getDossierId() != null) {
             try {
+                String description = String.format("Outbound %s message sent to %s", 
+                    message.getChannel(), message.getTo());
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("outboundMessageId", message.getId());
+                metadata.put("channel", message.getChannel().name());
+                metadata.put("to", message.getTo());
+                metadata.put("status", message.getStatus().name());
+                metadata.put("providerMessageId", result.getProviderMessageId());
+                metadata.put("attemptCount", message.getAttemptCount());
+                metadata.put("timestamp", LocalDateTime.now().toString());
+                if (message.getTemplateCode() != null) {
+                    metadata.put("templateCode", message.getTemplateCode());
+                }
+                
                 activityService.logActivity(
                     message.getDossierId(),
-                    activityType,
+                    ActivityType.MESSAGE_SENT,
                     description,
-                    Map.of(
-                        "outboundMessageId", message.getId(),
-                        "channel", message.getChannel().name(),
-                        "to", message.getTo(),
-                        "status", message.getStatus().name()
-                    )
+                    metadata
                 );
             } catch (Exception e) {
-                logger.warn("Failed to log activity", e);
+                logger.warn("Failed to log MESSAGE_SENT activity", e);
+            }
+        }
+    }
+
+    private void logMessageFailedActivity(OutboundMessageEntity message, String errorCode, 
+                                         String errorMessage, String reason) {
+        if (activityService != null && message.getDossierId() != null) {
+            try {
+                String description = String.format("Outbound %s message failed: %s", 
+                    message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("outboundMessageId", message.getId());
+                metadata.put("channel", message.getChannel().name());
+                metadata.put("to", message.getTo());
+                metadata.put("status", message.getStatus().name());
+                metadata.put("errorCode", errorCode);
+                metadata.put("errorMessage", errorMessage);
+                metadata.put("reason", reason);
+                metadata.put("attemptCount", message.getAttemptCount());
+                metadata.put("maxAttempts", message.getMaxAttempts());
+                metadata.put("timestamp", LocalDateTime.now().toString());
+                if (message.getTemplateCode() != null) {
+                    metadata.put("templateCode", message.getTemplateCode());
+                }
+                
+                activityService.logActivity(
+                    message.getDossierId(),
+                    ActivityType.MESSAGE_FAILED,
+                    description,
+                    metadata
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log MESSAGE_FAILED activity", e);
             }
         }
     }

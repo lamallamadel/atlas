@@ -1,237 +1,254 @@
-# Outbound Messaging Observability - Implementation Summary
+# WhatsApp Template Management System - Implementation Summary
 
 ## Overview
+A comprehensive WhatsApp template management system has been implemented with full CRUD operations, validation, status management, and admin controls.
 
-Comprehensive observability has been implemented for the outbound messaging system, providing real-time monitoring, alerting, and analytics capabilities through Micrometer metrics exposed via Prometheus.
+## Created Files
 
-## Files Created/Modified
+### Entities (2 files)
+1. `backend/src/main/java/com/example/backend/entity/WhatsAppTemplate.java`
+   - Main template entity with JSONB components
+   - Supports multi-language templates
+   - Includes status management and approval workflow
 
-### New Files
+2. `backend/src/main/java/com/example/backend/entity/TemplateVariable.java`
+   - Template variable entity for dynamic content
+   - Links to template with cascade delete
+   - Tracks position and component type
 
-1. **`backend/src/main/java/com/example/backend/observability/OutboundMessageMetricsService.java`**
-   - Service that manages gauge metrics for queue depth tracking
-   - Periodically updates metrics every 10 seconds (configurable)
-   - Tracks queue depth by status, channel, retry counts, and dead letter queue size
+### Enums (4 files)
+1. `backend/src/main/java/com/example/backend/entity/enums/TemplateStatus.java`
+   - ACTIVE, INACTIVE, PENDING_APPROVAL, REJECTED, DRAFT
 
-2. **`backend/src/main/java/com/example/backend/service/OutboundMessageAlertService.java`**
-   - Scheduled alert service that monitors message processing health
-   - Three scheduled jobs:
-     - Stuck messages detector (runs every 15 minutes)
-     - High queue depth monitor (runs every 10 minutes)
-     - Dead letter queue growth monitor (runs every hour)
-   - Logs warnings and increments alert metrics when thresholds are exceeded
+2. `backend/src/main/java/com/example/backend/entity/enums/TemplateCategory.java`
+   - MARKETING, UTILITY, AUTHENTICATION, TRANSACTIONAL
 
-3. **`backend/OUTBOUND_MESSAGING_OBSERVABILITY.md`**
-   - Comprehensive documentation of all metrics, gauges, and alerts
-   - Configuration reference
-   - Prometheus query examples
-   - Grafana dashboard examples
-   - Troubleshooting guide
+3. `backend/src/main/java/com/example/backend/entity/enums/ComponentType.java`
+   - HEADER, BODY, FOOTER, BUTTONS
 
-4. **`backend/METRICS_QUICK_REFERENCE.md`**
-   - Quick reference card for key metrics
-   - Alert rule examples
-   - Common Prometheus queries
-   - Dashboard recommendations
-   - Troubleshooting checklist
+4. `backend/src/main/java/com/example/backend/entity/enums/ButtonType.java`
+   - QUICK_REPLY, CALL_TO_ACTION, URL, PHONE_NUMBER
 
-5. **`backend/grafana-dashboard-outbound-messaging.json`**
-   - Sample Grafana dashboard configuration
-   - Visualizes all key metrics including queue depth, send rates, latency percentiles, retry rates, and alerts
+### Repositories (2 files)
+1. `backend/src/main/java/com/example/backend/repository/WhatsAppTemplateRepository.java`
+   - JPA repository with custom query methods
+   - Supports filtering by status, language, organization
 
-6. **`backend/IMPLEMENTATION_SUMMARY.md`**
-   - This file - high-level summary of the implementation
+2. `backend/src/main/java/com/example/backend/repository/TemplateVariableRepository.java`
+   - JPA repository for template variables
+   - Supports cascade operations
 
-### Modified Files
+### Services (2 files)
+1. `backend/src/main/java/com/example/backend/service/WhatsAppTemplateService.java`
+   - Business logic for template management
+   - CRUD operations with validation
+   - Status transitions and approval workflow
+   - Organization isolation
 
-1. **`backend/src/main/java/com/example/backend/observability/MetricsService.java`**
-   - Added methods for outbound message metrics:
-     - `incrementOutboundMessageQueued()`
-     - `incrementOutboundMessageSendSuccess()`
-     - `incrementOutboundMessageSendFailure()`
-     - `incrementOutboundMessageRetry()`
-     - `incrementOutboundMessageDeadLetter()`
-     - `recordOutboundMessageDeliveryLatency()`
-   - Made `counter()` and `timer()` methods public for alert service
-   - Added `getRegistry()` method for gauge registration
+2. `backend/src/main/java/com/example/backend/service/WhatsAppTemplateValidationService.java`
+   - Comprehensive validation for WhatsApp Business API format
+   - Validates template name, language code, components
+   - Validates header, body, footer, buttons
+   - Sequential variable validation
 
-2. **`backend/src/main/java/com/example/backend/repository/OutboundMessageRepository.java`**
-   - Added query methods for metrics and alerts:
-     - `countByStatus()` - Count messages by status
-     - `countByStatusAndChannel()` - Count messages by status and channel
-     - `countByChannelAndAttemptCountGreaterThan()` - Count messages with retries
-     - `findStuckMessages()` - Find messages stuck in processing
+### DTOs (7 files)
+1. `backend/src/main/java/com/example/backend/dto/WhatsAppTemplateRequest.java`
+   - Request DTO for creating/updating templates
+   - JSR-303 validation annotations
 
-3. **`backend/src/main/java/com/example/backend/service/OutboundJobWorker.java`**
-   - Integrated `MetricsService` via constructor injection
-   - Added metrics recording in `handleSuccess()`:
-     - Increments success counter
-     - Records delivery latency
-   - Added metrics recording in `handleFailure()`:
-     - Increments retry counter (for retryable failures)
-     - Increments failure and dead letter counters (for permanent failures)
+2. `backend/src/main/java/com/example/backend/dto/WhatsAppTemplateResponse.java`
+   - Response DTO with all template details
 
-4. **`backend/src/main/java/com/example/backend/service/OutboundMessageService.java`**
-   - Integrated `MetricsService` via constructor injection
-   - Added metrics recording in `createOutboundMessage()`:
-     - Increments queued counter when message is created
+3. `backend/src/main/java/com/example/backend/dto/TemplateVariableRequest.java`
+   - Request DTO for template variables
 
-5. **`backend/src/main/resources/application.yml`**
-   - Added outbound metrics configuration section
-   - Added outbound alert configuration section with cron expressions
-   - Configured percentile histograms for delivery latency metrics
-   - Defined custom percentiles (p50, p75, p90, p95, p99)
+4. `backend/src/main/java/com/example/backend/dto/TemplateVariableResponse.java`
+   - Response DTO for template variables
 
-6. **`backend/README.md`**
-   - Added Metrics and Prometheus endpoint documentation
-   - Added Observability section with reference to detailed documentation
+5. `backend/src/main/java/com/example/backend/dto/WhatsAppTemplateMapper.java`
+   - Mapper for entity-DTO conversions
 
-## Metrics Implemented
+6. `backend/src/main/java/com/example/backend/dto/TemplateApprovalRequest.java`
+   - Request DTO for approving templates
 
-### Counters (11 metrics)
-- `outbound_message_queued_total` - Messages queued by channel
-- `outbound_message_send_success_total` - Successful sends by channel
-- `outbound_message_send_failure_total` - Failed sends by channel and error code
-- `outbound_message_retry_total` - Retry attempts by channel
-- `outbound_message_dead_letter_total` - Permanently failed messages by channel
-- `outbound_message_stuck_alert_total` - Stuck message alerts by channel and status
-- `outbound_message_high_queue_depth_alert_total` - High queue depth alerts
-- `outbound_message_dead_letter_alert_total` - Dead letter queue growth alerts
-- `outbound_message_alert_error_total` - Alert service errors
+7. `backend/src/main/java/com/example/backend/dto/TemplateRejectionRequest.java`
+   - Request DTO for rejecting templates
 
-### Timers (1 metric)
-- `outbound_message_delivery_latency` - End-to-end delivery latency by channel with percentiles
+### Controller (1 file)
+`backend/src/main/java/com/example/backend/controller/WhatsAppTemplateController.java`
+- REST API endpoints under `/api/whatsapp/templates`
+- CRUD operations
+- Status management endpoints (activate, deactivate)
+- Approval workflow endpoints (submit, approve, reject)
+- Admin role required (except for active templates endpoint)
+- Swagger/OpenAPI documentation
+- Auditable operations
 
-### Gauges (5 metrics)
-- `outbound_message_queue_depth` - Current messages by status
-- `outbound_message_queue_depth_by_channel` - Current queued messages by channel
-- `outbound_message_retry_count` - Messages with retry attempts by channel
-- `outbound_message_dead_letter_queue_size` - Current failed message count
-- `outbound_message_total_queued` - Total queued messages across all channels
+### Database Migration (1 file)
+`backend/src/main/resources/db/migration/V24__Add_whatsapp_template_management.sql`
+- Creates whatsapp_template table with JSONB support
+- Creates template_variable table with foreign key
+- Indexes for performance optimization
+- Unique constraint on (org_id, name, language)
 
-## Alert Jobs Implemented
+### Documentation (2 files)
+1. `backend/WHATSAPP_TEMPLATES.md`
+   - Complete system documentation
+   - API endpoints with examples
+   - Validation rules
+   - Template lifecycle
+   - Integration guide
 
-### 1. Stuck Messages Alert
-- **Schedule**: Every 15 minutes (configurable)
-- **Detects**: Messages stuck in QUEUED or SENDING state
-- **Criteria**: 
-  - At least 3 attempts (configurable)
-  - At least 2 hours old (configurable)
-- **Action**: Logs detailed warning with message ID, channel, attempts, age, error code
+2. `backend/src/main/resources/whatsapp-template-examples.json`
+   - Real-world template examples
+   - Validation rule reference
+   - Usage patterns
 
-### 2. High Queue Depth Alert
-- **Schedule**: Every 10 minutes (configurable)
-- **Detects**: Excessive queue growth
-- **Criteria**: Total pending messages > 1000
-- **Action**: Logs warning with queue statistics
+### Updated Enums (2 files)
+1. `backend/src/main/java/com/example/backend/entity/enums/AuditEntityType.java`
+   - Added WHATSAPP_TEMPLATE and REFERENTIAL
 
-### 3. Dead Letter Queue Growth Alert
-- **Schedule**: Every hour (configurable)
-- **Detects**: Accumulation of permanently failed messages
-- **Criteria**: Failed messages > 100
-- **Action**: Logs warning with failed message count
+2. `backend/src/main/java/com/example/backend/entity/enums/AuditAction.java`
+   - Added ACTIVATE, DEACTIVATE, SUBMIT_FOR_APPROVAL, CREATE, UPDATE, DELETE, APPROVE, REJECT
 
-## Configuration Properties
+## API Endpoints
 
-All properties are environment-variable configurable:
+### Template Management
+- `GET /api/whatsapp/templates` - Get all templates (filtered by status)
+- `GET /api/whatsapp/templates/active` - Get active templates (public)
+- `GET /api/whatsapp/templates/{id}` - Get template by ID
+- `GET /api/whatsapp/templates/by-name` - Get template by name and language
+- `POST /api/whatsapp/templates` - Create template
+- `PUT /api/whatsapp/templates/{id}` - Update template
+- `DELETE /api/whatsapp/templates/{id}` - Delete template
 
-```yaml
-outbound:
-  metrics:
-    update-interval-ms: 10000
-  alert:
-    enabled: true
-    cron: "0 */15 * * * *"
-    stuck-message-threshold-attempts: 3
-    stuck-message-age-hours: 2
-    max-results: 100
-    high-queue-depth:
-      cron: "0 */10 * * * *"
-    dead-letter:
-      cron: "0 0 * * * *"
+### Status Management
+- `POST /api/whatsapp/templates/{id}/activate` - Activate template
+- `POST /api/whatsapp/templates/{id}/deactivate` - Deactivate template
 
-management:
-  metrics:
-    distribution:
-      percentiles-histogram:
-        outbound.message.delivery.latency: true
-      percentiles:
-        outbound.message.delivery.latency: 0.5, 0.75, 0.9, 0.95, 0.99
+### Approval Workflow
+- `POST /api/whatsapp/templates/{id}/submit-for-approval` - Submit for approval
+- `POST /api/whatsapp/templates/{id}/approve` - Approve template
+- `POST /api/whatsapp/templates/{id}/reject` - Reject template
+
+### Variables
+- `GET /api/whatsapp/templates/{id}/variables` - Get template variables
+
+## Key Features
+
+### Validation
+✅ Template name format (lowercase, numbers, underscores)
+✅ Language code format (ISO 639-1)
+✅ Component structure (header, body, footer, buttons)
+✅ Character length limits per component
+✅ Sequential variable validation ({{1}}, {{2}}, {{3}}, etc.)
+✅ Button count and type restrictions
+✅ Header format validation (TEXT, IMAGE, VIDEO, DOCUMENT)
+
+### Security
+✅ Organization isolation (tenant filtering)
+✅ Admin role requirement
+✅ Audit trail for all operations
+✅ Input validation with JSR-303
+✅ Secure status transitions
+
+### Business Rules
+✅ Cannot delete active templates
+✅ Templates must be unique per organization and language
+✅ Body component is required
+✅ Footer cannot contain variables
+✅ Maximum button limits enforced
+✅ Sequential variable numbering required
+
+### Template Lifecycle
 ```
+DRAFT → PENDING_APPROVAL → ACTIVE/REJECTED
+                              ↓
+                           INACTIVE
+```
+
+## Database Schema
+
+### whatsapp_template table
+- Primary key: id (BIGSERIAL)
+- Tenant isolation: org_id
+- Unique constraint: (org_id, name, language)
+- JSONB column: components
+- Audit fields: created_at, updated_at, created_by, updated_by
+- Indexes on: org_id, status, name, language, category
+
+### template_variable table
+- Primary key: id (BIGSERIAL)
+- Foreign key: template_id (CASCADE DELETE)
+- Tenant isolation: org_id
+- Audit fields: created_at, updated_at, created_by, updated_by
+- Indexes on: org_id, template_id, component_type, position
+
+## Testing
+
+### Example Templates Provided
+1. Order Confirmation (TRANSACTIONAL)
+2. Appointment Reminder (UTILITY)
+3. Welcome Message (MARKETING)
+
+### Validation Test Cases
+- Template name validation
+- Language code validation
+- Component structure validation
+- Variable sequence validation
+- Button limit validation
+- Character length validation
 
 ## Integration Points
 
-### Metrics Recording Flow
+### Existing System Integration
+✅ Uses BaseEntity for common fields
+✅ Follows existing entity patterns
+✅ Integrates with TenantContext for org isolation
+✅ Uses existing exception handling
+✅ Follows existing DTO/Mapper patterns
+✅ Integrates with audit system (@Auditable)
+✅ Uses existing security configuration (@PreAuthorize)
 
-1. **Message Creation**: `OutboundMessageService` → increments `outbound_message_queued_total`
-2. **Message Processing**: `OutboundJobWorker` → records success/failure/retry metrics
-3. **Delivery Tracking**: `OutboundJobWorker` → records delivery latency on success
-4. **Gauge Updates**: `OutboundMessageMetricsService` → queries DB and updates gauges every 10s
-5. **Alert Monitoring**: `OutboundMessageAlertService` → checks for issues and increments alert counters
+### External Integration
+- WhatsApp Business API (manual integration required)
+- Template submission flow documented
+- Approval/rejection workflow supported
 
-### Dependencies
+## Best Practices Followed
 
-- **Micrometer**: Core metrics library (already included via Spring Boot Actuator)
-- **Prometheus**: Metrics format for scraping (already configured)
-- **Spring Scheduling**: For periodic gauge updates and alert jobs (already enabled)
+✅ Separation of concerns (Entity, Service, Controller, DTO)
+✅ Input validation at multiple layers
+✅ Comprehensive error handling
+✅ Swagger/OpenAPI documentation
+✅ Transaction management
+✅ Audit trail
+✅ Security by default
+✅ RESTful API design
+✅ Database indexing for performance
+✅ Cascade operations for data integrity
 
-## Testing Considerations
+## Next Steps (Not Implemented)
 
-- Scheduling is disabled in test profiles (`spring.task.scheduling.enabled: false`)
-- Alert jobs will not run during tests
-- Metrics can still be validated by injecting `MeterRegistry` in tests
-- Gauge updates can be triggered manually by calling `OutboundMessageMetricsService.updateMetrics()`
+The following are documented as future enhancements:
+- Template versioning
+- Template cloning
+- Bulk template operations
+- Template usage analytics
+- Automatic WhatsApp API integration
+- Template preview rendering
+- A/B testing support
 
-## Deployment Considerations
+## Total Files Created: 23
 
-1. **Prometheus Scraping**: Configure Prometheus to scrape `/actuator/prometheus` endpoint
-2. **Grafana Dashboard**: Import the provided JSON dashboard configuration
-3. **Alert Configuration**: Consider setting up PagerDuty/Opsgenie alerts based on metrics
-4. **Resource Usage**: Gauge updates run every 10s - monitor DB query performance
-5. **Log Aggregation**: Ensure structured logs from alert service are captured
+- 2 Entities
+- 4 Enums
+- 2 Repositories
+- 2 Services
+- 7 DTOs
+- 1 Controller
+- 1 Migration
+- 2 Documentation files
+- 2 Updated enums
 
-## Sample Prometheus Queries
-
-```promql
-# Success rate by channel
-rate(outbound_message_send_success_total[5m]) / 
-(rate(outbound_message_send_success_total[5m]) + rate(outbound_message_send_failure_total[5m]))
-
-# P95 delivery latency
-histogram_quantile(0.95, sum by (channel, le) (rate(outbound_message_delivery_latency_bucket[5m])))
-
-# Current queue depth
-outbound_message_total_queued
-
-# Stuck message alert rate
-rate(outbound_message_stuck_alert_total[1h])
-```
-
-## Future Enhancements
-
-- Add circuit breaker metrics when implemented
-- Add per-organization queue depth metrics
-- Implement SLO tracking and burn rate alerts
-- Add provider-specific success/failure metrics
-- Track message age distribution in queue
-- Add correlation with external service health metrics
-
-## Monitoring Best Practices
-
-1. Set up alerts on:
-   - Delivery latency p95 > 5 seconds
-   - Success rate < 95%
-   - Stuck message alerts > 0
-   - Dead letter queue size growing
-   - High queue depth alerts
-
-2. Create dashboards for:
-   - Real-time queue health
-   - Channel-specific performance
-   - Error trending by error code
-   - Retry rate analysis
-
-3. Regular reviews:
-   - Weekly review of failed message patterns
-   - Monthly capacity planning based on queue trends
-   - Quarterly SLO review and adjustment
+All files follow the existing codebase patterns and conventions.

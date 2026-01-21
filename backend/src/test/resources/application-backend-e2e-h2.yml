@@ -53,3 +53,6 @@ logging:
   level:
     root: INFO
     com.example.backend: DEBUG
+
+rate-limit:
+  enabled: false

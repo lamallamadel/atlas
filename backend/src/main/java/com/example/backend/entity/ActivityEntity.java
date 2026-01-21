@@ -5,10 +5,13 @@ import com.example.backend.entity.enums.ActivityVisibility;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "activity")
@@ -35,6 +38,10 @@ public class ActivityEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "visibility", nullable = false, length = 50)
     private ActivityVisibility visibility;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "metadata", columnDefinition = "jsonb")
+    private Map<String, Object> metadata;
 
     @CreatedBy
     @Column(name = "created_by", length = 255)
@@ -86,5 +93,13 @@ public class ActivityEntity extends BaseEntity {
 
     public void setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 }

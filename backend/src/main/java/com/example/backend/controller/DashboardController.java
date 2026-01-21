@@ -5,6 +5,7 @@ import com.example.backend.dto.KpiCardDto;
 import com.example.backend.dto.TrendData;
 import com.example.backend.service.DashboardKpiService;
 import com.example.backend.service.DashboardService;
+import com.example.backend.service.OutboundMessageAlertService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -24,10 +25,12 @@ public class DashboardController {
 
     private final DashboardService dashboardService;
     private final DashboardKpiService dashboardKpiService;
+    private final OutboundMessageAlertService outboundMessageAlertService;
 
-    public DashboardController(DashboardService dashboardService, DashboardKpiService dashboardKpiService) {
+    public DashboardController(DashboardService dashboardService, DashboardKpiService dashboardKpiService, OutboundMessageAlertService outboundMessageAlertService) {
         this.dashboardService = dashboardService;
         this.dashboardKpiService = dashboardKpiService;
+        this.outboundMessageAlertService = outboundMessageAlertService;
     }
 
     @GetMapping("/kpis/annonces-actives")
@@ -68,5 +71,15 @@ public class DashboardController {
     public ResponseEntity<Map<String, TrendData>> getTrends(@RequestParam(required = false) String period) {
         Map<String, TrendData> trends = dashboardKpiService.getTrends(period);
         return ResponseEntity.ok(trends);
+    }
+
+    @GetMapping("/outbound/health")
+    @Operation(summary = "Get outbound message health metrics", description = "Returns real-time health metrics for outbound message processing including queue depths, DLQ size, and per-channel statistics")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Health metrics retrieved successfully")
+    })
+    public ResponseEntity<OutboundMessageAlertService.OutboundHealthMetrics> getOutboundHealth() {
+        OutboundMessageAlertService.OutboundHealthMetrics metrics = outboundMessageAlertService.getHealthMetrics();
+        return ResponseEntity.ok(metrics);
     }
 }

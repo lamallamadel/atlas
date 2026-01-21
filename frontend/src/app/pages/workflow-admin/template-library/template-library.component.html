@@ -1,0 +1,119 @@
+<div class="template-library-container">
+  <div class="library-header">
+    <h2>WhatsApp Template Library</h2>
+    <button mat-raised-button color="primary" (click)="createNewTemplate()">
+      <mat-icon>add</mat-icon>
+      Create Template
+    </button>
+  </div>
+
+  <div class="library-filters">
+    <mat-form-field appearance="outline" class="search-field">
+      <mat-label>Search templates</mat-label>
+      <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onSearchChange($event)" placeholder="Search by name or description">
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+
+    <mat-button-toggle-group [(ngModel)]="selectedStatus" (change)="onStatusFilterChange(selectedStatus)" class="status-filter">
+      <mat-button-toggle value="ALL">All</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.DRAFT">Draft</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.PENDING_APPROVAL">Pending</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.ACTIVE">Active</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.REJECTED">Rejected</mat-button-toggle>
+      <mat-button-toggle [value]="TemplateStatus.INACTIVE">Paused</mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <div class="templates-grid" *ngIf="!loading && filteredTemplates.length > 0">
+    <mat-card *ngFor="let template of filteredTemplates" class="template-card">
+      <mat-card-header>
+        <mat-icon [color]="getStatusColor(template.status)" mat-card-avatar>
+          {{ getStatusIcon(template.status) }}
+        </mat-icon>
+        <mat-card-title>{{ template.name }}</mat-card-title>
+        <mat-card-subtitle>{{ template.language }} - {{ getCategoryDisplay(template.category) }}</mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <div class="template-status">
+          <mat-chip [color]="getStatusColor(template.status)" selected>
+            {{ template.status }}
+          </mat-chip>
+        </div>
+        
+        <p class="template-description" *ngIf="template.description">
+          {{ template.description }}
+        </p>
+
+        <div class="template-meta">
+          <span class="meta-item">
+            <mat-icon>update</mat-icon>
+            {{ template.updatedAt | date:'short' }}
+          </span>
+          <span class="meta-item" *ngIf="template.variables && template.variables.length > 0">
+            <mat-icon>code</mat-icon>
+            {{ template.variables.length }} variable(s)
+          </span>
+        </div>
+
+        <div class="rejection-reason" *ngIf="template.status === TemplateStatus.REJECTED && template.rejectionReason">
+          <mat-icon color="warn">error</mat-icon>
+          <span>{{ template.rejectionReason }}</span>
+        </div>
+      </mat-card-content>
+
+      <mat-card-actions>
+        <button mat-button (click)="viewTemplate(template)">
+          <mat-icon>visibility</mat-icon>
+          View
+        </button>
+        <button mat-button (click)="editTemplate(template)" *ngIf="template.status !== TemplateStatus.PENDING_APPROVAL && template.status !== TemplateStatus.ACTIVE">
+          <mat-icon>edit</mat-icon>
+          Edit
+        </button>
+        <button mat-button [matMenuTriggerFor]="menu">
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          <button mat-menu-item (click)="duplicateTemplate(template)">
+            <mat-icon>content_copy</mat-icon>
+            Duplicate
+          </button>
+          <button mat-menu-item (click)="submitForApproval(template)" 
+                  *ngIf="template.status === TemplateStatus.DRAFT">
+            <mat-icon>send</mat-icon>
+            Submit for Approval
+          </button>
+          <button mat-menu-item (click)="pauseTemplate(template)" 
+                  *ngIf="template.status === TemplateStatus.ACTIVE">
+            <mat-icon>pause</mat-icon>
+            Pause
+          </button>
+          <button mat-menu-item (click)="activateTemplate(template)" 
+                  *ngIf="template.status === TemplateStatus.INACTIVE">
+            <mat-icon>play_arrow</mat-icon>
+            Activate
+          </button>
+          <button mat-menu-item (click)="deleteTemplate(template)" 
+                  *ngIf="template.status !== TemplateStatus.ACTIVE">
+            <mat-icon color="warn">delete</mat-icon>
+            Delete
+          </button>
+        </mat-menu>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && filteredTemplates.length === 0">
+    <mat-icon>inbox</mat-icon>
+    <h3>No templates found</h3>
+    <p *ngIf="searchQuery || selectedStatus !== 'ALL'">Try adjusting your filters</p>
+    <button mat-raised-button color="primary" (click)="createNewTemplate()" *ngIf="!searchQuery && selectedStatus === 'ALL'">
+      Create Your First Template
+    </button>
+  </div>
+
+  <div class="loading-state" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>

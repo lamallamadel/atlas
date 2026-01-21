@@ -41,4 +41,31 @@ public interface OutboundMessageRepository extends JpaRepository<OutboundMessage
     
     @Query("SELECT om FROM OutboundMessageEntity om WHERE om.status = :status AND om.attemptCount >= :minAttempts AND om.updatedAt < :beforeTime ORDER BY om.attemptCount DESC, om.updatedAt ASC")
     List<OutboundMessageEntity> findStuckMessages(@Param("status") OutboundMessageStatus status, @Param("minAttempts") Integer minAttempts, @Param("beforeTime") LocalDateTime beforeTime, Pageable pageable);
+    
+    @Query("SELECT om FROM OutboundMessageEntity om WHERE om.status = :status AND om.attemptCount >= :minAttempts ORDER BY om.attemptCount DESC, om.updatedAt ASC")
+    List<OutboundMessageEntity> findMessagesNeedingEscalation(@Param("status") OutboundMessageStatus status, @Param("minAttempts") Integer minAttempts, Pageable pageable);
+    
+    long countByChannelAndCreatedAtAfter(MessageChannel channel, LocalDateTime afterTime);
+    
+    long countByChannelAndStatusAndCreatedAtAfter(MessageChannel channel, OutboundMessageStatus status, LocalDateTime afterTime);
+    
+    @Query("SELECT om.channel, COUNT(om) FROM OutboundMessageEntity om WHERE om.status = :status GROUP BY om.channel")
+    List<Object[]> countByStatusGroupByChannel(@Param("status") OutboundMessageStatus status);
+    
+    @Query("SELECT om.channel, COUNT(om) FROM OutboundMessageEntity om WHERE om.status = :status AND om.createdAt >= :afterTime GROUP BY om.channel")
+    List<Object[]> countByStatusAndCreatedAtAfterGroupByChannel(@Param("status") OutboundMessageStatus status, @Param("afterTime") LocalDateTime afterTime);
+    
+    @Query("SELECT om.errorCode, COUNT(om) FROM OutboundMessageEntity om WHERE om.status = 'FAILED' AND om.createdAt >= :afterTime AND om.errorCode IS NOT NULL GROUP BY om.errorCode ORDER BY COUNT(om) DESC")
+    List<Object[]> countFailuresByErrorCode(@Param("afterTime") LocalDateTime afterTime);
+    
+    @Query("SELECT om FROM OutboundMessageEntity om WHERE om.status = 'FAILED' AND om.attemptCount >= om.maxAttempts ORDER BY om.updatedAt DESC")
+    List<OutboundMessageEntity> findDlqMessages(Pageable pageable);
+    
+    @Query("SELECT om.channel, COUNT(om) FROM OutboundMessageEntity om WHERE om.status = 'FAILED' AND om.attemptCount >= om.maxAttempts GROUP BY om.channel")
+    List<Object[]> countDlqMessagesByChannel();
+    
+    @Query("SELECT DATE(om.createdAt), COUNT(om) FROM OutboundMessageEntity om WHERE om.status = 'FAILED' AND om.createdAt >= :afterTime GROUP BY DATE(om.createdAt) ORDER BY DATE(om.createdAt)")
+    List<Object[]> countFailuresTrendByDate(@Param("afterTime") LocalDateTime afterTime);
+    
+    long countByStatusAndCreatedAtAfter(OutboundMessageStatus status, LocalDateTime afterTime);
 }

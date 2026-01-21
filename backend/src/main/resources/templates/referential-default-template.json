@@ -1,0 +1,207 @@
+{
+  "templateName": "Real Estate CRM Default Referentials",
+  "templateDescription": "Default referential values for real estate CRM including case types, statuses, lead sources, and outcome reasons",
+  "version": "1.0",
+  "items": [
+    {
+      "category": "CASE_TYPE",
+      "code": "CRM_LEAD_BUY",
+      "label": "Prospect Achat",
+      "description": "Lead for property purchase",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "category": "CASE_TYPE",
+      "code": "CRM_LEAD_RENT",
+      "label": "Prospect Location",
+      "description": "Lead for property rental",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "category": "CASE_TYPE",
+      "code": "CRM_OWNER_LEAD",
+      "label": "Prospect Propriétaire",
+      "description": "Owner lead (sell/rent)",
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "category": "CASE_TYPE",
+      "code": "CRM_SALE_TRANSACTION",
+      "label": "Transaction Vente",
+      "description": "Sale transaction",
+      "displayOrder": 4,
+      "isActive": true
+    },
+    {
+      "category": "CASE_TYPE",
+      "code": "CRM_RENTAL_TRANSACTION",
+      "label": "Transaction Location",
+      "description": "Rental transaction",
+      "displayOrder": 5,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_NEW",
+      "label": "Nouveau",
+      "description": "New case",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_TRIAGED",
+      "label": "Trié",
+      "description": "Triaged",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_CONTACTED",
+      "label": "Contacté",
+      "description": "Contacted",
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_QUALIFIED",
+      "label": "Qualifié",
+      "description": "Qualified",
+      "displayOrder": 5,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_VISIT_PLANNED",
+      "label": "Visite planifiée",
+      "description": "Visit planned",
+      "displayOrder": 8,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_CLOSED_WON",
+      "label": "Gagné",
+      "description": "Closed won",
+      "displayOrder": 16,
+      "isActive": true
+    },
+    {
+      "category": "CASE_STATUS",
+      "code": "CRM_CLOSED_LOST",
+      "label": "Perdu",
+      "description": "Closed lost",
+      "displayOrder": 17,
+      "isActive": true
+    },
+    {
+      "category": "LEAD_SOURCE",
+      "code": "WHATSAPP",
+      "label": "WhatsApp",
+      "description": "Lead from WhatsApp",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "category": "LEAD_SOURCE",
+      "code": "PHONE_CALL",
+      "label": "Appel téléphonique",
+      "description": "Lead from phone call",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "category": "LEAD_SOURCE",
+      "code": "EMAIL",
+      "label": "Email",
+      "description": "Lead from email",
+      "displayOrder": 4,
+      "isActive": true
+    },
+    {
+      "category": "LEAD_SOURCE",
+      "code": "FACEBOOK",
+      "label": "Facebook",
+      "description": "Lead from Facebook",
+      "displayOrder": 5,
+      "isActive": true
+    },
+    {
+      "category": "LEAD_SOURCE",
+      "code": "WEBSITE",
+      "label": "Site web",
+      "description": "Lead from website",
+      "displayOrder": 9,
+      "isActive": true
+    },
+    {
+      "category": "LOSS_REASON",
+      "code": "PRICE_TOO_HIGH",
+      "label": "Prix trop élevé",
+      "description": "Price too high",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "category": "LOSS_REASON",
+      "code": "NOT_INTERESTED",
+      "label": "Pas intéressé",
+      "description": "Not interested",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "category": "LOSS_REASON",
+      "code": "COMPETITOR",
+      "label": "Concurrence",
+      "description": "Competitor",
+      "displayOrder": 3,
+      "isActive": true
+    },
+    {
+      "category": "LOSS_REASON",
+      "code": "NO_RESPONSE",
+      "label": "Sans réponse",
+      "description": "No response",
+      "displayOrder": 4,
+      "isActive": true
+    },
+    {
+      "category": "WON_REASON",
+      "code": "SIGNED",
+      "label": "Signé",
+      "description": "Signed",
+      "displayOrder": 1,
+      "isActive": true
+    },
+    {
+      "category": "WON_REASON",
+      "code": "RESERVED",
+      "label": "Réservé",
+      "description": "Reserved",
+      "displayOrder": 2,
+      "isActive": true
+    },
+    {
+      "category": "WON_REASON",
+      "code": "SOLD",
+      "label": "Vendu",
+      "description": "Sold",
+      "displayOrder": 4,
+      "isActive": true
+    },
+    {
+      "category": "WON_REASON",
+      "code": "RENTED",
+      "label": "Loué",
+      "description": "Rented",
+      "displayOrder": 5,
+      "isActive": true
+    }
+  ]
+}

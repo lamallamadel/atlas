@@ -1,0 +1,244 @@
+<div class="whatsapp-messaging-ui" [class.mobile]="isMobile">
+  <!-- Header -->
+  <div class="messaging-header">
+    <div class="recipient-info">
+      <mat-icon class="whatsapp-icon">chat</mat-icon>
+      <div class="recipient-details">
+        <div class="recipient-name">{{ recipientName || 'Contact WhatsApp' }}</div>
+        <div class="recipient-phone" *ngIf="recipientPhone">{{ recipientPhone }}</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button 
+        mat-icon-button 
+        matTooltip="Actualiser"
+        (click)="loadMessages()">
+        <mat-icon>refresh</mat-icon>
+      </button>
+      <mat-icon 
+        class="connection-indicator"
+        [class.online]="isOnline"
+        [class.offline]="!isOnline"
+        [matTooltip]="isOnline ? 'En ligne' : 'Hors ligne'">
+        {{ isOnline ? 'wifi' : 'wifi_off' }}
+      </mat-icon>
+    </div>
+  </div>
+
+  <!-- Consent Warning -->
+  <div class="consent-warning" *ngIf="!hasValidConsent && consentChecked">
+    <mat-icon>warning</mat-icon>
+    <span>{{ getConsentWarningMessage() }}</span>
+  </div>
+
+  <!-- Messages Thread -->
+  <div class="messages-container" [class.with-consent-warning]="!hasValidConsent && consentChecked">
+    <cdk-virtual-scroll-viewport
+      #viewport
+      itemSize="80"
+      class="messages-viewport">
+      
+      <div class="loading-indicator" *ngIf="loading">
+        <mat-spinner diameter="40"></mat-spinner>
+        <span>Chargement des messages...</span>
+      </div>
+
+      <div class="messages-list" *ngIf="!loading">
+        <ng-container *cdkVirtualFor="let message of messages; trackBy: trackByMessageId; let i = index">
+          
+          <!-- Date divider -->
+          <div class="date-divider" *ngIf="showDateDivider(i)">
+            <span>{{ getDateDividerText(message.timestamp) }}</span>
+          </div>
+
+          <!-- Message bubble -->
+          <div 
+            class="message-wrapper"
+            [class.outbound]="message.direction === MessageDirection.OUTBOUND"
+            [class.inbound]="message.direction === MessageDirection.INBOUND"
+            [class.failed]="message.deliveryStatus === MessageDeliveryStatus.FAILED"
+            [style.transform]="getSwipeTransform(message.id)"
+            (touchstart)="onTouchStart($event, message)"
+            (touchmove)="onTouchMove($event, message)"
+            (touchend)="onTouchEnd($event, message)">
+            
+            <!-- Swipe actions -->
+            <div 
+              class="swipe-actions"
+              [class.visible]="swipedMessageId === message.id && Math.abs(swipeOffset) > 50">
+              <button 
+                mat-icon-button 
+                class="action-retry"
+                *ngIf="message.deliveryStatus === MessageDeliveryStatus.FAILED"
+                (click)="retryMessage(message, $event)"
+                matTooltip="Réessayer">
+                <mat-icon>refresh</mat-icon>
+              </button>
+              <button 
+                mat-icon-button 
+                class="action-copy"
+                (click)="copyMessage(message, $event)"
+                matTooltip="Copier">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+
+            <div class="message-bubble">
+              <div class="message-content">
+                {{ message.content }}
+              </div>
+              <div class="message-meta">
+                <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
+                <mat-icon 
+                  class="delivery-status"
+                  [class]="getDeliveryStatusClass(message.deliveryStatus)"
+                  *ngIf="message.direction === MessageDirection.OUTBOUND && message.deliveryStatus">
+                  {{ getDeliveryStatusIcon(message.deliveryStatus) }}
+                </mat-icon>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+
+        <!-- Empty state -->
+        <div class="empty-state" *ngIf="messages.length === 0">
+          <mat-icon>chat_bubble_outline</mat-icon>
+          <p>Aucun message WhatsApp</p>
+          <small>Commencez une conversation en envoyant un message</small>
+        </div>
+      </div>
+    </cdk-virtual-scroll-viewport>
+  </div>
+
+  <!-- Message Input Area -->
+  <div class="message-input-area" [class.disabled]="!hasValidConsent">
+    
+    <!-- Template chip -->
+    <div class="template-chip-container" *ngIf="selectedTemplate">
+      <mat-chip-listbox>
+        <mat-chip class="template-chip" [highlighted]="true">
+          <mat-icon matChipAvatar>description</mat-icon>
+          <span>{{ selectedTemplate.name }}</span>
+          <button matChipRemove (click)="removeTemplate()">
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      </mat-chip-listbox>
+    </div>
+
+    <!-- Template variables -->
+    <div class="template-variables" *ngIf="selectedTemplate && selectedTemplate.variables.length > 0">
+      <div class="variables-header">
+        <mat-icon>edit</mat-icon>
+        <span>Variables du modèle</span>
+      </div>
+      <div class="variable-inputs">
+        <mat-form-field 
+          appearance="outline" 
+          class="variable-field"
+          *ngFor="let variable of selectedTemplate.variables">
+          <mat-label>{{ variable }}</mat-label>
+          <input 
+            matInput 
+            [(ngModel)]="templateVariables[variable]"
+            (ngModelChange)="onVariableChange()"
+            [placeholder]="'Valeur pour ' + variable"
+            required>
+          <mat-icon matSuffix>label</mat-icon>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- Attachments preview -->
+    <div class="attachments-preview" *ngIf="attachments.length > 0">
+      <div class="attachments-header">
+        <mat-icon>attach_file</mat-icon>
+        <span>{{ attachments.length }} fichier(s) joint(s)</span>
+      </div>
+      <div class="attachment-list">
+        <div class="attachment-item" *ngFor="let attachment of attachments; let i = index">
+          <div class="attachment-preview" *ngIf="attachment.type === 'image' && attachment.preview">
+            <img [src]="attachment.preview" [alt]="attachment.file.name">
+          </div>
+          <div class="attachment-preview document" *ngIf="attachment.type === 'document'">
+            <mat-icon>{{ getAttachmentIcon(attachment) }}</mat-icon>
+          </div>
+          <div class="attachment-info">
+            <div class="attachment-name">{{ attachment.file.name }}</div>
+            <div class="attachment-size">{{ getAttachmentSize(attachment) }}</div>
+          </div>
+          <button 
+            mat-icon-button 
+            class="remove-attachment"
+            (click)="removeAttachment(i)"
+            matTooltip="Retirer">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Input controls -->
+    <div class="input-controls">
+      <button 
+        mat-icon-button 
+        class="template-button"
+        [disabled]="!hasValidConsent"
+        (click)="openTemplateSelector()"
+        [matTooltip]="selectedTemplate ? 'Modifier le modèle' : 'Sélectionner un modèle'">
+        <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
+      </button>
+
+      <button 
+        mat-icon-button 
+        class="attachment-button"
+        [disabled]="!hasValidConsent"
+        (click)="fileInput.click()"
+        matTooltip="Joindre un fichier">
+        <mat-icon>attach_file</mat-icon>
+      </button>
+      <input 
+        #fileInput
+        type="file" 
+        hidden 
+        multiple
+        [accept]="allowedImageTypes.concat(allowedDocumentTypes).join(',')"
+        (change)="onFileSelected($event)">
+
+      <div class="message-input-wrapper">
+        <textarea
+          #messageInput
+          class="message-textarea"
+          [placeholder]="getPlaceholder()"
+          [(ngModel)]="messageContent"
+          [disabled]="!hasValidConsent || selectedTemplate !== null"
+          (input)="autoGrow($event)"
+          (keydown.enter)="onEnterKey($any($event))"
+          rows="1"
+          maxlength="4096"
+          cdkTextareaAutosize
+          [cdkAutosizeMinRows]="1"
+          [cdkAutosizeMaxRows]="4"></textarea>
+      </div>
+
+      <button 
+        mat-fab 
+        color="primary"
+        class="send-button"
+        [disabled]="!canSend()"
+        (click)="sendMessage()"
+        [class.sending]="sending"
+        matTooltip="Envoyer">
+        <mat-icon *ngIf="!sending">send</mat-icon>
+        <mat-spinner *ngIf="sending" diameter="24"></mat-spinner>
+      </button>
+    </div>
+
+    <!-- Message info -->
+    <div class="message-info" *ngIf="messageContent.length > 0 || attachments.length > 0">
+      <span class="character-count">{{ messageContent.length }}/4096</span>
+      <span class="separator" *ngIf="attachments.length > 0">•</span>
+      <span class="attachment-count" *ngIf="attachments.length > 0">{{ attachments.length }} fichier(s)</span>
+    </div>
+  </div>
+</div>

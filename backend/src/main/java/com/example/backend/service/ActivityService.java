@@ -60,6 +60,7 @@ public class ActivityService {
         activity.setContent(request.getContent());
         activity.setDossier(dossier);
         activity.setVisibility(request.getVisibility());
+        activity.setMetadata(request.getMetadata());
 
         LocalDateTime now = LocalDateTime.now();
         activity.setCreatedAt(now);
@@ -173,6 +174,10 @@ public class ActivityService {
             activity.setVisibility(request.getVisibility());
         }
 
+        if (request.getMetadata() != null) {
+            activity.setMetadata(request.getMetadata());
+        }
+
         activity.setUpdatedAt(LocalDateTime.now());
         ActivityEntity updated = activityRepository.save(activity);
         ActivityResponse response = activityMapper.toResponse(updated);
@@ -217,11 +222,17 @@ public class ActivityService {
         activity.setContent(description);
         activity.setDossier(dossier);
         activity.setVisibility(ActivityVisibility.INTERNAL);
+        activity.setMetadata(metadata);
 
         LocalDateTime now = LocalDateTime.now();
         activity.setCreatedAt(now);
         activity.setUpdatedAt(now);
 
         activityRepository.save(activity);
+    }
+
+    @Transactional
+    public void logActivity(Long dossierId, ActivityType activityType, String description, Map<String, Object> metadata) {
+        logActivity(dossierId, activityType.name(), description, metadata);
     }
 }

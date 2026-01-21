@@ -1,0 +1,46 @@
+<div class="preview-dialog-container">
+  <div class="preview-header">
+    <div class="header-info">
+      <h2 class="document-title">{{ data.document.fileName }}</h2>
+      <span class="document-size">{{ formatFileSize(data.document.fileSize) }}</span>
+    </div>
+    <div class="header-actions">
+      <button mat-icon-button matTooltip="Télécharger" (click)="download()">
+        <mat-icon>download</mat-icon>
+      </button>
+      <button mat-icon-button matTooltip="Fermer" (click)="close()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <div class="preview-content">
+    <div *ngIf="loading" class="loading-container">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p class="loading-text">Chargement de l'aperçu...</p>
+    </div>
+
+    <div *ngIf="error && !loading" class="error-container">
+      <mat-icon class="error-icon">error_outline</mat-icon>
+      <p class="error-text">{{ error }}</p>
+      <button mat-raised-button color="primary" (click)="loadPreview()">
+        Réessayer
+      </button>
+    </div>
+
+    <div *ngIf="!loading && !error && previewUrl" class="preview-wrapper">
+      <img 
+        *ngIf="isImage" 
+        [src]="previewUrl" 
+        [alt]="data.document.fileName"
+        class="preview-image">
+      
+      <iframe 
+        *ngIf="isPdf" 
+        [src]="previewUrl" 
+        class="preview-iframe"
+        frameborder="0">
+      </iframe>
+    </div>
+  </div>
+</div>

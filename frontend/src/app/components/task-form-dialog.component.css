@@ -1,0 +1,28 @@
+.task-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px 0;
+  min-width: 500px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-dialog-content {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+mat-dialog-actions {
+  padding: 16px;
+  gap: 8px;
+}
+
+@media (max-width: 599px) {
+  .task-form {
+    min-width: auto;
+    width: 100%;
+  }
+}

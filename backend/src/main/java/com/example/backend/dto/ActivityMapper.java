@@ -15,6 +15,7 @@ public class ActivityMapper {
         response.setVisibility(entity.getVisibility());
         response.setCreatedAt(entity.getCreatedAt());
         response.setCreatedBy(entity.getCreatedBy());
+        response.setMetadata(entity.getMetadata());
         return response;
     }
 }

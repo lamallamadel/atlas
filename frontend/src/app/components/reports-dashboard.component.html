@@ -1,59 +1,91 @@
 <div class="reports-dashboard-container">
   <header class="header">
-    <h1>KPI & Reporting Dashboard</h1>
+    <h1>Analytics Dashboard</h1>
     
-    <div class="date-filter" role="group" aria-label="Filtres de date">
-      <mat-form-field appearance="outline">
-        <mat-label>From Date</mat-label>
-        <input
-          matInput
-          [matDatepicker]="fromPicker"
-          [ngModel]="parseDate(dateFrom)"
-          (ngModelChange)="dateFrom = formatDate($event)"
-          aria-label="Date de début pour le filtre"
+    <div class="header-controls">
+      <div class="date-filter" role="group" aria-label="Date range selector">
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>From Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="fromPicker"
+            [ngModel]="parseDate(dateFrom)"
+            (ngModelChange)="dateFrom = formatDate($event)"
+            aria-label="Start date for filter"
+          >
+          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
+        
+        <mat-form-field appearance="outline" class="date-field">
+          <mat-label>To Date</mat-label>
+          <input
+            matInput
+            [matDatepicker]="toPicker"
+            [ngModel]="parseDate(dateTo)"
+            (ngModelChange)="dateTo = formatDate($event)"
+            aria-label="End date for filter"
+          >
+          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+        
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="applyDateFilter()" 
+          aria-label="Apply date filter"
+          class="apply-filter-btn"
         >
-        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-        <mat-datepicker #fromPicker></mat-datepicker>
-      </mat-form-field>
-      
-      <mat-form-field appearance="outline">
-        <mat-label>To Date</mat-label>
-        <input
-          matInput
-          [matDatepicker]="toPicker"
-          [ngModel]="parseDate(dateTo)"
-          (ngModelChange)="dateTo = formatDate($event)"
-          aria-label="Date de fin pour le filtre"
+          <mat-icon>filter_alt</mat-icon>
+          Apply
+        </button>
+      </div>
+
+      <div class="export-controls">
+        <button 
+          mat-stroked-button 
+          (click)="exportToCSV()" 
+          [disabled]="loading || !analyticsData"
+          aria-label="Export to CSV"
+          class="export-btn"
         >
-        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-        <mat-datepicker #toPicker></mat-datepicker>
-      </mat-form-field>
-      
-      <button mat-raised-button color="primary" (click)="applyDateFilter()" aria-label="Appliquer les filtres de date">
-        Apply Filter
-      </button>
+          <mat-icon>table_chart</mat-icon>
+          Export CSV
+        </button>
+        <button 
+          mat-stroked-button 
+          (click)="exportToPDF()" 
+          [disabled]="loading || !analyticsData"
+          aria-label="Export to PDF"
+          class="export-btn"
+        >
+          <mat-icon>picture_as_pdf</mat-icon>
+          Export PDF
+        </button>
+      </div>
     </div>
   </header>
 
-  <div *ngIf="loading">
-    <app-loading-skeleton variant="dashboard-kpi" aria-label="Chargement des KPI"></app-loading-skeleton>
-    <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px;" aria-label="Chargement des rapports"></app-loading-skeleton>
+  <div *ngIf="loading" class="loading-container">
+    <app-loading-skeleton variant="dashboard-kpi" aria-label="Loading analytics data"></app-loading-skeleton>
+    <app-loading-skeleton variant="card" [rows]="3" style="margin-top: 24px;" aria-label="Loading charts"></app-loading-skeleton>
   </div>
 
   <div *ngIf="error" class="error-message" role="alert" aria-live="assertive">
     <mat-card>
       <mat-card-content>
+        <mat-icon color="warn">error</mat-icon>
         <p>{{ error }}</p>
       </mat-card-content>
     </mat-card>
   </div>
 
   <main *ngIf="!loading && !error" class="dashboard-content">
-    <section class="kpi-cards" aria-labelledby="kpi-section-title" role="list">
-      <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
-      
-      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Temps de réponse moyen: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' heures'">
+    <section class="kpi-cards" aria-label="Key performance indicators" role="list">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Average response time: ' + (kpiReport?.averageResponseTimeHours?.toFixed(2) || 0) + ' hours'">
         <mat-card-header>
+          <mat-icon class="kpi-icon" color="primary">schedule</mat-icon>
           <mat-card-title>
             <h3>Avg Response Time</h3>
           </mat-card-title>
@@ -64,8 +96,9 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Taux de présentation aux rendez-vous: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' pour cent'">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Appointment show rate: ' + (kpiReport?.appointmentShowRate?.toFixed(1) || 0) + ' percent'">
         <mat-card-header>
+          <mat-icon class="kpi-icon" color="accent">event_available</mat-icon>
           <mat-card-title>
             <h3>Appointment Show Rate</h3>
           </mat-card-title>
@@ -76,8 +109,9 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Vélocité du pipeline: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' jours jusqu\'à la clôture'">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Pipeline velocity: ' + (kpiReport?.pipelineVelocityDays?.toFixed(1) || 0) + ' days to close'">
         <mat-card-header>
+          <mat-icon class="kpi-icon" style="color: #FF9800;">speed</mat-icon>
           <mat-card-title>
             <h3>Pipeline Velocity</h3>
           </mat-card-title>
@@ -88,8 +122,9 @@
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Taux de conversion global: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' pour cent'">
+      <mat-card class="kpi-card" role="listitem" [attr.aria-label]="'Overall conversion rate: ' + (pipelineSummary?.overallConversionRate?.toFixed(1) || 0) + ' percent'">
         <mat-card-header>
+          <mat-icon class="kpi-icon" style="color: #4CAF50;">trending_up</mat-icon>
           <mat-card-title>
             <h3>Overall Conversion</h3>
           </mat-card-title>
@@ -102,16 +137,30 @@
     </section>
 
     <div class="charts-grid">
-      <mat-card class="chart-card">
+      <mat-card class="chart-card clickable" [matTooltip]="'Click on a stage to view filtered dossiers'">
         <mat-card-header>
-          <mat-card-title>Conversion Rate by Source</mat-card-title>
+          <mat-card-title>
+            <mat-icon class="chart-icon">filter_list</mat-icon>
+            Conversion Funnel by Stage
+          </mat-card-title>
+          <button mat-icon-button [matMenuTriggerFor]="funnelMenu" aria-label="Chart options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #funnelMenu="matMenu">
+            <button mat-menu-item (click)="exportToCSV()">
+              <mat-icon>download</mat-icon>
+              Export Data
+            </button>
+          </mat-menu>
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
-              [data]="conversionBySourceChartData"
-              [options]="conversionBySourceChartOptions"
-              [type]="conversionBySourceChartType">
+            <canvas 
+              #conversionFunnelCanvas
+              baseChart
+              [data]="conversionFunnelChartData"
+              [options]="conversionFunnelChartOptions"
+              [type]="conversionFunnelChartType">
             </canvas>
           </div>
         </mat-card-content>
@@ -119,14 +168,28 @@
 
       <mat-card class="chart-card">
         <mat-card-header>
-          <mat-card-title>Pipeline Funnel</mat-card-title>
+          <mat-card-title>
+            <mat-icon class="chart-icon">people</mat-icon>
+            Agent Performance Comparison
+          </mat-card-title>
+          <button mat-icon-button [matMenuTriggerFor]="agentMenu" aria-label="Chart options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #agentMenu="matMenu">
+            <button mat-menu-item (click)="exportToCSV()">
+              <mat-icon>download</mat-icon>
+              Export Data
+            </button>
+          </mat-menu>
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
-              [data]="pipelineFunnelChartData"
-              [options]="pipelineFunnelChartOptions"
-              [type]="pipelineFunnelChartType">
+            <canvas 
+              #agentPerformanceCanvas
+              baseChart
+              [data]="agentPerformanceChartData"
+              [options]="agentPerformanceChartOptions"
+              [type]="agentPerformanceChartType">
             </canvas>
           </div>
         </mat-card-content>
@@ -134,29 +197,57 @@
 
       <mat-card class="chart-card chart-card-wide">
         <mat-card-header>
-          <mat-card-title>Dossier Creation Over Time</mat-card-title>
+          <mat-card-title>
+            <mat-icon class="chart-icon">show_chart</mat-icon>
+            Revenue Forecast Over Time
+          </mat-card-title>
+          <button mat-icon-button [matMenuTriggerFor]="revenueMenu" aria-label="Chart options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #revenueMenu="matMenu">
+            <button mat-menu-item (click)="exportToCSV()">
+              <mat-icon>download</mat-icon>
+              Export Data
+            </button>
+          </mat-menu>
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
-              [data]="dossierTimeSeriesChartData"
-              [options]="dossierTimeSeriesChartOptions"
-              [type]="dossierTimeSeriesChartType">
+            <canvas 
+              #revenueForecastCanvas
+              baseChart
+              [data]="revenueForecastChartData"
+              [options]="revenueForecastChartOptions"
+              [type]="revenueForecastChartType">
             </canvas>
           </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card class="chart-card chart-card-wide">
+      <mat-card class="chart-card clickable" [matTooltip]="'Click on a source to view filtered dossiers'">
         <mat-card-header>
-          <mat-card-title>Conversions Over Time</mat-card-title>
+          <mat-card-title>
+            <mat-icon class="chart-icon">pie_chart</mat-icon>
+            Lead Sources Distribution
+          </mat-card-title>
+          <button mat-icon-button [matMenuTriggerFor]="sourceMenu" aria-label="Chart options">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          <mat-menu #sourceMenu="matMenu">
+            <button mat-menu-item (click)="exportToCSV()">
+              <mat-icon>download</mat-icon>
+              Export Data
+            </button>
+          </mat-menu>
         </mat-card-header>
         <mat-card-content>
           <div class="chart-container">
-            <canvas baseChart
-              [data]="conversionTimeSeriesChartData"
-              [options]="conversionTimeSeriesChartOptions"
-              [type]="conversionTimeSeriesChartType">
+            <canvas 
+              #leadSourceCanvas
+              baseChart
+              [data]="leadSourceChartData"
+              [options]="leadSourceChartOptions"
+              [type]="leadSourceChartType">
             </canvas>
           </div>
         </mat-card-content>
@@ -164,62 +255,146 @@
     </div>
 
     <div class="detailed-metrics">
-      <mat-card>
+      <mat-card class="metrics-card">
         <mat-card-header>
-          <mat-card-title>Conversion Details by Source</mat-card-title>
+          <mat-card-title>
+            <mat-icon class="chart-icon">leaderboard</mat-icon>
+            Agent Performance Details
+          </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <table mat-table [dataSource]="kpiReport?.conversionRateBySource || []" class="metrics-table">
-            <ng-container matColumnDef="source">
-              <th mat-header-cell *matHeaderCellDef>Source</th>
-              <td mat-cell *matCellDef="let element">{{ element.source }}</td>
-            </ng-container>
+          <div class="table-container">
+            <table mat-table [dataSource]="analyticsData?.agentPerformance || []" class="metrics-table">
+              <ng-container matColumnDef="agentName">
+                <th mat-header-cell *matHeaderCellDef>Agent Name</th>
+                <td mat-cell *matCellDef="let element">{{ element.agentName }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="totalDossiers">
-              <th mat-header-cell *matHeaderCellDef>Total Dossiers</th>
-              <td mat-cell *matCellDef="let element">{{ element.totalDossiers }}</td>
-            </ng-container>
+              <ng-container matColumnDef="totalDossiers">
+                <th mat-header-cell *matHeaderCellDef>Total Dossiers</th>
+                <td mat-cell *matCellDef="let element">{{ element.totalDossiers }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="wonDossiers">
-              <th mat-header-cell *matHeaderCellDef>Won Dossiers</th>
-              <td mat-cell *matCellDef="let element">{{ element.wonDossiers }}</td>
-            </ng-container>
+              <ng-container matColumnDef="closedDossiers">
+                <th mat-header-cell *matHeaderCellDef>Closed</th>
+                <td mat-cell *matCellDef="let element">{{ element.closedDossiers }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="conversionRate">
-              <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
-              <td mat-cell *matCellDef="let element">{{ element.conversionRate.toFixed(2) }}%</td>
-            </ng-container>
+              <ng-container matColumnDef="conversionRate">
+                <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="conversion-rate" [class.high]="element.conversionRate >= 50" [class.medium]="element.conversionRate >= 25 && element.conversionRate < 50">
+                    {{ element.conversionRate.toFixed(1) }}%
+                  </span>
+                </td>
+              </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="['source', 'totalDossiers', 'wonDossiers', 'conversionRate']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['source', 'totalDossiers', 'wonDossiers', 'conversionRate'];"></tr>
-          </table>
+              <ng-container matColumnDef="averageResponseTimeHours">
+                <th mat-header-cell *matHeaderCellDef>Avg Response Time</th>
+                <td mat-cell *matCellDef="let element">{{ element.averageResponseTimeHours.toFixed(1) }}h</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['agentName', 'totalDossiers', 'closedDossiers', 'conversionRate', 'averageResponseTimeHours']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['agentName', 'totalDossiers', 'closedDossiers', 'conversionRate', 'averageResponseTimeHours'];"></tr>
+            </table>
+          </div>
         </mat-card-content>
       </mat-card>
 
-      <mat-card>
+      <mat-card class="metrics-card">
         <mat-card-header>
-          <mat-card-title>Pipeline Stage Distribution</mat-card-title>
+          <mat-card-title>
+            <mat-icon class="chart-icon">source</mat-icon>
+            Lead Sources Breakdown
+          </mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <table mat-table [dataSource]="pipelineSummary?.stageMetrics || []" class="metrics-table">
-            <ng-container matColumnDef="stage">
-              <th mat-header-cell *matHeaderCellDef>Stage</th>
-              <td mat-cell *matCellDef="let element">{{ element.stage }}</td>
-            </ng-container>
+          <div class="table-container">
+            <table mat-table [dataSource]="analyticsData?.leadSources || []" class="metrics-table">
+              <ng-container matColumnDef="source">
+                <th mat-header-cell *matHeaderCellDef>Source</th>
+                <td mat-cell *matCellDef="let element">
+                  <button mat-button class="source-link" (click)="drillDownToSource(element.source)">
+                    {{ element.source }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
 
-            <ng-container matColumnDef="count">
-              <th mat-header-cell *matHeaderCellDef>Count</th>
-              <td mat-cell *matCellDef="let element">{{ element.count }}</td>
-            </ng-container>
+              <ng-container matColumnDef="count">
+                <th mat-header-cell *matHeaderCellDef>Count</th>
+                <td mat-cell *matCellDef="let element">{{ element.count }}</td>
+              </ng-container>
 
-            <ng-container matColumnDef="percentage">
-              <th mat-header-cell *matHeaderCellDef>Percentage</th>
-              <td mat-cell *matCellDef="let element">{{ element.percentage.toFixed(2) }}%</td>
-            </ng-container>
+              <ng-container matColumnDef="percentage">
+                <th mat-header-cell *matHeaderCellDef>Percentage</th>
+                <td mat-cell *matCellDef="let element">
+                  <div class="percentage-bar">
+                    <div class="percentage-fill" [style.width.%]="element.percentage"></div>
+                    <span class="percentage-text">{{ element.percentage.toFixed(1) }}%</span>
+                  </div>
+                </td>
+              </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="['stage', 'count', 'percentage']"></tr>
-            <tr mat-row *matRowDef="let row; columns: ['stage', 'count', 'percentage'];"></tr>
-          </table>
+              <ng-container matColumnDef="conversionRate">
+                <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
+                <td mat-cell *matCellDef="let element">{{ element.conversionRate.toFixed(1) }}%</td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['source', 'count', 'percentage', 'conversionRate']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['source', 'count', 'percentage', 'conversionRate'];"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="metrics-card chart-card-wide">
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon class="chart-icon">insights</mat-icon>
+            Conversion Funnel Metrics
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="analyticsData?.conversionFunnel || []" class="metrics-table">
+              <ng-container matColumnDef="stage">
+                <th mat-header-cell *matHeaderCellDef>Stage</th>
+                <td mat-cell *matCellDef="let element">
+                  <button mat-button class="source-link" (click)="drillDownToStage(element.stage)">
+                    {{ element.stage }}
+                    <mat-icon>open_in_new</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="count">
+                <th mat-header-cell *matHeaderCellDef>Count</th>
+                <td mat-cell *matCellDef="let element">{{ element.count }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="conversionRate">
+                <th mat-header-cell *matHeaderCellDef>Conversion Rate</th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="conversion-rate" [class.high]="element.conversionRate >= 70" [class.medium]="element.conversionRate >= 40 && element.conversionRate < 70">
+                    {{ element.conversionRate.toFixed(1) }}%
+                  </span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="dropOffRate">
+                <th mat-header-cell *matHeaderCellDef>Drop-off Rate</th>
+                <td mat-cell *matCellDef="let element">
+                  <span class="dropoff-rate" [class.high]="element.dropOffRate >= 30" [class.medium]="element.dropOffRate >= 15 && element.dropOffRate < 30">
+                    {{ element.dropOffRate.toFixed(1) }}%
+                  </span>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="['stage', 'count', 'conversionRate', 'dropOffRate']"></tr>
+              <tr mat-row *matRowDef="let row; columns: ['stage', 'count', 'conversionRate', 'dropOffRate'];"></tr>
+            </table>
+          </div>
         </mat-card-content>
       </mat-card>
     </div>

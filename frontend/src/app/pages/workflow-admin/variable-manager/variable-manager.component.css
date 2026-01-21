@@ -1,0 +1,172 @@
+.variable-manager {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.manager-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 8px;
+}
+
+.manager-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.variables-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100px;
+}
+
+.variable-card {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.2s;
+}
+
+.variable-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.drag-indicator {
+  display: flex;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.4);
+  cursor: grab;
+}
+
+.drag-indicator:active {
+  cursor: grabbing;
+}
+
+.variable-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variable-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.variable-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.variable-name mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.required-chip {
+  height: 20px;
+  font-size: 11px;
+  padding: 0 8px;
+}
+
+.variable-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 28px;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: rgba(0, 0, 0, 0.7);
+}
+
+.detail-item mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: rgba(0, 0, 0, 0.5);
+  border: 2px dashed rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+}
+
+.empty-state mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  margin-bottom: 12px;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  margin: 8px 0 4px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.empty-state small {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.variable-tips {
+  margin-top: 16px;
+}
+
+.variable-tips mat-expansion-panel {
+  box-shadow: none;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.variable-tips mat-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.variable-tips ul {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.variable-tips li {
+  margin: 8px 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.cdk-drag-preview {
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+  opacity: 0.9;
+}
+
+.cdk-drag-animating {
+  transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}

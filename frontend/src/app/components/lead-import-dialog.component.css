@@ -1,0 +1,330 @@
+.lead-import-dialog {
+  min-width: 500px;
+  max-width: 700px;
+}
+
+h2[mat-dialog-title] {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px 0;
+}
+
+.title-icon {
+  color: #1976d2;
+}
+
+mat-dialog-content {
+  padding: 0 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.import-section {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.drop-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.drop-zone.dragging {
+  border-color: #1976d2;
+  background-color: #e3f2fd;
+}
+
+.drop-zone.has-file {
+  border-color: #4caf50;
+  background-color: #f1f8f4;
+}
+
+.drop-zone-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #1976d2;
+}
+
+.drop-zone-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.drop-zone-subtext {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.file-input-label {
+  cursor: pointer;
+}
+
+.file-input {
+  display: none;
+}
+
+.file-hint {
+  margin: 8px 0 0 0;
+  font-size: 12px;
+  color: #999;
+}
+
+.drop-zone-file {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.file-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #1976d2;
+}
+
+.file-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+
+.file-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  word-break: break-word;
+}
+
+.file-size {
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+}
+
+.remove-btn {
+  color: #f44336;
+}
+
+.strategy-section {
+  margin-top: 16px;
+}
+
+.strategy-title {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.strategy-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.strategy-option {
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: all 0.3s ease;
+}
+
+.strategy-option:hover {
+  background-color: #f5f5f5;
+}
+
+.strategy-option.mat-radio-button-checked {
+  border-color: #1976d2;
+  background-color: #e3f2fd;
+}
+
+.option-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.option-label {
+  font-weight: 500;
+  font-size: 14px;
+  color: #333;
+}
+
+.option-description {
+  font-size: 12px;
+  color: #666;
+}
+
+.progress-section {
+  padding: 16px;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.progress-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+}
+
+.progress-percentage {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.progress-stats {
+  display: flex;
+  gap: 24px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: #4caf50;
+}
+
+.stat-icon.error {
+  color: #f44336;
+}
+
+.stat-icon.processing {
+  color: #ff9800;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.stat span {
+  font-size: 14px;
+  color: #666;
+}
+
+.status-message {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background-color: white;
+}
+
+.status-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.status-icon.success {
+  color: #4caf50;
+}
+
+.status-icon.error {
+  color: #f44336;
+}
+
+.status-icon.processing {
+  color: #ff9800;
+  animation: spin 1s linear infinite;
+}
+
+.error-section {
+  margin-top: 16px;
+}
+
+.error-toggle {
+  width: 100%;
+  justify-content: flex-start;
+  color: #f44336;
+}
+
+.error-table {
+  margin-top: 12px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.errors-table {
+  width: 100%;
+}
+
+.errors-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  color: #333;
+}
+
+.errors-table td {
+  font-size: 13px;
+  color: #666;
+}
+
+.error-reason {
+  color: #f44336;
+  font-weight: 500;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px;
+  margin: 0;
+  border-top: 1px solid #ddd;
+}
+
+@media (max-width: 600px) {
+  .lead-import-dialog {
+    min-width: 100%;
+  }
+
+  .drop-zone {
+    padding: 24px 16px;
+  }
+
+  .progress-stats {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

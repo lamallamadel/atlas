@@ -2,6 +2,7 @@ package com.example.backend.repository;
 
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.DossierStatus;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -27,8 +28,16 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     List<Dossier> findByLeadPhoneAndOrgIdAndStatusNotIn(@Param("phone") String phone, @Param("orgId") String orgId,
             @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
 
+    @Query("SELECT DISTINCT d FROM Dossier d WHERE d.leadEmail = :email AND d.orgId = :orgId AND d.status NOT IN :excludedStatuses")
+    List<Dossier> findByLeadEmailAndOrgIdAndStatusNotIn(@Param("email") String email, @Param("orgId") String orgId,
+            @Param("excludedStatuses") List<DossierStatus> excludedStatuses);
+
     @Query("SELECT d FROM Dossier d LEFT JOIN FETCH d.parties WHERE d.id = :id")
     java.util.Optional<Dossier> findByIdWithParties(@Param("id") Long id);
+
+    @EntityGraph(attributePaths = {"parties", "appointments"})
+    @Query("SELECT d FROM Dossier d WHERE d.id = :id")
+    java.util.Optional<Dossier> findByIdWithRelations(@Param("id") Long id);
 
     List<Dossier> findByCaseType(String caseType);
 

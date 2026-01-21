@@ -84,7 +84,8 @@ public class DossierMapper {
         response.setNotes(dossier.getNotes());
         response.setStatus(dossier.getStatus());
         response.setCaseType(dossier.getCaseType());
-        response.setStatusCode(dossier.getStatusCode());
+        response.setStatusCode(dossier.getStatusCode() != null ? dossier.getStatusCode() : 
+                (dossier.getStatus() != null ? dossier.getStatus().name() : null));
         response.setLossReason(dossier.getLossReason());
         response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());
