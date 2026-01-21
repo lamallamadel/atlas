@@ -118,7 +118,7 @@ public class DossierService {
 
         metricsService.incrementDossierCreated(request.getSource().getValue());
 
-        transitionService.recordTransition(saved, DossierStatus.DRAFT, saved.getStatus(), null, "Initial dossier creation");
+        transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
 
         searchService.indexDossier(saved);
 

@@ -142,7 +142,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
         List<DossierStatusHistory> history = statusHistoryRepository.findAll();
         assertThat(history).hasSize(1);
-        assertThat(history.get(0).getFromStatus()).isEqualTo(DossierStatus.DRAFT);
+        assertThat(history.get(0).getFromStatus()).isNull();
         assertThat(history.get(0).getToStatus()).isEqualTo(DossierStatus.NEW);
         assertThat(history.get(0).getReason()).isEqualTo("Initial dossier creation");
     }
@@ -646,7 +646,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
         List<DossierStatusHistory> historyAfterCreate = statusHistoryRepository.findByDossierId(dossierId, null).getContent();
         assertThat(historyAfterCreate).hasSize(1);
-        assertThat(historyAfterCreate.get(0).getFromStatus()).isEqualTo(DossierStatus.DRAFT);
+        assertThat(historyAfterCreate.get(0).getFromStatus()).isNull();
         assertThat(historyAfterCreate.get(0).getToStatus()).isEqualTo(DossierStatus.NEW);
         assertThat(historyAfterCreate.get(0).getReason()).isEqualTo("Initial dossier creation");
         assertThat(historyAfterCreate.get(0).getOrgId()).isEqualTo(ORG_ID);
