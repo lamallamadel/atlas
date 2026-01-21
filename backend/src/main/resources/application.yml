@@ -64,6 +64,10 @@ notification:
   processor:
     interval: ${NOTIFICATION_PROCESSOR_INTERVAL:10000}
 
+rate-limit:
+  default-requests-per-minute: ${RATE_LIMIT_DEFAULT_RPM:100}
+  enabled: ${RATE_LIMIT_ENABLED:true}
+
 outbound:
   worker:
     enabled: ${OUTBOUND_WORKER_ENABLED:true}
@@ -128,6 +132,8 @@ management:
         outbound.message.delivery.latency: true
       percentiles:
         outbound.message.delivery.latency: 0.5, 0.75, 0.9, 0.95, 0.99
+    tags:
+      application: ${spring.application.name}
   info:
     build:
       enabled: true

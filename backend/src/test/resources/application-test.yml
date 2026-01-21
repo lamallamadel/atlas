@@ -68,3 +68,6 @@ storage:
   strategy: localFileStorage
   local:
     base-path: ./test-storage
+
+rate-limit:
+  enabled: false

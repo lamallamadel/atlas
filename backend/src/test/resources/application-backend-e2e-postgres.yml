@@ -75,3 +75,6 @@ logging:
     org.springframework.jdbc.datasource: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+rate-limit:
+  enabled: false

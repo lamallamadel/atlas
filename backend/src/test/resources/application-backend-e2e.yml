@@ -48,3 +48,6 @@ logging:
 # This is intentionally broad for test scope only.
 cors:
   allowed-origins: "*"
+
+rate-limit:
+  enabled: false
