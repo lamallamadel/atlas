@@ -1,112 +1,127 @@
-# 🚀 Start Here - Repository Setup
+# 🚀 Setup Status - Action Required
 
-Welcome! This repository has been cloned and is ready for initial setup.
+## ✅ Completed Automatically
 
-## ⚡ Quick Start (< 5 minutes)
+✓ **Frontend NPM Dependencies** (1178 packages installed)
+  - All Angular dependencies ready
+  - Playwright test framework ready
+  - Development tools configured
 
-### Status Check
+✓ **Configuration Files**
+  - Maven toolchains configured for Java 17
+  - Package.json and dependencies ready
+  - Build configurations in place
 
-- ✅ Frontend dependencies installed (`npm install` complete)
-- ⚠️ Backend setup required (Maven install needed)
+## ⚠️ Action Required - Complete Backend Setup
 
-### Complete Backend Setup Now
+The backend Maven dependencies could not be installed automatically due to security restrictions.
 
-Open PowerShell in the repository root and run:
+### Quick Setup (Choose One Option)
 
+**Option 1 - Automated Setup Script (Easiest):**
 ```powershell
-cd backend
-..\mvn17.ps1 clean install -DskipTests
+.\COMPLETE_INITIAL_SETUP.ps1
+```
+This will:
+- Install backend Maven dependencies
+- Install Playwright browsers
+- Complete full setup
+
+**Option 2 - Backend Only:**
+```powershell
+.\mvn17.ps1 -f backend\pom.xml clean install -DskipTests
 ```
 
-**That's it!** This will download all Java dependencies and compile the Spring Boot application.
-
-## 🎯 Alternative Setup Methods
-
-### Option 1: Automated Script
-
-```powershell
-.\Initialize-Repository.ps1
-```
-
-### Option 2: Using Batch File
-
+**Option 3 - Using Batch File:**
 ```cmd
-cd backend
-..\mvn17.cmd clean install -DskipTests
+.\run-backend-mvn-install.cmd
 ```
 
-### Option 3: Manual JAVA_HOME
+**Estimated time:** 5-10 minutes (first time Maven build)
 
+### Optional: Install Playwright Browsers
+
+For E2E testing (optional):
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-cd backend
-mvn clean install -DskipTests
-```
-
-## ✅ Verify Setup
-
-After backend setup completes, verify:
-
-```powershell
-# Test backend
-cd backend
-..\mvn17.ps1 test
-
-# Test frontend (already set up)
 cd frontend
-npm test
+npx playwright install
 ```
 
-## 🏃 Run the Application
+## ✓ Verify Setup
 
-### Start Backend
+After running backend setup:
 
 ```powershell
+# Test backend build
 cd backend
-..\mvn17.ps1 spring-boot:run
+mvn clean package
+
+# Test frontend build  
+cd frontend
+npm run build
 ```
 
-Runs on: `http://localhost:8080`
+## 📚 Next Steps
 
-### Start Frontend
+Once setup is complete:
 
+### Run Development Servers
+
+**Backend:**
+```powershell
+cd backend
+mvn spring-boot:run
+```
+Server runs on: http://localhost:8080
+
+**Frontend:**
 ```powershell
 cd frontend
 npm start
 ```
+Server runs on: http://localhost:4200
 
-Runs on: `http://localhost:4200`
+### Run Tests
 
-## 📚 More Information
+**Backend Unit Tests:**
+```powershell
+cd backend
+mvn test
+```
 
-- **`SETUP_STATUS.md`**: Current setup status and detailed steps
-- **`INITIAL_SETUP_INSTRUCTIONS.md`**: Complete setup guide with troubleshooting
-- **`AGENTS.md`**: All development commands (build, test, lint, e2e)
-- **`README.md`**: Project overview and architecture
+**Backend E2E Tests (H2):**
+```powershell
+cd backend
+mvn verify -Pbackend-e2e-h2
+```
 
-## 🆘 Having Issues?
+**Frontend E2E Tests:**
+```powershell
+cd frontend
+npm run e2e
+```
 
-### "JAVA_HOME not defined correctly"
+### Start Infrastructure (PostgreSQL, etc.)
 
-Use the provided wrappers:
-- `mvn17.ps1` (PowerShell)
-- `mvn17.cmd` (Command Prompt)
+```powershell
+cd infra
+docker-compose up -d
+```
 
-These automatically set JAVA_HOME to Java 17.
+## 📖 Documentation
 
-### "Cannot find mvn command"
+- `AGENTS.md` - Complete command reference and development guide
+- `SETUP.md` - Detailed setup instructions
+- `README.md` - Project overview
+- `INITIAL_SETUP_SUMMARY.md` - Detailed setup status
 
-Maven is installed at: `C:\Environement\maven-3.8.6`
+## ❓ Need Help?
 
-Check it's in your PATH, or use the full path in mvn17.ps1 wrapper.
-
-### Need More Help?
-
-See `INITIAL_SETUP_INSTRUCTIONS.md` for:
-- Detailed troubleshooting
-- Alternative setup methods
-- Common issues and solutions
+If you encounter issues:
+1. Verify Java 17 is installed at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+2. Verify Maven is available: `mvn --version`
+3. Check `AGENTS.md` troubleshooting section
 
 ---
 
-**Ready to code!** Once backend setup is complete, you're all set for development.
+**Current Status:** Frontend ready ✓ | Backend setup required ⚠️
