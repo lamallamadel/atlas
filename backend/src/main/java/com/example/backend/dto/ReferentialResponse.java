@@ -46,6 +46,12 @@ public class ReferentialResponse {
     @Schema(description = "User who last updated the item", nullable = true)
     private String updatedBy;
 
+    @Schema(description = "Version number", example = "1")
+    private Long version;
+
+    @Schema(description = "Last change type", example = "UPDATED")
+    private String lastChangeType;
+
     public Long getId() {
         return id;
     }
@@ -148,5 +154,21 @@ public class ReferentialResponse {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public String getLastChangeType() {
+        return lastChangeType;
+    }
+
+    public void setLastChangeType(String lastChangeType) {
+        this.lastChangeType = lastChangeType;
     }
 }

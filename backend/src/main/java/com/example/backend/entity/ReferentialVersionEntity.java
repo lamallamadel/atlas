@@ -5,16 +5,23 @@ import org.hibernate.annotations.Filter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "referential",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"org_id", "category", "code"}))
+@Table(name = "referential_version",
+        indexes = {
+            @Index(name = "idx_ref_version_ref_id", columnList = "referential_id"),
+            @Index(name = "idx_ref_version_org_id", columnList = "org_id"),
+            @Index(name = "idx_ref_version_created_at", columnList = "created_at")
+        })
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
-public class ReferentialEntity extends BaseEntity {
+public class ReferentialVersionEntity extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
     private Long id;
+
+    @Column(name = "referential_id", nullable = false)
+    private Long referentialId;
 
     @Column(name = "category", nullable = false, length = 100)
     private String category;
@@ -32,16 +39,17 @@ public class ReferentialEntity extends BaseEntity {
     private Integer displayOrder;
 
     @Column(name = "is_active", nullable = false)
-    private Boolean isActive = true;
+    private Boolean isActive;
 
     @Column(name = "is_system", nullable = false)
-    private Boolean isSystem = false;
+    private Boolean isSystem;
 
-    @Column(name = "version")
-    private Long version = 1L;
+    @Column(name = "change_type", nullable = false, length = 50)
+    @Enumerated(EnumType.STRING)
+    private ReferentialChangeType changeType;
 
-    @Column(name = "last_change_type", length = 50)
-    private String lastChangeType;
+    @Column(name = "change_reason", columnDefinition = "TEXT")
+    private String changeReason;
 
     public Long getId() {
         return id;
@@ -49,6 +57,14 @@ public class ReferentialEntity extends BaseEntity {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getReferentialId() {
+        return referentialId;
+    }
+
+    public void setReferentialId(Long referentialId) {
+        this.referentialId = referentialId;
     }
 
     public String getCategory() {
@@ -107,19 +123,27 @@ public class ReferentialEntity extends BaseEntity {
         this.isSystem = isSystem;
     }
 
-    public Long getVersion() {
-        return version;
+    public ReferentialChangeType getChangeType() {
+        return changeType;
     }
 
-    public void setVersion(Long version) {
-        this.version = version;
+    public void setChangeType(ReferentialChangeType changeType) {
+        this.changeType = changeType;
     }
 
-    public String getLastChangeType() {
-        return lastChangeType;
+    public String getChangeReason() {
+        return changeReason;
     }
 
-    public void setLastChangeType(String lastChangeType) {
-        this.lastChangeType = lastChangeType;
+    public void setChangeReason(String changeReason) {
+        this.changeReason = changeReason;
+    }
+
+    public enum ReferentialChangeType {
+        CREATED,
+        UPDATED,
+        DELETED,
+        ACTIVATED,
+        DEACTIVATED
     }
 }

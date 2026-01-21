@@ -23,6 +23,8 @@ public class ReferentialMapper {
         response.setUpdatedAt(entity.getUpdatedAt());
         response.setCreatedBy(entity.getCreatedBy());
         response.setUpdatedBy(entity.getUpdatedBy());
+        response.setVersion(entity.getVersion());
+        response.setLastChangeType(entity.getLastChangeType());
 
         return response;
     }
