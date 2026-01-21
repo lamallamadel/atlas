@@ -69,7 +69,7 @@ class SecurityConfigTest {
 
         mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
                         .header("X-Org-Id", "ORG1"))
-                .andExpect(status().isOk());
+                .andExpect(status().isNoContent());
     }
 
     @Test

@@ -77,10 +77,6 @@ public class DossierService {
             if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {
                 throw new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce");
             }
-
-            if (annonce.getStatus() == AnnonceStatus.DRAFT) {
-                throw new IllegalArgumentException("Cannot create dossier with DRAFT annonce");
-            }
         }
 
         Dossier dossier = dossierMapper.toEntityWithoutParties(request);
@@ -118,7 +114,7 @@ public class DossierService {
 
         metricsService.incrementDossierCreated(request.getSource().getValue());
 
-        transitionService.recordTransition(saved, DossierStatus.DRAFT, saved.getStatus(), null, "Initial dossier creation");
+        transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
 
         searchService.indexDossier(saved);
 
