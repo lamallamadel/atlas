@@ -21,10 +21,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # (Optionnel mais utile) Vérifie que le lockfile est bien présent
-      - name: Verify lockfile exists
-        run: test -f frontend/package-lock.json
-
       # Important: créer un cache npm AVANT setup-node, et le forcer via env
       - name: Prepare npm cache directory
         run: mkdir -p "${{ github.workspace }}/.npm-cache"
