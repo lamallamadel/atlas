@@ -255,7 +255,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByChannel_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -274,7 +273,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByDirection_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -292,7 +290,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByChannelAndDirection_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -313,7 +310,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_SortByTimestampDesc_ReturnsSortedResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         Long msg1Id = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -333,7 +329,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_DefaultSortIsTimestampDesc() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         Long msg1Id = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -352,7 +347,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_Pagination_ReturnsCorrectPages() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         for (int i = 0; i < 25; i++) {
@@ -392,7 +386,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_CrossTenantIsolation_OnlyReturnsSameTenant() throws Exception {
         Dossier dossier1 = createDossier(TENANT_1);
         Dossier dossier2 = createDossier(TENANT_2);
@@ -419,7 +412,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_CrossTenantIsolation_CannotAccessOtherTenantDossier() throws Exception {
         Dossier dossier2 = createDossier(TENANT_2);
         createMessage(dossier2, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -574,7 +566,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_EmptyResults_ReturnsEmptyPage() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
 
@@ -589,7 +580,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_NonExistentDossier_Returns404() throws Exception {
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
@@ -599,7 +589,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_MultipleChannelsAndDirections_FiltersCorrectly() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -637,7 +626,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByDateRange_ReturnsMessagesInRange() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -658,7 +646,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByStartDateOnly_ReturnsMessagesAfterDate() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -677,7 +664,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByEndDateOnly_ReturnsMessagesBeforeDate() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -702,7 +688,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByDateRangeAndChannel_ReturnsCombinedFilter() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -724,7 +709,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     @WithMockUser(roles = {"PRO"})
-    @Transactional(readOnly = true)
     void listMessages_FilterByDateRangeChannelAndDirection_ReturnsCombinedFilter() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
