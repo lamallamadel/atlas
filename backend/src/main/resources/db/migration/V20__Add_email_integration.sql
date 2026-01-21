@@ -26,52 +26,20 @@ CREATE TABLE email_provider_config (
 CREATE INDEX idx_email_provider_config_org_id ON email_provider_config(org_id);
 CREATE INDEX idx_email_provider_config_enabled ON email_provider_config(enabled);
 
--- Add email-related columns to message table if not exists
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'message' AND column_name = 'from_address') THEN
-        ALTER TABLE message ADD COLUMN from_address VARCHAR(255);
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'message' AND column_name = 'to_address') THEN
-        ALTER TABLE message ADD COLUMN to_address VARCHAR(255);
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'message' AND column_name = 'subject') THEN
-        ALTER TABLE message ADD COLUMN subject VARCHAR(500);
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'message' AND column_name = 'html_content') THEN
-        ALTER TABLE message ADD COLUMN html_content TEXT;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'message' AND column_name = 'text_content') THEN
-        ALTER TABLE message ADD COLUMN text_content TEXT;
-    END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'message' AND column_name = 'attachments_json') THEN
-        ALTER TABLE message ADD COLUMN attachments_json ${json_type};
-    END IF;
-END $$;
+-- Add email-related columns to message table
+ALTER TABLE message ADD COLUMN from_address VARCHAR(255);
+ALTER TABLE message ADD COLUMN to_address VARCHAR(255);
+ALTER TABLE message ADD COLUMN subject VARCHAR(500);
+ALTER TABLE message ADD COLUMN html_content TEXT;
+ALTER TABLE message ADD COLUMN text_content TEXT;
+ALTER TABLE message ADD COLUMN attachments_json ${json_type};
 
 -- Add index on email addresses
 CREATE INDEX idx_message_from_address ON message(from_address);
 CREATE INDEX idx_message_to_address ON message(to_address);
 
--- Add email lookup to dossier if not exists
-DO $$
-BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
-                   WHERE table_name = 'dossier' AND column_name = 'lead_email') THEN
-        ALTER TABLE dossier ADD COLUMN lead_email VARCHAR(255);
-    END IF;
-END $$;
+-- Add email lookup to dossier
+ALTER TABLE dossier ADD COLUMN lead_email VARCHAR(255);
 
 -- Add index on lead_email
 CREATE INDEX idx_dossier_lead_email ON dossier(lead_email);
