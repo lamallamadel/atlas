@@ -5,8 +5,10 @@ import com.example.backend.dto.WorkflowDefinitionRequest;
 import com.example.backend.dto.WorkflowDefinitionResponse;
 import com.example.backend.dto.WorkflowTransitionMapper;
 import com.example.backend.dto.WorkflowTransitionResponse;
+import com.example.backend.entity.Dossier;
 import com.example.backend.entity.WorkflowDefinition;
 import com.example.backend.entity.WorkflowTransition;
+import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.repository.WorkflowTransitionRepository;
 import com.example.backend.util.TenantContext;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,16 +30,22 @@ public class WorkflowService {
     private final WorkflowTransitionRepository workflowTransitionRepository;
     private final WorkflowDefinitionMapper workflowDefinitionMapper;
     private final WorkflowTransitionMapper workflowTransitionMapper;
+    private final WorkflowValidationService workflowValidationService;
+    private final DossierRepository dossierRepository;
 
     public WorkflowService(
             WorkflowDefinitionRepository workflowDefinitionRepository,
             WorkflowTransitionRepository workflowTransitionRepository,
             WorkflowDefinitionMapper workflowDefinitionMapper,
-            WorkflowTransitionMapper workflowTransitionMapper) {
+            WorkflowTransitionMapper workflowTransitionMapper,
+            WorkflowValidationService workflowValidationService,
+            DossierRepository dossierRepository) {
         this.workflowDefinitionRepository = workflowDefinitionRepository;
         this.workflowTransitionRepository = workflowTransitionRepository;
         this.workflowDefinitionMapper = workflowDefinitionMapper;
         this.workflowTransitionMapper = workflowTransitionMapper;
+        this.workflowValidationService = workflowValidationService;
+        this.dossierRepository = dossierRepository;
     }
 
     @Transactional
@@ -173,5 +182,22 @@ public class WorkflowService {
         Page<WorkflowTransition> transitions = workflowTransitionRepository.findByDossierId(dossierId, pageable);
         
         return transitions.map(workflowTransitionMapper::toResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Object> validateTransition(Long dossierId, String fromStatus, String toStatus) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(dossierId)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
+        }
+
+        return workflowValidationService.checkTransitionValidity(dossier, fromStatus, toStatus);
     }
 }

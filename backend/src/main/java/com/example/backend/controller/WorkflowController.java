@@ -203,6 +203,29 @@ public class WorkflowController {
         return ResponseEntity.ok(allowedStatuses);
     }
 
+    @GetMapping("/validate-transition/dossier/{dossierId}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+        summary = "Validate transition before attempting",
+        description = "Checks if a status transition would be valid without actually performing it. " +
+                "Returns validation results including any errors, missing required fields, role issues, " +
+                "or pre-conditions that need to be satisfied."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Validation check completed successfully. " +
+                    "Check the 'isValid' field in response to determine if transition is allowed.")
+    })
+    public ResponseEntity<java.util.Map<String, Object>> validateTransition(
+            @Parameter(description = "Dossier ID", required = true)
+            @PathVariable Long dossierId,
+            @Parameter(description = "Source status", required = true)
+            @RequestParam String fromStatus,
+            @Parameter(description = "Target status", required = true)
+            @RequestParam String toStatus) {
+        java.util.Map<String, Object> validationResult = workflowService.validateTransition(dossierId, fromStatus, toStatus);
+        return ResponseEntity.ok(validationResult);
+    }
+
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
