@@ -71,7 +71,7 @@ Complete implementation of WhatsAppCloudApiProvider with advanced features:
     - Removed inline signature validation
 
 ### Database Migrations
-12. **backend/src/main/resources/db/migration/V25__Add_whatsapp_session_window_and_rate_limit.sql**
+12. **backend/src/main/resources/db/migration/V26__Add_whatsapp_session_window_and_rate_limit.sql**
     - Creates whatsapp_session_window table
     - Creates whatsapp_rate_limit table
     - Adds appropriate indexes

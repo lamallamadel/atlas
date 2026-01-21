@@ -8,7 +8,7 @@ Extended the Dossier entity and services to support flexible, referential-based 
 ### 1. Database Layer
 
 #### Migration V28
-**File**: `backend/src/main/resources/db/migration/V28__Migrate_dossier_status_to_referential.sql`
+**File**: `backend/src/main/resources/db/migration/V29__Migrate_dossier_status_to_referential.sql`
 
 - Populates `statusCode` from existing `status` enum values for all dossiers
 - Creates performance indexes:

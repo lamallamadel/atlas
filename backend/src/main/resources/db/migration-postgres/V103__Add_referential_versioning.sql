@@ -1,4 +1,4 @@
--- PostgreSQL-specific version of V26__Add_referential_versioning.sql
+-- PostgreSQL-specific version of V27__Add_referential_versioning.sql
 -- Create referential_version table for audit trail
 CREATE TABLE IF NOT EXISTS referential_version (
     id BIGSERIAL PRIMARY KEY,
@@ -28,12 +28,12 @@ CREATE INDEX IF NOT EXISTS idx_ref_version_category ON referential_version(categ
 -- Add change tracking columns to referential table if they don't exist
 DO $$
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
                    WHERE table_name = 'referential' AND column_name = 'version') THEN
         ALTER TABLE referential ADD COLUMN version BIGINT DEFAULT 1;
     END IF;
-    
-    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns
                    WHERE table_name = 'referential' AND column_name = 'last_change_type') THEN
         ALTER TABLE referential ADD COLUMN last_change_type VARCHAR(50);
     END IF;

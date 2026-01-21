@@ -87,7 +87,7 @@ All requested functionality has been fully implemented:
 ## Database Schema
 
 ### ✅ Migration Created
-- ✅ `V25__Add_whatsapp_session_window_and_rate_limit.sql`
+- ✅ `V26__Add_whatsapp_session_window_and_rate_limit.sql`
 
 ### ✅ Tables Created
 - ✅ `whatsapp_session_window` table with indexes
@@ -191,7 +191,7 @@ All requested functionality has been fully implemented:
 11. WhatsAppWebhookController.java (uses signature validator)
 
 ### Database Migrations (1)
-12. V25__Add_whatsapp_session_window_and_rate_limit.sql
+12. V26__Add_whatsapp_session_window_and_rate_limit.sql
 
 ### Test Classes (5)
 13. WhatsAppCloudApiProviderTest.java

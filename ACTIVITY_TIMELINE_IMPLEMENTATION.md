@@ -18,7 +18,7 @@ Added new activity types:
 ### 2. ActivityEntity Schema Changes
 **Files:**
 - `backend/src/main/java/com/example/backend/entity/ActivityEntity.java`
-- `backend/src/main/resources/db/migration/V29__Add_activity_metadata_and_new_types.sql`
+- `backend/src/main/resources/db/migration/V30__Add_activity_metadata_and_new_types.sql`
 
 Added `metadata` field (JSONB column) to store standardized JSON metadata for each activity event.
 
@@ -176,7 +176,7 @@ All DTOs now support the `metadata` field for JSON metadata.
 
 ## Database Migration
 
-**File:** `backend/src/main/resources/db/migration/V29__Add_activity_metadata_and_new_types.sql`
+**File:** `backend/src/main/resources/db/migration/V30__Add_activity_metadata_and_new_types.sql`
 
 The migration:
 1. Adds `metadata` JSONB column to the `activity` table

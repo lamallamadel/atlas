@@ -281,7 +281,7 @@ All exceptions are handled by `GlobalExceptionHandler` and return appropriate HT
 
 ## Database Schema
 
-### Migration: V24__Add_whatsapp_template_management.sql
+### Migration: V25__Add_whatsapp_template_management.sql
 
 Creates:
 - `whatsapp_template` table with JSONB components

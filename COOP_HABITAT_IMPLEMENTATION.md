@@ -285,7 +285,7 @@ Base path: `/api/v1/coop/`
 - backend/src/main/java/com/example/backend/controller/CoopContributionController.java
 
 ### Migration (1 file)
-- backend/src/main/resources/db/migration/V31__Add_coop_habitat_bounded_context.sql
+- backend/src/main/resources/db/migration/V32__Add_coop_habitat_bounded_context.sql
 
 ## Total Files: 46
 
