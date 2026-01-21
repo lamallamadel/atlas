@@ -186,7 +186,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit datetime-local format string on valid input', () => {
-      let emittedValue: string  = '';
+      let emittedValue  = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -199,7 +199,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit empty string when date is missing', () => {
-      let emittedValue: string  = '';
+      let emittedValue  = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -211,7 +211,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit empty string when time is missing', () => {
-      let emittedValue: string  = '';
+      let emittedValue  = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -223,7 +223,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit empty string when time is invalid', () => {
-      let emittedValue: string  = '';
+      let emittedValue  = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -672,7 +672,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should pad single digit months and days with zeros', () => {
-      let emittedValue: string = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -685,7 +685,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle year boundary dates correctly', () => {
-      let emittedValue: string = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -698,7 +698,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle leap year dates', () => {
-      let emittedValue: string = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });

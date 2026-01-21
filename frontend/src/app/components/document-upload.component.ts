@@ -24,7 +24,7 @@ export class DocumentUploadComponent {
 
   selectedFiles: File[] = [];
   uploadProgresses: Map<string, UploadProgress> = new Map();
-  selectedCategory: string = '';
+  selectedCategory = '';
   isDragging = false;
 
   categories = [
