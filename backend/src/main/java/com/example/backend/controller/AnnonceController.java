@@ -31,9 +31,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.example.backend.config.Deprecated;
+
 @RestController
 @RequestMapping("/api/v1/annonces")
-@Tag(name = "Annonces", description = "API for managing annonces")
+@Tag(name = "Annonces", description = "API for managing annonces (deprecated, use v2)")
+@Deprecated(sunsetDate = "2025-12-31", deprecationMessage = "API v1 is deprecated. Please migrate to /api/v2/annonces which provides structured responses with nested location, pricing, and audit information.")
 public class AnnonceController {
 
     private final AnnonceService annonceService;

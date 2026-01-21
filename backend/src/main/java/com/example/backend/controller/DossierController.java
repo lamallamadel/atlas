@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.config.Deprecated;
 import com.example.backend.dto.BulkOperationResponse;
 import com.example.backend.dto.DossierBulkAssignRequest;
 import com.example.backend.dto.DossierCreateRequest;
@@ -32,7 +33,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/dossiers")
-@Tag(name = "Dossiers", description = "API for managing dossiers")
+@Tag(name = "Dossiers", description = "API for managing dossiers (deprecated, use v2)")
+@Deprecated(sunsetDate = "2025-12-31", deprecationMessage = "API v1 is deprecated. Please migrate to /api/v2/dossiers which provides structured responses with nested objects.")
 public class DossierController {
 
     private final DossierService dossierService;

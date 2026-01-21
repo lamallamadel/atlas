@@ -73,7 +73,7 @@ public class DossierService {
                     .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId()));
 
             if (!orgId.equals(annonce.getOrgId())) {
-                throw new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId());
+                throw new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId()));
             }
 
             if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {
@@ -108,9 +108,7 @@ public class DossierService {
             
             partiePrenanteService.create(partyRequest);
             
-            // Flush to ensure the party is persisted and visible in the next query
             entityManager.flush();
-            // Clear the persistence context to force a fresh fetch from database
             entityManager.clear();
             
             final Long savedId = saved.getId();
@@ -186,16 +184,8 @@ public class DossierService {
         DossierStatus currentStatus = dossier.getStatus();
         DossierStatus newStatus = request.getStatus();
 
-        // Step 1: Basic transition validation - always enforced regardless of caseType
-        // Validates terminal states (WON, LOST cannot transition) and basic allowed transitions
-        // For example: NEW can go to QUALIFYING, QUALIFIED, APPOINTMENT, or LOST
         transitionService.validateTransition(currentStatus, newStatus);
 
-        // Step 2: Workflow validation - only when caseType is set
-        // When caseType is null or blank, workflow validation is bypassed, allowing flexible transitions
-        // that only need to satisfy the basic transition rules above.
-        // When caseType is set (e.g., "SALE", "RENTAL"), custom workflow rules are enforced,
-        // which may require additional fields or impose stricter transition constraints.
         if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
             workflowValidationService.validateAndRecordTransition(
                     dossier, 
@@ -297,10 +287,8 @@ public class DossierService {
                 DossierStatus currentStatus = dossier.getStatus();
                 DossierStatus newStatus = request.getStatus();
 
-                // Basic transition validation - always enforced
                 transitionService.validateTransition(currentStatus, newStatus);
 
-                // Workflow validation - only when caseType is set (bypassed when null)
                 if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
                     workflowValidationService.validateAndRecordTransition(
                             dossier, 
@@ -345,5 +333,44 @@ public class DossierService {
 
         dossierRepository.delete(dossier);
         searchService.deleteDossierIndex(id);
+    }
+
+    @Transactional(readOnly = true)
+    public Dossier findEntityById(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findByIdWithRelations(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + id));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found with id: " + id);
+        }
+
+        return dossier;
+    }
+
+    @Transactional(readOnly = true)
+    public Page<Dossier> findAll(DossierStatus status, String leadPhone, Long annonceId, Pageable pageable) {
+        Specification<Dossier> spec = Specification.where(null);
+
+        if (status != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("status"), status));
+        }
+
+        if (leadPhone != null && !leadPhone.trim().isEmpty()) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("leadPhone"), leadPhone));
+        }
+
+        if (annonceId != null) {
+            spec = spec.and((root, query, criteriaBuilder) ->
+                    criteriaBuilder.equal(root.get("annonceId"), annonceId));
+        }
+
+        return dossierRepository.findAll(spec, pageable);
     }
 }
