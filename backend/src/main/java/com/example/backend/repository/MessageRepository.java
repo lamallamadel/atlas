@@ -11,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
+
 @Repository
 public interface MessageRepository extends JpaRepository<MessageEntity, Long>, JpaSpecificationExecutor<MessageEntity> {
     
@@ -23,8 +25,8 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>, J
             @Param("dossierId") Long dossierId,
             @Param("channel") MessageChannel channel,
             @Param("direction") MessageDirection direction,
-            @Param("startDate") java.time.LocalDateTime startDate,
-            @Param("endDate") java.time.LocalDateTime endDate,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
             Pageable pageable);
 
     boolean existsByProviderMessageId(String providerMessageId);
