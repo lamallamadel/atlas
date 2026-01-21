@@ -11,7 +11,8 @@ public enum AuditEntityType {
     ORGANIZATION("organization"),
     NOTIFICATION("notification"),
     ACTIVITY("activity"),
-    OUTBOUND_MESSAGE("outbound_message");
+    OUTBOUND_MESSAGE("outbound_message"),
+    TASK("task");
     private final String value;
 
     AuditEntityType(String value) {
