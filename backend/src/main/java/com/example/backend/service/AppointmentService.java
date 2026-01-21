@@ -5,11 +5,14 @@ import com.example.backend.dto.AppointmentMapper;
 import com.example.backend.dto.AppointmentResponse;
 import com.example.backend.dto.AppointmentUpdateRequest;
 import com.example.backend.entity.AppointmentEntity;
+import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.AppointmentStatus;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -18,19 +21,28 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AppointmentService {
 
+    private static final Logger logger = LoggerFactory.getLogger(AppointmentService.class);
+
     private final AppointmentRepository appointmentRepository;
     private final AppointmentMapper appointmentMapper;
     private final MetricsService metricsService;
+    private final ActivityService activityService;
 
-    public AppointmentService(AppointmentRepository appointmentRepository, AppointmentMapper appointmentMapper, MetricsService metricsService) {
+    public AppointmentService(AppointmentRepository appointmentRepository, 
+                            AppointmentMapper appointmentMapper, 
+                            MetricsService metricsService,
+                            ActivityService activityService) {
         this.appointmentRepository = appointmentRepository;
         this.appointmentMapper = appointmentMapper;
         this.metricsService = metricsService;
+        this.activityService = activityService;
     }
 
     @Transactional
@@ -55,6 +67,11 @@ public class AppointmentService {
 
         AppointmentEntity saved = appointmentRepository.save(appointment);
         metricsService.incrementAppointmentsCreated();
+        
+        if (saved.getStatus() == AppointmentStatus.SCHEDULED) {
+            logAppointmentScheduledActivity(saved);
+        }
+        
         AppointmentResponse response = appointmentMapper.toResponse(saved);
 
         if (!warnings.isEmpty()) {
@@ -113,6 +130,9 @@ public class AppointmentService {
         if (oldStatus != AppointmentStatus.COMPLETED && updated.getStatus() == AppointmentStatus.COMPLETED) {
             metricsService.incrementAppointmentsCompleted();
             metricsService.recordAppointmentDurationSeconds( -updated.getStartTime().getSecond() + updated.getEndTime().getSecond());
+            logAppointmentCompletedActivity(updated);
+        } else if (oldStatus != AppointmentStatus.SCHEDULED && updated.getStatus() == AppointmentStatus.SCHEDULED) {
+            logAppointmentScheduledActivity(updated);
         }
 
         if (!warnings.isEmpty()) {
@@ -214,5 +234,75 @@ public Page<AppointmentResponse> listByDossier(
         }
 
         return warnings;
+    }
+
+    private void logAppointmentScheduledActivity(AppointmentEntity appointment) {
+        if (activityService != null && appointment.getDossier() != null) {
+            try {
+                String description = String.format("Appointment scheduled for %s", 
+                    appointment.getStartTime());
+                if (appointment.getLocation() != null && !appointment.getLocation().trim().isEmpty()) {
+                    description += " at " + appointment.getLocation();
+                }
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("appointmentId", appointment.getId());
+                metadata.put("status", appointment.getStatus().name());
+                metadata.put("startTime", appointment.getStartTime().toString());
+                metadata.put("endTime", appointment.getEndTime().toString());
+                if (appointment.getLocation() != null) {
+                    metadata.put("location", appointment.getLocation());
+                }
+                if (appointment.getAssignedTo() != null) {
+                    metadata.put("assignedTo", appointment.getAssignedTo());
+                }
+                metadata.put("timestamp", LocalDateTime.now().toString());
+                
+                activityService.logActivity(
+                    appointment.getDossier().getId(),
+                    ActivityType.APPOINTMENT_SCHEDULED,
+                    description,
+                    metadata
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log APPOINTMENT_SCHEDULED activity for appointment {}: {}", 
+                    appointment.getId(), e.getMessage(), e);
+            }
+        }
+    }
+
+    private void logAppointmentCompletedActivity(AppointmentEntity appointment) {
+        if (activityService != null && appointment.getDossier() != null) {
+            try {
+                String description = String.format("Appointment completed at %s", 
+                    appointment.getLocation() != null ? appointment.getLocation() : "location not specified");
+                
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("appointmentId", appointment.getId());
+                metadata.put("status", appointment.getStatus().name());
+                metadata.put("startTime", appointment.getStartTime().toString());
+                metadata.put("endTime", appointment.getEndTime().toString());
+                if (appointment.getLocation() != null) {
+                    metadata.put("location", appointment.getLocation());
+                }
+                if (appointment.getAssignedTo() != null) {
+                    metadata.put("assignedTo", appointment.getAssignedTo());
+                }
+                if (appointment.getNotes() != null) {
+                    metadata.put("notes", appointment.getNotes());
+                }
+                metadata.put("timestamp", LocalDateTime.now().toString());
+                
+                activityService.logActivity(
+                    appointment.getDossier().getId(),
+                    ActivityType.APPOINTMENT_COMPLETED,
+                    description,
+                    metadata
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log APPOINTMENT_COMPLETED activity for appointment {}: {}", 
+                    appointment.getId(), e.getMessage(), e);
+            }
+        }
     }
 }

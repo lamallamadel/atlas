@@ -5,6 +5,7 @@ import com.example.backend.entity.enums.ActivityVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Schema(description = "Activity response representation")
 public class ActivityResponse {
@@ -32,6 +33,9 @@ public class ActivityResponse {
 
     @Schema(description = "Display name of the user who created the activity", example = "John Doe")
     private String createdByName;
+
+    @Schema(description = "Additional metadata for the activity in JSON format")
+    private Map<String, Object> metadata;
 
     public Long getId() {
         return id;
@@ -95,5 +99,13 @@ public class ActivityResponse {
 
     public void setCreatedByName(String createdByName) {
         this.createdByName = createdByName;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 }

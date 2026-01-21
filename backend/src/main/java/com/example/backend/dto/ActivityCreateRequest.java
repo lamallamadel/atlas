@@ -5,6 +5,8 @@ import com.example.backend.entity.enums.ActivityVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
+import java.util.Map;
+
 @Schema(description = "Request to create a new activity")
 public class ActivityCreateRequest {
 
@@ -22,6 +24,9 @@ public class ActivityCreateRequest {
     @NotNull(message = "Visibility is required")
     @Schema(description = "Activity visibility", example = "INTERNAL", required = true)
     private ActivityVisibility visibility;
+
+    @Schema(description = "Additional metadata for the activity in JSON format")
+    private Map<String, Object> metadata;
 
     public ActivityType getType() {
         return type;
@@ -53,5 +58,13 @@ public class ActivityCreateRequest {
 
     public void setVisibility(ActivityVisibility visibility) {
         this.visibility = visibility;
+    }
+
+    public Map<String, Object> getMetadata() {
+        return metadata;
+    }
+
+    public void setMetadata(Map<String, Object> metadata) {
+        this.metadata = metadata;
     }
 }

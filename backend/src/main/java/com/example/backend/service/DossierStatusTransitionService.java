@@ -2,11 +2,14 @@ package com.example.backend.service;
 
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.DossierStatusHistory;
+import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.InvalidStatusTransitionException;
 import com.example.backend.repository.DossierStatusHistoryRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +21,19 @@ import java.util.Set;
 @Service
 public class DossierStatusTransitionService {
 
+    private static final Logger logger = LoggerFactory.getLogger(DossierStatusTransitionService.class);
+
     private final DossierStatusHistoryRepository historyRepository;
     private final MetricsService metricsService;
+    private final ActivityService activityService;
     private final Map<DossierStatus, Set<DossierStatus>> allowedTransitions;
 
-    public DossierStatusTransitionService(DossierStatusHistoryRepository historyRepository, MetricsService metricsService) {
+    public DossierStatusTransitionService(DossierStatusHistoryRepository historyRepository, 
+                                         MetricsService metricsService,
+                                         ActivityService activityService) {
         this.historyRepository = historyRepository;
         this.metricsService = metricsService;
+        this.activityService = activityService;
         this.allowedTransitions = initializeTransitions();
     }
 
@@ -114,6 +123,39 @@ public class DossierStatusTransitionService {
         historyRepository.save(history);
 
         metricsService.incrementDossierStatusTransition(fromStatus.name(), toStatus.name());
+
+        logStatusChangeActivity(dossier, fromStatus, toStatus, userId, reason);
+    }
+
+    private void logStatusChangeActivity(Dossier dossier, DossierStatus fromStatus, DossierStatus toStatus, 
+                                         String userId, String reason) {
+        if (activityService != null) {
+            try {
+                String description = String.format("Status changed from %s to %s", fromStatus, toStatus);
+                if (reason != null && !reason.trim().isEmpty()) {
+                    description += ": " + reason;
+                }
+
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("fromStatus", fromStatus.name());
+                metadata.put("toStatus", toStatus.name());
+                metadata.put("userId", userId);
+                if (reason != null) {
+                    metadata.put("reason", reason);
+                }
+                metadata.put("timestamp", LocalDateTime.now().toString());
+
+                activityService.logActivity(
+                    dossier.getId(),
+                    ActivityType.STATUS_CHANGE,
+                    description,
+                    metadata
+                );
+            } catch (Exception e) {
+                logger.warn("Failed to log status change activity for dossier {}: {}", 
+                    dossier.getId(), e.getMessage(), e);
+            }
+        }
     }
 
     public boolean isTerminalState(DossierStatus status) {
