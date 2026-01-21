@@ -1,0 +1,8 @@
+name,phone,email,source,lead_source,notes,score
+John Doe,+33612345678,john.doe@example.com,web,Google Ads,Interested in 2-bedroom apartment in Paris,85
+Jane Smith,+33698765432,jane.smith@example.com,phone,Direct Call,Looking for property in Paris 15th,70
+Bob Wilson,+33687654321,bob.wilson@example.com,referral,Partner Network,Premium buyer interested in luxury properties,95
+Alice Johnson,+33645678901,alice.j@example.com,email,Newsletter Signup,First-time buyer looking for studio,60
+Charlie Brown,+33656789012,charlie.b@example.com,social_media,Facebook,Interested in investment property,75
+Diana Prince,+33667890123,diana.p@example.com,walk_in,Office Visit,Looking for commercial space,80
+Eve Martinez,+33678901234,eve.m@example.com,mobile,Mobile App,Young professional seeking apartment,65
