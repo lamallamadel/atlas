@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -735,6 +736,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
         dossier.setLeadPhone("+33612345678");
         dossier.setLeadName("Test Lead");
         dossier.setStatus(DossierStatus.NEW);
+        dossier.setSource(com.example.backend.entity.enums.DossierSource.WEB);
         return dossierRepository.save(dossier);
     }
 

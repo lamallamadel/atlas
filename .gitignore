@@ -114,6 +114,10 @@ playwright-report/
 playwright/.cache/
 *.zip
 
+# Playwright browsers (installed via npx playwright install)
+frontend/.cache/
+ms-playwright/
+
 # Environment variables
 .env
 .env.local
@@ -405,3 +409,18 @@ mavenrc_pre.bat
 run-maven-clean-install.ps1
 setup-backend-build.js
 SETUP_STATUS_AUTOMATED.md
+
+# Setup helper scripts created during initial setup
+backend/run-mvn-install.ps1
+backend/setup-install.cmd
+backend/setup-toolchains.js
+backend/.mvn/
+
+# Latest setup helper scripts (created during automated setup)
+setup-now.ps1
+install-backend-deps.js
+
+# Temporary setup scripts (agent session - current setup attempt)
+setup-maven-build-temp.ps1
+setup-backend-maven.js
+run-backend-mvn-install.cmd

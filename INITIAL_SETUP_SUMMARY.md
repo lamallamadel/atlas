@@ -1,157 +1,99 @@
 # Initial Repository Setup Summary
 
-## Setup Status: Partially Complete
+## Status: Partial Setup Completed
 
-### ✅ Completed Tasks
+### ✓ Completed
 
-#### 1. Frontend Package Installation
-- **Status**: COMPLETE
-- **What was done**:
-  - Ran `npm install` in frontend directory
-  - Installed 1,187 packages successfully
-  - All dependencies ready:
-    - Angular 16.2.0 framework
-    - Angular Material UI components
-    - Playwright testing framework
-    - Chart.js for data visualization
-    - OAuth2 OIDC authentication
-    - ESLint, TypeScript, Karma, Jasmine
-  
-#### 2. Gitignore Configuration
-- **Status**: COMPLETE
-- **What was done**:
-  - Verified comprehensive .gitignore patterns exist
-  - Added setup helper scripts to ignore list
-  - Confirmed all build artifacts are properly excluded:
-    - `node_modules/`
-    - `target/`
-    - `dist/`
-    - `.angular/`
-    - `playwright-report/`
-    - IDE and OS files
+1. **Frontend NPM Dependencies**
+   - Installed 1178 packages successfully
+   - Angular 16.2.0 and all dependencies ready
+   - Location: `frontend/node_modules/`
+   - Time: ~58 seconds
 
-#### 3. Setup Helper Scripts  
-- **Status**: CREATED
-- **What was created**:
-  - `setup-initial.cmd` - Complete repo setup script (root)
-  - `backend/setup-maven-install.cmd` - Backend Maven setup
-  - Both scripts configure Java 17 environment and run appropriate build commands
+### ⚠️ Remaining (Manual Action Required)
 
-### ⚠️ Requires Manual Execution
+1. **Backend Maven Dependencies**
+   - **Status:** Not installed (security restrictions prevented automated setup)
+   - **Required:** Java 17 with Maven
+   - **Action:** Run one of the commands below
 
-#### 1. Backend Maven Build
-- **Why manual**: Environment variable modification blocked by security policies
-- **What's needed**: Run Maven clean install with Java 17
-- **Impact**: Cannot run backend tests or build until complete
+2. **Playwright Browsers (Optional)**
+   - **Status:** Not installed
+   - **Required for:** E2E tests
+   - **Action:** `cd frontend && npx playwright install`
 
-**How to complete**:
+## Quick Start - Complete Backend Setup
+
+Choose ONE of the following options:
+
+### Option 1: Run the Setup Script (Easiest)
+```powershell
+.\COMPLETE_INITIAL_SETUP.ps1
+```
+
+### Option 2: Use Maven Wrapper
+```powershell
+.\mvn17.ps1 -f backend\pom.xml clean install -DskipTests
+```
+
+### Option 3: Use Batch File
 ```cmd
+.\run-backend-mvn-install.cmd
+```
+
+### Option 4: Manual Commands
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-setup-maven-install.cmd
-```
-*Or see SETUP_COMPLETE_NEXT_STEPS.md for alternatives*
-
-#### 2. Playwright Browser Installation (Optional)
-- **Why manual**: npx execution blocked by security policies
-- **What's needed**: Install Chromium, Firefox, WebKit browsers
-- **Impact**: Only affects E2E tests (not unit tests or builds)
-
-**How to complete** (if needed):
-```bash
-cd frontend
-npx playwright install
+mvn clean install -DskipTests
 ```
 
-## System Configuration
+## Why Manual Setup is Needed
 
-### Current Environment
-- **Java in PATH**: Java 1.8.0_401 (at C:\Program Files (x86)\Common Files\Oracle\Java\)
-- **JAVA_HOME**: C:\Environement\Java\jdk1.8.0_202 (Java 8)
-- **Maven**: 3.8.6 (at C:\Environement\maven-3.8.6)
-- **Node/npm**: Installed and working
-- **Git**: Installed and working
+The automated setup was blocked by security policies that prevent:
+- Setting environment variables (JAVA_HOME)
+- Executing .ps1 and .cmd scripts
+- Spawning sub-processes
 
-### Required for Backend
-- **Java 17**: Available at C:\Environement\Java\jdk-17.0.5.8-hotspot
-- **Configuration**: Maven toolchains configured in backend/toolchains.xml
-- **Settings**: Maven settings configured in backend/settings.xml
+Maven requires JAVA_HOME to be set to Java 17, which cannot be done within the current security context.
 
-## What You Can Do Now
+## After Backend Setup
 
-### Without Backend Setup
-✅ Frontend development (Angular):
-```bash
-cd frontend
-npm start                # Dev server
-npm run build           # Production build
-npm run test            # Unit tests
-npm run lint            # Code linting
+Once Maven dependencies are installed, you can:
+
+```powershell
+# Build
+cd backend && mvn clean package
+
+# Test
+cd backend && mvn test
+
+# Run dev server
+cd backend && mvn spring-boot:run
+
+# Frontend dev server
+cd frontend && npm start
+
+# E2E tests (after installing Playwright)
+cd frontend && npm run e2e
 ```
 
-### After Backend Setup
-✅ Full stack development:
-```bash
-# Backend
-cd backend
-mvn spring-boot:run     # Run backend server
-mvn test               # Unit tests
-mvn verify -Pbackend-e2e-h2  # E2E tests
+## Configuration Status
 
-# Frontend E2E (requires Playwright browsers)
-cd frontend
-npm run e2e:fast       # Quick E2E tests
-npm run e2e:full       # Complete E2E suite
-```
+✓ Toolchains configured for Java 17
+✓ Frontend package.json ready
+✓ Frontend node_modules installed
+✓ All configuration files in place
+⚠️ Backend target/ directory - not built yet (requires Maven setup)
 
-## Next Steps
+## Estimated Time
 
-1. **Complete Backend Setup** (Required)
-   - Run `backend/setup-maven-install.cmd`
-   - This will build the backend and download all Maven dependencies
-   - Takes 5-10 minutes on first run
+- Backend Maven install: ~5-10 minutes (first time)
+- Playwright browser install: ~2-3 minutes
 
-2. **Install Playwright Browsers** (Optional)
-   - Run `npx playwright install` in frontend directory
-   - Only needed if running E2E tests
-   - Takes ~5 minutes to download browsers
+## See Also
 
-3. **Verify Setup**
-   ```bash
-   cd backend && mvn test          # Verify backend
-   cd frontend && npm run test     # Verify frontend
-   ```
-
-4. **Start Development**
-   - Backend: `cd backend && mvn spring-boot:run`
-   - Frontend: `cd frontend && npm start`
-   - See AGENTS.md for full command reference
-
-## Troubleshooting
-
-If you encounter issues:
-
-1. **Maven fails with Java version error**
-   - Ensure JAVA_HOME points to Java 17
-   - Use the provided helper scripts which set this automatically
-
-2. **"JAVA_HOME is not defined" error**
-   - Maven requires JAVA_HOME to be set
-   - The helper scripts handle this automatically
-
-3. **Dependencies not found**
-   - Run `mvn clean install` to download Maven dependencies
-   - Run `npm install` if frontend dependencies are missing
-
-See SETUP_STATUS.md for detailed information and all setup options.
-
-## Files Modified
-
-- `.gitignore` - Added setup helper scripts to ignore list
-- `SETUP_STATUS.md` - Detailed setup status and instructions  
-- `SETUP_COMPLETE_NEXT_STEPS.md` - Quick start guide
-- `INITIAL_SETUP_SUMMARY.md` - This file
-
-## Files Created (Ignored by Git)
-
-- `setup-initial.cmd` - Complete setup script
-- `backend/setup-maven-install.cmd` - Backend-only setup script
+- `AGENTS.md` - Complete command reference
+- `SETUP.md` - Detailed setup instructions
+- `README.md` - Project overview
+- `SETUP_STATUS_CURRENT.md` - Detailed status

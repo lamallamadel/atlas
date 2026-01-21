@@ -122,7 +122,7 @@ public class DossierStatusTransitionService {
 
         historyRepository.save(history);
 
-        metricsService.incrementDossierStatusTransition(fromStatus.name(), toStatus.name());
+        metricsService.incrementDossierStatusTransition(fromStatus != null ? fromStatus.name() : "NONE", toStatus.name());
 
         logStatusChangeActivity(dossier, fromStatus, toStatus, userId, reason);
     }

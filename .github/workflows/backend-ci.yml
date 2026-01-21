@@ -29,11 +29,11 @@ jobs:
           cache: 'maven'
       
       - name: Run tests
-        run: ./mvnw -B -ntp test
+        run: mvn -B -ntp test '-Dspring.profiles.active=test'
         working-directory: backend
       
       - name: Build package
-        run: ./mvnw -B -ntp clean package -DskipTests=false
+        run: mvn -B -ntp clean package -DskipTests=false
         working-directory: backend
       
       - name: Upload JAR artifact

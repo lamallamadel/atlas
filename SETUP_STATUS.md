@@ -1,95 +1,151 @@
-# Initial Setup Status
+# Repository Setup Status
 
-## Completed ✓
+## ✅ Completed
 
 ### Frontend Setup
-- **Status:** ✅ COMPLETE
-- **Dependencies:** All npm packages installed successfully
-- **Location:** `frontend/node_modules/`
-- **Verification:**
+- **Status**: ✅ Complete
+- **Action Taken**: Ran `npm install` in the `frontend/` directory
+- **Result**: All 1178 packages installed successfully
+- **Dependencies**: Angular 16, Playwright, testing frameworks, and all required packages
+- **Notes**: Some deprecation warnings present (non-blocking)
+
+### Toolchains Configuration
+- **Status**: ✅ Verified  
+- **Location**: `$HOME\.m2\toolchains.xml` already exists
+- **Java 17 Path**: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- **Maven Version**: 3.8.6 at `C:\Environement\maven-3.8.6`
+
+## ⚠️ Pending - Manual Action Required
+
+### Backend Setup
+- **Status**: ⚠️ Requires Manual Execution
+- **Required Command**: 
   ```powershell
-  cd frontend
-  npm --version  # Should show 11.6.2 or similar
+  cd backend
+  ..\mvn17.ps1 clean install -DskipTests
+  ```
+  
+  **OR** (Command Prompt):
+  ```cmd
+  cd backend
+  ..\mvn17.cmd clean install -DskipTests
   ```
 
-## Requires Manual Action ⚠️
+- **Why Manual?**: The Maven build requires setting `JAVA_HOME` environment variable, which cannot be done programmatically due to security restrictions
+- **Duration**: ~2-5 minutes (first time, downloads dependencies)
 
-### Backend Setup  
-- **Status:** ⏳ PENDING - Requires manual execution
-- **Reason:** Security restrictions prevent automated environment variable modification
-- **Current Issue:** JAVA_HOME is set to Java 8 (C:\Environement\Java\jdk1.8.0_202) which doesn't exist
-- **Required:** JAVA_HOME must be set to Java 17 (C:\Environement\Java\jdk-17.0.5.8-hotspot)
+### Alternative Backend Setup Methods
 
-### How to Complete Backend Setup
-
-**Option 1: Run the setup script (Recommended)**
+**Option 1: Using PowerShell** (Recommended)
 ```powershell
-.\SETUP_AFTER_CLONE.ps1
+cd backend
+..\mvn17.ps1 clean install -DskipTests
 ```
 
-**Option 2: Manual commands**
+**Option 2: Using Command Prompt**
+```cmd
+cd backend
+..\mvn17.cmd clean install -DskipTests
+```
+
+**Option 3: Using Initialize Script**
 ```powershell
-# Set environment for this session
+.\Initialize-Repository.ps1
+```
+
+**Option 4: Manual JAVA_HOME**
+```powershell
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
-
-# Install backend dependencies
-cd backend
+cd backend  
 mvn clean install -DskipTests
-cd ..
+```
 
-# Install Playwright browsers (optional, for E2E tests)
+## 📋 Prerequisites Verified
+
+- ✅ Java 17: Available at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- ✅ Maven 3.8.6: Available at `C:\Environement\maven-3.8.6`
+- ✅ Node.js: v25.2.1
+- ✅ Toolchains: Configured in `~/.m2/toolchains.xml`
+
+## 🔧 Helper Scripts Created
+
+The following wrapper scripts are available to simplify backend setup:
+
+- `mvn17.ps1` - PowerShell wrapper that sets JAVA_HOME to Java 17
+- `mvn17.cmd` - Command Prompt wrapper that sets JAVA_HOME to Java 17
+- `backend/mvn17.cmd` - Same as above, for backend directory
+- `Initialize-Repository.ps1` - Full automated setup script
+- `setup-backend-simple.ps1` - Simple PowerShell backend setup (created during this session)
+
+## 🚀 Next Steps
+
+1. **Complete Backend Setup** (Required)
+   - Run one of the backend setup commands above
+   - Verify with: `mvn -f backend/pom.xml test`
+
+2. **Verify Setup**
+   ```powershell
+   # Test backend build
+   cd backend
+   ..\mvn17.ps1 package
+   
+   # Test frontend build  
+   cd frontend
+   npm run build
+   ```
+
+3. **Run Application**
+   ```powershell
+   # Terminal 1: Backend
+   cd backend
+   ..\mvn17.ps1 spring-boot:run
+   
+   # Terminal 2: Frontend
+   cd frontend
+   npm start
+   ```
+
+## 📚 Documentation
+
+- **AGENTS.md**: Complete development commands (build, test, lint, e2e)
+- **SETUP.md**: Detailed setup instructions
+- **START_HERE_AFTER_CLONE.md**: Quick start guide
+- **README.md**: Project overview
+
+## ⚡ Quick Test Commands
+
+After completing backend setup, verify everything works:
+
+```powershell
+# Backend tests
+cd backend
+..\mvn17.ps1 test
+
+# Frontend tests  
 cd frontend
-npm run install-browsers
-cd ..
+npm test
+
+# E2E tests (requires Docker)
+cd frontend
+npm run e2e:fast
 ```
 
-**Option 3: Use the Maven wrapper scripts**
+## 🐛 Troubleshooting
+
+### "JAVA_HOME not defined correctly"
+Use the provided wrapper scripts (`mvn17.ps1` or `mvn17.cmd`) which automatically set JAVA_HOME.
+
+### Maven Download Timeouts
+If Maven dependency downloads fail:
 ```powershell
 cd backend
-.\mvn17.cmd clean install -DskipTests
-cd ..
+..\mvn17.ps1 clean install -DskipTests -U
 ```
 
-### Playwright Browsers (Optional)
-- **Status:** ⏳ PENDING
-- **Purpose:** Required for frontend E2E tests
-- **Install command:**
-  ```powershell
-  cd frontend
-  npm run install-browsers
-  ```
-- **Note:** Can be installed later when needed
+### Port Already in Use
+- Backend (8080): Check if another Spring Boot app is running
+- Frontend (4200): Check if another Angular dev server is running
 
-## Verification
+---
 
-After completing the backend setup, verify with:
-
-```powershell
-# Verify backend build
-cd backend
-.\mvn17.cmd --version  # Should show Maven with Java 17
-
-# Run backend tests (optional)
-.\mvn17.cmd test
-
-# Verify frontend
-cd ../frontend
-npm run build
-```
-
-## Next Steps
-
-Once setup is complete, see `AGENTS.md` for:
-- Build commands
-- Test commands  
-- Development server commands
-- E2E testing configurations
-
-## Technical Details
-
-- **Java Version Required:** 17
-- **Java Location:** C:\Environement\Java\jdk-17.0.5.8-hotspot
-- **Maven Version:** 3.6+ (3.8.6 installed at C:\Environement\maven-3.8.6)
-- **Node Version:** 11.6.2
-- **Toolchains:** Configured in `toolchains.xml` and `backend/toolchains.xml`
+**Summary**: Frontend is ready. Backend requires one manual command to complete setup (Maven install with Java 17).

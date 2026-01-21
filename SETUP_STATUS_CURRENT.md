@@ -1,133 +1,114 @@
 # Repository Setup Status
 
-## ✅ Completed Setup Tasks
+## Completed ✓
 
-### Frontend
-- **npm install**: ✅ **COMPLETE**
-  - All 1,188 packages installed successfully
-  - Angular CLI 16.2.16 verified and working
-  - Node.js 18.12.1 detected
-  - All dependencies resolved in `frontend/node_modules/`
+### Frontend Dependencies
+- ✓ NPM packages installed successfully (1178 packages)
+- ✓ Angular and dependencies ready
+- ✓ Development dependencies configured
 
-### Playwright
-- **Playwright package**: ✅ **INSTALLED**
-  - @playwright/test@1.57.0 installed as dev dependency
-  - Playwright CLI available at `frontend/node_modules/.bin/playwright.cmd`
-  
-⚠️ **Playwright browsers NOT yet installed** - see manual step below
+## Remaining Tasks
 
-## ⏳ Pending Setup Tasks
-
-### Backend (Maven/Java)
-- **Status**: ⏳ **REQUIRES MANUAL EXECUTION**
-- **Reason**: Security policy prevents automated modification of environment variables (JAVA_HOME)
-
-#### Required Manual Steps:
+### Backend Dependencies (REQUIRED)
+The backend Maven dependencies need to be installed. Due to security restrictions, this must be done manually.
 
 **Option 1: Using the provided setup script (RECOMMENDED)**
-
-```cmd
-.\COMPLETE-SETUP.cmd
-```
-
-This script will:
-1. Set JAVA_HOME to Java 17 (C:\Environement\Java\jdk-17.0.5.8-hotspot)
-2. Run `mvn clean install -DskipTests` in the backend directory
-3. Verify the setup was successful
-
-**Option 2: Manual command execution**
-
-```cmd
-cd backend
-setup.cmd
-```
-
-**Option 3: Direct Maven command (PowerShell)**
-
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-cd backend
-mvn clean install
+.\COMPLETE_INITIAL_SETUP.ps1
 ```
 
-### Playwright Browsers (Optional)
+**Option 2: Using the Maven wrapper**
+```powershell
+.\mvn17.ps1 -f backend\pom.xml clean install -DskipTests
+```
 
-If you plan to run frontend E2E tests, install Playwright browsers:
+**Option 3: Manual Maven execution**
+```powershell
+# Set Java 17
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
 
+# Run Maven install
+cd backend
+mvn clean install -DskipTests
+```
+
+**Option 4: Using the batch file**
 ```cmd
+.\run-backend-mvn-install.cmd
+```
+
+### Playwright Browsers (OPTIONAL - for E2E tests)
+Playwright browsers should be installed for running E2E tests.
+
+**To install:**
+```powershell
 cd frontend
 npx playwright install
 ```
 
-Or install only Chromium (faster):
-
-```cmd
+Or:
+```powershell
 cd frontend
-npx playwright install chromium
+npm run install-browsers
 ```
 
 ## Verification
 
-### Frontend Verification
-```cmd
-cd frontend
-npm run ng -- version
-```
+After completing the backend setup, verify the installation:
 
-Expected: Angular CLI version information should display
-
-### Backend Verification (after manual setup)
-```cmd
+```powershell
+# Verify backend build
 cd backend
-mvn -version
-```
+mvn --version  # Should show Java 17
 
-Expected: Maven and Java 17 version information
-
-```cmd
-mvn test
-```
-
-Expected: Tests should run successfully
-
-## Current Java Environment
-
-- **System Java**: Java 8 (C:\Program Files (x86)\Common Files\Oracle\Java\javapath\java.exe)
-- **Required Java**: Java 17 (C:\Environement\Java\jdk-17.0.5.8-hotspot) ✅ Verified present
-- **Maven**: 3.8.6 (C:\Environement\maven-3.8.6\bin\mvn.cmd)
-
-## Project Configuration Files
-
-All required configuration files are already present:
-- ✅ `backend/pom.xml` - Maven configuration
-- ✅ `backend/toolchains.xml` - Java 17 toolchain configuration
-- ✅ `backend/settings.xml` - Maven repository settings
-- ✅ `frontend/package.json` - npm configuration
-- ✅ `frontend/playwright.config.ts` - Playwright E2E test configuration
-
-## Available Commands After Setup
-
-### Backend
-```cmd
-cd backend
-mvn clean package    # Build
-mvn test             # Run tests
-mvn spring-boot:run  # Start dev server
-```
-
-### Frontend
-```cmd
+# Verify frontend
 cd frontend
-npm run build        # Build
-npm test             # Run unit tests
-npm start            # Start dev server
-npm run e2e          # Run E2E tests (after Playwright browsers installed)
+npm run build  # Should compile successfully
 ```
 
 ## Next Steps
 
-1. **Run backend setup** using one of the options above
-2. **(Optional)** Install Playwright browsers if you plan to run E2E tests
-3. **Verify** the setup by running build and test commands
+Once setup is complete, you can:
 
-The repository is now ready for development once the backend Maven installation is complete!
+1. **Run the backend dev server:**
+   ```powershell
+   cd backend
+   mvn spring-boot:run
+   ```
+
+2. **Run the frontend dev server:**
+   ```powershell
+   cd frontend
+   npm start
+   ```
+
+3. **Run tests:**
+   ```powershell
+   # Backend tests
+   cd backend
+   mvn test
+
+   # Frontend E2E tests (after installing Playwright)
+   cd frontend
+   npm run e2e
+   ```
+
+See `AGENTS.md` for complete command reference.
+
+## Toolchains Configuration
+
+The following toolchains configuration is already in place:
+- ✓ `toolchains.xml` in project root
+- ✓ `backend/toolchains.xml` configured for Java 17
+- ✓ `~/.m2/toolchains.xml` exists (user level)
+
+## Files Created
+
+During setup attempt, the following helper files were created:
+- `run-backend-mvn-install.cmd` - Batch file for Maven install
+- `setup-backend-maven.js` - Node.js setup script (alternative approach)
+- `setup-maven-build-temp.ps1` - PowerShell setup script (alternative)
+- `backend/.mavenrc` - Maven configuration file
+
+These are helper files and can be used or removed as needed.

@@ -105,7 +105,7 @@ public class DossierService {
         if (request.getInitialParty() != null) {
             PartiePrenanteCreateRequest partyRequest = new PartiePrenanteCreateRequest();
             partyRequest.setDossierId(saved.getId());
-            partyRequest.setRole(request.getInitialParty().getRole().name());
+            partyRequest.setRole(request.getInitialParty().getRole() != null ? request.getInitialParty().getRole().name() : null);
             partyRequest.setName(request.getInitialParty().getName());
             partyRequest.setFirstName(request.getInitialParty().getFirstName());
             partyRequest.setLastName(request.getInitialParty().getLastName());
@@ -124,9 +124,11 @@ public class DossierService {
                     .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + savedId));
         }
 
-        metricsService.incrementDossierCreated(request.getSource().getValue());
+        if (saved.getSource() != null) {
+            metricsService.incrementDossierCreated(saved.getSource().getValue());
+        }
 
-        transitionService.recordTransition(saved, DossierStatus.DRAFT, saved.getStatus(), null, "Initial dossier creation");
+        transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
 
         searchService.indexDossier(saved);
 

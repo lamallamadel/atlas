@@ -313,6 +313,49 @@ This installs Chromium, Firefox, and WebKit browsers needed for cross-browser te
 
 ### Troubleshooting
 
+#### PostgreSQL Integration Tests Require Docker
+
+**Important:** PostgreSQL integration tests (files ending in `IT.java` or `PostgresIT.java`) require Docker to be running and are **only executed** with the `backend-e2e-postgres` Maven profile. They are **NOT** run during regular unit test execution with `mvn test`.
+
+**Test Classification:**
+
+- **Unit Tests**: Executed with `mvn test` - uses H2 in-memory database, no Docker required
+- **PostgreSQL Integration Tests** (`*IT.java`, `*PostgresIT.java`): Executed with `mvn verify -Pbackend-e2e-postgres` - uses Testcontainers with Docker
+
+**Symptom (Docker not running):**
+```
+org.testcontainers.containers.ContainerLaunchException: Container startup failed
+```
+or
+```
+Could not find a valid Docker environment
+```
+
+**Solution:**
+
+1. **Start Docker:**
+   - **Windows**: Start Docker Desktop
+   - **Mac**: Start Docker Desktop
+   - **Linux**: `sudo systemctl start docker`
+
+2. **Verify Docker is running:**
+   ```bash
+   docker --version
+   docker ps
+   ```
+
+3. **Run PostgreSQL integration tests:**
+   ```bash
+   cd backend
+   mvn verify -Pbackend-e2e-postgres
+   ```
+
+**Note:** If you only want to run unit tests without Docker, use:
+```bash
+cd backend
+mvn test
+```
+
 #### Port 5432 Already in Use
 
 If PostgreSQL tests fail due to port conflicts:
@@ -830,3 +873,115 @@ All paginated endpoints enforce `size >= 1`:
 - **Maximum value**: Not enforced (but recommended to stay under 100 for performance)
 
 Refer to the Swagger/OpenAPI documentation for examples of proper pagination usage.
+
+#### JOIN FETCH with Pagination Warning
+
+**Symptom:**
+```
+HHH90003004: firstResult/maxResults specified with collection fetch; applying in memory
+```
+or
+```
+org.hibernate.QueryException: query specified join fetching, but the owner of the fetched association was not present in the select list
+```
+or test failures with:
+```
+org.hibernate.loader.MultipleBagFetchException: cannot simultaneously fetch multiple bags
+```
+
+**Root Cause:**
+
+When using `JOIN FETCH` in JPQL queries with pagination (using `Pageable`), Hibernate cannot properly apply database-level pagination because:
+
+1. **Memory Pagination**: Hibernate must load all results into memory first, then apply pagination in-memory, which defeats the purpose of pagination
+2. **Duplicate Results**: JOIN FETCH with one-to-many/many-to-many relationships can produce duplicate parent rows
+3. **Performance Impact**: Database fetches all rows regardless of page size
+
+**Example of Problematic Code:**
+
+```java
+@Query("SELECT m FROM MessageEntity m JOIN FETCH m.dossier WHERE m.dossier.id = :dossierId " +
+       "AND (:channel IS NULL OR m.channel = :channel)")
+Page<MessageEntity> findByDossierIdWithFilters(
+        @Param("dossierId") Long dossierId,
+        @Param("channel") MessageChannel channel,
+        Pageable pageable);
+```
+
+**Exception Details:**
+
+- **Type**: `org.hibernate.HibernateException` or warning `HHH90003004`
+- **Location**: Query execution during pagination
+- **Impact**: Tests may pass but with degraded performance, or fail entirely with PostgreSQL
+
+**Solutions:**
+
+**Option 1: Remove JOIN FETCH (Recommended for ManyToOne/Lazy)**
+
+For `@ManyToOne(fetch = FetchType.LAZY)` relationships, remove `JOIN FETCH` entirely. Hibernate can efficiently load the association later if needed:
+
+```java
+@Query("SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
+       "AND (:channel IS NULL OR m.channel = :channel)")
+Page<MessageEntity> findByDossierIdWithFilters(
+        @Param("dossierId") Long dossierId,
+        @Param("channel") MessageChannel channel,
+        Pageable pageable);
+```
+
+**Option 2: Use @EntityGraph**
+
+For cases where eager loading is necessary, use `@EntityGraph` instead:
+
+```java
+@EntityGraph(attributePaths = {"dossier"})
+@Query("SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
+       "AND (:channel IS NULL OR m.channel = :channel)")
+Page<MessageEntity> findByDossierIdWithFilters(
+        @Param("dossierId") Long dossierId,
+        @Param("channel") MessageChannel channel,
+        Pageable pageable);
+```
+
+**Option 3: Two-Query Approach (For Collections)**
+
+For one-to-many/many-to-many, use two queries:
+
+```java
+// Query 1: Paginated IDs
+@Query("SELECT m.id FROM MessageEntity m WHERE m.dossier.id = :dossierId")
+Page<Long> findIdsByDossierId(@Param("dossierId") Long dossierId, Pageable pageable);
+
+// Query 2: Fetch entities with associations
+@Query("SELECT DISTINCT m FROM MessageEntity m JOIN FETCH m.details WHERE m.id IN :ids")
+List<MessageEntity> findByIdsWithDetails(@Param("ids") List<Long> ids);
+```
+
+**Option 4: DTO Projection (Best Performance)**
+
+Use DTO projections to avoid fetching unnecessary associations:
+
+```java
+@Query("SELECT new com.example.backend.dto.MessageProjection(m.id, m.content, m.channel, d.id, d.leadName) " +
+       "FROM MessageEntity m JOIN m.dossier d WHERE d.id = :dossierId")
+Page<MessageProjection> findProjectedByDossierId(@Param("dossierId") Long dossierId, Pageable pageable);
+```
+
+**Testing Considerations:**
+
+1. **Run with PostgreSQL**: H2 may not show the warning, but PostgreSQL will
+2. **Check Logs**: Look for `HHH90003004` warnings in Hibernate logs
+3. **Performance Testing**: Verify database queries are using LIMIT/OFFSET correctly
+4. **N+1 Query Detection**: Use Hibernate statistics to detect inefficient queries
+
+**Related Files:**
+- `backend/src/main/java/com/example/backend/repository/MessageRepository.java`
+- `backend/src/main/java/com/example/backend/service/MessageService.java`
+- `backend/src/test/java/com/example/backend/MessageBackendE2ETest.java`
+
+**Best Practices:**
+- Avoid `JOIN FETCH` with pagination for collections (one-to-many, many-to-many)
+- For `ManyToOne` relationships, prefer lazy loading without JOIN FETCH
+- Use `@EntityGraph` when you need controlled eager loading with pagination
+- Consider DTO projections for read-heavy operations
+- Always test with both H2 and PostgreSQL profiles

@@ -1,89 +1,127 @@
-# 🚀 Start Here - Initial Setup Complete!
+# 🚀 Setup Status - Action Required
 
-## ✅ Frontend Setup Complete
+## ✅ Completed Automatically
 
-All frontend dependencies have been successfully installed:
-- ✅ 1,177 npm packages installed
-- ✅ Playwright test framework ready
-- ✅ Browser binaries downloaded (Chromium, Firefox)
+✓ **Frontend NPM Dependencies** (1178 packages installed)
+  - All Angular dependencies ready
+  - Playwright test framework ready
+  - Development tools configured
 
-## ⚠️ One Step Remaining: Backend Setup
+✓ **Configuration Files**
+  - Maven toolchains configured for Java 17
+  - Package.json and dependencies ready
+  - Build configurations in place
 
-To complete the setup, run **ONE** of the following commands:
+## ⚠️ Action Required - Complete Backend Setup
 
-### Option 1: PowerShell (Recommended)
-```powershell
-.\mvn17.ps1 clean install -DskipTests
-```
+The backend Maven dependencies could not be installed automatically due to security restrictions.
 
-### Option 2: Command Prompt
-```cmd
-backend\mvn17.cmd clean install -DskipTests
-```
+### Quick Setup (Choose One Option)
 
-### Option 3: Complete Setup Script
+**Option 1 - Automated Setup Script (Easiest):**
 ```powershell
 .\COMPLETE_INITIAL_SETUP.ps1
 ```
+This will:
+- Install backend Maven dependencies
+- Install Playwright browsers
+- Complete full setup
 
-**Time Required:** ~5 minutes (downloads dependencies on first run)
-
-## 📋 After Backend Setup
-
-Once the backend Maven install completes, you're ready to:
-
-### Start Development Servers
+**Option 2 - Backend Only:**
 ```powershell
-# Terminal 1: Start backend (http://localhost:8080)
-cd backend
-mvn spring-boot:run
-
-# Terminal 2: Start frontend (http://localhost:4200)
-cd frontend
-npm start
+.\mvn17.ps1 -f backend\pom.xml clean install -DskipTests
 ```
 
-### Run Tests
-```powershell
-# Backend unit tests
-cd backend
-mvn test
-
-# Frontend E2E tests
-cd frontend
-npm run e2e:fast
+**Option 3 - Using Batch File:**
+```cmd
+.\run-backend-mvn-install.cmd
 ```
 
-### Build for Production
+**Estimated time:** 5-10 minutes (first time Maven build)
+
+### Optional: Install Playwright Browsers
+
+For E2E testing (optional):
 ```powershell
-# Build backend
+cd frontend
+npx playwright install
+```
+
+## ✓ Verify Setup
+
+After running backend setup:
+
+```powershell
+# Test backend build
 cd backend
 mvn clean package
 
-# Build frontend
+# Test frontend build  
 cd frontend
 npm run build
 ```
 
-## 📚 More Information
+## 📚 Next Steps
 
-- **SETUP_COMPLETE_SUMMARY.md** - Full setup details and all available commands
-- **INITIAL_SETUP_STATUS.md** - Alternative setup methods and troubleshooting
-- **AGENTS.md** - Complete command reference (build, test, lint, E2E tests)
+Once setup is complete:
 
-## 🎯 Quick Commands Reference
+### Run Development Servers
 
-| Task | Command |
-|------|---------|
-| Build backend | `cd backend && mvn clean package` |
-| Run backend | `cd backend && mvn spring-boot:run` |
-| Test backend | `cd backend && mvn test` |
-| Build frontend | `cd frontend && npm run build` |
-| Run frontend | `cd frontend && npm start` |
-| Test frontend | `cd frontend && npm test` |
-| E2E tests (fast) | `cd frontend && npm run e2e:fast` |
-| E2E tests (all) | `cd frontend && npm run e2e:full` |
+**Backend:**
+```powershell
+cd backend
+mvn spring-boot:run
+```
+Server runs on: http://localhost:8080
+
+**Frontend:**
+```powershell
+cd frontend
+npm start
+```
+Server runs on: http://localhost:4200
+
+### Run Tests
+
+**Backend Unit Tests:**
+```powershell
+cd backend
+mvn test
+```
+
+**Backend E2E Tests (H2):**
+```powershell
+cd backend
+mvn verify -Pbackend-e2e-h2
+```
+
+**Frontend E2E Tests:**
+```powershell
+cd frontend
+npm run e2e
+```
+
+### Start Infrastructure (PostgreSQL, etc.)
+
+```powershell
+cd infra
+docker-compose up -d
+```
+
+## 📖 Documentation
+
+- `AGENTS.md` - Complete command reference and development guide
+- `SETUP.md` - Detailed setup instructions
+- `README.md` - Project overview
+- `INITIAL_SETUP_SUMMARY.md` - Detailed setup status
+
+## ❓ Need Help?
+
+If you encounter issues:
+1. Verify Java 17 is installed at: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+2. Verify Maven is available: `mvn --version`
+3. Check `AGENTS.md` troubleshooting section
 
 ---
 
-**Need Help?** See SETUP.md or AGENTS.md for detailed instructions.
+**Current Status:** Frontend ready ✓ | Backend setup required ⚠️

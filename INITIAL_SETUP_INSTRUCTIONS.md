@@ -1,152 +1,147 @@
-# Initial Repository Setup
+# Initial Repository Setup Instructions
 
-This document provides instructions for setting up the repository after cloning.
+This repository has been cloned and is ready for initial setup. Due to security restrictions in the automated environment, please run the following commands manually to complete the setup.
 
-## ✓ Completed Setup Steps
+## Prerequisites
 
-### Frontend Dependencies
-- **Status**: ✅ **COMPLETED**
-- Frontend npm dependencies have been installed successfully
-- Location: `frontend/node_modules/`
-- 1,188 packages installed
+- **Java 17**: JDK 17.0.5.8 or later must be installed at `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+- **Maven 3.6+**: Already available at `C:\Environement\maven-3.8.6`
+- **Node.js**: Already available at `C:\Environement\nodejs`
 
-## 🔧 Manual Setup Required: Backend
+## Quick Setup (Recommended)
 
-Due to environment restrictions, the backend setup requires manual execution of a setup script.
+### Option 1: Using PowerShell Script
 
-### Option 1: Run the Setup Script (Recommended)
+Run the provided setup script:
 
-**Windows Command Prompt:**
+```powershell
+.\Initialize-Repository.ps1
+```
+
+This script will:
+1. Configure Java 17 environment
+2. Run Maven install for backend
+3. Run npm install for frontend
+
+### Option 2: Using Batch File
+
+Run the provided batch file:
+
 ```cmd
-SETUP_BACKEND.cmd
+.\setup-initial-repo.cmd
 ```
 
-**Windows PowerShell:**
+## Manual Setup (Step-by-Step)
+
+If the automated scripts don't work, follow these steps:
+
+### 1. Backend Setup (Maven)
+
 ```powershell
-.\SETUP_BACKEND.ps1
-```
+# Using the mvn17.ps1 wrapper (sets JAVA_HOME automatically)
+cd backend
+..\mvn17.ps1 clean install -DskipTests
 
-These scripts will:
-1. Automatically set JAVA_HOME to Java 17
-2. Run `mvn clean install -DskipTests`
-3. Install all backend dependencies
-
-### Option 2: Manual Setup
-
-If you prefer to run the commands manually:
-
-**Windows (PowerShell):**
-```powershell
+# Alternative: Set JAVA_HOME manually
 $env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install -DskipTests -s settings.xml
-cd ..
+mvn clean install -DskipTests
 ```
 
-**Windows (Command Prompt):**
-```cmd
-set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"
-cd backend
-mvn clean install -DskipTests -s settings.xml
-cd ..
+This will:
+- Download all Maven dependencies
+- Compile the Spring Boot application
+- Create the target directory with build artifacts
+- Skip running tests (tests can be run later with `mvn test`)
+
+**Expected output**: `BUILD SUCCESS` and a `target/` directory containing `backend-0.0.1-SNAPSHOT.jar`
+
+### 2. Frontend Setup (npm)
+
+```powershell
+cd frontend
+npm install
+```
+
+This will:
+- Download all npm dependencies
+- Create the `node_modules/` directory
+- Prepare the Angular application for development
+
+**Expected output**: No errors and a `node_modules/` directory
+
+### 3. Optional: Install Playwright Browsers
+
+If you plan to run end-to-end tests:
+
+```powershell
+cd frontend
+npx playwright install
 ```
 
 ## Verification
 
-After running the backend setup, verify the installation:
+After setup is complete, verify everything works:
 
 ### Backend
-```bash
-cd backend
-mvn -version
-# Should show: Apache Maven 3.8.6 with Java version: 17.0.5
 
-# Run tests
-mvn test
+```powershell
+cd backend
+..\mvn17.ps1 test
 ```
 
 ### Frontend
-```bash
-cd frontend
-npm run build
-# Should complete successfully
 
+```powershell
+cd frontend
 npm test
-# Should run unit tests
 ```
+
+## What's Been Prepared
+
+The following helper files have been created for you:
+
+- **`mvn17.ps1`**: PowerShell wrapper that sets JAVA_HOME to Java 17 before running Maven
+- **`mvn17.cmd`**: Batch file wrapper for the same purpose
+- **`toolchains.xml`**: Maven toolchains configuration (copy to `%USERPROFILE%\.m2\toolchains.xml` if needed)
+- **`Initialize-Repository.ps1`**: Complete setup script
+- **`setup-initial-repo.cmd`**: Batch file for complete setup
+
+## Common Issues
+
+### JAVA_HOME Not Defined
+
+If you see: `The JAVA_HOME environment variable is not defined correctly`
+
+**Solution**: Use the provided `mvn17.ps1` or `mvn17.cmd` wrappers, or set JAVA_HOME manually:
+
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+```
+
+### Maven Download Issues
+
+If Maven cannot download dependencies:
+
+1. Check your internet connection
+2. Check if a proxy is required
+3. Maven uses `~/.m2/repository` for dependency cache
+
+### npm Install Fails
+
+If npm install fails:
+
+1. Try clearing the npm cache: `npm cache clean --force`
+2. Delete `package-lock.json` and try again
+3. Check Node.js version: `node --version` (should be 16+)
 
 ## Next Steps
 
-Once setup is complete, you can:
+After setup is complete:
 
-### Run the Development Stack
-```powershell
-.\dev.ps1 up
-```
+- **Start backend**: `cd backend && mvn spring-boot:run` (using mvn17.ps1)
+- **Start frontend**: `cd frontend && npm start`
+- **Run tests**: `cd backend && mvn test` (using mvn17.ps1)
+- **Run E2E tests**: `cd frontend && npm run e2e`
 
-### Run Tests
-```bash
-# Backend unit tests
-cd backend && mvn test
-
-# Backend E2E tests (H2)
-cd backend && mvn verify -Pbackend-e2e-h2
-
-# Backend E2E tests (PostgreSQL)
-cd backend && mvn verify -Pbackend-e2e-postgres
-
-# Frontend unit tests
-cd frontend && npm test
-
-# Frontend E2E tests
-cd frontend && npm run e2e
-```
-
-### Build
-```bash
-# Build backend
-cd backend && mvn clean package
-
-# Build frontend
-cd frontend && npm run build
-```
-
-## Configuration Files Created
-
-The following configuration files have been created to assist with setup:
-
-1. **backend/settings.xml** - Maven settings configured to use Maven Central directly (no proxy)
-2. **backend/mavenrc_pre.bat** - Maven RC file to set JAVA_HOME (for manual use)
-3. **backend/mvn.cmd** - Local Maven wrapper (for manual use)
-4. **SETUP_BACKEND.cmd** - Windows batch setup script
-5. **SETUP_BACKEND.ps1** - PowerShell setup script
-
-## Troubleshooting
-
-### JAVA_HOME not set
-If you see "JAVA_HOME environment variable is not defined correctly":
-- Run one of the provided setup scripts (SETUP_BACKEND.cmd or SETUP_BACKEND.ps1)
-- Or manually set JAVA_HOME as shown in Option 2 above
-
-### Maven download issues
-The backend/settings.xml file is configured to bypass proxies and use Maven Central directly. If you still experience issues:
-```bash
-mvn clean install -DskipTests -U  # Force update
-```
-
-### Port conflicts
-If ports 8080 or 4200 are in use:
-- Backend: Modify `backend/src/main/resources/application.yml` (server.port)
-- Frontend: Modify `frontend/angular.json` (port in serve options)
-
-## Tech Stack
-
-- **Backend**: Spring Boot 3.2.1, Java 17, Maven 3.8.6
-- **Frontend**: Angular 16, Node.js, npm
-- **Infrastructure**: Docker, PostgreSQL (via docker-compose)
-
-## Documentation
-
-- **AGENTS.md** - Complete development guide including commands
-- **SETUP.md** - Detailed setup instructions
-- **README.md** - Project overview
+See `AGENTS.md` for detailed development commands and workflow.
