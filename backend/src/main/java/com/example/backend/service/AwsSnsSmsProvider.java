@@ -11,6 +11,7 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.*;
+import software.amazon.awssdk.services.sns.model.ThrottlingException;
 
 import java.util.HashMap;
 import java.util.Map;

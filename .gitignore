@@ -404,6 +404,7 @@ setup-initial.ps1
 setup-backend.js
 mvn17.cmd
 mavenrc_pre.bat
+run-mvn-install-java17.cmd
 
 # Automated setup artifacts
 run-maven-clean-install.ps1
