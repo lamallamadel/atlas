@@ -30,7 +30,6 @@ public class DossierMapper {
         dossier.setLeadSource(request.getLeadSource());
         dossier.setNotes(request.getNotes());
         dossier.setStatus(DossierStatus.NEW);
-        dossier.setSource(request.getSource() );
         dossier.setSource(request.getSource());
         
         dossier.setCaseType(request.getCaseType());
@@ -58,7 +57,6 @@ public class DossierMapper {
         dossier.setLeadSource(request.getLeadSource());
         dossier.setNotes(request.getNotes());
         dossier.setStatus(DossierStatus.NEW);
-        dossier.setSource(request.getSource() );
         dossier.setSource(request.getSource());
         
         dossier.setCaseType(request.getCaseType());

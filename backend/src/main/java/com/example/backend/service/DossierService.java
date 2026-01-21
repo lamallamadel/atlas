@@ -116,7 +116,9 @@ public class DossierService {
                     .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + savedId));
         }
 
-        metricsService.incrementDossierCreated(saved.getSource().getValue());
+        if (saved.getSource() != null) {
+            metricsService.incrementDossierCreated(saved.getSource().getValue());
+        }
 
         transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
 
