@@ -33,6 +33,7 @@ public class WhatsAppMessageProcessingService {
     private final DossierRepository dossierRepository;
     private final WhatsAppProviderConfigRepository configRepository;
     private final OutboundMessageRepository outboundMessageRepository;
+    private final WhatsAppSessionWindowService sessionWindowService;
     private final AuditEventService auditEventService;
     private final ActivityService activityService;
 
@@ -41,12 +42,14 @@ public class WhatsAppMessageProcessingService {
             DossierRepository dossierRepository,
             WhatsAppProviderConfigRepository configRepository,
             OutboundMessageRepository outboundMessageRepository,
+            WhatsAppSessionWindowService sessionWindowService,
             AuditEventService auditEventService,
             ActivityService activityService) {
         this.messageRepository = messageRepository;
         this.dossierRepository = dossierRepository;
         this.configRepository = configRepository;
         this.outboundMessageRepository = outboundMessageRepository;
+        this.sessionWindowService = sessionWindowService;
         this.auditEventService = auditEventService;
         this.activityService = activityService;
     }
@@ -114,6 +117,8 @@ public class WhatsAppMessageProcessingService {
         messageEntity.setUpdatedAt(now);
 
         messageRepository.save(messageEntity);
+        
+        sessionWindowService.updateSessionWindow(orgId, phoneNumber, timestamp);
 
         log.info("Processed WhatsApp message {} for dossier {} in org {}", providerMessageId, dossier.getId(), orgId);
     }

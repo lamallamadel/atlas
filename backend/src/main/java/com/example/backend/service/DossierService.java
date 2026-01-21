@@ -73,7 +73,7 @@ public class DossierService {
                     .orElseThrow(() -> new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId()));
 
             if (!orgId.equals(annonce.getOrgId())) {
-                throw new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId()));
+                throw new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId());
             }
 
             if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {

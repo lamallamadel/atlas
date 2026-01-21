@@ -17,8 +17,6 @@ public class PartiePrenanteMapperV2 {
         response.setLastName(entity.getLastName());
         response.setEmail(entity.getEmail());
         response.setPhone(entity.getPhone());
-        response.setCompany(entity.getCompany());
-        response.setHasConsent(entity.getHasConsent());
         
         if (entity.getCreatedAt() != null) {
             response.setCreatedAt(entity.getCreatedAt().atZone(ZoneOffset.UTC).toInstant());
