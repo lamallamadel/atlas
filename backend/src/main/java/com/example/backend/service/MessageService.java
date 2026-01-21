@@ -14,11 +14,13 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import org.hibernate.Session;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class MessageService {
@@ -97,14 +99,12 @@ public class MessageService {
 
         Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
         
-        // Force initialization of dossier associations within the transaction
-        messages.forEach(message -> {
-            if (message.getDossier() != null) {
-                message.getDossier().getId(); // Force lazy load
-            }
-        });
+        // Map entities within transaction scope
+        List<MessageResponse> responseList = messages.getContent().stream()
+                .map(messageMapper::toResponse)
+                .toList();
         
-        return messages.map(messageMapper::toResponse);
+        return new PageImpl<>(responseList, pageable, messages.getTotalElements());
     }
 
     @Transactional
