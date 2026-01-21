@@ -269,6 +269,49 @@ This installs Chromium, Firefox, and WebKit browsers needed for cross-browser te
 
 ### Troubleshooting
 
+#### PostgreSQL Integration Tests Require Docker
+
+**Important:** PostgreSQL integration tests (files ending in `IT.java` or `PostgresIT.java`) require Docker to be running and are **only executed** with the `backend-e2e-postgres` Maven profile. They are **NOT** run during regular unit test execution with `mvn test`.
+
+**Test Classification:**
+
+- **Unit Tests**: Executed with `mvn test` - uses H2 in-memory database, no Docker required
+- **PostgreSQL Integration Tests** (`*IT.java`, `*PostgresIT.java`): Executed with `mvn verify -Pbackend-e2e-postgres` - uses Testcontainers with Docker
+
+**Symptom (Docker not running):**
+```
+org.testcontainers.containers.ContainerLaunchException: Container startup failed
+```
+or
+```
+Could not find a valid Docker environment
+```
+
+**Solution:**
+
+1. **Start Docker:**
+   - **Windows**: Start Docker Desktop
+   - **Mac**: Start Docker Desktop
+   - **Linux**: `sudo systemctl start docker`
+
+2. **Verify Docker is running:**
+   ```bash
+   docker --version
+   docker ps
+   ```
+
+3. **Run PostgreSQL integration tests:**
+   ```bash
+   cd backend
+   mvn verify -Pbackend-e2e-postgres
+   ```
+
+**Note:** If you only want to run unit tests without Docker, use:
+```bash
+cd backend
+mvn test
+```
+
 #### Port 5432 Already in Use
 
 If PostgreSQL tests fail due to port conflicts:

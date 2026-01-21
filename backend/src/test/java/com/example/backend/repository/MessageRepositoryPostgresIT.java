@@ -42,9 +42,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @ActiveProfiles("backend-e2e-postgres")
 @Import(PostgresTestcontainersConfiguration.class)
-class MessageRepositoryPostgresTest {
+class MessageRepositoryPostgresIT {
 
-    private static final Logger log = LoggerFactory.getLogger(MessageRepositoryPostgresTest.class);
+    private static final Logger log = LoggerFactory.getLogger(MessageRepositoryPostgresIT.class);
 
     @Autowired
     private MessageRepository messageRepository;

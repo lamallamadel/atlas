@@ -404,3 +404,7 @@ backend/run-mvn-install.ps1
 backend/setup-install.cmd
 backend/setup-toolchains.js
 backend/.mvn/
+
+# Latest setup helper scripts (created during automated setup)
+setup-now.ps1
+install-backend-deps.js
