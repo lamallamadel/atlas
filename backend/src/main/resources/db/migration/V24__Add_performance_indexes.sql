@@ -57,11 +57,11 @@ CREATE INDEX IF NOT EXISTS idx_outbound_message_status_attempt_count ON outbound
 CREATE INDEX IF NOT EXISTS idx_outbound_message_org_id_status ON outbound_message(org_id, status);
 
 -- Outbound Attempt table indexes
-CREATE INDEX IF NOT EXISTS idx_outbound_attempt_message_id ON outbound_attempt(message_id);
+CREATE INDEX IF NOT EXISTS idx_outbound_attempt_message_id ON outbound_attempt(outbound_message_id);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_status ON outbound_attempt(status);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempt_no ON outbound_attempt(attempt_no);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_next_retry_at ON outbound_attempt(next_retry_at);
-CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempted_at ON outbound_attempt(attempted_at);
+--CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempted_at ON outbound_attempt(attempted_at);
 
 -- Dossier Status History table indexes
 CREATE INDEX IF NOT EXISTS idx_dossier_status_history_dossier_id ON dossier_status_history(dossier_id);

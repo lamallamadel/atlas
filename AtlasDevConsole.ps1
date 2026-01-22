@@ -47,7 +47,7 @@ function Get-CommandExists([string]$Name) {
 }
 
 function Find-RepoRoot([string]$StartDir) {
-  $dir = Resolve-Path $StartDir
+  $dir = Resolve-Path -LiteralPath $StartDir -ErrorAction Stop | Select-Object -First 1
   $current = [System.IO.DirectoryInfo]$dir.Path
   while ($null -ne $current) {
     $markers = @(".git","infra","backend","frontend","pom.xml","package.json","docs")
@@ -56,7 +56,7 @@ function Find-RepoRoot([string]$StartDir) {
     }
     $current = $current.Parent
   }
-  return (Resolve-Path $StartDir).Path
+  return (Resolve-Path -LiteralPath $StartDir -ErrorAction Stop | Select-Object -First 1 -ExpandProperty Path)
 }
 
 function New-Action([string]$Category,[string]$Title,[string]$Command,[string]$Args,[string]$WorkDir,[string]$Source,[string]$Kind) {
@@ -69,6 +69,15 @@ function New-Action([string]$Category,[string]$Title,[string]$Command,[string]$A
     Source   = $Source
     Kind     = $Kind   # Script | Npm | Maven | Docker | Doc | Link
   }
+}
+
+
+function To-Array {
+  param([object]$Value)
+  if ($null -eq $Value) { return @() }
+  if ($Value -is [string]) { return @($Value) }
+  if ($Value -is [System.Array]) { return $Value }
+  try { return @($Value) } catch { return @($Value) }
 }
 
 # ----------------------------
@@ -84,13 +93,13 @@ function Discover-Compose([string]$RepoRoot) {
     $composeFiles += Get-ChildItem -Path $infraDir -Filter "docker-compose*.yaml" -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
   }
 
-  if ($composeFiles.Count -eq 0) {
+  if (@($composeFiles).Count -eq 0) {
     $composeFiles += Get-ChildItem -Path $RepoRoot -Filter "docker-compose*.yml"  -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
     $composeFiles += Get-ChildItem -Path $RepoRoot -Filter "docker-compose*.yaml" -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
   }
 
-  $composeFiles = $composeFiles | Sort-Object -Unique
-  if ($composeFiles.Count -eq 0) { return @{ Actions=@(); Files=@() } }
+  $composeFiles = @($composeFiles | Sort-Object -Unique)
+  if (@($composeFiles).Count -eq 0) { return @{ Actions=@(); Files=@() } }
 
   $composeMode = $null
   if (Get-CommandExists "docker") {
@@ -323,11 +332,11 @@ function Discover-ObservabilityLinks([string]$RepoRoot) {
   )
 
   $mds = @(
-    Join-Path $RepoRoot "docs\RUNBOOK_OBSERVABILITY.md",
-    Join-Path $RepoRoot "infra\RUNBOOK_OBSERVABILITY.md",
-    Join-Path $RepoRoot "README.md",
-    Join-Path $RepoRoot "infra\README.md",
-    Join-Path $RepoRoot "docs\README.md"
+    (Join-Path $RepoRoot "docs\RUNBOOK_OBSERVABILITY.md")
+    (Join-Path $RepoRoot "infra\RUNBOOK_OBSERVABILITY.md")
+    (Join-Path $RepoRoot "README.md")
+    (Join-Path $RepoRoot "infra\README.md")
+    (Join-Path $RepoRoot "docs\README.md")
   ) | Where-Object { Test-Path $_ }
 
   $all = ""
@@ -371,7 +380,7 @@ function Discover-ObservabilityLinks([string]$RepoRoot) {
 # Runner
 # ----------------------------
 $global:CurrentProc = $null
-$global:RepoRoot    = Find-RepoRoot (Get-Location)
+$global:RepoRoot    = Find-RepoRoot ((Get-Location).Path)
 
 function Format-Now { (Get-Date).ToString("yyyy-MM-dd HH:mm:ss") }
 
@@ -1070,20 +1079,58 @@ function Select-Action([object]$A) {
 function Reload-All {
   $repo = $TxtRepo.Text
   if (-not $repo -or -not (Test-Path $repo)) { $repo = $global:RepoRoot; $TxtRepo.Text = $repo }
-  $global:RepoRoot = (Resolve-Path $repo).Path
+  $global:RepoRoot = (Resolve-Path -LiteralPath $repo -ErrorAction Stop | Select-Object -First 1 -ExpandProperty Path)
   Update-Checks $global:RepoRoot
 
   $composeInfo = Discover-Compose $global:RepoRoot
-  $global:ComposeActions = @($composeInfo.Actions)
+  # Compose actions (safe array conversion for WPF ItemsSource)
+  $global:ComposeActions = @()
+  try {
+    $ca = $null
+    if ($composeInfo -is [System.Collections.IDictionary]) { $ca = $composeInfo['Actions'] } else { $ca = $composeInfo.Actions }
 
-  $global:ToolkitActions = @(Discover-Scripts $global:RepoRoot)
-  $global:Docs = @(Discover-Docs $global:RepoRoot)
-  $global:Links = @(Discover-ObservabilityLinks $global:RepoRoot)
+    if ($null -eq $ca) {
+      $global:ComposeActions = @()
+    }
+    elseif ($ca -is [System.Array]) {
+      $global:ComposeActions = $ca
+    }
+    elseif ($ca -is [System.Collections.IList] -and ($ca.GetType().FullName -like 'System.Collections.Generic.List*')) {
+      # Generic List<T> -> ToArray avoids some PowerShell adapter edge cases in Windows PowerShell 5.1
+      $global:ComposeActions = $ca.ToArray()
+    }
+    elseif ($ca -is [System.Collections.IEnumerable] -and -not ($ca -is [string])) {
+      $global:ComposeActions = @($ca)
+    }
+    else {
+      $global:ComposeActions = @($ca)
+    }
+  } catch {
+    $global:ComposeActions = @()
+    Append-Output ("[WARN] Compose discovery failed: " + $_.Exception.Message)
+  }
+
+  $global:ToolkitActions = To-Array (Discover-Scripts $global:RepoRoot)
+  $global:Docs = To-Array (Discover-Docs $global:RepoRoot)
+  $global:Links = To-Array (Discover-ObservabilityLinks $global:RepoRoot)
 
   $global:MavenInfo = Discover-Maven $global:RepoRoot
-  $global:BackendActions = @($global:MavenInfo.Actions)
+  # Backend actions (safe array conversion)
+  $global:BackendActions = @()
+  try {
+    $ba = $null
+    if ($global:MavenInfo -is [System.Collections.IDictionary]) { $ba = $global:MavenInfo['Actions'] } else { $ba = $global:MavenInfo.Actions }
 
-  $npmActions = @(Discover-Npm $global:RepoRoot)
+    if ($null -eq $ba) { $global:BackendActions = @() }
+    elseif ($ba -is [System.Array]) { $global:BackendActions = $ba }
+    elseif ($ba -is [System.Collections.IEnumerable] -and -not ($ba -is [string])) { $global:BackendActions = @($ba) }
+    else { $global:BackendActions = @($ba) }
+  } catch {
+    $global:BackendActions = @()
+    Append-Output ("[WARN] Maven action discovery failed: " + $_.Exception.Message)
+  }
+
+  $npmActions = To-Array (Discover-Npm $global:RepoRoot)
   $global:FrontendActions = @($npmActions | Where-Object { $_.Category -eq "Frontend" })
 
   $springProfiles = @(Discover-SpringProfiles $global:RepoRoot)
