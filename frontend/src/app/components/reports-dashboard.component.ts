@@ -29,6 +29,7 @@ export class ReportsDashboardComponent implements OnInit {
   loading = true;
   error: string | null = null;
   exportingPDF = false;
+  exportingCSV = false;
 
   dateFrom = '';
   dateTo = '';
@@ -424,19 +425,29 @@ export class ReportsDashboardComponent implements OnInit {
       return;
     }
 
-    const csvData = this.prepareCSVData();
-    const { default: Papa } = await import('papaparse');
-    const csv = Papa.unparse(csvData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `analytics-report-${this.dateFrom}-to-${this.dateTo}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    this.exportingCSV = true;
+    this.error = null;
+
+    try {
+      const csvData = this.prepareCSVData();
+      const { default: Papa } = await import('papaparse');
+      const csv = Papa.unparse(csvData);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `analytics-report-${this.dateFrom}-to-${this.dateTo}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      this.error = 'Failed to export CSV. Please try again.';
+    } finally {
+      this.exportingCSV = false;
+    }
   }
 
   async exportToPDF(): Promise<void> {
