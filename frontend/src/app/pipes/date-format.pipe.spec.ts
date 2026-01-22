@@ -1,9 +1,12 @@
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { DateFormatPipe } from './date-format.pipe';
 
 describe('DateFormatPipe', () => {
   let pipe: DateFormatPipe;
 
   beforeEach(() => {
+    registerLocaleData(localeFr, 'fr-FR');
     pipe = new DateFormatPipe();
   });
 

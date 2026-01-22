@@ -1,9 +1,12 @@
+import { registerLocaleData } from '@angular/common';
+import localeFr from '@angular/common/locales/fr';
 import { PriceFormatPipe } from './price-format.pipe';
 
 describe('PriceFormatPipe', () => {
   let pipe: PriceFormatPipe;
 
   beforeEach(() => {
+    registerLocaleData(localeFr, 'fr-FR');
     pipe = new PriceFormatPipe();
   });
 
