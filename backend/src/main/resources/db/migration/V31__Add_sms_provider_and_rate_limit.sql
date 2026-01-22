@@ -43,7 +43,7 @@ CREATE TABLE sms_rate_limit (
 );
 
 CREATE INDEX idx_sms_rate_limit_org_id ON sms_rate_limit(org_id);
-CREATE INDEX idx_sms_rate_limit_throttle ON sms_rate_limit(throttle_until) WHERE throttle_until IS NOT NULL;
+CREATE INDEX idx_sms_rate_limit_throttle ON sms_rate_limit(throttle_until) ;
 
 -- Add comments for documentation
 COMMENT ON TABLE sms_provider_config IS 'Configuration for SMS providers (Twilio, AWS SNS) per organization';
