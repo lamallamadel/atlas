@@ -36,7 +36,7 @@ CREATE TABLE coop_member (
     member_number VARCHAR(100) UNIQUE,
     join_date DATE,
     status VARCHAR(50) NOT NULL,
-    meta JSONB,
+    meta ${json_type},
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),

@@ -1,5 +1,5 @@
 -- Add metadata column to activity table for storing standardized JSON metadata
-ALTER TABLE activity ADD COLUMN IF NOT EXISTS metadata JSONB;
+ALTER TABLE activity ADD COLUMN IF NOT EXISTS metadata ${json_type};
 
 -- Create index on metadata column for faster JSON queries
 CREATE INDEX IF NOT EXISTS idx_activity_metadata ON activity USING GIN (metadata);
