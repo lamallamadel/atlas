@@ -128,6 +128,137 @@ WHERE next_retry_at IS NOT NULL;
 - Maven: Standard Maven project structure
 - Configuration: YAML-based Spring configuration
 
+## Bundle Optimization
+
+### CommonJS Dependency Strategy
+
+The frontend Angular application uses a carefully managed set of CommonJS dependencies that have been explicitly allowed in the build configuration. This section documents the rationale and strategy for these dependencies.
+
+#### Why These Dependencies Are CommonJS
+
+Several third-party libraries in the project remain as CommonJS modules rather than ES Modules (ESM):
+
+**Core Dependencies:**
+- **jspdf** (`^2.5.2`): Popular PDF generation library that hasn't fully migrated to ESM. Used for document export features.
+- **html2canvas** (`^1.4.1`): Converts HTML/DOM elements to canvas for PDF generation and screenshots. Critical dependency for jspdf.
+- **dompurify** (`^3.2.2`): HTML sanitization library for preventing XSS attacks. Essential for security when rendering user-generated content.
+- **lodash** (`^4.17.21`): Utility library providing consistent cross-browser implementations. While tree-shakeable versions exist (lodash-es), many plugins and libraries expect the CommonJS version.
+
+**Transitive Dependencies:**
+- **canvg**: Automatically included as a transitive dependency of jspdf or html2canvas for SVG rendering support. Cannot be directly controlled or migrated.
+
+#### Configuration: allowedCommonJsDependencies
+
+Angular's build configuration explicitly allows these CommonJS modules to suppress warnings during the build process:
+
+```json
+// angular.json
+{
+  "architect": {
+    "build": {
+      "options": {
+        "allowedCommonJsDependencies": [
+          "lodash",
+          "jspdf",
+          "html2canvas",
+          "dompurify",
+          "canvg"
+        ]
+      }
+    }
+  }
+}
+```
+
+**Purpose:**
+- **Suppress Build Warnings**: Prevents noisy warnings about CommonJS dependencies during development and production builds
+- **Explicit Allow-List**: Documents which dependencies are intentionally using CommonJS format
+- **Build Safety**: Ensures the build doesn't fail due to expected CommonJS usage
+
+**Impact:**
+- These dependencies will be bundled as-is without ES Module tree-shaking
+- Bundle size impact is acceptable given the functionality they provide
+- No runtime errors or compatibility issues with Angular's build system
+
+#### Lazy Loading Pattern for On-Demand Features
+
+Heavy dependencies like jspdf and html2canvas are lazy-loaded only when needed to minimize initial bundle size:
+
+**Implementation Pattern:**
+```typescript
+// Lazy load PDF generation dependencies
+async generatePDF() {
+  const jsPDF = (await import('jspdf')).default;
+  const html2canvas = (await import('html2canvas')).default;
+  
+  // Use libraries only when PDF export is triggered
+  const canvas = await html2canvas(document.getElementById('content'));
+  const pdf = new jsPDF();
+  pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0);
+  pdf.save('document.pdf');
+}
+```
+
+**Benefits:**
+- **Reduced Initial Load**: PDF generation libraries (several hundred KB) only downloaded when user triggers export
+- **Better Performance**: Faster application startup and first contentful paint
+- **On-Demand Loading**: Code-splitting ensures features load only when needed
+
+**Usage Locations:**
+- Document export features (PDF generation)
+- Advanced reporting modules
+- Administrative tools and utilities
+
+#### Transitive Dependency: canvg
+
+**Limitation:**
+- `canvg` is a transitive dependency of jspdf or html2canvas
+- Cannot be directly removed or replaced without replacing the parent libraries
+- Required for SVG-to-canvas rendering support in PDF generation
+
+**Workaround:**
+- Included in `allowedCommonJsDependencies` to suppress warnings
+- Minimal bundle impact as it's only loaded when parent libraries are used
+- Lazy loading of parent libraries (jspdf/html2canvas) ensures canvg is also lazy-loaded
+
+#### Future Considerations
+
+**Migration to ESM Alternatives:**
+
+As the JavaScript ecosystem continues to modernize, consider these future migration paths:
+
+1. **jspdf**: Monitor for ESM support in future versions (v3.x+)
+   - Track: https://github.com/parallax/jsPDF/issues (ESM migration discussions)
+   - Alternative: Consider `pdfmake` (has ESM builds) if jspdf doesn't migrate
+
+2. **html2canvas**: Watch for ESM releases
+   - Alternative: `dom-to-image` or `html-to-image` (some have ESM support)
+
+3. **lodash**: Migrate to `lodash-es` where possible
+   - Use individual imports: `import { debounce } from 'lodash-es'`
+   - Tree-shakeable and ES Module native
+   - Requires audit of all lodash usage across the codebase
+
+4. **dompurify**: Has ESM builds available in latest versions
+   - Consider updating import style: `import DOMPurify from 'dompurify'`
+   - May already support ESM - verify in future updates
+
+**Action Items for Future:**
+- Regularly check dependency updates for ESM support
+- Test ESM alternatives in a feature branch before migration
+- Monitor bundle size impact using `ng build --stats-json` and webpack-bundle-analyzer
+- Update this documentation when migrations occur
+
+**Bundle Analysis:**
+```bash
+# Generate bundle statistics
+cd frontend
+npm run build -- --stats-json
+
+# Analyze bundle composition
+npx webpack-bundle-analyzer dist/frontend/stats.json
+```
+
 ## End-to-End Testing
 
 ### Overview
