@@ -282,10 +282,10 @@ function Discover-Maven([string]$RepoRoot) {
 function Discover-SpringProfiles([string]$RepoRoot) {
   $profiles = New-Object System.Collections.Generic.List[string]
   $roots = @(
-    Join-Path $RepoRoot "backend\src\main\resources",
-    Join-Path $RepoRoot "src\main\resources",
-    Join-Path $RepoRoot "backend\src\test\resources",
-    Join-Path $RepoRoot "src\test\resources"
+    (Join-Path $RepoRoot "backend\src\main\resources")
+    (Join-Path $RepoRoot "src\main\resources")
+    (Join-Path $RepoRoot "backend\src\test\resources")
+    (Join-Path $RepoRoot "src\test\resources")
   ) | Where-Object { Test-Path $_ } | Select-Object -Unique
 
   foreach ($r in $roots) {
@@ -300,9 +300,9 @@ function Discover-SpringProfiles([string]$RepoRoot) {
 function Discover-PlaywrightProjects([string]$RepoRoot) {
   $projects = New-Object System.Collections.Generic.List[string]
   $cands = @(
-    Join-Path $RepoRoot "frontend\playwright.config.ts",
-    Join-Path $RepoRoot "frontend\playwright.config.js",
-    Join-Path $RepoRoot "playwright.config.ts",
+    (Join-Path $RepoRoot "frontend\playwright.config.ts")
+    (Join-Path $RepoRoot "frontend\playwright.config.js")
+    (Join-Path $RepoRoot "playwright.config.ts")
     Join-Path $RepoRoot "playwright.config.js"
   ) | Where-Object { Test-Path $_ } | Select-Object -Unique
 
@@ -498,7 +498,7 @@ function Start-Action([object]$Action) {
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Atlas Dev Dashboard" Height="820" Width="1280"
-        WindowStartupLocation="CenterScreen" Background="#0B1220" Foreground="#E5E7EB">
+        WindowStartupLocation="CenterScreen" Background="#0B1220" Foreground="#E5E7EB" WindowStyle="SingleBorderWindow" ResizeMode="CanResize" ShowInTaskbar="True">
   <Window.Resources>
     <SolidColorBrush x:Key="Surface"  Color="#111827"/>
     <SolidColorBrush x:Key="Surface2" Color="#0F172A"/>
@@ -556,7 +556,48 @@ function Start-Action([object]$Action) {
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
 
-    <Style TargetType="GroupBox">
+
+    <Style TargetType="ListBox">
+      <Setter Property="Margin" Value="6"/>
+      <Setter Property="Background" Value="{StaticResource Surface2}"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style TargetType="ComboBox">
+      <Setter Property="Margin" Value="6"/>
+      <Setter Property="Padding" Value="8,6"/>
+      <Setter Property="Background" Value="{StaticResource Surface2}"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+    </Style>
+
+    <Style TargetType="Label">
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+    </Style>
+
+    <Style TargetType="ListViewItem">
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+    </Style>
+
+    <Style TargetType="ListBoxItem">
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+    </Style>
+
+    <Style TargetType="ComboBoxItem">
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+    </Style>
+
+    <Style TargetType="GridViewColumnHeader">
+      <Setter Property="Background" Value="{StaticResource Surface}"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+      <Setter Property="BorderThickness" Value="0,0,0,1"/>
+      <Setter Property="Padding" Value="10,6"/>
+    </Style>
+<Style TargetType="GroupBox">
       <Setter Property="Margin" Value="10"/>
       <Setter Property="Padding" Value="10"/>
       <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
