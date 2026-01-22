@@ -46,7 +46,7 @@
         <button 
           mat-stroked-button 
           (click)="exportToCSV()" 
-          [disabled]="loading || !analyticsData"
+          [disabled]="loading || !analyticsData || exportingPDF"
           aria-label="Export to CSV"
           class="export-btn"
         >
@@ -56,12 +56,13 @@
         <button 
           mat-stroked-button 
           (click)="exportToPDF()" 
-          [disabled]="loading || !analyticsData"
+          [disabled]="loading || !analyticsData || exportingPDF"
           aria-label="Export to PDF"
           class="export-btn"
         >
-          <mat-icon>picture_as_pdf</mat-icon>
-          Export PDF
+          <mat-icon *ngIf="!exportingPDF">picture_as_pdf</mat-icon>
+          <mat-spinner *ngIf="exportingPDF" diameter="20" style="display: inline-block;"></mat-spinner>
+          <span [style.margin-left.px]="exportingPDF ? 8 : 0">{{ exportingPDF ? 'Exporting...' : 'Export PDF' }}</span>
         </button>
       </div>
     </div>
