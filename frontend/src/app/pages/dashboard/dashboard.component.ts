@@ -456,4 +456,47 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+
+  isExportingToCSV = false;
+
+  async exportToCSV(): Promise<void> {
+    if (this.isExportingToCSV) {
+      return;
+    }
+
+    this.isExportingToCSV = true;
+
+    try {
+      const Papa = await import('papaparse');
+      
+      const csvData = this.recentDossiers.map(dossier => ({
+        ID: dossier.id,
+        'Lead Name': dossier.leadName,
+        'Lead Phone': dossier.leadPhone,
+        'Status': dossier.status,
+        'Created At': dossier.createdAt
+      }));
+
+      const csv = Papa.unparse(csvData);
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `dossiers_${new Date().toISOString()}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      this.ariaAnnouncer.announcePolite('Export CSV terminé avec succès');
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+      this.ariaAnnouncer.announceAssertive('Erreur lors de l\'export CSV');
+    } finally {
+      this.isExportingToCSV = false;
+    }
+  }
 }
