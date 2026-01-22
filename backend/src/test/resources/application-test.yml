@@ -21,6 +21,10 @@ spring:
     locations: classpath:db/migration,classpath:db/migration-h2
     placeholders:
       json_type: JSON
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
 
   security:
     oauth2:
@@ -70,4 +74,7 @@ storage:
     base-path: ./test-storage
 
 rate-limit:
+  enabled: false
+
+elasticsearch:
   enabled: false
