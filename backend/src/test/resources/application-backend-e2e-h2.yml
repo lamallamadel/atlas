@@ -39,6 +39,14 @@ spring:
     scheduling:
       enabled: false
 
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
+
+elasticsearch:
+  enabled: false
+
 management:
   endpoint:
     health:
