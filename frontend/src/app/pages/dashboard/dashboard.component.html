@@ -99,6 +99,22 @@
                 <mat-card-title class="kpi-card-title">
                   <h3 id="recent-dossiers-title">Derniers dossiers</h3>
                 </mat-card-title>
+                <div class="export-actions">
+                  <button mat-icon-button 
+                          (click)="exportToCSV()" 
+                          [disabled]="isExportingToCSV || recentDossiers.length === 0"
+                          matTooltip="Exporter en CSV"
+                          aria-label="Exporter les dossiers en CSV">
+                    <mat-icon>file_download</mat-icon>
+                  </button>
+                  <button mat-icon-button 
+                          (click)="exportToPDF()" 
+                          [disabled]="isExportingToPDF || recentDossiers.length === 0"
+                          matTooltip="Exporter en PDF"
+                          aria-label="Exporter les dossiers en PDF">
+                    <mat-icon>picture_as_pdf</mat-icon>
+                  </button>
+                </div>
               </mat-card-header>
               
               <mat-card-content class="scrollable-content">
