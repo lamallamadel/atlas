@@ -430,3 +430,9 @@ install-backend-deps.js
 setup-maven-build-temp.ps1
 setup-backend-maven.js
 run-backend-mvn-install.cmd
+
+# Setup helper scripts (created during initial repo clone)
+run-maven-java17.cmd
+setup-java17-env.ps1
+backend/setup-and-build.ps1
+backend/run-maven-install.js

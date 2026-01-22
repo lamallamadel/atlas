@@ -53,7 +53,6 @@ CREATE INDEX IF NOT EXISTS idx_outbound_message_status ON outbound_message(statu
 CREATE INDEX IF NOT EXISTS idx_outbound_message_attempt_count ON outbound_message(attempt_count);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_channel ON outbound_message(channel);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_created_at ON outbound_message(created_at);
-CREATE INDEX IF NOT EXISTS idx_outbound_message_next_retry_at ON outbound_message(next_retry_at);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_status_attempt_count ON outbound_message(status, attempt_count);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_org_id_status ON outbound_message(org_id, status);
 
