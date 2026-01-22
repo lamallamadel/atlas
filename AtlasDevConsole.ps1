@@ -1,390 +1,523 @@
-#requires -Version 5.1
-<#[
-Atlas Dev Console (Windows GUI) - v1.1.0
-
-Purpose
-- Provide a Windows GUI to operate the Atlas dev environment and CI toolkits.
-- Autodetects the repository structure and available scripts to avoid command drift.
-
-Run
-  Windows PowerShell:
-    powershell -ExecutionPolicy Bypass -File .\AtlasDevConsole_v1.1.0.ps1
-
-  PowerShell 7:
-    pwsh -Sta -ExecutionPolicy Bypass -File .\AtlasDevConsole_v1.1.0.ps1
-
-Notes
-- WPF requires an STA thread. If not STA, the script will relaunch itself with -STA.
-- Docker Compose detection prefers `docker compose` and falls back to `docker-compose`.
+<#
+Atlas Dev Dashboard (v1.3.0)
+- WPF GUI to operate dev environment and CI toolkits
+- Auto-discovers repo commands (dev*/mak*/setup*/run*/mvn*/maven*, package.json scripts, docker-compose files, Maven, Spring profiles, Playwright project names)
+- Observability links inferred from runbooks if possible; falls back to standard localhost endpoints
+Compatible: Windows PowerShell 5.1 + PowerShell 7 (STA enforced)
 #>
 
-$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+$ErrorActionPreference = "Stop"
+
+function Restart-InSTA {
+  try {
+    if ($Host.Runspace.ApartmentState -ne "STA") {
+      $exe = (Get-Process -Id $PID).Path
+      $args = @()
+      if ($PSVersionTable.PSEdition -eq "Core") { $args += "-Sta" }
+      $args += "-NoProfile","-ExecutionPolicy","Bypass","-File",$PSCommandPath
+      Start-Process -FilePath $exe -ArgumentList $args -WorkingDirectory (Get-Location) | Out-Null
+      exit
+    }
+  } catch { }
+}
+Restart-InSTA
+
+Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase, System.Xaml
 
 # ----------------------------
-# STA + Windows guards
+# Utilities
 # ----------------------------
+function First-NotNull {
+  param([object[]]$Items)
+  foreach ($i in $Items) { if ($null -ne $i) { return $i } }
+  return $null
+}
 
-function Assert-Windows {
-    $isWin = $false
-    if (Get-Variable -Name IsWindows -Scope Global -ErrorAction SilentlyContinue) {
-        $isWin = [bool]$IsWindows
+function Try-ReadText([string]$Path) {
+  try { Get-Content -LiteralPath $Path -Raw -ErrorAction Stop } catch { $null }
+}
+
+function Safe-InvokeItem([string]$PathOrUrl) {
+  try { Start-Process $PathOrUrl | Out-Null } catch { }
+}
+
+function Get-CommandExists([string]$Name) {
+  [bool](Get-Command $Name -ErrorAction SilentlyContinue)
+}
+
+function Find-RepoRoot([string]$StartDir) {
+  $dir = Resolve-Path $StartDir
+  $current = [System.IO.DirectoryInfo]$dir.Path
+  while ($null -ne $current) {
+    $markers = @(".git","infra","backend","frontend","pom.xml","package.json","docs")
+    foreach ($m in $markers) {
+      if (Test-Path (Join-Path $current.FullName $m)) { return $current.FullName }
+    }
+    $current = $current.Parent
+  }
+  return (Resolve-Path $StartDir).Path
+}
+
+function New-Action([string]$Category,[string]$Title,[string]$Command,[string]$Args,[string]$WorkDir,[string]$Source,[string]$Kind) {
+  [PSCustomObject]@{
+    Category = $Category
+    Title    = $Title
+    Command  = $Command
+    Args     = $Args
+    WorkDir  = $WorkDir
+    Source   = $Source
+    Kind     = $Kind   # Script | Npm | Maven | Docker | Doc | Link
+  }
+}
+
+# ----------------------------
+# Discovery
+# ----------------------------
+function Discover-Compose([string]$RepoRoot) {
+  $actions = New-Object System.Collections.Generic.List[object]
+  $infraDir = Join-Path $RepoRoot "infra"
+
+  $composeFiles = @()
+  if (Test-Path $infraDir) {
+    $composeFiles += Get-ChildItem -Path $infraDir -Filter "docker-compose*.yml"  -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+    $composeFiles += Get-ChildItem -Path $infraDir -Filter "docker-compose*.yaml" -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+  }
+
+  if ($composeFiles.Count -eq 0) {
+    $composeFiles += Get-ChildItem -Path $RepoRoot -Filter "docker-compose*.yml"  -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+    $composeFiles += Get-ChildItem -Path $RepoRoot -Filter "docker-compose*.yaml" -File -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+  }
+
+  $composeFiles = $composeFiles | Sort-Object -Unique
+  if ($composeFiles.Count -eq 0) { return @{ Actions=@(); Files=@() } }
+
+  $composeMode = $null
+  if (Get-CommandExists "docker") {
+    try { & docker compose version *> $null; $composeMode = "docker compose" } catch {
+      if (Get-CommandExists "docker-compose") { $composeMode = "docker-compose" }
+    }
+  } elseif (Get-CommandExists "docker-compose") {
+    $composeMode = "docker-compose"
+  }
+
+  foreach ($f in $composeFiles) {
+    $name  = Split-Path $f -Leaf
+    $label = if ($name -match "e2e|test") { "E2E" } else { "Default" }
+    $wd    = Split-Path $f -Parent
+
+    if ($composeMode -eq "docker compose") {
+      $baseCmd  = "docker"
+      $baseArgs = "compose -f `"$f`""
+    } elseif ($composeMode -eq "docker-compose") {
+      $baseCmd  = "docker-compose"
+      $baseArgs = "-f `"$f`""
     } else {
-        $isWin = ($env:OS -like '*Windows*')
+      # still exposed; will fail with clear output if docker missing
+      $baseCmd  = "docker"
+      $baseArgs = "compose -f `"$f`""
     }
-    if (-not $isWin) {
-        throw 'This GUI requires Windows (WPF).'
-    }
+
+    $actions.Add((New-Action "Operations" "Infra ($label): Up"         $baseCmd "$baseArgs up -d"            $wd $f "Docker"))
+    $actions.Add((New-Action "Operations" "Infra ($label): Up (build)" $baseCmd "$baseArgs up -d --build"   $wd $f "Docker"))
+    $actions.Add((New-Action "Operations" "Infra ($label): Down"       $baseCmd "$baseArgs down"            $wd $f "Docker"))
+    $actions.Add((New-Action "Operations" "Infra ($label): Down (-v)"  $baseCmd "$baseArgs down -v"         $wd $f "Docker"))
+    $actions.Add((New-Action "Operations" "Infra ($label): Status"     $baseCmd "$baseArgs ps"              $wd $f "Docker"))
+  }
+
+  return @{ Actions=$actions; Files=$composeFiles }
 }
 
-Assert-Windows
+function Discover-Scripts([string]$RepoRoot) {
+  $actions  = New-Object System.Collections.Generic.List[object]
+  $patterns = @(
+    "dev*.ps1","dev*.cmd","dev*.bat",
+    "mak*.ps1","mak*.cmd","mak*.bat",
+    "make*.ps1","make*.cmd","make*.bat",
+    "setup*.ps1","setup*.cmd","setup*.bat",
+    "run*.ps1","run*.cmd","run*.bat",
+    "mvn*.ps1","mvn*.cmd","mvn*.bat",
+    "maven*.ps1","maven*.cmd","maven*.bat"
+  )
 
-try {
-    $apt = [System.Threading.Thread]::CurrentThread.ApartmentState
-    if ($apt -ne [System.Threading.ApartmentState]::STA) {
-        $self = $PSCommandPath
-        $args = @('-NoProfile','-ExecutionPolicy','Bypass','-STA','-File', $self)
-        Start-Process -FilePath 'powershell.exe' -ArgumentList $args -WorkingDirectory (Get-Location).Path | Out-Null
-        exit 0
+  $folders = @(
+    $RepoRoot,
+    (Join-Path $RepoRoot "scripts"),
+    (Join-Path $RepoRoot "toolkit"),
+    (Join-Path $RepoRoot "tools"),
+    (Join-Path $RepoRoot "infra"),
+    (Join-Path $RepoRoot "backend"),
+    (Join-Path $RepoRoot "frontend")
+  ) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
+  $found = New-Object System.Collections.Generic.List[string]
+  foreach ($d in $folders) {
+    foreach ($p in $patterns) {
+      Get-ChildItem -Path $d -Filter $p -File -ErrorAction SilentlyContinue | ForEach-Object { $found.Add($_.FullName) }
     }
-} catch {
-    # ignore
+  }
+
+  foreach ($f in ($found | Sort-Object -Unique)) {
+    $leaf = Split-Path $f -Leaf
+    $wd   = Split-Path $f -Parent
+
+    if ($leaf -like "*.ps1") {
+      $cmd  = "powershell"
+      $args = "-NoProfile -ExecutionPolicy Bypass -File `"$f`""
+    } else {
+      $cmd  = "cmd.exe"
+      $args = "/c `"$f`""
+    }
+
+    $actions.Add((New-Action "Toolkits" $leaf $cmd $args $wd $f "Script"))
+  }
+
+  return $actions
 }
 
-Add-Type -AssemblyName PresentationFramework, PresentationCore, WindowsBase
-Add-Type -AssemblyName System.Windows.Forms
+function Discover-Docs([string]$RepoRoot) {
+  $actions = New-Object System.Collections.Generic.List[object]
+  $docDirs = @((Join-Path $RepoRoot "docs"), (Join-Path $RepoRoot "infra"), $RepoRoot) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
+  $mds = @()
+  foreach ($d in $docDirs) {
+    $mds += Get-ChildItem -Path $d -Filter "RUNBOOK*.md" -File -ErrorAction SilentlyContinue
+    $mds += Get-ChildItem -Path $d -Filter "*.md"       -File -ErrorAction SilentlyContinue
+  }
+
+  foreach ($m in ($mds | Sort-Object FullName -Unique)) {
+    $actions.Add((New-Action "Guide" ("Open: " + $m.Name) "explorer.exe" "`"$($m.FullName)`"" (Split-Path $m.FullName -Parent) $m.FullName "Doc"))
+  }
+
+  return $actions
+}
+
+function Discover-Npm([string]$RepoRoot) {
+  $actions = New-Object System.Collections.Generic.List[object]
+  if (-not (Get-CommandExists "npm")) { return $actions }
+
+  $candidates = @(
+    (Join-Path $RepoRoot "frontend\package.json"),
+    (Join-Path $RepoRoot "package.json")
+  ) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
+  foreach ($pj in $candidates) {
+    $txt = Try-ReadText $pj
+    if (-not $txt) { continue }
+
+    try { $json = $txt | ConvertFrom-Json -ErrorAction Stop } catch { continue }
+    if (-not $json.scripts) { continue }
+
+    $wd   = Split-Path $pj -Parent
+    $lock = Join-Path $wd "package-lock.json"
+
+    if (Test-Path $lock) { $actions.Add((New-Action "Frontend" "npm ci"      "npm" "ci"      $wd $pj "Npm")) }
+    else                 { $actions.Add((New-Action "Frontend" "npm install" "npm" "install" $wd $pj "Npm")) }
+
+    $scriptNames = @($json.scripts.PSObject.Properties.Name) | Sort-Object
+    foreach ($name in $scriptNames) {
+      $val = [string]$json.scripts.$name
+      $cat = if (("$name $val") -match "playwright|e2e|test|lint|dev|start|build") { "Frontend" } else { "Toolkits" }
+      $actions.Add((New-Action $cat ("npm run " + $name) "npm" ("run " + $name) $wd $pj "Npm"))
+    }
+  }
+
+  return $actions
+}
+
+function Discover-Maven([string]$RepoRoot) {
+  $backendPom = Join-Path $RepoRoot "backend\pom.xml"
+  $rootPom    = Join-Path $RepoRoot "pom.xml"
+  $pom = $null
+  if (Test-Path $backendPom) { $pom = $backendPom }
+  elseif (Test-Path $rootPom) { $pom = $rootPom }
+
+  $result = @{
+    Actions  = @()
+    Profiles = @()
+    Pom      = $pom
+    MavenCmd = $null
+    WorkDir  = $null
+  }
+
+  if (-not $pom) { return $result }
+
+  $wd = Split-Path $pom -Parent
+  $mvn = $null
+  $mvnw = Join-Path $wd "mvnw.cmd"
+  if (Test-Path $mvnw) { $mvn = $mvnw }
+  elseif (Get-CommandExists "mvn") { $mvn = "mvn" }
+
+  $result.WorkDir  = $wd
+  $result.MavenCmd = $mvn
+
+  if ($mvn) {
+    $result.Actions += New-Action "Backend" "Maven: clean test"      $mvn "clean test"      $wd $pom "Maven"
+    $result.Actions += New-Action "Backend" "Maven: clean verify"    $mvn "clean verify"    $wd $pom "Maven"
+    $result.Actions += New-Action "Backend" "Maven: spotless check"  $mvn "spotless:check"  $wd $pom "Maven"
+    $result.Actions += New-Action "Backend" "Maven: spring-boot run" $mvn "spring-boot:run" $wd $pom "Maven"
+  }
+
+  $xml = Try-ReadText $pom
+  if ($xml) {
+    $profiles = New-Object System.Collections.Generic.List[string]
+    foreach ($m in [regex]::Matches($xml, "<profile>\s*.*?<id>\s*([^<\s]+)\s*</id>.*?</profile>", "Singleline")) {
+      $profiles.Add($m.Groups[1].Value)
+    }
+    $result.Profiles = $profiles | Sort-Object -Unique
+  }
+
+  return $result
+}
+
+function Discover-SpringProfiles([string]$RepoRoot) {
+  $profiles = New-Object System.Collections.Generic.List[string]
+  $roots = @(
+    Join-Path $RepoRoot "backend\src\main\resources",
+    Join-Path $RepoRoot "src\main\resources",
+    Join-Path $RepoRoot "backend\src\test\resources",
+    Join-Path $RepoRoot "src\test\resources"
+  ) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
+  foreach ($r in $roots) {
+    Get-ChildItem -Path $r -File -ErrorAction SilentlyContinue |
+      Where-Object { $_.Name -match "^application-(.+)\.(yml|yaml|properties)$" } |
+      ForEach-Object { $profiles.Add($Matches[1]) }
+  }
+
+  $profiles | Sort-Object -Unique
+}
+
+function Discover-PlaywrightProjects([string]$RepoRoot) {
+  $projects = New-Object System.Collections.Generic.List[string]
+  $cands = @(
+    Join-Path $RepoRoot "frontend\playwright.config.ts",
+    Join-Path $RepoRoot "frontend\playwright.config.js",
+    Join-Path $RepoRoot "playwright.config.ts",
+    Join-Path $RepoRoot "playwright.config.js"
+  ) | Where-Object { Test-Path $_ } | Select-Object -Unique
+
+  foreach ($c in $cands) {
+    $txt = Try-ReadText $c
+    if (-not $txt) { continue }
+    foreach ($m in [regex]::Matches($txt, "name\s*:\s*['""]([^'""]+)['""]")) {
+      $projects.Add($m.Groups[1].Value)
+    }
+  }
+
+  $projects | Sort-Object -Unique
+}
+
+function Discover-ObservabilityLinks([string]$RepoRoot) {
+  $links = New-Object System.Collections.Generic.List[object]
+  $fallbacks = @(
+    @{Title="Backend";        Url="http://localhost:8080"},
+    @{Title="Health";         Url="http://localhost:8080/actuator/health"},
+    @{Title="Swagger UI";     Url="http://localhost:8080/swagger-ui/index.html"},
+    @{Title="Keycloak";       Url="http://localhost:8081"},
+    @{Title="Adminer";        Url="http://localhost:8082"},
+    @{Title="Grafana";        Url="http://localhost:3000"},
+    @{Title="Prometheus";     Url="http://localhost:9090"},
+    @{Title="Kibana";         Url="http://localhost:5601"},
+    @{Title="Elasticsearch";  Url="http://localhost:9200"}
+  )
+
+  $mds = @(
+    Join-Path $RepoRoot "docs\RUNBOOK_OBSERVABILITY.md",
+    Join-Path $RepoRoot "infra\RUNBOOK_OBSERVABILITY.md",
+    Join-Path $RepoRoot "README.md",
+    Join-Path $RepoRoot "infra\README.md",
+    Join-Path $RepoRoot "docs\README.md"
+  ) | Where-Object { Test-Path $_ }
+
+  $all = ""
+  foreach ($m in $mds) {
+    $t = Try-ReadText $m
+    if ($t) { $all += "`n" + $t }
+  }
+
+  if ($all) {
+    foreach ($m in [regex]::Matches($all, "https?://[^\s\)\]]+")) {
+      $url = $m.Value.Trim()
+      $title = $url
+      if     ($url -match "swagger")          { $title = "Swagger UI" }
+      elseif ($url -match "health|actuator")  { $title = "Health" }
+      elseif ($url -match "grafana")          { $title = "Grafana" }
+      elseif ($url -match "prometheus")       { $title = "Prometheus" }
+      elseif ($url -match "kibana")           { $title = "Kibana" }
+      elseif ($url -match "keycloak")         { $title = "Keycloak" }
+      elseif ($url -match "adminer")          { $title = "Adminer" }
+      elseif ($url -match "9200")             { $title = "Elasticsearch" }
+
+      $links.Add([PSCustomObject]@{ Title=$title; Url=$url })
+    }
+  }
+
+  if ($links.Count -eq 0) {
+    foreach ($f in $fallbacks) { $links.Add([PSCustomObject]@{ Title=$f.Title; Url=$f.Url }) }
+  } else {
+    foreach ($n in @("Health","Swagger UI")) {
+      if (-not ($links | Where-Object { $_.Title -eq $n })) {
+        $fb = $fallbacks | Where-Object { $_.Title -eq $n } | Select-Object -First 1
+        if ($fb) { $links.Add([PSCustomObject]@{ Title=$fb.Title; Url=$fb.Url }) }
+      }
+    }
+  }
+
+  $links | Sort-Object Url -Unique
+}
 
 # ----------------------------
-# Helpers
+# Runner
 # ----------------------------
+$global:CurrentProc = $null
+$global:RepoRoot    = Find-RepoRoot (Get-Location)
 
-function Resolve-RepoRoot {
-    param([string]$StartPath)
+function Format-Now { (Get-Date).ToString("yyyy-MM-dd HH:mm:ss") }
 
-    $p = (Resolve-Path $StartPath).Path
-    while ($true) {
-        if (Test-Path (Join-Path $p 'infra')) { return $p }
-        if (Test-Path (Join-Path $p 'backend')) { return $p }
-        if (Test-Path (Join-Path $p 'frontend')) { return $p }
-
-        $parent = Split-Path -Parent $p
-        if ([string]::IsNullOrEmpty($parent) -or $parent -eq $p) {
-            return (Resolve-Path $StartPath).Path
-        }
-        $p = $parent
-    }
+function Append-Output([string]$Text) {
+  if ($null -eq $Text) { return }
+  $TxtOutput.Dispatcher.Invoke([action]{
+    $TxtOutput.AppendText($Text)
+    if (-not $Text.EndsWith("`n")) { $TxtOutput.AppendText("`r`n") }
+    $TxtOutput.ScrollToEnd()
+  })
 }
 
-function Get-ComposeCommand {
-    try {
-        $null = & docker compose version 2>$null
-        return @{ Command = 'docker'; ArgsPrefix = @('compose'); Kind = 'plugin' }
-    } catch {
-        try {
-            $null = & docker-compose version 2>$null
-            return @{ Command = 'docker-compose'; ArgsPrefix = @(); Kind = 'legacy' }
-        } catch {
-            return $null
-        }
-    }
+function Set-Status([string]$Text) {
+  $TxtStatus.Dispatcher.Invoke([action]{ $TxtStatus.Text = $Text })
 }
 
-function Get-MavenCommand {
-    param([string]$BackendDir)
-
-    $mvnwCmd = Join-Path $BackendDir 'mvnw.cmd'
-    $mvnCmd  = Join-Path $BackendDir 'mvn.cmd'
-
-    if (Test-Path $mvnwCmd) { return @{ Command = $mvnwCmd; ArgsPrefix = @() } }
-    if (Test-Path $mvnCmd)  { return @{ Command = $mvnCmd; ArgsPrefix = @() } }
-
-    return @{ Command = 'mvn'; ArgsPrefix = @() }
+function Stop-Current {
+  try {
+    if ($global:CurrentProc -and -not $global:CurrentProc.HasExited) {
+      $global:CurrentProc.Kill()
+      Append-Output "[INFO] Process terminated."
+    }
+  } catch {
+    Append-Output ("[WARN] Failed to stop: " + $_.Exception.Message)
+  } finally {
+    $global:CurrentProc = $null
+    Set-Status "Ready."
+  }
 }
 
-function Get-FrontendInfo {
-    param([string]$FrontendDir)
+function Show-FixHints {
+  try {
+    $txt = $TxtOutput.Text
+    if (-not $txt) { return }
+    $lines = $txt -split "`r?`n"
+    $tail  = ($lines | Select-Object -Last 200) -join "`n"
 
-    $pkgJson = Join-Path $FrontendDir 'package.json'
-    $info = [ordered]@{
-        Exists = (Test-Path $pkgJson)
-        PackageManager = 'npm'
-        InstallArgs = @('install')
-        Scripts = @()
+    $hints = New-Object System.Collections.Generic.List[string]
+    if ($tail -match "API route and version|server supports the requested API version|Minimum supported API version") {
+      $hints.Add("Docker API mismatch: update Docker Desktop or reset DOCKER_API_VERSION and restart Docker.")
+    }
+    if ($tail -match "compose build requires buildx|buildx") {
+      $hints.Add("Docker buildx missing: update Docker Desktop or enable buildx.")
+    }
+    if ($tail -match "package-lock\.json|unable to cache dependencies|npm ci") {
+      $hints.Add("Node lockfile: ensure package-lock.json exists or use npm install.")
+    }
+    if ($tail -match "JAVA_HOME|Unsupported class file major version") {
+      $hints.Add("Java mismatch: ensure expected Java version is active and JAVA_HOME is correct.")
+    }
+    if ($tail -match "mvnw\.cmd.*cannot find|mvn.*not recognized") {
+      $hints.Add("Maven not found: install mvn or use mvnw.cmd from backend folder.")
     }
 
-    if (-not $info.Exists) { return $info }
-
-    # Pick package manager based on lock file presence
-    if (Test-Path (Join-Path $FrontendDir 'pnpm-lock.yaml')) {
-        $info.PackageManager = 'pnpm'
-        $info.InstallArgs = @('install')
-    } elseif (Test-Path (Join-Path $FrontendDir 'yarn.lock')) {
-        $info.PackageManager = 'yarn'
-        $info.InstallArgs = @('install')
-    } else {
-        $info.PackageManager = 'npm'
-        # npm ci only when package-lock exists
-        if (Test-Path (Join-Path $FrontendDir 'package-lock.json')) {
-            $info.InstallArgs = @('ci')
-        } else {
-            $info.InstallArgs = @('install')
-        }
-    }
-
-    try {
-        $json = Get-Content $pkgJson -Raw | ConvertFrom-Json
-        if ($json.scripts) {
-            $info.Scripts = @($json.scripts.PSObject.Properties.Name | Sort-Object)
-        }
-    } catch {
-        $info.Scripts = @()
-    }
-
-    return $info
+    $TxtHints.Dispatcher.Invoke([action]{
+      if ($hints.Count -gt 0) { $TxtHints.Text = "- " + (($hints | Sort-Object -Unique) -join "`r`n- ") }
+      else { $TxtHints.Text = "" }
+    })
+  } catch { }
 }
 
-function Test-SpotlessConfigured {
-    param([string]$PomPath)
-    if (-not (Test-Path $PomPath)) { return $false }
-    try {
-        $hit = Select-String -Path $PomPath -Pattern 'spotless' -SimpleMatch -Quiet
-        return [bool]$hit
-    } catch {
-        return $false
-    }
-}
+function Start-Action([object]$Action) {
+  if (-not $Action) { return }
+  if ($global:CurrentProc -and -not $global:CurrentProc.HasExited) {
+    Append-Output "[WARN] A process is already running. Stop it first."
+    return
+  }
 
-function Start-StreamingProcess {
-    param(
-        [string]$FilePath,
-        [string[]]$Arguments,
-        [string]$WorkingDirectory,
-        [System.Windows.Controls.TextBox]$OutputTextBox,
-        [System.Windows.Controls.TextBlock]$StatusTextBlock,
-        [System.Windows.Window]$Window
-    )
+  if (-not $Action.Command) { Append-Output "[ERROR] No command defined."; return }
 
-    $psi = New-Object System.Diagnostics.ProcessStartInfo
-    $psi.FileName = $FilePath
-    $psi.WorkingDirectory = $WorkingDirectory
-    $psi.RedirectStandardOutput = $true
-    $psi.RedirectStandardError = $true
-    $psi.UseShellExecute = $false
-    $psi.CreateNoWindow = $true
+  Append-Output ("[{0}] >>> {1} {2}" -f (Format-Now), $Action.Command, $Action.Args)
+  Set-Status ("Running: " + $Action.Title)
 
-    if ($psi.PSObject.Properties.Name -contains 'ArgumentList') {
-        foreach ($a in $Arguments) { $null = $psi.ArgumentList.Add($a) }
-    } else {
-        function Quote-Arg([string]$s) {
-            if ($s -match '[\s"]') { return '"' + ($s -replace '"','\\"') + '"' }
-            return $s
-        }
-        $psi.Arguments = ($Arguments | ForEach-Object { Quote-Arg $_ }) -join ' '
-    }
+  $psi = New-Object System.Diagnostics.ProcessStartInfo
+  $psi.FileName = $Action.Command
+  $psi.Arguments = $Action.Args
+  $psi.WorkingDirectory = $Action.WorkDir
+  $psi.UseShellExecute = $false
+  $psi.RedirectStandardOutput = $true
+  $psi.RedirectStandardError  = $true
+  $psi.CreateNoWindow = $true
+  $psi.StandardOutputEncoding = [System.Text.Encoding]::UTF8
+  $psi.StandardErrorEncoding  = [System.Text.Encoding]::UTF8
 
-    $p = New-Object System.Diagnostics.Process
-    $p.StartInfo = $psi
+  $p = New-Object System.Diagnostics.Process
+  $p.StartInfo = $psi
+  $p.EnableRaisingEvents = $true
 
-    $append = {
-        param([string]$line)
-        if ([string]::IsNullOrEmpty($line)) { return }
-        $Window.Dispatcher.Invoke([action] {
-            $OutputTextBox.AppendText($line + [Environment]::NewLine)
-            $OutputTextBox.ScrollToEnd()
-        }) | Out-Null
-    }
+  $p.add_OutputDataReceived({ param($s,$e) if ($e.Data) { Append-Output $e.Data } })
+  $p.add_ErrorDataReceived({ param($s,$e) if ($e.Data) { Append-Output ("[ERR] " + $e.Data) } })
+  $p.add_Exited({
+    $exit = $p.ExitCode
+    $global:CurrentProc = $null
+    $TxtOutput.Dispatcher.Invoke([action]{ $TxtOutput.AppendText(("[" + (Format-Now) + "] <<< ExitCode: " + $exit + "`r`n")); $TxtOutput.ScrollToEnd() })
+    $TxtLastRun.Dispatcher.Invoke([action]{ $TxtLastRun.Text = ("Last run: " + $Action.Title + " | Exit " + $exit + " | " + (Format-Now)) })
+    if ($exit -eq 0) { Set-Status "Ready." } else { Set-Status "Completed with errors." }
+    Show-FixHints
+  })
 
-    $Window.Dispatcher.Invoke([action] {
-        $StatusTextBlock.Text = 'Running...'
-    }) | Out-Null
-
-    $p.add_OutputDataReceived({ if ($_.Data) { & $append $_.Data } })
-    $p.add_ErrorDataReceived({ if ($_.Data) { & $append ('[ERR] ' + $_.Data) } })
-
+  try {
     $null = $p.Start()
+    $global:CurrentProc = $p
     $p.BeginOutputReadLine()
     $p.BeginErrorReadLine()
-
-    Register-ObjectEvent -InputObject $p -EventName Exited -Action {
-        try {
-            $Window.Dispatcher.Invoke([action] {
-                $StatusTextBlock.Text = 'Ready.'
-            }) | Out-Null
-        } catch {}
-    } | Out-Null
-
-    return $p
-}
-
-function Append-Header {
-    param(
-        [System.Windows.Controls.TextBox]$OutputTextBox,
-        [System.Windows.Window]$Window,
-        [string]$Title,
-        [string]$CommandLine
-    )
-
-    $Window.Dispatcher.Invoke([action] {
-        $OutputTextBox.AppendText('')
-        $OutputTextBox.AppendText('===== ' + $Title + ' =====' + [Environment]::NewLine)
-        if ($CommandLine) {
-            $OutputTextBox.AppendText($CommandLine + [Environment]::NewLine)
-        }
-        $OutputTextBox.ScrollToEnd()
-    }) | Out-Null
-}
-
-function Get-ComposeBaseArgs {
-    param(
-        [string]$RepoRoot,
-        [string]$Mode
-    )
-
-    $infra = Join-Path $RepoRoot 'infra'
-    $base = Join-Path $infra 'docker-compose.yml'
-    $e2e = Join-Path $infra 'docker-compose.e2e-postgres.yml'
-
-    if ($Mode -eq 'E2E-Postgres') {
-        return @('-f', $base, '-f', $e2e)
-    }
-    return @('-f', $base)
-}
-
-function Get-ComposeServices {
-    param(
-        [hashtable]$Compose,
-        [string]$RepoRoot,
-        [string]$Mode
-    )
-
-    if (-not $Compose) { return @() }
-    $infra = Join-Path $RepoRoot 'infra'
-
-    $args = @()
-    $args += $Compose.ArgsPrefix
-    $args += (Get-ComposeBaseArgs -RepoRoot $RepoRoot -Mode $Mode)
-    $args += @('config','--services')
-
-    try {
-        $out = & $Compose.Command @args 2>$null
-        if ($LASTEXITCODE -ne 0) { return @() }
-        $svcs = @($out | Where-Object { $_ -and $_.Trim() -ne '' } | ForEach-Object { $_.Trim() })
-        return $svcs
-    } catch {
-        return @()
-    }
-}
-
-function Run-Compose {
-    param(
-        [hashtable]$Compose,
-        [string]$RepoRoot,
-        [string]$Mode,
-        [string[]]$ComposeArgs,
-        [System.Windows.Controls.TextBox]$OutputTextBox,
-        [System.Windows.Controls.TextBlock]$StatusTextBlock,
-        [System.Windows.Window]$Window
-    )
-
-    $infra = Join-Path $RepoRoot 'infra'
-    $args = @()
-    $args += $Compose.ArgsPrefix
-    $args += (Get-ComposeBaseArgs -RepoRoot $RepoRoot -Mode $Mode)
-    $args += $ComposeArgs
-
-    $cmdLine = ($Compose.Command + ' ' + (($args | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '))
-    Append-Header -OutputTextBox $OutputTextBox -Window $Window -Title 'Compose' -CommandLine $cmdLine
-
-    return Start-StreamingProcess -FilePath $Compose.Command -Arguments $args -WorkingDirectory $infra -OutputTextBox $OutputTextBox -StatusTextBlock $StatusTextBlock -Window $Window
-}
-
-function Run-PS1 {
-    param(
-        [string]$ScriptPath,
-        [string]$RepoRoot,
-        [System.Windows.Controls.TextBox]$OutputTextBox,
-        [System.Windows.Controls.TextBlock]$StatusTextBlock,
-        [System.Windows.Window]$Window
-    )
-
-    $ps = if (Get-Command pwsh -ErrorAction SilentlyContinue) { 'pwsh' } else { 'powershell' }
-    $args = @('-NoProfile','-ExecutionPolicy','Bypass','-File', $ScriptPath)
-
-    $cmdLine = ($ps + ' ' + (($args | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '))
-    Append-Header -OutputTextBox $OutputTextBox -Window $Window -Title 'Toolkit' -CommandLine $cmdLine
-
-    return Start-StreamingProcess -FilePath $ps -Arguments $args -WorkingDirectory $RepoRoot -OutputTextBox $OutputTextBox -StatusTextBlock $StatusTextBlock -Window $Window
-}
-
-function Run-Frontend {
-    param(
-        [hashtable]$FrontendInfo,
-        [string]$RepoRoot,
-        [string[]]$Args,
-        [System.Windows.Controls.TextBox]$OutputTextBox,
-        [System.Windows.Controls.TextBlock]$StatusTextBlock,
-        [System.Windows.Window]$Window
-    )
-
-    $frontendDir = Join-Path $RepoRoot 'frontend'
-    $exe = $FrontendInfo.PackageManager
-
-    $cmdLine = ($exe + ' ' + (($Args | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '))
-    Append-Header -OutputTextBox $OutputTextBox -Window $Window -Title 'Frontend' -CommandLine $cmdLine
-
-    return Start-StreamingProcess -FilePath $exe -Arguments $Args -WorkingDirectory $frontendDir -OutputTextBox $OutputTextBox -StatusTextBlock $StatusTextBlock -Window $Window
-}
-
-function Run-BackendMaven {
-    param(
-        [hashtable]$Mvn,
-        [string]$RepoRoot,
-        [string[]]$Args,
-        [System.Windows.Controls.TextBox]$OutputTextBox,
-        [System.Windows.Controls.TextBlock]$StatusTextBlock,
-        [System.Windows.Window]$Window
-    )
-
-    $backendDir = Join-Path $RepoRoot 'backend'
-    $exe = $Mvn.Command
-
-    $cmdLine = ($exe + ' ' + (($Args | ForEach-Object { if ($_ -match '\s') { '"' + $_ + '"' } else { $_ } }) -join ' '))
-    Append-Header -OutputTextBox $OutputTextBox -Window $Window -Title 'Backend' -CommandLine $cmdLine
-
-    return Start-StreamingProcess -FilePath $exe -Arguments $Args -WorkingDirectory $backendDir -OutputTextBox $OutputTextBox -StatusTextBlock $StatusTextBlock -Window $Window
+  } catch {
+    Append-Output ("[ERROR] Failed to start: " + $_.Exception.Message)
+    Set-Status "Ready."
+  }
 }
 
 # ----------------------------
-# UI (XAML)
+# UI (XAML) - no ampersands in text to avoid XML parsing issues
 # ----------------------------
-
 [xml]$xaml = @'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Atlas Dev Console" Height="820" Width="1240"
-        WindowStartupLocation="CenterScreen" Background="#111827" Foreground="#E5E7EB">
+        Title="Atlas Dev Dashboard" Height="820" Width="1280"
+        WindowStartupLocation="CenterScreen" Background="#0B1220" Foreground="#E5E7EB">
   <Window.Resources>
+    <SolidColorBrush x:Key="Surface"  Color="#111827"/>
+    <SolidColorBrush x:Key="Surface2" Color="#0F172A"/>
+    <SolidColorBrush x:Key="Border"   Color="#243041"/>
+    <SolidColorBrush x:Key="Muted"    Color="#9CA3AF"/>
+
     <Style TargetType="Button">
       <Setter Property="Margin" Value="6"/>
       <Setter Property="Padding" Value="10,8"/>
-      <Setter Property="Background" Value="#1F2937"/>
+      <Setter Property="Background" Value="{StaticResource Surface}"/>
       <Setter Property="Foreground" Value="#E5E7EB"/>
-      <Setter Property="BorderBrush" Value="#374151"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="Cursor" Value="Hand"/>
-      <Setter Property="MinWidth" Value="120"/>
+      <Setter Property="MinWidth" Value="110"/>
       <Setter Property="Template">
         <Setter.Value>
           <ControlTemplate TargetType="Button">
-            <Border CornerRadius="8" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+            <Border CornerRadius="10" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
               <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
-                <Setter Property="Background" Value="#0B1220"/>
-                <Setter Property="BorderBrush" Value="#4B5563"/>
+                <Setter Property="Background" Value="#0E1A2F"/>
+                <Setter Property="BorderBrush" Value="#3B4A63"/>
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
-                <Setter Property="Background" Value="#050A14"/>
+                <Setter Property="Background" Value="#071025"/>
               </Trigger>
               <Trigger Property="IsEnabled" Value="False">
                 <Setter Property="Opacity" Value="0.45"/>
@@ -398,47 +531,59 @@ function Run-BackendMaven {
     <Style TargetType="TextBox">
       <Setter Property="Margin" Value="6"/>
       <Setter Property="Padding" Value="10,8"/>
-      <Setter Property="Background" Value="#0B1220"/>
+      <Setter Property="Background" Value="{StaticResource Surface2}"/>
       <Setter Property="Foreground" Value="#E5E7EB"/>
-      <Setter Property="BorderBrush" Value="#374151"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
       <Setter Property="BorderThickness" Value="1"/>
       <Setter Property="FontFamily" Value="Consolas"/>
       <Setter Property="FontSize" Value="12"/>
     </Style>
 
-    <Style TargetType="ComboBox">
+    <Style TargetType="ListView">
       <Setter Property="Margin" Value="6"/>
-      <Setter Property="Padding" Value="6"/>
-      <Setter Property="Background" Value="#0B1220"/>
+      <Setter Property="Background" Value="{StaticResource Surface2}"/>
       <Setter Property="Foreground" Value="#E5E7EB"/>
-      <Setter Property="BorderBrush" Value="#374151"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
 
     <Style TargetType="GroupBox">
       <Setter Property="Margin" Value="10"/>
       <Setter Property="Padding" Value="10"/>
-      <Setter Property="BorderBrush" Value="#374151"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
 
-    <Style TargetType="TabItem">
-      <Setter Property="Padding" Value="12,8"/>
-      <Setter Property="Background" Value="#111827"/>
-      <Setter Property="Foreground" Value="#E5E7EB"/>
-      <Setter Property="BorderBrush" Value="#374151"/>
+    <Style TargetType="TextBlock">
+      <Setter Property="Margin" Value="4,2"/>
+    </Style>
+
+    <Style x:Key="NavButton" TargetType="Button">
+      <Setter Property="Margin" Value="6,6"/>
+      <Setter Property="Padding" Value="12,10"/>
+      <Setter Property="Background" Value="#0F172A"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+      <Setter Property="MinWidth" Value="0"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="Template">
         <Setter.Value>
-          <ControlTemplate TargetType="TabItem">
-            <Border CornerRadius="8,8,0,0" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" Margin="2,0">
-              <ContentPresenter Margin="10,6"/>
+          <ControlTemplate TargetType="Button">
+            <Border CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+              <Grid Margin="10,6">
+                <Grid.ColumnDefinitions>
+                  <ColumnDefinition Width="30"/>
+                  <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
+                <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0"/>
+              </Grid>
             </Border>
             <ControlTemplate.Triggers>
-              <Trigger Property="IsSelected" Value="True">
-                <Setter Property="Background" Value="#1F2937"/>
-                <Setter Property="BorderBrush" Value="#4B5563"/>
-              </Trigger>
               <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="#111E35"/>
+                <Setter Property="BorderBrush" Value="#3B4A63"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Background" Value="#0B1220"/>
               </Trigger>
             </ControlTemplate.Triggers>
@@ -446,691 +591,652 @@ function Run-BackendMaven {
         </Setter.Value>
       </Setter>
     </Style>
-
-    <Style TargetType="TextBlock">
-      <Setter Property="Margin" Value="6,2"/>
-    </Style>
   </Window.Resources>
 
   <DockPanel LastChildFill="True">
-    <!-- Header -->
-    <Border DockPanel.Dock="Top" Background="#0B1220" BorderBrush="#374151" BorderThickness="0,0,0,1" Padding="14">
+    <Border DockPanel.Dock="Top" Background="#071025" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="12">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
         <StackPanel Orientation="Vertical">
-          <TextBlock Text="Atlas Dev Console" FontSize="18" FontWeight="SemiBold"/>
-          <TextBlock Text="Ops UI for infra, dev and CI toolkits (Docker Compose, Maven, Angular, Playwright)" Foreground="#9CA3AF"/>
+          <TextBlock Text="Atlas Dev Dashboard" FontSize="18" FontWeight="SemiBold"/>
+          <TextBlock Text="Operations, Observability, Toolkits and Guide - auto-discovered from your repository" Foreground="{StaticResource Muted}"/>
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button x:Name="BtnReload" Content="Reload"/>
           <Button x:Name="BtnClear" Content="Clear Output"/>
           <Button x:Name="BtnStop" Content="Stop Current"/>
         </StackPanel>
       </Grid>
     </Border>
 
-    <!-- Footer -->
-    <Border DockPanel.Dock="Bottom" Background="#0B1220" BorderBrush="#374151" BorderThickness="0,1,0,0" Padding="10">
+    <Border DockPanel.Dock="Bottom" Background="#071025" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="10">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <TextBlock x:Name="TxtStatus" Text="Ready." Foreground="#9CA3AF"/>
-        <TextBlock Grid.Column="1" x:Name="TxtContext" Text="" Foreground="#9CA3AF"/>
+        <TextBlock x:Name="TxtStatus" Text="Ready." Foreground="{StaticResource Muted}"/>
+        <TextBlock Grid.Column="1" x:Name="TxtContext" Text="" Foreground="{StaticResource Muted}"/>
       </Grid>
     </Border>
 
-    <!-- Main -->
-    <Grid Margin="10">
+    <Grid>
       <Grid.ColumnDefinitions>
-        <ColumnDefinition Width="450"/>
+        <ColumnDefinition Width="260"/>
         <ColumnDefinition Width="*"/>
       </Grid.ColumnDefinitions>
 
-      <!-- Left: controls -->
-      <StackPanel Grid.Column="0">
-        <GroupBox Header="Repository">
-          <StackPanel>
-            <TextBlock Text="Project root" Foreground="#9CA3AF"/>
-            <DockPanel>
-              <TextBox x:Name="TxtRepo" MinHeight="28" DockPanel.Dock="Left"/>
-              <Button x:Name="BtnBrowse" Content="Browse" MinWidth="90"/>
-            </DockPanel>
-            <TextBlock x:Name="TxtChecks" Text="" Foreground="#9CA3AF" TextWrapping="Wrap"/>
+      <Border Grid.Column="0" Background="#071025" BorderBrush="{StaticResource Border}" BorderThickness="0,0,1,0">
+        <DockPanel>
+          <GroupBox Header="Repository" DockPanel.Dock="Top">
+            <StackPanel>
+              <TextBlock Text="Project root" Foreground="{StaticResource Muted}"/>
+              <TextBox x:Name="TxtRepo" MinHeight="28"/>
+              <TextBlock x:Name="TxtChecks" Text="" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+            </StackPanel>
+          </GroupBox>
+
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="8">
+              <Button x:Name="NavDashboard"     Style="{StaticResource NavButton}" Tag="&#xE80F;" Content="Dashboard"/>
+              <Button x:Name="NavOperations"    Style="{StaticResource NavButton}" Tag="&#xE7C1;" Content="Operations"/>
+              <Button x:Name="NavToolkits"      Style="{StaticResource NavButton}" Tag="&#xE8B7;" Content="Toolkits"/>
+              <Button x:Name="NavBackend"       Style="{StaticResource NavButton}" Tag="&#xE943;" Content="Backend"/>
+              <Button x:Name="NavFrontend"      Style="{StaticResource NavButton}" Tag="&#xE7C3;" Content="Frontend"/>
+              <Button x:Name="NavObservability" Style="{StaticResource NavButton}" Tag="&#xE9D9;" Content="Observability"/>
+              <Button x:Name="NavGuide"         Style="{StaticResource NavButton}" Tag="&#xE8A5;" Content="Guide"/>
+              <Separator Margin="8"/>
+              <Button x:Name="NavSettings"      Style="{StaticResource NavButton}" Tag="&#xE713;" Content="Settings"/>
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+
+      <Grid Grid.Column="1" Margin="10">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto"/>
+          <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="14" Padding="12" Margin="0,0,0,10">
+          <Grid>
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*"/>
+              <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+              <TextBlock x:Name="TxtPageTitle" Text="Dashboard" FontSize="16" FontWeight="SemiBold"/>
+              <TextBlock x:Name="TxtPageSubtitle" Text="Overview and quick actions" Foreground="{StaticResource Muted}"/>
+            </StackPanel>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+              <TextBox x:Name="TxtSearch" Width="320" ToolTip="Filter commands by title, category, or file"/>
+              <Button x:Name="BtnRunSelected" Content="Run Selected" MinWidth="130"/>
+            </StackPanel>
+          </Grid>
+        </Border>
+
+        <Grid Grid.Row="1">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="560"/>
+            <ColumnDefinition Width="*"/>
+          </Grid.ColumnDefinitions>
+
+          <!-- Left views -->
+          <Grid Grid.Column="0">
+            <Grid x:Name="ViewDashboard">
+              <StackPanel>
+                <GroupBox Header="Quick actions">
+                  <WrapPanel>
+                    <Button x:Name="BtnQuickUp" Content="Infra Up"/>
+                    <Button x:Name="BtnQuickPs" Content="Infra Status"/>
+                    <Button x:Name="BtnQuickBackendRun" Content="Backend Run"/>
+                    <Button x:Name="BtnQuickFrontendStart" Content="Frontend Start"/>
+                    <Button x:Name="BtnQuickHealth" Content="Open Health"/>
+                    <Button x:Name="BtnQuickSwagger" Content="Open Swagger"/>
+                  </WrapPanel>
+                </GroupBox>
+
+                <GroupBox Header="Detected profiles">
+                  <Grid>
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="Spring profiles" Foreground="{StaticResource Muted}"/>
+                      <ListBox x:Name="ListSpringProfiles" Margin="6" Background="{StaticResource Surface2}" BorderBrush="{StaticResource Border}" BorderThickness="1"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                      <TextBlock Text="Playwright projects" Foreground="{StaticResource Muted}"/>
+                      <ListBox x:Name="ListPlaywrightProjects" Margin="6" Background="{StaticResource Surface2}" BorderBrush="{StaticResource Border}" BorderThickness="1"/>
+                    </StackPanel>
+                  </Grid>
+                </GroupBox>
+
+                <GroupBox Header="Command catalog (auto-discovered)">
+                  <ListView x:Name="ListActions" Height="240">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Category" DisplayMemberBinding="{Binding Category}" Width="120"/>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="270"/>
+                        <GridViewColumn Header="Kind" DisplayMemberBinding="{Binding Kind}" Width="80"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+                </GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewOperations" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Operations">
+                  <StackPanel>
+                  <TextBlock Text="Docker Compose actions from docker-compose files in infra or repo root." Foreground="{StaticResource Muted}"/>
+                  <ListView x:Name="ListOps" Height="520">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="330"/>
+                        <GridViewColumn Header="Source" DisplayMemberBinding="{Binding Source}" Width="210"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewToolkits" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Toolkits">
+                  <StackPanel>
+                  <TextBlock Text="Discovered scripts: dev*, mak*, setup*, run*, mvn*, maven*." Foreground="{StaticResource Muted}"/>
+                  <ListView x:Name="ListToolkits" Height="520">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="250"/>
+                        <GridViewColumn Header="Source" DisplayMemberBinding="{Binding Source}" Width="290"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewBackend" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Backend">
+                  <StackPanel>
+                  <TextBlock Text="Maven actions plus Spring profile aware run." Foreground="{StaticResource Muted}"/>
+                  <WrapPanel>
+                    <Button x:Name="BtnBackendRun" Content="Run"/>
+                    <Button x:Name="BtnBackendTest" Content="Tests"/>
+                    <Button x:Name="BtnBackendVerify" Content="Verify"/>
+                    <Button x:Name="BtnBackendSpotless" Content="Spotless"/>
+                  </WrapPanel>
+
+                  <Grid Margin="6">
+                    <Grid.ColumnDefinitions>
+                      <ColumnDefinition Width="*"/>
+                      <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0">
+                      <TextBlock Text="Maven profiles" Foreground="{StaticResource Muted}"/>
+                      <ListBox x:Name="ListMavenProfiles" Margin="6" Background="{StaticResource Surface2}" BorderBrush="{StaticResource Border}" BorderThickness="1"/>
+                    </StackPanel>
+                    <StackPanel Grid.Column="1">
+                      <TextBlock Text="Spring profile for run" Foreground="{StaticResource Muted}"/>
+                      <ComboBox x:Name="CmbSpringRunProfile" Margin="6" Background="{StaticResource Surface2}" BorderBrush="{StaticResource Border}" BorderThickness="1"/>
+                      <TextBlock Text="Sets -Dspring-boot.run.profiles and -Dspring.profiles.active." Foreground="{StaticResource Muted}"/>
+                    </StackPanel>
+                  </Grid>
+
+                  <ListView x:Name="ListBackend" Height="300">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="330"/>
+                        <GridViewColumn Header="Kind" DisplayMemberBinding="{Binding Kind}" Width="80"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewFrontend" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Frontend">
+                  <StackPanel>
+                  <TextBlock Text="NPM scripts from package.json." Foreground="{StaticResource Muted}"/>
+                  <ListView x:Name="ListFrontend" Height="560">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="320"/>
+                        <GridViewColumn Header="Source" DisplayMemberBinding="{Binding Source}" Width="220"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewObservability" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Observability">
+                  <StackPanel>
+                  <TextBlock Text="Links from runbooks when present; fallbacks otherwise." Foreground="{StaticResource Muted}"/>
+                  <ListView x:Name="ListLinks" Height="520">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}" Width="200"/>
+                        <GridViewColumn Header="URL"   DisplayMemberBinding="{Binding Url}"   Width="360"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+                  <WrapPanel>
+                    <Button x:Name="BtnOpenLink" Content="Open selected link"/>
+                    <Button x:Name="BtnCopyLink" Content="Copy URL"/>
+                  </WrapPanel>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewGuide" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Guide">
+                  <StackPanel>
+                  <TextBlock Text="Runbooks and documentation." Foreground="{StaticResource Muted}"/>
+                  <ListView x:Name="ListDocs" Height="520">
+                    <ListView.View>
+                      <GridView>
+                        <GridViewColumn Header="Title" DisplayMemberBinding="{Binding Title}"  Width="260"/>
+                        <GridViewColumn Header="File"  DisplayMemberBinding="{Binding Source}" Width="300"/>
+                      </GridView>
+                    </ListView.View>
+                  </ListView>
+                  <Button x:Name="BtnOpenDoc" Content="Open selected"/>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+
+            <Grid x:Name="ViewSettings" Visibility="Collapsed">
+              <StackPanel>
+                <GroupBox Header="Settings">
+                  <StackPanel>
+                  <TextBlock Text="Open folders and review error hints." Foreground="{StaticResource Muted}"/>
+                  <WrapPanel>
+                    <Button x:Name="BtnOpenRepo" Content="Open repo folder"/>
+                    <Button x:Name="BtnOpenInCode" Content="Open in VS Code"/>
+                  </WrapPanel>
+                  <GroupBox Header="Error hints">
+                    <StackPanel>
+                    <TextBlock Text="When a command fails, hints are derived from output signatures." Foreground="{StaticResource Muted}"/>
+                    <TextBox x:Name="TxtHints" Height="170" IsReadOnly="True" TextWrapping="Wrap"/>
+
+                    </StackPanel>
+</GroupBox>
+
+                  </StackPanel>
+</GroupBox>
+              </StackPanel>
+            </Grid>
+          </Grid>
+
+          <!-- Right side -->
+          <StackPanel Grid.Column="1">
+            <GroupBox Header="Selected action">
+              <StackPanel>
+                <TextBlock x:Name="TxtSelectedTitle" Text="(none selected)" FontWeight="SemiBold"/>
+                <TextBlock x:Name="TxtSelectedCmd" Text="" Foreground="{StaticResource Muted}" TextWrapping="Wrap"/>
+                <TextBlock x:Name="TxtLastRun" Text="Last run: (none)" Foreground="{StaticResource Muted}"/>
+                <WrapPanel>
+                  <Button x:Name="BtnOpenSource" Content="Open source" IsEnabled="False"/>
+                  <Button x:Name="BtnOpenWorkDir" Content="Open workdir" IsEnabled="False"/>
+                </WrapPanel>
+              </StackPanel>
+            </GroupBox>
+
+            <GroupBox Header="Output">
+              <TextBox x:Name="TxtOutput" AcceptsReturn="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" TextWrapping="NoWrap" IsReadOnly="True"/>
+            </GroupBox>
           </StackPanel>
-        </GroupBox>
-
-        <TabControl x:Name="Tabs" Margin="10,0,10,10">
-          <TabItem Header="Infra">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel>
-                <TextBlock Text="Docker Compose stacks" Foreground="#9CA3AF"/>
-                <DockPanel>
-                  <TextBlock Text="Mode" VerticalAlignment="Center" Foreground="#9CA3AF"/>
-                  <ComboBox x:Name="CmbStackMode" MinWidth="220" Margin="10,6,6,6"/>
-                  <Button x:Name="BtnRefreshServices" Content="Refresh" MinWidth="90"/>
-                </DockPanel>
-
-                <WrapPanel>
-                  <Button x:Name="BtnInfraUp" Content="Start"/>
-                  <Button x:Name="BtnInfraUpBuild" Content="Start --build"/>
-                  <Button x:Name="BtnInfraDown" Content="Stop"/>
-                  <Button x:Name="BtnInfraDownV" Content="Down -v"/>
-                  <Button x:Name="BtnInfraPs" Content="Status"/>
-                  <Button x:Name="BtnResetDb" Content="Reset DB"/>
-                </WrapPanel>
-
-                <GroupBox Header="Service actions">
-                  <StackPanel>
-                    <DockPanel>
-                      <TextBlock Text="Service" VerticalAlignment="Center" Foreground="#9CA3AF"/>
-                      <ComboBox x:Name="CmbService" MinWidth="240" Margin="10,6,6,6"/>
-                    </DockPanel>
-                    <WrapPanel>
-                      <Button x:Name="BtnInfraLogs" Content="Tail logs"/>
-                      <Button x:Name="BtnInfraRestartSvc" Content="Restart service"/>
-                      <Button x:Name="BtnInfraStopSvc" Content="Stop service"/>
-                      <Button x:Name="BtnInfraStartSvc" Content="Start service"/>
-                    </WrapPanel>
-                    <TextBlock Text="Tip: if backend runs in Docker, use Tail logs on the backend service." Foreground="#9CA3AF" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </GroupBox>
-              </StackPanel>
-            </ScrollViewer>
-          </TabItem>
-
-          <TabItem Header="Backend">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel>
-                <TextBlock Text="Backend (tests/build locally; runtime often in Docker via Infra)" Foreground="#9CA3AF"/>
-                <WrapPanel>
-                  <Button x:Name="BtnBackendTest" Content="mvn test"/>
-                  <Button x:Name="BtnBackendPackage" Content="mvn package"/>
-                  <Button x:Name="BtnBackendSpotless" Content="spotless:check"/>
-                </WrapPanel>
-                <WrapPanel>
-                  <Button x:Name="BtnBackendDockerLogs" Content="Docker logs"/>
-                  <Button x:Name="BtnOpenSwagger" Content="Open Swagger"/>
-                  <Button x:Name="BtnOpenHealth" Content="Open Health"/>
-                </WrapPanel>
-                <TextBlock x:Name="TxtBackendHints" Text="" Foreground="#9CA3AF" TextWrapping="Wrap"/>
-              </StackPanel>
-            </ScrollViewer>
-          </TabItem>
-
-          <TabItem Header="Frontend">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel>
-                <TextBlock Text="Angular and Playwright" Foreground="#9CA3AF"/>
-                <WrapPanel>
-                  <Button x:Name="BtnFrontInstall" Content="Install deps"/>
-                  <Button x:Name="BtnFrontStart" Content="Start"/>
-                  <Button x:Name="BtnFrontTest" Content="Unit tests"/>
-                  <Button x:Name="BtnFrontLint" Content="Lint"/>
-                  <Button x:Name="BtnFrontInstallBrowsers" Content="Playwright install"/>
-                </WrapPanel>
-                <WrapPanel>
-                  <Button x:Name="BtnFrontE2eFast" Content="E2E fast"/>
-                  <Button x:Name="BtnFrontE2eUi" Content="E2E UI"/>
-                  <Button x:Name="BtnFrontE2eFull" Content="E2E full"/>
-                </WrapPanel>
-                <GroupBox Header="Run any npm script">
-                  <StackPanel>
-                    <DockPanel>
-                      <TextBlock Text="Script" VerticalAlignment="Center" Foreground="#9CA3AF"/>
-                      <ComboBox x:Name="CmbNpmScript" MinWidth="240" Margin="10,6,6,6"/>
-                      <Button x:Name="BtnRunNpmScript" Content="Run" MinWidth="90"/>
-                    </DockPanel>
-                    <TextBlock x:Name="TxtFrontHints" Text="" Foreground="#9CA3AF" TextWrapping="Wrap"/>
-                  </StackPanel>
-                </GroupBox>
-              </StackPanel>
-            </ScrollViewer>
-          </TabItem>
-
-          <TabItem Header="CI / Toolkits">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel>
-                <TextBlock Text="Repository scripts for CI-style validation" Foreground="#9CA3AF"/>
-                <WrapPanel>
-                  <Button x:Name="BtnFullSuite" Content="Full test suite"/>
-                  <Button x:Name="BtnGenReport" Content="Generate report"/>
-                  <Button x:Name="BtnOpenReports" Content="Open reports"/>
-                </WrapPanel>
-                <TextBlock Text="Full suite: scripts/run-full-test-suite.ps1" Foreground="#9CA3AF"/>
-                <TextBlock Text="Report: scripts/generate-test-report.ps1 (outputs to ./test-reports)" Foreground="#9CA3AF"/>
-              </StackPanel>
-            </ScrollViewer>
-          </TabItem>
-
-          <TabItem Header="Observability">
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-              <StackPanel>
-                <TextBlock Text="Open local UIs" Foreground="#9CA3AF"/>
-                <WrapPanel>
-                  <Button x:Name="BtnOpenFrontend" Content="Frontend"/>
-                  <Button x:Name="BtnOpenBackend" Content="Backend"/>
-                  <Button x:Name="BtnOpenKeycloak" Content="Keycloak"/>
-                  <Button x:Name="BtnOpenAdminer" Content="Adminer"/>
-                </WrapPanel>
-                <WrapPanel>
-                  <Button x:Name="BtnOpenKibana" Content="Kibana"/>
-                  <Button x:Name="BtnOpenGrafana" Content="Grafana"/>
-                  <Button x:Name="BtnOpenProm" Content="Prometheus"/>
-                  <Button x:Name="BtnOpenElastic" Content="Elasticsearch"/>
-                </WrapPanel>
-              </StackPanel>
-            </ScrollViewer>
-          </TabItem>
-        </TabControl>
-      </StackPanel>
-
-      <!-- Right: Output -->
-      <GroupBox Grid.Column="1" Header="Output">
-        <Grid>
-          <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-          </Grid.RowDefinitions>
-          <TextBlock Grid.Row="0" Text="Command output (stdout/stderr)" Foreground="#9CA3AF"/>
-          <TextBox Grid.Row="1" x:Name="TxtOutput" AcceptsReturn="True" AcceptsTab="True"
-                   VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                   TextWrapping="NoWrap" IsReadOnly="True"/>
         </Grid>
-      </GroupBox>
-
+      </Grid>
     </Grid>
   </DockPanel>
 </Window>
 '@
 
-$reader = (New-Object System.Xml.XmlNodeReader $xaml)
-$Window = [Windows.Markup.XamlReader]::Load($reader)
+$reader = New-Object System.Xml.XmlNodeReader $xaml
+$window = [Windows.Markup.XamlReader]::Load($reader)
+
+function Get-Control([string]$Name) { $window.FindName($Name) }
+
+# Bind controls
+$TxtRepo      = Get-Control "TxtRepo"
+$TxtChecks    = Get-Control "TxtChecks"
+$TxtContext   = Get-Control "TxtContext"
+$TxtStatus    = Get-Control "TxtStatus"
+$TxtSearch    = Get-Control "TxtSearch"
+$BtnReload    = Get-Control "BtnReload"
+$BtnClear     = Get-Control "BtnClear"
+$BtnStop      = Get-Control "BtnStop"
+$BtnRunSelected = Get-Control "BtnRunSelected"
+
+$NavDashboard = Get-Control "NavDashboard"
+$NavOperations = Get-Control "NavOperations"
+$NavToolkits  = Get-Control "NavToolkits"
+$NavBackend   = Get-Control "NavBackend"
+$NavFrontend  = Get-Control "NavFrontend"
+$NavObservability = Get-Control "NavObservability"
+$NavGuide     = Get-Control "NavGuide"
+$NavSettings  = Get-Control "NavSettings"
+
+$ViewDashboard = Get-Control "ViewDashboard"
+$ViewOperations = Get-Control "ViewOperations"
+$ViewToolkits  = Get-Control "ViewToolkits"
+$ViewBackend   = Get-Control "ViewBackend"
+$ViewFrontend  = Get-Control "ViewFrontend"
+$ViewObservability = Get-Control "ViewObservability"
+$ViewGuide     = Get-Control "ViewGuide"
+$ViewSettings  = Get-Control "ViewSettings"
+
+$TxtPageTitle  = Get-Control "TxtPageTitle"
+$TxtPageSubtitle = Get-Control "TxtPageSubtitle"
+
+$ListActions   = Get-Control "ListActions"
+$ListOps       = Get-Control "ListOps"
+$ListToolkits  = Get-Control "ListToolkits"
+$ListBackend   = Get-Control "ListBackend"
+$ListFrontend  = Get-Control "ListFrontend"
+$ListLinks     = Get-Control "ListLinks"
+$ListDocs      = Get-Control "ListDocs"
+
+$BtnQuickUp    = Get-Control "BtnQuickUp"
+$BtnQuickPs    = Get-Control "BtnQuickPs"
+$BtnQuickBackendRun = Get-Control "BtnQuickBackendRun"
+$BtnQuickFrontendStart = Get-Control "BtnQuickFrontendStart"
+$BtnQuickHealth = Get-Control "BtnQuickHealth"
+$BtnQuickSwagger = Get-Control "BtnQuickSwagger"
+
+$ListSpringProfiles = Get-Control "ListSpringProfiles"
+$ListPlaywrightProjects = Get-Control "ListPlaywrightProjects"
+$ListMavenProfiles = Get-Control "ListMavenProfiles"
+$CmbSpringRunProfile = Get-Control "CmbSpringRunProfile"
+
+$BtnBackendRun = Get-Control "BtnBackendRun"
+$BtnBackendTest = Get-Control "BtnBackendTest"
+$BtnBackendVerify = Get-Control "BtnBackendVerify"
+$BtnBackendSpotless = Get-Control "BtnBackendSpotless"
+
+$BtnOpenLink   = Get-Control "BtnOpenLink"
+$BtnCopyLink   = Get-Control "BtnCopyLink"
+$BtnOpenDoc    = Get-Control "BtnOpenDoc"
+
+$BtnOpenRepo   = Get-Control "BtnOpenRepo"
+$BtnOpenInCode = Get-Control "BtnOpenInCode"
+$TxtHints      = Get-Control "TxtHints"
+
+$TxtSelectedTitle = Get-Control "TxtSelectedTitle"
+$TxtSelectedCmd   = Get-Control "TxtSelectedCmd"
+$TxtLastRun       = Get-Control "TxtLastRun"
+$BtnOpenSource    = Get-Control "BtnOpenSource"
+$BtnOpenWorkDir   = Get-Control "BtnOpenWorkDir"
+
+$TxtOutput = Get-Control "TxtOutput"
 
 # ----------------------------
-# Grab controls
+# State + View logic
 # ----------------------------
+$global:AllActions = @()
+$global:ComposeActions = @()
+$global:ToolkitActions = @()
+$global:BackendActions = @()
+$global:FrontendActions = @()
+$global:Docs = @()
+$global:Links = @()
+$global:MavenInfo = $null
 
-$TxtRepo = $Window.FindName('TxtRepo')
-$BtnBrowse = $Window.FindName('BtnBrowse')
-$TxtChecks = $Window.FindName('TxtChecks')
-$TxtStatus = $Window.FindName('TxtStatus')
-$TxtContext = $Window.FindName('TxtContext')
-$TxtOutput = $Window.FindName('TxtOutput')
-$BtnClear = $Window.FindName('BtnClear')
-$BtnStop = $Window.FindName('BtnStop')
-
-$CmbStackMode = $Window.FindName('CmbStackMode')
-$BtnRefreshServices = $Window.FindName('BtnRefreshServices')
-$BtnInfraUp = $Window.FindName('BtnInfraUp')
-$BtnInfraUpBuild = $Window.FindName('BtnInfraUpBuild')
-$BtnInfraDown = $Window.FindName('BtnInfraDown')
-$BtnInfraDownV = $Window.FindName('BtnInfraDownV')
-$BtnInfraPs = $Window.FindName('BtnInfraPs')
-$BtnResetDb = $Window.FindName('BtnResetDb')
-$CmbService = $Window.FindName('CmbService')
-$BtnInfraLogs = $Window.FindName('BtnInfraLogs')
-$BtnInfraRestartSvc = $Window.FindName('BtnInfraRestartSvc')
-$BtnInfraStopSvc = $Window.FindName('BtnInfraStopSvc')
-$BtnInfraStartSvc = $Window.FindName('BtnInfraStartSvc')
-
-$BtnBackendTest = $Window.FindName('BtnBackendTest')
-$BtnBackendPackage = $Window.FindName('BtnBackendPackage')
-$BtnBackendSpotless = $Window.FindName('BtnBackendSpotless')
-$BtnBackendDockerLogs = $Window.FindName('BtnBackendDockerLogs')
-$BtnOpenSwagger = $Window.FindName('BtnOpenSwagger')
-$BtnOpenHealth = $Window.FindName('BtnOpenHealth')
-$TxtBackendHints = $Window.FindName('TxtBackendHints')
-
-$BtnFrontInstall = $Window.FindName('BtnFrontInstall')
-$BtnFrontStart = $Window.FindName('BtnFrontStart')
-$BtnFrontTest = $Window.FindName('BtnFrontTest')
-$BtnFrontLint = $Window.FindName('BtnFrontLint')
-$BtnFrontInstallBrowsers = $Window.FindName('BtnFrontInstallBrowsers')
-$BtnFrontE2eFast = $Window.FindName('BtnFrontE2eFast')
-$BtnFrontE2eUi = $Window.FindName('BtnFrontE2eUi')
-$BtnFrontE2eFull = $Window.FindName('BtnFrontE2eFull')
-$CmbNpmScript = $Window.FindName('CmbNpmScript')
-$BtnRunNpmScript = $Window.FindName('BtnRunNpmScript')
-$TxtFrontHints = $Window.FindName('TxtFrontHints')
-
-$BtnFullSuite = $Window.FindName('BtnFullSuite')
-$BtnGenReport = $Window.FindName('BtnGenReport')
-$BtnOpenReports = $Window.FindName('BtnOpenReports')
-
-$BtnOpenFrontend = $Window.FindName('BtnOpenFrontend')
-$BtnOpenBackend = $Window.FindName('BtnOpenBackend')
-$BtnOpenKeycloak = $Window.FindName('BtnOpenKeycloak')
-$BtnOpenAdminer = $Window.FindName('BtnOpenAdminer')
-$BtnOpenKibana = $Window.FindName('BtnOpenKibana')
-$BtnOpenGrafana = $Window.FindName('BtnOpenGrafana')
-$BtnOpenProm = $Window.FindName('BtnOpenProm')
-$BtnOpenElastic = $Window.FindName('BtnOpenElastic')
-
-# ----------------------------
-# State
-# ----------------------------
-
-$scriptDir = Split-Path -Parent $PSCommandPath
-$RepoRoot = Resolve-RepoRoot -StartPath $scriptDir
-$Compose = Get-ComposeCommand
-$CurrentProcess = $null
-
-$StackModes = @(
-    @{ Key = 'Full'; Name = 'Full (infra/docker-compose.yml)' },
-    @{ Key = 'E2E-Postgres'; Name = 'E2E Postgres (base + docker-compose.e2e-postgres.yml)' }
-)
-
-# ----------------------------
-# UI actions
-# ----------------------------
-
-function Set-ChecksText {
-    param([string]$RepoRoot)
-
-    $infraOk = Test-Path (Join-Path $RepoRoot 'infra\docker-compose.yml')
-    $backendOk = Test-Path (Join-Path $RepoRoot 'backend')
-    $frontendOk = Test-Path (Join-Path $RepoRoot 'frontend')
-    $scriptsOk = Test-Path (Join-Path $RepoRoot 'scripts')
-
-    $composeTxt = if ($Compose) { ($Compose.Command + ' ' + ($Compose.ArgsPrefix -join ' ')).Trim() } else { 'NOT FOUND' }
-
-    $lines = @()
-    $lines += ('Compose: ' + $composeTxt)
-    $lines += ('infra/docker-compose.yml: ' + ($(if ($infraOk) { 'OK' } else { 'MISSING' })))
-    $lines += ('backend/: ' + ($(if ($backendOk) { 'OK' } else { 'MISSING' })))
-    $lines += ('frontend/: ' + ($(if ($frontendOk) { 'OK' } else { 'MISSING' })))
-    $lines += ('scripts/: ' + ($(if ($scriptsOk) { 'OK' } else { 'MISSING' })))
-
-    $TxtChecks.Text = ($lines -join "`n")
+function Hide-AllViews {
+  $ViewDashboard.Visibility = "Collapsed"
+  $ViewOperations.Visibility = "Collapsed"
+  $ViewToolkits.Visibility  = "Collapsed"
+  $ViewBackend.Visibility   = "Collapsed"
+  $ViewFrontend.Visibility  = "Collapsed"
+  $ViewObservability.Visibility = "Collapsed"
+  $ViewGuide.Visibility     = "Collapsed"
+  $ViewSettings.Visibility  = "Collapsed"
 }
 
-function Refresh-Services {
-    $mode = ($CmbStackMode.SelectedItem.Tag)
-    $svcs = Get-ComposeServices -Compose $Compose -RepoRoot $RepoRoot -Mode $mode
-
-    $CmbService.Items.Clear()
-    $CmbService.Items.Add('(all)') | Out-Null
-    foreach ($s in $svcs) { $CmbService.Items.Add($s) | Out-Null }
-    $CmbService.SelectedIndex = 0
-
-    $TxtContext.Text = ('Services: ' + ($svcs.Count))
+function Show-View([string]$Name) {
+  Hide-AllViews
+  switch ($Name) {
+    "Dashboard"     { $ViewDashboard.Visibility = "Visible";     $TxtPageTitle.Text="Dashboard";     $TxtPageSubtitle.Text="Overview and quick actions" }
+    "Operations"    { $ViewOperations.Visibility = "Visible";    $TxtPageTitle.Text="Operations";    $TxtPageSubtitle.Text="Infra operations from docker-compose files" }
+    "Toolkits"      { $ViewToolkits.Visibility = "Visible";      $TxtPageTitle.Text="Toolkits";      $TxtPageSubtitle.Text="Scripts discovered by naming convention" }
+    "Backend"       { $ViewBackend.Visibility = "Visible";       $TxtPageTitle.Text="Backend";       $TxtPageSubtitle.Text="Maven and Spring profiles" }
+    "Frontend"      { $ViewFrontend.Visibility = "Visible";      $TxtPageTitle.Text="Frontend";      $TxtPageSubtitle.Text="NPM scripts and Playwright related commands" }
+    "Observability" { $ViewObservability.Visibility = "Visible"; $TxtPageTitle.Text="Observability"; $TxtPageSubtitle.Text="Health, Swagger and platform links" }
+    "Guide"         { $ViewGuide.Visibility = "Visible";         $TxtPageTitle.Text="Guide";         $TxtPageSubtitle.Text="Runbooks and documentation" }
+    "Settings"      { $ViewSettings.Visibility = "Visible";      $TxtPageTitle.Text="Settings";      $TxtPageSubtitle.Text="Open repo and view error hints" }
+  }
 }
 
-function Refresh-FrontendScripts {
-    $front = Get-FrontendInfo -FrontendDir (Join-Path $RepoRoot 'frontend')
-
-    $CmbNpmScript.Items.Clear()
-    foreach ($s in $front.Scripts) { $CmbNpmScript.Items.Add($s) | Out-Null }
-    if ($front.Scripts.Count -gt 0) { $CmbNpmScript.SelectedIndex = 0 }
-
-    $TxtFrontHints.Text = ('Package manager: ' + $front.PackageManager + ' | Install: ' + ($front.InstallArgs -join ' '))
-    return $front
+function Update-Checks([string]$RepoRoot) {
+  $checks = New-Object System.Collections.Generic.List[string]
+  $checks.Add("Repo: " + $RepoRoot)
+  $checks.Add("Docker: " + ($(if (Get-CommandExists "docker") { "OK" } else { "Missing" })))
+  $checks.Add("Node: " +   ($(if (Get-CommandExists "node")   { "OK" } else { "Missing" })))
+  $checks.Add("Npm: " +    ($(if (Get-CommandExists "npm")    { "OK" } else { "Missing" })))
+  $checks.Add("Maven: " +  ($(if (Get-CommandExists "mvn")    { "OK" } elseif (Test-Path (Join-Path $RepoRoot "backend\mvnw.cmd")) { "mvnw" } else { "Unknown" })))
+  $TxtChecks.Text = ($checks -join "`r`n")
+  $TxtContext.Text = "Root: " + $RepoRoot
 }
 
-function Refresh-BackendHints {
-    $backendDir = Join-Path $RepoRoot 'backend'
-    $pom = Join-Path $backendDir 'pom.xml'
-    $spotless = Test-SpotlessConfigured -PomPath $pom
-    if ($spotless) {
-        $TxtBackendHints.Text = 'Spotless detected in pom.xml.'
-    } else {
-        $TxtBackendHints.Text = 'Spotless not detected in pom.xml (button may fail if plugin is absent).'
-    }
-    return $spotless
+function Apply-Filter([string]$Q) {
+  if ($null -eq $Q) { $Q = "" }
+  $q2 = $Q.Trim()
+  if ([string]::IsNullOrWhiteSpace($q2)) {
+    $ListActions.ItemsSource = $global:AllActions
+    return
+  }
+  $ListActions.ItemsSource = ($global:AllActions | Where-Object {
+    ($_.Title -like "*$q2*") -or ($_.Category -like "*$q2*") -or ($_.Source -like "*$q2*")
+  })
 }
 
-function Ensure-NotRunning {
-    if ($CurrentProcess -and -not $CurrentProcess.HasExited) {
-        [System.Windows.MessageBox]::Show('A command is already running. Stop it first.', 'Atlas Dev Console') | Out-Null
-        return $false
-    }
-    return $true
+function Select-Action([object]$A) {
+  if (-not $A) { return }
+  $TxtSelectedTitle.Text = $A.Title
+  $TxtSelectedCmd.Text   = ("{0} {1}`r`nWorkDir: {2}`r`nSource: {3}" -f $A.Command, $A.Args, $A.WorkDir, $A.Source)
+  $BtnOpenSource.IsEnabled  = [bool]$A.Source
+  $BtnOpenWorkDir.IsEnabled = [bool]$A.WorkDir
 }
 
-function Start-Op {
-    param([scriptblock]$Runner)
+function Reload-All {
+  $repo = $TxtRepo.Text
+  if (-not $repo -or -not (Test-Path $repo)) { $repo = $global:RepoRoot; $TxtRepo.Text = $repo }
+  $global:RepoRoot = (Resolve-Path $repo).Path
+  Update-Checks $global:RepoRoot
 
-    if (-not (Ensure-NotRunning)) { return }
-    try {
-        $CurrentProcess = & $Runner
-    } catch {
-        Append-Header -OutputTextBox $TxtOutput -Window $Window -Title 'ERROR' -CommandLine ($_.Exception.Message)
-        $TxtStatus.Text = 'Ready.'
-    }
+  $composeInfo = Discover-Compose $global:RepoRoot
+  $global:ComposeActions = @($composeInfo.Actions)
+
+  $global:ToolkitActions = @(Discover-Scripts $global:RepoRoot)
+  $global:Docs = @(Discover-Docs $global:RepoRoot)
+  $global:Links = @(Discover-ObservabilityLinks $global:RepoRoot)
+
+  $global:MavenInfo = Discover-Maven $global:RepoRoot
+  $global:BackendActions = @($global:MavenInfo.Actions)
+
+  $npmActions = @(Discover-Npm $global:RepoRoot)
+  $global:FrontendActions = @($npmActions | Where-Object { $_.Category -eq "Frontend" })
+
+  $springProfiles = @(Discover-SpringProfiles $global:RepoRoot)
+  $pwProjects     = @(Discover-PlaywrightProjects $global:RepoRoot)
+
+  $ListSpringProfiles.ItemsSource = $springProfiles
+  $ListPlaywrightProjects.ItemsSource = $pwProjects
+  $ListMavenProfiles.ItemsSource = $global:MavenInfo.Profiles
+
+  $CmbSpringRunProfile.Items.Clear()
+  $CmbSpringRunProfile.Items.Add("(none)") | Out-Null
+  foreach ($p in $springProfiles) { $CmbSpringRunProfile.Items.Add($p) | Out-Null }
+  $CmbSpringRunProfile.SelectedIndex = 0
+
+  $global:AllActions = @()
+  $global:AllActions += $global:ComposeActions
+  $global:AllActions += $global:ToolkitActions
+  $global:AllActions += $global:BackendActions
+  $global:AllActions += $global:FrontendActions
+  $global:AllActions += ($global:Docs | Where-Object { $_.Category -eq "Guide" })
+
+  $ListActions.ItemsSource = $global:AllActions
+  $ListOps.ItemsSource = $global:ComposeActions
+  $ListToolkits.ItemsSource = $global:ToolkitActions
+  $ListBackend.ItemsSource = $global:BackendActions
+  $ListFrontend.ItemsSource = $global:FrontendActions
+  $ListLinks.ItemsSource = $global:Links
+  $ListDocs.ItemsSource = $global:Docs
+
+  # Quick action heuristics
+  $global:QuickUp      = ($global:ComposeActions | Where-Object { $_.Title -like "*Up" } | Select-Object -First 1)
+  $global:QuickPs      = ($global:ComposeActions | Where-Object { $_.Title -like "*Status*" } | Select-Object -First 1)
+  $global:QuickBackend = ($global:BackendActions | Where-Object { $_.Title -like "*spring-boot run*" } | Select-Object -First 1)
+  $global:QuickFront   = ($global:FrontendActions | Where-Object { $_.Title -match "npm run start|npm run dev" } | Select-Object -First 1)
+  $global:QuickHealth  = ($global:Links | Where-Object { $_.Title -eq "Health" } | Select-Object -First 1)
+  $global:QuickSwagger = ($global:Links | Where-Object { $_.Title -eq "Swagger UI" } | Select-Object -First 1)
+
+  Set-Status "Ready."
 }
-
-# Initialize stack modes
-$CmbStackMode.Items.Clear()
-foreach ($m in $StackModes) {
-    $item = New-Object System.Windows.Controls.ComboBoxItem
-    $item.Content = $m.Name
-    $item.Tag = $m.Key
-    $CmbStackMode.Items.Add($item) | Out-Null
-}
-$CmbStackMode.SelectedIndex = 0
-
-$TxtRepo.Text = $RepoRoot
-Set-ChecksText -RepoRoot $RepoRoot
-$FrontendInfo = Refresh-FrontendScripts
-$SpotlessConfigured = Refresh-BackendHints
-Refresh-Services
 
 # ----------------------------
-# Button handlers
+# Events
 # ----------------------------
+$BtnReload.Add_Click({ Reload-All })
+$BtnClear.Add_Click({ $TxtOutput.Clear(); $TxtHints.Clear() })
+$BtnStop.Add_Click({ Stop-Current })
+$TxtSearch.Add_TextChanged({ Apply-Filter $TxtSearch.Text })
 
-$BtnBrowse.Add_Click({
-    $dlg = New-Object System.Windows.Forms.FolderBrowserDialog
-    $dlg.Description = 'Select repository root (the folder containing infra/, backend/, frontend/).'
-    $dlg.SelectedPath = $RepoRoot
-    if ($dlg.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) {
-        $RepoRoot = Resolve-RepoRoot -StartPath $dlg.SelectedPath
-        $TxtRepo.Text = $RepoRoot
-        Set-ChecksText -RepoRoot $RepoRoot
-        $FrontendInfo = Refresh-FrontendScripts
-        $SpotlessConfigured = Refresh-BackendHints
-        Refresh-Services
-    }
+$ListActions.Add_SelectionChanged({ Select-Action $ListActions.SelectedItem })
+$ListOps.Add_SelectionChanged({ Select-Action $ListOps.SelectedItem })
+$ListToolkits.Add_SelectionChanged({ Select-Action $ListToolkits.SelectedItem })
+$ListBackend.Add_SelectionChanged({ Select-Action $ListBackend.SelectedItem })
+$ListFrontend.Add_SelectionChanged({ Select-Action $ListFrontend.SelectedItem })
+$ListDocs.Add_SelectionChanged({ Select-Action $ListDocs.SelectedItem })
+
+$BtnRunSelected.Add_Click({
+  $sel = First-NotNull @(
+    $ListActions.SelectedItem,
+    $ListOps.SelectedItem,
+    $ListToolkits.SelectedItem,
+    $ListBackend.SelectedItem,
+    $ListFrontend.SelectedItem,
+    $ListDocs.SelectedItem
+  )
+  if ($sel) { Start-Action $sel } else { Append-Output "[INFO] Select an action first." }
 })
 
-$BtnRefreshServices.Add_Click({ Refresh-Services })
-$CmbStackMode.Add_SelectionChanged({ Refresh-Services })
-
-$BtnClear.Add_Click({ $TxtOutput.Clear() })
-
-$BtnStop.Add_Click({
-    try {
-        if ($CurrentProcess -and -not $CurrentProcess.HasExited) {
-            Append-Header -OutputTextBox $TxtOutput -Window $Window -Title 'Stop' -CommandLine 'Stopping current process...'
-            $CurrentProcess.Kill()
-        }
-    } catch {}
+$BtnOpenSource.Add_Click({
+  $sel = First-NotNull @(
+    $ListActions.SelectedItem,$ListOps.SelectedItem,$ListToolkits.SelectedItem,$ListBackend.SelectedItem,$ListFrontend.SelectedItem,$ListDocs.SelectedItem
+  )
+  if ($sel -and $sel.Source) { Safe-InvokeItem $sel.Source }
 })
 
-# Infra
-$BtnInfraUp.Add_Click({
-    if (-not $Compose) {
-        [System.Windows.MessageBox]::Show('Docker Compose not found. Install Docker Desktop or docker-compose.', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('up','-d') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+$BtnOpenWorkDir.Add_Click({
+  $sel = First-NotNull @(
+    $ListActions.SelectedItem,$ListOps.SelectedItem,$ListToolkits.SelectedItem,$ListBackend.SelectedItem,$ListFrontend.SelectedItem,$ListDocs.SelectedItem
+  )
+  if ($sel -and $sel.WorkDir) { Safe-InvokeItem $sel.WorkDir }
 })
 
-$BtnInfraUpBuild.Add_Click({
-    if (-not $Compose) {
-        [System.Windows.MessageBox]::Show('Docker Compose not found. Install Docker Desktop or docker-compose.', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('up','-d','--build') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+$BtnQuickUp.Add_Click({ if ($global:QuickUp) { Start-Action $global:QuickUp } })
+$BtnQuickPs.Add_Click({ if ($global:QuickPs) { Start-Action $global:QuickPs } })
+
+$BtnQuickBackendRun.Add_Click({
+  if (-not $global:QuickBackend) { return }
+  $profile = [string]$CmbSpringRunProfile.SelectedItem
+  if ($profile -and $profile -ne "(none)" -and $global:MavenInfo -and $global:MavenInfo.MavenCmd) {
+    $cmd  = $global:MavenInfo.MavenCmd
+    $wd   = $global:MavenInfo.WorkDir
+    $pom  = $global:MavenInfo.Pom
+    $args = "spring-boot:run -Dspring-boot.run.profiles=$profile -Dspring.profiles.active=$profile"
+    Start-Action (New-Action "Backend" ("Maven: spring-boot run (profile=" + $profile + ")") $cmd $args $wd $pom "Maven")
+  } else {
+    Start-Action $global:QuickBackend
+  }
 })
 
-$BtnInfraDown.Add_Click({
-    if (-not $Compose) { return }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('down') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+$BtnQuickFrontendStart.Add_Click({ if ($global:QuickFront) { Start-Action $global:QuickFront } })
+$BtnQuickHealth.Add_Click({ if ($global:QuickHealth) { Safe-InvokeItem $global:QuickHealth.Url } })
+$BtnQuickSwagger.Add_Click({ if ($global:QuickSwagger) { Safe-InvokeItem $global:QuickSwagger.Url } })
+
+$BtnBackendRun.Add_Click({
+  if (-not $global:MavenInfo -or -not $global:MavenInfo.MavenCmd) { Append-Output "[WARN] Maven not detected."; return }
+  $profile = [string]$CmbSpringRunProfile.SelectedItem
+  $args = "spring-boot:run"
+  $title = "Maven: spring-boot run"
+  if ($profile -and $profile -ne "(none)") {
+    $args  = "spring-boot:run -Dspring-boot.run.profiles=$profile -Dspring.profiles.active=$profile"
+    $title = "Maven: spring-boot run (profile=" + $profile + ")"
+  }
+  Start-Action (New-Action "Backend" $title $global:MavenInfo.MavenCmd $args $global:MavenInfo.WorkDir $global:MavenInfo.Pom "Maven")
 })
 
-$BtnInfraDownV.Add_Click({
-    if (-not $Compose) { return }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('down','-v') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnInfraPs.Add_Click({
-    if (-not $Compose) { return }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('ps') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnInfraLogs.Add_Click({
-    if (-not $Compose) { return }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        $svc = [string]$CmbService.SelectedItem
-        $args = @('logs','-f')
-        if ($svc -and $svc -ne '(all)') { $args += @($svc) }
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs $args -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnInfraRestartSvc.Add_Click({
-    if (-not $Compose) { return }
-    $svc = [string]$CmbService.SelectedItem
-    if (-not $svc -or $svc -eq '(all)') {
-        [System.Windows.MessageBox]::Show('Select a specific service first.', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('restart',$svc) -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnInfraStopSvc.Add_Click({
-    if (-not $Compose) { return }
-    $svc = [string]$CmbService.SelectedItem
-    if (-not $svc -or $svc -eq '(all)') {
-        [System.Windows.MessageBox]::Show('Select a specific service first.', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('stop',$svc) -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnInfraStartSvc.Add_Click({
-    if (-not $Compose) { return }
-    $svc = [string]$CmbService.SelectedItem
-    if (-not $svc -or $svc -eq '(all)') {
-        [System.Windows.MessageBox]::Show('Select a specific service first.', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('start',$svc) -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnResetDb.Add_Click({
-    if (-not $Compose) { return }
-    $infra = Join-Path $RepoRoot 'infra'
-    $resetWin = Join-Path $infra 'reset-db.ps1'
-
-    Start-Op {
-        if (Test-Path $resetWin) {
-            Run-PS1 -ScriptPath $resetWin -RepoRoot $RepoRoot -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-        } else {
-            $mode = ($CmbStackMode.SelectedItem.Tag)
-            # Best-effort destructive reset: down, remove postgres_data, up
-            $p1 = Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('down') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-            try { $p1.WaitForExit() } catch {}
-
-            Append-Header -OutputTextBox $TxtOutput -Window $Window -Title 'Reset' -CommandLine 'docker volume rm postgres_data'
-            try {
-                $null = & docker volume rm postgres_data 2>$null
-            } catch {}
-
-            Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('up','-d','postgres') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-        }
-    }
-})
-
-# Backend
 $BtnBackendTest.Add_Click({
-    Start-Op {
-        $mvn = Get-MavenCommand -BackendDir (Join-Path $RepoRoot 'backend')
-        Run-BackendMaven -Mvn $mvn -RepoRoot $RepoRoot -Args @('test') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+  if ($global:MavenInfo -and $global:MavenInfo.MavenCmd) {
+    Start-Action (New-Action "Backend" "Maven: clean test" $global:MavenInfo.MavenCmd "clean test" $global:MavenInfo.WorkDir $global:MavenInfo.Pom "Maven")
+  }
 })
 
-$BtnBackendPackage.Add_Click({
-    Start-Op {
-        $mvn = Get-MavenCommand -BackendDir (Join-Path $RepoRoot 'backend')
-        Run-BackendMaven -Mvn $mvn -RepoRoot $RepoRoot -Args @('clean','package') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+$BtnBackendVerify.Add_Click({
+  if ($global:MavenInfo -and $global:MavenInfo.MavenCmd) {
+    Start-Action (New-Action "Backend" "Maven: clean verify" $global:MavenInfo.MavenCmd "clean verify" $global:MavenInfo.WorkDir $global:MavenInfo.Pom "Maven")
+  }
 })
 
 $BtnBackendSpotless.Add_Click({
-    Start-Op {
-        $backendDir = Join-Path $RepoRoot 'backend'
-        $pom = Join-Path $backendDir 'pom.xml'
-        if (-not (Test-SpotlessConfigured -PomPath $pom)) {
-            Append-Header -OutputTextBox $TxtOutput -Window $Window -Title 'Notice' -CommandLine 'Spotless not detected in pom.xml; command may fail.'
-        }
-        $mvn = Get-MavenCommand -BackendDir $backendDir
-        Run-BackendMaven -Mvn $mvn -RepoRoot $RepoRoot -Args @('spotless:check') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+  if ($global:MavenInfo -and $global:MavenInfo.MavenCmd) {
+    Start-Action (New-Action "Backend" "Maven: spotless check" $global:MavenInfo.MavenCmd "spotless:check" $global:MavenInfo.WorkDir $global:MavenInfo.Pom "Maven")
+  }
 })
 
-$BtnBackendDockerLogs.Add_Click({
-    if (-not $Compose) {
-        Append-Header -OutputTextBox $TxtOutput -Window $Window -Title 'Compose' -CommandLine 'Docker Compose not found.'
-        return
-    }
-    Start-Op {
-        $mode = ($CmbStackMode.SelectedItem.Tag)
-        Run-Compose -Compose $Compose -RepoRoot $RepoRoot -Mode $mode -ComposeArgs @('logs','-f','backend') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
+$BtnOpenLink.Add_Click({ if ($ListLinks.SelectedItem) { Safe-InvokeItem $ListLinks.SelectedItem.Url } })
+$BtnCopyLink.Add_Click({ if ($ListLinks.SelectedItem) { [System.Windows.Clipboard]::SetText([string]$ListLinks.SelectedItem.Url) } })
+$BtnOpenDoc.Add_Click({ if ($ListDocs.SelectedItem -and $ListDocs.SelectedItem.Source) { Safe-InvokeItem $ListDocs.SelectedItem.Source } })
+
+$BtnOpenRepo.Add_Click({ Safe-InvokeItem $global:RepoRoot })
+$BtnOpenInCode.Add_Click({
+  if (Get-CommandExists "code") { Start-Process "code" ("`"" + $global:RepoRoot + "`"") | Out-Null }
+  else { Append-Output "[WARN] VS Code 'code' not found in PATH." }
 })
 
-$BtnOpenSwagger.Add_Click({ Start-Process 'http://localhost:8080/swagger-ui' | Out-Null })
-$BtnOpenHealth.Add_Click({ Start-Process 'http://localhost:8080/actuator/health' | Out-Null })
+$NavDashboard.Add_Click({ Show-View "Dashboard" })
+$NavOperations.Add_Click({ Show-View "Operations" })
+$NavToolkits.Add_Click({ Show-View "Toolkits" })
+$NavBackend.Add_Click({ Show-View "Backend" })
+$NavFrontend.Add_Click({ Show-View "Frontend" })
+$NavObservability.Add_Click({ Show-View "Observability" })
+$NavGuide.Add_Click({ Show-View "Guide" })
+$NavSettings.Add_Click({ Show-View "Settings" })
 
-# Frontend
-$BtnFrontInstall.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @($FrontendInfo.InstallArgs) -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontStart.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('start') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontTest.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run','test') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontLint.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run','lint') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontInstallBrowsers.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run','install-browsers') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontE2eFast.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run','e2e:fast') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontE2eUi.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run','e2e:ui') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnFrontE2eFull.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run','e2e:full') -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnRunNpmScript.Add_Click({
-    $FrontendInfo = Refresh-FrontendScripts
-    $scriptName = [string]$CmbNpmScript.SelectedItem
-    if (-not $scriptName) {
-        [System.Windows.MessageBox]::Show('No script selected.', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        Run-Frontend -FrontendInfo $FrontendInfo -RepoRoot $RepoRoot -Args @('run', $scriptName) -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-# CI / Toolkits
-$BtnFullSuite.Add_Click({
-    $p = Join-Path $RepoRoot 'scripts\run-full-test-suite.ps1'
-    if (-not (Test-Path $p)) {
-        [System.Windows.MessageBox]::Show('Missing scripts/run-full-test-suite.ps1', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        Run-PS1 -ScriptPath $p -RepoRoot $RepoRoot -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnGenReport.Add_Click({
-    $p = Join-Path $RepoRoot 'scripts\generate-test-report.ps1'
-    if (-not (Test-Path $p)) {
-        [System.Windows.MessageBox]::Show('Missing scripts/generate-test-report.ps1', 'Atlas Dev Console') | Out-Null
-        return
-    }
-    Start-Op {
-        Run-PS1 -ScriptPath $p -RepoRoot $RepoRoot -OutputTextBox $TxtOutput -StatusTextBlock $TxtStatus -Window $Window
-    }
-})
-
-$BtnOpenReports.Add_Click({
-    $p = Join-Path $RepoRoot 'test-reports'
-    if (-not (Test-Path $p)) {
-        New-Item -ItemType Directory -Path $p | Out-Null
-    }
-    Start-Process -FilePath $p | Out-Null
-})
-
-# Observability
-$BtnOpenFrontend.Add_Click({ Start-Process 'http://localhost:4200' | Out-Null })
-$BtnOpenBackend.Add_Click({ Start-Process 'http://localhost:8080' | Out-Null })
-$BtnOpenKeycloak.Add_Click({ Start-Process 'http://localhost:8081' | Out-Null })
-$BtnOpenAdminer.Add_Click({ Start-Process 'http://localhost:8082' | Out-Null })
-$BtnOpenKibana.Add_Click({ Start-Process 'http://localhost:5601' | Out-Null })
-$BtnOpenGrafana.Add_Click({ Start-Process 'http://localhost:3000' | Out-Null })
-$BtnOpenProm.Add_Click({ Start-Process 'http://localhost:9090' | Out-Null })
-$BtnOpenElastic.Add_Click({ Start-Process 'http://localhost:9200' | Out-Null })
-
-# Close cleanup
-$Window.add_Closing({
-    try {
-        if ($CurrentProcess -and -not $CurrentProcess.HasExited) {
-            $CurrentProcess.Kill()
-        }
-    } catch {}
-})
-
-# Show
-$Window.ShowDialog() | Out-Null
+# Init
+$TxtRepo.Text = $global:RepoRoot
+Reload-All
+Show-View "Dashboard"
+$null = $window.ShowDialog()
