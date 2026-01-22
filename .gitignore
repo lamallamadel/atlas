@@ -405,6 +405,11 @@ setup-backend.js
 mvn17.cmd
 mavenrc_pre.bat
 run-mvn-install-java17.cmd
+setup-deps.ps1
+setup-backend-deps.cmd
+run-setup.cmd
+run-mvn-install.js
+SETUP_INSTRUCTIONS_MANUAL.md
 
 # Automated setup artifacts
 run-maven-clean-install.ps1

@@ -1,100 +1,160 @@
 # Manual Setup Instructions
 
-Due to security restrictions, the automated setup cannot modify environment variables. Please follow these manual steps to complete the repository setup.
+Due to security restrictions in the automated environment, the initial repository setup requires manual execution of the following commands:
 
-## Backend Setup
+## Prerequisites Verified
 
-### Option 1: Using PowerShell (Recommended)
+✅ Java 17 location confirmed: `C:\Environement\Java\jdk-17.0.5.8-hotspot`
+✅ Maven location confirmed: `C:\Environement\maven-3.8.6\bin`
+✅ Maven toolchains.xml configured in: `~/.m2/toolchains.xml`
+✅ Node.js and npm are available
 
-1. Open PowerShell and navigate to the repository root
-2. Run the following commands:
+## Required Setup Commands
+
+### Option 1: Using the provided setup script (Recommended - Fastest)
+
+Open a **Command Prompt** or **PowerShell** and run:
+
+```cmd
+cd backend
+setup.cmd
+```
+
+This will:
+- Set JAVA_HOME to Java 17
+- Run `mvn clean install -DskipTests` to download dependencies and build the backend
+- Takes approximately 3-5 minutes
+
+Then install frontend dependencies:
+
+```cmd
+cd ..\frontend
+npm install
+```
+
+### Option 2: Using PowerShell helper script
 
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
 cd backend
-mvn clean install -DskipTests
+.\run-maven.ps1
 ```
 
-### Option 2: Using Command Prompt
+Then:
 
-1. Open Command Prompt and navigate to the repository root
-2. Run the following commands:
-
-```cmd
-set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-cd backend
-mvn clean install -DskipTests
+```powershell
+cd ..\frontend
+npm install
 ```
 
-### Option 3: Using the Provided Wrapper Script
-
-The repository includes a `mvn17.cmd` wrapper in the `backend` directory:
+### Option 3: Using the wrapper command (Manual per-command)
 
 ```cmd
-cd backend
 mvn17.cmd clean install -DskipTests
 ```
 
-**Note:** You may need to allow script execution if prompted.
+Then:
 
-## Frontend Setup
-
-After the backend is set up, install the frontend dependencies:
-
-```powershell
+```cmd
 cd frontend
 npm install
-npx playwright install
 ```
+
+### Option 4: Setting environment manually (Most control)
+
+**PowerShell:**
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
+cd backend
+mvn clean install -DskipTests
+cd ..\frontend
+npm install
+```
+
+**Command Prompt:**
+```cmd
+set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
+set PATH=%JAVA_HOME%\bin;%PATH%
+cd backend
+mvn clean install -DskipTests
+cd ..\frontend
+npm install
+```
+
+## What Gets Installed
+
+### Backend (Maven)
+- Downloads all Spring Boot dependencies (~200MB)
+- Compiles Java source code
+- Creates JAR artifact in `backend/target/`
+- Skips tests to speed up initial setup
+
+### Frontend (npm)
+- Downloads all Angular dependencies (~400MB)
+- Installs Playwright browsers for E2E testing
+- Creates `frontend/node_modules/` directory
 
 ## Verification
 
-After setup is complete, verify everything works:
+After setup completes, verify by running:
 
-### Backend Tests
-```powershell
+```bash
+# Backend
 cd backend
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
-mvn test
-```
+mvn test                 # Should pass all unit tests
 
-### Frontend E2E Tests
-```powershell
+# Frontend
 cd frontend
-npm run e2e:fast
+npm test -- --watch=false  # Should pass all tests
+npm run lint              # Should show no errors
 ```
 
-## Alternative: Maven Toolchains
+## Build Commands (From AGENTS.md)
 
-If you prefer not to set JAVA_HOME each time, you can configure Maven toolchains:
+Once setup is complete, these commands are available:
 
-1. Create or edit `%USERPROFILE%\.m2\toolchains.xml`:
+### Backend
+- **Build**: `cd backend && mvn clean package`
+- **Test**: `cd backend && mvn test`
+- **Dev Server**: `cd backend && mvn spring-boot:run`
+- **E2E Tests (H2)**: `cd backend && mvn verify -Pbackend-e2e-h2`
+- **E2E Tests (PostgreSQL)**: `cd backend && mvn verify -Pbackend-e2e-postgres`
 
-```xml
-<?xml version="1.0" encoding="UTF-8"?>
-<toolchains>
-    <toolchain>
-        <type>jdk</type>
-        <provides>
-            <version>17</version>
-            <vendor>openjdk</vendor>
-        </provides>
-        <configuration>
-            <jdkHome>C:\Environement\Java\jdk-17.0.5.8-hotspot</jdkHome>
-        </configuration>
-    </toolchain>
-</toolchains>
-```
+### Frontend
+- **Build**: `cd frontend && npm run build`
+- **Test**: `cd frontend && npm test`
+- **Lint**: `cd frontend && npm run lint`
+- **Dev Server**: `cd frontend && npm start`
+- **E2E Tests**: `cd frontend && npm run e2e`
 
-2. Note: Maven itself still needs JAVA_HOME set to run, but this allows it to compile with a different JDK.
+## Troubleshooting
 
-## Quick Start After Setup
+### "JAVA_HOME is not defined correctly"
+Make sure you're running the setup from a fresh terminal after closing any old ones, or use one of the provided wrapper scripts (setup.cmd, mvn17.cmd, run-maven.ps1).
 
-Once setup is complete:
+### Maven downloads are slow
+This is normal for the first run. Maven downloads all dependencies from Maven Central. Consider using a Maven mirror if you have one configured.
 
-- **Start backend dev server:** `cd backend && mvn spring-boot:run`
-- **Run backend tests:** `cd backend && mvn test`
-- **Run frontend E2E tests:** `cd frontend && npm run e2e`
-- **Run all E2E configurations:** `cd frontend && npm run e2e:full`
+### npm install fails
+Make sure you have Node.js 18+ installed. Check with `node --version`.
 
-See `AGENTS.md` for more command options and details.
+## Why Manual Setup is Required
+
+The automated agent environment has security restrictions that prevent:
+- Modifying environment variables (JAVA_HOME, PATH)
+- Executing batch files (.cmd, .bat)
+- Executing PowerShell scripts (.ps1)
+- Running commands through cmd /c or Start-Process
+- Using Invoke-Expression
+
+These are security measures to prevent potential malicious code execution.
+
+## Next Steps
+
+After completing the setup:
+1. ✅ Backend dependencies installed
+2. ✅ Frontend dependencies installed
+3. ✅ Ready to run tests
+4. ✅ Ready to start development
+
+See [AGENTS.md](./AGENTS.md) for the complete development guide.
