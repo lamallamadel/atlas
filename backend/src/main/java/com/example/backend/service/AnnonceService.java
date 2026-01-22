@@ -13,11 +13,13 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,10 +33,11 @@ public class AnnonceService {
 
     private final AnnonceRepository annonceRepository;
     private final AnnonceMapper annonceMapper;
+    @Nullable
     private final SearchService searchService;
     private final MetricsService metricsService;
 
-    public AnnonceService(AnnonceRepository annonceRepository, AnnonceMapper annonceMapper, SearchService searchService, MetricsService metricsService) {
+    public AnnonceService(AnnonceRepository annonceRepository, AnnonceMapper annonceMapper, @Autowired(required = false) @Nullable SearchService searchService, MetricsService metricsService) {
         this.annonceRepository = annonceRepository;
         this.annonceMapper = annonceMapper;
         this.searchService = searchService;
@@ -70,7 +73,9 @@ public class AnnonceService {
         validateActiveAnnonce(annonce);
 
         Annonce saved = annonceRepository.save(annonce);
-        searchService.indexAnnonce(saved);
+        if (searchService != null) {
+            searchService.indexAnnonce(saved);
+        }
         return annonceMapper.toResponse(saved);
     }
 
@@ -120,7 +125,9 @@ public class AnnonceService {
 
         annonce.setUpdatedAt(LocalDateTime.now());
         Annonce updated = annonceRepository.save(annonce);
-        searchService.indexAnnonce(updated);
+        if (searchService != null) {
+            searchService.indexAnnonce(updated);
+        }
         return annonceMapper.toResponse(updated);
     }
 
