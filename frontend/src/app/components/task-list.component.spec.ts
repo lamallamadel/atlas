@@ -46,7 +46,7 @@ describe('TaskListComponent', () => {
         FullCalendarModule
       ],
       providers: [
-        { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken']) }
+        { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken', 'configure', 'setStorage', 'logOut', 'getAccessToken']) }
       ]
     })
     .compileComponents();

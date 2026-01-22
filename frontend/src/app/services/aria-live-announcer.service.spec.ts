@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { AriaLiveAnnouncerService } from './aria-live-announcer.service';
 
 describe('AriaLiveAnnouncerService', () => {
@@ -17,16 +17,16 @@ describe('AriaLiveAnnouncerService', () => {
 
   it('should announce polite message', fakeAsync(() => {
     service.announcePolite('Test message');
+    tick(50);
     tick(100);
     expect(service).toBeTruthy();
-    discardPeriodicTasks();
   }));
 
   it('should announce assertive message', fakeAsync(() => {
     service.announceAssertive('Urgent message');
+    tick(50);
     tick(100);
     expect(service).toBeTruthy();
-    discardPeriodicTasks();
   }));
 
   it('should not announce when mode is off', () => {
