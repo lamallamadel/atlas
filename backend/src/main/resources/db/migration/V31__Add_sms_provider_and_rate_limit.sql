@@ -22,7 +22,9 @@ CREATE TABLE sms_provider_config (
 );
 
 CREATE INDEX idx_sms_provider_config_org_id ON sms_provider_config(org_id);
-CREATE INDEX idx_sms_provider_config_enabled ON sms_provider_config(enabled) WHERE enabled = true;
+-- Portable (H2 + Postgres)
+CREATE INDEX idx_sms_provider_config_enabled ON sms_provider_config(enabled);
+
 
 -- Create SMS rate limit table
 CREATE TABLE sms_rate_limit (
