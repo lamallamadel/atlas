@@ -16,6 +16,7 @@ import { EmptyStateComponent } from './empty-state.component';
 import { TaskCardComponent } from './task-card.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -43,6 +44,9 @@ describe('TaskListComponent', () => {
         HttpClientTestingModule,
         BrowserAnimationsModule,
         FullCalendarModule
+      ],
+      providers: [
+        { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken']) }
       ]
     })
     .compileComponents();
