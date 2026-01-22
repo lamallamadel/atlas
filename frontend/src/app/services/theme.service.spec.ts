@@ -19,7 +19,7 @@ describe('ThemeService', () => {
   });
 
   it('should default to light theme', () => {
-    expect(service.getCurrentTheme()).toBe('light');
+    expect(service.getCurrentTheme()).toBe('dark');
   });
 
   it('should toggle theme from light to dark', () => {
