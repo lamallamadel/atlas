@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { LeadExportDialogComponent } from './lead-export-dialog.component';
 import { LeadApiService } from '../services/lead-api.service';
@@ -14,7 +15,8 @@ describe('LeadExportDialogComponent', () => {
       declarations: [ LeadExportDialogComponent ],
       imports: [
         HttpClientTestingModule,
-        MatSnackBarModule
+        MatSnackBarModule,
+        MatIconModule
       ],
       providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
