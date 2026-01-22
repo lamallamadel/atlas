@@ -56,6 +56,9 @@ describe('OfflineMessageQueueService', () => {
   it('should enqueue message when offline', (done) => {
     spyOnProperty(navigator, 'onLine', 'get').and.returnValue(false);
     
+    // Initialize isOnline$ observable by accessing it
+    const isOnlineSubscription = service.isOnline$.subscribe();
+    
     const request: MessageCreateRequest = {
       dossierId: 1,
       content: 'Test message',
@@ -67,6 +70,7 @@ describe('OfflineMessageQueueService', () => {
     service.enqueue(request).subscribe(result => {
       expect(result).toBeNull();
       expect(service.getQueueSize()).toBeGreaterThan(0);
+      isOnlineSubscription.unsubscribe();
       done();
     });
   });
