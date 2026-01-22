@@ -30,7 +30,7 @@ public class DatabaseIndexAudit {
         foreignKeyColumns.put("annonce", Arrays.asList("status", "type", "city", "org_id", "created_at"));
         foreignKeyColumns.put("notification", Arrays.asList("user_id", "status", "type", "created_at", "org_id"));
         foreignKeyColumns.put("outbound_message", Arrays.asList("status", "attempt_count", "channel", "created_at", "next_retry_at", "org_id"));
-        foreignKeyColumns.put("outbound_attempt", Arrays.asList("message_id", "status", "attempt_number", "next_retry_at", "attempted_at"));
+        foreignKeyColumns.put("outbound_attempt", Arrays.asList("message_id", "status", "attempt_no", "next_retry_at", "attempted_at"));
         foreignKeyColumns.put("dossier_status_history", Arrays.asList("dossier_id", "from_status", "to_status", "transitioned_at", "org_id"));
 
         for (Map.Entry<String, List<String>> entry : foreignKeyColumns.entrySet()) {
