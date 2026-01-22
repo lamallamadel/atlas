@@ -1,5 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
 import { DocumentApiService } from '../services/document-api.service';
 import { of } from 'rxjs';
@@ -16,6 +22,14 @@ describe('DocumentPreviewDialogComponent', () => {
 
     TestBed.configureTestingModule({
       declarations: [DocumentPreviewDialogComponent],
+      imports: [
+        CommonModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatIconModule,
+        MatTooltipModule,
+        MatProgressSpinnerModule
+      ],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { 
