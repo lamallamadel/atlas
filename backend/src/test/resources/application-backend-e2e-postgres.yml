@@ -4,6 +4,11 @@ spring:
   config:
     activate:
       on-profile: backend-e2e-postgres
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
 
   datasource:
     driver-class-name: org.postgresql.Driver

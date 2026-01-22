@@ -1,4 +1,13 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -50,4 +59,7 @@ cors:
   allowed-origins: "*"
 
 rate-limit:
+  enabled: false
+
+elasticsearch:
   enabled: false
