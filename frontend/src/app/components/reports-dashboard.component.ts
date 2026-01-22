@@ -11,7 +11,6 @@ import {
   ConversionFunnel
 } from '../services/reporting-api.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import * as Papa from 'papaparse';
 
 @Component({
   selector: 'app-reports-dashboard',
@@ -420,12 +419,13 @@ export class ReportsDashboardComponent implements OnInit {
     };
   }
 
-  exportToCSV(): void {
+  async exportToCSV(): Promise<void> {
     if (!this.analyticsData) {
       return;
     }
 
     const csvData = this.prepareCSVData();
+    const { default: Papa } = await import('papaparse');
     const csv = Papa.unparse(csvData);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
