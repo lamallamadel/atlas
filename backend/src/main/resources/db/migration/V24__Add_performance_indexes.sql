@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_message_dossier_id_direction ON message(dossier_i
 CREATE INDEX IF NOT EXISTS idx_message_dossier_id_timestamp ON message(dossier_id, timestamp);
 
 -- Notification table indexes
-CREATE INDEX IF NOT EXISTS idx_notification_user_id ON notification(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_dossier_id ON notification(dossier_id);
 CREATE INDEX IF NOT EXISTS idx_notification_status ON notification(status);
 CREATE INDEX IF NOT EXISTS idx_notification_type ON notification(type);
 CREATE INDEX IF NOT EXISTS idx_notification_created_at ON notification(created_at);
