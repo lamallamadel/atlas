@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -159,7 +160,27 @@ public class AuditAspect {
         try {
             Object service = joinPoint.getTarget();
             Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
-            return getByIdMethod.invoke(service, entityId);
+            Object result = getByIdMethod.invoke(service, entityId);
+            
+            // Convert to map early to ensure all fields including status are captured
+            if (result != null) {
+                Map<String, Object> capturedState = safeConvertToMap(result);
+                
+                // Explicitly ensure status is captured if present in DTO
+                try {
+                    Method getStatusMethod = result.getClass().getMethod("getStatus");
+                    Object status = getStatusMethod.invoke(result);
+                    if (status != null && !capturedState.containsKey("status")) {
+                        capturedState.put("status", status.toString());
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+                    // DTO doesn't have getStatus() or error accessing it, which is fine
+                }
+                
+                return capturedState;
+            }
+            
+            return result;
         } catch (Exception e) {
             return null;
         }
