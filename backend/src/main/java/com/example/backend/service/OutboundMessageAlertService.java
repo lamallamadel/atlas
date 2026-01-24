@@ -363,10 +363,25 @@ public class OutboundMessageAlertService {
             metrics.setFailureRate(0.0);
         }
 
-        Double avgLatency = outboundAttemptRepository.calculateAverageDeliveryLatency(channel, windowStart);
+        Double avgLatency = calculateAverageDeliveryLatency(channel, windowStart);
         metrics.setAverageDeliveryLatencySeconds(avgLatency != null ? avgLatency : 0.0);
 
         return metrics;
+    }
+
+    private Double calculateAverageDeliveryLatency(MessageChannel channel, LocalDateTime windowStart) {
+        var attempts = outboundAttemptRepository.findSuccessfulAttempts(channel, windowStart);
+        if (attempts.isEmpty()) {
+            return null;
+        }
+
+        double totalLatency = 0.0;
+        for (var attempt : attempts) {
+            Duration duration = Duration.between(attempt.getCreatedAt(), attempt.getUpdatedAt());
+            totalLatency += duration.toSeconds();
+        }
+
+        return totalLatency / attempts.size();
     }
 
     private ChannelFailureRate calculateChannelFailureRate(MessageChannel channel, LocalDateTime windowStart) {

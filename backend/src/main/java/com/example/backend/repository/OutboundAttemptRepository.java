@@ -16,14 +16,13 @@ public interface OutboundAttemptRepository extends JpaRepository<OutboundAttempt
     
     List<OutboundAttemptEntity> findByOutboundMessageIdOrderByAttemptNoAsc(Long outboundMessageId);
     
-    @Query("SELECT AVG(EXTRACT(EPOCH FROM oa.updatedAt) - EXTRACT(EPOCH FROM oa.createdAt)) FROM OutboundAttemptEntity oa " +
+    @Query("SELECT oa FROM OutboundAttemptEntity oa " +
            "JOIN oa.outboundMessage om " +
            "WHERE om.channel = :channel AND oa.status = 'SUCCESS' AND oa.createdAt >= :afterTime")
-    Double calculateAverageDeliveryLatency(@Param("channel") MessageChannel channel, @Param("afterTime") LocalDateTime afterTime);
+    List<OutboundAttemptEntity> findSuccessfulAttempts(@Param("channel") MessageChannel channel, @Param("afterTime") LocalDateTime afterTime);
     
-    @Query("SELECT (EXTRACT(EPOCH FROM oa.updatedAt) - EXTRACT(EPOCH FROM oa.createdAt)) FROM OutboundAttemptEntity oa " +
+    @Query("SELECT oa FROM OutboundAttemptEntity oa " +
            "JOIN oa.outboundMessage om " +
-           "WHERE om.channel = :channel AND oa.status = 'SUCCESS' AND oa.createdAt >= :afterTime " +
-           "ORDER BY (EXTRACT(EPOCH FROM oa.updatedAt) - EXTRACT(EPOCH FROM oa.createdAt))")
-    List<Double> findDeliveryLatencies(@Param("channel") MessageChannel channel, @Param("afterTime") LocalDateTime afterTime);
+           "WHERE om.channel = :channel AND oa.status = 'SUCCESS' AND oa.createdAt >= :afterTime")
+    List<OutboundAttemptEntity> findDeliveryLatencies(@Param("channel") MessageChannel channel, @Param("afterTime") LocalDateTime afterTime);
 }
