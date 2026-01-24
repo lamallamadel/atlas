@@ -161,7 +161,31 @@ public class AuditAspect {
             Object service = joinPoint.getTarget();
             Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
             Object result = getByIdMethod.invoke(service, entityId);
-            return result;
+            
+            // Convert to map and ensure status field is captured
+            Map<String, Object> capturedMap = safeConvertToMap(result);
+            
+            if (capturedMap != null && result != null) {
+                // Explicitly check for getStatus() method and add status if present
+                try {
+                    Method getStatusMethod = result.getClass().getMethod("getStatus");
+                    Object statusValue = getStatusMethod.invoke(result);
+                    
+                    // Only add if not already present in the map
+                    if (statusValue != null && !capturedMap.containsKey("status")) {
+                        // Convert enum to string if applicable
+                        if (statusValue instanceof Enum<?>) {
+                            capturedMap.put("status", ((Enum<?>) statusValue).name());
+                        } else {
+                            capturedMap.put("status", statusValue);
+                        }
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    // No getStatus() method or unable to access it, continue without status
+                }
+            }
+            
+            return capturedMap != null ? capturedMap : result;
         } catch (Exception e) {
             return null;
         }
