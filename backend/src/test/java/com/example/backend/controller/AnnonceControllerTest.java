@@ -1,45 +1,40 @@
 package com.example.backend.controller;
 
-import com.example.backend.config.SecurityConfig;
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
+import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
-import com.example.backend.service.AnnonceService;
+import com.example.backend.repository.AnnonceRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(AnnonceController.class)
-@Import(SecurityConfig.class) // ensure security filter chain is present in slice test
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("test")
+@Transactional
 @WithMockUser(roles = "ADMIN")
 class AnnonceControllerTest {
 
+    private static final String ORG_ID_HEADER = "X-Org-Id";
+    private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
     private static final String ORG_ID = "org123";
+    private static final String CORRELATION_ID = "test-correlation-id";
 
     @Autowired
     private MockMvc mockMvc;
@@ -47,14 +42,21 @@ class AnnonceControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
-    private AnnonceService annonceService;
+    @Autowired
+    private AnnonceRepository annonceRepository;
 
     private AnnonceCreateRequest createRequest;
-    private AnnonceResponse annonceResponse;
+
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
+        return (T) builder
+                .header(ORG_ID_HEADER, ORG_ID)
+                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    }
 
     @BeforeEach
     void setUp() {
+        annonceRepository.deleteAll();
+        
         createRequest = new AnnonceCreateRequest();
         // orgId comes from tenant header (X-Org-Id) => DO NOT set in request
         createRequest.setTitle("Test Annonce");
@@ -63,19 +65,6 @@ class AnnonceControllerTest {
         createRequest.setCity("Paris");
         createRequest.setPrice(BigDecimal.valueOf(100.00));
         createRequest.setCurrency("EUR");
-
-        annonceResponse = new AnnonceResponse();
-        annonceResponse.setId(1L);
-        annonceResponse.setOrgId(ORG_ID);
-        annonceResponse.setTitle("Test Annonce");
-        annonceResponse.setDescription("Test Description");
-        annonceResponse.setCategory("Electronics");
-        annonceResponse.setCity("Paris");
-        annonceResponse.setPrice(BigDecimal.valueOf(100.00));
-        annonceResponse.setCurrency("EUR");
-        annonceResponse.setStatus(AnnonceStatus.DRAFT);
-        annonceResponse.setCreatedAt(LocalDateTime.now());
-        annonceResponse.setUpdatedAt(LocalDateTime.now());
     }
 
     // -------------------------------------------------------------------------
@@ -84,15 +73,12 @@ class AnnonceControllerTest {
 
     @Test
     void create_ValidRequest_Returns201WithCreatedEntity() throws Exception {
-        when(annonceService.create(any(AnnonceCreateRequest.class))).thenReturn(annonceResponse);
-
-        mockMvc.perform(post("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(post("/api/v1/annonces")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                .content(objectMapper.writeValueAsString(createRequest))))
             .andExpect(status().isCreated())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.id").exists())
             .andExpect(jsonPath("$.orgId").value(ORG_ID))
             .andExpect(jsonPath("$.title").value("Test Annonce"))
             .andExpect(jsonPath("$.description").value("Test Description"))
@@ -107,10 +93,9 @@ class AnnonceControllerTest {
     void create_MissingTitle_Returns400() throws Exception {
         createRequest.setTitle(null);
 
-        mockMvc.perform(post("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(post("/api/v1/annonces")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                .content(objectMapper.writeValueAsString(createRequest))))
             .andExpect(status().isBadRequest());
     }
 
@@ -118,10 +103,9 @@ class AnnonceControllerTest {
     void create_BlankTitle_Returns400() throws Exception {
         createRequest.setTitle("");
 
-        mockMvc.perform(post("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(post("/api/v1/annonces")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                .content(objectMapper.writeValueAsString(createRequest))))
             .andExpect(status().isBadRequest());
     }
 
@@ -129,10 +113,9 @@ class AnnonceControllerTest {
     void create_TitleTooLong_Returns400() throws Exception {
         createRequest.setTitle("A".repeat(501));
 
-        mockMvc.perform(post("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(post("/api/v1/annonces")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                .content(objectMapper.writeValueAsString(createRequest))))
             .andExpect(status().isBadRequest());
     }
 
@@ -140,16 +123,21 @@ class AnnonceControllerTest {
     void create_NegativePrice_Returns400() throws Exception {
         createRequest.setPrice(BigDecimal.valueOf(-10.00));
 
-        mockMvc.perform(post("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(post("/api/v1/annonces")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createRequest)))
+                .content(objectMapper.writeValueAsString(createRequest))))
             .andExpect(status().isBadRequest());
     }
 
-    // NOTE: "MissingOrgId" is now a tenant-header concern, not a body validation concern.
-    // If you want a dedicated test, do it on TenantFilterTest (recommended).
-    // This controller slice test cannot reliably assert tenant filter behavior unless the filter is part of the slice.
+    @Test
+    void create_MissingTenantHeader_Returns400() throws Exception {
+        mockMvc.perform(post("/api/v1/annonces")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                .content(objectMapper.writeValueAsString(createRequest)))
+            .andExpect(status().isBadRequest())
+            .andExpect(header().string(CORRELATION_ID_HEADER, CORRELATION_ID));
+    }
 
     // -------------------------------------------------------------------------
     // GET
@@ -157,24 +145,19 @@ class AnnonceControllerTest {
 
     @Test
     void getById_ExistingId_Returns200WithEntity() throws Exception {
-        when(annonceService.getById(1L)).thenReturn(annonceResponse);
+        Annonce annonce = createAnnonce(ORG_ID);
 
-        mockMvc.perform(get("/api/v1/annonces/1")
-                .header("X-Org-Id", ORG_ID))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces/" + annonce.getId())))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.id").value(annonce.getId()))
             .andExpect(jsonPath("$.title").value("Test Annonce"))
             .andExpect(jsonPath("$.orgId").value(ORG_ID));
     }
 
     @Test
     void getById_NonExistingId_Returns404() throws Exception {
-        when(annonceService.getById(999L))
-            .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
-
-        mockMvc.perform(get("/api/v1/annonces/999")
-                .header("X-Org-Id", ORG_ID))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces/999")))
             .andExpect(status().isNotFound());
     }
 
@@ -184,24 +167,17 @@ class AnnonceControllerTest {
 
     @Test
     void update_ValidRequest_Returns200() throws Exception {
+        Annonce annonce = createAnnonce(ORG_ID);
+
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
         updateRequest.setStatus(AnnonceStatus.PUBLISHED);
 
-        AnnonceResponse updatedResponse = new AnnonceResponse();
-        updatedResponse.setId(1L);
-        updatedResponse.setOrgId(ORG_ID);
-        updatedResponse.setTitle("Updated Title");
-        updatedResponse.setStatus(AnnonceStatus.PUBLISHED);
-
-        when(annonceService.update(eq(1L), any(AnnonceUpdateRequest.class))).thenReturn(updatedResponse);
-
-        mockMvc.perform(put("/api/v1/annonces/1")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(put("/api/v1/annonces/" + annonce.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
+                .content(objectMapper.writeValueAsString(updateRequest))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(1))
+            .andExpect(jsonPath("$.id").value(annonce.getId()))
             .andExpect(jsonPath("$.title").value("Updated Title"))
             .andExpect(jsonPath("$.status").value("PUBLISHED"));
     }
@@ -211,13 +187,9 @@ class AnnonceControllerTest {
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
 
-        when(annonceService.update(eq(999L), any(AnnonceUpdateRequest.class)))
-            .thenThrow(new EntityNotFoundException("Annonce not found with id: 999"));
-
-        mockMvc.perform(put("/api/v1/annonces/999")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(put("/api/v1/annonces/999")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
+                .content(objectMapper.writeValueAsString(updateRequest))))
             .andExpect(status().isNotFound());
     }
 
@@ -227,60 +199,24 @@ class AnnonceControllerTest {
 
     @Test
     void list_NoFilters_Returns200WithPagedResults() throws Exception {
-        AnnonceResponse annonce1 = new AnnonceResponse();
-        annonce1.setId(1L);
-        annonce1.setTitle("Annonce 1");
-        annonce1.setStatus(AnnonceStatus.PUBLISHED);
+        Annonce annonce1 = createAnnonce(ORG_ID, "Annonce 1", AnnonceStatus.PUBLISHED);
+        Annonce annonce2 = createAnnonce(ORG_ID, "Annonce 2", AnnonceStatus.DRAFT);
 
-        AnnonceResponse annonce2 = new AnnonceResponse();
-        annonce2.setId(2L);
-        annonce2.setTitle("Annonce 2");
-        annonce2.setStatus(AnnonceStatus.DRAFT);
-
-        List<AnnonceResponse> annonces = Arrays.asList(annonce1, annonce2);
-        Page<AnnonceResponse> page = new PageImpl<>(annonces, PageRequest.of(0, 20), 2);
-
-        when(annonceService.list(
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")))
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andExpect(jsonPath("$.content", hasSize(2)))
-            .andExpect(jsonPath("$.content[0].id").value(1))
-            .andExpect(jsonPath("$.content[0].title").value("Annonce 1"))
-            .andExpect(jsonPath("$.content[1].id").value(2))
-            .andExpect(jsonPath("$.content[1].title").value("Annonce 2"))
             .andExpect(jsonPath("$.totalElements").value(2))
             .andExpect(jsonPath("$.size").value(20));
     }
 
     @Test
     void list_WithStatusFilter_Returns200WithFilteredResults() throws Exception {
-        AnnonceResponse annonce1 = new AnnonceResponse();
-        annonce1.setId(1L);
-        annonce1.setTitle("Published Annonce");
-        annonce1.setStatus(AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Published Annonce", AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Draft Annonce", AnnonceStatus.DRAFT);
 
-        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(0, 20), 1);
-
-        when(annonceService.list(
-            eq(AnnonceStatus.PUBLISHED),
-            isNull(),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
-                .param("status", "PUBLISHED"))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")
+                .param("status", "PUBLISHED")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(1)))
             .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
@@ -289,24 +225,11 @@ class AnnonceControllerTest {
 
     @Test
     void list_WithSearchQuery_Returns200WithMatchingResults() throws Exception {
-        AnnonceResponse annonce1 = new AnnonceResponse();
-        annonce1.setId(1L);
-        annonce1.setTitle("Electronics in Paris");
-        annonce1.setStatus(AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Electronics in Paris", AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Furniture in Lyon", AnnonceStatus.PUBLISHED);
 
-        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(0, 20), 1);
-
-        when(annonceService.list(
-            isNull(),
-            eq("Electronics"),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
-                .param("q", "Electronics"))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")
+                .param("q", "Electronics")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(1)))
             .andExpect(jsonPath("$.content[0].title").value("Electronics in Paris"))
@@ -315,25 +238,12 @@ class AnnonceControllerTest {
 
     @Test
     void list_WithStatusAndSearchQuery_Returns200WithFilteredAndMatchingResults() throws Exception {
-        AnnonceResponse annonce1 = new AnnonceResponse();
-        annonce1.setId(1L);
-        annonce1.setTitle("Electronics in Paris");
-        annonce1.setStatus(AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Electronics in Paris", AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Electronics in Lyon", AnnonceStatus.DRAFT);
 
-        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(0, 20), 1);
-
-        when(annonceService.list(
-            eq(AnnonceStatus.PUBLISHED),
-            eq("Electronics"),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")
                 .param("status", "PUBLISHED")
-                .param("q", "Electronics"))
+                .param("q", "Electronics")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(1)))
             .andExpect(jsonPath("$.content[0].title").value("Electronics in Paris"))
@@ -343,26 +253,15 @@ class AnnonceControllerTest {
 
     @Test
     void list_WithPagination_Returns200WithCorrectPage() throws Exception {
-        AnnonceResponse annonce1 = new AnnonceResponse();
-        annonce1.setId(11L);
-        annonce1.setTitle("Annonce 11");
+        for (int i = 1; i <= 25; i++) {
+            createAnnonce(ORG_ID, "Annonce " + i, AnnonceStatus.PUBLISHED);
+        }
 
-        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1), PageRequest.of(1, 10), 25);
-
-        when(annonceService.list(
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")
                 .param("page", "1")
-                .param("size", "10"))
+                .param("size", "10")))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
+            .andExpect(jsonPath("$.content", hasSize(10)))
             .andExpect(jsonPath("$.number").value(1))
             .andExpect(jsonPath("$.size").value(10))
             .andExpect(jsonPath("$.totalElements").value(25));
@@ -370,27 +269,11 @@ class AnnonceControllerTest {
 
     @Test
     void list_WithSorting_Returns200WithSortedResults() throws Exception {
-        AnnonceResponse annonce1 = new AnnonceResponse();
-        annonce1.setId(1L);
-        annonce1.setTitle("Annonce A");
+        createAnnonce(ORG_ID, "Annonce B", AnnonceStatus.PUBLISHED);
+        createAnnonce(ORG_ID, "Annonce A", AnnonceStatus.PUBLISHED);
 
-        AnnonceResponse annonce2 = new AnnonceResponse();
-        annonce2.setId(2L);
-        annonce2.setTitle("Annonce B");
-
-        Page<AnnonceResponse> page = new PageImpl<>(List.of(annonce1, annonce2), PageRequest.of(0, 20), 2);
-
-        when(annonceService.list(
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(page);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID)
-                .param("sort", "title,asc"))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")
+                .param("sort", "title,asc")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(2)))
             .andExpect(jsonPath("$.content[0].title").value("Annonce A"))
@@ -399,20 +282,30 @@ class AnnonceControllerTest {
 
     @Test
     void list_EmptyResult_Returns200WithEmptyPage() throws Exception {
-        Page<AnnonceResponse> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
-
-        when(annonceService.list(
-            isNull(),
-            isNull(),
-            isNull(),
-            isNull(),
-            any(Pageable.class)
-        )).thenReturn(emptyPage);
-
-        mockMvc.perform(get("/api/v1/annonces")
-                .header("X-Org-Id", ORG_ID))
+        mockMvc.perform(withHeaders(get("/api/v1/annonces")))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.content", hasSize(0)))
             .andExpect(jsonPath("$.totalElements").value(0));
+    }
+
+    // -------------------------------------------------------------------------
+    // Helper methods
+    // -------------------------------------------------------------------------
+
+    private Annonce createAnnonce(String orgId) {
+        return createAnnonce(orgId, "Test Annonce", AnnonceStatus.DRAFT);
+    }
+
+    private Annonce createAnnonce(String orgId, String title, AnnonceStatus status) {
+        Annonce annonce = new Annonce();
+        annonce.setOrgId(orgId);
+        annonce.setTitle(title);
+        annonce.setDescription("Test Description");
+        annonce.setCategory("Electronics");
+        annonce.setCity("Paris");
+        annonce.setPrice(BigDecimal.valueOf(100.00));
+        annonce.setCurrency("EUR");
+        annonce.setStatus(status);
+        return annonceRepository.save(annonce);
     }
 }
