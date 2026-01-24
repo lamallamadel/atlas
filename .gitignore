@@ -438,3 +438,6 @@ run-maven-java17.cmd
 setup-java17-env.ps1
 backend/setup-and-build.ps1
 backend/run-maven-install.js
+
+# Agent-created setup script (current session)
+setup-repo-packages.ps1

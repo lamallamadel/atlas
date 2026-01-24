@@ -82,8 +82,8 @@ public class DossierService {
                 throw new EntityNotFoundException("Annonce not found with id: " + request.getAnnonceId());
             }
 
-            if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {
-                throw new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce");
+            if (annonce.getStatus() == AnnonceStatus.ARCHIVED || annonce.getStatus() == AnnonceStatus.DRAFT) {
+                throw new IllegalArgumentException("Cannot create dossier with ARCHIVED or DRAFT annonce");
             }
         }
 
