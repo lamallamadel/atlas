@@ -78,8 +78,6 @@ class WhatsAppWebhookSignatureValidatorTest {
 
     @Test
     void validateSignature_ReturnsFalse_ForNullPayload() {
-        when(providerConfigRepository.findByOrgId(orgId)).thenReturn(Optional.of(config));
-
         boolean result = validator.validateSignature(null, "sha256=signature", orgId);
 
         assertFalse(result);
@@ -87,8 +85,6 @@ class WhatsAppWebhookSignatureValidatorTest {
 
     @Test
     void validateSignature_ReturnsFalse_ForNullSignature() {
-        when(providerConfigRepository.findByOrgId(orgId)).thenReturn(Optional.of(config));
-
         boolean result = validator.validateSignature(payload, null, orgId);
 
         assertFalse(result);
