@@ -20,6 +20,17 @@ spring:
       max-lifetime: ${HIKARI_MAX_LIFETIME:1800000}
       leak-detection-threshold: ${HIKARI_LEAK_DETECTION_THRESHOLD:60000}
       pool-name: ${HIKARI_POOL_NAME:BackendHikariPool}
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
   data:
     redis:
       host: ${REDIS_HOST:localhost}
