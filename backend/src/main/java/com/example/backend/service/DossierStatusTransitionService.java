@@ -28,7 +28,7 @@ public class DossierStatusTransitionService {
     private final ActivityService activityService;
     private final Map<DossierStatus, Set<DossierStatus>> allowedTransitions;
 
-    public DossierStatusTransitionService(DossierStatusHistoryRepository historyRepository, 
+    public DossierStatusTransitionService(DossierStatusHistoryRepository historyRepository,
                                          MetricsService metricsService,
                                          ActivityService activityService) {
         this.historyRepository = historyRepository;
@@ -40,10 +40,10 @@ public class DossierStatusTransitionService {
     /**
      * Initializes basic status transition rules that apply to all dossiers.
      * These rules are always enforced, regardless of whether caseType is set.
-     * 
+     *
      * When caseType is null, ONLY these rules apply (workflow validation bypassed).
      * When caseType is set, these rules AND custom workflow rules both apply.
-     * 
+     *
      * Transition Map:
      * - NEW: Can go to QUALIFYING (start qualification), QUALIFIED (pre-qualified client),
      *        APPOINTMENT (direct scheduling), or LOST (client not interested)
@@ -127,7 +127,7 @@ public class DossierStatusTransitionService {
         logStatusChangeActivity(dossier, fromStatus, toStatus, userId, reason);
     }
 
-    private void logStatusChangeActivity(Dossier dossier, DossierStatus fromStatus, DossierStatus toStatus, 
+    private void logStatusChangeActivity(Dossier dossier, DossierStatus fromStatus, DossierStatus toStatus,
                                          String userId, String reason) {
         if (activityService != null) {
             try {
@@ -137,7 +137,7 @@ public class DossierStatusTransitionService {
                 }
 
                 Map<String, Object> metadata = new HashMap<>();
-                metadata.put("fromStatus", fromStatus.name());
+                metadata.put("fromStatus", fromStatus != null ? fromStatus.name() : "NONE");
                 metadata.put("toStatus", toStatus.name());
                 metadata.put("userId", userId);
                 if (reason != null) {
@@ -152,7 +152,7 @@ public class DossierStatusTransitionService {
                     metadata
                 );
             } catch (Exception e) {
-                logger.warn("Failed to log status change activity for dossier {}: {}", 
+                logger.warn("Failed to log status change activity for dossier {}: {}",
                     dossier.getId(), e.getMessage(), e);
             }
         }
