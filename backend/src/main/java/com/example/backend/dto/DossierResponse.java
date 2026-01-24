@@ -26,6 +26,9 @@ public class DossierResponse {
     @Schema(description = "Lead phone number", example = "+33612345678", nullable = true)
     private String leadPhone;
 
+    @Schema(description = "Lead email address", example = "john.doe@example.com", nullable = true)
+    private String leadEmail;
+
     @Schema(description = "Lead name", example = "John Doe", nullable = true)
     private String leadName;
 
@@ -115,6 +118,14 @@ public class DossierResponse {
 
     public void setLeadPhone(String leadPhone) {
         this.leadPhone = leadPhone;
+    }
+
+    public String getLeadEmail() {
+        return leadEmail;
+    }
+
+    public void setLeadEmail(String leadEmail) {
+        this.leadEmail = leadEmail;
     }
 
     public String getLeadName() {
