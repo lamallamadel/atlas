@@ -90,10 +90,12 @@ public class DossierService {
         Dossier dossier = dossierMapper.toEntityWithoutParties(request);
         dossier.setOrgId(orgId);
 
-        statusCodeValidationService.validateCaseType(dossier.getCaseType());
-        statusCodeValidationService.validateStatusCodeForCaseType(
-                dossier.getCaseType(), 
-                dossier.getStatusCode());
+        if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
+            statusCodeValidationService.validateCaseType(dossier.getCaseType());
+            statusCodeValidationService.validateStatusCodeForCaseType(
+                    dossier.getCaseType(), 
+                    dossier.getStatusCode());
+        }
 
         LocalDateTime now = LocalDateTime.now();
         dossier.setCreatedAt(now);
