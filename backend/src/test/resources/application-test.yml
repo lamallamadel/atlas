@@ -47,6 +47,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: mock
+  cache:
+    type: none
 
 keycloak:
   admin:
