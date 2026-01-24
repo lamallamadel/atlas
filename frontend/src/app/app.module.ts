@@ -62,7 +62,7 @@ import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog
 import { AppointmentFormDialogComponent } from './components/appointment-form-dialog.component';
 import { BulkOperationDialogComponent } from './components/bulk-operation-dialog.component';
 import { ReportsDashboardComponent } from './components/reports-dashboard.component';
-import { DatetimePickerComponent } from './components/datetime-picker.component';
+import DatetimePickerComponent from './components/datetime-picker.component';
 import { GlobalSearchBarComponent } from './components/global-search-bar.component';
 import { SearchComponent } from './pages/search/search.component';
 import { ActivityTimelineComponent } from './components/activity-timeline.component';
@@ -228,7 +228,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
       useClass: CorrelationIdInterceptor,
       multi: true
     },
-    
+
   ],
   bootstrap: [AppComponent]
 })

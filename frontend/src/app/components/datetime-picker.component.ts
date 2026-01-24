@@ -39,7 +39,7 @@ import { Subject, takeUntil } from 'rxjs';
     }
   ]
 })
-export class DatetimePickerComponent
+class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy
 {
   @Input() label = 'Date et heure';
@@ -52,8 +52,8 @@ export class DatetimePickerComponent
   private pendingValue: string | null = null;
 
   private destroy$ = new Subject<void>();
-  private onChange: (value: string) => void = () => {};
-  private onTouched: () => void = () => {};
+  private onChange: (value: string) => void = (value) => {console.log("value changed new value : $" , value)};
+  private onTouched: () => void = () => {console.log("Touched");};
 
   constructor(private fb: FormBuilder) {}
 
@@ -186,3 +186,5 @@ export class DatetimePickerComponent
     return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
   }
 }
+
+export default DatetimePickerComponent

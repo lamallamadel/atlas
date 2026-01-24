@@ -1,16 +1,16 @@
 /**
  * Reporting API Service
- * 
+ *
  * This service provides reporting and export functionality with lazy-loaded dependencies.
- * 
+ *
  * Export methods use dynamic imports to load jsPDF and PapaParse only when needed,
  * reducing the initial bundle size by ~600KB.
- * 
+ *
  * Example usage:
  * ```typescript
  * // In a component
  * constructor(private reportingService: ReportingApiService) {}
- * 
+ *
  * async exportReport() {
  *   const data = await this.reportingService.getAnalyticsData().toPromise();
  *   await this.reportingService.exportAnalyticsToPDF(data);
@@ -165,11 +165,11 @@ export class ReportingApiService {
   private downloadFile(blob: Blob, filename: string): void {
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
-    
+
     link.setAttribute('href', url);
     link.setAttribute('download', filename);
     link.style.visibility = 'hidden';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -237,40 +237,40 @@ export class ReportingApiService {
     if (orgId) {
       params = params.set('orgId', orgId);
     }
-    return this.http.get(`${this.apiUrl}/observability/metrics/export`, { 
-      params, 
-      responseType: 'blob' 
+    return this.http.get(`${this.apiUrl}/observability/metrics/export`, {
+      params,
+      responseType: 'blob'
     });
   }
 
   /**
    * Export analytics data to PDF using lazy-loaded jsPDF library.
-   * 
+   *
    * The jsPDF and jspdf-autotable libraries (~500KB total) are loaded on-demand
    * to avoid bloating the initial bundle.
-   * 
+   *
    * @param data - Analytics data to export
    * @param filename - Name of the PDF file (default: 'analytics-report.pdf')
    * @returns Promise that resolves when the PDF is downloaded
-   * 
+   *
    * @example
    * ```typescript
    * const data = await this.reportingService.getAnalyticsData().toPromise();
    * await this.reportingService.exportAnalyticsToPDF(data, 'my-report.pdf');
    * ```
    */
-  async exportAnalyticsToPDF(data: AnalyticsData, filename: string = 'analytics-report.pdf'): Promise<void> {
+  async exportAnalyticsToPDF(data: AnalyticsData, filename = 'analytics-report.pdf'): Promise<void> {
     const [jsPDFModule] = await Promise.all([
       import('jspdf'),
       import('jspdf-autotable')
     ]);
-    
+
     const { jsPDF: JsPDFClass } = jsPDFModule;
     const doc = new JsPDFClass();
 
     doc.setFontSize(18);
     doc.text('Analytics Report', 14, 20);
-    
+
     doc.setFontSize(11);
     doc.text(`Date Range: ${data.dateRange.from} to ${data.dateRange.to}`, 14, 30);
 
@@ -356,21 +356,21 @@ export class ReportingApiService {
 
   /**
    * Export analytics data to CSV using lazy-loaded PapaParse library.
-   * 
+   *
    * The PapaParse library (~100KB) is loaded on-demand to avoid bloating
    * the initial bundle.
-   * 
+   *
    * @param data - Analytics data to export
    * @param filename - Name of the CSV file (default: 'analytics-report.csv')
    * @returns Promise that resolves when the CSV is downloaded
-   * 
+   *
    * @example
    * ```typescript
    * const data = await this.reportingService.getAnalyticsData().toPromise();
    * await this.reportingService.exportAnalyticsToCSV(data, 'my-report.csv');
    * ```
    */
-  async exportAnalyticsToCSV(data: AnalyticsData, filename: string = 'analytics-report.csv'): Promise<void> {
+  async exportAnalyticsToCSV(data: AnalyticsData, filename = 'analytics-report.csv'): Promise<void> {
     const Papa = await import('papaparse');
 
     const csvSections: string[] = [];
@@ -429,17 +429,17 @@ export class ReportingApiService {
 
   /**
    * Export KPI report data to PDF using lazy-loaded jsPDF library.
-   * 
+   *
    * @param data - KPI report data to export
    * @param filename - Name of the PDF file (default: 'kpi-report.pdf')
    * @returns Promise that resolves when the PDF is downloaded
    */
-  async exportKpiReportToPDF(data: KpiReportResponse, filename: string = 'kpi-report.pdf'): Promise<void> {
+  async exportKpiReportToPDF(data: KpiReportResponse, filename = 'kpi-report.pdf'): Promise<void> {
     const [jsPDFModule] = await Promise.all([
       import('jspdf'),
       import('jspdf-autotable')
     ]);
-    
+
     const { jsPDF: JsPDFClass } = jsPDFModule;
     const doc = new JsPDFClass();
 
@@ -485,12 +485,12 @@ export class ReportingApiService {
 
   /**
    * Export KPI report data to CSV using lazy-loaded PapaParse library.
-   * 
+   *
    * @param data - KPI report data to export
    * @param filename - Name of the CSV file (default: 'kpi-report.csv')
    * @returns Promise that resolves when the CSV is downloaded
    */
-  async exportKpiReportToCSV(data: KpiReportResponse, filename: string = 'kpi-report.csv'): Promise<void> {
+  async exportKpiReportToCSV(data: KpiReportResponse, filename = 'kpi-report.csv'): Promise<void> {
     const Papa = await import('papaparse');
 
     const csvSections: string[] = [];

@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { DatetimePickerComponent } from './datetime-picker.component';
+import DatetimePickerComponent from './datetime-picker.component';
 import { CommonModule } from '@angular/common';
 
 describe('DatetimePickerComponent', () => {

@@ -1,5 +1,5 @@
 <#
-Atlas Dev Dashboard (v1.3.0)
+Atlas Dev Dashboard (v1.5.7)
 - WPF GUI to operate dev environment and CI toolkits
 - Auto-discovers repo commands (dev*/mak*/setup*/run*/mvn*/maven*, package.json scripts, docker-compose files, Maven, Spring profiles, Playwright project names)
 - Observability links inferred from runbooks if possible; falls back to standard localhost endpoints
@@ -74,11 +74,30 @@ function New-Action([string]$Category,[string]$Title,[string]$Command,[string]$A
 
 function To-Array {
   param([object]$Value)
+
   if ($null -eq $Value) { return @() }
-  if ($Value -is [string]) { return @($Value) }
+
+  # Strings are IEnumerable but must be treated as scalar
+  if ($Value -is [string]) { return ,$Value }
+
+  # Already an array
   if ($Value -is [System.Array]) { return $Value }
-  try { return @($Value) } catch { return @($Value) }
+
+  # Generic lists / IEnumerable -> materialize to object[]
+  if ($Value -is [System.Collections.IEnumerable]) {
+    try {
+      $list = New-Object System.Collections.Generic.List[object]
+      foreach ($x in $Value) { $list.Add($x) | Out-Null }
+      return $list.ToArray()
+    } catch {
+      # fallback: single item
+      return ,$Value
+    }
+  }
+
+  return ,$Value
 }
+
 
 # ----------------------------
 # Discovery
@@ -497,13 +516,15 @@ function Start-Action([object]$Action) {
 [xml]$xaml = @'
 <Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:shell="clr-namespace:System.Windows.Shell;assembly=PresentationFramework"
         Title="Atlas Dev Dashboard" Height="820" Width="1280"
-        WindowStartupLocation="CenterScreen" Background="#0B1220" Foreground="#E5E7EB" WindowStyle="SingleBorderWindow" ResizeMode="CanResize" ShowInTaskbar="True">
+        WindowStartupLocation="CenterScreen" Background="#0B1220" Foreground="#E5E7EB" WindowStyle="None" ResizeMode="CanResize" ShowInTaskbar="True">
   <Window.Resources>
     <SolidColorBrush x:Key="Surface"  Color="#111827"/>
     <SolidColorBrush x:Key="Surface2" Color="#0F172A"/>
     <SolidColorBrush x:Key="Border"   Color="#243041"/>
     <SolidColorBrush x:Key="Muted"    Color="#9CA3AF"/>
+    <SolidColorBrush x:Key="Accent"   Color="#22C55E"/>
 
     <Style TargetType="Button">
       <Setter Property="Margin" Value="6"/>
@@ -574,6 +595,42 @@ function Start-Action([object]$Action) {
       <Setter Property="BorderThickness" Value="1"/>
     </Style>
 
+    <Style TargetType="ToggleButton">
+      <Setter Property="Margin" Value="6"/>
+      <Setter Property="Padding" Value="10,8"/>
+      <Setter Property="Background" Value="{StaticResource Surface2}"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+      <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="ToggleButton">
+            <Border x:Name="Bd" CornerRadius="10" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" TextElement.Foreground="{TemplateBinding Foreground}"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="#111E35"/>
+                <Setter TargetName="Bd" Property="BorderBrush" Value="#3B4A63"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="#0B1220"/>
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter TargetName="Bd" Property="Background" Value="#0B1B33"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.55"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+
     <Style TargetType="Label">
       <Setter Property="Foreground" Value="#E5E7EB"/>
     </Style>
@@ -598,7 +655,8 @@ function Start-Action([object]$Action) {
       <Setter Property="Padding" Value="10,6"/>
     </Style>
 <Style TargetType="GroupBox">
-      <Setter Property="Margin" Value="10"/>
+            <Setter Property="Foreground" Value="#E5E7EB"/>
+<Setter Property="Margin" Value="10"/>
       <Setter Property="Padding" Value="10"/>
       <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
       <Setter Property="BorderThickness" Value="1"/>
@@ -606,32 +664,74 @@ function Start-Action([object]$Action) {
 
     <Style TargetType="TextBlock">
       <Setter Property="Margin" Value="4,2"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
     </Style>
 
-    <Style x:Key="NavButton" TargetType="Button">
+    <Style x:Key="NavButton" TargetType="ToggleButton">
       <Setter Property="Margin" Value="6,6"/>
       <Setter Property="Padding" Value="12,10"/>
       <Setter Property="Background" Value="#0F172A"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
       <Setter Property="BorderBrush" Value="{StaticResource Border}"/>
       <Setter Property="MinWidth" Value="0"/>
       <Setter Property="HorizontalContentAlignment" Value="Left"/>
       <Setter Property="Template">
         <Setter.Value>
-          <ControlTemplate TargetType="Button">
-            <Border CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
+          <ControlTemplate TargetType="ToggleButton">
+            <Border x:Name="Bd" CornerRadius="12" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1">
               <Grid Margin="10,6">
                 <Grid.ColumnDefinitions>
                   <ColumnDefinition Width="30"/>
                   <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="{TemplateBinding Tag}" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
-                <ContentPresenter Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0"/>
+                <TextBlock x:Name="Icon" Text="{TemplateBinding Tag}" FontFamily="Segoe MDL2 Assets" FontSize="16" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
+                <TextBlock x:Name="Txt" Grid.Column="1" Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" Margin="10,0,0,0"/>
               </Grid>
             </Border>
             <ControlTemplate.Triggers>
               <Trigger Property="IsMouseOver" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="#111E35"/>
+                <Setter TargetName="Bd" Property="BorderBrush" Value="#3B4A63"/>
+              </Trigger>
+              <Trigger Property="IsPressed" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="#0B1220"/>
+              </Trigger>
+              <Trigger Property="IsChecked" Value="True">
+                <Setter TargetName="Bd" Property="Background" Value="#0B1B33"/>
+                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
+                <Setter TargetName="Icon" Property="Foreground" Value="{StaticResource Accent}"/>
+                <Setter Property="Foreground" Value="#E5E7EB"/>
+              </Trigger>
+              <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.55"/>
+              </Trigger>
+            </ControlTemplate.Triggers>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+    </Style>
+
+    <Style x:Key="TitleBarButton" TargetType="Button">
+      <Setter Property="Width" Value="44"/>
+      <Setter Property="Height" Value="32"/>
+      <Setter Property="Margin" Value="2,0"/>
+      <Setter Property="Padding" Value="0"/>
+      <Setter Property="Background" Value="Transparent"/>
+      <Setter Property="Foreground" Value="#E5E7EB"/>
+      <Setter Property="BorderBrush" Value="Transparent"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="FontFamily" Value="Segoe MDL2 Assets"/>
+      <Setter Property="FontSize" Value="12"/>
+      <Setter Property="Cursor" Value="Hand"/>
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border CornerRadius="8" Background="{TemplateBinding Background}">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            </Border>
+            <ControlTemplate.Triggers>
+              <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="#111E35"/>
-                <Setter Property="BorderBrush" Value="#3B4A63"/>
               </Trigger>
               <Trigger Property="IsPressed" Value="True">
                 <Setter Property="Background" Value="#0B1220"/>
@@ -641,26 +741,55 @@ function Start-Action([object]$Action) {
         </Setter.Value>
       </Setter>
     </Style>
+
+    <Style x:Key="TitleBarCloseButton" TargetType="Button" BasedOn="{StaticResource TitleBarButton}">
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Background" Value="#B91C1C"/>
+        </Trigger>
+        <Trigger Property="IsPressed" Value="True">
+          <Setter Property="Background" Value="#7F1D1D"/>
+        </Trigger>
+      </Style.Triggers>
+    </Style>
   </Window.Resources>
 
+  <shell:WindowChrome.WindowChrome>
+    <shell:WindowChrome CaptionHeight="44" ResizeBorderThickness="6" CornerRadius="0" GlassFrameThickness="0" UseAeroCaptionButtons="False"/>
+  </shell:WindowChrome.WindowChrome>
+
+  <Grid>
   <DockPanel LastChildFill="True">
-    <Border DockPanel.Dock="Top" Background="#071025" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="12">
+
+    <!-- Custom Title Bar -->
+    <Border x:Name="TitleBar" DockPanel.Dock="Top" Background="#071025" BorderBrush="{StaticResource Border}" BorderThickness="0,0,0,1" Padding="10">
       <Grid>
         <Grid.ColumnDefinitions>
           <ColumnDefinition Width="*"/>
           <ColumnDefinition Width="Auto"/>
+          <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Orientation="Vertical">
-          <TextBlock Text="Atlas Dev Dashboard" FontSize="18" FontWeight="SemiBold"/>
+
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+          <TextBlock Text="Atlas Dev Dashboard" FontSize="16" FontWeight="SemiBold"/>
           <TextBlock Text="Operations, Observability, Toolkits and Guide - auto-discovered from your repository" Foreground="{StaticResource Muted}"/>
         </StackPanel>
-        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+
+        <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+          <Button x:Name="BtnCmdPalette" Content="Command Palette (Ctrl+K)"/>
           <Button x:Name="BtnReload" Content="Reload"/>
           <Button x:Name="BtnClear" Content="Clear Output"/>
           <Button x:Name="BtnStop" Content="Stop Current"/>
         </StackPanel>
+
+        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+          <Button x:Name="BtnMin" Style="{StaticResource TitleBarButton}" Content="&#xE921;" ToolTip="Minimize"/>
+          <Button x:Name="BtnMax" Style="{StaticResource TitleBarButton}" Content="&#xE922;" ToolTip="Maximize / Restore"/>
+          <Button x:Name="BtnClose" Style="{StaticResource TitleBarCloseButton}" Content="&#xE8BB;" ToolTip="Close"/>
+        </StackPanel>
       </Grid>
     </Border>
+
 
     <Border DockPanel.Dock="Bottom" Background="#071025" BorderBrush="{StaticResource Border}" BorderThickness="0,1,0,0" Padding="10">
       <Grid>
@@ -691,15 +820,15 @@ function Start-Action([object]$Action) {
 
           <ScrollViewer VerticalScrollBarVisibility="Auto">
             <StackPanel Margin="8">
-              <Button x:Name="NavDashboard"     Style="{StaticResource NavButton}" Tag="&#xE80F;" Content="Dashboard"/>
-              <Button x:Name="NavOperations"    Style="{StaticResource NavButton}" Tag="&#xE7C1;" Content="Operations"/>
-              <Button x:Name="NavToolkits"      Style="{StaticResource NavButton}" Tag="&#xE8B7;" Content="Toolkits"/>
-              <Button x:Name="NavBackend"       Style="{StaticResource NavButton}" Tag="&#xE943;" Content="Backend"/>
-              <Button x:Name="NavFrontend"      Style="{StaticResource NavButton}" Tag="&#xE7C3;" Content="Frontend"/>
-              <Button x:Name="NavObservability" Style="{StaticResource NavButton}" Tag="&#xE9D9;" Content="Observability"/>
-              <Button x:Name="NavGuide"         Style="{StaticResource NavButton}" Tag="&#xE8A5;" Content="Guide"/>
+              <ToggleButton x:Name="NavDashboard"     Style="{StaticResource NavButton}" Tag="&#xE80F;" Content="Dashboard" IsChecked="True"/>
+              <ToggleButton x:Name="NavOperations"    Style="{StaticResource NavButton}" Tag="&#xE7C1;" Content="Operations"/>
+              <ToggleButton x:Name="NavToolkits"      Style="{StaticResource NavButton}" Tag="&#xE8B7;" Content="Toolkits"/>
+              <ToggleButton x:Name="NavBackend"       Style="{StaticResource NavButton}" Tag="&#xE943;" Content="Backend"/>
+              <ToggleButton x:Name="NavFrontend"      Style="{StaticResource NavButton}" Tag="&#xE7C3;" Content="Frontend"/>
+              <ToggleButton x:Name="NavObservability" Style="{StaticResource NavButton}" Tag="&#xE9D9;" Content="Observability"/>
+              <ToggleButton x:Name="NavGuide"         Style="{StaticResource NavButton}" Tag="&#xE8A5;" Content="Guide"/>
               <Separator Margin="8"/>
-              <Button x:Name="NavSettings"      Style="{StaticResource NavButton}" Tag="&#xE713;" Content="Settings"/>
+              <ToggleButton x:Name="NavSettings"      Style="{StaticResource NavButton}" Tag="&#xE713;" Content="Settings"/>
             </StackPanel>
           </ScrollViewer>
         </DockPanel>
@@ -968,11 +1097,110 @@ function Start-Action([object]$Action) {
       </Grid>
     </Grid>
   </DockPanel>
+
+  <!-- Command Palette Overlay -->
+  <Border x:Name="CmdOverlay" Background="#A6000000" Visibility="Collapsed">
+    <Grid VerticalAlignment="Center" HorizontalAlignment="Center" Width="920" MaxWidth="920">
+      <Border Background="{StaticResource Surface}" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="18" Padding="14">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+          </Grid.RowDefinitions>
+
+          <StackPanel Grid.Row="0">
+            <TextBlock Text="Command Palette" FontSize="16" FontWeight="SemiBold"/>
+            <TextBlock Text="Fuzzy search + categories + recent commands. Works on actions, links, Spring profiles and Playwright projects." Foreground="{StaticResource Muted}"/>
+            <Grid Margin="0,10,0,8">
+              <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="220"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+              </Grid.ColumnDefinitions>
+              <TextBox x:Name="TxtCmdSearch" MinHeight="34" Margin="0,0,10,0"/>
+              <ComboBox x:Name="CmbCmdCategory" Grid.Column="1" MinHeight="34" Margin="0,0,10,0"/>
+              <ToggleButton x:Name="TglCmdRecent" Grid.Column="2" Content="Recent" MinWidth="90" Margin="0,0,10,0"/>
+              <Button x:Name="BtnCmdClearRecent" Grid.Column="3" Content="Clear" MinWidth="80"/>
+            </Grid>
+          </StackPanel>
+
+          <ListBox Grid.Row="1" x:Name="LstCmdResults" Background="{StaticResource Surface2}" BorderBrush="{StaticResource Border}" BorderThickness="1" Margin="0,6,0,6">
+            <ListBox.ItemTemplate>
+              <DataTemplate>
+                <Grid Margin="8,6">
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="140"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="130"/>
+                  </Grid.ColumnDefinitions>
+                  <Border Grid.Column="0" Background="#0B1220" BorderBrush="{StaticResource Border}" BorderThickness="1" CornerRadius="10" Padding="8,4" Margin="0,0,10,0">
+                    <TextBlock Text="{Binding Category}" Foreground="{StaticResource Muted}" FontSize="12"/>
+                  </Border>
+                  <StackPanel Grid.Column="1">
+                    <TextBlock Text="{Binding Title}" FontSize="13" FontWeight="SemiBold"/>
+                    <TextBlock Text="{Binding Hint}" Foreground="{StaticResource Muted}" TextTrimming="CharacterEllipsis"/>
+                  </StackPanel>
+                  <TextBlock Grid.Column="2" Text="{Binding Shortcut}" Foreground="{StaticResource Muted}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="10,0,0,0"/>
+                </Grid>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+
+          <DockPanel Grid.Row="2" LastChildFill="False" Margin="0,6,0,0">
+            <TextBlock x:Name="TxtCmdHint" Text="Ctrl+K: open | Enter: run | Esc: close | Alt+1..7: navigate | ↑↓: navigate" Foreground="{StaticResource Muted}" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" DockPanel.Dock="Right">
+              <Button x:Name="BtnCmdRun" Content="Run" MinWidth="90"/>
+              <Button x:Name="BtnCmdClose" Content="Close" MinWidth="90"/>
+            </StackPanel>
+          </DockPanel>
+        </Grid>
+      </Border>
+    </Grid>
+  </Border>
+</Grid>
 </Window>
+
 '@
 
-$reader = New-Object System.Xml.XmlNodeReader $xaml
-$window = [Windows.Markup.XamlReader]::Load($reader)
+function New-WindowFromXaml([xml]$XamlDoc) {
+  $reader = New-Object System.Xml.XmlNodeReader $XamlDoc
+  return [Windows.Markup.XamlReader]::Load($reader)
+}
+
+function Get-FallbackXamlDoc([xml]$XamlDoc) {
+  # Fallback: remove WindowChrome if the platform cannot instantiate it.
+  $raw = $XamlDoc.OuterXml
+
+  # Remove WindowChrome block and shell namespace
+  $raw = [regex]::Replace($raw, '(?s)<shell:WindowChrome\.WindowChrome>.*?</shell:WindowChrome\.WindowChrome>', '')
+  $raw = [regex]::Replace($raw, '\s+xmlns:shell="[^"]+"', '')
+
+  # Restore standard window chrome
+  $raw = $raw -replace 'WindowStyle="None"', 'WindowStyle="SingleBorderWindow"'
+  $raw = $raw -replace 'ResizeMode="CanResizeWithGrip"', 'ResizeMode="CanResize"'
+
+  # Ensure a readable foreground in case theme resources fail
+  if ($raw -notmatch 'Foreground="#') {
+    $raw = $raw -replace '<Window ', '<Window Foreground="#E5E7EB" '
+  }
+
+  try { return ([xml]$raw) } catch { return $XamlDoc }
+}
+
+try {
+  $window = New-WindowFromXaml $xaml
+} catch {
+  # If the failure looks like WindowChrome / missing type, retry without custom chrome
+  $msg = $_.Exception.Message
+  if ($msg -match 'WindowChrome' -or $msg -match 'type inconnu' -or $msg -match 'unknown type') {
+    $xaml2 = Get-FallbackXamlDoc $xaml
+    $window = New-WindowFromXaml $xaml2
+  } else {
+    throw
+  }
+}
 
 function Get-Control([string]$Name) { $window.FindName($Name) }
 
@@ -985,6 +1213,23 @@ $TxtSearch    = Get-Control "TxtSearch"
 $BtnReload    = Get-Control "BtnReload"
 $BtnClear     = Get-Control "BtnClear"
 $BtnStop      = Get-Control "BtnStop"
+$BtnMin      = Get-Control "BtnMin"
+$BtnMax      = Get-Control "BtnMax"
+$BtnClose    = Get-Control "BtnClose"
+$TitleBar    = Get-Control "TitleBar"
+
+$BtnCmdPalette = Get-Control "BtnCmdPalette"
+$CmdOverlay   = Get-Control "CmdOverlay"
+$TxtCmdSearch = Get-Control "TxtCmdSearch"
+$LstCmdResults = Get-Control "LstCmdResults"
+$TxtCmdHint   = Get-Control "TxtCmdHint"
+$BtnCmdRun    = Get-Control "BtnCmdRun"
+$BtnCmdClose  = Get-Control "BtnCmdClose"
+
+$CmbCmdCategory = Get-Control "CmbCmdCategory"
+$TglCmdRecent  = Get-Control "TglCmdRecent"
+$BtnCmdClearRecent = Get-Control "BtnCmdClearRecent"
+
 $BtnRunSelected = Get-Control "BtnRunSelected"
 
 $NavDashboard = Get-Control "NavDashboard"
@@ -1086,6 +1331,329 @@ function Show-View([string]$Name) {
   }
 }
 
+
+function Set-NavChecked([string]$Name) {
+  $map = @{
+    "Dashboard"     = $NavDashboard
+    "Operations"    = $NavOperations
+    "Toolkits"      = $NavToolkits
+    "Backend"       = $NavBackend
+    "Frontend"      = $NavFrontend
+    "Observability" = $NavObservability
+    "Guide"         = $NavGuide
+    "Settings"      = $NavSettings
+  }
+  foreach ($k in $map.Keys) {
+    try { $map[$k].IsChecked = ($k -eq $Name) } catch { }
+  }
+}
+
+function Get-HashString([string]$Text) {
+  try {
+    $sha1 = [System.Security.Cryptography.SHA1]::Create()
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($Text)
+    $hash  = $sha1.ComputeHash($bytes)
+    return ([System.BitConverter]::ToString($hash) -replace "-", "").ToLowerInvariant()
+  } catch {
+    return ([Guid]::NewGuid().ToString("N"))
+  }
+}
+
+function Get-CommandItemId($item) {
+  if ($null -eq $item) { return $null }
+  try {
+    if ($item.Type -eq "Link" -and $item.Url) { return "link|" + [string]$item.Url }
+    if ($item.Action) {
+      $src = ""
+      try { $src = [string]$item.Action.Source } catch { }
+      $k = ([string]$item.Action.Command) + "|" + ([string]$item.Action.Args) + "|" + ([string]$item.Action.WorkDir) + "|" + $src
+      return "action|" + (Get-HashString $k)
+    }
+  } catch { }
+  return "item|" + (Get-HashString ($item.Title + "|" + $item.Category + "|" + $item.Hint))
+}
+
+function Get-RecentStorePath {
+  try {
+    $dir = Join-Path $env:LOCALAPPDATA "AtlasDevConsole"
+    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir | Out-Null }
+    return (Join-Path $dir "recent.json")
+  } catch {
+    return (Join-Path $env:TEMP "AtlasDevConsole_recent.json")
+  }
+}
+
+function Load-RecentCommands {
+  $path = Get-RecentStorePath
+  $global:RecentStorePath = $path
+  $global:RecentCommands = @()
+  if (Test-Path $path) {
+    try {
+      $raw = Get-Content -Raw -Path $path
+      if ($raw) {
+        $data = $raw | ConvertFrom-Json
+        if ($data) { $global:RecentCommands = (To-Array $data) }
+      }
+    } catch { $global:RecentCommands = @() }
+  }
+  $seen = @{}
+  $out = New-Object System.Collections.Generic.List[object]
+  foreach ($r in $global:RecentCommands) {
+    if (-not $r) { continue }
+    $id = [string]$r.Id
+    if (-not $id) { continue }
+    if ($seen.ContainsKey($id)) { continue }
+    $seen[$id] = $true
+    $out.Add($r) | Out-Null
+    if ($out.Count -ge 20) { break }
+  }
+  $global:RecentCommands = $out.ToArray()
+}
+
+function Save-RecentCommands {
+  try {
+    $path = $global:RecentStorePath
+    if (-not $path) { $path = Get-RecentStorePath }
+    ($global:RecentCommands | ConvertTo-Json -Depth 5) | Set-Content -Path $path -Encoding UTF8
+  } catch { }
+}
+
+function Add-RecentCommand($item) {
+  if (-not $item) { return }
+  $id = Get-CommandItemId $item
+  if (-not $id) { return }
+
+  $entry = [PSCustomObject]@{
+    Id       = $id
+    Type     = [string]$item.Type
+    Category = [string]$item.Category
+    Title    = [string]$item.Title
+    Hint     = [string]$item.Hint
+    Url      = [string]$item.Url
+    When     = (Get-Date).ToString("s")
+  }
+
+  $list = New-Object System.Collections.Generic.List[object]
+  $list.Add($entry) | Out-Null
+  foreach ($r in (To-Array $global:RecentCommands)) {
+    if ($r -and [string]$r.Id -ne $id) { $list.Add($r) | Out-Null }
+  }
+  $global:RecentCommands = @($list.ToArray() | Select-Object -First 20)
+  Save-RecentCommands
+}
+
+function Get-FuzzyScore([string]$Text, [string]$Query) {
+  if (-not $Query) { return 0 }
+  if ($null -eq $Text) { $Text = "" }
+  $t = $Text.ToLowerInvariant()
+  if ($null -eq $Query) { $Query = "" }
+  $q = $Query.ToLowerInvariant()
+  if (-not $t -or -not $q) { return -1 }
+
+  if ($t.Contains($q)) { return 10000 - ($t.Length - $q.Length) }
+
+  $ti = 0
+  $score = 0
+  foreach ($ch in $q.ToCharArray()) {
+    $found = $false
+    while ($ti -lt $t.Length) {
+      if ($t[$ti] -eq $ch) { $score += 15; $ti++; $found = $true; break }
+      $score -= 1
+      $ti++
+    }
+    if (-not $found) { return -1 }
+  }
+  return $score
+}
+
+function Build-CommandCatalog {
+  Load-RecentCommands
+
+  $catalog = New-Object System.Collections.Generic.List[object]
+
+  foreach ($a in ($global:AllActions | Where-Object { $_ -and $_.Title })) {
+    $obj = [PSCustomObject]@{
+      Id       = $null
+      Type     = "Action"
+      Category = [string]$a.Category
+      Title    = [string]$a.Title
+      Hint     = ("Kind: " + [string]$a.Kind)
+      Shortcut = "Enter"
+      Action   = $a
+      Url      = $null
+    }
+    $obj.Id = Get-CommandItemId $obj
+    $catalog.Add($obj) | Out-Null
+  }
+
+  foreach ($l in (To-Array $global:Links)) {
+    if ($null -ne $l -and $l.PSObject.Properties.Match("Url").Count -gt 0) {
+      $obj = [PSCustomObject]@{
+        Id       = $null
+        Type     = "Link"
+        Category = "Link"
+        Title    = [string]$l.Title
+        Hint     = [string]$l.Url
+        Shortcut = "Enter"
+        Action   = $null
+        Url      = [string]$l.Url
+      }
+      $obj.Id = Get-CommandItemId $obj
+      $catalog.Add($obj) | Out-Null
+    }
+  }
+
+  $profiles = @()
+  try { $profiles = @(Discover-SpringProfiles $global:RepoRoot) } catch { $profiles = @() }
+  if ($global:MavenInfo -and $global:MavenInfo.MavenCmd) {
+    foreach ($p in $profiles) {
+      if (-not $p) { continue }
+      $args  = "spring-boot:run -Dspring-boot.run.profiles=$p -Dspring.profiles.active=$p"
+      $title = "Run backend (profile=" + $p + ")"
+      $act = New-Action "Backend" $title $global:MavenInfo.MavenCmd $args $global:MavenInfo.WorkDir $global:MavenInfo.Pom "Maven"
+      $obj = [PSCustomObject]@{
+        Id       = $null
+        Type     = "Action"
+        Category = "Backend"
+        Title    = $title
+        Hint     = "Spring profile shortcut"
+        Shortcut = "Enter"
+        Action   = $act
+        Url      = $null
+      }
+      $obj.Id = Get-CommandItemId $obj
+      $catalog.Add($obj) | Out-Null
+    }
+  }
+
+  $pw = @()
+  try { $pw = @(Discover-PlaywrightProjects $global:RepoRoot) } catch { $pw = @() }
+  $base = $null
+  try { $base = ($global:FrontendActions | Where-Object { $_.Title -match "npm run .*?(e2e|playwright)" } | Select-Object -First 1) } catch { $base = $null }
+
+  if ($base -and $pw.Count -gt 0) {
+    foreach ($proj in $pw) {
+      if (-not $proj) { continue }
+      $args = ($base.Args + " -- --project=" + $proj)
+      $title = ($base.Title + " (project=" + $proj + ")")
+      $act = New-Action "Frontend" $title $base.Command $args $base.WorkDir $base.Source "Npm"
+      $obj = [PSCustomObject]@{
+        Id       = $null
+        Type     = "Action"
+        Category = "Frontend"
+        Title    = $title
+        Hint     = "Playwright project shortcut"
+        Shortcut = "Enter"
+        Action   = $act
+        Url      = $null
+      }
+      $obj.Id = Get-CommandItemId $obj
+      $catalog.Add($obj) | Out-Null
+    }
+  }
+
+  $global:CommandCatalog = $catalog.ToArray()
+
+  $cats = @("All")
+  try { $cats += @($global:CommandCatalog | Select-Object -ExpandProperty Category -Unique | Sort-Object) } catch { }
+  $global:CommandCategories = $cats
+  try { $CmbCmdCategory.ItemsSource = $cats; $CmbCmdCategory.SelectedIndex = 0 } catch { }
+
+  $global:CatalogById = @{}
+  foreach ($it in $global:CommandCatalog) { if ($it -and $it.Id) { $global:CatalogById[[string]$it.Id] = $it } }
+}
+
+function Get-RecentCatalogItems {
+  $items = New-Object System.Collections.Generic.List[object]
+  foreach ($r in (To-Array $global:RecentCommands)) {
+    if (-not $r) { continue }
+    $id = [string]$r.Id
+    if (-not $id) { continue }
+    if ($global:CatalogById.ContainsKey($id)) {
+      $it = $global:CatalogById[$id]
+      $items.Add([PSCustomObject]@{
+        Id=$it.Id; Type=$it.Type; Category="Recent"; Title=$it.Title; Hint=$it.Hint; Shortcut=$it.Shortcut; Action=$it.Action; Url=$it.Url
+      }) | Out-Null
+    } elseif ($id.StartsWith("link|")) {
+      $url = $id.Substring(5)
+      $items.Add([PSCustomObject]@{ Id=$id; Type="Link"; Category="Recent"; Title=([string]$r.Title); Hint=$url; Shortcut="Enter"; Action=$null; Url=$url }) | Out-Null
+    }
+  }
+  return @($items)
+}
+
+function Refresh-CommandPalette([string]$Query) {
+  if (-not $global:CommandCatalog) { Build-CommandCatalog }
+
+  $q = ([string]$Query).Trim()
+  $cat = "All"
+  try { $cat = [string]$CmbCmdCategory.SelectedItem } catch { }
+  $recentOnly = $false
+  try { $recentOnly = ($TglCmdRecent.IsChecked -eq $true) } catch { }
+
+  $items = @()
+
+  if (-not $q) {
+    $items = Get-RecentCatalogItems
+    if (-not $recentOnly) { $items += @($global:CommandCatalog | Select-Object -First 40) }
+  } else {
+    $base = $global:CommandCatalog
+
+    if ($cat -and $cat -ne "All") { $base = @($base | Where-Object { $_.Category -eq $cat }) }
+
+    if ($recentOnly) {
+      $recentIds = @((To-Array $global:RecentCommands) | ForEach-Object { [string]$_.Id })
+      $base = @($base | Where-Object { $recentIds -contains [string]$_.Id })
+    }
+
+    $scored = foreach ($it in $base) {
+      $txt = ($it.Title + " " + $it.Category + " " + $it.Hint)
+      $s = Get-FuzzyScore $txt $q
+      if ($s -ge 0) { [PSCustomObject]@{ Score=$s; Item=$it } }
+    }
+
+    $items = @($scored | Sort-Object -Property Score -Descending | Select-Object -First 60 | ForEach-Object { $_.Item })
+  }
+
+  if ($cat -and $cat -ne "All" -and $items.Count -gt 0 -and $q -eq "") {
+    $items = @($items | Where-Object { $_.Category -eq "Recent" -or $_.Category -eq $cat } | Select-Object -First 60)
+  }
+
+  $LstCmdResults.ItemsSource = $items
+  if ($items.Count -gt 0) { $LstCmdResults.SelectedIndex = 0 }
+  $TxtCmdHint.Text = ("Ctrl+K: open | Enter: run | Esc: close | Results: " + $items.Count)
+}
+
+function Show-CommandPalette {
+  if (-not $global:CommandCatalog) { Build-CommandCatalog }
+  try { $CmbCmdCategory.SelectedIndex = 0 } catch { }
+  try { $TglCmdRecent.IsChecked = $false } catch { }
+  $CmdOverlay.Visibility = "Visible"
+  $TxtCmdSearch.Text = ""
+  Refresh-CommandPalette ""
+  $TxtCmdSearch.Focus() | Out-Null
+}
+
+function Hide-CommandPalette {
+  $CmdOverlay.Visibility = "Collapsed"
+  $TxtCmdSearch.Text = ""
+}
+
+function Clear-RecentCommands {
+  $global:RecentCommands = @()
+  Save-RecentCommands
+}
+
+function Run-CommandPaletteSelection {
+  $sel = $LstCmdResults.SelectedItem
+  if (-not $sel) { return }
+  Hide-CommandPalette
+  Add-RecentCommand $sel
+
+  if ($sel.Type -eq "Link" -and $sel.Url) { Safe-InvokeItem $sel.Url; return }
+  if ($sel.Action) { Start-Action $sel.Action; return }
+}
+
 function Update-Checks([string]$RepoRoot) {
   $checks = New-Object System.Collections.Generic.List[string]
   $checks.Add("Repo: " + $RepoRoot)
@@ -1141,10 +1709,10 @@ function Reload-All {
       $global:ComposeActions = $ca.ToArray()
     }
     elseif ($ca -is [System.Collections.IEnumerable] -and -not ($ca -is [string])) {
-      $global:ComposeActions = @($ca)
+      $global:ComposeActions = (To-Array $ca)
     }
     else {
-      $global:ComposeActions = @($ca)
+      $global:ComposeActions = (To-Array $ca)
     }
   } catch {
     $global:ComposeActions = @()
@@ -1164,8 +1732,8 @@ function Reload-All {
 
     if ($null -eq $ba) { $global:BackendActions = @() }
     elseif ($ba -is [System.Array]) { $global:BackendActions = $ba }
-    elseif ($ba -is [System.Collections.IEnumerable] -and -not ($ba -is [string])) { $global:BackendActions = @($ba) }
-    else { $global:BackendActions = @($ba) }
+    elseif ($ba -is [System.Collections.IEnumerable] -and -not ($ba -is [string])) { $global:BackendActions = (To-Array $ba) }
+    else { $global:BackendActions = (To-Array $ba) }
   } catch {
     $global:BackendActions = @()
     Append-Output ("[WARN] Maven action discovery failed: " + $_.Exception.Message)
@@ -1209,6 +1777,8 @@ function Reload-All {
   $global:QuickHealth  = ($global:Links | Where-Object { $_.Title -eq "Health" } | Select-Object -First 1)
   $global:QuickSwagger = ($global:Links | Where-Object { $_.Title -eq "Swagger UI" } | Select-Object -First 1)
 
+  Build-CommandCatalog
+
   Set-Status "Ready."
 }
 
@@ -1218,6 +1788,56 @@ function Reload-All {
 $BtnReload.Add_Click({ Reload-All })
 $BtnClear.Add_Click({ $TxtOutput.Clear(); $TxtHints.Clear() })
 $BtnStop.Add_Click({ Stop-Current })
+
+# Title bar window controls
+$BtnMin.Add_Click({ $window.WindowState = "Minimized" })
+$BtnMax.Add_Click({
+  if ($window.WindowState -eq "Maximized") { $window.WindowState = "Normal" }
+  else { $window.WindowState = "Maximized" }
+})
+$BtnClose.Add_Click({ $window.Close() })
+
+# Drag window from custom title bar (double click to maximize/restore)
+$TitleBar.Add_MouseLeftButtonDown({
+  param($s,$e)
+  if ($e.ClickCount -eq 2) {
+    if ($window.WindowState -eq "Maximized") { $window.WindowState = "Normal" }
+    else { $window.WindowState = "Maximized" }
+  } else {
+    try { $window.DragMove() } catch { }
+  }
+})
+
+
+# Command palette
+$BtnCmdPalette.Add_Click({
+  if ($CmdOverlay.Visibility -eq "Visible") { Hide-CommandPalette } else { Show-CommandPalette }
+})
+$BtnCmdRun.Add_Click({ Run-CommandPaletteSelection })
+$BtnCmdClose.Add_Click({ Hide-CommandPalette })
+
+$TxtCmdSearch.Add_TextChanged({ Refresh-CommandPalette $TxtCmdSearch.Text })
+
+$CmbCmdCategory.Add_SelectionChanged({ Refresh-CommandPalette $TxtCmdSearch.Text })
+$TglCmdRecent.Add_Click({ Refresh-CommandPalette $TxtCmdSearch.Text })
+$BtnCmdClearRecent.Add_Click({ Clear-RecentCommands; Refresh-CommandPalette $TxtCmdSearch.Text })
+$LstCmdResults.Add_MouseDoubleClick({ Run-CommandPaletteSelection })
+
+$window.Add_PreviewKeyDown({
+  param($s,$e)
+  $mods = [System.Windows.Input.Keyboard]::Modifiers
+  if (($mods -band [System.Windows.Input.ModifierKeys]::Control) -and $e.Key -eq "K") {
+    if ($CmdOverlay.Visibility -eq "Visible") { Hide-CommandPalette } else { Show-CommandPalette }
+    $e.Handled = $true
+    return
+  }
+  if ($CmdOverlay.Visibility -eq "Visible") {
+    if ($e.Key -eq "Escape") { Hide-CommandPalette; $e.Handled = $true; return }
+    if ($e.Key -eq "Enter")  { Run-CommandPaletteSelection; $e.Handled = $true; return }
+  }
+})
+
+
 $TxtSearch.Add_TextChanged({ Apply-Filter $TxtSearch.Text })
 
 $ListActions.Add_SelectionChanged({ Select-Action $ListActions.SelectedItem })
@@ -1314,16 +1934,17 @@ $BtnOpenInCode.Add_Click({
   else { Append-Output "[WARN] VS Code 'code' not found in PATH." }
 })
 
-$NavDashboard.Add_Click({ Show-View "Dashboard" })
-$NavOperations.Add_Click({ Show-View "Operations" })
-$NavToolkits.Add_Click({ Show-View "Toolkits" })
-$NavBackend.Add_Click({ Show-View "Backend" })
-$NavFrontend.Add_Click({ Show-View "Frontend" })
-$NavObservability.Add_Click({ Show-View "Observability" })
-$NavGuide.Add_Click({ Show-View "Guide" })
-$NavSettings.Add_Click({ Show-View "Settings" })
+$NavDashboard.Add_Click({ Set-NavChecked "Dashboard"; Show-View "Dashboard" })
+$NavOperations.Add_Click({ Set-NavChecked "Operations"; Show-View "Operations" })
+$NavToolkits.Add_Click({ Set-NavChecked "Toolkits"; Show-View "Toolkits" })
+$NavBackend.Add_Click({ Set-NavChecked "Backend"; Show-View "Backend" })
+$NavFrontend.Add_Click({ Set-NavChecked "Frontend"; Show-View "Frontend" })
+$NavObservability.Add_Click({ Set-NavChecked "Observability"; Show-View "Observability" })
+$NavGuide.Add_Click({ Set-NavChecked "Guide"; Show-View "Guide" })
+$NavSettings.Add_Click({ Set-NavChecked "Settings"; Show-View "Settings" })
 
 # Init
+Set-NavChecked "Dashboard"
 $TxtRepo.Text = $global:RepoRoot
 Reload-All
 Show-View "Dashboard"

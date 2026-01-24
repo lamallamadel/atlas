@@ -189,7 +189,7 @@ export class AuthService {
     try {
       const payload = this.decodeToken(token);
       const direct = Array.isArray(payload.roles) ? payload.roles : [];
-      const realm = Array.isArray(payload.realm_access?.roles) ? payload.realm_access?.roles! : [];
+      const realm = Array.isArray(payload.realm_access?.roles) ? payload.realm_access?.roles : [];
 
       const clientId = environment.oidc.clientId;
       const clientRoles = payload.resource_access?.[clientId]?.roles || [];
