@@ -325,12 +325,9 @@ public class AnnonceControllerTestConfiguration {
             }
             
             log.debug("Extracted roles: {}", roles);
-            List<SimpleGrantedAuthority> authorities = roles.stream()
+            return roles.stream()
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .collect(Collectors.toList());
-            
-            log.debug("Granted authorities: {}", authorities);
-            return authorities;
         });
         
         log.debug("✓ JwtAuthenticationConverter created");
