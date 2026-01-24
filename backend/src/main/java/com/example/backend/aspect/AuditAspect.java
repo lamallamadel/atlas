@@ -166,15 +166,20 @@ public class AuditAspect {
             if (result != null) {
                 Map<String, Object> capturedState = safeConvertToMap(result);
                 
-                // Explicitly ensure status is captured if present in DTO
-                try {
-                    Method getStatusMethod = result.getClass().getMethod("getStatus");
-                    Object status = getStatusMethod.invoke(result);
-                    if (status != null && !capturedState.containsKey("status")) {
-                        capturedState.put("status", status.toString());
+                // Explicitly check for getStatus() method and add status to captured map if present
+                // This ensures status field is included even if ObjectMapper serialization missed it
+                if (capturedState != null) {
+                    try {
+                        Method getStatusMethod = result.getClass().getMethod("getStatus");
+                        Object status = getStatusMethod.invoke(result);
+                        if (status != null) {
+                            // Always add/overwrite status to ensure it's properly captured
+                            // Convert enum to string for consistent diff calculation
+                            capturedState.put("status", status.toString());
+                        }
+                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
+                        // DTO doesn't have getStatus() or error accessing it, which is fine
                     }
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-                    // DTO doesn't have getStatus() or error accessing it, which is fine
                 }
                 
                 return capturedState;
