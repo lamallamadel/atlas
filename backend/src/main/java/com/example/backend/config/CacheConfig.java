@@ -4,10 +4,14 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.jboss.resteasy.annotations.cache.NoCache;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurer;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.CacheErrorHandler;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -25,7 +29,7 @@ import java.util.Map;
 
 @Configuration
 @EnableCaching
-public class CacheConfig {
+public class CacheConfig implements CachingConfigurer {
 
     @Value("${spring.data.redis.host:localhost}")
     private String redisHost;
@@ -67,7 +71,7 @@ public class CacheConfig {
             .disableCachingNullValues();
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
-        
+
         cacheConfigurations.put("annonce", defaultConfig.entryTtl(Duration.ofMinutes(15)));
         cacheConfigurations.put("dossier", defaultConfig.entryTtl(Duration.ofMinutes(10)));
         cacheConfigurations.put("funnelAnalysis", defaultConfig.entryTtl(Duration.ofHours(1)));
@@ -81,4 +85,24 @@ public class CacheConfig {
             .transactionAware()
             .build();
     }
+
+
+    @Bean
+    @Override
+    public CacheErrorHandler errorHandler() {
+        return new CacheErrorHandler() {
+            @Override
+            public void handleCacheGetError(RuntimeException e, Cache cache, Object key) { /* swallow */ }
+
+            @Override
+            public void handleCachePutError(RuntimeException e, Cache cache, Object key, Object value) { /* swallow */ }
+
+            @Override
+            public void handleCacheEvictError(RuntimeException e, Cache cache, Object key) { /* swallow */ }
+
+            @Override
+            public void handleCacheClearError(RuntimeException e, Cache cache) { /* swallow */ }
+        };
+    }
+
 }

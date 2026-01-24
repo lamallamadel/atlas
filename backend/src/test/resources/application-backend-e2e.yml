@@ -22,7 +22,7 @@ spring:
         jwt:
           issuer-uri: mock
   cache:
-    type: none
+    type: simple
 
 keycloak:
   admin:
@@ -48,6 +48,8 @@ management:
     elasticsearch:
       enabled: false
     mail:
+      enabled: false
+    redis:
       enabled: false
 
 logging:
