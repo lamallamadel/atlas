@@ -161,30 +161,6 @@ public class AuditAspect {
             Object service = joinPoint.getTarget();
             Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
             Object result = getByIdMethod.invoke(service, entityId);
-            
-            // Convert to map early to ensure all fields including status are captured
-            if (result != null) {
-                Map<String, Object> capturedState = safeConvertToMap(result);
-                
-                // Explicitly check for getStatus() method and add status to captured map if present
-                // This ensures status field is included even if ObjectMapper serialization missed it
-                if (capturedState != null) {
-                    try {
-                        Method getStatusMethod = result.getClass().getMethod("getStatus");
-                        Object status = getStatusMethod.invoke(result);
-                        if (status != null) {
-                            // Always add/overwrite status to ensure it's properly captured
-                            // Convert enum to string for consistent diff calculation
-                            capturedState.put("status", status.toString());
-                        }
-                    } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException ignored) {
-                        // DTO doesn't have getStatus() or error accessing it, which is fine
-                    }
-                }
-                
-                return capturedState;
-            }
-            
             return result;
         } catch (Exception e) {
             return null;
@@ -240,7 +216,19 @@ public class AuditAspect {
         if (obj == null) return null;
 
         try {
-            return objectMapper.convertValue(obj, new TypeReference<LinkedHashMap<String, Object>>() {});
+            Map<String, Object> map = objectMapper.convertValue(obj, new TypeReference<LinkedHashMap<String, Object>>() {});
+            
+            // Ensure enum values are converted to strings
+            if (map != null) {
+                map.replaceAll((key, value) -> {
+                    if (value instanceof Enum<?>) {
+                        return ((Enum<?>) value).name();
+                    }
+                    return value;
+                });
+            }
+            
+            return map;
         } catch (Exception e) {
             // Keep non-null for tests expecting presence of before/after snapshots
             Map<String, Object> fallback = new LinkedHashMap<>();

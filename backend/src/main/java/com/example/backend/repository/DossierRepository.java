@@ -35,8 +35,7 @@ public interface DossierRepository extends JpaRepository<Dossier, Long>, JpaSpec
     @Query("SELECT d FROM Dossier d LEFT JOIN FETCH d.parties WHERE d.id = :id")
     java.util.Optional<Dossier> findByIdWithParties(@Param("id") Long id);
 
-    @EntityGraph(attributePaths = {"parties"}, type = EntityGraph.EntityGraphType.FETCH)
-    @Query("SELECT d FROM Dossier d WHERE d.id = :id")
+    @Query("SELECT d FROM Dossier d LEFT JOIN FETCH d.parties WHERE d.id = :id")
     java.util.Optional<Dossier> findByIdWithRelations(@Param("id") Long id);
 
     default java.util.Optional<Dossier> findByIdWithAllRelations(Long id) {
