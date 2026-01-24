@@ -61,10 +61,10 @@ public class Dossier extends BaseEntity {
     @Column(name = "source", length = 50)
     private DossierSource source;
 
-    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<PartiePrenanteEntity> parties = new ArrayList<>();
 
-    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AppointmentEntity> appointments = new ArrayList<>();
 
     public Long getId() {
