@@ -38,7 +38,7 @@ public class PostgresTestcontainersConfiguration {
 
         long containerStartTime = System.currentTimeMillis();
 
-        PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
+        PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"))
                 .withReuse(true)
                 .withDatabaseName("testdb")
                 .withUsername("test")
@@ -47,7 +47,7 @@ public class PostgresTestcontainersConfiguration {
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)));
 
-        log.info("Starting PostgreSQL container with image: postgres:16-alpine");
+        log.info("Starting PostgreSQL container with image: postgres:15-alpine");
         log.info("Container reuse enabled: true");
 
         container.start();
