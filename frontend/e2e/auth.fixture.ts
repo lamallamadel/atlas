@@ -22,7 +22,7 @@ export function buildFakeJwt(orgId = 'ORG-001', username = 'e2e-user'): string {
     exp: now + 60 * 60,
     iss: 'mock'
   };
-  return `${base64UrlEncode(header)}.${base64UrlEncode(payload)}.`;
+  return `mock-${base64UrlEncode(header)}.${base64UrlEncode(payload)}.`;
 }
 
 export async function loginWithMockToken(page: Page, orgId: string, username?: string): Promise<void> {

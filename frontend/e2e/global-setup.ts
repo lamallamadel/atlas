@@ -28,7 +28,7 @@ function buildMockJwt(expiresInSeconds: number = 60 * 60): string {
   const h = base64UrlEncode(JSON.stringify(header));
   const p = base64UrlEncode(JSON.stringify(payload));
   // Third segment must exist; signature is irrelevant for 'alg=none' style token here.
-  return `${h}.${p}.x`;
+  return `mock-${h}.${p}.x`;
 }
 
 async function ensureDir(dir: string): Promise<void> {
