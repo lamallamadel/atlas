@@ -82,7 +82,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setInitialParty(party);
 
         mockMvc.perform(withTenantHeaders(post("/api/v1/dossiers")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID)
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -122,7 +122,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setInitialParty(party);
 
         mockMvc.perform(withTenantHeaders(post("/api/v2/dossiers")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID)
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -156,7 +156,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setStatus(AnnonceStatus.PUBLISHED);
 
         mockMvc.perform(withTenantHeaders(post("/api/v1/annonces")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID)
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -187,7 +187,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setStatus(AnnonceStatus.PUBLISHED);
 
         mockMvc.perform(withTenantHeaders(post("/api/v2/annonces")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID)
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -216,14 +216,14 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .persist();
 
         mockMvc.perform(withTenantHeaders(get("/api/v1/dossiers/" + dossier.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID))
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(dossier.getId().intValue())))
                 .andExpect(jsonPath("$.leadName", is("Test User")))
                 .andExpect(header().exists("Deprecation"));
 
         mockMvc.perform(withTenantHeaders(get("/api/v2/dossiers/" + dossier.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID))
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(dossier.getId().intValue())))
                 .andExpect(jsonPath("$.lead.name", is("Test User")))
@@ -241,7 +241,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .persist();
 
         mockMvc.perform(withTenantHeaders(get("/api/v2/annonces/" + annonce.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID))
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.audit.createdAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
                 .andExpect(jsonPath("$.audit.updatedAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")));
@@ -258,7 +258,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .persist();
 
         mockMvc.perform(withTenantHeaders(get("/api/v1/annonces/" + annonce.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID))
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Deprecation"))
                 .andExpect(header().string("Deprecation", "true"))
@@ -268,7 +268,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .andExpect(header().exists("Link"));
 
         mockMvc.perform(withTenantHeaders(get("/api/v2/annonces/" + annonce.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))), ORG_ID))
+                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")), ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(header().doesNotExist("Deprecation"))
                 .andExpect(header().doesNotExist("Sunset"))
