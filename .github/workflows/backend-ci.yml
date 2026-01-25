@@ -16,26 +16,26 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: 'maven'
-      
+
       - name: Run tests
         run: mvn -B -ntp test '-Dspring.profiles.active=test'
         working-directory: backend
-      
+
       - name: Build package
-        run: mvn -B -ntp clean package -DskipTests=false
+        run: mvn -B -ntp clean package -DskipTests=false '-Dspring.profiles.active=test'
         working-directory: backend
-      
+
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
         with:
