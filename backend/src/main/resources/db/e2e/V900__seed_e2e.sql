@@ -1,0 +1,8 @@
+-- E2E seed data
+--
+-- Intentionally minimal.
+-- The E2E suite creates its own entities through the UI/API and should not depend
+-- on brittle static fixtures.
+--
+-- Keep this file (and the db/e2e location) so teams can add deterministic fixtures
+-- later without impacting dev/test/local/staging/prod.
