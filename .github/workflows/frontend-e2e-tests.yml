@@ -79,6 +79,22 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+
+      - name: Start frontend
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --host 0.0.0.0 --port 4200 > frontend.log 2>&1 &
+          echo $! > frontend.pid
+        working-directory: frontend
+
+      - name: Wait for frontend
+        run: |
+          timeout 120 bash -c 'until curl -fsS http://localhost:4200; do sleep 2; done'
+      
+      - name: Show frontend log on failure
+        if: failure()
+        run: cat frontend.log || true
+        working-directory: frontend
       
       - name: Run Playwright tests
         run: npx playwright test --config=playwright.config.ts
@@ -110,6 +126,14 @@ jobs:
             kill $(cat backend.pid) || true
           fi
         working-directory: backend
+
+      - name: Stop frontend
+        if: always()
+        run: |
+          if [ -f frontend.pid ]; then
+            kill $(cat frontend.pid) || true
+          fi
+        working-directory: frontend
 
   playwright-postgres-mock:
     name: Playwright (PostgreSQL + Mock Auth)
@@ -161,6 +185,22 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+
+      - name: Start frontend
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --host 0.0.0.0 --port 4200 > frontend.log 2>&1 &
+          echo $! > frontend.pid
+        working-directory: frontend
+
+      - name: Wait for frontend
+        run: |
+          timeout 120 bash -c 'until curl -fsS http://localhost:4200; do sleep 2; done'
+      
+      - name: Show frontend log on failure
+        if: failure()
+        run: cat frontend.log || true
+        working-directory: frontend
       
       - name: Run Playwright tests (PostgreSQL config)
         run: npx playwright test --config=playwright-postgres-mock.config.ts
@@ -194,6 +234,14 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml down -v
         working-directory: infra
+
+      - name: Stop frontend
+        if: always()
+        run: |
+          if [ -f frontend.pid ]; then
+            kill $(cat frontend.pid) || true
+          fi
+        working-directory: frontend
 
   playwright-full:
     name: Playwright Full (${{ matrix.variant }})
@@ -279,6 +327,22 @@ jobs:
       - name: Build frontend
         run: npm run build
         working-directory: frontend
+
+      - name: Start frontend
+        run: |
+          set -euo pipefail
+          nohup npm run start -- --host 0.0.0.0 --port 4200 > frontend.log 2>&1 &
+          echo $! > frontend.pid
+        working-directory: frontend
+
+      - name: Wait for frontend
+        run: |
+          timeout 120 bash -c 'until curl -fsS http://localhost:4200; do sleep 2; done'
+      
+      - name: Show frontend log on failure
+        if: failure()
+        run: cat frontend.log || true
+        working-directory: frontend
       
       # Determine which config file to use
       - name: Run Playwright tests
@@ -354,3 +418,11 @@ jobs:
             docker compose -f docker-compose.yml down -v
           fi
         working-directory: infra
+
+      - name: Stop frontend
+        if: always()
+        run: |
+          if [ -f frontend.pid ]; then
+            kill $(cat frontend.pid) || true
+          fi
+        working-directory: frontend
