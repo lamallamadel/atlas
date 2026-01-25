@@ -1,4 +1,4 @@
-# E2E Tests with Playwright - Stabilized ✨
+# E2E Tests with Playwright - Stabilized Test Suite - Stabilized ✨
 
 This directory contains end-to-end tests for the frontend application using Playwright with **comprehensive stabilization features** and **API response validation**.
 

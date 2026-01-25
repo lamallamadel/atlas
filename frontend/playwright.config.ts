@@ -4,9 +4,9 @@ import * as path from 'path';
 /**
  * Playwright config for E2E tests with H2 + mock auth (default, fastest)
  * - Backend runs with default test profile (H2 + mock JWT)
- * - Uses globalSetup to create a storageState with a mock token
+ * - Uses deterministic per-test authentication via stable-test-fixture
  * - No external dependencies required (no PostgreSQL or Keycloak)
- * - Stabilized with retry logic, proper waits, and screenshot capture
+ * - Stabilized with retry logic, proper waits, screenshot capture, and data cleanup
  */
 export default defineConfig({
   testDir: './e2e',
@@ -18,15 +18,14 @@ export default defineConfig({
   expect: {
     timeout: 10000,
   },
-  reporter: process.env.CI 
+  reporter: process.env.CI
     ? [
-        ['html', { outputFolder: 'test-results/html-report' }], 
-        ['junit', { outputFile: 'test-results/junit.xml' }], 
-        ['json', { outputFile: 'test-results/results.json' }],
-        ['list']
-      ] 
+        ['html', { outputFolder: 'test-results/html-report' }],
+        ['junit', { outputFile: 'test-results/junit.xml' }],
+        ['json', { outputFile: 'test-results/json-report.json' }],
+        ['list'],
+      ]
     : [['html'], ['list']],
-  globalSetup: require.resolve('./e2e/global-setup'),
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200',
     trace: 'on-first-retry',
@@ -36,9 +35,8 @@ export default defineConfig({
     },
     video: {
       mode: 'retain-on-failure',
-      size: { width: 1280, height: 720 }
+      size: { width: 1280, height: 720 },
     },
-    storageState: 'e2e/.auth/storageState.json',
     actionTimeout: 15000,
     navigationTimeout: 30000,
   },
@@ -57,10 +55,12 @@ export default defineConfig({
       use: { ...devices['Desktop Safari'] },
     },
   ],
-  webServer: process.env.CI ? undefined : {
-    command: 'npm run start',
-    url: 'http://localhost:4200',
-    reuseExistingServer: true,
-    timeout: 240000,
-  },
+  webServer: process.env.CI
+    ? undefined
+    : {
+        command: 'npm run start',
+        url: 'http://localhost:4200',
+        reuseExistingServer: true,
+        timeout: 240000,
+      },
 });
