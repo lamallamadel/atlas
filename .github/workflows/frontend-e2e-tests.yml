@@ -11,7 +11,7 @@ on:
       - '.github/workflows/frontend-e2e-tests.yml'
   push:
     branches:
-      - main
+      - master
   schedule:
     - cron: '0 3 * * *'  # Nightly at 3 AM UTC
 
