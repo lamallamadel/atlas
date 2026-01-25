@@ -81,3 +81,6 @@ logging:
 
 rate-limit:
   enabled: false
+
+referential:
+  seed-on-missing: true
