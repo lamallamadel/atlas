@@ -4,6 +4,67 @@ This directory contains reusable Angular components.
 
 ---
 
+## ObservabilityDashboardComponent
+
+### Overview
+The Observability Dashboard provides comprehensive real-time monitoring and metrics visualization for outbound message processing. It displays queue depth, delivery latency, failure rates, DLQ monitoring, and provider quota consumption.
+
+### Key Features
+
+1. **Real-time Queue Depth Monitoring**
+   - Line chart with 1-minute intervals showing queue depth trends by channel
+   - Maintains up to 60 historical data points (1 hour of data)
+   - Auto-refreshes every 30 seconds by default
+   - Summary cards showing total queued messages and per-channel breakdown
+
+2. **Message Delivery Latency Histograms**
+   - P50/P95/P99 percentile visualization
+   - Grouped bar chart comparing latency across channels
+   - Detailed table with average latency metrics
+   - Color-coded visualization for quick identification
+
+3. **Failure Rate Trends**
+   - Stacked bar chart showing failure trends by error code over time
+   - Overall failure rate percentage
+   - Error code distribution with doughnut chart
+   - Detailed error code breakdown list
+
+4. **DLQ (Dead Letter Queue) Monitoring**
+   - Warning and critical threshold indicators
+   - Color-coded alerts (normal/warning/critical)
+   - Recent DLQ messages table with error details
+   - Per-channel DLQ size visualization with threshold lines
+   - Alert banner when thresholds are exceeded
+
+5. **Provider Quota Consumption Tracking**
+   - Real-time quota usage percentage by channel
+   - Visual progress bars with color coding:
+     - Green: < 75% (Normal)
+     - Orange: 75-90% (Warning)
+     - Red: >= 90% (Critical)
+   - Detailed usage statistics (used/limit/period)
+   - Status indicators for each provider
+
+### Technical Implementation
+
+**Auto-refresh with RxJS:** Uses interval operator with 30-second refresh, switchMap for cancellable requests, and takeUntil for cleanup.
+
+**Chart.js Integration:** Lazy-loaded Chart.js library for optimal bundle size with dynamic chart creation and responsive design.
+
+**API Endpoint:** `GET /api/v1/reports/observability/metrics`
+
+### Export Functionality
+
+Two export formats supported:
+1. **CSV Export** - Tabular data for spreadsheet analysis
+2. **JSON Export** - Complete metrics structure for programmatic processing
+
+### Usage
+
+Navigate to `/observability` route or click "Observabilité" in the navigation menu.
+
+---
+
 ## ReportsDashboardComponent
 
 Enhanced analytics dashboard with comprehensive visualizations and data export capabilities.

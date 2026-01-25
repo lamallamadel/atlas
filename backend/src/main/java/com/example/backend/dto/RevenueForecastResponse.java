@@ -10,6 +10,9 @@ public class RevenueForecastResponse {
     private Integer totalOpportunities;
     private List<PipelineStageValue> pipelineByStage;
     private List<SourceForecast> forecastBySource;
+    private RevenueForecastProjection projection30Days;
+    private RevenueForecastProjection projection60Days;
+    private RevenueForecastProjection projection90Days;
 
     public BigDecimal getTotalPipelineValue() {
         return totalPipelineValue;
@@ -57,6 +60,91 @@ public class RevenueForecastResponse {
 
     public void setForecastBySource(List<SourceForecast> forecastBySource) {
         this.forecastBySource = forecastBySource;
+    }
+
+    public RevenueForecastProjection getProjection30Days() {
+        return projection30Days;
+    }
+
+    public void setProjection30Days(RevenueForecastProjection projection30Days) {
+        this.projection30Days = projection30Days;
+    }
+
+    public RevenueForecastProjection getProjection60Days() {
+        return projection60Days;
+    }
+
+    public void setProjection60Days(RevenueForecastProjection projection60Days) {
+        this.projection60Days = projection60Days;
+    }
+
+    public RevenueForecastProjection getProjection90Days() {
+        return projection90Days;
+    }
+
+    public void setProjection90Days(RevenueForecastProjection projection90Days) {
+        this.projection90Days = projection90Days;
+    }
+
+    public static class RevenueForecastProjection {
+        private Integer days;
+        private BigDecimal estimatedRevenue;
+        private BigDecimal conservativeRevenue;
+        private BigDecimal optimisticRevenue;
+        private Integer expectedClosedDeals;
+
+        public RevenueForecastProjection() {
+        }
+
+        public RevenueForecastProjection(Integer days, BigDecimal estimatedRevenue, 
+                                        BigDecimal conservativeRevenue, BigDecimal optimisticRevenue, 
+                                        Integer expectedClosedDeals) {
+            this.days = days;
+            this.estimatedRevenue = estimatedRevenue;
+            this.conservativeRevenue = conservativeRevenue;
+            this.optimisticRevenue = optimisticRevenue;
+            this.expectedClosedDeals = expectedClosedDeals;
+        }
+
+        public Integer getDays() {
+            return days;
+        }
+
+        public void setDays(Integer days) {
+            this.days = days;
+        }
+
+        public BigDecimal getEstimatedRevenue() {
+            return estimatedRevenue;
+        }
+
+        public void setEstimatedRevenue(BigDecimal estimatedRevenue) {
+            this.estimatedRevenue = estimatedRevenue;
+        }
+
+        public BigDecimal getConservativeRevenue() {
+            return conservativeRevenue;
+        }
+
+        public void setConservativeRevenue(BigDecimal conservativeRevenue) {
+            this.conservativeRevenue = conservativeRevenue;
+        }
+
+        public BigDecimal getOptimisticRevenue() {
+            return optimisticRevenue;
+        }
+
+        public void setOptimisticRevenue(BigDecimal optimisticRevenue) {
+            this.optimisticRevenue = optimisticRevenue;
+        }
+
+        public Integer getExpectedClosedDeals() {
+            return expectedClosedDeals;
+        }
+
+        public void setExpectedClosedDeals(Integer expectedClosedDeals) {
+            this.expectedClosedDeals = expectedClosedDeals;
+        }
     }
 
     public static class PipelineStageValue {

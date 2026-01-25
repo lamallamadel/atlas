@@ -31,6 +31,14 @@
           <span matListItemTitle>Rapports et KPIs</span>
         </a>
         <a mat-list-item 
+           routerLink="/observability" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Accéder au tableau de bord observabilité">
+          <mat-icon matListItemIcon aria-hidden="true">analytics</mat-icon>
+          <span matListItemTitle>Observabilité</span>
+        </a>
+        <a mat-list-item 
            routerLink="/tasks" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"

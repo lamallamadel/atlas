@@ -1,0 +1,6 @@
+name,phone,email,source,lead_source,notes,score
+John Doe,+33612345678,john.doe@example.com,web,Website Campaign,VIP client interested in premium properties,85
+Jane Smith,+33698765432,jane.smith@example.com,phone,Cold call,Follow up next week,60
+Robert Johnson,+33656781234,robert.j@example.com,email,Newsletter signup,Interested in rentals,70
+Maria Garcia,+33645678901,maria.g@example.com,referral,Friend recommendation,Looking for family home,90
+David Lee,+33634567890,david.lee@example.com,social_media,Facebook ad campaign,First time buyer,55

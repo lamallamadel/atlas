@@ -1,25 +1,35 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { LeadApiService, LeadImportJobResponse, LeadImportError } from '../services/lead-api.service';
-import { interval, Subscription } from 'rxjs';
-import { switchMap, takeWhile } from 'rxjs/operators';
+import { LeadApiService } from '../services/lead-api.service';
+
+export interface LeadImportError {
+  row: number;
+  field: string;
+  message: string;
+}
+
+export interface LeadImportResponse {
+  importJobId: number;
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  skippedCount: number;
+  validationErrors: LeadImportError[];
+}
 
 @Component({
   selector: 'app-lead-import-dialog',
   templateUrl: './lead-import-dialog.component.html',
   styleUrls: ['./lead-import-dialog.component.css']
 })
-export class LeadImportDialogComponent implements OnDestroy {
+export class LeadImportDialogComponent {
   selectedFile: File | null = null;
   duplicateStrategy: 'SKIP' | 'OVERWRITE' | 'CREATE_NEW' = 'SKIP';
   isDragging = false;
   isUploading = false;
   
-  jobId: string | null = null;
-  importStatus: LeadImportJobResponse | null = null;
-  pollingSubscription: Subscription | null = null;
-  
+  importResponse: LeadImportResponse | null = null;
   errors: LeadImportError[] = [];
   showErrors = false;
 
@@ -28,10 +38,6 @@ export class LeadImportDialogComponent implements OnDestroy {
     private leadApiService: LeadApiService,
     private snackBar: MatSnackBar
   ) {}
-
-  ngOnDestroy(): void {
-    this.stopPolling();
-  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -84,6 +90,9 @@ export class LeadImportDialogComponent implements OnDestroy {
 
   removeFile(): void {
     this.selectedFile = null;
+    this.importResponse = null;
+    this.errors = [];
+    this.showErrors = false;
   }
 
   startImport(): void {
@@ -95,18 +104,32 @@ export class LeadImportDialogComponent implements OnDestroy {
     this.isUploading = true;
     this.errors = [];
     this.showErrors = false;
+    this.importResponse = null;
 
     this.leadApiService.importLeads(this.selectedFile, this.duplicateStrategy)
       .subscribe({
         next: (response) => {
-          this.jobId = response.jobId;
-          this.importStatus = response;
-          this.startPolling();
-          this.snackBar.open('Import démarré avec succès', 'Fermer', { duration: 3000 });
+          this.isUploading = false;
+          this.importResponse = response;
+          this.errors = response.validationErrors || [];
+          
+          if (response.errorCount > 0 || response.skippedCount > 0) {
+            this.snackBar.open(
+              `Import terminé: ${response.successCount} réussi(s), ${response.errorCount} erreur(s), ${response.skippedCount} ignoré(s)`,
+              'Fermer',
+              { duration: 5000, panelClass: ['warning-snackbar'] }
+            );
+          } else {
+            this.snackBar.open(
+              `Import terminé avec succès: ${response.successCount} prospect(s) importé(s)`,
+              'Fermer',
+              { duration: 5000, panelClass: ['success-snackbar'] }
+            );
+          }
         },
         error: (err) => {
           this.isUploading = false;
-          const message = err.error?.message || 'Échec du démarrage de l\'import';
+          const message = err.error?.message || 'Échec de l\'import';
           this.snackBar.open(message, 'Fermer', {
             duration: 5000,
             panelClass: ['error-snackbar']
@@ -115,67 +138,16 @@ export class LeadImportDialogComponent implements OnDestroy {
       });
   }
 
-  private startPolling(): void {
-    if (!this.jobId) return;
-
-    this.pollingSubscription = interval(2000)
-      .pipe(
-        switchMap(() => this.leadApiService.getImportStatus(this.jobId!)),
-        takeWhile(status => {
-          return status.status === 'PENDING' || status.status === 'PROCESSING';
-        }, true)
-      )
-      .subscribe({
-        next: (status) => {
-          this.importStatus = status;
-          
-          if (status.status === 'COMPLETED' || status.status === 'FAILED') {
-            this.isUploading = false;
-            this.errors = status.errors || [];
-            
-            if (status.status === 'COMPLETED') {
-              this.snackBar.open(
-                `Import terminé: ${status.successCount} réussi(s), ${status.failureCount} échoué(s)`,
-                'Fermer',
-                { duration: 5000, panelClass: ['success-snackbar'] }
-              );
-            } else {
-              this.snackBar.open('L\'import a échoué', 'Fermer', {
-                duration: 5000,
-                panelClass: ['error-snackbar']
-              });
-            }
-            
-            this.stopPolling();
-          }
-        },
-        error: (err) => {
-          this.isUploading = false;
-          this.snackBar.open('Erreur lors de la vérification du statut', 'Fermer', {
-            duration: 5000,
-            panelClass: ['error-snackbar']
-          });
-          this.stopPolling();
-        }
-      });
-  }
-
-  private stopPolling(): void {
-    if (this.pollingSubscription) {
-      this.pollingSubscription.unsubscribe();
-      this.pollingSubscription = null;
-    }
-  }
-
   toggleErrorsView(): void {
     this.showErrors = !this.showErrors;
   }
 
   getProgressPercentage(): number {
-    if (!this.importStatus || this.importStatus.totalRows === 0) {
+    if (!this.importResponse || this.importResponse.totalRows === 0) {
       return 0;
     }
-    return Math.round((this.importStatus.processedRows / this.importStatus.totalRows) * 100);
+    const processed = this.importResponse.successCount + this.importResponse.errorCount + this.importResponse.skippedCount;
+    return Math.round((processed / this.importResponse.totalRows) * 100);
   }
 
   formatFileSize(bytes: number): string {
@@ -196,7 +168,7 @@ export class LeadImportDialogComponent implements OnDestroy {
 
   close(): void {
     if (this.canClose()) {
-      this.dialogRef.close(this.importStatus?.status === 'COMPLETED');
+      this.dialogRef.close(this.importResponse !== null);
     }
   }
 }

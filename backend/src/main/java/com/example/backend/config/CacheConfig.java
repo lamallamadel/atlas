@@ -76,8 +76,12 @@ public class CacheConfig implements CachingConfigurer {
         cacheConfigurations.put("dossier", defaultConfig.entryTtl(Duration.ofMinutes(10)));
         cacheConfigurations.put("funnelAnalysis", defaultConfig.entryTtl(Duration.ofHours(1)));
         cacheConfigurations.put("agentPerformance", defaultConfig.entryTtl(Duration.ofHours(1)));
-        cacheConfigurations.put("revenueForecast", defaultConfig.entryTtl(Duration.ofHours(2)));
+        cacheConfigurations.put("revenueForecast", defaultConfig.entryTtl(Duration.ofHours(1)));
         cacheConfigurations.put("pipelineSummary", defaultConfig.entryTtl(Duration.ofMinutes(30)));
+        cacheConfigurations.put("conversionFunnelBySource", defaultConfig.entryTtl(Duration.ofHours(1)));
+        cacheConfigurations.put("conversionFunnelByPeriod", defaultConfig.entryTtl(Duration.ofHours(1)));
+        cacheConfigurations.put("agentMetricsDetailed", defaultConfig.entryTtl(Duration.ofHours(1)));
+        cacheConfigurations.put("revenueProjections", defaultConfig.entryTtl(Duration.ofHours(1)));
 
         return RedisCacheManager.builder(connectionFactory)
             .cacheDefaults(defaultConfig)

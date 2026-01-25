@@ -18,22 +18,28 @@ interface ColumnOption {
 export class LeadExportDialogComponent {
   columns: ColumnOption[] = [
     { value: 'id', label: 'ID', selected: true },
-    { value: 'leadName', label: 'Nom du prospect', selected: true },
-    { value: 'leadPhone', label: 'Téléphone', selected: true },
-    { value: 'leadSource', label: 'Source', selected: true },
+    { value: 'name', label: 'Nom du prospect', selected: true },
+    { value: 'phone', label: 'Téléphone', selected: true },
+    { value: 'email', label: 'Email', selected: true },
+    { value: 'source', label: 'Source', selected: true },
+    { value: 'lead_source', label: 'Source détaillée', selected: false },
     { value: 'status', label: 'Statut', selected: true },
-    { value: 'annonceId', label: 'ID Annonce', selected: false },
-    { value: 'annonceTitle', label: 'Titre Annonce', selected: false },
     { value: 'score', label: 'Score', selected: false },
-    { value: 'createdAt', label: 'Date de création', selected: true },
-    { value: 'updatedAt', label: 'Date de modification', selected: false },
-    { value: 'createdBy', label: 'Créé par', selected: false },
-    { value: 'updatedBy', label: 'Modifié par', selected: false }
+    { value: 'notes', label: 'Notes', selected: false },
+    { value: 'annonce_id', label: 'ID Annonce', selected: false },
+    { value: 'case_type', label: 'Type de dossier', selected: false },
+    { value: 'status_code', label: 'Code statut', selected: false },
+    { value: 'loss_reason', label: 'Raison perte', selected: false },
+    { value: 'won_reason', label: 'Raison gain', selected: false },
+    { value: 'created_at', label: 'Date de création', selected: true },
+    { value: 'updated_at', label: 'Date de modification', selected: false },
+    { value: 'created_by', label: 'Créé par', selected: false },
+    { value: 'updated_by', label: 'Modifié par', selected: false }
   ];
 
   statusFilter = '';
-  dateFrom = '';
-  dateTo = '';
+  startDate = '';
+  endDate = '';
   sourceFilter = '';
   
   isExporting = false;
@@ -46,6 +52,17 @@ export class LeadExportDialogComponent {
     { value: DossierStatus.APPOINTMENT, label: 'Rendez-vous' },
     { value: DossierStatus.WON, label: 'Gagné' },
     { value: DossierStatus.LOST, label: 'Perdu' }
+  ];
+
+  sourceOptions = [
+    { value: '', label: 'Toutes les sources' },
+    { value: 'WEB', label: 'Web' },
+    { value: 'MOBILE', label: 'Mobile' },
+    { value: 'PHONE', label: 'Téléphone' },
+    { value: 'EMAIL', label: 'Email' },
+    { value: 'REFERRAL', label: 'Référence' },
+    { value: 'WALK_IN', label: 'En personne' },
+    { value: 'SOCIAL_MEDIA', label: 'Réseaux sociaux' }
   ];
 
   constructor(
@@ -89,14 +106,14 @@ export class LeadExportDialogComponent {
     if (this.statusFilter) {
       request.status = this.statusFilter;
     }
-    if (this.dateFrom) {
-      request.dateFrom = this.dateFrom;
+    if (this.startDate) {
+      request.startDate = this.startDate + 'T00:00:00';
     }
-    if (this.dateTo) {
-      request.dateTo = this.dateTo;
+    if (this.endDate) {
+      request.endDate = this.endDate + 'T23:59:59';
     }
-    if (this.sourceFilter.trim()) {
-      request.source = this.sourceFilter.trim();
+    if (this.sourceFilter) {
+      request.source = this.sourceFilter;
     }
 
     this.leadApiService.exportLeads(request)

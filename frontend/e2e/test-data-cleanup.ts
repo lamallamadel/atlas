@@ -10,10 +10,7 @@ export class TestDataCleanup {
   private cleanupTasks: CleanupTask[] = [];
   private baseUrl: string;
 
-  constructor(
-    private page: Page,
-    private apiContext?: APIRequestContext
-  ) {
+  constructor(private page: Page, private apiContext?: APIRequestContext) {
     this.baseUrl = process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200';
   }
 
@@ -66,12 +63,12 @@ export class TestDataCleanup {
 
   private getEndpoint(task: CleanupTask): string {
     const endpoints: Record<string, string> = {
-      'dossier': `/api/v1/dossiers/${task.id}`,
-      'annonce': `/api/v1/annonces/${task.id}`,
-      'message': `/api/v1/messages/${task.id}`,
-      'appointment': `/api/v1/appointments/${task.id}`,
+      dossier: `/api/v1/dossiers/${task.id}`,
+      annonce: `/api/v1/annonces/${task.id}`,
+      message: `/api/v1/messages/${task.id}`,
+      appointment: `/api/v1/appointments/${task.id}`,
       'partie-prenante': `/api/v1/parties-prenantes/${task.id}`,
-      'consentement': `/api/v1/consentements/${task.id}`,
+      consentement: `/api/v1/consentements/${task.id}`,
     };
 
     return endpoints[task.type];
@@ -93,7 +90,10 @@ export class TestDataCleanup {
         const url = `${this.baseUrl}${endpoint}`;
 
         if (this.apiContext) {
-          await this.apiContext.delete(url, { headers });
+          const response = await this.apiContext.delete(url, { headers });
+          if (response.status() !== 204 && response.status() !== 404) {
+            console.warn(`Unexpected status ${response.status()} when deleting ${task.type} ${task.id}`);
+          }
         } else {
           await this.page.evaluate(
             async ({ url, headers }) => {
@@ -106,7 +106,7 @@ export class TestDataCleanup {
           );
         }
 
-        await this.page.waitForTimeout(100);
+        await this.page.waitForTimeout(50);
       } catch (error) {
         const errorMsg = `Failed to cleanup ${task.type} ${task.id}: ${error}`;
         errors.push(errorMsg);
@@ -123,7 +123,7 @@ export class TestDataCleanup {
 
   async cleanupByType(type: CleanupTask['type']): Promise<void> {
     const tasksOfType = this.cleanupTasks.filter((t) => t.type === type);
-    
+
     if (tasksOfType.length === 0) {
       return;
     }

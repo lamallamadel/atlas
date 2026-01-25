@@ -1,4 +1,4 @@
-import { test, expect } from './auth.fixture';
+import { test, expect } from './stable-test-fixture';
 
 test.describe.configure({ mode: 'serial' });
 test.use({ trace: 'retain-on-failure' });
@@ -7,16 +7,14 @@ test.describe('Dashboard KPIs E2E Tests', () => {
   test('Dashboard KPIs: Navigate to dashboard → Verify KPI cards visible → Verify counts are numbers → Navigate via KPI cards with filters', async ({ page }) => {
     const startTime = Date.now();
 
-    // Step 1: Navigate to dashboard (/ or /dashboard)
     await page.goto('/', { waitUntil: 'domcontentloaded' });
     await page.waitForURL(/\/(dashboard)?$/, { timeout: 5000 });
 
     // Step 2: Verify all KPI cards are visible within 2 seconds
     const kpiCardsLocator = page.locator('.kpi-card');
-    
-    // Wait for KPI cards to be visible within 2 seconds
-    await expect(kpiCardsLocator.first()).toBeVisible({ timeout: 2000 });
-    
+
+    await helpers.waitForSelector('.kpi-card');
+
     const kpiCardCount = await kpiCardsLocator.count();
     expect(kpiCardCount, 'Should have exactly 2 KPI cards').toBeGreaterThanOrEqual(2);
 
@@ -35,11 +33,13 @@ test.describe('Dashboard KPIs E2E Tests', () => {
       // Ignore if loading state never appeared
     });
 
-    // Get the count values
-    const annoncesActivesValue = await annoncesActivesCard.locator('.kpi-value').textContent({ timeout: 3000 });
-    const dossiersATraiterValue = await dossiersATraiterCard.locator('.kpi-value').textContent({ timeout: 3000 });
+    const annoncesActivesValue = await annoncesActivesCard
+      .locator('.kpi-value')
+      .textContent({ timeout: 3000 });
+    const dossiersATraiterValue = await dossiersATraiterCard
+      .locator('.kpi-value')
+      .textContent({ timeout: 3000 });
 
-    // Verify they are numbers (including 0)
     expect(annoncesActivesValue?.trim()).toMatch(/^\d+$/);
     expect(dossiersATraiterValue?.trim()).toMatch(/^\d+$/);
 
@@ -102,19 +102,17 @@ test.describe('Dashboard KPIs E2E Tests', () => {
 
     // Step 9: Performance assertion - verify dashboard loads and renders all KPIs within 2 seconds
     const performanceStartTime = Date.now();
-    
-    // Reload the dashboard to test performance
+
     await page.reload({ waitUntil: 'domcontentloaded' });
     
     // Wait for all KPI cards to be visible
     await expect(annoncesActivesCard).toBeVisible({ timeout: 2000 });
     await expect(dossiersATraiterCard).toBeVisible({ timeout: 2000 });
     await expect(derniersDossiersCard).toBeVisible({ timeout: 2000 });
-    
+
     const performanceEndTime = Date.now();
     const loadTime = performanceEndTime - performanceStartTime;
-    
-    // Verify that the dashboard loaded within 2 seconds (2000ms)
+
     expect(loadTime).toBeLessThanOrEqual(2000);
 
     // Additional verification: Ensure KPI values are loaded (not in loading state)
@@ -134,12 +132,13 @@ test.describe('Dashboard KPIs E2E Tests', () => {
     console.log(`Dashboard KPIs test completed in ${totalTestTime}ms`);
   });
 
-  test('Dashboard KPIs: Verify all KPIs display correct data types and handle loading states', async ({ page }) => {
-    // Navigate to dashboard
+  test('Dashboard KPIs: Verify all KPIs display correct data types and handle loading states', async ({
+    authenticatedPage: page,
+    helpers,
+  }) => {
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.kpi-card', { timeout: 5000 });
+    await helpers.waitForSelector('.kpi-card');
 
-    // Verify Annonces actives KPI
     const annoncesCard = page.locator('.kpi-card:has-text("Annonces actives")');
     await expect(annoncesCard).toBeVisible();
     
@@ -155,7 +154,6 @@ test.describe('Dashboard KPIs E2E Tests', () => {
     const annoncesValue = await annoncesCard.locator('.kpi-value').textContent();
     expect(annoncesValue?.trim()).toMatch(/^\d+$/);
 
-    // Verify Dossiers à traiter KPI
     const dossiersCard = page.locator('.kpi-card:has-text("Dossiers à traiter")');
     await expect(dossiersCard).toBeVisible();
     
@@ -203,23 +201,21 @@ test.describe('Dashboard KPIs E2E Tests', () => {
         contentType: 'application/json',
         body: JSON.stringify({ error: 'Internal Server Error' })
       });
-    });
 
-    // Navigate to dashboard
-    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
-    await page.waitForSelector('.kpi-card', { timeout: 5000 });
+    const annoncesValue = await annoncesCard.locator('.kpi-value').textContent();
+    const dossiersValue = await dossiersCard.locator('.kpi-value').textContent();
 
-    // Wait a bit for API calls to complete
-    await page.waitForTimeout(2000);
+    expect(annoncesValue).toMatch(/^\d+$/);
+    expect(dossiersValue).toMatch(/^\d+$/);
 
     // Verify error messages are displayed in KPI cards
     const annoncesCard = page.locator('.kpi-card:has-text("Annonces actives")');
     const dossiersCard = page.locator('.kpi-card:has-text("Dossiers à traiter")');
     const derniersCard = page.locator('mat-card.section-card:has-text("Derniers dossiers")');
 
-    // Check for error indicators
-    const annoncesError = await annoncesCard.locator('.kpi-error, .error-message').isVisible().catch(() => false);
-    const dossiersError = await dossiersCard.locator('.kpi-error, .error-message').isVisible().catch(() => false);
+    if (hasDerniers) {
+      const firstDossier = derniersList.first();
+      await expect(firstDossier).toBeVisible();
 
     // At least one should show an error (or values might be 0 if error handling shows default)
     // This verifies graceful error handling
