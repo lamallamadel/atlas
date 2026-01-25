@@ -1,0 +1,28 @@
+<div class="form-progress-container">
+  <div class="progress-bar-wrapper" *ngIf="showPercentage">
+    <mat-progress-bar 
+      mode="determinate" 
+      [value]="progressPercentage"
+      color="primary">
+    </mat-progress-bar>
+    <div class="progress-percentage">{{ progressPercentage }}% complété</div>
+  </div>
+
+  <div class="steps-indicator">
+    <div 
+      *ngFor="let step of steps; let i = index" 
+      class="step-item"
+      [ngClass]="getStepClass(i)">
+      <div class="step-marker">
+        <mat-icon [class.completed]="isStepCompleted(i)">
+          {{ getStepIcon(i) }}
+        </mat-icon>
+      </div>
+      <div class="step-label">
+        {{ step.label }}
+        <span class="optional-badge" *ngIf="step.optional">(optionnel)</span>
+      </div>
+      <div class="step-connector" *ngIf="i < steps.length - 1"></div>
+    </div>
+  </div>
+</div>

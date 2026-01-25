@@ -103,6 +103,11 @@ import { WhatsappMessagingUiComponent } from './components/whatsapp-messaging-ui
 import { KeyboardShortcutsComponent } from './components/keyboard-shortcuts.component';
 import { CommandPaletteComponent } from './components/command-palette.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
+import { ConfirmNavigationDialogComponent } from './components/confirm-navigation-dialog.component';
+import { FormProgressIndicatorComponent } from './components/form-progress-indicator.component';
+import { InlineValidationSuggestionComponent } from './components/inline-validation-suggestion.component';
+import { ContextualHintDirective } from './directives/contextual-hint.directive';
+import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
 
 registerLocaleData(localeFr);
 
@@ -167,7 +172,12 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ObservabilityDashboardComponent,
     WhatsappMessagingUiComponent,
     KeyboardShortcutsComponent,
-    CommandPaletteComponent
+    CommandPaletteComponent,
+    ConfirmNavigationDialogComponent,
+    FormProgressIndicatorComponent,
+    InlineValidationSuggestionComponent,
+    ContextualHintDirective,
+    EnhancedFormExampleComponent
   ],
   imports: [
     BrowserModule,

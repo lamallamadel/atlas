@@ -1,0 +1,209 @@
+<div class="enhanced-form-container">
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>Formulaire avec Validation Avancée</mat-card-title>
+      <mat-card-subtitle>
+        Exemple de validation inline progressive avec suggestions en temps réel
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-card-content>
+      <!-- Progress Indicator -->
+      <app-form-progress-indicator
+        [steps]="formSteps"
+        [currentStep]="currentStep"
+        [showPercentage]="true">
+      </app-form-progress-indicator>
+
+      <!-- Auto-save indicator -->
+      <div class="auto-save-status" *ngIf="autoSaveEnabled && lastSavedAt">
+        <mat-icon class="save-icon">cloud_done</mat-icon>
+        <span>Sauvegarde automatique: {{ lastSavedAt | date:'HH:mm:ss' }}</span>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <!-- Step 1: Basic Information -->
+        <div class="form-step" *ngIf="currentStep === 0">
+          <h3>Informations de base</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Prénom</mat-label>
+            <input 
+              matInput 
+              formControlName="firstName"
+              [appContextualHint]="{
+                default: 'Entrez votre prénom',
+                focused: 'Prénom tel qu\'il apparaîtra sur les documents',
+                valid: 'Prénom enregistré ✓'
+              }"
+              [hintControl]="form.get('firstName')!"
+              hintPosition="below">
+            <mat-error *ngIf="getFieldError('firstName')">
+              {{ getFieldError('firstName') }}
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Nom</mat-label>
+            <input 
+              matInput 
+              formControlName="lastName"
+              [appContextualHint]="{
+                default: 'Entrez votre nom de famille',
+                focused: 'Nom tel qu\'il apparaîtra sur les documents',
+                valid: 'Nom enregistré ✓'
+              }"
+              [hintControl]="form.get('lastName')!"
+              hintPosition="below">
+            <mat-error *ngIf="getFieldError('lastName')">
+              {{ getFieldError('lastName') }}
+            </mat-error>
+          </mat-form-field>
+        </div>
+
+        <!-- Step 2: Contact Information -->
+        <div class="form-step" *ngIf="currentStep === 1">
+          <h3>Coordonnées</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input 
+              matInput 
+              type="email"
+              formControlName="email"
+              [appContextualHint]="emailHints"
+              [hintControl]="form.get('email')!"
+              hintPosition="below">
+            <mat-icon matSuffix *ngIf="validatingEmail">
+              <mat-spinner diameter="20"></mat-spinner>
+            </mat-icon>
+            <mat-error *ngIf="getFieldError('email')">
+              {{ getFieldError('email') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Email suggestions -->
+          <app-inline-validation-suggestion
+            *ngIf="emailSuggestions.length > 0"
+            [suggestion]="emailSuggestions[0]"
+            (accept)="onAcceptEmailSuggestion($event)"
+            (dismiss)="onDismissEmailSuggestion()">
+          </app-inline-validation-suggestion>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Téléphone</mat-label>
+            <input 
+              matInput 
+              formControlName="phone"
+              [appContextualHint]="phoneHints"
+              [hintControl]="form.get('phone')!"
+              hintPosition="below">
+            <mat-icon matSuffix *ngIf="validatingPhone">
+              <mat-spinner diameter="20"></mat-spinner>
+            </mat-icon>
+            <mat-error *ngIf="getFieldError('phone')">
+              {{ getFieldError('phone') }}
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Phone suggestions -->
+          <app-inline-validation-suggestion
+            *ngIf="phoneSuggestions.length > 0"
+            [suggestion]="phoneSuggestions[0]"
+            (accept)="onAcceptPhoneSuggestion($event)"
+            (dismiss)="onDismissPhoneSuggestion()">
+          </app-inline-validation-suggestion>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Message (optionnel)</mat-label>
+            <textarea 
+              matInput 
+              formControlName="message"
+              rows="4"
+              [appContextualHint]="{
+                default: 'Ajoutez un message si nécessaire',
+                focused: 'Maximum 500 caractères',
+                hasValue: form.get('message')?.value?.length + ' / 500 caractères'
+              }"
+              [hintControl]="form.get('message')!"
+              hintPosition="above">
+            </textarea>
+            <mat-hint align="end">
+              {{ form.get('message')?.value?.length || 0 }} / 500
+            </mat-hint>
+          </mat-form-field>
+        </div>
+
+        <!-- Step 3: Confirmation -->
+        <div class="form-step" *ngIf="currentStep === 2">
+          <h3>Confirmation</h3>
+          
+          <div class="summary-section">
+            <h4>Récapitulatif</h4>
+            <div class="summary-item">
+              <span class="label">Nom complet:</span>
+              <span class="value">{{ form.get('firstName')?.value }} {{ form.get('lastName')?.value }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Email:</span>
+              <span class="value">{{ form.get('email')?.value }}</span>
+            </div>
+            <div class="summary-item">
+              <span class="label">Téléphone:</span>
+              <span class="value">{{ form.get('phone')?.value }}</span>
+            </div>
+          </div>
+
+          <mat-checkbox formControlName="acceptTerms" class="accept-terms">
+            J'accepte les conditions d'utilisation
+          </mat-checkbox>
+          <mat-error *ngIf="form.get('acceptTerms')?.touched && form.get('acceptTerms')?.invalid">
+            Vous devez accepter les conditions
+          </mat-error>
+        </div>
+
+        <!-- Navigation buttons -->
+        <div class="form-actions">
+          <button 
+            mat-button 
+            type="button"
+            (click)="previousStep()"
+            *ngIf="currentStep > 0">
+            <mat-icon>arrow_back</mat-icon>
+            Précédent
+          </button>
+
+          <div class="spacer"></div>
+
+          <button 
+            mat-button 
+            type="button"
+            color="warn"
+            (click)="onReset()">
+            Réinitialiser
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="button"
+            (click)="nextStep()"
+            *ngIf="currentStep < formSteps.length - 1">
+            Suivant
+            <mat-icon>arrow_forward</mat-icon>
+          </button>
+
+          <button 
+            mat-raised-button 
+            color="primary"
+            type="submit"
+            *ngIf="currentStep === formSteps.length - 1"
+            [disabled]="form.invalid">
+            <mat-icon>send</mat-icon>
+            Envoyer
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
