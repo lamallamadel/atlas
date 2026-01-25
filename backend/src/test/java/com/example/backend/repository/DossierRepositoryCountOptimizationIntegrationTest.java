@@ -207,7 +207,7 @@ class DossierRepositoryCountOptimizationIntegrationTest {
 
         // When: Call countByStatusAndCreatedAtAfter
         Long count = dossierRepository.countByStatusAndCreatedAtAfter(
-                DossierStatus.NEW, now.minusDays(10));
+                DossierStatus.NEW, now.minusDays(10).minusSeconds(1));
 
         // Then: Verify count is correct
         assertThat(count).isEqualTo(11);
@@ -244,7 +244,7 @@ class DossierRepositoryCountOptimizationIntegrationTest {
 
         // When: Call countByStatusInAndCreatedAtAfter
         List<DossierStatus> statuses = Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED);
-        Long count = dossierRepository.countByStatusInAndCreatedAtAfter(statuses, now.minusDays(15));
+        Long count = dossierRepository.countByStatusInAndCreatedAtAfter(statuses, now.minusDays(15).minusSeconds(1));
 
         // Then: Verify count is correct
         assertThat(count).isEqualTo(16);

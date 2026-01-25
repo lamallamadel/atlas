@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @BackendE2ETest
 @WithMockUser(roles = {"PRO", "ADMIN"})
+@ActiveProfiles("backend-e2e-h2")
 public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
 
     private static final String ORG_ID = "test-org-versioning";
