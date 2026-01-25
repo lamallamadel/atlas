@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     # E2E profile with PostgreSQL and real Keycloak for full integration testing.
     url: ${DB_URL:jdbc:postgresql://localhost:5432/atlas}

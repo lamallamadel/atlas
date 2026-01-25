@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     # E2E profile with H2 in-memory database and real Keycloak authentication.
     # Uses H2 in-memory with PostgreSQL compatibility for local E2E.
