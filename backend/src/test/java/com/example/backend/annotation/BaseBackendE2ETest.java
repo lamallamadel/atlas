@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
@@ -13,6 +15,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -128,14 +131,16 @@ public abstract class BaseBackendE2ETest {
     }
 
     protected RequestPostProcessor jwtWithRoles(String orgId, String... roles) {
-        List<String> rolesList = roles.length > 0 ? List.of(roles) : List.of("ADMIN", "PRO");
-        List<GrantedAuthority> authorities = rolesList.stream()
+        String[] effectiveRoles = (roles == null || roles.length == 0) ? new String[]{"ADMIN"} : roles;
+        List<GrantedAuthority> authorities = Arrays.stream(effectiveRoles)
+                .filter(role -> role != null && !role.isBlank())
                 .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .map(authority -> (GrantedAuthority) authority)
+                .toList();
 
         return jwt()
-                .jwt(createMockJwt(orgId, "test-user", rolesList.toArray(new String[0])))
+                .jwt(createMockJwt(orgId, "test-user", effectiveRoles))
                 .authorities(authorities);
     }
 }
