@@ -42,6 +42,7 @@
       <!-- Filters -->
       <div class="filters-section">
         <h3 class="section-title">Filtres (optionnel)</h3>
+        <p class="section-description">Appliquez des filtres pour exporter uniquement certains prospects</p>
         
         <div class="filter-grid">
           <mat-form-field appearance="outline" class="filter-field">
@@ -51,11 +52,17 @@
                 {{ option.label }}
               </mat-option>
             </mat-select>
+            <mat-icon matSuffix>filter_list</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="filter-field">
             <mat-label>Source</mat-label>
-            <input matInput [(ngModel)]="sourceFilter" placeholder="Ex: WEB, PHONE">
+            <mat-select [(ngModel)]="sourceFilter">
+              <mat-option *ngFor="let option of sourceOptions" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matSuffix>source</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="filter-field">
@@ -63,8 +70,9 @@
             <input 
               matInput 
               type="date" 
-              [(ngModel)]="dateFrom"
-              [max]="dateTo || null">
+              [(ngModel)]="startDate"
+              [max]="endDate || null">
+            <mat-icon matSuffix>calendar_today</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="filter-field">
@@ -72,8 +80,9 @@
             <input 
               matInput 
               type="date" 
-              [(ngModel)]="dateTo"
-              [min]="dateFrom || null">
+              [(ngModel)]="endDate"
+              [min]="startDate || null">
+            <mat-icon matSuffix>calendar_today</mat-icon>
           </mat-form-field>
         </div>
 
@@ -86,7 +95,10 @@
       <!-- Export Progress -->
       <div class="export-progress" *ngIf="isExporting">
         <mat-progress-bar mode="indeterminate" color="primary"></mat-progress-bar>
-        <p class="progress-text">Préparation de l'export en cours...</p>
+        <p class="progress-text">
+          <mat-icon class="progress-icon">cloud_download</mat-icon>
+          Préparation de l'export en cours...
+        </p>
       </div>
     </div>
   </mat-dialog-content>

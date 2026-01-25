@@ -57,4 +57,32 @@ describe('LeadExportDialogComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should select all columns', () => {
+    component.deselectAllColumns();
+    component.selectAllColumns();
+    expect(component.columns.every(col => col.selected)).toBe(true);
+  });
+
+  it('should deselect all columns', () => {
+    component.selectAllColumns();
+    component.deselectAllColumns();
+    expect(component.columns.every(col => !col.selected)).toBe(true);
+  });
+
+  it('should count selected columns', () => {
+    component.selectAllColumns();
+    const count = component.getSelectedColumnsCount();
+    expect(count).toBe(component.columns.length);
+  });
+
+  it('should allow export when columns are selected', () => {
+    component.selectAllColumns();
+    expect(component.canExport()).toBe(true);
+  });
+
+  it('should not allow export when no columns are selected', () => {
+    component.deselectAllColumns();
+    expect(component.canExport()).toBe(false);
+  });
 });

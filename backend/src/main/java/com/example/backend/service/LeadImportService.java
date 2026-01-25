@@ -75,7 +75,8 @@ public class LeadImportService {
                 try {
                     if (!validateRow(row, rowNumber, response)) {
                         errorCount++;
-                        errorReport.append(String.format("Row %d: Validation failed\n", rowNumber));
+                        errorReport.append(String.format("Row %d: Validation failed - ", rowNumber));
+                        errorReport.append(getValidationErrors(row)).append("\n");
                         continue;
                     }
 
@@ -89,6 +90,7 @@ public class LeadImportService {
                     if (!existingDossiers.isEmpty()) {
                         if (mergeStrategy == MergeStrategy.SKIP) {
                             skippedCount++;
+                            errorReport.append(String.format("Row %d: Duplicate phone number - skipped\n", rowNumber));
                             continue;
                         } else if (mergeStrategy == MergeStrategy.OVERWRITE) {
                             Dossier existingDossier = existingDossiers.get(0);
@@ -172,6 +174,20 @@ public class LeadImportService {
         }
 
         return valid;
+    }
+
+    private String getValidationErrors(LeadImportRow row) {
+        StringBuilder errors = new StringBuilder();
+        if (row.getName() == null || row.getName().trim().isEmpty()) {
+            errors.append("Name is required. ");
+        }
+        if (row.getPhone() == null || row.getPhone().trim().isEmpty()) {
+            errors.append("Phone is required. ");
+        }
+        if (row.getSource() == null || row.getSource().trim().isEmpty()) {
+            errors.append("Source is required. ");
+        }
+        return errors.toString().trim();
     }
 
     private Dossier createDossierFromRow(LeadImportRow row, String orgId) {

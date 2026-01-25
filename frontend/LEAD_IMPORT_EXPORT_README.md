@@ -1,264 +1,414 @@
-# Lead Import/Export UI Implementation
+# Lead Import/Export Functionality
 
 ## Overview
 
-This implementation provides a complete frontend UI for bulk importing and exporting lead data (dossiers) in the application. The feature includes two dialog components with comprehensive file handling, validation, real-time progress tracking, and error reporting.
+The Lead Import/Export functionality provides a comprehensive solution for bulk importing leads from CSV files and exporting leads with advanced filtering and column selection capabilities.
 
-## Components Created
+## Features
 
-### 1. LeadApiService (`frontend/src/app/services/lead-api.service.ts`)
+### Lead Import
 
-Service handling all API communication for lead import/export operations.
+#### CSV Format
+The CSV file must include the following columns:
+- **name** (required): Full name of the lead
+- **phone** (required): Phone number (used for duplicate detection)
+- **source** (required): Lead source (web, mobile, phone, email, referral, walk_in, social_media)
+- **email** (optional): Email address
+- **lead_source** (optional): Detailed source description
+- **notes** (optional): Additional notes
+- **score** (optional): Lead score (0-100)
 
-**Key Features:**
-- Import leads from CSV files with duplicate strategy selection
-- Poll import job status at regular intervals
-- Export leads to CSV with customizable columns and filters
-- Type-safe interfaces for all API requests and responses
+#### Example CSV
+```csv
+name,phone,email,source,lead_source,notes,score
+John Doe,+33612345678,john@example.com,web,Website Campaign,VIP client,85
+Jane Smith,+33698765432,jane@example.com,phone,Cold call,Follow up needed,60
+```
 
-**API Endpoints:**
-- `POST /api/v1/leads/import` - Start import job
-- `GET /api/v1/leads/import/{jobId}/status` - Get import status
-- `GET /api/v1/leads/export` - Export leads to CSV
+#### Duplicate Detection
+The system detects duplicates by phone number and provides three merge strategies:
 
-### 2. LeadImportDialogComponent (`frontend/src/app/components/lead-import-dialog.component.*`)
+1. **SKIP**: Ignore duplicates and count them separately
+2. **OVERWRITE**: Update existing records with new data
+3. **CREATE_NEW**: Create new records even if duplicates exist
 
-Dialog component for importing leads from CSV files.
+#### Validation Rules
+- **Name**: Required, non-empty string
+- **Phone**: Required, non-empty string
+- **Source**: Required, must be one of: web, mobile, phone, email, referral, walk_in, social_media
+- **Score**: Optional, must be between 0 and 100 if provided
 
-**Key Features:**
-- **File Upload**
-  - Drag-and-drop zone for CSV files
-  - File input with CSV validation
-  - File size limit (10 MB)
-  - Visual feedback for file selection
+#### Import Process
+1. User selects CSV file via drag-and-drop or file picker
+2. User chooses duplicate handling strategy
+3. File is validated (CSV format, max 10 MB)
+4. Import starts with real-time progress tracking
+5. Results displayed with statistics:
+   - Total rows processed
+   - Successful imports
+   - Errors with detailed reasons
+   - Skipped duplicates
 
-- **Duplicate Strategy Selection**
-  - SKIP: Ignore duplicate entries
-  - OVERWRITE: Update existing entries
-  - CREATE_NEW: Create new entries regardless of duplicates
-  - Radio button group with descriptions
+#### Error Reporting
+Errors are displayed in a detailed table showing:
+- Row number
+- Field with error
+- Error message/reason
 
-- **Real-time Progress Tracking**
-  - Polls `/api/v1/leads/import/{jobId}/status` every 2 seconds
-  - Progress bar showing percentage completion
-  - Statistics display (success count, failure count, processed/total rows)
-  - Status messages (Pending, Processing, Completed, Failed)
+Common errors:
+- Missing required fields (name, phone, source)
+- Invalid source value
+- Score out of range (0-100)
+- Invalid data format
 
-- **Error Reporting**
-  - Expandable error table
-  - Displays failed rows with reasons
-  - Columns: Row Number, Lead Name, Phone, Reason
-  - Scrollable table for large error lists
+### Lead Export
 
-- **User Experience**
-  - Prevents closing dialog during import
-  - Auto-refreshes parent data on successful completion
-  - Success/error notifications via snackbar
-  - Responsive design for mobile devices
+#### Column Selection
+Users can select from the following columns:
+- **id**: Lead ID
+- **name**: Lead name
+- **phone**: Phone number
+- **email**: Email address
+- **source**: Lead source (web, mobile, etc.)
+- **lead_source**: Detailed source description
+- **status**: Lead status (NEW, QUALIFIED, etc.)
+- **score**: Lead score
+- **notes**: Additional notes
+- **annonce_id**: Associated property ID
+- **case_type**: Case type
+- **status_code**: Status code
+- **loss_reason**: Reason for lost lead
+- **won_reason**: Reason for won lead
+- **created_at**: Creation date
+- **updated_at**: Last update date
+- **created_by**: Creator user
+- **updated_by**: Last modifier user
 
-### 3. LeadExportDialogComponent (`frontend/src/app/components/lead-export-dialog.component.*`)
+#### Filters
+Apply filters to export only specific leads:
+- **Status**: Filter by lead status
+- **Source**: Filter by lead source
+- **Date Range**: Filter by creation date (start and end dates)
 
-Dialog component for exporting leads to CSV files.
+#### Export Process
+1. User selects desired columns (select all/deselect all available)
+2. User applies optional filters
+3. Click export to generate CSV file
+4. File downloads automatically with timestamp
 
-**Key Features:**
-- **Column Selection**
-  - Checkboxes for 12 available columns (ID, name, phone, source, status, etc.)
-  - "Select All" and "Deselect All" quick actions
-  - Visual counter showing selected columns
-  - Default selection of most common columns
-
-- **Export Filters**
-  - Status filter (dropdown with all status options)
-  - Source filter (text input)
-  - Date range filter (from/to date pickers)
-  - All filters are optional
-
-- **File Download**
-  - Generates filename with timestamp: `leads_export_YYYY-MM-DDTHH-mm-ss.csv`
-  - Auto-downloads file via browser
-  - Progress indicator during export
-  - Success/error notifications
-
-- **Responsive Design**
-  - Grid layout adapts to screen size
-  - Mobile-friendly column selection
-  - Touch-optimized controls
-
-## Integration Points
-
-### Updated Files
-
-1. **`frontend/src/app/app.module.ts`**
-   - Added `LeadImportDialogComponent` and `LeadExportDialogComponent` to declarations
-   - Added `MatRadioModule` to imports
-   - Added `LeadApiService` (auto-provided via `providedIn: 'root'`)
-
-2. **`frontend/src/app/pages/dossiers/dossiers.component.ts`**
-   - Imported dialog components
-   - Added `openImportDialog()` method
-   - Added `openExportDialog()` method
-   - Refreshes dossier list after successful import
-
-3. **`frontend/src/app/pages/dossiers/dossiers.component.html`**
-   - Added import/export buttons to page header
-   - Buttons positioned before "Create Dossier" button
-   - Material icons for visual clarity
-
-4. **`frontend/src/app/pages/dossiers/dossiers.component.css`**
-   - Added `.page-header` styling
-   - Added `.header-actions` styling for button group
-   - Responsive layout with flex wrap
+#### Export File Format
+- CSV format with UTF-8 encoding
+- Filename pattern: `leads_export_YYYYMMDD_HHMMSS.csv`
+- First row contains column headers
+- Empty values represented as empty strings
 
 ## Usage
 
 ### Opening Import Dialog
 
-From the Dossiers page, users can:
-1. Click the "Importer" button in the header
-2. Drag-and-drop a CSV file or click to browse
-3. Select duplicate handling strategy
-4. Click "Démarrer l'import"
-5. Monitor progress in real-time
-6. View errors if any occur
-7. Close dialog when complete
+```typescript
+import { MatDialog } from '@angular/material/dialog';
+import { LeadImportDialogComponent } from './components/lead-import-dialog.component';
+
+constructor(private dialog: MatDialog) {}
+
+openImportDialog(): void {
+  const dialogRef = this.dialog.open(LeadImportDialogComponent, {
+    width: '700px',
+    disableClose: true
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      console.log('Import completed successfully');
+      // Refresh lead list
+    }
+  });
+}
+```
 
 ### Opening Export Dialog
 
-From the Dossiers page, users can:
-1. Click the "Exporter" button in the header
-2. Select columns to include in export
-3. Optionally apply filters (status, source, date range)
-4. Click "Exporter"
-5. File downloads automatically with timestamped filename
+```typescript
+import { MatDialog } from '@angular/material/dialog';
+import { LeadExportDialogComponent } from './components/lead-export-dialog.component';
 
-## CSV Format
+constructor(private dialog: MatDialog) {}
 
-### Import CSV Expected Format
+openExportDialog(): void {
+  const dialogRef = this.dialog.open(LeadExportDialogComponent, {
+    width: '700px'
+  });
 
-The backend should expect CSV with headers:
-- `leadName` (required)
-- `leadPhone` (required)
-- `leadSource` (optional)
-- `annonceId` (optional)
-- Additional fields as defined by backend
-
-### Export CSV Format
-
-The export includes selected columns in CSV format with proper headers and French labels.
-
-## Error Handling
-
-### Import Errors
-- File validation errors (wrong format, too large)
-- Upload errors (network, server issues)
-- Processing errors (displayed in error table)
-- Each error includes row number, lead info, and reason
-
-### Export Errors
-- No columns selected
-- Network/server errors
-- All errors displayed via snackbar notifications
-
-## Styling
-
-All components follow the application's Material Design theme:
-- Primary color: `#1976d2`
-- Success color: `#4caf50`
-- Error color: `#f44336`
-- Warning color: `#ff9800`
-
-Components are fully responsive with breakpoints at:
-- Mobile: `< 600px`
-- Tablet: `600px - 768px`
-- Desktop: `> 768px`
-
-## Accessibility
-
-Both dialogs include:
-- ARIA labels for all interactive elements
-- Keyboard navigation support
-- Screen reader friendly error messages
-- Focus management
-- Disabled state handling
-
-## Testing
-
-Spec files created for:
-- `lead-api.service.spec.ts`
-- `lead-import-dialog.component.spec.ts`
-- `lead-export-dialog.component.spec.ts`
-
-Basic test setup provided. Full test coverage should include:
-- File upload validation
-- API integration tests
-- Progress polling logic
-- Export with various column/filter combinations
-- Error handling scenarios
-
-## Backend Requirements
-
-The frontend expects the following backend endpoints:
-
-### Import Endpoint
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      console.log('Export completed successfully');
+    }
+  });
+}
 ```
-POST /api/v1/leads/import
-Content-Type: multipart/form-data
 
-Fields:
-- file: CSV file
-- duplicateStrategy: SKIP | OVERWRITE | CREATE_NEW
+## API Endpoints
 
-Response: LeadImportJobResponse
+### Import Leads
+**POST** `/api/v1/leads/import`
+
+**Request:**
+- Content-Type: `multipart/form-data`
+- Parameters:
+  - `file`: CSV file (required)
+  - `mergeStrategy`: SKIP | OVERWRITE | CREATE_NEW (default: SKIP)
+
+**Response:**
+```json
 {
-  jobId: string,
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED',
-  totalRows: number,
-  processedRows: number,
-  successCount: number,
-  failureCount: number,
-  errors: [
+  "importJobId": 123,
+  "totalRows": 100,
+  "successCount": 95,
+  "errorCount": 3,
+  "skippedCount": 2,
+  "validationErrors": [
     {
-      rowNumber: number,
-      leadName?: string,
-      leadPhone?: string,
-      reason: string
+      "row": 5,
+      "field": "phone",
+      "message": "Phone is required"
     }
   ]
 }
 ```
 
-### Import Status Endpoint
-```
-GET /api/v1/leads/import/{jobId}/status
+### Get Import History
+**GET** `/api/v1/leads/import/history`
 
-Response: Same as above (LeadImportJobResponse)
+**Response:**
+```json
+[
+  {
+    "id": 123,
+    "filename": "leads.csv",
+    "status": "COMPLETED",
+    "totalRows": 100,
+    "successCount": 95,
+    "errorCount": 3,
+    "skippedCount": 2,
+    "errorReport": "Row 5: Phone is required\nRow 7: Invalid source\n",
+    "createdAt": "2024-01-15T10:30:00",
+    "createdBy": "user@example.com"
+  }
+]
 ```
 
-### Export Endpoint
-```
-GET /api/v1/leads/export
+### Get Import Job Details
+**GET** `/api/v1/leads/import/history/{id}`
 
-Query Parameters:
-- columns[]: Array of column names (required, at least one)
-- status?: Status filter (optional)
-- source?: Source filter (optional)
-- dateFrom?: ISO date string (optional)
-- dateTo?: ISO date string (optional)
-
-Response: CSV file (Content-Type: text/csv)
-Headers: Content-Disposition: attachment; filename="leads_export.csv"
+**Response:**
+```json
+{
+  "id": 123,
+  "filename": "leads.csv",
+  "status": "COMPLETED",
+  "totalRows": 100,
+  "successCount": 95,
+  "errorCount": 3,
+  "skippedCount": 2,
+  "errorReport": "Row 5: Phone is required\n",
+  "createdAt": "2024-01-15T10:30:00",
+  "createdBy": "user@example.com"
+}
 ```
+
+### Export Leads
+**GET** `/api/v1/leads/export`
+
+**Parameters:**
+- `columns`: Comma-separated list of column names (optional)
+- `status`: Filter by status (optional)
+- `source`: Filter by source (optional)
+- `startDate`: Start date in ISO format (optional)
+- `endDate`: End date in ISO format (optional)
+
+**Response:**
+- Content-Type: `text/csv`
+- Content-Disposition: `attachment; filename="leads_export_20240115_103000.csv"`
+
+**Example:**
+```
+GET /api/v1/leads/export?columns=id,name,phone,email&status=NEW&source=WEB
+```
+
+## Backend Architecture
+
+### Service Layer
+
+#### LeadImportService
+- Handles CSV parsing using OpenCSV library
+- Validates required fields (name, phone, source)
+- Detects duplicates by phone number
+- Applies merge strategy (skip, overwrite, create new)
+- Tracks import progress in ImportJobEntity
+- Generates detailed error reports
+
+#### LeadExportService
+- Builds dynamic JPA specifications for filtering
+- Supports configurable column selection
+- Generates CSV with CSVWriter
+- Handles date formatting and null values
+
+### Entity Layer
+
+#### ImportJobEntity
+Tracks import job execution:
+- `id`: Primary key
+- `orgId`: Organization ID (multi-tenant)
+- `filename`: Original CSV filename
+- `status`: IN_PROGRESS | COMPLETED | FAILED
+- `totalRows`: Total rows in CSV
+- `successCount`: Successfully imported
+- `errorCount`: Rows with errors
+- `skippedCount`: Duplicate rows skipped
+- `errorReport`: Detailed error messages
+- Audit fields: createdAt, updatedAt, createdBy, updatedBy
+
+### Repository Layer
+
+#### ImportJobRepository
+```java
+List<ImportJobEntity> findByOrgIdOrderByCreatedAtDesc(String orgId);
+```
+
+#### DossierRepository
+```java
+List<Dossier> findByLeadPhoneAndOrgIdAndStatusNotIn(
+    String phone, 
+    String orgId, 
+    List<DossierStatus> excludedStatuses
+);
+```
+
+## Frontend Architecture
+
+### Components
+
+#### LeadImportDialogComponent
+Features:
+- Drag-and-drop file upload
+- File validation (CSV, max 10 MB)
+- Duplicate strategy selector
+- Real-time progress display
+- Error report table with filtering
+- Success/error statistics
+
+#### LeadExportDialogComponent
+Features:
+- Column selector with select all/deselect all
+- Filter panel (status, source, date range)
+- Export progress indicator
+- Automatic file download
+
+### Services
+
+#### LeadApiService
+Provides methods for:
+- `importLeads(file, strategy)`: Upload and import CSV
+- `getImportHistory()`: Fetch import job history
+- `getImportJobById(id)`: Get specific job details
+- `exportLeads(request)`: Export leads with filters
+
+## Database Schema
+
+### import_job Table
+```sql
+CREATE TABLE import_job (
+    id BIGSERIAL PRIMARY KEY,
+    org_id VARCHAR(255) NOT NULL,
+    filename VARCHAR(255),
+    status VARCHAR(50) NOT NULL,
+    total_rows INTEGER NOT NULL DEFAULT 0,
+    success_count INTEGER NOT NULL DEFAULT 0,
+    error_count INTEGER NOT NULL DEFAULT 0,
+    skipped_count INTEGER NOT NULL DEFAULT 0,
+    error_report TEXT,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
+);
+
+CREATE INDEX idx_import_job_org_id ON import_job(org_id);
+CREATE INDEX idx_import_job_status ON import_job(status);
+CREATE INDEX idx_import_job_created_at ON import_job(created_at);
+```
+
+## Testing
+
+### Unit Tests
+
+#### Backend
+- `LeadImportServiceTest`: Tests CSV parsing, validation, duplicate handling
+- `LeadExportServiceTest`: Tests column selection, filtering, CSV generation
+
+#### Frontend
+- `LeadImportDialogComponent.spec.ts`: Tests file validation, progress tracking
+- `LeadExportDialogComponent.spec.ts`: Tests column selection, export flow
+
+### E2E Tests
+Create E2E tests for:
+1. Import flow with valid CSV
+2. Import with validation errors
+3. Import with duplicates (all strategies)
+4. Export with various column selections
+5. Export with filters
+
+## Security Considerations
+
+1. **File Validation**: Only CSV files accepted, max 10 MB
+2. **Multi-tenancy**: All operations scoped to organization ID
+3. **Authentication**: Requires ADMIN or PRO role
+4. **Input Sanitization**: All CSV data validated and sanitized
+5. **Rate Limiting**: Consider adding rate limits for large imports
+
+## Performance Considerations
+
+1. **Batch Processing**: Import processes rows in batches
+2. **Streaming Export**: Large exports stream to client
+3. **Indexes**: Database indexes on org_id, status, created_at
+4. **Pagination**: Consider paginating import history for large datasets
 
 ## Future Enhancements
 
-Potential improvements:
-1. Import template download button
-2. Export preview before download
-3. Scheduled exports
-4. Import validation before processing
-5. Resume failed imports
-6. Export to multiple formats (Excel, JSON)
-7. Column mapping for imports
-8. Bulk edit via import
-9. Import history/audit log
-10. Progress percentage in browser tab title
+1. **Background Jobs**: Async processing for large files (>10k rows)
+2. **Progress Websockets**: Real-time progress updates via WebSocket
+3. **Excel Support**: Import/export Excel files (.xlsx)
+4. **Column Mapping**: Allow users to map CSV columns to fields
+5. **Import Templates**: Downloadable CSV templates
+6. **Scheduled Exports**: Schedule recurring exports
+7. **Export Formats**: Support JSON, XML formats
+8. **Import Validation Preview**: Preview and validate before import
+9. **Rollback**: Ability to rollback imports
+10. **Import Queue**: Queue system for handling multiple imports
+
+## Troubleshooting
+
+### Common Issues
+
+**Import fails with "File is empty"**
+- Ensure CSV file has content beyond headers
+
+**Import fails with "Invalid source value"**
+- Source must be one of: web, mobile, phone, email, referral, walk_in, social_media
+
+**Export returns empty file**
+- Check that filters match existing data
+- Verify user has access to leads in organization
+
+**Upload timeout**
+- Increase server timeout for large files
+- Consider splitting large files into smaller batches
+
+## Support
+
+For issues or questions:
+1. Check error messages in import/export dialogs
+2. Review import job history for detailed error reports
+3. Check browser console for frontend errors
+4. Review backend logs for server-side issues

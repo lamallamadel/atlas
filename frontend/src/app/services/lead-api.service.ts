@@ -8,28 +8,39 @@ export interface LeadImportRequest {
   duplicateStrategy: 'SKIP' | 'OVERWRITE' | 'CREATE_NEW';
 }
 
-export interface LeadImportJobResponse {
-  jobId: string;
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED';
-  totalRows: number;
-  processedRows: number;
-  successCount: number;
-  failureCount: number;
-  errors: LeadImportError[];
+export interface LeadImportError {
+  row: number;
+  field: string;
+  message: string;
 }
 
-export interface LeadImportError {
-  rowNumber: number;
-  leadName?: string;
-  leadPhone?: string;
-  reason: string;
+export interface LeadImportResponse {
+  importJobId: number;
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  skippedCount: number;
+  validationErrors: LeadImportError[];
+}
+
+export interface ImportJobResponse {
+  id: number;
+  filename: string;
+  status: 'IN_PROGRESS' | 'COMPLETED' | 'FAILED';
+  totalRows: number;
+  successCount: number;
+  errorCount: number;
+  skippedCount: number;
+  errorReport: string;
+  createdAt: string;
+  createdBy: string;
 }
 
 export interface LeadExportRequest {
   columns: string[];
   status?: string;
-  dateFrom?: string;
-  dateTo?: string;
+  startDate?: string;
+  endDate?: string;
   source?: string;
 }
 
@@ -41,33 +52,37 @@ export class LeadApiService {
 
   constructor(private http: HttpClient) {}
 
-  importLeads(file: File, duplicateStrategy: string): Observable<LeadImportJobResponse> {
+  importLeads(file: File, duplicateStrategy: string): Observable<LeadImportResponse> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('duplicateStrategy', duplicateStrategy);
+    formData.append('mergeStrategy', duplicateStrategy);
 
-    return this.http.post<LeadImportJobResponse>(`${this.apiUrl}/import`, formData);
+    return this.http.post<LeadImportResponse>(`${this.apiUrl}/import`, formData);
   }
 
-  getImportStatus(jobId: string): Observable<LeadImportJobResponse> {
-    return this.http.get<LeadImportJobResponse>(`${this.apiUrl}/import/${jobId}/status`);
+  getImportHistory(): Observable<ImportJobResponse[]> {
+    return this.http.get<ImportJobResponse[]>(`${this.apiUrl}/import/history`);
+  }
+
+  getImportJobById(id: number): Observable<ImportJobResponse> {
+    return this.http.get<ImportJobResponse>(`${this.apiUrl}/import/history/${id}`);
   }
 
   exportLeads(request: LeadExportRequest): Observable<Blob> {
     let params = new HttpParams();
     
-    request.columns.forEach(col => {
-      params = params.append('columns', col);
-    });
+    if (request.columns && request.columns.length > 0) {
+      params = params.set('columns', request.columns.join(','));
+    }
     
     if (request.status) {
       params = params.set('status', request.status);
     }
-    if (request.dateFrom) {
-      params = params.set('dateFrom', request.dateFrom);
+    if (request.startDate) {
+      params = params.set('startDate', request.startDate);
     }
-    if (request.dateTo) {
-      params = params.set('dateTo', request.dateTo);
+    if (request.endDate) {
+      params = params.set('endDate', request.endDate);
     }
     if (request.source) {
       params = params.set('source', request.source);

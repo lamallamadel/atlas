@@ -42,7 +42,12 @@ public class LeadExportService {
                 ? columns 
                 : getDefaultColumns();
 
-        try (CSVWriter csvWriter = new CSVWriter(writer)) {
+        try (CSVWriter csvWriter = new CSVWriter(writer,
+                CSVWriter.DEFAULT_SEPARATOR,
+                CSVWriter.DEFAULT_QUOTE_CHARACTER,
+                CSVWriter.DEFAULT_ESCAPE_CHARACTER,
+                CSVWriter.DEFAULT_LINE_END)) {
+            
             String[] header = selectedColumns.toArray(new String[0]);
             csvWriter.writeNext(header);
 
