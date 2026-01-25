@@ -160,7 +160,6 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest statusPatchToQualified = new DossierStatusPatchRequest();
         statusPatchToQualified.setStatus(DossierStatus.QUALIFIED);
-        statusPatchToQualified.setStatusCode("CRM_QUALIFIED");
         statusPatchToQualified.setUserId("agent-001");
         statusPatchToQualified.setReason("Lead qualified");
 
