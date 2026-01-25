@@ -1,62 +1,107 @@
-<div class="command-palette-overlay" *ngIf="visible$ | async" (click)="close()" (keydown.escape)="close()" role="dialog" aria-modal="true" tabindex="-1">
-  <div class="command-palette" (click)="$event.stopPropagation()" (keydown.escape)="close()" role="document" tabindex="0">
-    <div class="command-search">
-      <mat-icon class="search-icon">search</mat-icon>
-      <input
-        #commandInput
-        type="text"
-        class="command-input"
-        placeholder="Tapez une commande ou recherchez..."
-        [(ngModel)]="searchQuery"
-        (input)="onSearchChange()"
-        (keydown)="onKeyDown($event)"
-        autocomplete="off"
-      />
-      <div class="shortcut-hint">
-        <kbd>Ctrl+K</kbd>
+<div class="command-palette-overlay" 
+     *ngIf="visible$ | async" 
+     (click)="close()"
+     (keydown.escape)="close()" 
+     role="dialog" 
+     aria-modal="true"
+     aria-labelledby="command-palette-title"
+     tabindex="0">
+  <div class="command-palette" 
+       (click)="$event.stopPropagation()"
+       (keydown)="$event.stopPropagation()" 
+       role="document">
+    
+    <!-- Header -->
+    <div class="command-header">
+      <h2 id="command-palette-title" class="visually-hidden">Palette de commandes</h2>
+      <div class="command-search">
+        <mat-icon class="search-icon">search</mat-icon>
+        <input
+          #commandInput
+          type="text"
+          class="command-input"
+          placeholder="Tapez une commande, recherchez des annonces ou dossiers..."
+          [(ngModel)]="searchQuery"
+          (input)="onSearchChange()"
+          (keydown)="onKeyDown($event)"
+          autocomplete="off"
+          aria-label="Recherche de commandes"
+          aria-autocomplete="list"
+          aria-controls="command-list"
+          [attr.aria-activedescendant]="'command-item-' + selectedIndex"
+        />
+        <mat-spinner 
+          *ngIf="isSearching" 
+          diameter="20" 
+          class="search-spinner">
+        </mat-spinner>
+        <div class="shortcut-hint">
+          <kbd>Ctrl+K</kbd>
+        </div>
       </div>
     </div>
 
-    <div class="command-list" *ngIf="filteredCommands.length > 0">
-      <ng-container *ngFor="let group of getCategorizedCommands()">
-        <div class="command-category">{{ group.category }}</div>
+    <!-- Results -->
+    <div class="command-list" 
+         *ngIf="filteredItems.length > 0"
+         id="command-list"
+         role="listbox">
+      <ng-container *ngFor="let group of getGroupedItems()">
+        <div class="command-category" role="presentation">
+          {{ group.category }}
+        </div>
         <div
-          *ngFor="let command of group.commands; let i = index"
+          *ngFor="let item of group.items; let i = index"
           class="command-item"
-          [class.selected]="filteredCommands.indexOf(command) === selectedIndex"
-          (click)="executeCommand(command)"
-          (keydown.enter)="executeCommand(command)"
-          (mouseenter)="selectCommand(filteredCommands.indexOf(command))"
+          [class.selected]="filteredItems.indexOf(item) === selectedIndex"
+          [id]="'command-item-' + filteredItems.indexOf(item)"
+          (click)="executeItem(item)"
+          (keydown.enter)="executeItem(item)"
+          (mouseenter)="selectItem(filteredItems.indexOf(item))"
           role="option"
-          [attr.aria-selected]="filteredCommands.indexOf(command) === selectedIndex"
-          [attr.tabindex]="filteredCommands.indexOf(command) === selectedIndex ? 0 : -1"
+          [attr.aria-selected]="filteredItems.indexOf(item) === selectedIndex"
+          tabindex="-1"
         >
           <div class="command-content">
-            <mat-icon class="command-icon">{{ command.icon }}</mat-icon>
+            <mat-icon class="command-icon">{{ getItemIcon(item) }}</mat-icon>
             <div class="command-details">
-              <div class="command-label">{{ command.label }}</div>
-              <div class="command-description">{{ command.description }}</div>
+              <div class="command-label">{{ getItemLabel(item) }}</div>
+              <div class="command-description" *ngIf="getItemDescription(item)">
+                {{ getItemDescription(item) }}
+              </div>
+            </div>
+            <div class="command-shortcut" *ngIf="getItemShortcut(item)">
+              <kbd>{{ getItemShortcut(item) }}</kbd>
             </div>
           </div>
         </div>
       </ng-container>
     </div>
 
-    <div class="command-empty" *ngIf="filteredCommands.length === 0">
+    <!-- Empty State -->
+    <div class="command-empty" *ngIf="filteredItems.length === 0 && !isSearching">
       <mat-icon>search_off</mat-icon>
-      <p>Aucune commande trouvée</p>
+      <p *ngIf="searchQuery">Aucun résultat trouvé pour "{{ searchQuery }}"</p>
+      <p *ngIf="!searchQuery">Commencez à taper pour rechercher...</p>
     </div>
 
+    <!-- Loading State -->
+    <div class="command-loading" *ngIf="isSearching && searchQuery.length >= 2">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Recherche en cours...</p>
+    </div>
+
+    <!-- Footer -->
     <div class="command-footer">
       <div class="footer-shortcuts">
         <span class="footer-shortcut">
-          <kbd>↑</kbd><kbd>↓</kbd> pour naviguer
+          <kbd>↑</kbd><kbd>↓</kbd> naviguer
         </span>
         <span class="footer-shortcut">
-          <kbd>↵</kbd> pour sélectionner
+          <kbd>↵</kbd> sélectionner
         </span>
         <span class="footer-shortcut">
-          <kbd>Esc</kbd> pour fermer
+          <kbd>Esc</kbd> fermer
         </span>
       </div>
     </div>

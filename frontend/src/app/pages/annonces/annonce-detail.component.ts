@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
+import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 @Component({
   selector: 'app-annonce-detail',
@@ -17,7 +18,8 @@ export class AnnonceDetailComponent implements OnInit {
   constructor(
     private annonceApiService: AnnonceApiService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private recentNavigationService: RecentNavigationService
   ) {}
 
   ngOnInit(): void {
@@ -44,6 +46,15 @@ export class AnnonceDetailComponent implements OnInit {
       next: (response) => {
         this.annonce = response;
         this.loading = false;
+        
+        // Add to recent navigation
+        this.recentNavigationService.addRecentItem({
+          id: String(response.id),
+          type: 'annonce',
+          title: response.title,
+          subtitle: response.city ? `${response.city} - ${response.price ? response.price + '€' : ''}` : undefined,
+          route: `/annonces/${response.id}`
+        });
       },
       error: (err) => {
         if (err.status === 404) {
