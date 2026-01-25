@@ -122,6 +122,6 @@ export class LoginComponent implements OnInit {
     const base64Payload = btoa(JSON.stringify(payload));
     const signature = 'mock-signature';
 
-    return `${base64Header}.${base64Payload}.${signature}`;
+    return `mock-${base64Header}.${base64Payload}.${signature}`;
   }
 }
