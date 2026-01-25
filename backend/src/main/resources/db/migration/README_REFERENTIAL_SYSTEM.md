@@ -72,7 +72,7 @@ All admin endpoints are under `/api/workflow-admin/referentials`:
 For initial setup or specific organizations:
 
 ```sql
--- V27__Seed_default_referentials_per_org.sql
+-- V28__Seed_default_referentials_per_org.sql
 INSERT INTO referential (org_id, category, code, label, ...) VALUES
 ('ORG-123', 'CASE_TYPE', 'CRM_LEAD_BUY', 'Prospect Achat', ...);
 ```
@@ -225,8 +225,8 @@ List<ReferentialVersionEntity> history =
 ### Standard Migrations (H2 & PostgreSQL)
 - `V14__Add_referential_system.sql` - Creates referential table
 - `V15__Seed_default_referentials.sql` - Seeds DEFAULT-ORG
-- `V26__Add_referential_versioning.sql` - Adds versioning table
-- `V27__Seed_default_referentials_per_org.sql` - Seeds DEMO-ORG
+- `V27__Add_referential_versioning.sql` - Adds versioning table
+- `V28__Seed_default_referentials_per_org.sql` - Seeds DEMO-ORG
 
 ### PostgreSQL-Specific Migrations
 - `V103__Add_referential_versioning.sql` - PostgreSQL version with conditional DDL

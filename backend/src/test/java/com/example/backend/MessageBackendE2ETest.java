@@ -30,11 +30,13 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @BackendE2ETest
+@WithMockUser(roles = {"PRO", "ADMIN"})
 class MessageBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String TENANT_1 = "org-tenant-1";
@@ -68,7 +70,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_WithEmailChannel_Returns201AndCreatesAuditLog() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         LocalDateTime timestamp = LocalDateTime.of(2024, 1, 15, 10, 30, 0);
@@ -82,6 +83,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result = mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -118,7 +120,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_WithSmsChannel_Returns201() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         LocalDateTime timestamp = LocalDateTime.of(2024, 1, 15, 11, 0, 0);
@@ -132,6 +133,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -141,7 +143,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_WithWhatsappChannel_Returns201() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         LocalDateTime timestamp = LocalDateTime.of(2024, 1, 15, 12, 0, 0);
@@ -155,6 +156,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -163,7 +165,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_WithPhoneChannel_Returns201() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         LocalDateTime timestamp = LocalDateTime.of(2024, 1, 15, 13, 0, 0);
@@ -177,6 +178,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -185,7 +187,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_AllChannelsAndDirectionsCombinations_Returns201() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         MessageChannel[] channels = {MessageChannel.EMAIL, MessageChannel.SMS, MessageChannel.WHATSAPP, MessageChannel.PHONE};
@@ -206,6 +207,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
                 mockMvc.perform(withTenantHeaders(
                                 post("/api/v1/messages")
+                                        .with(jwt().jwt(createMockJwt(TENANT_1)))
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)), TENANT_1))
                         .andExpect(status().isCreated())
@@ -218,7 +220,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_ValidatesTimestamp() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         LocalDateTime pastTimestamp = LocalDateTime.of(2020, 1, 1, 0, 0, 0);
@@ -233,6 +234,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request1)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -247,6 +249,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request2)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -254,7 +257,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByChannel_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -264,6 +266,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("channel", "EMAIL"), TENANT_1))
                 .andExpect(status().isOk())
@@ -272,7 +275,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByDirection_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -281,6 +283,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("direction", "INBOUND"), TENANT_1))
                 .andExpect(status().isOk())
@@ -289,7 +292,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByChannelAndDirection_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -299,6 +301,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("channel", "EMAIL")
                                 .param("direction", "INBOUND"), TENANT_1))
@@ -309,7 +312,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_SortByTimestampDesc_ReturnsSortedResults() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         Long msg1Id = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -318,6 +320,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("sort", "timestamp,desc"), TENANT_1))
                 .andExpect(status().isOk())
@@ -328,7 +331,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_DefaultSortIsTimestampDesc() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         Long msg1Id = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
@@ -337,6 +339,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString()), TENANT_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
@@ -346,7 +349,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_Pagination_ReturnsCorrectPages() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         for (int i = 0; i < 25; i++) {
@@ -355,6 +357,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("page", "0")
                                 .param("size", "10"), TENANT_1))
@@ -367,6 +370,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("page", "1")
                                 .param("size", "10"), TENANT_1))
@@ -376,6 +380,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("page", "2")
                                 .param("size", "10"), TENANT_1))
@@ -385,7 +390,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_CrossTenantIsolation_OnlyReturnsSameTenant() throws Exception {
         Dossier dossier1 = createDossier(TENANT_1);
         Dossier dossier2 = createDossier(TENANT_2);
@@ -397,6 +401,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier1.getId().toString()), TENANT_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -404,6 +409,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_2)))
                                 .param("dossierId", dossier2.getId().toString()), TENANT_2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -411,19 +417,18 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_CrossTenantIsolation_CannotAccessOtherTenantDossier() throws Exception {
         Dossier dossier2 = createDossier(TENANT_2);
         createMessage(dossier2, MessageChannel.EMAIL, MessageDirection.INBOUND, LocalDateTime.of(2024, 1, 1, 10, 0));
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier2.getId().toString()), TENANT_1))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_AuditLog_ContainsContentInDiff() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         String messageContent = "Sensitive customer information about property inquiry";
@@ -438,6 +443,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result = mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)), TENANT_1))
                 .andExpect(status().isCreated())
@@ -465,7 +471,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_AuditLog_PersistsAcrossMultipleMessages() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
 
@@ -479,6 +484,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
             mockMvc.perform(withTenantHeaders(
                             post("/api/v1/messages")
+                                    .with(jwt().jwt(createMockJwt(TENANT_1)))
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(request)), TENANT_1))
                     .andExpect(status().isCreated());
@@ -511,7 +517,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void createMessage_AuditLog_IsolatedByTenant() throws Exception {
         Dossier dossier1 = createDossier(TENANT_1);
         Dossier dossier2 = createDossier(TENANT_2);
@@ -525,6 +530,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request1)), TENANT_1))
                 .andExpect(status().isCreated());
@@ -538,6 +544,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         post("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_2)))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request2)), TENANT_2))
                 .andExpect(status().isCreated());
@@ -565,12 +572,12 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_EmptyResults_ReturnsEmptyPage() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString()), TENANT_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
@@ -579,16 +586,15 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_NonExistentDossier_Returns404() throws Exception {
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", "99999"), TENANT_1))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_MultipleChannelsAndDirections_FiltersCorrectly() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -603,6 +609,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("channel", "EMAIL"), TENANT_1))
                 .andExpect(status().isOk())
@@ -610,6 +617,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("direction", "INBOUND"), TENANT_1))
                 .andExpect(status().isOk())
@@ -617,6 +625,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("channel", "WHATSAPP")
                                 .param("direction", "OUTBOUND"), TENANT_1))
@@ -625,7 +634,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByDateRange_ReturnsMessagesInRange() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -637,6 +645,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("startDate", "2024-01-05T00:00:00")
                                 .param("endDate", "2024-01-15T23:59:59"), TENANT_1))
@@ -645,7 +654,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByStartDateOnly_ReturnsMessagesAfterDate() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -656,6 +664,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("startDate", "2024-01-10T00:00:00"), TENANT_1))
                 .andExpect(status().isOk())
@@ -663,7 +672,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByEndDateOnly_ReturnsMessagesBeforeDate() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -680,6 +688,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("endDate", "2024-01-10T10:00:00"), TENANT_1))
                 .andExpect(status().isOk())
@@ -687,7 +696,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByDateRangeAndChannel_ReturnsCombinedFilter() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -698,6 +706,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("channel", "EMAIL")
                                 .param("startDate", "2024-01-05T00:00:00")
@@ -708,7 +717,6 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser(roles = {"PRO"})
     void listMessages_FilterByDateRangeChannelAndDirection_ReturnsCombinedFilter() throws Exception {
         Dossier dossier = createDossier(TENANT_1);
         
@@ -719,6 +727,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(withTenantHeaders(
                         get("/api/v1/messages")
+                                .with(jwt().jwt(createMockJwt(TENANT_1)))
                                 .param("dossierId", dossier.getId().toString())
                                 .param("channel", "EMAIL")
                                 .param("direction", "INBOUND")
@@ -751,6 +760,7 @@ class MessageBackendE2ETest extends BaseBackendE2ETest {
         try {
             MvcResult result = mockMvc.perform(withTenantHeaders(
                             post("/api/v1/messages")
+                                    .with(jwt().jwt(createMockJwt(dossier.getOrgId())))
                                     .contentType(MediaType.APPLICATION_JSON)
                                     .content(objectMapper.writeValueAsString(request)), dossier.getOrgId()))
                     .andExpect(status().isCreated())

@@ -1,9 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.entity.OutboundAttemptEntity;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.enums.MessageChannel;
-import com.example.backend.entity.enums.OutboundAttemptStatus;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.OutboundAttemptRepository;
@@ -19,10 +17,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.time.Duration;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class OutboundMessageAlertService {
@@ -96,7 +95,7 @@ public class OutboundMessageAlertService {
 
         try {
             LocalDateTime thresholdTime = LocalDateTime.now().minusHours(stuckMessageAgeHours);
-            
+
             List<OutboundMessageEntity> stuckQueuedMessages = outboundMessageRepository.findStuckMessages(
                     OutboundMessageStatus.QUEUED,
                     stuckMessageThresholdAttempts,
@@ -113,24 +112,24 @@ public class OutboundMessageAlertService {
 
             if (!stuckQueuedMessages.isEmpty() || !stuckSendingMessages.isEmpty()) {
                 int totalStuck = stuckQueuedMessages.size() + stuckSendingMessages.size();
-                
-                String alertMessage = String.format("ALERT: Found %d stuck outbound messages (threshold: %d attempts, age: %d hours)", 
+
+                String alertMessage = String.format("ALERT: Found %d stuck outbound messages (threshold: %d attempts, age: %d hours)",
                         totalStuck, stuckMessageThresholdAttempts, stuckMessageAgeHours);
-                
+
                 logger.warn(alertMessage);
 
                 if (!stuckQueuedMessages.isEmpty()) {
                     logger.warn("Stuck QUEUED messages: {}", stuckQueuedMessages.size());
                     for (OutboundMessageEntity msg : stuckQueuedMessages) {
-                        logger.warn("  - Message ID: {}, Channel: {}, Attempts: {}/{}, Age: {} hours, Error: {}", 
-                                msg.getId(), 
+                        logger.warn("  - Message ID: {}, Channel: {}, Attempts: {}/{}, Age: {} hours, Error: {}",
+                                msg.getId(),
                                 msg.getChannel(),
                                 msg.getAttemptCount(),
                                 msg.getMaxAttempts(),
                                 Duration.between(msg.getCreatedAt(), LocalDateTime.now()).toHours(),
                                 msg.getErrorCode());
-                        
-                        metricsService.counter("outbound_message_stuck_alert_total", 
+
+                        metricsService.counter("outbound_message_stuck_alert_total",
                                 "channel", msg.getChannel().name().toLowerCase(),
                                 "status", "queued").increment();
                     }
@@ -139,14 +138,14 @@ public class OutboundMessageAlertService {
                 if (!stuckSendingMessages.isEmpty()) {
                     logger.warn("Stuck SENDING messages: {}", stuckSendingMessages.size());
                     for (OutboundMessageEntity msg : stuckSendingMessages) {
-                        logger.warn("  - Message ID: {}, Channel: {}, Attempts: {}/{}, Age: {} hours", 
-                                msg.getId(), 
+                        logger.warn("  - Message ID: {}, Channel: {}, Attempts: {}/{}, Age: {} hours",
+                                msg.getId(),
                                 msg.getChannel(),
                                 msg.getAttemptCount(),
                                 msg.getMaxAttempts(),
                                 Duration.between(msg.getCreatedAt(), LocalDateTime.now()).toHours());
-                        
-                        metricsService.counter("outbound_message_stuck_alert_total", 
+
+                        metricsService.counter("outbound_message_stuck_alert_total",
                                 "channel", msg.getChannel().name().toLowerCase(),
                                 "status", "sending").increment();
                     }
@@ -175,11 +174,11 @@ public class OutboundMessageAlertService {
             long totalPending = queuedCount + sendingCount;
 
             if (totalPending > highQueueThreshold) {
-                String alertMessage = String.format("ALERT: High outbound message queue depth detected - Queued: %d, Sending: %d, Total: %d (threshold: %d)", 
+                String alertMessage = String.format("ALERT: High outbound message queue depth detected - Queued: %d, Sending: %d, Total: %d (threshold: %d)",
                         queuedCount, sendingCount, totalPending, highQueueThreshold);
                 logger.warn(alertMessage);
                 metricsService.counter("outbound_message_high_queue_depth_alert_total").increment();
-                
+
                 sendAlert("High Queue Depth Alert", alertMessage, "warning");
             }
 
@@ -199,11 +198,11 @@ public class OutboundMessageAlertService {
             long failedCount = outboundMessageRepository.countByStatus(OutboundMessageStatus.FAILED);
 
             if (failedCount > dlqThreshold) {
-                String alertMessage = String.format("ALERT: Dead letter queue has %d failed messages (threshold: %d)", 
+                String alertMessage = String.format("ALERT: Dead letter queue has %d failed messages (threshold: %d)",
                         failedCount, dlqThreshold);
                 logger.warn(alertMessage);
                 metricsService.counter("outbound_message_dead_letter_alert_total").increment();
-                
+
                 sendAlert("Dead Letter Queue Alert", alertMessage, "critical");
             }
 
@@ -221,10 +220,10 @@ public class OutboundMessageAlertService {
 
         try {
             LocalDateTime timeWindowStart = LocalDateTime.now().minusMinutes(timeWindowMinutes);
-            
+
             for (MessageChannel channel : MessageChannel.values()) {
                 ChannelFailureRate failureRate = calculateChannelFailureRate(channel, timeWindowStart);
-                
+
                 if (failureRate.getFailureRate() > failureRateThreshold && failureRate.getTotalMessages() >= 10) {
                     String alertMessage = String.format(
                             "ALERT: High failure rate for channel %s: %.2f%% (%d failures out of %d messages in last %d minutes)",
@@ -235,10 +234,10 @@ public class OutboundMessageAlertService {
                             timeWindowMinutes
                     );
                     logger.warn(alertMessage);
-                    
+
                     metricsService.counter("outbound_message_high_failure_rate_alert_total",
                             "channel", channel.name().toLowerCase()).increment();
-                    
+
                     sendAlert("High Failure Rate Alert", alertMessage, "critical");
                 }
             }
@@ -256,7 +255,7 @@ public class OutboundMessageAlertService {
         }
 
         try {
-            List<OutboundMessageEntity> messagesNeedingEscalation = 
+            List<OutboundMessageEntity> messagesNeedingEscalation =
                     outboundMessageRepository.findMessagesNeedingEscalation(
                             OutboundMessageStatus.QUEUED,
                             escalationAttempts,
@@ -272,17 +271,17 @@ public class OutboundMessageAlertService {
                 logger.error(alertMessage);
 
                 for (OutboundMessageEntity msg : messagesNeedingEscalation) {
-                    logger.error("  - Message ID: {}, Channel: {}, Attempts: {}, Recipient: {}, Error: {}", 
-                            msg.getId(), 
+                    logger.error("  - Message ID: {}, Channel: {}, Attempts: {}, Recipient: {}, Error: {}",
+                            msg.getId(),
                             msg.getChannel(),
                             msg.getAttemptCount(),
                             msg.getTo(),
                             msg.getErrorCode());
-                    
-                    metricsService.counter("outbound_message_escalation_alert_total", 
+
+                    metricsService.counter("outbound_message_escalation_alert_total",
                             "channel", msg.getChannel().name().toLowerCase()).increment();
                 }
-                
+
                 sendAlert("Message Escalation Required", alertMessage, "critical");
             }
 
@@ -296,20 +295,20 @@ public class OutboundMessageAlertService {
     public void updateHealthMetrics() {
         try {
             OutboundHealthMetrics metrics = new OutboundHealthMetrics();
-            
+
             LocalDateTime now = LocalDateTime.now();
             LocalDateTime windowStart = now.minusMinutes(timeWindowMinutes);
-            
+
             long queuedCount = outboundMessageRepository.countByStatus(OutboundMessageStatus.QUEUED);
             long sendingCount = outboundMessageRepository.countByStatus(OutboundMessageStatus.SENDING);
             long failedCount = outboundMessageRepository.countByStatus(OutboundMessageStatus.FAILED);
-            
+
             metrics.setQueuedMessages(queuedCount);
             metrics.setSendingMessages(sendingCount);
             metrics.setDeadLetterQueueSize(failedCount);
             metrics.setTotalPendingMessages(queuedCount + sendingCount);
             metrics.setTimestamp(now);
-            
+
             Map<String, ChannelHealthMetrics> channelMetrics = new HashMap<>();
             for (MessageChannel channel : MessageChannel.values()) {
                 ChannelHealthMetrics channelHealth = calculateChannelHealth(channel, windowStart);
@@ -317,9 +316,9 @@ public class OutboundMessageAlertService {
                 channelHealthCache.put(channel, channelHealth);
             }
             metrics.setChannelMetrics(channelMetrics);
-            
+
             latestHealthMetrics = metrics;
-            
+
             metricsService.getRegistry().gauge("outbound_message_queue_depth", queuedCount);
             metricsService.getRegistry().gauge("outbound_message_dlq_size", failedCount);
 
@@ -342,7 +341,7 @@ public class OutboundMessageAlertService {
     private ChannelHealthMetrics calculateChannelHealth(MessageChannel channel, LocalDateTime windowStart) {
         ChannelHealthMetrics metrics = new ChannelHealthMetrics();
         metrics.setChannel(channel.name());
-        
+
         long totalInWindow = outboundMessageRepository.countByChannelAndCreatedAtAfter(channel, windowStart);
         long sentInWindow = outboundMessageRepository.countByChannelAndStatusAndCreatedAtAfter(
                 channel, OutboundMessageStatus.SENT, windowStart);
@@ -350,12 +349,12 @@ public class OutboundMessageAlertService {
                 channel, OutboundMessageStatus.DELIVERED, windowStart);
         long failedInWindow = outboundMessageRepository.countByChannelAndStatusAndCreatedAtAfter(
                 channel, OutboundMessageStatus.FAILED, windowStart);
-        
+
         metrics.setTotalMessages(totalInWindow);
         metrics.setSentMessages(sentInWindow);
         metrics.setDeliveredMessages(deliveredInWindow);
         metrics.setFailedMessages(failedInWindow);
-        
+
         if (totalInWindow > 0) {
             metrics.setSuccessRate((double) (sentInWindow + deliveredInWindow) / totalInWindow);
             metrics.setFailureRate((double) failedInWindow / totalInWindow);
@@ -363,20 +362,35 @@ public class OutboundMessageAlertService {
             metrics.setSuccessRate(1.0);
             metrics.setFailureRate(0.0);
         }
-        
-        Double avgLatency = outboundAttemptRepository.calculateAverageDeliveryLatency(channel, windowStart);
+
+        Double avgLatency = calculateAverageDeliveryLatency(channel, windowStart);
         metrics.setAverageDeliveryLatencySeconds(avgLatency != null ? avgLatency : 0.0);
-        
+
         return metrics;
+    }
+
+    private Double calculateAverageDeliveryLatency(MessageChannel channel, LocalDateTime windowStart) {
+        var attempts = outboundAttemptRepository.findSuccessfulAttempts(channel, windowStart);
+        if (attempts.isEmpty()) {
+            return null;
+        }
+
+        double totalLatency = 0.0;
+        for (var attempt : attempts) {
+            Duration duration = Duration.between(attempt.getCreatedAt(), attempt.getUpdatedAt());
+            totalLatency += duration.toSeconds();
+        }
+
+        return totalLatency / attempts.size();
     }
 
     private ChannelFailureRate calculateChannelFailureRate(MessageChannel channel, LocalDateTime windowStart) {
         long totalMessages = outboundMessageRepository.countByChannelAndCreatedAtAfter(channel, windowStart);
         long failedMessages = outboundMessageRepository.countByChannelAndStatusAndCreatedAtAfter(
                 channel, OutboundMessageStatus.FAILED, windowStart);
-        
+
         double failureRate = totalMessages > 0 ? (double) failedMessages / totalMessages : 0.0;
-        
+
         return new ChannelFailureRate(channel, totalMessages, failedMessages, failureRate);
     }
 
@@ -385,7 +399,7 @@ public class OutboundMessageAlertService {
             if (emailAlertsEnabled && emailRecipients != null && !emailRecipients.isEmpty()) {
                 sendEmailAlert(title, message, severity);
             }
-            
+
             if (slackAlertsEnabled && slackWebhookUrl != null && !slackWebhookUrl.isEmpty()) {
                 sendSlackAlert(title, message, severity);
             }
@@ -397,7 +411,7 @@ public class OutboundMessageAlertService {
     private void sendEmailAlert(String title, String message, String severity) {
         try {
             logger.info("Sending email alert: {} - {}", title, message);
-            
+
         } catch (Exception e) {
             logger.error("Failed to send email alert", e);
         }
@@ -410,27 +424,27 @@ public class OutboundMessageAlertService {
                 case "warning" -> "warning";
                 default -> "good";
             };
-            
+
             Map<String, Object> payload = new HashMap<>();
             payload.put("text", title);
-            
+
             Map<String, Object> attachment = new HashMap<>();
             attachment.put("color", color);
             attachment.put("text", message);
             attachment.put("ts", System.currentTimeMillis() / 1000);
-            
+
             payload.put("attachments", List.of(attachment));
-            
+
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            
+
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-            
+
             restTemplate.postForEntity(slackWebhookUrl, request, String.class);
-            
+
             logger.info("Slack alert sent: {} - {}", title, message);
             metricsService.counter("outbound_alert_slack_sent_total", "severity", severity).increment();
-            
+
         } catch (Exception e) {
             logger.error("Failed to send Slack alert", e);
             metricsService.counter("outbound_alert_slack_error_total").increment();

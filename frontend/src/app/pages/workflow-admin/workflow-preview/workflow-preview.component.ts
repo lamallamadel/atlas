@@ -1,5 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, Input, OnInit } from '@angular/core';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewState } from '../models/workflow.model';
 
@@ -8,28 +7,16 @@ import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewSta
   templateUrl: './workflow-preview.component.html',
   styleUrls: ['./workflow-preview.component.css']
 })
-export class WorkflowPreviewComponent implements OnInit, OnDestroy {
-  workflow: WorkflowConfiguration | null = null;
+export class WorkflowPreviewComponent implements OnInit {
+  @Input() workflow: WorkflowConfiguration | null = null;
   previewState: WorkflowPreviewState | null = null;
-  
-  private destroy$ = new Subject<void>();
 
   constructor(private workflowService: WorkflowConfigService) {}
 
   ngOnInit(): void {
-    this.workflowService.workflow$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(workflow => {
-        this.workflow = workflow;
-        if (workflow && workflow.nodes.length > 0) {
-          this.initializePreview(workflow.nodes[0].status);
-        }
-      });
-  }
-
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    if (this.workflow && this.workflow.nodes.length > 0) {
+      this.initializePreview(this.workflow.nodes[0].status);
+    }
   }
 
   initializePreview(startStatus: string): void {
@@ -71,7 +58,7 @@ export class WorkflowPreviewComponent implements OnInit, OnDestroy {
     return this.workflow?.nodes.find(n => n.status === status);
   }
 
-  canExecuteTransition(): boolean {
+  canExecuteTransition(transition: TransitionRule): boolean {
     return true;
   }
 

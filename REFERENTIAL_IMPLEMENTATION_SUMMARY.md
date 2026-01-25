@@ -33,8 +33,8 @@ A comprehensive referential data management system has been implemented with the
 #### Migrations
 
 **Standard Migrations (H2 & PostgreSQL compatible):**
-- `V26__Add_referential_versioning.sql` - Creates referential_version table and adds version tracking columns
-- `V27__Seed_default_referentials_per_org.sql` - Seeds default referentials for DEMO-ORG
+- `V27__Add_referential_versioning.sql` - Creates referential_version table and adds version tracking columns
+- `V28__Seed_default_referentials_per_org.sql` - Seeds default referentials for DEMO-ORG
 
 **PostgreSQL-Specific Migrations:**
 - `V103__Add_referential_versioning.sql` - PostgreSQL version with conditional DDL
@@ -360,8 +360,8 @@ curl -X PUT \
 6. `backend/src/main/java/com/example/backend/dto/ReferentialVersionResponse.java`
 7. `backend/src/main/java/com/example/backend/dto/ReferentialUpdateRequest.java`
 8. `backend/src/main/java/com/example/backend/dto/ReferentialTemplateDto.java`
-9. `backend/src/main/resources/db/migration/V26__Add_referential_versioning.sql`
-10. `backend/src/main/resources/db/migration/V27__Seed_default_referentials_per_org.sql`
+9. `backend/src/main/resources/db/migration/V27__Add_referential_versioning.sql`
+10. `backend/src/main/resources/db/migration/V28__Seed_default_referentials_per_org.sql`
 11. `backend/src/main/resources/db/migration-postgres/V103__Add_referential_versioning.sql`
 12. `backend/src/main/resources/db/migration-postgres/V104__Seed_default_referentials_per_org.sql`
 13. `backend/src/main/resources/db/migration/README_REFERENTIAL_SYSTEM.md`

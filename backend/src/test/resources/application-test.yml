@@ -1,6 +1,11 @@
 spring:
   main:
     allow-bean-definition-overriding: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
   datasource:
     url: jdbc:h2:mem:testdb
     username: sa
@@ -9,7 +14,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     show-sql: false
     properties:
       hibernate:
@@ -18,15 +23,34 @@ spring:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
-    locations: classpath:db/migration,classpath:db/migration-h2
+    locations: classpath:db/migration
     placeholders:
       json_type: JSON
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
 
   security:
     oauth2:
       resourceserver:
         jwt:
           issuer-uri: mock
+
+  cache:
+    type: simple
+
 
 keycloak:
   admin:
@@ -63,6 +87,8 @@ management:
       enabled: false
     mail:
       enabled: false
+    redis:
+      enabled: false
 
 storage:
   strategy: localFileStorage
@@ -70,4 +96,7 @@ storage:
     base-path: ./test-storage
 
 rate-limit:
+  enabled: false
+
+elasticsearch:
   enabled: false

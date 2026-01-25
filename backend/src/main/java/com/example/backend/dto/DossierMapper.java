@@ -79,6 +79,7 @@ public class DossierMapper {
         }
 
         response.setLeadPhone(dossier.getLeadPhone());
+        response.setLeadEmail(dossier.getLeadEmail());
         response.setLeadName(dossier.getLeadName());
         response.setLeadSource(dossier.getLeadSource());
         response.setNotes(dossier.getNotes());

@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -19,7 +21,8 @@ import java.util.Map;
 @Tag(name = "Search", description = "Search API for Annonces and Dossiers")
 public class SearchController {
 
-    @Autowired
+    @Autowired(required = false)
+    @Nullable
     private SearchService searchService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -43,6 +46,10 @@ public class SearchController {
             @Parameter(description = "Page size") 
             @RequestParam(defaultValue = "10") int size
     ) {
+        if (searchService == null) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+
         Map<String, Object> filterMap = new HashMap<>();
         
         if (filters != null && !filters.isBlank()) {
@@ -67,6 +74,10 @@ public class SearchController {
             @Parameter(description = "Filter by type: 'annonce' or 'dossier'") 
             @RequestParam(required = false) String type
     ) {
+        if (searchService == null) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
+        }
+
         SearchResponseDto results = searchService.search(q, type, null, 0, 5);
         return ResponseEntity.ok(results);
     }

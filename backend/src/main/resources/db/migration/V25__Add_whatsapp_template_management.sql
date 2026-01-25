@@ -7,7 +7,7 @@ CREATE TABLE whatsapp_template (
     category VARCHAR(50) NOT NULL,
     status VARCHAR(50) NOT NULL,
     whatsapp_template_id VARCHAR(255),
-    components JSONB,
+    components ${json_type},
     description TEXT,
     rejection_reason TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

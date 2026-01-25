@@ -12,15 +12,13 @@ import com.example.backend.entity.enums.NotificationType;
 import com.example.backend.repository.NotificationRepository;
 import com.example.backend.service.NotificationService;
 import com.example.backend.utils.BackendE2ETestDataBuilder;
-import com.fasterxml.jackson.core.type.TypeReference;
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -51,7 +49,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
     @Autowired
     private NotificationService notificationService;
 
-    @Autowired
+    @MockBean
     private JavaMailSender mailSender;
 
     @Autowired
@@ -79,7 +77,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         request.setRecipient("test@example.com");
         request.setSubject("Test Subject");
         request.setTemplateId("test-email");
-        
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("userName", "John Doe");
         variables.put("message", "This is a test message");
@@ -120,7 +118,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         request.setType(NotificationType.SMS);
         request.setRecipient("+33612345678");
         request.setTemplateId("sms-template");
-        
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("code", "123456");
         request.setVariables(variables);
@@ -162,7 +160,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
                 .withOrgId(ORG_ID)
                 .persist();
         Long dossierId = dossier.getId();
-        
+
         NotificationCreateRequest request = new NotificationCreateRequest();
         request.setDossierId(dossierId);
         request.setType(NotificationType.EMAIL);
@@ -200,12 +198,12 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         notification.setRecipient("success@example.com");
         notification.setSubject("Test Email");
         notification.setTemplateId("test-email");
-        
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("userName", "Jane Doe");
         variables.put("message", "Success test message");
         notification.setVariables(variables);
-        
+
         notification.setStatus(NotificationStatus.PENDING);
         notification.setRetryCount(0);
         notification.setMaxRetries(3);
@@ -302,12 +300,12 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         notification.setRecipient("verify@example.com");
         notification.setSubject("Verification Email");
         notification.setTemplateId("test-email");
-        
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("userName", "Test User");
         variables.put("message", "Verification message");
         notification.setVariables(variables);
-        
+
         notification.setStatus(NotificationStatus.PENDING);
         notification.setRetryCount(0);
         notification.setMaxRetries(3);
@@ -316,7 +314,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         notificationService.processPendingNotifications();
 
         verify(mailSender).send(any(MimeMessage.class));
-        
+
         NotificationEntity processed = notificationRepository.findById(notification.getId()).orElse(null);
         assertThat(processed).isNotNull();
         assertThat(processed.getStatus()).isEqualTo(NotificationStatus.SENT);
@@ -337,13 +335,13 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         notification.setRecipient("template@example.com");
         notification.setSubject("Template Test");
         notification.setTemplateId("test-email");
-        
+
         Map<String, Object> variables = new HashMap<>();
         variables.put("userName", "Alice");
         variables.put("message", "Template rendering test");
         variables.put("dossierId", 12345);
         notification.setVariables(variables);
-        
+
         notification.setStatus(NotificationStatus.PENDING);
         notification.setRetryCount(0);
         notification.setMaxRetries(3);
@@ -681,7 +679,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.totalElements").value(2));
     }
 
-    private NotificationEntity createTestNotification(String orgId, Long dossierId, 
+    private NotificationEntity createTestNotification(String orgId, Long dossierId,
                                                       NotificationType type, NotificationStatus status) {
         if (dossierId != null) {
             Dossier dossier = testDataBuilder.dossierBuilder()

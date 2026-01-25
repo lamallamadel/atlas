@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -159,7 +160,32 @@ public class AuditAspect {
         try {
             Object service = joinPoint.getTarget();
             Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
-            return getByIdMethod.invoke(service, entityId);
+            Object result = getByIdMethod.invoke(service, entityId);
+            
+            // Convert to map and ensure status field is captured
+            Map<String, Object> capturedMap = safeConvertToMap(result);
+            
+            if (capturedMap != null && result != null) {
+                // Explicitly check for getStatus() method and add status if present
+                try {
+                    Method getStatusMethod = result.getClass().getMethod("getStatus");
+                    Object statusValue = getStatusMethod.invoke(result);
+                    
+                    // Only add if not already present in the map
+                    if (statusValue != null && !capturedMap.containsKey("status")) {
+                        // Convert enum to string if applicable
+                        if (statusValue instanceof Enum<?>) {
+                            capturedMap.put("status", ((Enum<?>) statusValue).name());
+                        } else {
+                            capturedMap.put("status", statusValue);
+                        }
+                    }
+                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                    // No getStatus() method or unable to access it, continue without status
+                }
+            }
+            
+            return capturedMap != null ? capturedMap : result;
         } catch (Exception e) {
             return null;
         }
@@ -214,7 +240,19 @@ public class AuditAspect {
         if (obj == null) return null;
 
         try {
-            return objectMapper.convertValue(obj, new TypeReference<LinkedHashMap<String, Object>>() {});
+            Map<String, Object> map = objectMapper.convertValue(obj, new TypeReference<LinkedHashMap<String, Object>>() {});
+            
+            // Ensure enum values are converted to strings
+            if (map != null) {
+                map.replaceAll((key, value) -> {
+                    if (value instanceof Enum<?>) {
+                        return ((Enum<?>) value).name();
+                    }
+                    return value;
+                });
+            }
+            
+            return map;
         } catch (Exception e) {
             // Keep non-null for tests expecting presence of before/after snapshots
             Map<String, Object> fallback = new LinkedHashMap<>();

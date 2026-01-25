@@ -4,6 +4,11 @@ spring:
   config:
     activate:
       on-profile: backend-e2e-postgres
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
 
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -40,6 +45,18 @@ spring:
     out-of-order: false
     ignore-missing-migrations: false
 
+  mail:
+    host: localhost
+    port: 3025
+    username: test
+    password: test
+    properties:
+      mail:
+        smtp:
+          auth: false
+          starttls:
+            enable: false
+
   security:
     oauth2:
       resourceserver:
@@ -49,6 +66,14 @@ spring:
   task:
     scheduling:
       enabled: false
+
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
+
+elasticsearch:
+  enabled: false
 
 management:
   endpoint:

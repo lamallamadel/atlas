@@ -43,7 +43,7 @@ CREATE INDEX IF NOT EXISTS idx_message_dossier_id_direction ON message(dossier_i
 CREATE INDEX IF NOT EXISTS idx_message_dossier_id_timestamp ON message(dossier_id, timestamp);
 
 -- Notification table indexes
-CREATE INDEX IF NOT EXISTS idx_notification_user_id ON notification(user_id);
+CREATE INDEX IF NOT EXISTS idx_notification_dossier_id ON notification(dossier_id);
 CREATE INDEX IF NOT EXISTS idx_notification_status ON notification(status);
 CREATE INDEX IF NOT EXISTS idx_notification_type ON notification(type);
 CREATE INDEX IF NOT EXISTS idx_notification_created_at ON notification(created_at);
@@ -53,16 +53,15 @@ CREATE INDEX IF NOT EXISTS idx_outbound_message_status ON outbound_message(statu
 CREATE INDEX IF NOT EXISTS idx_outbound_message_attempt_count ON outbound_message(attempt_count);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_channel ON outbound_message(channel);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_created_at ON outbound_message(created_at);
-CREATE INDEX IF NOT EXISTS idx_outbound_message_next_retry_at ON outbound_message(next_retry_at);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_status_attempt_count ON outbound_message(status, attempt_count);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_org_id_status ON outbound_message(org_id, status);
 
 -- Outbound Attempt table indexes
-CREATE INDEX IF NOT EXISTS idx_outbound_attempt_message_id ON outbound_attempt(message_id);
+CREATE INDEX IF NOT EXISTS idx_outbound_attempt_message_id ON outbound_attempt(outbound_message_id);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_status ON outbound_attempt(status);
-CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempt_number ON outbound_attempt(attempt_number);
+CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempt_no ON outbound_attempt(attempt_no);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_next_retry_at ON outbound_attempt(next_retry_at);
-CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempted_at ON outbound_attempt(attempted_at);
+--CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempted_at ON outbound_attempt(attempted_at);
 
 -- Dossier Status History table indexes
 CREATE INDEX IF NOT EXISTS idx_dossier_status_history_dossier_id ON dossier_status_history(dossier_id);

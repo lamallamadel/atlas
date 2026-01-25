@@ -85,7 +85,7 @@ A comprehensive WhatsApp template management system has been implemented with fu
 - Auditable operations
 
 ### Database Migration (1 file)
-`backend/src/main/resources/db/migration/V24__Add_whatsapp_template_management.sql`
+`backend/src/main/resources/db/migration/V25__Add_whatsapp_template_management.sql`
 - Creates whatsapp_template table with JSONB support
 - Creates template_variable table with foreign key
 - Indexes for performance optimization

@@ -22,6 +22,18 @@ spring:
     placeholders:
       json_type: JSONB
 
+  mail:
+    host: ${MAIL_HOST:localhost}
+    port: ${MAIL_PORT:1025}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:false}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:false}
+
   security:
     oauth2:
       resourceserver:
@@ -35,6 +47,11 @@ server:
 outbound:
   worker:
     enabled: false
+
+management:
+  health:
+    mail:
+      enabled: false
 
 logging:
   level:

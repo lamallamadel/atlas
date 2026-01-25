@@ -11,9 +11,6 @@ import {
   ConversionFunnel
 } from '../services/reporting-api.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
-import * as Papa from 'papaparse';
 
 @Component({
   selector: 'app-reports-dashboard',
@@ -31,6 +28,8 @@ export class ReportsDashboardComponent implements OnInit {
   analyticsData: AnalyticsData | null = null;
   loading = true;
   error: string | null = null;
+  exportingPDF = false;
+  exportingCSV = false;
 
   dateFrom = '';
   dateTo = '';
@@ -421,137 +420,161 @@ export class ReportsDashboardComponent implements OnInit {
     };
   }
 
-  exportToCSV(): void {
+  async exportToCSV(): Promise<void> {
     if (!this.analyticsData) {
       return;
     }
 
-    const csvData = this.prepareCSVData();
-    const csv = Papa.unparse(csvData);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', `analytics-report-${this.dateFrom}-to-${this.dateTo}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    this.exportingCSV = true;
+    this.error = null;
+
+    try {
+      const csvData = this.prepareCSVData();
+      const { default: Papa } = await import('papaparse');
+      const csv = Papa.unparse(csvData);
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `analytics-report-${this.dateFrom}-to-${this.dateTo}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('Failed to export CSV:', err);
+      this.error = 'Failed to export CSV. Please try again.';
+    } finally {
+      this.exportingCSV = false;
+    }
   }
 
-  exportToPDF(): void {
+  async exportToPDF(): Promise<void> {
     if (!this.analyticsData) {
       return;
     }
 
-    const doc = new jsPDF();
-    const pageWidth = doc.internal.pageSize.getWidth();
-    
-    doc.setFontSize(18);
-    doc.text('Analytics Dashboard Report', pageWidth / 2, 15, { align: 'center' });
-    
-    doc.setFontSize(10);
-    doc.text(`Date Range: ${this.dateFrom} to ${this.dateTo}`, pageWidth / 2, 22, { align: 'center' });
-    
-    let yPos = 30;
+    this.exportingPDF = true;
+    this.error = null;
 
-    doc.setFontSize(14);
-    doc.text('Key Performance Indicators', 14, yPos);
-    yPos += 5;
+    try {
+      const { default: jsPDF } = await import('jspdf');
+      const { default: autoTable } = await import('jspdf-autotable');
 
-    if (this.kpiReport) {
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Metric', 'Value']],
-        body: [
-          ['Average Response Time', `${this.kpiReport.averageResponseTimeHours.toFixed(2)} hours`],
-          ['Appointment Show Rate', `${this.kpiReport.appointmentShowRate.toFixed(1)}%`],
-          ['Pipeline Velocity', `${this.kpiReport.pipelineVelocityDays.toFixed(1)} days`],
-          ['Overall Conversion Rate', `${this.pipelineSummary?.overallConversionRate.toFixed(1)}%`]
-        ],
-        theme: 'grid',
-        headStyles: { fillColor: [54, 162, 235] }
-      });
-      yPos = (doc as any).lastAutoTable.finalY + 10;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      
+      doc.setFontSize(18);
+      doc.text('Analytics Dashboard Report', pageWidth / 2, 15, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.text(`Date Range: ${this.dateFrom} to ${this.dateTo}`, pageWidth / 2, 22, { align: 'center' });
+      
+      let yPos = 30;
+
+      doc.setFontSize(14);
+      doc.text('Key Performance Indicators', 14, yPos);
+      yPos += 5;
+
+      if (this.kpiReport) {
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Metric', 'Value']],
+          body: [
+            ['Average Response Time', `${this.kpiReport.averageResponseTimeHours.toFixed(2)} hours`],
+            ['Appointment Show Rate', `${this.kpiReport.appointmentShowRate.toFixed(1)}%`],
+            ['Pipeline Velocity', `${this.kpiReport.pipelineVelocityDays.toFixed(1)} days`],
+            ['Overall Conversion Rate', `${this.pipelineSummary?.overallConversionRate.toFixed(1)}%`]
+          ],
+          theme: 'grid',
+          headStyles: { fillColor: [54, 162, 235] }
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('Agent Performance', 14, yPos);
+      yPos += 5;
+
+      if (this.analyticsData.agentPerformance.length > 0) {
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Agent', 'Total Dossiers', 'Closed', 'Conversion Rate', 'Avg Response Time']],
+          body: this.analyticsData.agentPerformance.map(agent => [
+            agent.agentName,
+            agent.totalDossiers.toString(),
+            agent.closedDossiers.toString(),
+            `${agent.conversionRate.toFixed(1)}%`,
+            `${agent.averageResponseTimeHours.toFixed(1)}h`
+          ]),
+          theme: 'grid',
+          headStyles: { fillColor: [75, 192, 192] }
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('Lead Sources', 14, yPos);
+      yPos += 5;
+
+      if (this.analyticsData.leadSources.length > 0) {
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Source', 'Count', 'Percentage', 'Conversion Rate']],
+          body: this.analyticsData.leadSources.map(source => [
+            source.source,
+            source.count.toString(),
+            `${source.percentage.toFixed(1)}%`,
+            `${source.conversionRate.toFixed(1)}%`
+          ]),
+          theme: 'grid',
+          headStyles: { fillColor: [153, 102, 255] }
+        });
+        yPos = (doc as any).lastAutoTable.finalY + 10;
+      }
+
+      if (yPos > 250) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.text('Conversion Funnel', 14, yPos);
+      yPos += 5;
+
+      if (this.analyticsData.conversionFunnel.length > 0) {
+        autoTable(doc, {
+          startY: yPos,
+          head: [['Stage', 'Count', 'Conversion Rate', 'Drop-off Rate']],
+          body: this.analyticsData.conversionFunnel.map(stage => [
+            stage.stage,
+            stage.count.toString(),
+            `${stage.conversionRate.toFixed(1)}%`,
+            `${stage.dropOffRate.toFixed(1)}%`
+          ]),
+          theme: 'grid',
+          headStyles: { fillColor: [255, 159, 64] }
+        });
+      }
+
+      doc.save(`analytics-report-${this.dateFrom}-to-${this.dateTo}.pdf`);
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+      this.error = 'Failed to export PDF. Please try again.';
+    } finally {
+      this.exportingPDF = false;
     }
-
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
-    }
-
-    doc.setFontSize(14);
-    doc.text('Agent Performance', 14, yPos);
-    yPos += 5;
-
-    if (this.analyticsData.agentPerformance.length > 0) {
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Agent', 'Total Dossiers', 'Closed', 'Conversion Rate', 'Avg Response Time']],
-        body: this.analyticsData.agentPerformance.map(agent => [
-          agent.agentName,
-          agent.totalDossiers.toString(),
-          agent.closedDossiers.toString(),
-          `${agent.conversionRate.toFixed(1)}%`,
-          `${agent.averageResponseTimeHours.toFixed(1)}h`
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [75, 192, 192] }
-      });
-      yPos = (doc as any).lastAutoTable.finalY + 10;
-    }
-
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
-    }
-
-    doc.setFontSize(14);
-    doc.text('Lead Sources', 14, yPos);
-    yPos += 5;
-
-    if (this.analyticsData.leadSources.length > 0) {
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Source', 'Count', 'Percentage', 'Conversion Rate']],
-        body: this.analyticsData.leadSources.map(source => [
-          source.source,
-          source.count.toString(),
-          `${source.percentage.toFixed(1)}%`,
-          `${source.conversionRate.toFixed(1)}%`
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [153, 102, 255] }
-      });
-      yPos = (doc as any).lastAutoTable.finalY + 10;
-    }
-
-    if (yPos > 250) {
-      doc.addPage();
-      yPos = 20;
-    }
-
-    doc.setFontSize(14);
-    doc.text('Conversion Funnel', 14, yPos);
-    yPos += 5;
-
-    if (this.analyticsData.conversionFunnel.length > 0) {
-      autoTable(doc, {
-        startY: yPos,
-        head: [['Stage', 'Count', 'Conversion Rate', 'Drop-off Rate']],
-        body: this.analyticsData.conversionFunnel.map(stage => [
-          stage.stage,
-          stage.count.toString(),
-          `${stage.conversionRate.toFixed(1)}%`,
-          `${stage.dropOffRate.toFixed(1)}%`
-        ]),
-        theme: 'grid',
-        headStyles: { fillColor: [255, 159, 64] }
-      });
-    }
-
-    doc.save(`analytics-report-${this.dateFrom}-to-${this.dateTo}.pdf`);
   }
 
   private prepareCSVData(): any[] {

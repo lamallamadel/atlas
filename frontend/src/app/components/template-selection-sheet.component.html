@@ -36,7 +36,7 @@
       #templateList 
       [multiple]="false"
       [(ngModel)]="selectedTemplate"
-      (selectionChange)="selectTemplate($event.options[0]?.value)">
+      (selectionChange)="selectTemplate($event.options[0].value)">
       <mat-list-option 
         *ngFor="let template of filteredTemplates"
         [value]="template"

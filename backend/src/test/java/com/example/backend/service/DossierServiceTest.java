@@ -188,17 +188,16 @@ class DossierServiceTest {
     }
 
     @Test
-    void create_WithDraftAnnonce_CreatesSuccessfully() {
+    void create_WithDraftAnnonce_ThrowsIllegalArgumentException() {
         Annonce draftAnnonce = createAnnonce(DEFAULT_ORG, "Draft Annonce", AnnonceStatus.DRAFT);
         draftAnnonce = annonceRepository.save(draftAnnonce);
 
         DossierCreateRequest request = createBasicRequest();
         request.setAnnonceId(draftAnnonce.getId());
 
-        DossierResponse response = dossierService.create(request);
-
-        assertThat(response.getId()).isNotNull();
-        assertThat(response.getAnnonceId()).isEqualTo(draftAnnonce.getId());
+        assertThatThrownBy(() -> dossierService.create(request))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Cannot create dossier with DRAFT annonce");
     }
 
     @Test

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MessageFormDialogComponent } from './message-form-dialog.component';
-import { DatetimePickerComponent } from './datetime-picker.component';
+import DatetimePickerComponent from './datetime-picker.component';
 import { MaterialTestingModule } from '../testing/material-testing.module';
 
 describe('MessageFormDialogComponent', () => {

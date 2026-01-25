@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class WhatsAppWebhookSignatureValidatorTest {
 
     @Mock
@@ -78,8 +81,6 @@ class WhatsAppWebhookSignatureValidatorTest {
 
     @Test
     void validateSignature_ReturnsFalse_ForNullPayload() {
-        when(providerConfigRepository.findByOrgId(orgId)).thenReturn(Optional.of(config));
-
         boolean result = validator.validateSignature(null, "sha256=signature", orgId);
 
         assertFalse(result);
@@ -87,8 +88,6 @@ class WhatsAppWebhookSignatureValidatorTest {
 
     @Test
     void validateSignature_ReturnsFalse_ForNullSignature() {
-        when(providerConfigRepository.findByOrgId(orgId)).thenReturn(Optional.of(config));
-
         boolean result = validator.validateSignature(payload, null, orgId);
 
         assertFalse(result);

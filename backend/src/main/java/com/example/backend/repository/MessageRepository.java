@@ -31,12 +31,12 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>, J
             @Param("endDate") LocalDateTime endDate);
 
     @EntityGraph(attributePaths = {"dossier"})
-    @Query(value = "SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
+    @Query(value = "SELECT DISTINCT m FROM MessageEntity m LEFT JOIN m.dossier d WHERE m.dossier.id = :dossierId " +
            "AND (:channel IS NULL OR m.channel = :channel) " +
            "AND (:direction IS NULL OR m.direction = :direction) " +
            "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
            "AND (:endDate IS NULL OR m.timestamp <= :endDate)",
-           countQuery = "SELECT COUNT(m) FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
+           countQuery = "SELECT COUNT(DISTINCT m) FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
            "AND (:channel IS NULL OR m.channel = :channel) " +
            "AND (:direction IS NULL OR m.direction = :direction) " +
            "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +

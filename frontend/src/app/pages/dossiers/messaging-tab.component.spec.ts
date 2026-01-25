@@ -3,8 +3,11 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { of, throwError } from 'rxjs';
 import { MessagingTabComponent } from './messaging-tab.component';
+import { OutboundMessageFormComponent } from './outbound-message-form.component';
+import { OutboundMessageListComponent } from './outbound-message-list.component';
 import { OutboundMessageApiService, OutboundMessageStatus } from '../../services/outbound-message-api.service';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
+import { MaterialTestingModule } from '../../testing/material-testing.module';
 
 describe('MessagingTabComponent', () => {
   let component: MessagingTabComponent;
@@ -16,10 +19,15 @@ describe('MessagingTabComponent', () => {
   beforeEach(async () => {
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
-    mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['retry']);
+    mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['retry', 'listTemplates', 'create', 'list']);
 
     await TestBed.configureTestingModule({
-      declarations: [ MessagingTabComponent ],
+      declarations: [ 
+        MessagingTabComponent,
+        OutboundMessageFormComponent,
+        OutboundMessageListComponent
+      ],
+      imports: [ MaterialTestingModule ],
       providers: [
         { provide: MatDialog, useValue: mockDialog },
         { provide: MatSnackBar, useValue: mockSnackBar },

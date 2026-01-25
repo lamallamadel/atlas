@@ -20,8 +20,8 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
-.mvn/timing.properties
-.mvn/wrapper/maven-wrapper.jar
+.mvn/
+.mavenrc
 backend/.mvn/
 backend/backend/
 
@@ -404,6 +404,14 @@ setup-initial.ps1
 setup-backend.js
 mvn17.cmd
 mavenrc_pre.bat
+run-mvn-install-java17.cmd
+setup-deps.ps1
+setup-backend-deps.cmd
+run-setup.cmd
+run-mvn-install.js
+SETUP_INSTRUCTIONS_MANUAL.md
+setup-java17-maven.ps1
+run-maven-install-backend.cmd
 
 # Automated setup artifacts
 run-maven-clean-install.ps1
@@ -424,3 +432,12 @@ install-backend-deps.js
 setup-maven-build-temp.ps1
 setup-backend-maven.js
 run-backend-mvn-install.cmd
+
+# Setup helper scripts (created during initial repo clone)
+run-maven-java17.cmd
+setup-java17-env.ps1
+backend/setup-and-build.ps1
+backend/run-maven-install.js
+
+# Agent-created setup script (current session)
+setup-repo-packages.ps1

@@ -36,6 +36,8 @@ public class NotificationService {
         this.providerMap = Map.of(
                 NotificationType.EMAIL, emailProvider
         );
+        log.info("NotificationService initialized successfully with EmailProvider: {}", 
+                emailProvider.getClass().getSimpleName());
     }
 
     @Transactional

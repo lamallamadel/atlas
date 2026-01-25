@@ -456,4 +456,127 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     });
   }
+
+  isExportingToCSV = false;
+  isExportingToPDF = false;
+
+  async exportToCSV(): Promise<void> {
+    if (this.isExportingToCSV) {
+      return;
+    }
+
+    this.isExportingToCSV = true;
+
+    try {
+      const Papa = await import('papaparse');
+      
+      const csvData = this.recentDossiers.map(dossier => ({
+        ID: dossier.id,
+        'Lead Name': dossier.leadName,
+        'Lead Phone': dossier.leadPhone,
+        'Status': dossier.status,
+        'Created At': dossier.createdAt
+      }));
+
+      const csv = Papa.unparse(csvData);
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', `dossiers_${new Date().toISOString()}.csv`);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      this.ariaAnnouncer.announcePolite('Export CSV terminé avec succès');
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+      this.ariaAnnouncer.announceAssertive('Erreur lors de l\'export CSV');
+    } finally {
+      this.isExportingToCSV = false;
+    }
+  }
+
+  async exportToPDF(): Promise<void> {
+    if (this.isExportingToPDF) {
+      return;
+    }
+
+    this.isExportingToPDF = true;
+
+    try {
+      const [jsPDF, autoTable] = await Promise.all([
+        import('jspdf'),
+        import('jspdf-autotable')
+      ]);
+      
+      const { jsPDF: JsPDFClass } = jsPDF;
+      const doc = new JsPDFClass();
+
+      doc.setFontSize(18);
+      doc.text('Dashboard Report', 14, 20);
+      
+      doc.setFontSize(12);
+      doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
+
+      let yPosition = 45;
+
+      doc.setFontSize(14);
+      doc.text('KPI Summary', 14, yPosition);
+      yPosition += 10;
+
+      const kpiData = [
+        ['Annonces Actives', this.kpiCards['annoncesActives'].value.toString(), this.kpiCards['annoncesActives'].trend],
+        ['Dossiers à Traiter', this.kpiCards['dossiersATraiter'].value.toString(), this.kpiCards['dossiersATraiter'].trend]
+      ];
+
+      (doc as any).autoTable({
+        startY: yPosition,
+        head: [['Metric', 'Value', 'Trend']],
+        body: kpiData,
+        theme: 'grid',
+        styles: { fontSize: 10 },
+        headStyles: { fillColor: [66, 139, 202] }
+      });
+
+      yPosition = (doc as any).lastAutoTable.finalY + 15;
+
+      if (this.recentDossiers.length > 0) {
+        doc.setFontSize(14);
+        doc.text('Recent Dossiers', 14, yPosition);
+        yPosition += 10;
+
+        const dossierData = this.recentDossiers.map(dossier => [
+          dossier.id.toString(),
+          dossier.leadName || 'N/A',
+          dossier.leadPhone || 'N/A',
+          dossier.status,
+          new Date(dossier.createdAt).toLocaleDateString()
+        ]);
+
+        (doc as any).autoTable({
+          startY: yPosition,
+          head: [['ID', 'Lead Name', 'Lead Phone', 'Status', 'Created At']],
+          body: dossierData,
+          theme: 'striped',
+          styles: { fontSize: 9 },
+          headStyles: { fillColor: [66, 139, 202] }
+        });
+      }
+
+      doc.save(`dashboard_report_${new Date().toISOString()}.pdf`);
+      
+      this.ariaAnnouncer.announcePolite('Export PDF terminé avec succès');
+    } catch (error) {
+      console.error('Failed to export PDF:', error);
+      this.ariaAnnouncer.announceAssertive('Erreur lors de l\'export PDF');
+    } finally {
+      this.isExportingToPDF = false;
+    }
+  }
 }

@@ -99,9 +99,13 @@ public class MessageService {
 
         Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
         
-        // Map entities within transaction scope
+        // Force eager loading of dossier associations and map to DTOs within transaction boundary
         List<MessageResponse> responseList = messages.getContent().stream()
-                .map(messageMapper::toResponse)
+                .map(message -> {
+                    // Touch the dossier association to ensure it's loaded within transaction
+                    message.getDossier().getId();
+                    return messageMapper.toResponse(message);
+                })
                 .toList();
         
         return new PageImpl<>(responseList, pageable, messages.getTotalElements());

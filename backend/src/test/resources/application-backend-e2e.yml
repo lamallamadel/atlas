@@ -1,4 +1,13 @@
 spring:
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -12,6 +21,8 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: mock
+  cache:
+    type: simple
 
 keycloak:
   admin:
@@ -38,6 +49,8 @@ management:
       enabled: false
     mail:
       enabled: false
+    redis:
+      enabled: false
 
 logging:
   level:
@@ -50,4 +63,7 @@ cors:
   allowed-origins: "*"
 
 rate-limit:
+  enabled: false
+
+elasticsearch:
   enabled: false

@@ -17,11 +17,13 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,6 +40,7 @@ public class DossierService {
     private final DossierMapper dossierMapper;
     private final AnnonceRepository annonceRepository;
     private final DossierStatusTransitionService transitionService;
+    @Nullable
     private final SearchService searchService;
     private final MetricsService metricsService;
     private final WorkflowValidationService workflowValidationService;
@@ -47,7 +50,7 @@ public class DossierService {
 
     public DossierService(DossierRepository dossierRepository, DossierMapper dossierMapper,
                          AnnonceRepository annonceRepository, DossierStatusTransitionService transitionService,
-                         SearchService searchService, MetricsService metricsService,
+                         @Autowired(required = false) @Nullable SearchService searchService, MetricsService metricsService,
                          WorkflowValidationService workflowValidationService,
                          PartiePrenanteService partiePrenanteService,
                          jakarta.persistence.EntityManager entityManager,
@@ -82,7 +85,6 @@ public class DossierService {
             if (annonce.getStatus() == AnnonceStatus.ARCHIVED) {
                 throw new IllegalArgumentException("Cannot create dossier with ARCHIVED annonce");
             }
-
             if (annonce.getStatus() == AnnonceStatus.DRAFT) {
                 throw new IllegalArgumentException("Cannot create dossier with DRAFT annonce");
             }
@@ -91,10 +93,12 @@ public class DossierService {
         Dossier dossier = dossierMapper.toEntityWithoutParties(request);
         dossier.setOrgId(orgId);
 
-        statusCodeValidationService.validateCaseType(dossier.getCaseType());
-        statusCodeValidationService.validateStatusCodeForCaseType(
-                dossier.getCaseType(), 
-                dossier.getStatusCode());
+        if (dossier.getCaseType() != null && !dossier.getCaseType().isBlank()) {
+            statusCodeValidationService.validateCaseType(dossier.getCaseType());
+            statusCodeValidationService.validateStatusCodeForCaseType(
+                    dossier.getCaseType(), 
+                    dossier.getStatusCode());
+        }
 
         LocalDateTime now = LocalDateTime.now();
         dossier.setCreatedAt(now);
@@ -130,7 +134,9 @@ public class DossierService {
 
         transitionService.recordTransition(saved, null, saved.getStatus(), null, "Initial dossier creation");
 
-        searchService.indexDossier(saved);
+        if (searchService != null) {
+            searchService.indexDossier(saved);
+        }
 
         return dossierMapper.toResponse(saved);
     }
@@ -229,7 +235,9 @@ public class DossierService {
 
         transitionService.recordTransition(dossier, currentStatus, newStatus, request.getUserId(), request.getReason());
 
-        searchService.indexDossier(updated);
+        if (searchService != null) {
+            searchService.indexDossier(updated);
+        }
 
         return dossierMapper.toResponse(updated);
     }
@@ -253,7 +261,9 @@ public class DossierService {
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setUpdatedAt(LocalDateTime.now());
         Dossier updated = dossierRepository.save(dossier);
-        searchService.indexDossier(updated);
+        if (searchService != null) {
+            searchService.indexDossier(updated);
+        }
         return dossierMapper.toResponse(updated);
     }
 
@@ -349,7 +359,9 @@ public class DossierService {
         }
 
         dossierRepository.delete(dossier);
-        searchService.deleteDossierIndex(id);
+        if (searchService != null) {
+            searchService.deleteDossierIndex(id);
+        }
     }
 
     @Transactional(readOnly = true)

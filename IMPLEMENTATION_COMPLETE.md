@@ -18,7 +18,7 @@ Successfully implemented a comprehensive referential-based status system for the
   - Returns case type and list of allowed status codes
 
 ### 3. Database Migration
-- **`backend/src/main/resources/db/migration/V28__Migrate_dossier_status_to_referential.sql`**
+- **`backend/src/main/resources/db/migration/V29__Migrate_dossier_status_to_referential.sql`**
   - Migrates existing status enum values to statusCode field
   - Creates performance indexes
   - Adds column documentation

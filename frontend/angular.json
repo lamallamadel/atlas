@@ -42,7 +42,15 @@
               "src/styles/print.scss",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [],
+            "allowedCommonJsDependencies": [
+              "jspdf",
+              "jspdf-autotable",
+              "papaparse",
+              "canvg",
+              "raf",
+              "rgbcolor"
+            ]
           },
           "configurations": {
             "production": {
