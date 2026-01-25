@@ -5,9 +5,22 @@ describe('ThemeService', () => {
   let service: ThemeService;
 
   beforeEach(() => {
+    localStorage.clear();
+    Object.defineProperty(window, 'matchMedia', {
+      writable: true,
+      value: jasmine.createSpy('matchMedia').and.returnValue({
+        matches: false,
+        media: '(prefers-color-scheme: dark)',
+        onchange: null,
+        addListener: jasmine.createSpy('addListener'),
+        removeListener: jasmine.createSpy('removeListener'),
+        addEventListener: jasmine.createSpy('addEventListener'),
+        removeEventListener: jasmine.createSpy('removeEventListener'),
+        dispatchEvent: jasmine.createSpy('dispatchEvent')
+      })
+    });
     TestBed.configureTestingModule({});
     service = TestBed.inject(ThemeService);
-    localStorage.clear();
   });
 
   afterEach(() => {
@@ -19,7 +32,7 @@ describe('ThemeService', () => {
   });
 
   it('should default to light theme', () => {
-    expect(service.getCurrentTheme()).toBe('dark');
+    expect(service.getCurrentTheme()).toBe('light');
   });
 
   it('should toggle theme from light to dark', () => {
