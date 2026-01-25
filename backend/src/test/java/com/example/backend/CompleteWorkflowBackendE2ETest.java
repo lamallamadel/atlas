@@ -146,7 +146,6 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest statusPatchToQualifying = new DossierStatusPatchRequest();
         statusPatchToQualifying.setStatus(DossierStatus.QUALIFYING);
-        statusPatchToQualifying.setStatusCode("CRM_QUALIFYING");
         statusPatchToQualifying.setUserId("agent-001");
         statusPatchToQualifying.setReason("Starting qualification process");
 
@@ -160,7 +159,6 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest statusPatchToQualified = new DossierStatusPatchRequest();
         statusPatchToQualified.setStatus(DossierStatus.QUALIFIED);
-        statusPatchToQualified.setStatusCode("CRM_QUALIFIED");
         statusPatchToQualified.setUserId("agent-001");
         statusPatchToQualified.setReason("Lead qualified");
 
@@ -174,7 +172,6 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest statusPatchToAppointment = new DossierStatusPatchRequest();
         statusPatchToAppointment.setStatus(DossierStatus.APPOINTMENT);
-        statusPatchToAppointment.setStatusCode("CRM_APPOINTMENT");
         statusPatchToAppointment.setUserId("agent-001");
         statusPatchToAppointment.setReason("Appointment scheduled");
 
