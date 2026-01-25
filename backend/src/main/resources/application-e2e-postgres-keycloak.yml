@@ -40,6 +40,10 @@ spring:
         jwt:
           # Real Keycloak issuer-uri for full integration E2E tests.
           issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8081/realms/myrealm}
+  data:
+    elasticsearch:
+      repositories:
+        enabled: false
 
 server:
   port: ${SERVER_PORT:8085}
