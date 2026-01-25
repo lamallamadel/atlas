@@ -654,7 +654,7 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
         patchRequest.setStatus(DossierStatus.QUALIFYING);
-        patchRequest.setStatusCode("CRM_QUALIFYING");
+        patchRequest.setStatusCode("QUALIFYING");
         patchRequest.setUserId("user-123");
         patchRequest.setReason("Client called back");
 
