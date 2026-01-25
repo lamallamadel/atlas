@@ -1,0 +1,152 @@
+# Complete WhatsApp Outbound Messaging Configuration
+# This configuration enables all features including Redis rate limiting,
+# DLQ alerting with email/Slack notifications, and webhook processing
+
+# WhatsApp Cloud API Configuration
+whatsapp:
+  cloud:
+    api:
+      base-url: "https://graph.facebook.com/v18.0"
+  
+  rate-limit:
+    # Default quota per organization (messages per 24 hours)
+    default-quota: 1000
+    # Rate limit window in seconds (86400 = 24 hours)
+    window-seconds: 86400
+
+# Redis Configuration for High-Performance Rate Limiting
+spring:
+  data:
+    redis:
+      # Redis server host
+      host: localhost
+      # Redis server port
+      port: 6379
+      # Optional password
+      password: ${REDIS_PASSWORD:}
+      # Connection timeout
+      timeout: 2000ms
+      # Lettuce connection pool configuration
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 2
+          max-wait: -1ms
+        shutdown-timeout: 100ms
+
+# Outbound Message Alert Configuration
+outbound:
+  alert:
+    # Enable alert system
+    enabled: true
+    
+    # Stuck message detection thresholds
+    stuck-message-threshold-attempts: 3
+    stuck-message-age-hours: 2
+    
+    # Dead Letter Queue (DLQ) threshold
+    # Alert triggered when failed messages exceed this number
+    dlq-threshold: 100
+    
+    # High queue depth threshold
+    # Alert triggered when pending messages exceed this number
+    high-queue-threshold: 1000
+    
+    # Channel failure rate threshold (30%)
+    # Alert triggered when failure rate exceeds this percentage
+    failure-rate-threshold: 0.30
+    
+    # Time window for rate calculations (minutes)
+    time-window-minutes: 60
+    
+    # Escalation threshold (message attempts)
+    escalation-attempts: 5
+    
+    # Maximum results to return in alerts
+    max-results: 100
+    
+    # Email notification configuration
+    email:
+      enabled: true
+      # Comma-separated list of email recipients
+      recipients: "ops-team@example.com,admin@example.com"
+    
+    # Slack notification configuration
+    slack:
+      enabled: true
+      # Slack webhook URL (obtain from Slack App configuration)
+      webhook-url: "${SLACK_WEBHOOK_URL:}"
+    
+    # Alert schedule cron expressions
+    # Stuck messages check - every 15 minutes
+    cron: "0 */15 * * * *"
+    
+    # Dead letter queue check - every hour
+    dead-letter:
+      cron: "0 0 * * * *"
+    
+    # High queue depth check - every 10 minutes
+    high-queue-depth:
+      cron: "0 */10 * * * *"
+    
+    # Failure rate check - every 5 minutes
+    failure-rate:
+      cron: "0 */5 * * * *"
+    
+    # Escalation check - every 20 minutes
+    escalation:
+      cron: "0 */20 * * * *"
+    
+    # Health metrics update - every 30 seconds
+    health-metrics-update-ms: 30000
+
+# Outbound Job Worker Configuration
+outbound:
+  job:
+    # Batch size for processing messages
+    batch-size: 50
+    # Polling interval in milliseconds
+    poll-interval-ms: 5000
+    # Processing timeout in milliseconds
+    processing-timeout-ms: 30000
+
+# Mail Configuration for Alert Emails
+spring:
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
+# Metrics and Monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        enabled: true
+
+# Logging Configuration
+logging:
+  level:
+    com.example.backend.service.WhatsAppCloudApiProvider: DEBUG
+    com.example.backend.service.WhatsAppMessageProcessingService: DEBUG
+    com.example.backend.service.WhatsAppRateLimitService: INFO
+    com.example.backend.service.OutboundMessageAlertService: INFO
+    com.example.backend.service.OutboundJobWorker: INFO

@@ -1,0 +1,50 @@
+# WhatsApp Rate Limiting with Redis Configuration
+# This profile enables Redis-based rate limiting for WhatsApp messages
+# Redis provides better performance and scalability for high-volume messaging
+
+spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      password: # Optional
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# WhatsApp Rate Limiting Configuration
+whatsapp:
+  rate-limit:
+    # Default quota per organization (messages per day)
+    default-quota: 1000
+    # Rate limit window in seconds (86400 = 24 hours)
+    window-seconds: 86400
+    # Redis key prefix for rate limit counters
+    redis-key-prefix: "whatsapp:ratelimit:"
+    # Sync counter to database every N messages
+    sync-threshold: 10
+
+# Outbound Message Alert Configuration
+outbound:
+  alert:
+    enabled: true
+    # DLQ threshold for alerts
+    dlq-threshold: 100
+    # Email notifications
+    email:
+      enabled: true
+      recipients: "ops@example.com,admin@example.com"
+    # Slack notifications
+    slack:
+      enabled: true
+      webhook-url: "https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
+    # Alert schedules (cron expressions)
+    cron: "0 */15 * * * *"  # Every 15 minutes
+    dead-letter:
+      cron: "0 0 * * * *"  # Every hour
+    failure-rate:
+      cron: "0 */5 * * * *"  # Every 5 minutes
