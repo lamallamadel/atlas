@@ -1,9 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatSidenav } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
+import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { RouterOutlet } from '@angular/router';
@@ -28,7 +29,8 @@ export class AppLayoutComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private authService: AuthService,
     public themeService: ThemeService,
-    private dossierApiService: DossierApiService
+    private dossierApiService: DossierApiService,
+    private keyboardShortcutService: KeyboardShortcutService
   ) {
     this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
       .pipe(
@@ -88,7 +90,16 @@ export class AppLayoutComponent implements OnInit {
     this.themeService.toggleTheme();
   }
 
+  showKeyboardShortcuts(): void {
+    this.keyboardShortcutService.toggleShortcutHelp();
+  }
+
   prepareRoute(outlet: RouterOutlet) {
     return outlet?.activatedRouteData?.['animation'];
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent): void {
+    this.keyboardShortcutService.handleKeyDown(event);
   }
 }

@@ -1,0 +1,64 @@
+<div class="keyboard-shortcuts-overlay" *ngIf="visible$ | async" (click)="close()" (keydown.escape)="close()" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="shortcuts-modal" (click)="$event.stopPropagation()" (keydown.escape)="close()" role="document" tabindex="0">
+    <div class="shortcuts-header">
+      <h2>Raccourcis clavier</h2>
+      <button mat-icon-button class="close-button" (click)="close()" aria-label="Fermer">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <div class="shortcuts-content">
+      <div class="preferences-section">
+        <mat-checkbox 
+          [checked]="preferences.keyboardShortcutsEnabled"
+          (change)="toggleShortcutsEnabled()">
+          Activer les raccourcis clavier
+        </mat-checkbox>
+        <mat-checkbox 
+          [checked]="preferences.showShortcutHints"
+          (change)="toggleShortcutHints()">
+          Afficher les indices de raccourcis
+        </mat-checkbox>
+      </div>
+
+      <div class="shortcuts-grid">
+        <div class="shortcuts-column">
+          <h3>Navigation</h3>
+          <div class="shortcut-item" *ngFor="let shortcut of navigationShortcuts">
+            <div class="shortcut-keys">
+              <kbd class="key">{{ formatKey(shortcut.key) }}</kbd>
+            </div>
+            <div class="shortcut-description">{{ shortcut.description }}</div>
+          </div>
+        </div>
+
+        <div class="shortcuts-column">
+          <h3>Actions</h3>
+          <div class="shortcut-item" *ngFor="let shortcut of actionShortcuts">
+            <div class="shortcut-keys">
+              <kbd class="key">{{ formatKey(shortcut.key) }}</kbd>
+            </div>
+            <div class="shortcut-description">{{ shortcut.description }}</div>
+          </div>
+        </div>
+
+        <div class="shortcuts-column">
+          <h3>Navigation dans les listes</h3>
+          <div class="shortcut-item" *ngFor="let shortcut of listShortcuts">
+            <div class="shortcut-keys">
+              <kbd class="key">{{ formatKey(shortcut.key) }}</kbd>
+            </div>
+            <div class="shortcut-description">{{ shortcut.description }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shortcuts-footer">
+      <p class="footer-tip">
+        <mat-icon class="tip-icon">info</mat-icon>
+        Appuyez sur <kbd class="key">?</kbd> à tout moment pour afficher cette aide
+      </p>
+    </div>
+  </div>
+</div>

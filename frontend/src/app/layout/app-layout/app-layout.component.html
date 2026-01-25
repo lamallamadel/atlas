@@ -1,5 +1,8 @@
 <a href="#main-content" class="skip-to-content">Passer au contenu principal</a>
 
+<app-keyboard-shortcuts></app-keyboard-shortcuts>
+<app-command-palette></app-command-palette>
+
 <mat-sidenav-container class="sidenav-container">
   <mat-sidenav
     #drawer
@@ -18,7 +21,9 @@
            routerLink="/dashboard" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"
-           aria-label="Accéder au tableau de bord">
+           aria-label="Accéder au tableau de bord"
+           matTooltip="Raccourci: g puis h"
+           matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">dashboard</mat-icon>
           <span matListItemTitle>Tableau de bord</span>
         </a>
@@ -42,7 +47,9 @@
            routerLink="/tasks" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux tâches">
+           aria-label="Accéder aux tâches"
+           matTooltip="Raccourci: g puis t"
+           matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">task</mat-icon>
           <span matListItemTitle>Tâches</span>
         </a>
@@ -50,7 +57,9 @@
            routerLink="/annonces" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux annonces">
+           aria-label="Accéder aux annonces"
+           matTooltip="Raccourci: g puis a"
+           matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">campaign</mat-icon>
           <span matListItemTitle>Annonces</span>
         </a>
@@ -58,7 +67,9 @@
            routerLink="/dossiers" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux dossiers">
+           aria-label="Accéder aux dossiers"
+           matTooltip="Raccourci: g puis d"
+           matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
           <span matListItemTitle>Dossiers <span *ngIf="dossiersPendingCount$ | async as count" class="badge-count">({{ count }})</span></span>
         </a>
@@ -106,6 +117,16 @@
         <mat-icon aria-hidden="true">
           {{ (isDarkTheme$ | async) ? 'light_mode' : 'dark_mode' }}
         </mat-icon>
+      </button>
+
+      <button
+        mat-icon-button
+        (click)="showKeyboardShortcuts()"
+        class="keyboard-shortcuts-button"
+        aria-label="Afficher les raccourcis clavier"
+        matTooltip="Raccourcis clavier (?)"
+        matTooltipPosition="below">
+        <mat-icon aria-hidden="true">keyboard</mat-icon>
       </button>
       
       <div class="user-menu-container">

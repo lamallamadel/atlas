@@ -1,0 +1,64 @@
+<div class="command-palette-overlay" *ngIf="visible$ | async" (click)="close()" (keydown.escape)="close()" role="dialog" aria-modal="true" tabindex="-1">
+  <div class="command-palette" (click)="$event.stopPropagation()" (keydown.escape)="close()" role="document" tabindex="0">
+    <div class="command-search">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input
+        #commandInput
+        type="text"
+        class="command-input"
+        placeholder="Tapez une commande ou recherchez..."
+        [(ngModel)]="searchQuery"
+        (input)="onSearchChange()"
+        (keydown)="onKeyDown($event)"
+        autocomplete="off"
+      />
+      <div class="shortcut-hint">
+        <kbd>Ctrl+K</kbd>
+      </div>
+    </div>
+
+    <div class="command-list" *ngIf="filteredCommands.length > 0">
+      <ng-container *ngFor="let group of getCategorizedCommands()">
+        <div class="command-category">{{ group.category }}</div>
+        <div
+          *ngFor="let command of group.commands; let i = index"
+          class="command-item"
+          [class.selected]="filteredCommands.indexOf(command) === selectedIndex"
+          (click)="executeCommand(command)"
+          (keydown.enter)="executeCommand(command)"
+          (mouseenter)="selectCommand(filteredCommands.indexOf(command))"
+          role="option"
+          [attr.aria-selected]="filteredCommands.indexOf(command) === selectedIndex"
+          [attr.tabindex]="filteredCommands.indexOf(command) === selectedIndex ? 0 : -1"
+        >
+          <div class="command-content">
+            <mat-icon class="command-icon">{{ command.icon }}</mat-icon>
+            <div class="command-details">
+              <div class="command-label">{{ command.label }}</div>
+              <div class="command-description">{{ command.description }}</div>
+            </div>
+          </div>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="command-empty" *ngIf="filteredCommands.length === 0">
+      <mat-icon>search_off</mat-icon>
+      <p>Aucune commande trouvée</p>
+    </div>
+
+    <div class="command-footer">
+      <div class="footer-shortcuts">
+        <span class="footer-shortcut">
+          <kbd>↑</kbd><kbd>↓</kbd> pour naviguer
+        </span>
+        <span class="footer-shortcut">
+          <kbd>↵</kbd> pour sélectionner
+        </span>
+        <span class="footer-shortcut">
+          <kbd>Esc</kbd> pour fermer
+        </span>
+      </div>
+    </div>
+  </div>
+</div>

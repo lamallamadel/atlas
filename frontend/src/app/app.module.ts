@@ -74,6 +74,7 @@ import { ApiStatusIndicatorComponent } from './components/api-status-indicator.c
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { FormValidationAnimationDirective } from './directives/form-validation-animation.directive';
+import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hint.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -99,6 +100,8 @@ import { TaskCardComponent } from './components/task-card.component';
 import { TaskFormDialogComponent } from './components/task-form-dialog.component';
 import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
 import { WhatsappMessagingUiComponent } from './components/whatsapp-messaging-ui.component';
+import { KeyboardShortcutsComponent } from './components/keyboard-shortcuts.component';
+import { CommandPaletteComponent } from './components/command-palette.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
 
 registerLocaleData(localeFr);
@@ -142,6 +145,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     SuccessAnimationComponent,
     ApiStatusIndicatorComponent,
     FormValidationAnimationDirective,
+    KeyboardShortcutHintDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
@@ -161,7 +165,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     TaskCardComponent,
     TaskFormDialogComponent,
     ObservabilityDashboardComponent,
-    WhatsappMessagingUiComponent
+    WhatsappMessagingUiComponent,
+    KeyboardShortcutsComponent,
+    CommandPaletteComponent
   ],
   imports: [
     BrowserModule,

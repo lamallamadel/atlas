@@ -525,3 +525,51 @@ mat-chip-listbox {
 mat-chip.template-chip button[matChipRemove] {
   opacity: 1;
 }
+
+/* Keyboard Shortcut Hints */
+.keyboard-hint {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+  pointer-events: none;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.dark-theme .keyboard-hint {
+  background: linear-gradient(135deg, #66BB6A 0%, #5cb860 100%);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+}
+
+/* Keyboard shortcut in tooltips */
+kbd {
+  display: inline-block;
+  padding: 3px 6px;
+  font-size: 11px;
+  line-height: 1;
+  color: #24292e;
+  vertical-align: middle;
+  background-color: #fafbfc;
+  border: solid 1px #d1d5da;
+  border-bottom-color: #c6cbd1;
+  border-radius: 3px;
+  box-shadow: inset 0 -1px 0 #c6cbd1;
+  font-family: 'Courier New', 'Courier', monospace;
+}
+
+.dark-theme kbd {
+  color: #e0e0e0;
+  background-color: #2c2c2c;
+  border-color: #555;
+  border-bottom-color: #444;
+  box-shadow: inset 0 -1px 0 #444;
+}
