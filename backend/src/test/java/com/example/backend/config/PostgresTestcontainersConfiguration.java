@@ -26,16 +26,19 @@ public class PostgresTestcontainersConfiguration {
 
     private static final Logger log = LoggerFactory.getLogger(PostgresTestcontainersConfiguration.class);
 
-    private static final PostgreSQLContainer<?> POSTGRES_CONTAINER;
-
-    static {
+    @Bean
+    @ServiceConnection
+    public PostgreSQLContainer<?> postgresContainer() {
         log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-        log.info("║ STEP 1: Initializing PostgreSQL Testcontainer (Static Initialization)      ║");
+        log.info("║ STEP 1: Initializing PostgreSQL Testcontainer (Bean Initialization)        ║");
+        log.info("╠════════════════════════════════════════════════════════════════════════════╣");
+        log.info("║ @ServiceConnection will auto-configure DataSource properties               ║");
+        log.info("║ Spring Boot will use this container for datasource configuration           ║");
         log.info("╚════════════════════════════════════════════════════════════════════════════╝");
-        
+
         long containerStartTime = System.currentTimeMillis();
-        
-        POSTGRES_CONTAINER = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
+
+        PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:16-alpine"))
                 .withReuse(true)
                 .withDatabaseName("testdb")
                 .withUsername("test")
@@ -43,59 +46,46 @@ public class PostgresTestcontainersConfiguration {
                 .withEnv("POSTGRES_INITDB_ARGS", "-E UTF8")
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)));
-        
+
         log.info("Starting PostgreSQL container with image: postgres:16-alpine");
         log.info("Container reuse enabled: true");
-        
-        POSTGRES_CONTAINER.start();
-        
+
+        container.start();
+
         long containerDuration = System.currentTimeMillis() - containerStartTime;
-        
+
         log.info("╔════════════════════════════════════════════════════════════════════════════╗");
         log.info("║ PostgreSQL Testcontainer Started Successfully                              ║");
         log.info("╠════════════════════════════════════════════════════════════════════════════╣");
         log.info("║ Container Details:                                                          ║");
-        log.info("║   • Container ID: {}", String.format("%-56s", POSTGRES_CONTAINER.getContainerId()) + "║");
-        log.info("║   • JDBC URL: {}", String.format("%-60s", POSTGRES_CONTAINER.getJdbcUrl()) + "║");
-        log.info("║   • Database: {}", String.format("%-62s", POSTGRES_CONTAINER.getDatabaseName()) + "║");
-        log.info("║   • Username: {}", String.format("%-62s", POSTGRES_CONTAINER.getUsername()) + "║");
-        log.info("║   • Host:Port: {}:{}", String.format("%-55s", POSTGRES_CONTAINER.getHost() + ":" + POSTGRES_CONTAINER.getFirstMappedPort()) + "║");
+        log.info("║   • Container ID: {}", String.format("%-56s", container.getContainerId()) + "║");
+        log.info("║   • JDBC URL: {}", String.format("%-60s", container.getJdbcUrl()) + "║");
+        log.info("║   • Database: {}", String.format("%-62s", container.getDatabaseName()) + "║");
+        log.info("║   • Username: {}", String.format("%-62s", container.getUsername()) + "║");
+        log.info("║   • Host:Port: {}:{}", String.format("%-55s", container.getHost() + ":" + container.getFirstMappedPort()) + "║");
         log.info("║   • Startup Time: {} ms", String.format("%-56s", containerDuration) + "║");
         log.info("║   • Reusable: true                                                          ║");
         log.info("╚════════════════════════════════════════════════════════════════════════════╝");
-        
-        // Configure Flyway placeholders for JSONB support
+
         System.setProperty("flyway.placeholders.json_type", "JSONB");
         log.info("Set Flyway placeholder: json_type=JSONB");
-        
-        // Add shutdown hook to log container lifecycle
+
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (POSTGRES_CONTAINER.isRunning()) {
+            if (container.isRunning()) {
                 log.info("╔════════════════════════════════════════════════════════════════════════════╗");
                 log.info("║ PostgreSQL Testcontainer Shutdown Hook Triggered                          ║");
                 log.info("║ Container will persist (reuse enabled)                                     ║");
                 log.info("╚════════════════════════════════════════════════════════════════════════════╝");
             }
         }));
-        
-        // Verify container is healthy
-        if (POSTGRES_CONTAINER.isRunning()) {
+
+        if (container.isRunning()) {
             log.info("Container health check: PASSED");
         } else {
             throw new IllegalStateException("PostgreSQL container failed to start properly");
         }
-    }
 
-    @Bean
-    @ServiceConnection
-    public PostgreSQLContainer<?> postgresContainer() {
-        log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-        log.info("║ STEP 2: Registering PostgreSQL Container as Spring Bean                    ║");
-        log.info("╠════════════════════════════════════════════════════════════════════════════╣");
-        log.info("║ @ServiceConnection will auto-configure DataSource properties               ║");
-        log.info("║ Spring Boot will use this container for datasource configuration           ║");
-        log.info("╚════════════════════════════════════════════════════════════════════════════╝");
-        return POSTGRES_CONTAINER;
+        return container;
     }
 
     @Bean
