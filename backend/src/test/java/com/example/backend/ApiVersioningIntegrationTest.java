@@ -49,6 +49,7 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
     void setUp() {
         annonceRepository.deleteAll();
         dossierRepository.deleteAll();
+        testDataBuilder.withOrgId(ORG_ID);
         testDataBuilder.deleteAllTestData();
     }
 
