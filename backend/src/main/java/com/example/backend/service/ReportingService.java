@@ -22,6 +22,7 @@ import java.math.RoundingMode;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -98,6 +99,60 @@ public class ReportingService {
         return response;
     }
 
+    @Cacheable(value = "conversionFunnelBySource", key = "#orgId + '_' + #from + '_' + #to")
+    @Transactional(readOnly = true)
+    public Map<String, FunnelAnalysisResponse.FunnelStageMetrics> generateConversionFunnelBySource(
+            LocalDateTime from, LocalDateTime to, String orgId) {
+        
+        Specification<Dossier> spec = buildDateRangeSpec(from, to);
+        List<Dossier> dossiers = dossierRepository.findAll(spec);
+
+        Map<String, List<Dossier>> dossiersBySource = dossiers.stream()
+            .collect(Collectors.groupingBy(d -> 
+                d.getSource() != null ? d.getSource().name() : "UNKNOWN"
+            ));
+
+        Map<String, FunnelAnalysisResponse.FunnelStageMetrics> funnelBySource = new HashMap<>();
+
+        for (Map.Entry<String, List<Dossier>> entry : dossiersBySource.entrySet()) {
+            String source = entry.getKey();
+            List<Dossier> sourceDossiers = entry.getValue();
+
+            FunnelAnalysisResponse.FunnelStageMetrics metrics = calculateFunnelMetricsForDossiers(sourceDossiers);
+            funnelBySource.put(source, metrics);
+        }
+
+        return funnelBySource;
+    }
+
+    @Cacheable(value = "conversionFunnelByPeriod", key = "#orgId + '_' + #from + '_' + #to + '_' + #periodType")
+    @Transactional(readOnly = true)
+    public Map<String, FunnelAnalysisResponse.FunnelStageMetrics> generateConversionFunnelByTimePeriod(
+            LocalDateTime from, LocalDateTime to, String orgId, String periodType) {
+        
+        Specification<Dossier> spec = buildDateRangeSpec(from, to);
+        List<Dossier> dossiers = dossierRepository.findAll(spec);
+
+        Map<String, List<Dossier>> dossiersByPeriod = new HashMap<>();
+
+        for (Dossier dossier : dossiers) {
+            String periodKey = getPeriodKey(dossier.getCreatedAt(), periodType);
+            dossiersByPeriod.computeIfAbsent(periodKey, k -> new ArrayList<>()).add(dossier);
+        }
+
+        Map<String, FunnelAnalysisResponse.FunnelStageMetrics> funnelByPeriod = new HashMap<>();
+
+        for (Map.Entry<String, List<Dossier>> entry : dossiersByPeriod.entrySet()) {
+            String period = entry.getKey();
+            List<Dossier> periodDossiers = entry.getValue();
+
+            FunnelAnalysisResponse.FunnelStageMetrics metrics = calculateFunnelMetricsForDossiers(periodDossiers);
+            funnelByPeriod.put(period, metrics);
+        }
+
+        return funnelByPeriod;
+    }
+
     @Cacheable(value = "agentPerformance", key = "#orgId + '_' + #from + '_' + #to")
     @Transactional(readOnly = true)
     public AgentPerformanceResponse generateAgentPerformance(LocalDateTime from, LocalDateTime to, String orgId) {
@@ -136,6 +191,41 @@ public class ReportingService {
         response.setAggregateMetrics(aggregateMetrics);
 
         return response;
+    }
+
+    @Cacheable(value = "agentMetricsDetailed", key = "#agentId + '_' + #from + '_' + #to + '_' + #orgId")
+    @Transactional(readOnly = true)
+    public AgentPerformanceResponse.AgentMetrics generateDetailedAgentMetrics(
+            String agentId, LocalDateTime from, LocalDateTime to, String orgId) {
+        
+        Specification<Dossier> spec = (root, query, cb) -> {
+            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+            
+            if (from != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+            }
+            if (to != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), to));
+            }
+            predicates.add(cb.equal(root.get("createdBy"), agentId));
+            
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        List<Dossier> agentDossiers = dossierRepository.findAll(spec);
+
+        Double avgResponseTime = calculateAgentAverageResponseTime(agentDossiers);
+        Long messagesSent = countAgentMessagesSent(agentDossiers);
+        Long appointmentsScheduled = countAgentAppointmentsScheduled(agentDossiers);
+        Long dossiersAssigned = (long) agentDossiers.size();
+        Long dossiersWon = agentDossiers.stream()
+            .filter(d -> d.getStatus() == DossierStatus.WON)
+            .count();
+
+        return new AgentPerformanceResponse.AgentMetrics(
+            agentId, avgResponseTime, messagesSent, appointmentsScheduled,
+            dossiersAssigned, dossiersWon
+        );
     }
 
     @Cacheable(value = "revenueForecast", key = "#orgId")
@@ -210,10 +300,53 @@ public class ReportingService {
         return response;
     }
 
-    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelStageMetrics(LocalDateTime from, LocalDateTime to, String orgId) {
-        Specification<Dossier> spec = buildDateRangeSpec(from, to);
-        List<Dossier> dossiers = dossierRepository.findAll(spec);
+    @Cacheable(value = "revenueProjections", key = "#orgId")
+    @Transactional(readOnly = true)
+    public RevenueForecastResponse generateRevenueForecastWithProjections(String orgId) {
+        RevenueForecastResponse response = generateRevenueForecast(orgId);
 
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threeMonthsAgo = now.minusMonths(3);
+        
+        List<Object[]> historicalWonDeals = annonceAnalyticsRepository.getConversionRatesBySource(orgId, threeMonthsAgo);
+        
+        double avgConversionRate = response.getAverageConversionRate();
+        BigDecimal avgPipelineValue = response.getTotalPipelineValue();
+        int totalOpportunities = response.getTotalOpportunities();
+
+        response.setProjection30Days(calculateRevenueProjection(30, avgConversionRate, avgPipelineValue, totalOpportunities));
+        response.setProjection60Days(calculateRevenueProjection(60, avgConversionRate, avgPipelineValue, totalOpportunities));
+        response.setProjection90Days(calculateRevenueProjection(90, avgConversionRate, avgPipelineValue, totalOpportunities));
+
+        return response;
+    }
+
+    private RevenueForecastResponse.RevenueForecastProjection calculateRevenueProjection(
+            int days, double avgConversionRate, BigDecimal totalPipelineValue, int totalOpportunities) {
+        
+        double timeFactor = days / 90.0;
+        double adjustedConversionRate = avgConversionRate * timeFactor;
+        
+        BigDecimal estimatedRevenue = totalPipelineValue
+            .multiply(BigDecimal.valueOf(adjustedConversionRate / 100.0))
+            .setScale(2, RoundingMode.HALF_UP);
+        
+        BigDecimal conservativeRevenue = estimatedRevenue
+            .multiply(BigDecimal.valueOf(0.7))
+            .setScale(2, RoundingMode.HALF_UP);
+        
+        BigDecimal optimisticRevenue = estimatedRevenue
+            .multiply(BigDecimal.valueOf(1.3))
+            .setScale(2, RoundingMode.HALF_UP);
+        
+        int expectedDeals = (int) Math.round(totalOpportunities * adjustedConversionRate / 100.0);
+
+        return new RevenueForecastResponse.RevenueForecastProjection(
+            days, estimatedRevenue, conservativeRevenue, optimisticRevenue, expectedDeals
+        );
+    }
+
+    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelMetricsForDossiers(List<Dossier> dossiers) {
         Map<DossierStatus, Long> statusCounts = dossiers.stream()
             .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
 
@@ -242,6 +375,31 @@ public class ReportingService {
         metrics.setOverallConversionRate(totalDossiers > 0 ? (wonCount * 100.0 / totalDossiers) : 0.0);
 
         return metrics;
+    }
+
+    private String getPeriodKey(LocalDateTime dateTime, String periodType) {
+        switch (periodType.toUpperCase()) {
+            case "DAILY":
+                return dateTime.toLocalDate().toString();
+            case "WEEKLY":
+                return dateTime.toLocalDate().getYear() + "-W" + 
+                       ((dateTime.getDayOfYear() - 1) / 7 + 1);
+            case "MONTHLY":
+                return YearMonth.from(dateTime).toString();
+            case "QUARTERLY":
+                int quarter = (dateTime.getMonthValue() - 1) / 3 + 1;
+                return dateTime.getYear() + "-Q" + quarter;
+            case "YEARLY":
+                return String.valueOf(dateTime.getYear());
+            default:
+                return dateTime.toLocalDate().toString();
+        }
+    }
+
+    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelStageMetrics(LocalDateTime from, LocalDateTime to, String orgId) {
+        Specification<Dossier> spec = buildDateRangeSpec(from, to);
+        List<Dossier> dossiers = dossierRepository.findAll(spec);
+        return calculateFunnelMetricsForDossiers(dossiers);
     }
 
     private Double calculateAgentAverageResponseTime(List<Dossier> dossiers) {

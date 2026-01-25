@@ -1,10 +1,12 @@
 package com.example.backend.dto;
 
 import java.util.List;
+import java.util.Map;
 
 public class FunnelAnalysisResponse {
     private List<ConversionRateBySourceDto> conversionRateBySource;
     private FunnelStageMetrics overallFunnelMetrics;
+    private Map<String, FunnelStageMetrics> funnelByTimePeriod;
 
     public List<ConversionRateBySourceDto> getConversionRateBySource() {
         return conversionRateBySource;
@@ -20,6 +22,14 @@ public class FunnelAnalysisResponse {
 
     public void setOverallFunnelMetrics(FunnelStageMetrics overallFunnelMetrics) {
         this.overallFunnelMetrics = overallFunnelMetrics;
+    }
+
+    public Map<String, FunnelStageMetrics> getFunnelByTimePeriod() {
+        return funnelByTimePeriod;
+    }
+
+    public void setFunnelByTimePeriod(Map<String, FunnelStageMetrics> funnelByTimePeriod) {
+        this.funnelByTimePeriod = funnelByTimePeriod;
     }
 
     public static class FunnelStageMetrics {

@@ -140,6 +140,100 @@ public class ReportingController {
         return ResponseEntity.ok(forecast);
     }
 
+    @GetMapping("/revenue-forecast/projections")
+    @Operation(summary = "Get revenue forecast with projections", description = "Returns revenue forecast with 30/60/90 day projections including conservative, estimated, and optimistic scenarios")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Revenue forecast with projections generated successfully",
+                    content = @Content(schema = @Schema(implementation = RevenueForecastResponse.class)))
+    })
+    public ResponseEntity<RevenueForecastResponse> getRevenueForecastWithProjections(
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        RevenueForecastResponse forecast = reportingService.generateRevenueForecastWithProjections(effectiveOrgId);
+        return ResponseEntity.ok(forecast);
+    }
+
+    @GetMapping("/funnel-analysis/by-source")
+    @Operation(summary = "Get conversion funnel by source", description = "Returns conversion funnel metrics broken down by lead source (WEBSITE, REFERRAL, PHONE, etc.)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conversion funnel by source generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters")
+    })
+    public ResponseEntity<java.util.Map<String, FunnelAnalysisResponse.FunnelStageMetrics>> getConversionFunnelBySource(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        java.util.Map<String, FunnelAnalysisResponse.FunnelStageMetrics> funnelBySource = 
+            reportingService.generateConversionFunnelBySource(fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(funnelBySource);
+    }
+
+    @GetMapping("/funnel-analysis/by-period")
+    @Operation(summary = "Get conversion funnel by time period", description = "Returns conversion funnel metrics broken down by time period (DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY)")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Conversion funnel by period generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid date or period type parameters")
+    })
+    public ResponseEntity<java.util.Map<String, FunnelAnalysisResponse.FunnelStageMetrics>> getConversionFunnelByPeriod(
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Period type: DAILY, WEEKLY, MONTHLY, QUARTERLY, YEARLY")
+            @RequestParam(defaultValue = "MONTHLY") String periodType,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        java.util.Map<String, FunnelAnalysisResponse.FunnelStageMetrics> funnelByPeriod = 
+            reportingService.generateConversionFunnelByTimePeriod(fromDateTime, toDateTime, effectiveOrgId, periodType);
+        return ResponseEntity.ok(funnelByPeriod);
+    }
+
+    @GetMapping("/agent-performance/{agentId}")
+    @Operation(summary = "Get detailed agent metrics", description = "Returns detailed performance metrics for a specific agent including response time, messages sent, appointments, and conversion rate")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Agent metrics generated successfully",
+                    content = @Content(schema = @Schema(implementation = AgentPerformanceResponse.AgentMetrics.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid date parameters"),
+            @ApiResponse(responseCode = "404", description = "Agent not found")
+    })
+    public ResponseEntity<AgentPerformanceResponse.AgentMetrics> getDetailedAgentMetrics(
+            @Parameter(description = "Agent ID")
+            @PathVariable String agentId,
+            @Parameter(description = "Start date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @Parameter(description = "End date (ISO format: yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        LocalDateTime fromDateTime = from != null ? from.atStartOfDay() : null;
+        LocalDateTime toDateTime = to != null ? to.atTime(23, 59, 59) : null;
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        AgentPerformanceResponse.AgentMetrics metrics = 
+            reportingService.generateDetailedAgentMetrics(agentId, fromDateTime, toDateTime, effectiveOrgId);
+        return ResponseEntity.ok(metrics);
+    }
+
     @GetMapping("/analytics")
     @Operation(summary = "Get analytics data", description = "Returns comprehensive analytics including agent performance, revenue forecast, lead sources, and conversion funnel")
     @ApiResponses(value = {
