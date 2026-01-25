@@ -1,4 +1,6 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
   datasource:
     # E2E profile: fast, deterministic runs without external dependencies.
     # Uses H2 in-memory with PostgreSQL compatibility for local E2E.
