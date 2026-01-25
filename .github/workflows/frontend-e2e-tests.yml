@@ -53,7 +53,7 @@ jobs:
         working-directory: frontend
       
       - name: Build backend
-        run: ./mvnw clean package -DskipTests
+        run: ../mvnw clean package -DskipTests
         working-directory: backend
       
       - name: Start backend (H2 + Mock)
@@ -134,7 +134,7 @@ jobs:
         working-directory: frontend
       
       - name: Build backend
-        run: ./mvnw clean package -DskipTests
+        run: ../mvnw clean package -DskipTests
         working-directory: backend
       
       - name: Start PostgreSQL and Backend
@@ -227,7 +227,7 @@ jobs:
         working-directory: frontend
       
       - name: Build backend
-        run: ./mvnw clean package -DskipTests
+        run: ../mvnw clean package -DskipTests
         working-directory: backend
       
       # H2 variants - start backend directly
