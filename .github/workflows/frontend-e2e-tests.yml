@@ -67,6 +67,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: frontend
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Build backend
         run: ../mvnw clean package -DskipTests
@@ -118,6 +120,7 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:4200
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -198,6 +201,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: frontend
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Build backend
         run: ../mvnw clean package -DskipTests
@@ -240,6 +245,7 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:4200
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Upload Playwright report
         uses: actions/upload-artifact@v4
@@ -331,6 +337,8 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
         working-directory: frontend
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Build backend
         run: ../mvnw clean package -DskipTests
@@ -414,6 +422,7 @@ jobs:
         env:
           CI: true
           PLAYWRIGHT_BASE_URL: http://localhost:4200
+          PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Upload Playwright HTML report
         uses: actions/upload-artifact@v4
