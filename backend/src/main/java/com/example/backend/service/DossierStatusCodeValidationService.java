@@ -6,6 +6,9 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.ReferentialRepository;
 import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.util.TenantContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,14 +19,22 @@ import java.util.stream.Collectors;
 @Service
 public class DossierStatusCodeValidationService {
 
+    private static final Logger log = LoggerFactory.getLogger(DossierStatusCodeValidationService.class);
+
     private final ReferentialRepository referentialRepository;
     private final WorkflowDefinitionRepository workflowDefinitionRepository;
+    private final ReferentialSeedingService referentialSeedingService;
+    private final boolean seedOnMissingReferentials;
 
     public DossierStatusCodeValidationService(
             ReferentialRepository referentialRepository,
-            WorkflowDefinitionRepository workflowDefinitionRepository) {
+            WorkflowDefinitionRepository workflowDefinitionRepository,
+            ReferentialSeedingService referentialSeedingService,
+            @Value("${referential.seed-on-missing:false}") boolean seedOnMissingReferentials) {
         this.referentialRepository = referentialRepository;
         this.workflowDefinitionRepository = workflowDefinitionRepository;
+        this.referentialSeedingService = referentialSeedingService;
+        this.seedOnMissingReferentials = seedOnMissingReferentials;
     }
 
     @Transactional(readOnly = true)
@@ -140,7 +151,13 @@ public class DossierStatusCodeValidationService {
     private Optional<ReferentialEntity> findReferentialByOrg(String category, String code) {
         String orgId = TenantContext.getOrgId();
         if (orgId != null && !orgId.isBlank()) {
-            return referentialRepository.findByOrgIdAndCategoryAndCode(orgId, category, code);
+            Optional<ReferentialEntity> referential = referentialRepository.findByOrgIdAndCategoryAndCode(orgId, category, code);
+            if (referential.isEmpty() && seedOnMissingReferentials) {
+                log.debug("Seeding missing referentials for orgId={} before validating {}:{}", orgId, category, code);
+                referentialSeedingService.seedDefaultReferentialsForOrg(orgId);
+                return referentialRepository.findByOrgIdAndCategoryAndCode(orgId, category, code);
+            }
+            return referential;
         }
         return referentialRepository.findByCategoryAndCode(category, code);
     }

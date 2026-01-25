@@ -34,13 +34,13 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>, J
     @Query(value = "SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
            "AND (:channel IS NULL OR m.channel = :channel) " +
            "AND (:direction IS NULL OR m.direction = :direction) " +
-           "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
-           "AND (:endDate IS NULL OR m.timestamp <= :endDate)",
+           "AND m.timestamp >= COALESCE(:startDate, m.timestamp) " +
+           "AND m.timestamp <= COALESCE(:endDate, m.timestamp)",
            countQuery = "SELECT COUNT(m) FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
            "AND (:channel IS NULL OR m.channel = :channel) " +
            "AND (:direction IS NULL OR m.direction = :direction) " +
-           "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
-           "AND (:endDate IS NULL OR m.timestamp <= :endDate)")
+           "AND m.timestamp >= COALESCE(:startDate, m.timestamp) " +
+           "AND m.timestamp <= COALESCE(:endDate, m.timestamp)")
     Page<MessageEntity> findByDossierIdWithFilters(
             @Param("dossierId") Long dossierId,
             @Param("channel") MessageChannel channel,
