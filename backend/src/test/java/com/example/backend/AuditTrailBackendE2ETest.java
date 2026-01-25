@@ -536,6 +536,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         TenantContext.setOrgId(ORG_1);
         
         auditEventRepository.deleteAll();
+        dossierRepository.deleteAll();
+        partiePrenanteRepository.deleteAll();
         entityManager.flush();
         entityManager.clear();
         
