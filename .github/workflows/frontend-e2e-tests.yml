@@ -64,7 +64,7 @@ jobs:
             echo "No backend JAR found in target/." >&2
             exit 1
           fi
-          nohup java -jar "$APP_JAR" --spring.profiles.active=e2e-h2-mock --server.port=8080 > backend.log 2>&1 &
+          nohup java -jar "$APP_JAR" --spring.profiles.active=e2e-h2-mock --server.port=8080 --spring.main.allow-bean-definition-overriding=true > backend.log 2>&1 &
           echo $! > backend.pid
         working-directory: backend
       
@@ -251,7 +251,7 @@ jobs:
             echo "No backend JAR found in target/." >&2
             exit 1
           fi
-          nohup java -jar "$APP_JAR" --spring.profiles.active=$PROFILE --server.port=8080 > backend.log 2>&1 &
+          nohup java -jar "$APP_JAR" --spring.profiles.active=$PROFILE --server.port=8080 --spring.main.allow-bean-definition-overriding=true > backend.log 2>&1 &
           echo $! > backend.pid
           timeout 120 bash -c 'until curl -fsS http://localhost:8080/actuator/health; do sleep 2; done'
         working-directory: backend
