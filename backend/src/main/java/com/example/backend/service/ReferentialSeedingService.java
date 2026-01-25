@@ -98,6 +98,21 @@ public class ReferentialSeedingService {
             "Gagné", "Closed won", 16, true, true));
         referentials.add(createReferential(orgId, "CASE_STATUS", "CRM_CLOSED_LOST", 
             "Perdu", "Closed lost", 17, true, true));
+
+        referentials.add(createReferential(orgId, "CASE_STATUS", "NEW",
+            "Nouveau (Legacy)", "Legacy NEW status", 18, true, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "QUALIFYING",
+            "Qualification (Legacy)", "Legacy QUALIFYING status", 19, true, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "QUALIFIED",
+            "Qualifié (Legacy)", "Legacy QUALIFIED status", 20, true, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "APPOINTMENT",
+            "Rendez-vous (Legacy)", "Legacy APPOINTMENT status", 21, true, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "WON",
+            "Gagné (Legacy)", "Legacy WON status", 22, true, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "LOST",
+            "Perdu (Legacy)", "Legacy LOST status", 23, true, true));
+        referentials.add(createReferential(orgId, "CASE_STATUS", "DRAFT",
+            "Brouillon (Legacy)", "Legacy DRAFT status", 24, true, true));
         
         return referentials;
     }

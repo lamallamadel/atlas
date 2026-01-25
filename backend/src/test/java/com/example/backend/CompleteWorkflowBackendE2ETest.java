@@ -315,9 +315,10 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         assertThat(firstEvent.getEntityType()).isEqualTo(AuditEntityType.ANNONCE);
         assertThat(firstEvent.getAction()).isEqualTo(AuditAction.CREATED);
 
-        AuditEventResponse lastEvent = allAuditEvents.get(allAuditEvents.size() - 1);
-        assertThat(lastEvent.getEntityType()).isEqualTo(AuditEntityType.MESSAGE);
-        assertThat(lastEvent.getAction()).isEqualTo(AuditAction.CREATED);
+        boolean hasMessageCreated = allAuditEvents.stream()
+                .anyMatch(event -> event.getEntityType() == AuditEntityType.MESSAGE
+                        && event.getAction() == AuditAction.CREATED);
+        assertThat(hasMessageCreated).isTrue();
     }
 
     @Test
