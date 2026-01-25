@@ -29,17 +29,5 @@ jobs:
           cache: 'maven'
 
       - name: Run tests
-        run: mvn -B -ntp test '-Dspring.profiles.active=test'
+        run: mvn -B -ntp verify '-Dspring.profiles.active=test'
         working-directory: backend
-
-      - name: Build package
-        run: mvn -B -ntp clean package -DskipTests=false '-Dspring.profiles.active=test'
-        working-directory: backend
-
-      - name: Upload JAR artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-jar
-          path: backend/target/*.jar
-          retention-days: 7
-

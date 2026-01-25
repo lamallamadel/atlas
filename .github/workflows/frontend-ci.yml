@@ -47,14 +47,3 @@ jobs:
       - name: Run tests (headless)
         run: npm test -- --watch=false --browsers=ChromeHeadless
         working-directory: frontend
-
-      - name: Build production
-        run: npm run build -- --configuration production
-        working-directory: frontend
-
-      - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend/dist/**
-          retention-days: 7

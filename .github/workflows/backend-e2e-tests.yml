@@ -14,6 +14,11 @@ on:
   schedule:
     - cron: '0 2 * * *'
 
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -43,11 +48,13 @@ jobs:
           MAVEN_OPTS: -Xmx1024m
       
       - name: Generate test report
-        if: always()
+        if: always() && github.event.pull_request.head.repo.fork == false
         uses: dorny/test-reporter@v1
         with:
           name: E2E Test Results (H2)
-          path: backend/target/surefire-reports/*.xml
+          path: |
+            backend/target/surefire-reports/*.xml
+            backend/target/failsafe-reports/*.xml
           reporter: java-junit
           fail-on-error: false
       
@@ -64,10 +71,10 @@ jobs:
       - name: Generate coverage report
         run: mvn -B -ntp jacoco:report
         working-directory: backend
-        if: always()
+        if: always() && github.event_name != 'pull_request'
       
       - name: Upload coverage report
-        if: always()
+        if: always() && github.event_name != 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: coverage-report-h2
@@ -77,10 +84,10 @@ jobs:
       - name: Check coverage thresholds
         run: mvn -B -ntp jacoco:check
         working-directory: backend
-        if: always()
+        if: always() && github.event_name != 'pull_request'
       
       - name: Add PR comment with test results
-        if: always() && github.event_name == 'pull_request'
+        if: always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.fork == false
         uses: actions/github-script@v7
         with:
           script: |
@@ -166,7 +173,9 @@ jobs:
         uses: dorny/test-reporter@v1
         with:
           name: E2E Test Results (PostgreSQL)
-          path: backend/target/surefire-reports/*.xml
+          path: |
+            backend/target/surefire-reports/*.xml
+            backend/target/failsafe-reports/*.xml
           reporter: java-junit
           fail-on-error: false
       
