@@ -16,5 +16,7 @@ public interface ReferentialRepository extends JpaRepository<ReferentialEntity, 
 
     Optional<ReferentialEntity> findByCategoryAndCode(String category, String code);
 
+    Optional<ReferentialEntity> findByOrgIdAndCategoryAndCode(String orgId, String category, String code);
+
     boolean existsByCategoryAndCode(String category, String code);
 }

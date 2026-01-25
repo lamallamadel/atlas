@@ -32,7 +32,7 @@ public class DossierStatusCodeValidationService {
             return;
         }
 
-        Optional<ReferentialEntity> caseTypeRef = referentialRepository.findByCategoryAndCode("CASE_TYPE", caseType);
+        Optional<ReferentialEntity> caseTypeRef = findReferentialByOrg("CASE_TYPE", caseType);
         if (caseTypeRef.isEmpty()) {
             throw new IllegalArgumentException(
                     String.format("Invalid caseType: '%s'. Case type does not exist in CASE_TYPE referential.", caseType));
@@ -50,7 +50,7 @@ public class DossierStatusCodeValidationService {
             return;
         }
 
-        Optional<ReferentialEntity> statusRef = referentialRepository.findByCategoryAndCode("CASE_STATUS", statusCode);
+        Optional<ReferentialEntity> statusRef = findReferentialByOrg("CASE_STATUS", statusCode);
         if (statusRef.isEmpty()) {
             throw new IllegalArgumentException(
                     String.format("Invalid statusCode: '%s'. Status code does not exist in CASE_STATUS referential.", statusCode));
@@ -135,5 +135,13 @@ public class DossierStatusCodeValidationService {
                 .collect(Collectors.toList()));
 
         return allowedStatusCodes.stream().distinct().collect(Collectors.toList());
+    }
+
+    private Optional<ReferentialEntity> findReferentialByOrg(String category, String code) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId != null && !orgId.isBlank()) {
+            return referentialRepository.findByOrgIdAndCategoryAndCode(orgId, category, code);
+        }
+        return referentialRepository.findByCategoryAndCode(category, code);
     }
 }
