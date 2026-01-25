@@ -1,5 +1,8 @@
 import { test, expect } from './auth.fixture';
 
+test.describe.configure({ mode: 'serial' });
+test.use({ trace: 'retain-on-failure' });
+
 test.describe('Dashboard KPIs E2E Tests', () => {
   test('Dashboard KPIs: Navigate to dashboard → Verify KPI cards visible → Verify counts are numbers → Navigate via KPI cards with filters', async ({ page }) => {
     const startTime = Date.now();
