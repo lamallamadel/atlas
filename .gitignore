@@ -118,6 +118,14 @@ playwright/.cache/
 frontend/.cache/
 ms-playwright/
 
+# Accessibility & Performance Testing
+a11y-reports/
+.lighthouseci/
+lighthouse-reports/
+frontend/a11y-reports/
+frontend/.lighthouseci/
+frontend/lighthouse-reports/
+
 # Environment variables
 .env
 .env.local

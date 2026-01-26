@@ -56,3 +56,8 @@ Thumbs.db
 # Service Worker / Offline Mode
 .sw-cache/
 sw-debug.log
+
+# Accessibility & Performance Testing
+/a11y-reports/
+/.lighthouseci/
+/lighthouse-reports/

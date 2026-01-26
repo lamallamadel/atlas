@@ -1,0 +1,22 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🔍 Running pre-commit accessibility checks..."
+
+cd frontend
+
+if ! lsof -Pi :4200 -sTCP:LISTEN -t >/dev/null 2>&1; then
+  echo "⚠️  Warning: Development server not running on port 4200"
+  echo "Skipping accessibility checks. To enable, run 'npm start' in another terminal."
+  exit 0
+fi
+
+npm run a11y:pre-commit || {
+  echo ""
+  echo "❌ Accessibility violations detected!"
+  echo "Please fix the violations or run without pre-commit checks using:"
+  echo "  git commit --no-verify"
+  exit 1
+}
+
+echo "✅ Pre-commit checks passed!"
