@@ -57,6 +57,7 @@ jobs:
             backend/target/failsafe-reports/*.xml
           reporter: java-junit
           fail-on-error: false
+          fail-on-empty: false
       
       - name: Upload test results
         if: always()
@@ -178,6 +179,7 @@ jobs:
             backend/target/failsafe-reports/*.xml
           reporter: java-junit
           fail-on-error: false
+          fail-on-empty: false
       
       - name: Upload test results
         if: always()
