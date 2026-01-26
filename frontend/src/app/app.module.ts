@@ -82,6 +82,7 @@ import { InfiniteScrollDirective } from './directives/infinite-scroll.directive'
 import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
 import { AnimatedButtonDirective } from './directives/animated-button.directive';
 import { AnimatedFocusDirective } from './directives/animated-focus.directive';
+import { MaintainScrollDirective } from './directives/maintain-scroll.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -141,6 +142,7 @@ import { CustomSpinnerComponent } from './components/custom-spinner.component';
 import { LoadingButtonComponent } from './components/loading-button.component';
 import { AnimationsDemoComponent } from './components/animations-demo.component';
 import { ButtonExamplesComponent } from './components/button-examples.component';
+import { ProgressBarComponent } from './components/progress-bar.component';
 
 registerLocaleData(localeFr);
 
@@ -190,6 +192,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     SwipeGestureDirective,
     AnimatedButtonDirective,
     AnimatedFocusDirective,
+    MaintainScrollDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
@@ -241,7 +244,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     CustomSpinnerComponent,
     LoadingButtonComponent,
     AnimationsDemoComponent,
-    ButtonExamplesComponent
+    ButtonExamplesComponent,
+    ProgressBarComponent
   ],
   imports: [
     BrowserModule,

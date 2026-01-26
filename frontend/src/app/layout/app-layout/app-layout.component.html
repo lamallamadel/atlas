@@ -309,7 +309,7 @@
       </div>
     </mat-toolbar>
 
-    <main id="main-content" class="main-content" role="main" tabindex="-1">
+    <main id="main-content" class="main-content" role="main" tabindex="-1" appMaintainScroll>
       <div [@routeFadeSlideAnimation]="prepareRoute(outlet)">
         <router-outlet #outlet="outlet"></router-outlet>
       </div>
