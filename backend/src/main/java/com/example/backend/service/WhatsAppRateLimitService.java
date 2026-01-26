@@ -69,13 +69,10 @@ public class WhatsAppRateLimitService {
             return false;
         }
         
-        Integer quotaLimit = DEFAULT_QUOTA_LIMIT;
+        WhatsAppRateLimit rateLimit = getOrCreateRateLimit(orgId);
+        Integer quotaLimit = rateLimit.getQuotaLimit();
         String limitStr = redisTemplate.opsForValue().get(limitKey);
-        if (limitStr != null) {
-            quotaLimit = Integer.parseInt(limitStr);
-        } else {
-            WhatsAppRateLimit rateLimit = getOrCreateRateLimit(orgId);
-            quotaLimit = rateLimit.getQuotaLimit();
+        if (limitStr == null || !limitStr.equals(String.valueOf(quotaLimit))) {
             redisTemplate.opsForValue().set(limitKey, String.valueOf(quotaLimit), 24, TimeUnit.HOURS);
         }
         
