@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.entity.OutboundAttemptEntity;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.enums.ActivityType;
+import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundAttemptStatus;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
@@ -31,6 +32,7 @@ public class OutboundJobWorker {
     private final OutboundMessageRepository outboundMessageRepository;
     private final OutboundAttemptRepository outboundAttemptRepository;
     private final List<OutboundMessageProvider> providers;
+    private final WhatsAppRateLimitService whatsAppRateLimitService;
     private final AuditEventService auditEventService;
     private final ActivityService activityService;
     private final MetricsService metricsService;
@@ -45,12 +47,14 @@ public class OutboundJobWorker {
             OutboundMessageRepository outboundMessageRepository,
             OutboundAttemptRepository outboundAttemptRepository,
             List<OutboundMessageProvider> providers,
+            WhatsAppRateLimitService whatsAppRateLimitService,
             AuditEventService auditEventService,
             ActivityService activityService,
             MetricsService metricsService) {
         this.outboundMessageRepository = outboundMessageRepository;
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.providers = providers;
+        this.whatsAppRateLimitService = whatsAppRateLimitService;
         this.auditEventService = auditEventService;
         this.activityService = activityService;
         this.metricsService = metricsService;
@@ -153,6 +157,13 @@ public class OutboundJobWorker {
                 handleFailure(message, attempt, "NO_PROVIDER", errorMsg, false);
                 return;
             }
+
+            if (MessageChannel.WHATSAPP.equals(message.getChannel()) && shouldEnforceWhatsAppRateLimit(provider)) {
+                if (!whatsAppRateLimitService.checkAndConsumeQuota(message.getOrgId())) {
+                    handleFailure(message, attempt, "QUOTA_EXCEEDED", "WhatsApp quota exceeded or rate limited", true);
+                    return;
+                }
+            }
             
             ProviderSendResult result = provider.send(message);
             
@@ -241,6 +252,10 @@ public class OutboundJobWorker {
         
         attempt.setUpdatedAt(LocalDateTime.now());
         outboundAttemptRepository.save(attempt);
+    }
+
+    private boolean shouldEnforceWhatsAppRateLimit(OutboundMessageProvider provider) {
+        return !(provider instanceof WhatsAppCloudApiProvider);
     }
     
     private OutboundAttemptEntity createAttempt(OutboundMessageEntity message, OutboundAttemptStatus status) {
