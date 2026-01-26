@@ -40,6 +40,7 @@
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
               "src/styles/print.scss",
+              "src/styles/shepherd-theme.css",
               "src/styles.css"
             ],
             "scripts": [],
@@ -49,7 +50,8 @@
               "papaparse",
               "canvg",
               "raf",
-              "rgbcolor"
+              "rgbcolor",
+              "shepherd.js"
             ]
           },
           "configurations": {
@@ -121,6 +123,7 @@
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
               "src/styles/print.scss",
+              "src/styles/shepherd-theme.css",
               "src/styles.css"
             ],
             "scripts": []

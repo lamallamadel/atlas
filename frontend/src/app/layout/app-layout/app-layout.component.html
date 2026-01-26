@@ -128,6 +128,45 @@
         matTooltipPosition="below">
         <mat-icon aria-hidden="true">keyboard</mat-icon>
       </button>
+
+      <button
+        mat-icon-button
+        [matMenuTriggerFor]="helpMenu"
+        class="help-menu-button"
+        aria-label="Aide et guides interactifs"
+        matTooltip="Aide (?)"
+        matTooltipPosition="below">
+        <mat-icon aria-hidden="true">help_outline</mat-icon>
+      </button>
+
+      <mat-menu #helpMenu="matMenu" class="help-menu" aria-label="Menu d'aide">
+        <div class="help-menu-header" mat-menu-item disabled>
+          <mat-icon aria-hidden="true">school</mat-icon>
+          <span>Guides interactifs</span>
+        </div>
+        <mat-divider role="separator"></mat-divider>
+        <button mat-menu-item (click)="startTour('dossier-creation')" aria-label="Démarrer le guide de création de dossier">
+          <mat-icon aria-hidden="true">add_circle_outline</mat-icon>
+          <span>Créer un dossier</span>
+        </button>
+        <button mat-menu-item (click)="startTour('dossier-detail')" aria-label="Démarrer le guide du détail de dossier">
+          <mat-icon aria-hidden="true">folder_open</mat-icon>
+          <span>Explorer un dossier</span>
+        </button>
+        <button mat-menu-item (click)="startTour('message-creation')" aria-label="Démarrer le guide d'envoi de message">
+          <mat-icon aria-hidden="true">message</mat-icon>
+          <span>Envoyer un message</span>
+        </button>
+        <button mat-menu-item (click)="startTour('workflow-status')" aria-label="Démarrer le guide de workflow">
+          <mat-icon aria-hidden="true">swap_horiz</mat-icon>
+          <span>Changer le statut</span>
+        </button>
+        <mat-divider role="separator"></mat-divider>
+        <button mat-menu-item (click)="resetAllTours()" aria-label="Réinitialiser tous les guides">
+          <mat-icon aria-hidden="true">refresh</mat-icon>
+          <span>Réinitialiser tous les guides</span>
+        </button>
+      </mat-menu>
       
       <div class="user-menu-container">
         <button

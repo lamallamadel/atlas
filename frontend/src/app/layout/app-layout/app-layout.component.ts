@@ -5,9 +5,10 @@ import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
 import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
+import { OnboardingTourService } from '../../services/onboarding-tour.service';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { RouterOutlet } from '@angular/router';
+import { RouterOutlet, Router } from '@angular/router';
 import { routeFadeSlideAnimation } from '../../animations/route-animations';
 
 @Component({
@@ -30,7 +31,9 @@ export class AppLayoutComponent implements OnInit {
     private authService: AuthService,
     public themeService: ThemeService,
     private dossierApiService: DossierApiService,
-    private keyboardShortcutService: KeyboardShortcutService
+    private keyboardShortcutService: KeyboardShortcutService,
+    private onboardingTourService: OnboardingTourService,
+    private router: Router
   ) {
     this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
       .pipe(
@@ -92,6 +95,26 @@ export class AppLayoutComponent implements OnInit {
 
   showKeyboardShortcuts(): void {
     this.keyboardShortcutService.toggleShortcutHelp();
+  }
+
+  startTour(tourId: 'dossier-creation' | 'dossier-detail' | 'message-creation' | 'workflow-status'): void {
+    const currentUrl = this.router.url;
+    
+    if (tourId === 'dossier-creation' && !currentUrl.includes('/dossiers/create')) {
+      this.router.navigate(['/dossiers/create']).then(() => {
+        setTimeout(() => this.onboardingTourService.startManualTour(tourId), 500);
+      });
+    } else if (tourId === 'dossier-detail' && !currentUrl.match(/\/dossiers\/\d+/)) {
+      return;
+    } else {
+      this.onboardingTourService.startManualTour(tourId);
+    }
+  }
+
+  resetAllTours(): void {
+    if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les guides interactifs ?')) {
+      this.onboardingTourService.resetAllTours();
+    }
   }
 
   prepareRoute(outlet: RouterOutlet) {
