@@ -5,6 +5,7 @@ import { ThemeService } from './services/theme.service';
 import { ServiceWorkerRegistrationService } from './services/service-worker-registration.service';
 import { OfflineQueueService } from './services/offline-queue.service';
 import { LiveAnnouncerService } from './services/live-announcer.service';
+import { PrefetchService } from './services/prefetch.service';
 
 @Component({
   selector: 'app-root',
@@ -19,7 +20,8 @@ export class AppComponent implements OnInit {
     private themeService: ThemeService,
     private swService: ServiceWorkerRegistrationService,
     private queueService: OfflineQueueService,
-    private liveAnnouncer: LiveAnnouncerService
+    private liveAnnouncer: LiveAnnouncerService,
+    private prefetchService: PrefetchService
   ) {}
 
   ngOnInit(): void {

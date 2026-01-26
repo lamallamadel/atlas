@@ -77,6 +77,8 @@ import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { FormValidationAnimationDirective } from './directives/form-validation-animation.directive';
 import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hint.directive';
 import { FocusTrapDirective } from './directives/focus-trap.directive';
+import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
+import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -122,6 +124,7 @@ import { QuickActionsComponent } from './components/quick-actions.component';
 import { VoipConfigDialogComponent } from './components/voip-config-dialog.component';
 import { OfflineIndicatorComponent } from './components/offline-indicator.component';
 import { OfflineInterceptor } from './interceptors/offline.interceptor';
+import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
 
 registerLocaleData(localeFr);
 
@@ -166,6 +169,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     FormValidationAnimationDirective,
     KeyboardShortcutHintDirective,
     FocusTrapDirective,
+    LazyLoadImageDirective,
+    InfiniteScrollDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
@@ -203,7 +208,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AdvancedFiltersDialogComponent,
     QuickActionsComponent,
     VoipConfigDialogComponent,
-    OfflineIndicatorComponent
+    OfflineIndicatorComponent,
+    VirtualScrollListComponent
   ],
   imports: [
     BrowserModule,

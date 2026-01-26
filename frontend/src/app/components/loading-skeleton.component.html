@@ -1,4 +1,4 @@
-<div class="skeleton-container" [ngClass]="'skeleton-' + variant" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
+<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate, 'skeleton-card': variant === 'card', 'skeleton-list': variant === 'list', 'skeleton-table': variant === 'table', 'skeleton-form': variant === 'form', 'skeleton-dashboard-kpi': variant === 'dashboard-kpi', 'skeleton-detail': variant === 'detail', 'skeleton-grid': variant === 'grid', 'skeleton-message': variant === 'message', 'skeleton-timeline': variant === 'timeline'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
   <span class="sr-only">Chargement des données en cours...</span>
   
   <!-- Card variant -->
@@ -15,6 +15,10 @@
         <div class="skeleton-rectangle skeleton-line"></div>
         <div class="skeleton-rectangle skeleton-line"></div>
         <div class="skeleton-rectangle skeleton-line skeleton-line-short"></div>
+      </div>
+      <div class="skeleton-card-footer">
+        <div class="skeleton-rectangle skeleton-button-small"></div>
+        <div class="skeleton-rectangle skeleton-button-small"></div>
       </div>
     </div>
   </div>
@@ -79,6 +83,45 @@
       <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-detail-row">
         <div class="skeleton-rectangle skeleton-detail-label"></div>
         <div class="skeleton-rectangle skeleton-detail-value"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid variant -->
+  <div *ngIf="variant === 'grid'" class="skeleton-grid" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-grid-item">
+      <div class="skeleton-rectangle skeleton-grid-image"></div>
+      <div class="skeleton-grid-content">
+        <div class="skeleton-rectangle skeleton-grid-title"></div>
+        <div class="skeleton-rectangle skeleton-grid-subtitle"></div>
+        <div class="skeleton-rectangle skeleton-grid-price"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message variant -->
+  <div *ngIf="variant === 'message'" class="skeleton-message" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" [ngClass]="{'skeleton-message-item': true, 'skeleton-message-right': i % 2 === 0}">
+      <div class="skeleton-rectangle skeleton-message-avatar" *ngIf="i % 2 !== 0"></div>
+      <div class="skeleton-message-bubble">
+        <div class="skeleton-rectangle skeleton-message-text"></div>
+        <div class="skeleton-rectangle skeleton-message-text skeleton-message-text-short"></div>
+        <div class="skeleton-rectangle skeleton-message-time"></div>
+      </div>
+      <div class="skeleton-rectangle skeleton-message-avatar" *ngIf="i % 2 === 0"></div>
+    </div>
+  </div>
+
+  <!-- Timeline variant -->
+  <div *ngIf="variant === 'timeline'" class="skeleton-timeline" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-timeline-item">
+      <div class="skeleton-timeline-marker">
+        <div class="skeleton-rectangle skeleton-timeline-dot"></div>
+      </div>
+      <div class="skeleton-timeline-content">
+        <div class="skeleton-rectangle skeleton-timeline-title"></div>
+        <div class="skeleton-rectangle skeleton-timeline-description"></div>
+        <div class="skeleton-rectangle skeleton-timeline-time"></div>
       </div>
     </div>
   </div>

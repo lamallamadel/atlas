@@ -131,6 +131,26 @@ a:hover {
   transform: scale(1.1);
 }
 
+/* Lazy loading image styles */
+.lazy-image {
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.lazy-image-loading {
+  filter: blur(10px);
+  opacity: 0.6;
+}
+
+.lazy-image-loaded {
+  filter: blur(0);
+  opacity: 1;
+}
+
+.lazy-image-error {
+  filter: grayscale(100%);
+  opacity: 0.5;
+}
+
 /* Mat menu item with icons */
 .mat-mdc-menu-item mat-icon {
   margin-right: 8px;
