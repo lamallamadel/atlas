@@ -267,7 +267,7 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should limit history to max points', () => {
-    const maxHistoryPoints = (component as { maxHistoryPoints: number }).maxHistoryPoints;
+    const maxHistoryPoints = (component as unknown as { maxHistoryPoints: number }).maxHistoryPoints;
 
     for (let i = 0; i < maxHistoryPoints + 1; i++) {
       component['addToHistory'](mockMetrics);
