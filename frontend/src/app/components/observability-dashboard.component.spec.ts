@@ -23,7 +23,7 @@ describe('ObservabilityDashboardComponent', () => {
   let fixture: ComponentFixture<ObservabilityDashboardComponent>;
   let reportingService: jasmine.SpyObj<ReportingApiService>;
 
-  const mockMetrics = {
+  const baseMockMetrics = {
     queueMetrics: {
       queueDepthByChannel: {
         'SMS': 10,
@@ -86,6 +86,8 @@ describe('ObservabilityDashboardComponent', () => {
     timestamp: '2024-01-01T12:00:00Z'
   };
 
+  const createMockMetrics = () => JSON.parse(JSON.stringify(baseMockMetrics));
+
   beforeEach(async () => {
     const reportingServiceSpy = jasmine.createSpyObj('ReportingApiService', [
       'getObservabilityMetrics',
@@ -117,12 +119,17 @@ describe('ObservabilityDashboardComponent', () => {
     }).compileComponents();
 
     reportingService = TestBed.inject(ReportingApiService) as jasmine.SpyObj<ReportingApiService>;
-    reportingService.getObservabilityMetrics.and.returnValue(of(mockMetrics));
+    reportingService.getObservabilityMetrics.and.returnValue(of(createMockMetrics()));
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ObservabilityDashboardComponent);
     component = fixture.componentInstance;
+    (globalThis as { Chart?: new () => { destroy: () => void; update: () => void } }).Chart = class {
+      destroy(): void {}
+      update(): void {}
+    };
+    spyOn(component as { loadChartJs: () => Promise<void> }, 'loadChartJs').and.returnValue(Promise.resolve());
   });
 
   it('should create', () => {
@@ -139,7 +146,7 @@ describe('ObservabilityDashboardComponent', () => {
 
     setTimeout(() => {
       expect(reportingService.getObservabilityMetrics).toHaveBeenCalled();
-      expect(component.metrics).toEqual(mockMetrics);
+      expect(component.metrics).toEqual(baseMockMetrics);
       expect(component.lastUpdated).toBeTruthy();
       done();
     }, 100);
@@ -201,20 +208,20 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should get channel names from metrics', () => {
-    component.metrics = mockMetrics;
+    component.metrics = createMockMetrics();
     const channels = component.getChannelNames();
     expect(channels).toEqual(['SMS', 'EMAIL', 'WHATSAPP']);
   });
 
   it('should get queue depth for channel', () => {
-    component.metrics = mockMetrics;
+    component.metrics = createMockMetrics();
     expect(component.getQueueDepth('SMS')).toBe(10);
     expect(component.getQueueDepth('EMAIL')).toBe(5);
     expect(component.getQueueDepth('UNKNOWN')).toBe(0);
   });
 
   it('should get latency for channel', () => {
-    component.metrics = mockMetrics;
+    component.metrics = createMockMetrics();
     const latency = component.getLatency('SMS');
     expect(latency.p50).toBe(100);
     expect(latency.p95).toBe(200);
@@ -222,13 +229,13 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should get DLQ size for channel', () => {
-    component.metrics = mockMetrics;
+    component.metrics = createMockMetrics();
     expect(component.getDlqSize('SMS')).toBe(3);
     expect(component.getDlqSize('EMAIL')).toBe(2);
   });
 
   it('should determine DLQ status', () => {
-    component.metrics = mockMetrics;
+    component.metrics = createMockMetrics();
     
     // Normal status
     expect(component.getDlqStatus('WHATSAPP')).toBe('normal');
@@ -245,7 +252,7 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should get quota usage for channel', () => {
-    component.metrics = mockMetrics;
+    component.metrics = createMockMetrics();
     const quota = component.getQuotaUsage('SMS');
     expect(quota.used).toBe(500);
     expect(quota.limit).toBe(1000);
@@ -259,18 +266,19 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should add metrics to history', () => {
-    component.metrics = mockMetrics;
-    component['addToHistory'](mockMetrics);
+    const metrics = createMockMetrics();
+    component.metrics = metrics;
+    component['addToHistory'](metrics);
     
     expect(component['queueDepthHistory'].length).toBe(1);
-    expect(component['queueDepthHistory'][0].values).toEqual(mockMetrics.queueMetrics.queueDepthByChannel);
+    expect(component['queueDepthHistory'][0].values).toEqual(metrics.queueMetrics.queueDepthByChannel);
   });
 
   it('should limit history to max points', () => {
-    const maxHistoryPoints = (component as unknown as { maxHistoryPoints: number }).maxHistoryPoints;
+    const maxHistoryPoints = component['maxHistoryPoints'];
 
     for (let i = 0; i < maxHistoryPoints + 1; i++) {
-      component['addToHistory'](mockMetrics);
+      component['addToHistory'](createMockMetrics());
     }
     
     expect(component['queueDepthHistory'].length).toBe(maxHistoryPoints);
