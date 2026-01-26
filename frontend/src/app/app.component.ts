@@ -4,6 +4,7 @@ import { routeFadeSlideAnimation } from './animations/route-animations';
 import { ThemeService } from './services/theme.service';
 import { ServiceWorkerRegistrationService } from './services/service-worker-registration.service';
 import { OfflineQueueService } from './services/offline-queue.service';
+import { LiveAnnouncerService } from './services/live-announcer.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +18,8 @@ export class AppComponent implements OnInit {
   constructor(
     private themeService: ThemeService,
     private swService: ServiceWorkerRegistrationService,
-    private queueService: OfflineQueueService
+    private queueService: OfflineQueueService,
+    private liveAnnouncer: LiveAnnouncerService
   ) {}
 
   ngOnInit(): void {

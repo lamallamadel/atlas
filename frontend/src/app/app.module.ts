@@ -76,6 +76,7 @@ import { CorrelationIdInterceptor } from './interceptors/correlation-id.intercep
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { FormValidationAnimationDirective } from './directives/form-validation-animation.directive';
 import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hint.directive';
+import { FocusTrapDirective } from './directives/focus-trap.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -164,6 +165,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ApiStatusIndicatorComponent,
     FormValidationAnimationDirective,
     KeyboardShortcutHintDirective,
+    FocusTrapDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,

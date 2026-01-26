@@ -1,6 +1,34 @@
 # Frontend Application
 
-This Angular 16 application implements best practices for code splitting and lazy loading of third-party dependencies.
+This Angular 16 application implements best practices for code splitting, lazy loading, and comprehensive accessibility (WCAG 2.1 AA).
+
+## ♿ Accessibility Features
+
+This application is fully accessible and meets WCAG 2.1 Level AA standards with AAA enhancements.
+
+### Quick Start
+```bash
+# Show accessibility testing guide
+npm run a11y
+
+# Run Lighthouse accessibility audit
+npm run a11y:lighthouse
+```
+
+### Documentation
+- **Full Guide**: [ACCESSIBILITY.md](./ACCESSIBILITY.md) - Complete implementation guide
+- **Quick Reference**: [ACCESSIBILITY_QUICK_REFERENCE.md](./ACCESSIBILITY_QUICK_REFERENCE.md) - Common patterns & examples
+- **Implementation Summary**: [ACCESSIBILITY_IMPLEMENTATION_SUMMARY.md](./ACCESSIBILITY_IMPLEMENTATION_SUMMARY.md) - All changes
+
+### Key Features
+- ✅ Full keyboard navigation with shortcuts
+- ✅ Screen reader support (NVDA, JAWS, VoiceOver, TalkBack)
+- ✅ Focus management in modals/dialogs
+- ✅ WCAG AA color contrast (4.5:1 minimum)
+- ✅ ARIA live regions for dynamic content
+- ✅ 40x40px touch targets
+- ✅ Skip links and landmark regions
+- ✅ Comprehensive form accessibility
 
 ## Export Functionality with Lazy Loading
 

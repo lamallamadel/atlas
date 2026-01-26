@@ -5,8 +5,10 @@
      role="dialog" 
      aria-modal="true"
      aria-labelledby="command-palette-title"
-     tabindex="0">
+     aria-describedby="command-palette-description"
+     tabindex="-1">
   <div class="command-palette" 
+       appFocusTrap
        (click)="$event.stopPropagation()"
        (keydown)="$event.stopPropagation()" 
        role="document">
@@ -14,6 +16,9 @@
     <!-- Header -->
     <div class="command-header">
       <h2 id="command-palette-title" class="visually-hidden">Palette de commandes</h2>
+      <p id="command-palette-description" class="visually-hidden">
+        Tapez pour rechercher des commandes, annonces ou dossiers. Utilisez les flèches haut et bas pour naviguer, Entrée pour sélectionner, Échap pour fermer.
+      </p>
       <div class="command-search">
         <mat-icon class="search-icon">search</mat-icon>
         <input
@@ -79,15 +84,15 @@
     </div>
 
     <!-- Empty State -->
-    <div class="command-empty" *ngIf="filteredItems.length === 0 && !isSearching">
-      <mat-icon>search_off</mat-icon>
+    <div class="command-empty" *ngIf="filteredItems.length === 0 && !isSearching" role="status" aria-live="polite">
+      <mat-icon aria-hidden="true">search_off</mat-icon>
       <p *ngIf="searchQuery">Aucun résultat trouvé pour "{{ searchQuery }}"</p>
       <p *ngIf="!searchQuery">Commencez à taper pour rechercher...</p>
     </div>
 
     <!-- Loading State -->
-    <div class="command-loading" *ngIf="isSearching && searchQuery.length >= 2">
-      <mat-spinner diameter="40"></mat-spinner>
+    <div class="command-loading" *ngIf="isSearching && searchQuery.length >= 2" role="status" aria-live="polite">
+      <mat-spinner diameter="40" aria-label="Recherche en cours"></mat-spinner>
       <p>Recherche en cours...</p>
     </div>
 
