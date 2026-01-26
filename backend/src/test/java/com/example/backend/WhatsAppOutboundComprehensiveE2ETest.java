@@ -498,6 +498,8 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
         config.setOrgId(TENANT_1);
         config.setPhoneNumberId("test-phone-number-id");
         config.setApiKeyEncrypted("test-api-key");
+        config.setApiSecretEncrypted("test-api-secret");
+        config.setWebhookSecretEncrypted("test-webhook-secret");
         config.setEnabled(true);
         config.setCreatedAt(LocalDateTime.now());
         config.setUpdatedAt(LocalDateTime.now());
