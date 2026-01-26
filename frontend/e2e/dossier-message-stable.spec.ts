@@ -8,21 +8,17 @@ import {
 } from './api-validation';
 
 test.describe('Dossier Message E2E Tests (Stabilized)', () => {
-  test.beforeEach(async ({ page, userManager, helpers }) => {
+  test.beforeEach(async ({ authenticatedPage: page, helpers }) => {
     await helpers.retryAssertion(async () => {
       await page.goto('/');
       await page.waitForSelector('app-root', { timeout: 10000 });
     });
   });
 
-  test.afterEach(async ({ dataCleanup }) => {
-    await dataCleanup.fullCleanup();
-  });
-
   test('Create dossier and add message with stable waits', async ({ 
-    page, 
+    authenticatedPage: page, 
     helpers, 
-    dataCleanup 
+    cleanup 
   }) => {
     await helpers.navigateToDossiers();
 
@@ -47,7 +43,7 @@ test.describe('Dossier Message E2E Tests (Stabilized)', () => {
 
     const { body: dossierBody } = await createDossierPromise;
     expect(dossierBody.id).toBeTruthy();
-    dataCleanup.trackDossier(dossierBody.id);
+    cleanup.trackDossier(dossierBody.id);
 
     await helpers.retryAssertion(async () => {
       await page.waitForURL(/.*dossiers\/\d+/, { timeout: 30000 });
@@ -90,7 +86,7 @@ test.describe('Dossier Message E2E Tests (Stabilized)', () => {
     const { body: messageBody } = await createMessagePromise;
     expect(messageBody.id).toBeTruthy();
     expect(messageBody.content).toBe(messageContent);
-    dataCleanup.trackMessage(messageBody.id);
+    cleanup.trackMessage(messageBody.id);
 
     await helpers.closeSnackbar();
 
@@ -108,7 +104,7 @@ test.describe('Dossier Message E2E Tests (Stabilized)', () => {
     await expect(messageCard.locator('.direction-badge').filter({ hasText: /Entrant|INBOUND/i })).toBeVisible();
   });
 
-  test('Handle message creation error with retry', async ({ page, helpers, dataCleanup }) => {
+  test('Handle message creation error with retry', async ({ authenticatedPage: page, helpers, cleanup }) => {
     await helpers.navigateToDossiers();
 
     await helpers.ensureDossierExists('Test Lead Error', '+33612345999');
@@ -116,7 +112,7 @@ test.describe('Dossier Message E2E Tests (Stabilized)', () => {
 
     const dossierId = helpers.extractDossierId(page.url());
     if (dossierId) {
-      dataCleanup.trackDossier(dossierId);
+      cleanup.trackDossier(dossierId);
     }
 
     await helpers.switchToTab('Messages');
@@ -182,7 +178,7 @@ test.describe('Dossier Message E2E Tests (Stabilized)', () => {
     });
   });
 
-  test('Message list loads with proper pagination', async ({ page, helpers, dataCleanup }) => {
+  test('Message list loads with proper pagination', async ({ authenticatedPage: page, helpers, cleanup }) => {
     await helpers.navigateToDossiers();
 
     await helpers.ensureDossierExists('Test Pagination', '+33612346000');
@@ -190,7 +186,7 @@ test.describe('Dossier Message E2E Tests (Stabilized)', () => {
 
     const dossierId = helpers.extractDossierId(page.url());
     if (dossierId) {
-      dataCleanup.trackDossier(dossierId);
+      cleanup.trackDossier(dossierId);
     }
 
     await helpers.switchToTab('Messages');
