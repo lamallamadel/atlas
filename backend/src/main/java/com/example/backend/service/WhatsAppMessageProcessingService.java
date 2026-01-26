@@ -183,9 +183,10 @@ public class WhatsAppMessageProcessingService {
     private void processDeliveryStatus(WhatsAppWebhookPayload.Status status, String orgId) {
         String providerMessageId = status.getId();
         String deliveryStatus = status.getStatus();
+        String timestamp = status.getTimestamp();
 
-        log.info("Processing delivery status for message {}: status={}, orgId={}", 
-            providerMessageId, deliveryStatus, orgId);
+        log.info("Processing delivery status for message {}: status={}, timestamp={}, orgId={}", 
+            providerMessageId, deliveryStatus, timestamp, orgId);
 
         Optional<OutboundMessageEntity> messageOpt = outboundMessageRepository.findByProviderMessageId(providerMessageId);
 
@@ -210,22 +211,32 @@ public class WhatsAppMessageProcessingService {
 
         OutboundMessageStatus currentStatus = message.getStatus();
         if (shouldUpdateStatus(currentStatus, newStatus)) {
+            LocalDateTime now = LocalDateTime.now();
             message.setStatus(newStatus);
-            message.setUpdatedAt(LocalDateTime.now());
+            message.setUpdatedAt(now);
 
             if (newStatus == OutboundMessageStatus.FAILED && status.getErrors() != null && !status.getErrors().isEmpty()) {
                 WhatsAppWebhookPayload.StatusError error = status.getErrors().get(0);
-                message.setErrorCode(String.valueOf(error.getCode()));
-                message.setErrorMessage(error.getMessage());
+                String errorCode = String.valueOf(error.getCode());
+                String errorMessage = error.getMessage();
+                
+                message.setErrorCode(errorCode);
+                message.setErrorMessage(errorMessage != null ? errorMessage : error.getTitle());
+                
+                log.warn("Message {} failed with error code {}: {}", 
+                    message.getId(), errorCode, message.getErrorMessage());
+            } else if (newStatus == OutboundMessageStatus.DELIVERED) {
+                message.setErrorCode(null);
+                message.setErrorMessage(null);
             }
 
             outboundMessageRepository.save(message);
 
-            log.info("Updated outbound message {} status from {} to {}", 
-                message.getId(), currentStatus, newStatus);
+            log.info("Updated outbound message {} status from {} to {} (webhook timestamp: {})", 
+                message.getId(), currentStatus, newStatus, timestamp);
 
-            logDeliveryStatusAudit(message, deliveryStatus);
-            logDeliveryStatusActivity(message, deliveryStatus);
+            logDeliveryStatusAudit(message, deliveryStatus, status);
+            logDeliveryStatusActivity(message, deliveryStatus, status);
         }
     }
 
@@ -255,14 +266,22 @@ public class WhatsAppMessageProcessingService {
         return true;
     }
 
-    private void logDeliveryStatusAudit(OutboundMessageEntity message, String deliveryStatus) {
+    private void logDeliveryStatusAudit(OutboundMessageEntity message, String deliveryStatus, WhatsAppWebhookPayload.Status status) {
         if (auditEventService != null) {
             try {
+                String details = String.format("Delivery status updated to: %s (timestamp: %s)", 
+                    deliveryStatus, status.getTimestamp());
+                
+                if (status.getErrors() != null && !status.getErrors().isEmpty()) {
+                    WhatsAppWebhookPayload.StatusError error = status.getErrors().get(0);
+                    details += String.format(" - Error: [%d] %s", error.getCode(), error.getMessage());
+                }
+                
                 auditEventService.logEvent(
                     "OUTBOUND_MESSAGE",
                     message.getId(),
-                    "UPDATED",
-                    String.format("Delivery status updated to: %s", deliveryStatus)
+                    "DELIVERY_STATUS_UPDATED",
+                    details
                 );
             } catch (Exception e) {
                 log.warn("Failed to log audit event for delivery status update", e);
@@ -270,19 +289,39 @@ public class WhatsAppMessageProcessingService {
         }
     }
 
-    private void logDeliveryStatusActivity(OutboundMessageEntity message, String deliveryStatus) {
+    private void logDeliveryStatusActivity(OutboundMessageEntity message, String deliveryStatus, WhatsAppWebhookPayload.Status status) {
         if (activityService != null && message.getDossierId() != null) {
             try {
+                java.util.Map<String, Object> metadata = new java.util.HashMap<>();
+                metadata.put("outboundMessageId", message.getId());
+                metadata.put("providerMessageId", message.getProviderMessageId() != null ? message.getProviderMessageId() : "");
+                metadata.put("status", deliveryStatus);
+                metadata.put("channel", "WHATSAPP");
+                metadata.put("timestamp", status.getTimestamp());
+                
+                if (status.getRecipientId() != null) {
+                    metadata.put("recipientId", status.getRecipientId());
+                }
+                
+                if (status.getConversation() != null) {
+                    metadata.put("conversationId", status.getConversation().getId());
+                    if (status.getConversation().getOrigin() != null) {
+                        metadata.put("conversationOrigin", status.getConversation().getOrigin().getType());
+                    }
+                }
+                
+                if (status.getErrors() != null && !status.getErrors().isEmpty()) {
+                    WhatsAppWebhookPayload.StatusError error = status.getErrors().get(0);
+                    metadata.put("errorCode", error.getCode());
+                    metadata.put("errorMessage", error.getMessage());
+                    metadata.put("errorTitle", error.getTitle());
+                }
+                
                 activityService.logActivity(
                     message.getDossierId(),
                     "MESSAGE_STATUS_UPDATE",
                     String.format("WhatsApp message delivery status: %s", deliveryStatus),
-                    java.util.Map.of(
-                        "outboundMessageId", message.getId(),
-                        "providerMessageId", message.getProviderMessageId() != null ? message.getProviderMessageId() : "",
-                        "status", deliveryStatus,
-                        "channel", "WHATSAPP"
-                    )
+                    metadata
                 );
             } catch (Exception e) {
                 log.warn("Failed to log activity for delivery status update", e);
