@@ -131,7 +131,7 @@ describe('ObservabilityDashboardComponent', () => {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       update(): void {}
     };
-    spyOn(component as { loadChartJs: () => Promise<void> }, 'loadChartJs').and.returnValue(Promise.resolve());
+    spyOn<any>(component, 'loadChartJs').and.returnValue(Promise.resolve());
   });
 
   it('should create', () => {
@@ -238,18 +238,23 @@ describe('ObservabilityDashboardComponent', () => {
 
   it('should determine DLQ status', () => {
     component.metrics = createMockMetrics();
+    const metrics = component.metrics;
+    if (!metrics) {
+      fail('Expected metrics to be defined for DLQ status assertions.');
+      return;
+    }
     
     // Normal status
     expect(component.getDlqStatus('WHATSAPP')).toBe('normal');
     
     // Test with different thresholds
-    component.metrics.dlqMetrics.alertThreshold = 10;
+    metrics.dlqMetrics.alertThreshold = 10;
     expect(component.getDlqStatus('SMS')).toBe('normal'); // 3 < 7.5
     
-    component.metrics.dlqMetrics.dlqSizeByChannel['SMS'] = 8;
+    metrics.dlqMetrics.dlqSizeByChannel['SMS'] = 8;
     expect(component.getDlqStatus('SMS')).toBe('warning'); // 8 >= 7.5
     
-    component.metrics.dlqMetrics.dlqSizeByChannel['SMS'] = 11;
+    metrics.dlqMetrics.dlqSizeByChannel['SMS'] = 11;
     expect(component.getDlqStatus('SMS')).toBe('critical'); // 11 >= 10
   });
 
