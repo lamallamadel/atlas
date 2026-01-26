@@ -5,6 +5,8 @@ import com.example.backend.repository.WhatsAppRateLimitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.RedisSystemException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,9 +46,14 @@ public class WhatsAppRateLimitService {
 
     @Transactional
     public boolean checkAndConsumeQuota(String orgId) {
-        if (redisEnabled) {
+        if (!redisEnabled) {
+            return checkAndConsumeQuotaWithDatabase(orgId);
+        }
+
+        try {
             return checkAndConsumeQuotaWithRedis(orgId);
-        } else {
+        } catch (RedisConnectionFailureException | RedisSystemException ex) {
+            logger.warn("Redis unavailable for WhatsApp rate limit checks; falling back to database for orgId={}", orgId, ex);
             return checkAndConsumeQuotaWithDatabase(orgId);
         }
     }
@@ -62,13 +69,10 @@ public class WhatsAppRateLimitService {
             return false;
         }
         
-        Integer quotaLimit = DEFAULT_QUOTA_LIMIT;
+        WhatsAppRateLimit rateLimit = getOrCreateRateLimit(orgId);
+        Integer quotaLimit = rateLimit.getQuotaLimit();
         String limitStr = redisTemplate.opsForValue().get(limitKey);
-        if (limitStr != null) {
-            quotaLimit = Integer.parseInt(limitStr);
-        } else {
-            WhatsAppRateLimit rateLimit = getOrCreateRateLimit(orgId);
-            quotaLimit = rateLimit.getQuotaLimit();
+        if (limitStr == null || !limitStr.equals(String.valueOf(quotaLimit))) {
             redisTemplate.opsForValue().set(limitKey, String.valueOf(quotaLimit), 24, TimeUnit.HOURS);
         }
         
@@ -160,8 +164,12 @@ public class WhatsAppRateLimitService {
         rateLimitRepository.save(rateLimit);
         
         if (redisEnabled) {
-            String throttleKey = REDIS_KEY_PREFIX + "throttle:" + orgId;
-            redisTemplate.opsForValue().set(throttleKey, throttleUntil.toString(), throttleSeconds, TimeUnit.SECONDS);
+            try {
+                String throttleKey = REDIS_KEY_PREFIX + "throttle:" + orgId;
+                redisTemplate.opsForValue().set(throttleKey, throttleUntil.toString(), throttleSeconds, TimeUnit.SECONDS);
+            } catch (RedisConnectionFailureException | RedisSystemException ex) {
+                logger.warn("Redis unavailable while setting WhatsApp throttle; proceeding with database only for orgId={}", orgId, ex);
+            }
         }
     }
 
@@ -173,8 +181,12 @@ public class WhatsAppRateLimitService {
         logger.info("Updated WhatsApp quota limit for orgId={} to {}", orgId, newLimit);
         
         if (redisEnabled) {
-            String limitKey = REDIS_KEY_PREFIX + "limit:" + orgId;
-            redisTemplate.opsForValue().set(limitKey, String.valueOf(newLimit), 24, TimeUnit.HOURS);
+            try {
+                String limitKey = REDIS_KEY_PREFIX + "limit:" + orgId;
+                redisTemplate.opsForValue().set(limitKey, String.valueOf(newLimit), 24, TimeUnit.HOURS);
+            } catch (RedisConnectionFailureException | RedisSystemException ex) {
+                logger.warn("Redis unavailable while updating WhatsApp quota limit; proceeding with database only for orgId={}", orgId, ex);
+            }
         }
     }
 
