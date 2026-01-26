@@ -1,4 +1,4 @@
-<mat-card class="task-card" [class.overdue]="isOverdue" [class.completed]="task.status === TaskStatus.COMPLETED">
+<mat-card class="task-card" [class.overdue]="isOverdue" [class.completed]="task.status === TaskStatus.COMPLETED" @scaleIn>
   <mat-card-header>
     <div class="task-header">
       <mat-checkbox

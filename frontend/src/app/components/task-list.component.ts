@@ -8,6 +8,7 @@ import { AuthService } from '../services/auth.service';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
+import { staggerList, cardStagger } from '../animations';
 
 enum ViewMode {
   LIST = 'list',
@@ -29,7 +30,8 @@ enum StatusFilter {
 @Component({
   selector: 'app-task-list',
   templateUrl: './task-list.component.html',
-  styleUrls: ['./task-list.component.css']
+  styleUrls: ['./task-list.component.css'],
+  animations: [staggerList, cardStagger]
 })
 export class TaskListComponent implements OnInit {
   tasks: TaskResponse[] = [];

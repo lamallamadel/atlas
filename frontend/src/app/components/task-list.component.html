@@ -51,7 +51,7 @@
 
   <div class="content" *ngIf="!loading">
     <div class="list-view" *ngIf="viewMode === ViewMode.LIST">
-      <div class="tasks-grid" *ngIf="filteredTasks.length > 0">
+      <div class="tasks-grid" *ngIf="filteredTasks.length > 0" [@cardStagger]="filteredTasks.length">
         <app-task-card
           *ngFor="let task of filteredTasks"
           [task]="task"

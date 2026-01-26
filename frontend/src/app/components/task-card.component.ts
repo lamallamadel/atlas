@@ -1,10 +1,12 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { TaskResponse, TaskPriority, TaskStatus } from '../services/task-api.service';
+import { fadeIn, scaleIn } from '../animations';
 
 @Component({
   selector: 'app-task-card',
   templateUrl: './task-card.component.html',
-  styleUrls: ['./task-card.component.css']
+  styleUrls: ['./task-card.component.css'],
+  animations: [fadeIn, scaleIn]
 })
 export class TaskCardComponent {
   @Input() task!: TaskResponse;

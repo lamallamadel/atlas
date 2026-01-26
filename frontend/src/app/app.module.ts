@@ -80,6 +80,8 @@ import { FocusTrapDirective } from './directives/focus-trap.directive';
 import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
+import { AnimatedButtonDirective } from './directives/animated-button.directive';
+import { AnimatedFocusDirective } from './directives/animated-focus.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -135,6 +137,10 @@ import { MobileActionSheetComponent } from './components/mobile-action-sheet.com
 import { MobileDossierCardComponent } from './components/mobile-dossier-card.component';
 import { LogoComponent } from './components/logo.component';
 import { LogoInlineComponent } from './components/logo-inline.component';
+import { CustomSpinnerComponent } from './components/custom-spinner.component';
+import { LoadingButtonComponent } from './components/loading-button.component';
+import { AnimationsDemoComponent } from './components/animations-demo.component';
+import { ButtonExamplesComponent } from './components/button-examples.component';
 
 registerLocaleData(localeFr);
 
@@ -182,6 +188,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LazyLoadImageDirective,
     InfiniteScrollDirective,
     SwipeGestureDirective,
+    AnimatedButtonDirective,
+    AnimatedFocusDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
@@ -229,7 +237,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MobileActionSheetComponent,
     MobileDossierCardComponent,
     LogoComponent,
-    LogoInlineComponent
+    LogoInlineComponent,
+    CustomSpinnerComponent,
+    LoadingButtonComponent,
+    AnimationsDemoComponent,
+    ButtonExamplesComponent
   ],
   imports: [
     BrowserModule,
