@@ -186,7 +186,8 @@
      ======================================== */
   
   table,
-  .data-table {
+  .data-table,
+  .mat-mdc-table {
     width: 100% !important;
     border-collapse: collapse !important;
     page-break-inside: auto;
@@ -195,30 +196,36 @@
   }
 
   thead,
-  .data-table thead {
+  .data-table thead,
+  .mat-mdc-header-row {
     display: table-header-group;
     font-weight: bold;
   }
 
   tbody,
-  .data-table tbody {
+  .data-table tbody,
+  .mat-mdc-table tbody {
     display: table-row-group;
   }
 
-  tr {
+  tr,
+  .mat-mdc-row {
     page-break-inside: avoid;
     page-break-after: auto;
   }
 
   th,
-  td {
+  td,
+  .mat-mdc-header-cell,
+  .mat-mdc-cell {
     padding: 8pt 6pt !important;
     border: 1pt solid #333 !important;
     text-align: left;
     vertical-align: top;
   }
 
-  th {
+  th,
+  .mat-mdc-header-cell {
     background-color: #f0f0f0 !important;
     font-weight: bold;
     color: black !important;
@@ -234,9 +241,18 @@
   }
 
   /* Optimize table wrapper */
-  .data-table-wrapper {
+  .data-table-wrapper,
+  .table-wrapper,
+  .mat-mdc-table-container {
     overflow: visible !important;
     max-height: none !important;
+  }
+
+  /* Export toolbar - hide in print */
+  .export-toolbar,
+  .table-actions,
+  .export-buttons {
+    display: none !important;
   }
 
   /* ========================================

@@ -256,14 +256,17 @@
         [enableSort]="false"
         [rowClickable]="true"
         [useKebabMenu]="true"
-        [showTableHeader]="false"
-        [showInlinePagination]="false"
+        [enableRowSelection]="true"
+        [enableExport]="true"
+        [showTableHeader]="true"
+        [showInlinePagination]="true"
         [paginationData]="paginationData"
         [counterSingular]="'dossier'"
         [counterPlural]="'dossier(s)'"
         (rowAction)="onRowAction($event)"
         (rowClick)="onRowClick($event)"
-        (paginationChange)="onPaginationChange($event)">
+        (paginationChange)="onPaginationChange($event)"
+        (exportRequest)="onExportRequest($event)">
       </app-generic-table>
 
       <nav class="pagination-section" *ngIf="page" aria-label="Pagination des dossiers">

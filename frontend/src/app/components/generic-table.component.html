@@ -1,11 +1,40 @@
 <div class="table-container">
   <!-- Desktop Table View -->
   <div *ngIf="!isMobile" class="table-wrapper">
-    <!-- Table Header with Counter and Pagination -->
+    <!-- Table Header with Counter, Export, and Pagination -->
     <div class="table-header" *ngIf="showTableHeader">
       <div class="table-counter">
         <span class="counter-value">{{ data.length }}</span>
         <span class="counter-label">{{ data.length === 1 ? counterSingular : counterPlural }}</span>
+        <span *ngIf="enableRowSelection && hasSelection()" class="selection-info">
+          ({{ getSelectedCount() }} sélectionné{{ getSelectedCount() > 1 ? 's' : '' }})
+        </span>
+      </div>
+      <div class="table-actions" *ngIf="enableExport">
+        <button
+          mat-icon-button
+          [matTooltip]="hasSelection() ? 'Exporter la sélection en PDF' : 'Exporter tout en PDF'"
+          (click)="exportToPDF()"
+          [disabled]="data.length === 0"
+          aria-label="Exporter en PDF">
+          <mat-icon>picture_as_pdf</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [matTooltip]="hasSelection() ? 'Exporter la sélection en Excel' : 'Exporter tout en Excel'"
+          (click)="exportToExcel()"
+          [disabled]="data.length === 0"
+          aria-label="Exporter en Excel">
+          <mat-icon>table_chart</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          [matTooltip]="hasSelection() ? 'Imprimer la sélection' : 'Imprimer tout'"
+          (click)="printTable()"
+          [disabled]="data.length === 0"
+          aria-label="Imprimer">
+          <mat-icon>print</mat-icon>
+        </button>
       </div>
       <div class="table-pagination-controls" *ngIf="showInlinePagination && paginationData">
         <button

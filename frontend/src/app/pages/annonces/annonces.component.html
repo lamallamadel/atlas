@@ -206,7 +206,11 @@
         [actions]="actions"
         [showPagination]="false"
         [enableSort]="false"
-        (rowAction)="onRowAction($event)">
+        [enableRowSelection]="true"
+        [enableExport]="true"
+        [showTableHeader]="true"
+        (rowAction)="onRowAction($event)"
+        (exportRequest)="onExportRequest($event)">
       </app-generic-table>
 
       <nav class="pagination-section" *ngIf="page" aria-label="Pagination des annonces">

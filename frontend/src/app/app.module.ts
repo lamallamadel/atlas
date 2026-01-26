@@ -113,6 +113,7 @@ import { EnhancedFormExampleComponent } from './components/enhanced-form-example
 import { KanbanBoardComponent } from './components/kanban-board.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
 import { NotificationCenterComponent } from './components/notification-center.component';
+import { ExportProgressDialogComponent } from './components/export-progress-dialog.component';
 
 registerLocaleData(localeFr);
 
@@ -186,7 +187,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     EnhancedFormExampleComponent,
     KanbanBoardComponent,
     CalendarViewComponent,
-    NotificationCenterComponent
+    NotificationCenterComponent,
+    ExportProgressDialogComponent
   ],
   imports: [
     BrowserModule,

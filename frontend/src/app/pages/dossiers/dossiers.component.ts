@@ -17,6 +17,8 @@ import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobil
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
 import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
+import { ExportService, ColumnDef } from '../../services/export.service';
+import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -228,7 +230,8 @@ export class DossiersComponent implements OnInit {
     private userPreferencesService: UserPreferencesService,
     private bottomSheet: MatBottomSheet,
     private breakpointObserver: BreakpointObserver,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private exportService: ExportService
   ) {}
 
   ngOnInit(): void {
@@ -812,5 +815,55 @@ export class DossiersComponent implements OnInit {
 
   get allDossiersForKanban(): DossierResponse[] {
     return this.dossiers;
+  }
+
+  onExportRequest(event: { format: 'pdf' | 'excel' | 'print'; data: unknown[] }): void {
+    const exportColumns: ColumnDef[] = [
+      { key: 'id', header: 'ID', width: 20 },
+      { key: 'annonceTitle', header: 'Annonce', width: 60 },
+      { key: 'leadName', header: 'Nom', width: 50 },
+      { key: 'leadPhone', header: 'Téléphone', width: 40 },
+      { key: 'leadSource', header: 'Source', width: 40 },
+      { key: 'status', header: 'Statut', width: 35 },
+      { key: 'createdAt', header: 'Créé le', width: 35 },
+      { key: 'updatedAt', header: 'Modifié le', width: 35 }
+    ];
+
+    const dataToExport = event.data.map(item => {
+      const dossier = item as DossierResponse;
+      return {
+        id: dossier.id,
+        annonceTitle: dossier.annonceTitle || '-',
+        leadName: dossier.leadName || '-',
+        leadPhone: this.phoneFormatPipe.transform(dossier.leadPhone || '') || '-',
+        leadSource: dossier.leadSource || dossier.source || '-',
+        status: this.getStatusLabel(dossier.status),
+        createdAt: this.dateFormatPipe.transform(dossier.createdAt),
+        updatedAt: this.dateFormatPipe.transform(dossier.updatedAt)
+      };
+    });
+
+    const exportConfig = {
+      title: 'Liste des Dossiers',
+      filename: 'dossiers',
+      primaryColor: '#2c5aa0',
+      secondaryColor: '#e67e22'
+    };
+
+    this.dialog.open(ExportProgressDialogComponent, {
+      width: '500px',
+      disableClose: true,
+      data: { message: 'Préparation de l\'export...' }
+    });
+
+    const exportPromise = event.format === 'pdf'
+      ? this.exportService.exportToPDF(dataToExport, exportColumns, exportConfig)
+      : event.format === 'excel'
+      ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
+      : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
+
+    exportPromise.catch(error => {
+      console.error('Export error:', error);
+    });
   }
 }
