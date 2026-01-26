@@ -90,6 +90,14 @@
   padding: 16px;
 }
 
+.list-view-wrapper {
+  margin-top: 20px;
+  background: white;
+  border-radius: 4px;
+  overflow: hidden;
+  min-height: 500px;
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -210,6 +218,20 @@
 
 ::ng-deep .fc .fc-highlight {
   background-color: rgba(63, 81, 181, 0.1);
+}
+
+::ng-deep .fc-event-custom.fc-event-cancelled {
+  opacity: 0.6;
+  text-decoration: line-through;
+}
+
+::ng-deep .fc-event-custom.fc-event-completed {
+  border-left: 4px solid #4CAF50;
+}
+
+::ng-deep .fc .fc-timegrid-now-indicator-line {
+  border-color: #f44336;
+  border-width: 2px;
 }
 
 @media (max-width: 768px) {

@@ -13,6 +13,13 @@
               <mat-icon>refresh</mat-icon>
             </button>
             <button 
+              mat-icon-button 
+              (click)="toggleListView()" 
+              matTooltip="Vue liste"
+              [color]="showListView ? 'primary' : 'default'">
+              <mat-icon>{{ showListView ? 'calendar_view_month' : 'list' }}</mat-icon>
+            </button>
+            <button 
               mat-raised-button 
               color="primary" 
               (click)="exportToICal()"
@@ -69,11 +76,19 @@
         </div>
       </div>
 
-      <div class="calendar-wrapper" *ngIf="!isLoading">
+      <div class="calendar-wrapper" *ngIf="!isLoading && !showListView">
         <full-calendar 
           #calendar
           [options]="calendarOptions">
         </full-calendar>
+      </div>
+
+      <div class="list-view-wrapper" *ngIf="!isLoading && showListView">
+        <app-calendar-list-view
+          [filterByAssignedTo]="filterByAssignedTo"
+          [filterByStatus]="filterByStatus"
+          (appointmentUpdated)="loadAppointments()">
+        </app-calendar-list-view>
       </div>
 
       <div class="loading-state" *ngIf="isLoading">

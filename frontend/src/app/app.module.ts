@@ -116,6 +116,7 @@ import { ContextualHintDirective } from './directives/contextual-hint.directive'
 import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
 import { KanbanBoardComponent } from './components/kanban-board.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
+import { CalendarListViewComponent } from './components/calendar-list-view.component';
 import { NotificationCenterComponent } from './components/notification-center.component';
 import { ExportProgressDialogComponent } from './components/export-progress-dialog.component';
 import { NotificationDemoComponent } from './components/notification-demo.component';
@@ -207,6 +208,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     EnhancedFormExampleComponent,
     KanbanBoardComponent,
     CalendarViewComponent,
+    CalendarListViewComponent,
     NotificationCenterComponent,
     ExportProgressDialogComponent,
     NotificationDemoComponent,
