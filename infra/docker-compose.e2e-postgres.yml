@@ -67,6 +67,29 @@ services:
 
   # Disable elasticsearch - not needed for E2E tests
   elasticsearch:
+    profiles:
+      - disabled
+    deploy:
+      replicas: 0
+    restart: "no"
+
+  kibana:
+    profiles:
+      - disabled
+    deploy:
+      replicas: 0
+    restart: "no"
+
+  logstash:
+    profiles:
+      - disabled
+    deploy:
+      replicas: 0
+    restart: "no"
+
+  filebeat:
+    profiles:
+      - disabled
     deploy:
       replicas: 0
     restart: "no"
