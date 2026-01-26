@@ -54,6 +54,15 @@ public class WhatsAppTemplate extends BaseEntity {
     @Column(name = "rejection_reason", columnDefinition = "TEXT")
     private String rejectionReason;
 
+    @Column(name = "current_version", nullable = false)
+    private Integer currentVersion = 1;
+
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<WhatsAppTemplateVersion> versions = new ArrayList<>();
+
+    @Column(name = "meta_submission_id", length = 255)
+    private String metaSubmissionId;
+
     public Long getId() {
         return id;
     }
@@ -142,5 +151,29 @@ public class WhatsAppTemplate extends BaseEntity {
     public void removeVariable(TemplateVariable variable) {
         variables.remove(variable);
         variable.setTemplate(null);
+    }
+
+    public Integer getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public void setCurrentVersion(Integer currentVersion) {
+        this.currentVersion = currentVersion;
+    }
+
+    public List<WhatsAppTemplateVersion> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(List<WhatsAppTemplateVersion> versions) {
+        this.versions = versions;
+    }
+
+    public String getMetaSubmissionId() {
+        return metaSubmissionId;
+    }
+
+    public void setMetaSubmissionId(String metaSubmissionId) {
+        this.metaSubmissionId = metaSubmissionId;
     }
 }

@@ -28,4 +28,20 @@ public interface WhatsAppTemplateRepository extends JpaRepository<WhatsAppTempla
     List<WhatsAppTemplate> findByOrgIdAndStatus(@Param("orgId") String orgId, @Param("status") TemplateStatus status);
 
     List<WhatsAppTemplate> findByLanguageOrderByNameAsc(String language);
+
+    List<WhatsAppTemplate> findByCategoryOrderByNameAsc(com.example.backend.entity.enums.TemplateCategory category);
+
+    @Query("SELECT t FROM WhatsAppTemplate t WHERE " +
+           "(:category IS NULL OR t.category = :category) AND " +
+           "(:status IS NULL OR t.status = :status) AND " +
+           "(:language IS NULL OR t.language = :language) AND " +
+           "(:searchTerm IS NULL OR LOWER(t.name) LIKE LOWER(CONCAT('%', :searchTerm, '%')) OR " +
+           "LOWER(t.description) LIKE LOWER(CONCAT('%', :searchTerm, '%'))) " +
+           "ORDER BY t.createdAt DESC")
+    List<WhatsAppTemplate> searchTemplates(
+        @Param("category") com.example.backend.entity.enums.TemplateCategory category,
+        @Param("status") TemplateStatus status,
+        @Param("language") String language,
+        @Param("searchTerm") String searchTerm
+    );
 }

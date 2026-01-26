@@ -2,6 +2,7 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.TemplateVariable;
 import com.example.backend.entity.WhatsAppTemplate;
+import com.example.backend.entity.WhatsAppTemplateVersion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,6 +26,8 @@ public class WhatsAppTemplateMapper {
         response.setComponents(entity.getComponents());
         response.setDescription(entity.getDescription());
         response.setRejectionReason(entity.getRejectionReason());
+        response.setCurrentVersion(entity.getCurrentVersion());
+        response.setMetaSubmissionId(entity.getMetaSubmissionId());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
         response.setCreatedBy(entity.getCreatedBy());
@@ -104,5 +107,25 @@ public class WhatsAppTemplateMapper {
         return entities.stream()
                 .map(WhatsAppTemplateMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    public static TemplateVersionResponse toVersionResponse(WhatsAppTemplateVersion entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        TemplateVersionResponse response = new TemplateVersionResponse();
+        response.setId(entity.getId());
+        response.setTemplateId(entity.getTemplate() != null ? entity.getTemplate().getId() : null);
+        response.setVersionNumber(entity.getVersionNumber());
+        response.setComponents(entity.getComponents());
+        response.setVariablesSnapshot(entity.getVariablesSnapshot());
+        response.setDescription(entity.getDescription());
+        response.setChangeSummary(entity.getChangeSummary());
+        response.setIsActive(entity.getIsActive());
+        response.setCreatedAt(entity.getCreatedAt());
+        response.setCreatedBy(entity.getCreatedBy());
+
+        return response;
     }
 }

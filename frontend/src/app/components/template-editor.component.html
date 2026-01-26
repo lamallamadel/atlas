@@ -1,0 +1,167 @@
+<div class="template-editor-container">
+  <div class="editor-layout">
+    <div class="editor-form">
+      <h2>{{ mode === 'create' ? 'Create Template' : 'Edit Template' }}</h2>
+      
+      <form [formGroup]="templateForm" (ngSubmit)="onSubmit()">
+        <div class="form-section">
+          <h3>Basic Information</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Template Name</mat-label>
+            <input matInput formControlName="name" placeholder="order_confirmation">
+            <mat-hint>Lowercase letters, numbers, and underscores only</mat-hint>
+            <mat-error *ngIf="templateForm.get('name')?.hasError('required')">
+              Name is required
+            </mat-error>
+            <mat-error *ngIf="templateForm.get('name')?.hasError('pattern')">
+              Only lowercase letters, numbers, and underscores allowed
+            </mat-error>
+          </mat-form-field>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Language</mat-label>
+              <mat-select formControlName="language">
+                <mat-option *ngFor="let lang of languages" [value]="lang.value">
+                  {{ lang.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="half-width">
+              <mat-label>Category</mat-label>
+              <mat-select formControlName="category">
+                <mat-option *ngFor="let cat of categories" [value]="cat.value">
+                  {{ cat.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="2"></textarea>
+          </mat-form-field>
+        </div>
+
+        <div class="form-section">
+          <h3>Template Content</h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Header (Optional)</mat-label>
+            <input matInput formControlName="headerText" placeholder="Welcome!">
+            <mat-hint>Use {{variableName}} for variables</mat-hint>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Body *</mat-label>
+            <textarea matInput formControlName="bodyText" rows="4" 
+                     placeholder="Hello {{name}}, your order {{orderId}} is confirmed!"></textarea>
+            <mat-error *ngIf="templateForm.get('bodyText')?.hasError('required')">
+              Body text is required
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Footer (Optional)</mat-label>
+            <input matInput formControlName="footerText" placeholder="Thank you for your business">
+          </mat-form-field>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Variables</h3>
+            <button mat-raised-button type="button" color="primary" (click)="addVariable()">
+              <mat-icon>add</mat-icon> Add Variable
+            </button>
+          </div>
+
+          <div formArrayName="variables" class="variables-list">
+            <div *ngFor="let variable of variables.controls; let i = index" 
+                 [formGroupName]="i" class="variable-item">
+              <mat-form-field appearance="outline" class="variable-name">
+                <mat-label>Variable Name</mat-label>
+                <input matInput formControlName="variableName">
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="variable-type">
+                <mat-label>Component</mat-label>
+                <mat-select formControlName="componentType">
+                  <mat-option *ngFor="let type of componentTypes" [value]="type.value">
+                    {{ type.label }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="variable-example">
+                <mat-label>Example Value</mat-label>
+                <input matInput formControlName="exampleValue" 
+                       (input)="updateVariableExample(i, $any($event.target).value)">
+              </mat-form-field>
+
+              <button mat-icon-button type="button" color="warn" (click)="removeVariable(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="section-header">
+            <h3>Buttons</h3>
+            <button mat-raised-button type="button" color="primary" (click)="addButton()">
+              <mat-icon>add</mat-icon> Add Button
+            </button>
+          </div>
+
+          <div formArrayName="buttons" class="buttons-list">
+            <div *ngFor="let button of buttons.controls; let i = index" 
+                 [formGroupName]="i" class="button-item">
+              <mat-form-field appearance="outline" class="button-type">
+                <mat-label>Button Type</mat-label>
+                <mat-select formControlName="type">
+                  <mat-option value="QUICK_REPLY">Quick Reply</mat-option>
+                  <mat-option value="URL">URL</mat-option>
+                  <mat-option value="PHONE_NUMBER">Phone Number</mat-option>
+                </mat-select>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline" class="button-text">
+                <mat-label>Button Text</mat-label>
+                <input matInput formControlName="text">
+              </mat-form-field>
+
+              <button mat-icon-button type="button" color="warn" (click)="removeButton(i)">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button mat-raised-button type="button" (click)="onCancel()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="templateForm.invalid">
+            {{ mode === 'create' ? 'Create Template' : 'Update Template' }}
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview-panel">
+      <h3>Live Preview</h3>
+      <div class="whatsapp-preview">
+        <div class="preview-phone">
+          <div class="preview-message">
+            <pre>{{ previewText }}</pre>
+          </div>
+        </div>
+      </div>
+      <p class="preview-note">
+        <mat-icon>info</mat-icon>
+        This is a simplified preview. Actual appearance may vary in WhatsApp.
+      </p>
+    </div>
+  </div>
+</div>

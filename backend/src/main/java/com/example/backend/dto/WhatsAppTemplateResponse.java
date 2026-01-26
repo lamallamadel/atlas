@@ -44,6 +44,12 @@ public class WhatsAppTemplateResponse {
     @Schema(description = "Rejection reason (if rejected)", nullable = true)
     private String rejectionReason;
 
+    @Schema(description = "Current version number", example = "1")
+    private Integer currentVersion;
+
+    @Schema(description = "Meta submission ID", nullable = true)
+    private String metaSubmissionId;
+
     @Schema(description = "Created at timestamp", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
 
@@ -174,5 +180,21 @@ public class WhatsAppTemplateResponse {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Integer getCurrentVersion() {
+        return currentVersion;
+    }
+
+    public void setCurrentVersion(Integer currentVersion) {
+        this.currentVersion = currentVersion;
+    }
+
+    public String getMetaSubmissionId() {
+        return metaSubmissionId;
+    }
+
+    public void setMetaSubmissionId(String metaSubmissionId) {
+        this.metaSubmissionId = metaSubmissionId;
     }
 }
