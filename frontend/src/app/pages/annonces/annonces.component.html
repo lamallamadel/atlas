@@ -192,8 +192,8 @@
 
     <app-empty-state 
       *ngIf="!loading && !error && annonces.length === 0"
-      message="Aucune annonce trouvée"
-      subtext="Commencez par créer votre première annonce ou réinitialisez les filtres pour voir toutes les annonces disponibles."
+      [context]="emptyStateContext"
+      [isNewUser]="isNewUser"
       [primaryAction]="emptyStatePrimaryAction"
       [secondaryAction]="emptyStateSecondaryAction">
     </app-empty-state>

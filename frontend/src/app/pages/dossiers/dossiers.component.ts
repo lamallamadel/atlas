@@ -8,6 +8,7 @@ import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../s
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction, PaginationData } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
+import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
@@ -183,16 +184,15 @@ export class DossiersComponent implements OnInit {
     };
   }
 
-  get emptyStateMessage(): string {
+  get emptyStateContext(): EmptyStateContext {
     return this.appliedFilters.length > 0
-      ? 'Aucun dossier ne correspond à vos filtres'
-      : 'Vous n\'avez encore aucun dossier';
+      ? EmptyStateContext.NO_DOSSIERS_FILTERED
+      : EmptyStateContext.NO_DOSSIERS;
   }
 
-  get emptyStateSubtext(): string {
-    return this.appliedFilters.length > 0
-      ? 'Essayez de modifier ou réinitialiser les filtres pour voir d\'autres résultats.'
-      : '';
+  get isNewUser(): boolean {
+    // Consider a user "new" if they have no dossiers and no filters applied
+    return this.dossiers.length === 0 && this.appliedFilters.length === 0 && this.page?.totalElements === 0;
   }
 
   get emptyStatePrimaryAction(): ActionButtonConfig {
@@ -202,13 +202,16 @@ export class DossiersComponent implements OnInit {
     };
   }
 
-  get emptyStateSecondaryAction(): ActionButtonConfig | undefined {
+  get emptyStateSecondaryAction(): ActionButtonConfig {
     return this.appliedFilters.length > 0
       ? {
           label: 'Réinitialiser les filtres',
           handler: () => this.clearFilters()
         }
-      : undefined;
+      : {
+          label: 'Importer des dossiers',
+          handler: () => this.openImportDialog()
+        };
   }
 
   constructor(

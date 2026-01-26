@@ -6,80 +6,348 @@
   justify-content: center;
   padding: var(--spacing-12) var(--spacing-6);
   min-height: 300px;
+  animation: fadeIn 0.5s ease-out;
 }
 
 .empty-state-content {
   text-align: center;
-  max-width: 400px;
+  max-width: 480px;
+  width: 100%;
 }
 
+/* Illustration styles */
+.empty-state-illustration {
+  margin-bottom: var(--spacing-6);
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
+}
+
+.empty-state-illustration ::ng-deep svg {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto;
+  display: block;
+}
+
+.empty-state-illustration ::ng-deep .empty-state-svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Fallback icon styles */
 .empty-state-icon {
   margin-bottom: var(--spacing-4);
   color: var(--color-neutral-400);
+  animation: fadeInUp 0.6s ease-out;
+  animation-fill-mode: both;
 }
 
+/* Title styles */
+.empty-state-title {
+  margin: 0 0 var(--spacing-3) 0;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-neutral-800);
+  line-height: var(--line-height-tight);
+  animation: fadeInUp 0.6s ease-out 0.1s;
+  animation-fill-mode: both;
+}
+
+/* Message styles */
 .empty-state-message {
-  margin: 0 0 var(--spacing-2) 0;
-  font-size: var(--font-size-lg);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-neutral-700);
+  margin: 0 0 var(--spacing-8) 0;
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-600);
+  line-height: var(--line-height-relaxed);
+  animation: fadeInUp 0.6s ease-out 0.2s;
+  animation-fill-mode: both;
 }
 
-.empty-state-subtext {
-  margin: 0 0 var(--spacing-6) 0;
-  font-size: var(--font-size-sm);
-  color: var(--color-neutral-500);
-  line-height: var(--line-height-normal);
-}
-
+/* Actions container */
 .empty-state-actions {
   display: flex;
   gap: var(--spacing-3);
   justify-content: center;
   flex-wrap: wrap;
+  margin-bottom: var(--spacing-4);
+  animation: fadeInUp 0.6s ease-out 0.3s;
+  animation-fill-mode: both;
 }
 
+/* Button base styles */
 .btn-primary-action,
 .btn-secondary-action {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
   padding: var(--spacing-3) var(--spacing-6);
   border: none;
   border-radius: var(--radius-lg);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-base);
   font-weight: var(--font-weight-semibold);
   cursor: pointer;
-  transition: var(--transition-colors);
+  transition: all var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
 }
 
+.btn-primary-action::before,
+.btn-secondary-action::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary-action:hover::before,
+.btn-secondary-action:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Primary button */
 .btn-primary-action {
-  background: var(--color-primary-500);
+  background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
   color: var(--color-neutral-0);
 }
 
 .btn-primary-action:hover {
-  background: var(--color-primary-600);
+  background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
+.btn-primary-action:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+}
+
+/* Secondary button */
 .btn-secondary-action {
-  background: var(--color-neutral-200);
+  background: var(--color-neutral-100);
   color: var(--color-neutral-700);
+  border: 1px solid var(--color-neutral-300);
 }
 
 .btn-secondary-action:hover {
-  background: var(--color-neutral-300);
+  background: var(--color-neutral-200);
+  border-color: var(--color-neutral-400);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.btn-secondary-action:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Button icons */
+.btn-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+/* Help link styles */
+.empty-state-help {
+  margin-top: var(--spacing-4);
+  animation: fadeInUp 0.6s ease-out 0.4s;
+  animation-fill-mode: both;
+}
+
+.help-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-1);
+  color: var(--color-primary-600);
+  text-decoration: none;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
+  padding: var(--spacing-2) var(--spacing-3);
+  border-radius: var(--radius-md);
+}
+
+.help-link:hover {
+  color: var(--color-primary-700);
+  background: var(--color-primary-50);
+  transform: translateX(2px);
+}
+
+.help-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* Focus styles for accessibility */
+.btn-primary-action:focus-visible,
+.btn-secondary-action:focus-visible,
+.help-link:focus-visible {
+  outline: 2px solid var(--color-primary-500);
+  outline-offset: 2px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .empty-state-title {
+    color: var(--color-neutral-100);
+  }
+
+  .empty-state-message {
+    color: var(--color-neutral-300);
+  }
+
+  .btn-secondary-action {
+    background: var(--color-neutral-800);
+    color: var(--color-neutral-200);
+    border-color: var(--color-neutral-600);
+  }
+
+  .btn-secondary-action:hover {
+    background: var(--color-neutral-700);
+    border-color: var(--color-neutral-500);
+  }
+
+  .help-link {
+    color: var(--color-primary-400);
+  }
+
+  .help-link:hover {
+    color: var(--color-primary-300);
+    background: var(--color-primary-900);
+  }
+}
+
+/* Mobile responsive */
 @media (max-width: 768px) {
   .empty-state-container {
     padding: var(--spacing-8) var(--spacing-4);
+    min-height: 250px;
+  }
+
+  .empty-state-content {
+    max-width: 100%;
+  }
+
+  .empty-state-illustration ::ng-deep svg {
+    width: 160px;
+    height: 160px;
+  }
+
+  .empty-state-title {
+    font-size: var(--font-size-lg);
+  }
+
+  .empty-state-message {
+    font-size: var(--font-size-sm);
   }
 
   .empty-state-actions {
     flex-direction: column;
     width: 100%;
+    gap: var(--spacing-2);
   }
 
   .btn-primary-action,
   .btn-secondary-action {
     width: 100%;
+    justify-content: center;
+    padding: var(--spacing-3) var(--spacing-4);
+  }
+}
+
+/* Tablet responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .empty-state-illustration ::ng-deep svg {
+    width: 180px;
+    height: 180px;
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .empty-state-container,
+  .empty-state-illustration,
+  .empty-state-icon,
+  .empty-state-title,
+  .empty-state-message,
+  .empty-state-actions,
+  .empty-state-help {
+    animation: none;
+  }
+
+  .btn-primary-action:hover,
+  .btn-secondary-action:hover,
+  .help-link:hover {
+    transform: none;
+  }
+
+  .empty-state-illustration ::ng-deep .pulse-circle,
+  .empty-state-illustration ::ng-deep .document-pulse,
+  .empty-state-illustration ::ng-deep .plus-icon,
+  .empty-state-illustration ::ng-deep .folder-main,
+  .empty-state-illustration ::ng-deep .house-float,
+  .empty-state-illustration ::ng-deep .window-blink,
+  .empty-state-illustration ::ng-deep .bubble-float-1,
+  .empty-state-illustration ::ng-deep .bubble-float-2,
+  .empty-state-illustration ::ng-deep .typing-dots,
+  .empty-state-illustration ::ng-deep .send-icon,
+  .empty-state-illustration ::ng-deep .search-glass,
+  .empty-state-illustration ::ng-deep .question-mark,
+  .empty-state-illustration ::ng-deep .particle-1,
+  .empty-state-illustration ::ng-deep .particle-2,
+  .empty-state-illustration ::ng-deep .particle-3,
+  .empty-state-illustration ::ng-deep .calendar-float,
+  .empty-state-illustration ::ng-deep .date-pulse,
+  .empty-state-illustration ::ng-deep .clock-icon,
+  .empty-state-illustration ::ng-deep .clipboard-float,
+  .empty-state-illustration ::ng-deep .task-item-1,
+  .empty-state-illustration ::ng-deep .task-item-2,
+  .empty-state-illustration ::ng-deep .task-item-3,
+  .empty-state-illustration ::ng-deep .doc-main,
+  .empty-state-illustration ::ng-deep .upload-icon,
+  .empty-state-illustration ::ng-deep .pulse-ring-1,
+  .empty-state-illustration ::ng-deep .pulse-ring-2,
+  .empty-state-illustration ::ng-deep .pulse-ring-3,
+  .empty-state-illustration ::ng-deep .bell-swing {
+    animation: none !important;
   }
 }

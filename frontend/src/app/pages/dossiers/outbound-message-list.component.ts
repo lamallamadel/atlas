@@ -2,6 +2,7 @@ import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angu
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { OutboundMessageApiService, OutboundMessageResponse, OutboundMessageStatus } from '../../services/outbound-message-api.service';
+import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 
 @Component({
   selector: 'app-outbound-message-list',
@@ -19,6 +20,7 @@ export class OutboundMessageListComponent implements OnInit, OnDestroy {
   private readonly POLLING_INTERVAL = 5000;
 
   OutboundMessageStatus = OutboundMessageStatus;
+  EmptyStateContext = EmptyStateContext;
 
   constructor(private outboundMessageService: OutboundMessageApiService) {}
 

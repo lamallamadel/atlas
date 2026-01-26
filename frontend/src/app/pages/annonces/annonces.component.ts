@@ -5,6 +5,7 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
+import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
@@ -123,15 +124,34 @@ export class AnnoncesComponent implements OnInit {
     { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'primary' }
   ];
 
-  emptyStatePrimaryAction: ActionButtonConfig = {
-    label: 'Créer une annonce',
-    handler: () => this.createAnnonce()
-  };
+  get emptyStateContext(): EmptyStateContext {
+    return this.appliedFilters.length > 0
+      ? EmptyStateContext.NO_ANNONCES_FILTERED
+      : EmptyStateContext.NO_ANNONCES;
+  }
 
-  emptyStateSecondaryAction: ActionButtonConfig = {
-    label: 'Réinitialiser les filtres',
-    handler: () => this.resetFilters()
-  };
+  get isNewUser(): boolean {
+    return this.annonces.length === 0 && this.appliedFilters.length === 0 && this.page?.totalElements === 0;
+  }
+
+  get emptyStatePrimaryAction(): ActionButtonConfig {
+    return {
+      label: 'Créer une annonce',
+      handler: () => this.createAnnonce()
+    };
+  }
+
+  get emptyStateSecondaryAction(): ActionButtonConfig {
+    return this.appliedFilters.length > 0
+      ? {
+          label: 'Réinitialiser les filtres',
+          handler: () => this.resetFilters()
+        }
+      : {
+          label: 'Parcourir les modèles',
+          handler: () => console.log('Browse templates')
+        };
+  }
 
   constructor(
     private annonceApiService: AnnonceApiService,

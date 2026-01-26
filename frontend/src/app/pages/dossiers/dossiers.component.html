@@ -207,8 +207,8 @@
 
     <app-empty-state 
       *ngIf="!loading && !error && dossiers.length === 0"
-      [message]="emptyStateMessage"
-      [subtext]="emptyStateSubtext"
+      [context]="emptyStateContext"
+      [isNewUser]="isNewUser"
       [primaryAction]="emptyStatePrimaryAction"
       [secondaryAction]="emptyStateSecondaryAction">
     </app-empty-state>

@@ -1,29 +1,56 @@
 <div class="empty-state-container" role="status" aria-live="polite">
   <div class="empty-state-content">
-    <div class="empty-state-icon" aria-hidden="true">
+    <!-- Illustration with fade-in animation -->
+    <div class="empty-state-illustration" aria-hidden="true" *ngIf="displayIllustration">
+      <div [innerHTML]="displayIllustration"></div>
+    </div>
+    
+    <!-- Fallback icon if no illustration provided -->
+    <div class="empty-state-icon" aria-hidden="true" *ngIf="!displayIllustration">
       <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="12" y1="8" x2="12" y2="12"></line>
         <line x1="12" y1="16" x2="12.01" y2="16"></line>
       </svg>
     </div>
-    <h3 class="empty-state-message">{{ message }}</h3>
-    <p class="empty-state-subtext" *ngIf="subtext">{{ subtext }}</p>
-    <div class="empty-state-actions" *ngIf="primaryAction || secondaryAction">
+    
+    <!-- Title with fade-in animation -->
+    <h3 class="empty-state-title">{{ displayTitle }}</h3>
+    
+    <!-- Message with fade-in animation -->
+    <p class="empty-state-message" *ngIf="displayMessage">{{ displayMessage }}</p>
+    
+    <!-- Action buttons with fade-in animation -->
+    <div class="empty-state-actions" *ngIf="displayPrimaryAction || displaySecondaryAction">
       <button 
-        *ngIf="primaryAction" 
+        *ngIf="displayPrimaryAction" 
         class="btn-primary-action" 
         (click)="onPrimaryClick()"
-        [attr.aria-label]="primaryAction.label">
-        {{ primaryAction.label }}
+        [attr.aria-label]="displayPrimaryAction.label">
+        <mat-icon *ngIf="displayPrimaryAction.icon" class="btn-icon">{{ displayPrimaryAction.icon }}</mat-icon>
+        <span>{{ displayPrimaryAction.label }}</span>
       </button>
+      
       <button 
-        *ngIf="secondaryAction" 
+        *ngIf="displaySecondaryAction" 
         class="btn-secondary-action" 
         (click)="onSecondaryClick()"
-        [attr.aria-label]="secondaryAction.label">
-        {{ secondaryAction.label }}
+        [attr.aria-label]="displaySecondaryAction.label">
+        <mat-icon *ngIf="displaySecondaryAction.icon" class="btn-icon">{{ displaySecondaryAction.icon }}</mat-icon>
+        <span>{{ displaySecondaryAction.label }}</span>
       </button>
+    </div>
+    
+    <!-- Help link with fade-in animation -->
+    <div class="empty-state-help" *ngIf="displayHelpLink">
+      <a 
+        href="javascript:void(0)" 
+        class="help-link" 
+        (click)="onHelpLinkClick()"
+        [attr.aria-label]="displayHelpLink.label">
+        <mat-icon class="help-icon">help_outline</mat-icon>
+        <span>{{ displayHelpLink.label }}</span>
+      </a>
     </div>
   </div>
 </div>
