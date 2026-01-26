@@ -56,6 +56,15 @@ public class NotificationEntity extends BaseEntity {
     @Column(name = "sent_at")
     private LocalDateTime sentAt;
 
+    @Column(name = "read_at")
+    private LocalDateTime readAt;
+
+    @Column(name = "message", columnDefinition = "text")
+    private String message;
+
+    @Column(name = "action_url", length = 500)
+    private String actionUrl;
+
     public Long getId() {
         return id;
     }
@@ -150,5 +159,29 @@ public class NotificationEntity extends BaseEntity {
 
     public void setSentAt(LocalDateTime sentAt) {
         this.sentAt = sentAt;
+    }
+
+    public LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getActionUrl() {
+        return actionUrl;
+    }
+
+    public void setActionUrl(String actionUrl) {
+        this.actionUrl = actionUrl;
     }
 }

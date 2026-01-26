@@ -21,6 +21,9 @@ public class NotificationResponse {
     private Integer retryCount;
     private Integer maxRetries;
     private LocalDateTime sentAt;
+    private LocalDateTime readAt;
+    private String message;
+    private String actionUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -142,5 +145,29 @@ public class NotificationResponse {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(LocalDateTime readAt) {
+        this.readAt = readAt;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getActionUrl() {
+        return actionUrl;
+    }
+
+    public void setActionUrl(String actionUrl) {
+        this.actionUrl = actionUrl;
     }
 }

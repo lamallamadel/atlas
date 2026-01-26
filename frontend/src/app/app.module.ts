@@ -34,6 +34,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatBadgeModule } from '@angular/material/badge';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -111,6 +112,7 @@ import { ContextualHintDirective } from './directives/contextual-hint.directive'
 import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
 import { KanbanBoardComponent } from './components/kanban-board.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
+import { NotificationCenterComponent } from './components/notification-center.component';
 
 registerLocaleData(localeFr);
 
@@ -183,7 +185,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ContextualHintDirective,
     EnhancedFormExampleComponent,
     KanbanBoardComponent,
-    CalendarViewComponent
+    CalendarViewComponent,
+    NotificationCenterComponent
   ],
   imports: [
     BrowserModule,
@@ -223,6 +226,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatDatepickerModule,
     MatNativeDateModule,
     MatRadioModule,
+    MatBadgeModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,

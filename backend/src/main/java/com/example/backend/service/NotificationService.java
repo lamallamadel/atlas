@@ -167,4 +167,61 @@ public class NotificationService {
             org.springframework.data.domain.Pageable pageable) {
         return notificationRepository.findByFilters(dossierId, type, status, pageable);
     }
+
+    @Transactional
+    public NotificationEntity markAsRead(Long id) {
+        NotificationEntity notification = notificationRepository.findById(id).orElse(null);
+        if (notification != null && notification.getReadAt() == null) {
+            notification.setReadAt(LocalDateTime.now());
+            notification.setUpdatedAt(LocalDateTime.now());
+            return notificationRepository.save(notification);
+        }
+        return notification;
+    }
+
+    @Transactional
+    public NotificationEntity markAsUnread(Long id) {
+        NotificationEntity notification = notificationRepository.findById(id).orElse(null);
+        if (notification != null) {
+            notification.setReadAt(null);
+            notification.setUpdatedAt(LocalDateTime.now());
+            return notificationRepository.save(notification);
+        }
+        return notification;
+    }
+
+    @Transactional(readOnly = true)
+    public long getUnreadCount() {
+        return notificationRepository.countUnread();
+    }
+
+    @Transactional
+    public NotificationEntity createInAppNotification(
+            String orgId,
+            Long dossierId,
+            String recipient,
+            String subject,
+            String message,
+            String actionUrl) {
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setOrgId(orgId);
+        notification.setDossierId(dossierId);
+        notification.setType(NotificationType.IN_APP);
+        notification.setRecipient(recipient);
+        notification.setSubject(subject);
+        notification.setMessage(message);
+        notification.setActionUrl(actionUrl);
+        notification.setTemplateId("in_app_notification");
+        notification.setStatus(NotificationStatus.SENT);
+        notification.setRetryCount(0);
+        notification.setMaxRetries(0);
+
+        LocalDateTime now = LocalDateTime.now();
+        notification.setCreatedAt(now);
+        notification.setUpdatedAt(now);
+        notification.setSentAt(now);
+
+        return notificationRepository.save(notification);
+    }
 }

@@ -141,6 +141,38 @@
 
       <button
         mat-icon-button
+        [matMenuTriggerFor]="notificationMenu"
+        class="notification-menu-button"
+        aria-label="Ouvrir le centre de notifications"
+        matTooltip="Notifications"
+        matTooltipPosition="below"
+        (menuOpened)="notificationMenuOpen = true"
+        (menuClosed)="notificationMenuOpen = false">
+        <mat-icon 
+          [matBadge]="(unreadNotificationCount$ | async) || 0" 
+          [matBadgeHidden]="(unreadNotificationCount$ | async) === 0"
+          matBadgeColor="warn"
+          matBadgeSize="small"
+          aria-hidden="true">
+          notifications
+        </mat-icon>
+      </button>
+
+      <mat-menu #notificationMenu="matMenu" class="notification-dropdown-menu" aria-label="Centre de notifications">
+        <div (click)="$event.stopPropagation()" 
+             (keydown)="$event.stopPropagation()"
+             (keyup)="$event.stopPropagation()" 
+             (keypress)="$event.stopPropagation()"
+             class="notification-menu-content" 
+             tabindex="0"
+             role="region"
+             aria-label="Centre de notifications">
+          <app-notification-center></app-notification-center>
+        </div>
+      </mat-menu>
+
+      <button
+        mat-icon-button
         [matMenuTriggerFor]="helpMenu"
         class="help-menu-button"
         aria-label="Aide et guides interactifs"

@@ -4,6 +4,7 @@ import { MatSidenav } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
+import { NotificationApiService } from '../../services/notification-api.service';
 import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
 import { OnboardingTourService } from '../../services/onboarding-tour.service';
 import { Observable } from 'rxjs';
@@ -23,14 +24,17 @@ export class AppLayoutComponent implements OnInit {
   isHandset$: Observable<boolean>;
   isMobile$: Observable<boolean>;
   userMenuOpen = false;
+  notificationMenuOpen = false;
   isDarkTheme$: Observable<boolean>;
   dossiersPendingCount$: Observable<number>;
+  unreadNotificationCount$: Observable<number>;
 
   constructor(
     private breakpointObserver: BreakpointObserver,
     private authService: AuthService,
     public themeService: ThemeService,
     private dossierApiService: DossierApiService,
+    private notificationApiService: NotificationApiService,
     private keyboardShortcutService: KeyboardShortcutService,
     private onboardingTourService: OnboardingTourService,
     private router: Router
@@ -52,6 +56,7 @@ export class AppLayoutComponent implements OnInit {
     );
 
     this.dossiersPendingCount$ = this.dossierApiService.getPendingCount();
+    this.unreadNotificationCount$ = this.notificationApiService.getUnreadCount();
   }
 
   ngOnInit(): void {
@@ -74,6 +79,14 @@ export class AppLayoutComponent implements OnInit {
 
   closeUserMenu(): void {
     this.userMenuOpen = false;
+  }
+
+  toggleNotificationMenu(): void {
+    this.notificationMenuOpen = !this.notificationMenuOpen;
+  }
+
+  closeNotificationMenu(): void {
+    this.notificationMenuOpen = false;
   }
 
   logout(): void {

@@ -33,3 +33,28 @@
     }
   }
 }
+
+.notification-menu-button {
+  position: relative;
+
+  .mat-icon {
+    position: relative;
+  }
+}
+
+.notification-dropdown-menu {
+  .mat-mdc-menu-content {
+    padding: 0;
+  }
+
+  .notification-menu-content {
+    padding: 0;
+  }
+}
+
+::ng-deep .notification-dropdown-menu {
+  .mat-mdc-menu-panel {
+    max-width: none !important;
+    max-height: none !important;
+  }
+}
