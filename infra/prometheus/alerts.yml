@@ -1,24 +1,221 @@
 groups:
-  - name: atlas-backend
+  - name: outbound_messaging_alerts
+    interval: 30s
     rules:
-      - alert: AtlasBackendInstanceDown
-        expr: up{job="atlas-backend"} == 0
-        for: 1m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Atlas backend down"
-          description: "Prometheus cannot scrape atlas-backend for > 1m."
-
-      - alert: AtlasBackendHigh5xxRate
-        expr: |
-          sum(rate(http_server_requests_seconds_count{job="atlas-backend", outcome="SERVER_ERROR"}[5m]))
-          /
-          sum(rate(http_server_requests_seconds_count{job="atlas-backend"}[5m]))
-          > 0.05
+      - alert: OutboundHighQueueDepth
+        expr: outbound_message_total_queued > 1000
         for: 5m
         labels:
           severity: warning
+          component: outbound-messaging
+          team: backend
         annotations:
-          summary: "High 5xx rate"
-          description: "5xx ratio > 5% over 5m."
+          summary: "High outbound message queue depth"
+          description: "Queue depth is {{ $value }} messages (threshold: 1000). Messages are accumulating faster than being processed."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#high-queue-depth"
+
+      - alert: OutboundDeadLetterQueueGrowth
+        expr: increase(outbound_message_dead_letter_queue_size[10m]) > 50
+        for: 5m
+        labels:
+          severity: critical
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "Dead letter queue growing rapidly"
+          description: "DLQ increased by {{ $value }} messages in 10 minutes. Multiple messages are permanently failing."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#dlq-growth"
+
+      - alert: OutboundLowSuccessRate
+        expr: |
+          (
+            sum(rate(outbound_message_send_success_total[5m])) 
+            / 
+            (sum(rate(outbound_message_send_success_total[5m])) + sum(rate(outbound_message_send_failure_total[5m])))
+          ) < 0.95
+        for: 15m
+        labels:
+          severity: critical
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "Low message send success rate"
+          description: "Success rate is {{ $value | humanizePercentage }} (threshold: 95%). System is experiencing high failure rate."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#high-failure-rate"
+
+      - alert: OutboundHighDeliveryLatencyP95
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(outbound_message_delivery_latency_seconds_bucket[5m])) by (le)
+          ) > 30
+        for: 10m
+        labels:
+          severity: warning
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "High message delivery latency (P95)"
+          description: "P95 latency is {{ $value }}s (threshold: 30s). Messages are taking longer than expected to deliver."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#high-latency"
+
+      - alert: OutboundHighDeliveryLatencyP99
+        expr: |
+          histogram_quantile(0.99, 
+            sum(rate(outbound_message_delivery_latency_seconds_bucket[5m])) by (le)
+          ) > 60
+        for: 10m
+        labels:
+          severity: warning
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "High message delivery latency (P99)"
+          description: "P99 latency is {{ $value }}s (threshold: 60s). Worst-case delivery times are degraded."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#high-latency"
+
+      - alert: OutboundWhatsAppQuotaNearLimit
+        expr: (whatsapp_quota_used / whatsapp_quota_limit) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+          component: outbound-messaging
+          channel: whatsapp
+          team: backend
+        annotations:
+          summary: "WhatsApp quota near limit"
+          description: "Quota usage is {{ $value | humanizePercentage }} (threshold: 85%). Consider requesting quota increase or reducing usage."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#whatsapp-quota"
+
+      - alert: OutboundWhatsAppQuotaCritical
+        expr: (whatsapp_quota_used / whatsapp_quota_limit) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          component: outbound-messaging
+          channel: whatsapp
+          team: backend
+        annotations:
+          summary: "WhatsApp quota critical"
+          description: "Quota usage is {{ $value | humanizePercentage }} (threshold: 95%). Immediate action required to prevent service disruption."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#whatsapp-quota"
+
+      - alert: OutboundWhatsAppQuotaExceeded
+        expr: whatsapp_quota_used >= whatsapp_quota_limit
+        for: 1m
+        labels:
+          severity: critical
+          component: outbound-messaging
+          channel: whatsapp
+          team: backend
+        annotations:
+          summary: "WhatsApp quota exceeded"
+          description: "Quota limit reached: {{ $value }} messages sent. WhatsApp messages will fail until quota resets."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#whatsapp-quota"
+
+      - alert: OutboundStuckMessages
+        expr: |
+          outbound_message_queue_depth{status="queued"} > 10
+          and
+          rate(outbound_message_send_success_total[10m]) == 0
+          and
+          rate(outbound_message_send_failure_total[10m]) == 0
+        for: 15m
+        labels:
+          severity: critical
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "Messages stuck in queue"
+          description: "{{ $value }} messages queued but no processing activity detected for 15 minutes. Worker may be down."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#stuck-messages"
+
+      - alert: OutboundChannelFailureSpike
+        expr: |
+          sum by (channel) (rate(outbound_message_send_failure_total[5m])) > 0.5
+        for: 10m
+        labels:
+          severity: warning
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "High failure rate for {{ $labels.channel }} channel"
+          description: "{{ $labels.channel }} experiencing {{ $value }} failures/sec. Provider may be degraded."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#high-failure-rate"
+
+      - alert: OutboundHighRetryRate
+        expr: |
+          sum by (channel) (rate(outbound_message_retry_total[5m])) > 1.0
+        for: 15m
+        labels:
+          severity: warning
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "High retry rate for {{ $labels.channel }}"
+          description: "{{ $labels.channel }} experiencing {{ $value }} retries/sec. Provider may be intermittently failing."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#high-failure-rate"
+
+      - alert: OutboundDLQThresholdExceeded
+        expr: outbound_message_dead_letter_queue_size > 100
+        for: 30m
+        labels:
+          severity: warning
+          component: outbound-messaging
+          team: backend
+        annotations:
+          summary: "Dead letter queue threshold exceeded"
+          description: "DLQ size is {{ $value }} messages (threshold: 100). Review and clean up failed messages."
+          dashboard: "http://grafana:3000/d/outbound-messaging-observability"
+          runbook: "https://docs.example.com/runbooks/outbound-messaging#dlq-growth"
+
+  - name: system_health_alerts
+    interval: 30s
+    rules:
+      - alert: ServiceDown
+        expr: up{job="spring-boot-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+          team: platform
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend service {{ $labels.instance }} is not responding to health checks."
+          runbook: "https://docs.example.com/runbooks/platform#service-down"
+
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+          team: platform
+        annotations:
+          summary: "High memory usage"
+          description: "Memory usage is {{ $value }}% on {{ $labels.instance }} (threshold: 85%)."
+          runbook: "https://docs.example.com/runbooks/platform#high-memory"
+
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 10m
+        labels:
+          severity: warning
+          component: infrastructure
+          team: platform
+        annotations:
+          summary: "High CPU usage"
+          description: "CPU usage is {{ $value }}% on {{ $labels.instance }} (threshold: 80%)."
+          runbook: "https://docs.example.com/runbooks/platform#high-cpu"

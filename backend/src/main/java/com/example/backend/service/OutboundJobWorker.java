@@ -10,6 +10,7 @@ import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,6 +22,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class OutboundJobWorker {
@@ -63,6 +65,10 @@ public class OutboundJobWorker {
             return;
         }
         
+        String workerCorrelationId = "worker-" + UUID.randomUUID().toString();
+        MDC.put("correlationId", workerCorrelationId);
+        MDC.put("workerType", "outbound-job");
+        
         try {
             recoverStaleMessages();
             
@@ -78,6 +84,11 @@ public class OutboundJobWorker {
             logger.info("Processing {} pending outbound messages", messages.size());
             
             for (OutboundMessageEntity message : messages) {
+                String messageCorrelationId = "msg-" + message.getId() + "-" + UUID.randomUUID().toString();
+                MDC.put("correlationId", messageCorrelationId);
+                MDC.put("messageId", String.valueOf(message.getId()));
+                MDC.put("channel", message.getChannel().name());
+                
                 try {
                     if (isReadyForProcessing(message)) {
                         processMessage(message);
@@ -86,11 +97,17 @@ public class OutboundJobWorker {
                     }
                 } catch (Exception e) {
                     logger.error("Error processing message {}: {}", message.getId(), e.getMessage(), e);
+                } finally {
+                    MDC.remove("messageId");
+                    MDC.remove("channel");
                 }
             }
             
         } catch (Exception e) {
             logger.error("Error in outbound job worker: {}", e.getMessage(), e);
+        } finally {
+            MDC.remove("correlationId");
+            MDC.remove("workerType");
         }
     }
 

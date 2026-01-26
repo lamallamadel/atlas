@@ -213,6 +213,15 @@ info:
     description: Spring Boot Backend Application
     version: ${app.version}
 
+sentry:
+  enabled: ${SENTRY_ENABLED:false}
+  dsn: ${SENTRY_DSN:}
+  environment: ${SENTRY_ENVIRONMENT:${app.env}}
+  traces-sample-rate: ${SENTRY_TRACES_SAMPLE_RATE:0.1}
+  logging:
+    minimum-event-level: error
+    minimum-breadcrumb-level: info
+
 resilience4j:
   circuitbreaker:
     instances:
