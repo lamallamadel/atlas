@@ -1,0 +1,303 @@
+/* Inline Logo Container */
+.logo-inline-container {
+  display: inline-block;
+  line-height: 0;
+}
+
+.logo-inline-container .logo-svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Path Drawing Animation */
+.logo-inline-animated .path-animated {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 1.8s cubic-bezier(0.47, 0, 0.745, 0.715) forwards;
+}
+
+/* Stagger animation delays for different paths */
+.logo-inline-animated .path-animated:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.logo-inline-animated .path-animated:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.logo-inline-animated .path-animated:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+.logo-inline-animated .path-animated:nth-child(4) {
+  animation-delay: 0.45s;
+}
+
+.logo-inline-animated .path-animated:nth-child(5) {
+  animation-delay: 0.6s;
+}
+
+.logo-inline-animated .path-animated:nth-child(6) {
+  animation-delay: 0.75s;
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Building shape fill animation */
+.logo-inline-animated .shape-animated {
+  opacity: 0;
+  animation: fadeInShape 0.8s ease-out 1.2s forwards;
+}
+
+.logo-inline-animated .shape-animated:nth-child(1) {
+  animation-delay: 1.2s;
+}
+
+.logo-inline-animated .shape-animated:nth-child(2) {
+  animation-delay: 1.35s;
+}
+
+.logo-inline-animated .shape-animated:nth-child(3) {
+  animation-delay: 1.5s;
+}
+
+@keyframes fadeInShape {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 0.9;
+    transform: translateY(0);
+  }
+}
+
+/* Window lights animation */
+.logo-inline-animated .window-animated {
+  opacity: 0;
+  animation: flickerWindow 0.3s ease-out forwards;
+}
+
+/* Stagger window animations */
+.logo-inline-animated .window-animated:nth-child(4) {
+  animation-delay: 1.6s;
+}
+
+.logo-inline-animated .window-animated:nth-child(5) {
+  animation-delay: 1.65s;
+}
+
+.logo-inline-animated .window-animated:nth-child(6) {
+  animation-delay: 1.7s;
+}
+
+.logo-inline-animated .window-animated:nth-child(7) {
+  animation-delay: 1.75s;
+}
+
+.logo-inline-animated .window-animated:nth-child(8) {
+  animation-delay: 1.8s;
+}
+
+.logo-inline-animated .window-animated:nth-child(9) {
+  animation-delay: 1.85s;
+}
+
+.logo-inline-animated .window-animated:nth-child(10) {
+  animation-delay: 1.9s;
+}
+
+.logo-inline-animated .window-animated:nth-child(11) {
+  animation-delay: 1.95s;
+}
+
+.logo-inline-animated .window-animated:nth-child(12) {
+  animation-delay: 2s;
+}
+
+.logo-inline-animated .window-animated:nth-child(13) {
+  animation-delay: 2.05s;
+}
+
+.logo-inline-animated .window-animated:nth-child(14) {
+  animation-delay: 2.1s;
+}
+
+@keyframes flickerWindow {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.7;
+  }
+}
+
+/* Text fade-in animation */
+.logo-inline-animated .text-animated {
+  opacity: 0;
+  animation: fadeInText 0.8s ease-out 2s forwards;
+}
+
+.logo-inline-animated .text-animated:nth-child(2) {
+  animation-delay: 2.2s;
+}
+
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effects */
+.logo-inline-container:hover .logo-svg {
+  transform: scale(1.02);
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.logo-inline-container:hover .buildings-group {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.9;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+/* Responsive sizing */
+.logo-inline-container.logo-horizontal .logo-svg {
+  width: 100%;
+  max-width: 400px;
+  height: auto;
+}
+
+.logo-inline-container.logo-vertical .logo-svg {
+  width: 100%;
+  max-width: 160px;
+  height: auto;
+}
+
+.logo-inline-container.logo-icon .logo-svg {
+  width: 80px;
+  height: 80px;
+}
+
+@media (max-width: 768px) {
+  .logo-inline-container.logo-horizontal .logo-svg {
+    max-width: 300px;
+  }
+  
+  .logo-inline-container.logo-vertical .logo-svg {
+    max-width: 120px;
+  }
+  
+  .logo-inline-container.logo-icon .logo-svg {
+    width: 64px;
+    height: 64px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-inline-container.logo-horizontal .logo-svg {
+    max-width: 240px;
+  }
+  
+  .logo-inline-container.logo-vertical .logo-svg {
+    max-width: 100px;
+  }
+  
+  .logo-inline-container.logo-icon .logo-svg {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+/* Accessibility: Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .logo-inline-animated .path-animated,
+  .logo-inline-animated .shape-animated,
+  .logo-inline-animated .window-animated,
+  .logo-inline-animated .text-animated {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  .logo-inline-animated .shape-animated {
+    opacity: 0.9 !important;
+  }
+  
+  .logo-inline-animated .window-animated {
+    opacity: 0.7 !important;
+  }
+  
+  .logo-inline-container:hover .logo-svg {
+    transform: none;
+  }
+  
+  .logo-inline-container:hover .buildings-group {
+    animation: none;
+  }
+}
+
+/* Print styles */
+@media print {
+  .logo-inline-container {
+    break-inside: avoid;
+  }
+  
+  .logo-inline-animated .path-animated,
+  .logo-inline-animated .shape-animated,
+  .logo-inline-animated .window-animated,
+  .logo-inline-animated .text-animated {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+  }
+  
+  .logo-inline-animated .shape-animated {
+    opacity: 0.9 !important;
+  }
+  
+  .logo-inline-animated .window-animated {
+    opacity: 0.7 !important;
+  }
+}
+
+/* Focus styles for accessibility */
+.logo-inline-container:focus-within {
+  outline: 2px solid #1976D2;
+  outline-offset: 4px;
+  border-radius: 4px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .logo-inline-container .logo-svg path,
+  .logo-inline-container .logo-svg circle,
+  .logo-inline-container .logo-svg ellipse {
+    stroke-width: 3px !important;
+  }
+}

@@ -128,6 +128,8 @@ import { OfflineInterceptor } from './interceptors/offline.interceptor';
 import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
 import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
 import { MobileDossierCardComponent } from './components/mobile-dossier-card.component';
+import { LogoComponent } from './components/logo.component';
+import { LogoInlineComponent } from './components/logo-inline.component';
 
 registerLocaleData(localeFr);
 
@@ -215,7 +217,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     OfflineIndicatorComponent,
     VirtualScrollListComponent,
     MobileActionSheetComponent,
-    MobileDossierCardComponent
+    MobileDossierCardComponent,
+    LogoComponent,
+    LogoInlineComponent
   ],
   imports: [
     BrowserModule,

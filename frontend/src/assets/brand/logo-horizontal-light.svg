@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 100" aria-labelledby="logo-horizontal-light-title">
+  <title id="logo-horizontal-light-title">Atlas Immobilier</title>
+  <defs>
+    <linearGradient id="gradient-horizontal-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#42A5F5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Icon: Atlas Globe with Building -->
+  <g id="icon-horizontal-light">
+    <!-- Globe structure -->
+    <circle cx="40" cy="50" r="28" fill="none" stroke="url(#gradient-horizontal-light)" stroke-width="2.5"/>
+    
+    <!-- Meridian lines -->
+    <path d="M 40 22 Q 30 50 40 78" fill="none" stroke="url(#gradient-horizontal-light)" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 40 22 Q 50 50 40 78" fill="none" stroke="url(#gradient-horizontal-light)" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Latitude lines -->
+    <ellipse cx="40" cy="50" rx="28" ry="8" fill="none" stroke="url(#gradient-horizontal-light)" stroke-width="1.5"/>
+    <path d="M 15 36 Q 40 38 65 36" fill="none" stroke="url(#gradient-horizontal-light)" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 15 64 Q 40 62 65 64" fill="none" stroke="url(#gradient-horizontal-light)" stroke-width="1.5" stroke-linecap="round"/>
+    
+    <!-- Building silhouette inside globe -->
+    <g opacity="0.9">
+      <rect x="32" y="45" width="6" height="15" fill="url(#gradient-horizontal-light)" rx="0.5"/>
+      <rect x="40" y="40" width="6" height="20" fill="url(#gradient-horizontal-light)" rx="0.5"/>
+      <rect x="48" y="47" width="6" height="13" fill="url(#gradient-horizontal-light)" rx="0.5"/>
+      
+      <!-- Windows -->
+      <rect x="33.5" y="48" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="33.5" y="51" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="33.5" y="54" width="1" height="1.5" fill="white" opacity="0.8"/>
+      
+      <rect x="41.5" y="43" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="41.5" y="46" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="41.5" y="49" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="41.5" y="52" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="41.5" y="55" width="1" height="1.5" fill="white" opacity="0.8"/>
+      
+      <rect x="49.5" y="50" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="49.5" y="53" width="1" height="1.5" fill="white" opacity="0.8"/>
+      <rect x="49.5" y="56" width="1" height="1.5" fill="white" opacity="0.8"/>
+    </g>
+  </g>
+  
+  <!-- Text -->
+  <g id="text-horizontal-light">
+    <text x="85" y="50" font-family="'Segoe UI', 'Roboto', 'Arial', sans-serif" font-size="28" font-weight="700" fill="#42A5F5" letter-spacing="-0.5">ATLAS</text>
+    <text x="85" y="72" font-family="'Segoe UI', 'Roboto', 'Arial', sans-serif" font-size="16" font-weight="400" fill="#78909C" letter-spacing="1">IMMOBILIER</text>
+  </g>
+</svg>
