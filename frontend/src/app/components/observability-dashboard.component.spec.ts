@@ -126,7 +126,9 @@ describe('ObservabilityDashboardComponent', () => {
     fixture = TestBed.createComponent(ObservabilityDashboardComponent);
     component = fixture.componentInstance;
     (globalThis as { Chart?: new () => { destroy: () => void; update: () => void } }).Chart = class {
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       destroy(): void {}
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
       update(): void {}
     };
     spyOn(component as { loadChartJs: () => Promise<void> }, 'loadChartJs').and.returnValue(Promise.resolve());
