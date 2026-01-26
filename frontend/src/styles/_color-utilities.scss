@@ -1,0 +1,357 @@
+/* ========================================
+   COLOR UTILITY CLASSES
+   Extended Semantic Color System
+   ======================================== */
+
+/* ========================================
+   BACKGROUND COLOR UTILITIES
+   ======================================== */
+
+/* Neutral-Warmth Backgrounds */
+.bg-neutral-warmth-50 { background-color: var(--color-neutral-warmth-50) !important; }
+.bg-neutral-warmth-100 { background-color: var(--color-neutral-warmth-100) !important; }
+.bg-neutral-warmth-200 { background-color: var(--color-neutral-warmth-200) !important; }
+.bg-neutral-warmth-300 { background-color: var(--color-neutral-warmth-300) !important; }
+.bg-neutral-warmth-400 { background-color: var(--color-neutral-warmth-400) !important; }
+.bg-neutral-warmth-500 { background-color: var(--color-neutral-warmth-500) !important; }
+.bg-neutral-warmth-600 { background-color: var(--color-neutral-warmth-600) !important; }
+.bg-neutral-warmth-700 { background-color: var(--color-neutral-warmth-700) !important; }
+.bg-neutral-warmth-800 { background-color: var(--color-neutral-warmth-800) !important; }
+.bg-neutral-warmth-900 { background-color: var(--color-neutral-warmth-900) !important; }
+
+/* Success-Sold Backgrounds */
+.bg-success-sold-50 { background-color: var(--color-success-sold-50) !important; }
+.bg-success-sold-100 { background-color: var(--color-success-sold-100) !important; }
+.bg-success-sold-200 { background-color: var(--color-success-sold-200) !important; }
+.bg-success-sold-300 { background-color: var(--color-success-sold-300) !important; }
+.bg-success-sold-400 { background-color: var(--color-success-sold-400) !important; }
+.bg-success-sold-500 { background-color: var(--color-success-sold-500) !important; }
+.bg-success-sold-600 { background-color: var(--color-success-sold-600) !important; }
+.bg-success-sold-700 { background-color: var(--color-success-sold-700) !important; }
+.bg-success-sold-800 { background-color: var(--color-success-sold-800) !important; }
+.bg-success-sold-900 { background-color: var(--color-success-sold-900) !important; }
+
+/* Success-Rented Backgrounds */
+.bg-success-rented-50 { background-color: var(--color-success-rented-50) !important; }
+.bg-success-rented-100 { background-color: var(--color-success-rented-100) !important; }
+.bg-success-rented-200 { background-color: var(--color-success-rented-200) !important; }
+.bg-success-rented-300 { background-color: var(--color-success-rented-300) !important; }
+.bg-success-rented-400 { background-color: var(--color-success-rented-400) !important; }
+.bg-success-rented-500 { background-color: var(--color-success-rented-500) !important; }
+.bg-success-rented-600 { background-color: var(--color-success-rented-600) !important; }
+.bg-success-rented-700 { background-color: var(--color-success-rented-700) !important; }
+.bg-success-rented-800 { background-color: var(--color-success-rented-800) !important; }
+.bg-success-rented-900 { background-color: var(--color-success-rented-900) !important; }
+
+/* Success-Signed Backgrounds */
+.bg-success-signed-50 { background-color: var(--color-success-signed-50) !important; }
+.bg-success-signed-100 { background-color: var(--color-success-signed-100) !important; }
+.bg-success-signed-200 { background-color: var(--color-success-signed-200) !important; }
+.bg-success-signed-300 { background-color: var(--color-success-signed-300) !important; }
+.bg-success-signed-400 { background-color: var(--color-success-signed-400) !important; }
+.bg-success-signed-500 { background-color: var(--color-success-signed-500) !important; }
+.bg-success-signed-600 { background-color: var(--color-success-signed-600) !important; }
+.bg-success-signed-700 { background-color: var(--color-success-signed-700) !important; }
+.bg-success-signed-800 { background-color: var(--color-success-signed-800) !important; }
+.bg-success-signed-900 { background-color: var(--color-success-signed-900) !important; }
+
+/* Warning-Attention Backgrounds */
+.bg-warning-attention-50 { background-color: var(--color-warning-attention-50) !important; }
+.bg-warning-attention-100 { background-color: var(--color-warning-attention-100) !important; }
+.bg-warning-attention-200 { background-color: var(--color-warning-attention-200) !important; }
+.bg-warning-attention-300 { background-color: var(--color-warning-attention-300) !important; }
+.bg-warning-attention-400 { background-color: var(--color-warning-attention-400) !important; }
+.bg-warning-attention-500 { background-color: var(--color-warning-attention-500) !important; }
+.bg-warning-attention-600 { background-color: var(--color-warning-attention-600) !important; }
+.bg-warning-attention-700 { background-color: var(--color-warning-attention-700) !important; }
+.bg-warning-attention-800 { background-color: var(--color-warning-attention-800) !important; }
+.bg-warning-attention-900 { background-color: var(--color-warning-attention-900) !important; }
+
+/* Warning-Urgent Backgrounds */
+.bg-warning-urgent-50 { background-color: var(--color-warning-urgent-50) !important; }
+.bg-warning-urgent-100 { background-color: var(--color-warning-urgent-100) !important; }
+.bg-warning-urgent-200 { background-color: var(--color-warning-urgent-200) !important; }
+.bg-warning-urgent-300 { background-color: var(--color-warning-urgent-300) !important; }
+.bg-warning-urgent-400 { background-color: var(--color-warning-urgent-400) !important; }
+.bg-warning-urgent-500 { background-color: var(--color-warning-urgent-500) !important; }
+.bg-warning-urgent-600 { background-color: var(--color-warning-urgent-600) !important; }
+.bg-warning-urgent-700 { background-color: var(--color-warning-urgent-700) !important; }
+.bg-warning-urgent-800 { background-color: var(--color-warning-urgent-800) !important; }
+.bg-warning-urgent-900 { background-color: var(--color-warning-urgent-900) !important; }
+
+/* Warning-Critical Backgrounds */
+.bg-warning-critical-50 { background-color: var(--color-warning-critical-50) !important; }
+.bg-warning-critical-100 { background-color: var(--color-warning-critical-100) !important; }
+.bg-warning-critical-200 { background-color: var(--color-warning-critical-200) !important; }
+.bg-warning-critical-300 { background-color: var(--color-warning-critical-300) !important; }
+.bg-warning-critical-400 { background-color: var(--color-warning-critical-400) !important; }
+.bg-warning-critical-500 { background-color: var(--color-warning-critical-500) !important; }
+.bg-warning-critical-600 { background-color: var(--color-warning-critical-600) !important; }
+.bg-warning-critical-700 { background-color: var(--color-warning-critical-700) !important; }
+.bg-warning-critical-800 { background-color: var(--color-warning-critical-800) !important; }
+.bg-warning-critical-900 { background-color: var(--color-warning-critical-900) !important; }
+
+/* Danger-Soft Backgrounds */
+.bg-danger-soft-50 { background-color: var(--color-danger-soft-50) !important; }
+.bg-danger-soft-100 { background-color: var(--color-danger-soft-100) !important; }
+.bg-danger-soft-200 { background-color: var(--color-danger-soft-200) !important; }
+.bg-danger-soft-300 { background-color: var(--color-danger-soft-300) !important; }
+.bg-danger-soft-400 { background-color: var(--color-danger-soft-400) !important; }
+.bg-danger-soft-500 { background-color: var(--color-danger-soft-500) !important; }
+.bg-danger-soft-600 { background-color: var(--color-danger-soft-600) !important; }
+.bg-danger-soft-700 { background-color: var(--color-danger-soft-700) !important; }
+.bg-danger-soft-800 { background-color: var(--color-danger-soft-800) !important; }
+.bg-danger-soft-900 { background-color: var(--color-danger-soft-900) !important; }
+
+/* Surface Backgrounds */
+.bg-surface-base { background-color: var(--color-surface-base) !important; }
+.bg-surface-1 { background-color: var(--color-surface-1) !important; }
+.bg-surface-2 { background-color: var(--color-surface-2) !important; }
+.bg-surface-3 { background-color: var(--color-surface-3) !important; }
+.bg-surface-4 { background-color: var(--color-surface-4) !important; }
+
+.bg-surface-warm-1 { background-color: var(--color-surface-warm-1) !important; }
+.bg-surface-warm-2 { background-color: var(--color-surface-warm-2) !important; }
+.bg-surface-warm-3 { background-color: var(--color-surface-warm-3) !important; }
+.bg-surface-warm-4 { background-color: var(--color-surface-warm-4) !important; }
+
+/* ========================================
+   TEXT COLOR UTILITIES
+   ======================================== */
+
+/* Neutral-Warmth Text */
+.text-neutral-warmth-50 { color: var(--color-neutral-warmth-50) !important; }
+.text-neutral-warmth-100 { color: var(--color-neutral-warmth-100) !important; }
+.text-neutral-warmth-200 { color: var(--color-neutral-warmth-200) !important; }
+.text-neutral-warmth-300 { color: var(--color-neutral-warmth-300) !important; }
+.text-neutral-warmth-400 { color: var(--color-neutral-warmth-400) !important; }
+.text-neutral-warmth-500 { color: var(--color-neutral-warmth-500) !important; }
+.text-neutral-warmth-600 { color: var(--color-neutral-warmth-600) !important; }
+.text-neutral-warmth-700 { color: var(--color-neutral-warmth-700) !important; }
+.text-neutral-warmth-800 { color: var(--color-neutral-warmth-800) !important; }
+.text-neutral-warmth-900 { color: var(--color-neutral-warmth-900) !important; }
+
+/* Success-Sold Text */
+.text-success-sold-700 { color: var(--color-success-sold-700) !important; }
+.text-success-sold-800 { color: var(--color-success-sold-800) !important; }
+.text-success-sold-900 { color: var(--color-success-sold-900) !important; }
+
+/* Success-Rented Text */
+.text-success-rented-700 { color: var(--color-success-rented-700) !important; }
+.text-success-rented-800 { color: var(--color-success-rented-800) !important; }
+.text-success-rented-900 { color: var(--color-success-rented-900) !important; }
+
+/* Success-Signed Text */
+.text-success-signed-700 { color: var(--color-success-signed-700) !important; }
+.text-success-signed-800 { color: var(--color-success-signed-800) !important; }
+.text-success-signed-900 { color: var(--color-success-signed-900) !important; }
+
+/* Warning-Attention Text */
+.text-warning-attention-700 { color: var(--color-warning-attention-700) !important; }
+.text-warning-attention-800 { color: var(--color-warning-attention-800) !important; }
+.text-warning-attention-900 { color: var(--color-warning-attention-900) !important; }
+
+/* Warning-Urgent Text */
+.text-warning-urgent-700 { color: var(--color-warning-urgent-700) !important; }
+.text-warning-urgent-800 { color: var(--color-warning-urgent-800) !important; }
+.text-warning-urgent-900 { color: var(--color-warning-urgent-900) !important; }
+
+/* Warning-Critical Text */
+.text-warning-critical-700 { color: var(--color-warning-critical-700) !important; }
+.text-warning-critical-800 { color: var(--color-warning-critical-800) !important; }
+.text-warning-critical-900 { color: var(--color-warning-critical-900) !important; }
+
+/* Danger-Soft Text */
+.text-danger-soft-700 { color: var(--color-danger-soft-700) !important; }
+.text-danger-soft-800 { color: var(--color-danger-soft-800) !important; }
+.text-danger-soft-900 { color: var(--color-danger-soft-900) !important; }
+
+/* Semantic Alias Text */
+.text-property-sold { color: var(--color-property-sold) !important; }
+.text-property-rented { color: var(--color-property-rented) !important; }
+.text-property-signed { color: var(--color-property-signed) !important; }
+.text-property-available { color: var(--color-property-available) !important; }
+.text-property-pending { color: var(--color-property-pending) !important; }
+.text-property-reserved { color: var(--color-property-reserved) !important; }
+.text-property-withdrawn { color: var(--color-property-withdrawn) !important; }
+
+/* ========================================
+   BORDER COLOR UTILITIES
+   ======================================== */
+
+/* Neutral-Warmth Borders */
+.border-neutral-warmth-200 { border-color: var(--color-neutral-warmth-200) !important; }
+.border-neutral-warmth-300 { border-color: var(--color-neutral-warmth-300) !important; }
+.border-neutral-warmth-400 { border-color: var(--color-neutral-warmth-400) !important; }
+.border-neutral-warmth-500 { border-color: var(--color-neutral-warmth-500) !important; }
+.border-neutral-warmth-600 { border-color: var(--color-neutral-warmth-600) !important; }
+
+/* Success Variant Borders */
+.border-success-sold { border-color: var(--color-success-sold-700) !important; }
+.border-success-rented { border-color: var(--color-success-rented-700) !important; }
+.border-success-signed { border-color: var(--color-success-signed-700) !important; }
+
+/* Warning Level Borders */
+.border-warning-attention { border-color: var(--color-warning-attention-700) !important; }
+.border-warning-urgent { border-color: var(--color-warning-urgent-700) !important; }
+.border-warning-critical { border-color: var(--color-warning-critical-700) !important; }
+
+/* Danger Soft Borders */
+.border-danger-soft { border-color: var(--color-danger-soft-700) !important; }
+
+/* ========================================
+   TRANSITION UTILITIES
+   ======================================== */
+
+.transition-badge-smooth { transition: var(--transition-badge-smooth) !important; }
+.transition-badge-color { transition: var(--transition-badge-color) !important; }
+.transition-badge-transform { transition: var(--transition-badge-transform) !important; }
+.transition-badge-shadow { transition: var(--transition-badge-shadow) !important; }
+
+/* ========================================
+   SHADOW UTILITIES FOR LAYERING
+   ======================================== */
+
+.shadow-surface-1 { box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05) !important; }
+.shadow-surface-2 { box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important; }
+.shadow-surface-3 { box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important; }
+.shadow-surface-4 { box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12) !important; }
+
+/* ========================================
+   HOVER STATE UTILITIES
+   ======================================== */
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition-badge-smooth);
+}
+
+.hover-brighten:hover {
+  filter: brightness(1.1);
+  transition: var(--transition-badge-smooth);
+}
+
+/* ========================================
+   ACCESSIBILITY UTILITIES
+   ======================================== */
+
+/* WCAG AAA Text - Ensure 7:1 contrast */
+.text-accessible-on-white {
+  color: var(--color-neutral-warmth-700) !important;
+  font-weight: var(--font-weight-medium);
+}
+
+.text-accessible-critical {
+  color: var(--color-error-700) !important;
+  font-weight: var(--font-weight-semibold);
+}
+
+/* Focus visible utilities */
+.focus-badge:focus-visible {
+  outline: 2px solid var(--color-primary-500) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.2) !important;
+}
+
+/* ========================================
+   RESPONSIVE UTILITIES
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .transition-badge-smooth,
+  .transition-badge-color,
+  .transition-badge-transform,
+  .transition-badge-shadow,
+  .hover-lift,
+  .hover-brighten {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+/* ========================================
+   COMPONENT-SPECIFIC UTILITIES
+   ======================================== */
+
+/* Property Card Variants */
+.property-card-sold {
+  border-left: 4px solid var(--color-success-sold-700) !important;
+  background: var(--color-success-sold-50) !important;
+}
+
+.property-card-rented {
+  border-left: 4px solid var(--color-success-rented-700) !important;
+  background: var(--color-success-rented-50) !important;
+}
+
+.property-card-signed {
+  border-left: 4px solid var(--color-success-signed-700) !important;
+  background: var(--color-success-signed-50) !important;
+}
+
+.property-card-pending {
+  border-left: 4px solid var(--color-warning-attention-700) !important;
+  background: var(--color-warning-attention-50) !important;
+}
+
+.property-card-reserved {
+  border-left: 4px solid var(--color-warning-urgent-700) !important;
+  background: var(--color-warning-urgent-50) !important;
+}
+
+/* Lead Urgency Indicators */
+.lead-attention {
+  border-left: 3px solid var(--color-lead-attention) !important;
+}
+
+.lead-urgent {
+  border-left: 3px solid var(--color-lead-urgent) !important;
+  animation: pulse-urgent 2s infinite;
+}
+
+.lead-critical {
+  border-left: 3px solid var(--color-lead-critical) !important;
+  animation: pulse-critical 1s infinite;
+}
+
+@keyframes pulse-urgent {
+  0%, 100% { 
+    border-color: var(--color-lead-urgent);
+    box-shadow: 0 0 0 0 var(--color-warning-urgent-alpha-10);
+  }
+  50% { 
+    border-color: var(--color-warning-urgent-500);
+    box-shadow: 0 0 0 4px var(--color-warning-urgent-alpha-20);
+  }
+}
+
+@keyframes pulse-critical {
+  0%, 100% { 
+    border-color: var(--color-lead-critical);
+    box-shadow: 0 0 0 0 var(--color-warning-critical-alpha-10);
+  }
+  50% { 
+    border-color: var(--color-warning-critical-500);
+    box-shadow: 0 0 0 4px var(--color-warning-critical-alpha-20);
+  }
+}
+
+/* Validation State Indicators */
+.validation-error-soft {
+  border: 1px solid var(--color-danger-soft-600) !important;
+  background: var(--color-danger-soft-50) !important;
+}
+
+.validation-error-soft-text {
+  color: var(--color-danger-soft-700) !important;
+}
+
+.validation-warning {
+  border: 1px solid var(--color-warning-urgent-600) !important;
+  background: var(--color-warning-urgent-50) !important;
+}
+
+.validation-warning-text {
+  color: var(--color-warning-urgent-700) !important;
+}

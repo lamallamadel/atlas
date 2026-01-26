@@ -1,4 +1,5 @@
 @import '../../styles/variables.scss';
+@import '../../styles/_colors-extended.scss';
 
 .badge-chip {
   display: inline-flex !important;
@@ -11,14 +12,16 @@
   font-size: 13px !important;
   font-weight: var(--font-weight-medium, 500) !important;
   line-height: 1.4 !important;
-  transition: var(--transition-base) !important;
+  transition: var(--transition-badge-smooth) !important;
   cursor: default !important;
   user-select: none !important;
+  will-change: transform, box-shadow !important;
 }
 
 .badge-chip:hover {
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
+  transition: var(--transition-badge-transform), var(--transition-badge-shadow) !important;
 }
 
 .badge-icon {
@@ -27,10 +30,12 @@
   height: 16px !important;
   line-height: 16px !important;
   margin: 0 !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-label {
   line-height: 1 !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 @keyframes pulse {
@@ -48,22 +53,32 @@
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* WCAG AA Compliant Badge Colors - 4.5:1 Contrast Ratio */
+/* ========================================
+   WCAG AAA COMPLIANT BADGE COLORS
+   Extended Semantic Color System
+   7:1 Contrast Ratio for Critical Text
+   ======================================== */
+
+/* ========================================
+   EXISTING ANNONCE STATUS BADGES
+   ======================================== */
 
 .badge-draft {
-  background-color: #e0e0e0 !important;
-  color: #212121 !important;
-  border: 1px solid #9e9e9e !important;
+  background-color: var(--color-neutral-200) !important;
+  color: var(--color-neutral-900) !important;
+  border: 1px solid var(--color-neutral-400) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-draft .badge-icon {
-  color: #424242 !important;
+  color: var(--color-neutral-700) !important;
 }
 
 .badge-active {
-  background-color: #1b5e20 !important;
+  background-color: var(--color-success-700) !important;
   color: #ffffff !important;
-  border: 1px solid #2e7d32 !important;
+  border: 1px solid var(--color-success-800) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-active .badge-icon {
@@ -71,9 +86,10 @@
 }
 
 .badge-paused {
-  background-color: #e65100 !important;
+  background-color: var(--color-warning-urgent-700) !important;
   color: #ffffff !important;
-  border: 1px solid #bf360c !important;
+  border: 1px solid var(--color-warning-urgent-800) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-paused .badge-icon {
@@ -81,19 +97,25 @@
 }
 
 .badge-archived {
-  background-color: #424242 !important;
+  background-color: var(--color-neutral-warmth-700) !important;
   color: #ffffff !important;
-  border: 1px solid #212121 !important;
+  border: 1px solid var(--color-neutral-warmth-800) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-archived .badge-icon {
   color: #ffffff !important;
 }
 
+/* ========================================
+   EXISTING DOSSIER STATUS BADGES
+   ======================================== */
+
 .badge-new {
-  background-color: #0d47a1 !important;
+  background-color: var(--color-info-700) !important;
   color: #ffffff !important;
-  border: 1px solid #1565c0 !important;
+  border: 1px solid var(--color-info-800) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-new .badge-icon {
@@ -101,9 +123,10 @@
 }
 
 .badge-qualifying {
-  background-color: #e65100 !important;
+  background-color: var(--color-warning-attention-800) !important;
   color: #ffffff !important;
-  border: 1px solid #bf360c !important;
+  border: 1px solid var(--color-warning-attention-900) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-qualifying .badge-icon {
@@ -111,9 +134,10 @@
 }
 
 .badge-qualified {
-  background-color: #2e7d32 !important;
+  background-color: var(--color-success-700) !important;
   color: #ffffff !important;
-  border: 1px solid #1b5e20 !important;
+  border: 1px solid var(--color-success-800) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-qualified .badge-icon {
@@ -121,9 +145,10 @@
 }
 
 .badge-appointment {
-  background-color: #4527a0 !important;
+  background-color: var(--color-info-800) !important;
   color: #ffffff !important;
-  border: 1px solid #311b92 !important;
+  border: 1px solid var(--color-info-900) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-appointment .badge-icon {
@@ -131,9 +156,10 @@
 }
 
 .badge-won {
-  background-color: #1b5e20 !important;
+  background-color: var(--color-success-800) !important;
   color: #ffffff !important;
-  border: 1px solid #0d5b1e !important;
+  border: 1px solid var(--color-success-900) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-won .badge-icon {
@@ -141,11 +167,324 @@
 }
 
 .badge-lost {
-  background-color: #b71c1c !important;
+  background-color: var(--color-danger-soft-700) !important;
   color: #ffffff !important;
-  border: 1px solid #8b0000 !important;
+  border: 1px solid var(--color-danger-soft-800) !important;
+  transition: var(--transition-badge-color) !important;
 }
 
 .badge-lost .badge-icon {
   color: #ffffff !important;
+}
+
+/* ========================================
+   NEW PROPERTY STATUS BADGES
+   Extended Success Variants & Warning Levels
+   ======================================== */
+
+/* Success Variants - WCAG AAA (7:1) */
+
+.badge-property-sold {
+  background-color: var(--color-success-sold-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-sold-800) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-sold .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-sold:hover {
+  background-color: var(--color-success-sold-600) !important;
+}
+
+.badge-property-rented {
+  background-color: var(--color-success-rented-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-rented-800) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-rented .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-rented:hover {
+  background-color: var(--color-success-rented-600) !important;
+}
+
+.badge-property-signed {
+  background-color: var(--color-success-signed-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-signed-800) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-signed .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-signed:hover {
+  background-color: var(--color-success-signed-600) !important;
+}
+
+.badge-property-available {
+  background-color: var(--color-success-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-800) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-available .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-available:hover {
+  background-color: var(--color-success-600) !important;
+}
+
+/* Warning Levels - WCAG AAA (7:1) */
+
+.badge-property-pending {
+  background-color: var(--color-warning-attention-800) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-warning-attention-900) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-pending .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-pending:hover {
+  background-color: var(--color-warning-attention-700) !important;
+}
+
+.badge-property-reserved {
+  background-color: var(--color-warning-urgent-800) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-warning-urgent-900) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-reserved .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-reserved:hover {
+  background-color: var(--color-warning-urgent-700) !important;
+}
+
+/* Neutral-Warmth - WCAG AAA (7:1) */
+
+.badge-property-withdrawn {
+  background-color: var(--color-neutral-warmth-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-neutral-warmth-800) !important;
+  transition: var(--transition-badge-color) !important;
+}
+
+.badge-property-withdrawn .badge-icon {
+  color: #ffffff !important;
+}
+
+.badge-property-withdrawn:hover {
+  background-color: var(--color-neutral-warmth-600) !important;
+}
+
+/* ========================================
+   SURFACE LAYERING CONTEXT
+   Badges on different surface levels
+   ======================================== */
+
+.surface-1 .badge-chip {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.surface-2 .badge-chip {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.surface-3 .badge-chip {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.surface-4 .badge-chip {
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* ========================================
+   DARK MODE OVERRIDES
+   ======================================== */
+
+.dark-theme .badge-draft {
+  background-color: var(--color-neutral-700) !important;
+  color: var(--color-neutral-50) !important;
+  border: 1px solid var(--color-neutral-600) !important;
+}
+
+.dark-theme .badge-draft .badge-icon {
+  color: var(--color-neutral-200) !important;
+}
+
+.dark-theme .badge-active {
+  background-color: var(--color-success-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-500) !important;
+}
+
+.dark-theme .badge-paused {
+  background-color: var(--color-warning-urgent-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-warning-urgent-500) !important;
+}
+
+.dark-theme .badge-archived {
+  background-color: var(--color-neutral-warmth-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-neutral-warmth-500) !important;
+}
+
+.dark-theme .badge-new {
+  background-color: var(--color-info-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-info-500) !important;
+}
+
+.dark-theme .badge-qualifying {
+  background-color: var(--color-warning-attention-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-warning-attention-500) !important;
+}
+
+.dark-theme .badge-qualified {
+  background-color: var(--color-success-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-500) !important;
+}
+
+.dark-theme .badge-appointment {
+  background-color: var(--color-info-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-info-600) !important;
+}
+
+.dark-theme .badge-won {
+  background-color: var(--color-success-700) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-600) !important;
+}
+
+.dark-theme .badge-lost {
+  background-color: var(--color-danger-soft-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-danger-soft-500) !important;
+}
+
+.dark-theme .badge-property-sold {
+  background-color: var(--color-success-sold-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-sold-500) !important;
+}
+
+.dark-theme .badge-property-sold:hover {
+  background-color: var(--color-success-sold-500) !important;
+}
+
+.dark-theme .badge-property-rented {
+  background-color: var(--color-success-rented-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-rented-500) !important;
+}
+
+.dark-theme .badge-property-rented:hover {
+  background-color: var(--color-success-rented-500) !important;
+}
+
+.dark-theme .badge-property-signed {
+  background-color: var(--color-success-signed-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-signed-500) !important;
+}
+
+.dark-theme .badge-property-signed:hover {
+  background-color: var(--color-success-signed-500) !important;
+}
+
+.dark-theme .badge-property-available {
+  background-color: var(--color-success-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-success-500) !important;
+}
+
+.dark-theme .badge-property-available:hover {
+  background-color: var(--color-success-500) !important;
+}
+
+.dark-theme .badge-property-pending {
+  background-color: var(--color-warning-attention-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-warning-attention-500) !important;
+}
+
+.dark-theme .badge-property-pending:hover {
+  background-color: var(--color-warning-attention-500) !important;
+}
+
+.dark-theme .badge-property-reserved {
+  background-color: var(--color-warning-urgent-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-warning-urgent-500) !important;
+}
+
+.dark-theme .badge-property-reserved:hover {
+  background-color: var(--color-warning-urgent-500) !important;
+}
+
+.dark-theme .badge-property-withdrawn {
+  background-color: var(--color-neutral-warmth-600) !important;
+  color: #ffffff !important;
+  border: 1px solid var(--color-neutral-warmth-500) !important;
+}
+
+.dark-theme .badge-property-withdrawn:hover {
+  background-color: var(--color-neutral-warmth-500) !important;
+}
+
+/* ========================================
+   ACCESSIBILITY - FOCUS INDICATORS
+   WCAG AA Compliant 2px Focus Ring
+   ======================================== */
+
+.badge-chip:focus-visible {
+  outline: 2px solid var(--color-primary-500) !important;
+  outline-offset: 2px !important;
+  box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.2) !important;
+}
+
+.dark-theme .badge-chip:focus-visible {
+  outline: 2px solid var(--color-primary-400) !important;
+  box-shadow: 0 0 0 4px rgba(66, 136, 206, 0.2) !important;
+}
+
+/* ========================================
+   REDUCED MOTION SUPPORT
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .badge-chip,
+  .badge-icon,
+  .badge-label {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .badge-pulse {
+    animation: none !important;
+  }
+
+  .badge-chip:hover {
+    transform: none !important;
+  }
 }

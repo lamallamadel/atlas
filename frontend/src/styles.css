@@ -3,6 +3,7 @@
 @import './styles/pages.css';
 @import './styles/material-overrides.css';
 @import './styles/document-preview-dialog.css';
+@import './styles/_color-utilities.scss';
 @import 'shepherd.js/dist/css/shepherd.css';
 
 * {
