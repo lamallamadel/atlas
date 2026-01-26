@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
@@ -14,6 +15,9 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
+import { MobileActionSheetComponent, MobileActionSheetData, MobileAction } from '../../components/mobile-action-sheet.component';
+import { DossierAction } from '../../components/mobile-dossier-card.component';
+import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
 import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
@@ -288,7 +292,8 @@ export class DossiersComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private dialog: MatDialog,
     private exportService: ExportService,
-    private dossierFilterApi: DossierFilterApiService
+    private dossierFilterApi: DossierFilterApiService,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -834,6 +839,10 @@ export class DossiersComponent implements OnInit {
     return annonce.id;
   }
 
+  trackByDossierId(index: number, dossier: DossierResponse): number {
+    return dossier.id;
+  }
+
   trackByPreset(index: number, preset: FilterPreset): string {
     return preset.id;
   }
@@ -927,7 +936,7 @@ export class DossiersComponent implements OnInit {
     });
   }
 
-  applyAdvancedFilter(filter: { conditions: any[]; logicOperator: 'AND' | 'OR' }): void {
+  applyAdvancedFilter(filter: { conditions: unknown[]; logicOperator: 'AND' | 'OR' }): void {
     this.useAdvancedFilter = true;
     this.advancedFilterRequest = {
       conditions: filter.conditions,
@@ -1003,6 +1012,145 @@ export class DossiersComponent implements OnInit {
 
     exportPromise.catch(error => {
       console.error('Export error:', error);
+    });
+  }
+
+  onMobileDossierAction(action: DossierAction): void {
+    switch (action.type) {
+      case 'view':
+        this.viewDossier(action.dossier.id);
+        break;
+      case 'call':
+        this.handleMobileCall(action.dossier);
+        break;
+      case 'message':
+        this.handleMobileMessage(action.dossier);
+        break;
+      case 'delete':
+        this.confirmDeleteDossier(action.dossier);
+        break;
+    }
+  }
+
+  handleMobileCall(dossier: DossierResponse): void {
+    if (dossier.leadPhone) {
+      window.location.href = `tel:${dossier.leadPhone}`;
+    } else {
+      this.snackBar.open('Aucun numéro de téléphone disponible', 'Fermer', {
+        duration: 3000
+      });
+    }
+  }
+
+  handleMobileMessage(dossier: DossierResponse): void {
+    if (dossier.leadPhone) {
+      window.location.href = `sms:${dossier.leadPhone}`;
+    } else {
+      this.snackBar.open('Aucun numéro de téléphone disponible', 'Fermer', {
+        duration: 3000
+      });
+    }
+  }
+
+  confirmDeleteDossier(dossier: DossierResponse): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '400px',
+      maxWidth: '90vw',
+      data: {
+        title: 'Supprimer le dossier',
+        message: `Êtes-vous sûr de vouloir supprimer le dossier de ${dossier.leadName || 'ce prospect'} ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmed: boolean) => {
+      if (confirmed) {
+        this.dossierApiService.delete(dossier.id).subscribe({
+          next: () => {
+            this.snackBar.open('Dossier supprimé avec succès', 'Fermer', {
+              duration: 3000,
+              panelClass: ['success-snackbar']
+            });
+            this.loadDossiers();
+          },
+          error: (err) => {
+            this.snackBar.open('Erreur lors de la suppression du dossier', 'Fermer', {
+              duration: 5000,
+              panelClass: ['error-snackbar']
+            });
+            console.error('Error deleting dossier:', err);
+          }
+        });
+      }
+    });
+  }
+
+  openMobileActionSheet(dossier: DossierResponse): void {
+    const actions: MobileAction[] = [
+      {
+        icon: 'visibility',
+        label: 'Voir les détails',
+        action: 'view',
+        color: 'primary'
+      },
+      {
+        icon: 'phone',
+        label: 'Appeler',
+        action: 'call',
+        color: 'success',
+        disabled: !dossier.leadPhone,
+        divider: true
+      },
+      {
+        icon: 'message',
+        label: 'Envoyer un message',
+        action: 'message',
+        disabled: !dossier.leadPhone
+      },
+      {
+        icon: 'sync_alt',
+        label: 'Changer le statut',
+        action: 'status',
+        divider: true
+      },
+      {
+        icon: 'delete',
+        label: 'Supprimer',
+        action: 'delete',
+        color: 'warn'
+      }
+    ];
+
+    const data: MobileActionSheetData = {
+      title: dossier.leadName || 'Dossier',
+      subtitle: dossier.leadPhone ? this.phoneFormatPipe.transform(dossier.leadPhone) : undefined,
+      actions,
+      cancelLabel: 'Annuler'
+    };
+
+    const sheetRef = this.bottomSheet.open(MobileActionSheetComponent, {
+      data
+    });
+
+    sheetRef.afterDismissed().subscribe((actionType: string | null) => {
+      if (actionType) {
+        switch (actionType) {
+          case 'view':
+            this.viewDossier(dossier.id);
+            break;
+          case 'call':
+            this.handleMobileCall(dossier);
+            break;
+          case 'message':
+            this.handleMobileMessage(dossier);
+            break;
+          case 'delete':
+            this.confirmDeleteDossier(dossier);
+            break;
+          case 'status':
+            this.changeStatus(dossier);
+            break;
+        }
+      }
     });
   }
 }

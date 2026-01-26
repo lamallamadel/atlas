@@ -79,6 +79,7 @@ import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hi
 import { FocusTrapDirective } from './directives/focus-trap.directive';
 import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
+import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
@@ -125,6 +126,8 @@ import { VoipConfigDialogComponent } from './components/voip-config-dialog.compo
 import { OfflineIndicatorComponent } from './components/offline-indicator.component';
 import { OfflineInterceptor } from './interceptors/offline.interceptor';
 import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
+import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
+import { MobileDossierCardComponent } from './components/mobile-dossier-card.component';
 
 registerLocaleData(localeFr);
 
@@ -171,6 +174,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     FocusTrapDirective,
     LazyLoadImageDirective,
     InfiniteScrollDirective,
+    SwipeGestureDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
@@ -209,7 +213,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     QuickActionsComponent,
     VoipConfigDialogComponent,
     OfflineIndicatorComponent,
-    VirtualScrollListComponent
+    VirtualScrollListComponent,
+    MobileActionSheetComponent,
+    MobileDossierCardComponent
   ],
   imports: [
     BrowserModule,

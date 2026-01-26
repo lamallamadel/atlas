@@ -45,8 +45,8 @@
    ======================================== */
 .dossier-header {
   position: sticky;
-  top: 0;
-  z-index: var(--z-index-sticky);
+  top: -1px;
+  z-index: 100;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
@@ -55,7 +55,12 @@
   background: var(--color-neutral-0);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-md);
-  transition: var(--transition-shadow);
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.dossier-header.scrolled {
+  box-shadow: var(--shadow-lg);
+  border-radius: 0;
 }
 
 .dossier-header:hover {
@@ -1760,13 +1765,39 @@
 /* ========================================
    RESPONSIVE LAYOUT - MOBILE SINGLE COLUMN
    ======================================== */
+/* ========================================
+   MOBILE FAB - FLOATING ACTION BUTTON
+   ======================================== */
+.mobile-fab {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .page-content {
-    padding: var(--spacing-4);
+    padding: var(--spacing-3);
+  }
+
+  .link-back {
+    position: sticky;
+    top: 0;
+    z-index: 101;
+    background: var(--color-neutral-0);
+    padding: var(--spacing-3);
+    margin: calc(-1 * var(--spacing-3)) calc(-1 * var(--spacing-3)) var(--spacing-3);
+    box-shadow: var(--shadow-sm);
+    border-bottom: var(--border-width-1) solid var(--color-neutral-200);
+    min-height: 56px;
+    display: flex;
+    align-items: center;
   }
 
   .dossier-header {
-    gap: var(--spacing-4);
+    position: sticky;
+    top: 56px;
+    gap: var(--spacing-3);
+    padding: var(--spacing-4);
+    margin-bottom: var(--spacing-4);
+    border-radius: var(--radius-lg);
   }
 
   .header-line-1 {
@@ -1783,21 +1814,31 @@
   .dossier-title {
     font-size: var(--font-size-lg);
     white-space: normal;
+    line-height: 1.3;
   }
 
   .btn-change-status-secondary {
     width: 100%;
     justify-content: center;
+    min-height: 56px;
+    font-size: var(--font-size-base);
   }
 
   .header-line-2 {
-    gap: var(--spacing-3);
+    gap: var(--spacing-2);
   }
 
   .metadata-item {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--spacing-1);
+  }
+
+  .status-change-button,
+  .add-partie-button,
+  .update-status-button {
+    min-height: 56px;
+    font-size: var(--font-size-base);
   }
 
   /* Single column layout for info sections */

@@ -354,5 +354,59 @@
         (dossierUpdated)="onKanbanDossierUpdated()">
       </app-kanban-board>
     </section>
+
+    <!-- Mobile List View -->
+    <section *ngIf="viewMode === 'list'" class="mobile-dossiers-list" aria-labelledby="mobile-list-title">
+      <div class="mobile-list-header">
+        <h2 id="mobile-list-title">Dossiers</h2>
+        <div class="mobile-list-meta" *ngIf="page">
+          <span>{{ page.totalElements }} résultat(s)</span>
+          <span *ngIf="appliedFilters.length > 0">{{ appliedFilters.length }} filtre(s)</span>
+        </div>
+      </div>
+
+      <app-loading-skeleton *ngIf="loading" variant="card" [rows]="5" aria-label="Chargement des dossiers"></app-loading-skeleton>
+
+      <app-empty-state 
+        *ngIf="!loading && !error && dossiers.length === 0"
+        [context]="emptyStateContext"
+        [isNewUser]="isNewUser"
+        [primaryAction]="emptyStatePrimaryAction"
+        [secondaryAction]="emptyStateSecondaryAction">
+      </app-empty-state>
+
+      <div *ngIf="!loading && !error && dossiers.length > 0" class="mobile-cards-container">
+        <app-mobile-dossier-card
+          *ngFor="let dossier of dossiers; trackBy: trackByDossierId"
+          [dossier]="dossier"
+          (action)="onMobileDossierAction($event)">
+        </app-mobile-dossier-card>
+      </div>
+
+      <nav class="pagination-section" *ngIf="page && !loading && !error && dossiers.length > 0" aria-label="Pagination mobile des dossiers">
+        <div class="pagination-info" role="status" aria-live="polite">
+          Page {{ page.number + 1 }} sur {{ page.totalPages }}
+        </div>
+        <div class="pagination-controls">
+          <button
+            class="btn-page"
+            [disabled]="page.first"
+            (click)="previousPage()"
+            aria-label="Page précédente">
+            <mat-icon>chevron_left</mat-icon>
+            Précédent
+          </button>
+
+          <button
+            class="btn-page"
+            [disabled]="page.last"
+            (click)="nextPage()"
+            aria-label="Page suivante">
+            Suivant
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </nav>
+    </section>
   </main>
 </div>
