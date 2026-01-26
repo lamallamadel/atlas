@@ -1,11 +1,4 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { FullCalendarComponent } from '@fullcalendar/angular';
-import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import iCalendarPlugin from '@fullcalendar/icalendar';
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus, AppointmentCreateRequest, AppointmentUpdateRequest } from '../services/appointment-api.service';
 import { CalendarSyncService } from '../services/calendar-sync.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -38,15 +31,17 @@ interface CalendarEvent extends EventInput {
   styleUrls: ['./calendar-view.component.css']
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
-  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+  @ViewChild('calendar') calendarComponent: any;
 
   private destroy$ = new Subject<void>();
   isMobile = false;
   currentView = 'timeGridWeek';
   showListView = false;
+  calendarLoaded = false;
+  calendarLoading = false;
   
-  calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, iCalendarPlugin],
+  calendarOptions: any = {
+    plugins: [],
     initialView: 'timeGridWeek',
     headerToolbar: {
       left: 'prev,next today',
@@ -89,7 +84,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       minute: '2-digit',
       meridiem: false
     },
-    eventClassNames: (arg) => {
+    eventClassNames: (arg: any) => {
       const classes = ['fc-event-custom'];
       if (arg.event.extendedProps && arg.event.extendedProps['status'] === AppointmentStatus.CANCELLED) {
         classes.push('fc-event-cancelled');
@@ -121,7 +116,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     private breakpointObserver: BreakpointObserver
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.breakpointObserver
       .observe([Breakpoints.Handset])
       .pipe(takeUntil(this.destroy$))
@@ -132,7 +127,50 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
         }
       });
 
+    await this.loadCalendarPlugins();
     this.loadAppointments();
+  }
+
+  private async loadCalendarPlugins(): Promise<void> {
+    if (this.calendarLoaded) {
+      return;
+    }
+
+    if (this.calendarLoading) {
+      return;
+    }
+
+    this.calendarLoading = true;
+
+    try {
+      const [
+        { default: dayGridPlugin },
+        { default: timeGridPlugin },
+        { default: listPlugin },
+        { default: interactionPlugin },
+        { default: iCalendarPlugin }
+      ] = await Promise.all([
+        import('@fullcalendar/daygrid'),
+        import('@fullcalendar/timegrid'),
+        import('@fullcalendar/list'),
+        import('@fullcalendar/interaction'),
+        import('@fullcalendar/icalendar')
+      ]);
+
+      this.calendarOptions.plugins = [
+        dayGridPlugin,
+        timeGridPlugin,
+        listPlugin,
+        interactionPlugin,
+        iCalendarPlugin
+      ];
+
+      this.calendarLoaded = true;
+      this.calendarLoading = false;
+    } catch (error) {
+      console.error('Failed to load FullCalendar plugins:', error);
+      this.calendarLoading = false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -228,7 +266,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleDateSelect(selectInfo: DateSelectArg): void {
+  handleDateSelect(selectInfo: any): void {
     const calendarApi = selectInfo.view.calendar;
 
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
@@ -257,7 +295,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleEventClick(clickInfo: EventClickArg): void {
+  handleEventClick(clickInfo: any): void {
     const appointmentId = parseInt(clickInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 
@@ -288,7 +326,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleEventDrop(dropInfo: EventDropArg): void {
+  handleEventDrop(dropInfo: any): void {
     const appointmentId = parseInt(dropInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { 
   ReportingApiService, 
@@ -10,14 +10,13 @@ import {
   LeadSourceData,
   ConversionFunnel
 } from '../services/reporting-api.service';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 
 @Component({
   selector: 'app-reports-dashboard',
   templateUrl: './reports-dashboard.component.html',
   styleUrls: ['./reports-dashboard.component.css']
 })
-export class ReportsDashboardComponent implements OnInit {
+export class ReportsDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('conversionFunnelCanvas') conversionFunnelCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('agentPerformanceCanvas') agentPerformanceCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('revenueForecastCanvas') revenueForecastCanvas!: ElementRef<HTMLCanvasElement>;
@@ -30,16 +29,24 @@ export class ReportsDashboardComponent implements OnInit {
   error: string | null = null;
   exportingPDF = false;
   exportingCSV = false;
+  chartjsLoaded = false;
+  chartjsLoading = false;
 
   dateFrom = '';
   dateTo = '';
 
-  conversionFunnelChartData: ChartData<'bar'> = {
+  // Chart instances
+  private conversionFunnelChart: any = null;
+  private agentPerformanceChart: any = null;
+  private revenueForecastChart: any = null;
+  private leadSourceChart: any = null;
+
+  conversionFunnelChartData: any = {
     labels: [],
     datasets: []
   };
-  conversionFunnelChartOptions: ChartConfiguration['options'] = {
-    indexAxis: 'y',
+  conversionFunnelChartOptions: any = {
+    indexAxis: 'y' as const,
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -51,12 +58,12 @@ export class ReportsDashboardComponent implements OnInit {
         text: 'Conversion Funnel by Stage',
         font: {
           size: 16,
-          weight: 'bold'
+          weight: 'bold' as const
         }
       },
       tooltip: {
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             const label = context.dataset.label || '';
             const value = context.parsed.x;
             return `${label}: ${value}`;
@@ -73,7 +80,7 @@ export class ReportsDashboardComponent implements OnInit {
         }
       }
     },
-    onClick: (_event, elements) => {
+    onClick: (_event: any, elements: any) => {
       if (elements.length > 0) {
         const index = elements[0].index;
         const stage = this.analyticsData?.conversionFunnel[index]?.stage;
@@ -83,30 +90,30 @@ export class ReportsDashboardComponent implements OnInit {
       }
     }
   };
-  conversionFunnelChartType: ChartType = 'bar';
+  conversionFunnelChartType = 'bar';
 
-  agentPerformanceChartData: ChartData<'bar'> = {
+  agentPerformanceChartData: any = {
     labels: [],
     datasets: []
   };
-  agentPerformanceChartOptions: ChartConfiguration['options'] = {
+  agentPerformanceChartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         display: true,
-        position: 'top'
+        position: 'top' as const
       },
       title: {
         display: true,
         text: 'Agent Performance Comparison',
         font: {
           size: 16,
-          weight: 'bold'
+          weight: 'bold' as const
         }
       },
       tooltip: {
-        mode: 'index',
+        mode: 'index' as const,
         intersect: false
       }
     },
@@ -120,33 +127,33 @@ export class ReportsDashboardComponent implements OnInit {
       }
     }
   };
-  agentPerformanceChartType: ChartType = 'bar';
+  agentPerformanceChartType = 'bar';
 
-  revenueForecastChartData: ChartData<'line'> = {
+  revenueForecastChartData: any = {
     labels: [],
     datasets: []
   };
-  revenueForecastChartOptions: ChartConfiguration['options'] = {
+  revenueForecastChartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         display: true,
-        position: 'top'
+        position: 'top' as const
       },
       title: {
         display: true,
         text: 'Revenue Forecast Over Time',
         font: {
           size: 16,
-          weight: 'bold'
+          weight: 'bold' as const
         }
       },
       tooltip: {
-        mode: 'index',
+        mode: 'index' as const,
         intersect: false,
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             const label = context.dataset.label || '';
             const value = context.parsed.y;
             return `${label}: €${(value || 0).toLocaleString()}`;
@@ -162,7 +169,7 @@ export class ReportsDashboardComponent implements OnInit {
           text: 'Revenue (€)'
         },
         ticks: {
-          callback: (value) => '€' + value.toLocaleString()
+          callback: (value: any) => '€' + value.toLocaleString()
         }
       },
       x: {
@@ -173,41 +180,41 @@ export class ReportsDashboardComponent implements OnInit {
       }
     }
   };
-  revenueForecastChartType: ChartType = 'line';
+  revenueForecastChartType = 'line';
 
-  leadSourceChartData: ChartData<'pie'> = {
+  leadSourceChartData: any = {
     labels: [],
     datasets: []
   };
-  leadSourceChartOptions: ChartConfiguration['options'] = {
+  leadSourceChartOptions: any = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
       legend: {
         display: true,
-        position: 'right'
+        position: 'right' as const
       },
       title: {
         display: true,
         text: 'Lead Sources Distribution',
         font: {
           size: 16,
-          weight: 'bold'
+          weight: 'bold' as const
         }
       },
       tooltip: {
         callbacks: {
-          label: (context) => {
+          label: (context: any) => {
             const label = context.label || '';
             const value = context.parsed;
-            const total = (context.dataset.data as number[]).reduce((a, b) => a + b, 0);
+            const total = (context.dataset.data as number[]).reduce((a: number, b: number) => a + b, 0);
             const percentage = ((value / total) * 100).toFixed(1);
             return `${label}: ${value} (${percentage}%)`;
           }
         }
       }
     },
-    onClick: (_event, elements) => {
+    onClick: (_event: any, elements: any) => {
       if (elements.length > 0) {
         const index = elements[0].index;
         const source = this.analyticsData?.leadSources[index]?.source;
@@ -217,7 +224,7 @@ export class ReportsDashboardComponent implements OnInit {
       }
     }
   };
-  leadSourceChartType: ChartType = 'pie';
+  leadSourceChartType = 'pie';
 
   constructor(
     private reportingService: ReportingApiService,
@@ -233,6 +240,89 @@ export class ReportsDashboardComponent implements OnInit {
     this.dateFrom = this.formatDate(thirtyDaysAgo);
 
     this.loadReports();
+  }
+
+  async ngAfterViewInit(): Promise<void> {
+    await this.loadChartJs();
+  }
+
+  private async loadChartJs(): Promise<void> {
+    if (this.chartjsLoaded || this.chartjsLoading) {
+      return;
+    }
+
+    this.chartjsLoading = true;
+
+    try {
+      const { Chart, registerables } = await import('chart.js');
+      Chart.register(...registerables);
+      this.chartjsLoaded = true;
+      this.chartjsLoading = false;
+
+      // If data already loaded, render charts
+      if (this.analyticsData) {
+        this.renderAllCharts();
+      }
+    } catch (error) {
+      console.error('Failed to load Chart.js:', error);
+      this.chartjsLoading = false;
+    }
+  }
+
+  private async renderAllCharts(): Promise<void> {
+    if (!this.chartjsLoaded || !this.analyticsData) {
+      return;
+    }
+
+    const { Chart } = await import('chart.js');
+
+    // Render conversion funnel chart
+    if (this.conversionFunnelCanvas && this.analyticsData.conversionFunnel.length > 0) {
+      if (this.conversionFunnelChart) {
+        this.conversionFunnelChart.destroy();
+      }
+      this.conversionFunnelChart = new Chart(this.conversionFunnelCanvas.nativeElement, {
+        type: this.conversionFunnelChartType as any,
+        data: this.conversionFunnelChartData,
+        options: this.conversionFunnelChartOptions
+      });
+    }
+
+    // Render agent performance chart
+    if (this.agentPerformanceCanvas && this.analyticsData.agentPerformance.length > 0) {
+      if (this.agentPerformanceChart) {
+        this.agentPerformanceChart.destroy();
+      }
+      this.agentPerformanceChart = new Chart(this.agentPerformanceCanvas.nativeElement, {
+        type: this.agentPerformanceChartType as any,
+        data: this.agentPerformanceChartData,
+        options: this.agentPerformanceChartOptions
+      });
+    }
+
+    // Render revenue forecast chart
+    if (this.revenueForecastCanvas && this.analyticsData.revenueForecast.length > 0) {
+      if (this.revenueForecastChart) {
+        this.revenueForecastChart.destroy();
+      }
+      this.revenueForecastChart = new Chart(this.revenueForecastCanvas.nativeElement, {
+        type: this.revenueForecastChartType as any,
+        data: this.revenueForecastChartData,
+        options: this.revenueForecastChartOptions
+      });
+    }
+
+    // Render lead source chart
+    if (this.leadSourceCanvas && this.analyticsData.leadSources.length > 0) {
+      if (this.leadSourceChart) {
+        this.leadSourceChart.destroy();
+      }
+      this.leadSourceChart = new Chart(this.leadSourceCanvas.nativeElement, {
+        type: this.leadSourceChartType as any,
+        data: this.leadSourceChartData,
+        options: this.leadSourceChartOptions
+      });
+    }
   }
 
   loadReports(): void {
@@ -262,13 +352,18 @@ export class ReportsDashboardComponent implements OnInit {
     });
 
     this.reportingService.getAnalyticsData(this.dateFrom, this.dateTo).subscribe({
-      next: (data) => {
+      next: async (data) => {
         this.analyticsData = data;
         this.updateConversionFunnelChart(data.conversionFunnel);
         this.updateAgentPerformanceChart(data.agentPerformance);
         this.updateRevenueForecastChart(data.revenueForecast);
         this.updateLeadSourceChart(data.leadSources);
         this.loading = false;
+
+        // Render charts if Chart.js already loaded
+        if (this.chartjsLoaded) {
+          await this.renderAllCharts();
+        }
       },
       error: (err) => {
         this.error = 'Failed to load analytics data';

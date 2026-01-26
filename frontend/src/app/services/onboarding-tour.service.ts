@@ -1,11 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import Shepherd from 'shepherd.js';
 import { filter, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { TourDefinitionService } from './tour-definition.service';
 import { AuthService } from './auth.service';
+
+// Type definitions for Shepherd.js (lazy-loaded)
+type ShepherdTour = any;
+type ShepherdStep = any;
 
 export interface TourProgress {
   [tourId: string]: {
@@ -36,10 +39,12 @@ export class OnboardingTourService {
   private readonly ANALYTICS_KEY = 'onboarding_tour_analytics';
   private readonly API_BASE = '/api/v1/user-preferences';
   
-  private currentTour: Shepherd.Tour | null = null;
+  private currentTour: ShepherdTour | null = null;
   private tourProgress: TourProgress = {};
   private tourStartTime: number | null = null;
   private syncInProgress = false;
+  private shepherdLoaded = false;
+  private shepherdModule: any = null;
 
   constructor(
     private router: Router,
@@ -263,12 +268,30 @@ export class OnboardingTourService {
     }
   }
 
-  private createTour(tourId: string, options?: Shepherd.Tour.TourOptions): Shepherd.Tour {
+  private async loadShepherd(): Promise<any> {
+    if (this.shepherdLoaded && this.shepherdModule) {
+      return this.shepherdModule;
+    }
+
+    try {
+      const { default: Shepherd } = await import('shepherd.js');
+      this.shepherdModule = Shepherd;
+      this.shepherdLoaded = true;
+      return Shepherd;
+    } catch (error) {
+      console.error('Failed to load Shepherd.js:', error);
+      throw error;
+    }
+  }
+
+  private async createTour(tourId: string, options?: any): Promise<ShepherdTour> {
     if (this.currentTour) {
       this.currentTour.complete();
     }
 
-    const defaultOptions: Shepherd.Tour.TourOptions = {
+    const Shepherd = await this.loadShepherd();
+
+    const defaultOptions: any = {
       useModalOverlay: true,
       defaultStepOptions: {
         classes: 'shepherd-theme-custom',
@@ -352,14 +375,14 @@ export class OnboardingTourService {
     return this.currentTour;
   }
 
-  startDossierCreationTour(): void {
+  async startDossierCreationTour(): Promise<void> {
     const tourId = 'dossier-creation';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'welcome',
@@ -554,14 +577,14 @@ export class OnboardingTourService {
     tour.start();
   }
 
-  startDossierDetailTour(): void {
+  async startDossierDetailTour(): Promise<void> {
     const tourId = 'dossier-detail';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'overview',
@@ -757,14 +780,14 @@ export class OnboardingTourService {
     tour.start();
   }
 
-  startMessageCreationTour(): void {
+  async startMessageCreationTour(): Promise<void> {
     const tourId = 'message-creation';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'intro',
@@ -887,14 +910,14 @@ export class OnboardingTourService {
     tour.start();
   }
 
-  startWorkflowStatusTour(): void {
+  async startWorkflowStatusTour(): Promise<void> {
     const tourId = 'workflow-status';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'intro',

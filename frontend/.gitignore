@@ -61,3 +61,12 @@ sw-debug.log
 /a11y-reports/
 /.lighthouseci/
 /lighthouse-reports/
+
+# Bundle analysis
+stats.json
+dist/frontend/stats.json
+dist/frontend/stats-es2015.json
+dist/frontend/stats-es5.json
+
+# Source map explorer
+.sourcemap-explorer/
