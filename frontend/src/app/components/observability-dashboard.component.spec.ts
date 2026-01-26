@@ -267,13 +267,13 @@ describe('ObservabilityDashboardComponent', () => {
   });
 
   it('should limit history to max points', () => {
-    component['maxHistoryPoints'] = 3;
-    
-    for (let i = 0; i < 5; i++) {
+    const maxHistoryPoints = (component as { maxHistoryPoints: number }).maxHistoryPoints;
+
+    for (let i = 0; i < maxHistoryPoints + 1; i++) {
       component['addToHistory'](mockMetrics);
     }
     
-    expect(component['queueDepthHistory'].length).toBe(3);
+    expect(component['queueDepthHistory'].length).toBe(maxHistoryPoints);
   });
 
   it('should cleanup on destroy', () => {
