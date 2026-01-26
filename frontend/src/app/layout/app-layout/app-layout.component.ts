@@ -7,6 +7,7 @@ import { DossierApiService } from '../../services/dossier-api.service';
 import { NotificationApiService } from '../../services/notification-api.service';
 import { KeyboardShortcutService } from '../../services/keyboard-shortcut.service';
 import { OnboardingTourService } from '../../services/onboarding-tour.service';
+import { TourDefinitionService } from '../../services/tour-definition.service';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import { RouterOutlet, Router } from '@angular/router';
@@ -28,6 +29,7 @@ export class AppLayoutComponent implements OnInit {
   isDarkTheme$: Observable<boolean>;
   dossiersPendingCount$: Observable<number>;
   unreadNotificationCount$: Observable<number>;
+  tourCompletionPercentage: number = 0;
 
   constructor(
     private breakpointObserver: BreakpointObserver,
@@ -37,6 +39,7 @@ export class AppLayoutComponent implements OnInit {
     private notificationApiService: NotificationApiService,
     private keyboardShortcutService: KeyboardShortcutService,
     private onboardingTourService: OnboardingTourService,
+    private tourDefinitionService: TourDefinitionService,
     private router: Router
   ) {
     this.isHandset$ = this.breakpointObserver.observe([Breakpoints.Handset])
@@ -71,6 +74,8 @@ export class AppLayoutComponent implements OnInit {
         }
       }
     });
+    
+    this.updateTourProgress();
   }
 
   toggleUserMenu(): void {
@@ -127,6 +132,57 @@ export class AppLayoutComponent implements OnInit {
   resetAllTours(): void {
     if (confirm('Êtes-vous sûr de vouloir réinitialiser tous les guides interactifs ?')) {
       this.onboardingTourService.resetAllTours();
+      this.updateTourProgress();
+    }
+  }
+
+  isTourCompleted(tourId: string): boolean {
+    return this.onboardingTourService.isTourCompleted(tourId);
+  }
+
+  updateTourProgress(): void {
+    const tours = this.tourDefinitionService.getCoreTours();
+    const completedCount = tours.filter(tour => this.isTourCompleted(tour.id)).length;
+    this.tourCompletionPercentage = tours.length > 0 
+      ? Math.round((completedCount / tours.length) * 100)
+      : 0;
+  }
+
+  startQuickTour(tourId: string): void {
+    const tour = this.tourDefinitionService.getTour(tourId);
+    if (!tour) {
+      return;
+    }
+
+    if (tour.requiredRoute && !this.router.url.includes(tour.requiredRoute)) {
+      this.router.navigate([tour.requiredRoute]).then(() => {
+        setTimeout(() => {
+          this.onboardingTourService.startManualTour(tourId as any);
+        }, 500);
+      });
+    } else {
+      this.onboardingTourService.startManualTour(tourId as any);
+    }
+  }
+
+  viewAllTours(): void {
+    this.router.navigate(['/tours']);
+  }
+
+  skipAllTours(): void {
+    if (confirm('Êtes-vous sûr de vouloir ignorer tous les guides interactifs ?')) {
+      const tours = this.tourDefinitionService.getCoreTours();
+      tours.forEach(tour => {
+        this.onboardingTourService.resetTour(tour.id);
+      });
+      this.updateTourProgress();
+    }
+  }
+
+  restartAllTours(): void {
+    if (confirm('Êtes-vous sûr de vouloir redémarrer tous les guides interactifs ?')) {
+      this.onboardingTourService.resetAllTours();
+      this.updateTourProgress();
     }
   }
 

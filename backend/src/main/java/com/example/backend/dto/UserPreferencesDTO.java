@@ -28,6 +28,9 @@ public class UserPreferencesDTO {
     @Schema(description = "Role-based template", example = "agent")
     private String roleTemplate;
 
+    @Schema(description = "Tour progress and completion state")
+    private Map<String, Object> tourProgress;
+
     public String getUserId() {
         return userId;
     }
@@ -82,5 +85,13 @@ public class UserPreferencesDTO {
 
     public void setRoleTemplate(String roleTemplate) {
         this.roleTemplate = roleTemplate;
+    }
+
+    public Map<String, Object> getTourProgress() {
+        return tourProgress;
+    }
+
+    public void setTourProgress(Map<String, Object> tourProgress) {
+        this.tourProgress = tourProgress;
     }
 }

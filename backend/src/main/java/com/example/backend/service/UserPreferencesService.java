@@ -126,6 +126,26 @@ public class UserPreferencesService {
         return toDTO(saved);
     }
 
+    @Transactional
+    public UserPreferencesDTO updateTourProgress(String userId, Map<String, Object> tourProgress) {
+        String orgId = TenantContext.getOrgId();
+        logger.debug("Updating tour progress for userId={}, orgId={}", userId, orgId);
+
+        UserPreferencesEntity entity = userPreferencesRepository
+                .findByUserIdAndOrgId(userId, orgId)
+                .orElseGet(() -> {
+                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                    newEntity.setUserId(userId);
+                    newEntity.setOrgId(orgId);
+                    return newEntity;
+                });
+
+        entity.setTourProgress(tourProgress);
+        UserPreferencesEntity saved = userPreferencesRepository.save(entity);
+
+        return toDTO(saved);
+    }
+
     private UserPreferencesEntity createDefaultPreferences(String userId, String orgId) {
         UserPreferencesEntity entity = new UserPreferencesEntity();
         entity.setUserId(userId);
@@ -135,6 +155,7 @@ public class UserPreferencesService {
         entity.setDashboardLayout(new HashMap<>());
         entity.setWidgetSettings(new HashMap<>());
         entity.setGeneralPreferences(new HashMap<>());
+        entity.setTourProgress(new HashMap<>());
         return entity;
     }
 
@@ -203,6 +224,7 @@ public class UserPreferencesService {
         dto.setTheme(entity.getTheme());
         dto.setLanguage(entity.getLanguage());
         dto.setRoleTemplate(entity.getRoleTemplate());
+        dto.setTourProgress(entity.getTourProgress());
         return dto;
     }
 
@@ -224,6 +246,9 @@ public class UserPreferencesService {
         }
         if (dto.getRoleTemplate() != null) {
             entity.setRoleTemplate(dto.getRoleTemplate());
+        }
+        if (dto.getTourProgress() != null) {
+            entity.setTourProgress(dto.getTourProgress());
         }
     }
 }

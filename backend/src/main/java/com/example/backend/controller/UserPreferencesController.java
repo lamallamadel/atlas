@@ -169,4 +169,37 @@ public class UserPreferencesController {
         UserPreferencesDTO updated = userPreferencesService.saveUserPreferences(userId, dto);
         return ResponseEntity.ok(updated);
     }
+
+    @PutMapping("/{userId}/tour-progress")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Update tour progress", 
+               description = "Updates the guided tour progress and completion state for a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tour progress updated successfully",
+                    content = @Content(schema = @Schema(implementation = UserPreferencesDTO.class)))
+    })
+    public ResponseEntity<UserPreferencesDTO> updateTourProgress(
+            @Parameter(description = "User ID", required = true)
+            @PathVariable String userId,
+            @RequestBody Map<String, Object> tourProgress) {
+        UserPreferencesDTO updated = userPreferencesService.updateTourProgress(userId, tourProgress);
+        return ResponseEntity.ok(updated);
+    }
+
+    @GetMapping("/{userId}/tour-progress")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get tour progress", 
+               description = "Retrieves the guided tour progress and completion state for a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Tour progress retrieved successfully")
+    })
+    public ResponseEntity<Map<String, Object>> getTourProgress(
+            @Parameter(description = "User ID", required = true)
+            @PathVariable String userId) {
+        UserPreferencesDTO preferences = userPreferencesService.getUserPreferences(userId);
+        Map<String, Object> tourProgress = preferences.getTourProgress() != null 
+            ? preferences.getTourProgress() 
+            : new java.util.HashMap<>();
+        return ResponseEntity.ok(tourProgress);
+    }
 }

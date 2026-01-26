@@ -143,7 +143,7 @@ public class SmartSuggestionsService {
 
         List<AppointmentEntity> recentAppointments = dossier.getAppointments().stream()
                 .filter(apt -> apt.getStatus() == AppointmentStatus.COMPLETED)
-                .filter(apt -> ChronoUnit.HOURS.between(apt.getScheduledAt(), LocalDateTime.now()) <= 24)
+                .filter(apt -> ChronoUnit.HOURS.between(apt.getStartTime(), LocalDateTime.now()) <= 24)
                 .collect(Collectors.toList());
 
         if (!recentAppointments.isEmpty()) {
