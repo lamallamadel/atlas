@@ -12,6 +12,7 @@ import { EmptyStateContext } from '../../services/empty-state-illustrations.serv
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
+import { UserPreferencesService } from '../../services/user-preferences.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
@@ -56,6 +57,10 @@ export class DossiersComponent implements OnInit {
   isMobile = false;
   savedPresets: FilterPreset[] = [];
   showPresetMenu = false;
+
+  viewMode: 'list' | 'kanban' = 'list';
+  quickFilterControl = new FormControl<string>('');
+  quickFilterValue = '';
 
   private dateFormatPipe = new DateFormatPipe();
   private phoneFormatPipe = new PhoneFormatPipe();
@@ -220,6 +225,7 @@ export class DossiersComponent implements OnInit {
     private router: Router,
     private route: ActivatedRoute,
     private filterPresetService: FilterPresetService,
+    private userPreferencesService: UserPreferencesService,
     private bottomSheet: MatBottomSheet,
     private breakpointObserver: BreakpointObserver,
     private dialog: MatDialog
@@ -228,8 +234,9 @@ export class DossiersComponent implements OnInit {
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
     this.loadSavedPresets();
+    this.loadViewPreference();
+    this.setupQuickFilter();
 
-    // Default columns before the first breakpoint emission.
     this.configureColumns();
     
     this.breakpointObserver.observe([Breakpoints.Handset])
@@ -329,8 +336,8 @@ export class DossiersComponent implements OnInit {
       leadSource?: string;
       annonceId?: number;
     } = {
-      page: this.currentPage,
-      size: this.pageSize
+      page: this.viewMode === 'kanban' ? 0 : this.currentPage,
+      size: this.viewMode === 'kanban' ? 1000 : this.pageSize
     };
 
     if (this.selectedStatus) {
@@ -686,6 +693,8 @@ export class DossiersComponent implements OnInit {
     switch (status) {
       case DossierStatus.NEW:
         return 'Nouveau';
+      case DossierStatus.QUALIFYING:
+        return 'Qualification';
       case DossierStatus.QUALIFIED:
         return 'Qualifié';
       case DossierStatus.APPOINTMENT:
@@ -772,5 +781,36 @@ export class DossiersComponent implements OnInit {
         console.log('Export completed successfully');
       }
     });
+  }
+
+  toggleViewMode(): void {
+    this.viewMode = this.viewMode === 'list' ? 'kanban' : 'list';
+    this.userPreferencesService.setPreference('dossierViewMode', this.viewMode);
+    this.loadDossiers();
+  }
+
+  private loadViewPreference(): void {
+    const savedViewMode = this.userPreferencesService.getPreference('dossierViewMode', 'list');
+    this.viewMode = savedViewMode as 'list' | 'kanban';
+  }
+
+  private setupQuickFilter(): void {
+    this.quickFilterControl.valueChanges
+      .pipe(debounceTime(300))
+      .subscribe(value => {
+        this.quickFilterValue = value || '';
+      });
+  }
+
+  onKanbanDossierClick(dossier: DossierResponse): void {
+    this.viewDossier(dossier.id);
+  }
+
+  onKanbanDossierUpdated(): void {
+    this.loadDossiers();
+  }
+
+  get allDossiersForKanban(): DossierResponse[] {
+    return this.dossiers;
   }
 }

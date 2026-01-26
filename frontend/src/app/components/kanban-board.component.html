@@ -1,0 +1,95 @@
+<div class="kanban-board" *ngIf="!loading">
+  <div class="kanban-columns">
+    <div
+      *ngFor="let column of filteredColumns; trackBy: trackByColumnId"
+      class="kanban-column"
+      [class.column-won]="column.id === 'WON'"
+      [class.column-lost]="column.id === 'LOST'"
+    >
+      <div class="column-header">
+        <div class="column-title">
+          <mat-icon class="column-icon">{{ column.icon }}</mat-icon>
+          <h3>{{ column.title }}</h3>
+        </div>
+        <div class="column-count" [class]="column.badgeClass">
+          {{ getFilteredColumnCount(column) }}
+        </div>
+      </div>
+
+      <div
+        class="column-content"
+        cdkDropList
+        [id]="column.id"
+        [cdkDropListData]="column.dossiers"
+        [cdkDropListConnectedTo]="getConnectedLists()"
+        (cdkDropListDropped)="onDrop($event, column)"
+      >
+        <div
+          *ngFor="let dossier of column.dossiers; trackBy: trackByDossierId"
+          class="kanban-card"
+          cdkDrag
+          [cdkDragData]="dossier"
+          (click)="onCardClick(dossier)"
+          (keydown.enter)="onCardClick(dossier)"
+          (keydown.space)="$event.preventDefault(); onCardClick(dossier)"
+          role="button"
+          tabindex="0"
+          [attr.aria-label]="'Dossier ' + dossier.id + ' - ' + (dossier.leadName || 'Sans nom')"
+        >
+          <div class="card-header">
+            <span class="card-id">#{{ dossier.id }}</span>
+            <mat-icon class="drag-handle" cdkDragHandle>drag_indicator</mat-icon>
+          </div>
+
+          <div class="card-body">
+            <div class="card-lead-info">
+              <div class="lead-name" *ngIf="dossier.leadName">
+                <mat-icon class="info-icon">person</mat-icon>
+                <span>{{ dossier.leadName }}</span>
+              </div>
+              <div class="lead-phone" *ngIf="dossier.leadPhone">
+                <mat-icon class="info-icon">phone</mat-icon>
+                <span>{{ dossier.leadPhone }}</span>
+              </div>
+            </div>
+
+            <div class="card-annonce" *ngIf="dossier.annonceTitle">
+              <mat-icon class="info-icon">home</mat-icon>
+              <span class="annonce-title">{{ dossier.annonceTitle }}</span>
+            </div>
+
+            <div class="card-meta">
+              <div class="meta-item" *ngIf="dossier.leadSource || dossier.source">
+                <mat-icon class="meta-icon">source</mat-icon>
+                <span>{{ dossier.leadSource || dossier.source }}</span>
+              </div>
+              <div class="meta-item" *ngIf="dossier.score !== null && dossier.score !== undefined">
+                <mat-icon class="meta-icon">star</mat-icon>
+                <span>{{ dossier.score }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <div class="card-date">
+              <mat-icon class="date-icon">schedule</mat-icon>
+              <span>{{ dossier.updatedAt | date: 'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="drag-placeholder" *cdkDragPlaceholder></div>
+        </div>
+
+        <div *ngIf="column.dossiers.length === 0" class="empty-column">
+          <mat-icon>inbox</mat-icon>
+          <p>Aucun dossier</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="kanban-loading" *ngIf="loading">
+  <mat-spinner diameter="48"></mat-spinner>
+  <p>Chargement des dossiers...</p>
+</div>

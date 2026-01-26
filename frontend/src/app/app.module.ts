@@ -108,6 +108,7 @@ import { FormProgressIndicatorComponent } from './components/form-progress-indic
 import { InlineValidationSuggestionComponent } from './components/inline-validation-suggestion.component';
 import { ContextualHintDirective } from './directives/contextual-hint.directive';
 import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
+import { KanbanBoardComponent } from './components/kanban-board.component';
 
 registerLocaleData(localeFr);
 
@@ -177,7 +178,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     FormProgressIndicatorComponent,
     InlineValidationSuggestionComponent,
     ContextualHintDirective,
-    EnhancedFormExampleComponent
+    EnhancedFormExampleComponent,
+    KanbanBoardComponent
   ],
   imports: [
     BrowserModule,

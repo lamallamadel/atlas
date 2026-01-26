@@ -22,6 +22,14 @@
   flex-wrap: wrap;
 }
 
+.view-mode-toggle {
+  border-radius: var(--radius-lg);
+}
+
+.view-mode-toggle mat-button-toggle {
+  border: none;
+}
+
 .page-content {
   min-height: 400px;
   display: flex;
@@ -351,4 +359,32 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+.kanban-quick-filter {
+  margin-bottom: var(--spacing-4);
+}
+
+.quick-filter-card {
+  padding: var(--spacing-2) 0;
+}
+
+.quick-filter-card ::ng-deep .mat-mdc-card-content {
+  padding: var(--spacing-2) var(--spacing-4);
+}
+
+.quick-filter-field {
+  width: 100%;
+  max-width: 500px;
+}
+
+@media (max-width: 768px) {
+  .quick-filter-field {
+    max-width: 100%;
+  }
+  
+  .view-mode-toggle {
+    order: -1;
+    width: 100%;
+  }
 }

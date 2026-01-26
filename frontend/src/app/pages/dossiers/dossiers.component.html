@@ -2,6 +2,19 @@
   <header class="page-header">
     <h1 class="page-title">Dossiers</h1>
     <div class="header-actions">
+      <mat-button-toggle-group 
+        [value]="viewMode" 
+        (change)="toggleViewMode()"
+        aria-label="Mode d'affichage"
+        class="view-mode-toggle">
+        <mat-button-toggle value="list" aria-label="Vue en liste">
+          <mat-icon>view_list</mat-icon>
+        </mat-button-toggle>
+        <mat-button-toggle value="kanban" aria-label="Vue Kanban">
+          <mat-icon>view_kanban</mat-icon>
+        </mat-button-toggle>
+      </mat-button-toggle-group>
+
       <button 
         mat-button
         (click)="openImportDialog()" 
@@ -28,8 +41,26 @@
     </div>
   </header>
 
-  <!-- Desktop Filters -->
-  <section *ngIf="!isMobile" aria-label="Filtres de recherche">
+  <!-- Kanban Quick Filter (Kanban view only) -->
+  <section *ngIf="viewMode === 'kanban' && !isMobile" class="kanban-quick-filter" aria-label="Filtre rapide Kanban">
+    <mat-card class="quick-filter-card">
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="quick-filter-field">
+          <mat-label>Recherche rapide</mat-label>
+          <input
+            matInput
+            [formControl]="quickFilterControl"
+            placeholder="Filtrer par nom, téléphone, annonce..."
+            aria-label="Filtre rapide pour le tableau Kanban"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+      </mat-card-content>
+    </mat-card>
+  </section>
+
+  <!-- Desktop Filters (List view only) -->
+  <section *ngIf="viewMode === 'list' && !isMobile" aria-label="Filtres de recherche">
     <mat-card class="filters-card">
       <mat-card-content>
         <div class="filters-container">
@@ -58,6 +89,7 @@
                   <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()" aria-label="Filtrer par statut">
                     <mat-option value="">Tous</mat-option>
                     <mat-option [value]="DossierStatus.NEW">Nouveau</mat-option>
+                    <mat-option [value]="DossierStatus.QUALIFYING">Qualification</mat-option>
                     <mat-option [value]="DossierStatus.QUALIFIED">Qualifié</mat-option>
                     <mat-option [value]="DossierStatus.APPOINTMENT">Rendez-vous</mat-option>
                     <mat-option [value]="DossierStatus.WON">Gagné</mat-option>
@@ -187,7 +219,7 @@
   </section>
 
   <!-- Mobile Filter Button -->
-  <div class="mobile-filter-button" *ngIf="isMobile">
+  <div class="mobile-filter-button" *ngIf="isMobile && viewMode === 'list'">
     <button mat-raised-button color="primary" (click)="openMobileFilters()" aria-label="Ouvrir les filtres">
       <mat-icon aria-hidden="true">filter_list</mat-icon>
       Filtres
@@ -198,7 +230,7 @@
   </div>
 
   <main class="page-content">
-    <app-loading-skeleton *ngIf="loading" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-loading-skeleton>
+    <app-loading-skeleton *ngIf="loading && viewMode === 'list'" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-loading-skeleton>
 
     <div *ngIf="error && !loading" class="error-state" role="alert" aria-live="assertive">
       <p class="error-message">{{ error }}</p>
@@ -206,14 +238,15 @@
     </div>
 
     <app-empty-state 
-      *ngIf="!loading && !error && dossiers.length === 0"
+      *ngIf="!loading && !error && dossiers.length === 0 && viewMode === 'list'"
       [context]="emptyStateContext"
       [isNewUser]="isNewUser"
       [primaryAction]="emptyStatePrimaryAction"
       [secondaryAction]="emptyStateSecondaryAction">
     </app-empty-state>
 
-    <section *ngIf="!loading && !error && dossiers.length > 0" aria-labelledby="results-title">
+    <!-- List View -->
+    <section *ngIf="!loading && !error && dossiers.length > 0 && viewMode === 'list'" aria-labelledby="results-title">
       <h2 id="results-title" class="sr-only">Résultats de la recherche</h2>
       <app-generic-table
         [columns]="columns"
@@ -278,6 +311,26 @@
           </button>
         </div>
       </nav>
+    </section>
+
+    <!-- Kanban View -->
+    <section *ngIf="viewMode === 'kanban'" aria-labelledby="kanban-title">
+      <h2 id="kanban-title" class="sr-only">Vue Kanban des dossiers</h2>
+      <app-empty-state 
+        *ngIf="!loading && !error && dossiers.length === 0"
+        [context]="emptyStateContext"
+        [isNewUser]="isNewUser"
+        [primaryAction]="emptyStatePrimaryAction"
+        [secondaryAction]="emptyStateSecondaryAction">
+      </app-empty-state>
+      <app-kanban-board
+        *ngIf="!error"
+        [dossiers]="allDossiersForKanban"
+        [loading]="loading"
+        [quickFilter]="quickFilterValue"
+        (dossierClick)="onKanbanDossierClick($event)"
+        (dossierUpdated)="onKanbanDossierUpdated()">
+      </app-kanban-board>
     </section>
   </main>
 </div>
