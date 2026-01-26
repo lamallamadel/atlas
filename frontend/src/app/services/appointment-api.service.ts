@@ -76,6 +76,9 @@ export interface Page<T> {
 export interface AppointmentListParams {
   dossierId?: number;
   status?: AppointmentStatus;
+  assignedTo?: string;
+  startTimeFrom?: string;
+  startTimeTo?: string;
   page?: number;
   size?: number;
   sort?: string;
@@ -98,6 +101,15 @@ export class AppointmentApiService {
     }
     if (params.status !== undefined) {
       httpParams = httpParams.set('status', params.status);
+    }
+    if (params.assignedTo !== undefined) {
+      httpParams = httpParams.set('assignedTo', params.assignedTo);
+    }
+    if (params.startTimeFrom !== undefined) {
+      httpParams = httpParams.set('startTimeFrom', params.startTimeFrom);
+    }
+    if (params.startTimeTo !== undefined) {
+      httpParams = httpParams.set('startTimeTo', params.startTimeTo);
     }
     if (params.page !== undefined) {
       httpParams = httpParams.set('page', params.page.toString());

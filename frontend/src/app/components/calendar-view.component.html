@@ -1,0 +1,94 @@
+<div class="calendar-view-container">
+  <mat-card class="calendar-card">
+    <mat-card-header>
+      <mat-card-title>
+        <div class="header-row">
+          <h2>Calendrier des rendez-vous</h2>
+          <div class="header-actions">
+            <button 
+              mat-icon-button 
+              (click)="refreshCalendar()" 
+              matTooltip="Actualiser"
+              [disabled]="isLoading">
+              <mat-icon>refresh</mat-icon>
+            </button>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              (click)="exportToICal()"
+              [disabled]="isLoading">
+              <mat-icon>file_download</mat-icon>
+              Exporter iCal
+            </button>
+          </div>
+        </div>
+      </mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <div class="filters-section">
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filtrer par assigné</mat-label>
+          <mat-select 
+            [(value)]="filterByAssignedTo" 
+            (selectionChange)="onFilterByAssignedToChange($event.value)">
+            <mat-option [value]="null">Tous les assignés</mat-option>
+            <mat-option *ngFor="let assignee of availableAssignees" [value]="assignee">
+              {{ assignee }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Filtrer par statut</mat-label>
+          <mat-select 
+            [(value)]="filterByStatus" 
+            (selectionChange)="onFilterByStatusChange($event.value)">
+            <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="legend-section">
+        <div class="legend-title">Légende:</div>
+        <div class="legend-items">
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #2196F3;"></span>
+            <span class="legend-label">Planifié</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #4CAF50;"></span>
+            <span class="legend-label">Terminé</span>
+          </div>
+          <div class="legend-item">
+            <span class="legend-color" style="background-color: #9E9E9E;"></span>
+            <span class="legend-label">Annulé</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="calendar-wrapper" *ngIf="!isLoading">
+        <full-calendar 
+          #calendar
+          [options]="calendarOptions">
+        </full-calendar>
+      </div>
+
+      <div class="loading-state" *ngIf="isLoading">
+        <mat-spinner diameter="50"></mat-spinner>
+        <p>Chargement des rendez-vous...</p>
+      </div>
+
+      <div class="help-text">
+        <mat-icon>info</mat-icon>
+        <span>
+          Cliquez sur un créneau vide pour créer un rendez-vous. 
+          Cliquez sur un rendez-vous pour le modifier. 
+          Glissez-déposez pour déplacer ou redimensionner.
+        </span>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -109,6 +109,7 @@ import { InlineValidationSuggestionComponent } from './components/inline-validat
 import { ContextualHintDirective } from './directives/contextual-hint.directive';
 import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
 import { KanbanBoardComponent } from './components/kanban-board.component';
+import { CalendarViewComponent } from './components/calendar-view.component';
 
 registerLocaleData(localeFr);
 
@@ -179,7 +180,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     InlineValidationSuggestionComponent,
     ContextualHintDirective,
     EnhancedFormExampleComponent,
-    KanbanBoardComponent
+    KanbanBoardComponent,
+    CalendarViewComponent
   ],
   imports: [
     BrowserModule,

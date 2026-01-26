@@ -149,6 +149,16 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
         action: () => this.navigateTo('/tasks')
       },
       {
+        id: 'nav-calendar',
+        label: 'Calendrier',
+        description: 'Voir le calendrier des rendez-vous',
+        icon: 'calendar_today',
+        category: 'Navigation',
+        keywords: ['calendar', 'calendrier', 'rendez-vous', 'appointments', 'rdv'],
+        shortcut: 'g+c',
+        action: () => this.navigateTo('/calendar')
+      },
+      {
         id: 'nav-reports',
         label: 'Rapports',
         description: 'Voir les rapports et KPIs',

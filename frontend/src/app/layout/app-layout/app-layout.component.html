@@ -54,6 +54,16 @@
           <span matListItemTitle>Tâches</span>
         </a>
         <a mat-list-item 
+           routerLink="/calendar" 
+           routerLinkActive="active" 
+           (click)="closeSidenavOnMobile()"
+           aria-label="Accéder au calendrier"
+           matTooltip="Raccourci: g puis c"
+           matTooltipPosition="right">
+          <mat-icon matListItemIcon aria-hidden="true">calendar_today</mat-icon>
+          <span matListItemTitle>Calendrier</span>
+        </a>
+        <a mat-list-item 
            routerLink="/annonces" 
            routerLinkActive="active" 
            (click)="closeSidenavOnMobile()"

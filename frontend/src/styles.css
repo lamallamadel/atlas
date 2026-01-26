@@ -3,6 +3,10 @@
 @import './styles/pages.css';
 @import './styles/material-overrides.css';
 @import './styles/document-preview-dialog.css';
+@import '@fullcalendar/core/main.css';
+@import '@fullcalendar/daygrid/main.css';
+@import '@fullcalendar/timegrid/main.css';
+@import '@fullcalendar/list/main.css';
 
 * {
   margin: 0;

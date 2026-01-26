@@ -14,6 +14,7 @@ import { ReportsDashboardComponent } from './components/reports-dashboard.compon
 import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
 import { SearchComponent } from './pages/search/search.component';
 import { TaskListComponent } from './components/task-list.component';
+import { CalendarViewComponent } from './components/calendar-view.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -33,6 +34,7 @@ const routes: Routes = [
       { path: 'observability', component: ObservabilityDashboardComponent, data: { animation: 'ObservabilityPage' } },
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
       { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
+      { path: 'calendar', component: CalendarViewComponent, data: { animation: 'CalendarPage' } },
       { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
       { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
       { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },

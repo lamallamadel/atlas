@@ -119,6 +119,14 @@ export class KeyboardShortcutService {
     });
 
     this.registerShortcut({
+      key: 'g+c',
+      description: 'Aller au calendrier',
+      category: 'navigation',
+      sequence: true,
+      action: () => this.navigateToCalendar()
+    });
+
+    this.registerShortcut({
       key: 'Escape',
       description: 'Fermer les modales',
       category: 'actions',
@@ -275,6 +283,10 @@ export class KeyboardShortcutService {
 
   private navigateToTasks(): void {
     this.router.navigate(['/tasks']);
+  }
+
+  private navigateToCalendar(): void {
+    this.router.navigate(['/calendar']);
   }
 
   private closeModals(): void {
