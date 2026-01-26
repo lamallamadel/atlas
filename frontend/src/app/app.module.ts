@@ -119,6 +119,8 @@ import { AdvancedFiltersComponent } from './components/advanced-filters.componen
 import { AdvancedFiltersDialogComponent } from './components/advanced-filters-dialog.component';
 import { QuickActionsComponent } from './components/quick-actions.component';
 import { VoipConfigDialogComponent } from './components/voip-config-dialog.component';
+import { OfflineIndicatorComponent } from './components/offline-indicator.component';
+import { OfflineInterceptor } from './interceptors/offline.interceptor';
 
 registerLocaleData(localeFr);
 
@@ -198,7 +200,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AdvancedFiltersComponent,
     AdvancedFiltersDialogComponent,
     QuickActionsComponent,
-    VoipConfigDialogComponent
+    VoipConfigDialogComponent,
+    OfflineIndicatorComponent
   ],
   imports: [
     BrowserModule,
@@ -266,7 +269,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
       useClass: CorrelationIdInterceptor,
       multi: true
     },
-
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: OfflineInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })
