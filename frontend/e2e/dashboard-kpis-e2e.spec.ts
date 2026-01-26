@@ -4,7 +4,7 @@ test.describe.configure({ mode: 'serial' });
 test.use({ trace: 'retain-on-failure' });
 
 test.describe('Dashboard KPIs E2E Tests', () => {
-  test('Dashboard KPIs: Navigate to dashboard → Verify KPI cards visible → Verify counts are numbers → Navigate via KPI cards with filters', async ({ page }) => {
+  test('Dashboard KPIs: Navigate to dashboard → Verify KPI cards visible → Verify counts are numbers → Navigate via KPI cards with filters', async ({ authenticatedPage: page, helpers }) => {
     const startTime = Date.now();
 
     await page.goto('/', { waitUntil: 'domcontentloaded' });
@@ -185,7 +185,7 @@ test.describe('Dashboard KPIs E2E Tests', () => {
     expect(hasDossiersList || hasEmptyState).toBeTruthy();
   });
 
-  test('Dashboard KPIs: Verify error handling when API fails', async ({ page, context }) => {
+  test('Dashboard KPIs: Verify error handling when API fails', async ({ authenticatedPage: page, context }) => {
     // Intercept API calls and simulate failures
     await context.route('**/api/v1/dashboard/kpis/trends', route => {
       route.fulfill({
@@ -201,29 +201,26 @@ test.describe('Dashboard KPIs E2E Tests', () => {
         contentType: 'application/json',
         body: JSON.stringify({ error: 'Internal Server Error' })
       });
+    });
 
-    const annoncesValue = await annoncesCard.locator('.kpi-value').textContent();
-    const dossiersValue = await dossiersCard.locator('.kpi-value').textContent();
+    await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
 
-    expect(annoncesValue).toMatch(/^\d+$/);
-    expect(dossiersValue).toMatch(/^\d+$/);
-
-    // Verify error messages are displayed in KPI cards
     const annoncesCard = page.locator('.kpi-card:has-text("Annonces actives")');
     const dossiersCard = page.locator('.kpi-card:has-text("Dossiers à traiter")');
     const derniersCard = page.locator('mat-card.section-card:has-text("Derniers dossiers")');
 
-    if (hasDerniers) {
-      const firstDossier = derniersList.first();
-      await expect(firstDossier).toBeVisible();
+    await expect(annoncesCard).toBeVisible();
+    await expect(dossiersCard).toBeVisible();
+    await expect(derniersCard).toBeVisible();
 
-    // At least one should show an error (or values might be 0 if error handling shows default)
-    // This verifies graceful error handling
-    const derniereListeErreur = await derniersCard.locator('.kpi-error, .error-message').isVisible().catch(() => false);
-    const hasErrorHandling = annoncesError || dossiersError || derniereListeErreur;
+    const annoncesError = await annoncesCard.locator('.kpi-error, .error-message').isVisible().catch(() => false);
+    const dossiersError = await dossiersCard.locator('.kpi-error, .error-message').isVisible().catch(() => false);
+    const derniersError = await derniersCard.locator('.kpi-error, .error-message').isVisible().catch(() => false);
+
+    const hasErrorHandling = annoncesError || dossiersError || derniersError;
     expect(hasErrorHandling).toBeTruthy();
     
     // Log the result for debugging
-    console.log(`Error handling test: Annonces error shown: ${annoncesError}, Dossiers error shown: ${dossiersError}, Derniers dossiers error shown: ${derniereListeErreur}`);
+    console.log(`Error handling test: Annonces error shown: ${annoncesError}, Dossiers error shown: ${dossiersError}, Derniers dossiers error shown: ${derniersError}`);
   });
 });

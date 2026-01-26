@@ -115,21 +115,17 @@ class AnnonceDetailPage {
 }
 
 test.describe('Annonce Wizard E2E Tests (Stabilized)', () => {
-  test.beforeEach(async ({ page, helpers }) => {
+  test.beforeEach(async ({ authenticatedPage: page, helpers }) => {
     await helpers.retryAssertion(async () => {
       await page.goto('/');
       await page.waitForSelector('app-root', { timeout: 10000 });
     });
   });
 
-  test.afterEach(async ({ dataCleanup }) => {
-    await dataCleanup.fullCleanup();
-  });
-
   test('Create and edit annonce via wizard with stable waits', async ({ 
-    page, 
+    authenticatedPage: page, 
     helpers, 
-    dataCleanup 
+    cleanup 
   }) => {
     const annoncesPage = new AnnoncesListPage(helpers, page);
     const wizardPage = new AnnonceWizardPage(helpers, page);
@@ -165,7 +161,7 @@ test.describe('Annonce Wizard E2E Tests (Stabilized)', () => {
 
     const { body: createdAnnonce } = await wizardPage.clickSubmit();
     expect(createdAnnonce.id).toBeTruthy();
-    dataCleanup.trackAnnonce(createdAnnonce.id);
+    cleanup.trackAnnonce(createdAnnonce.id);
 
     await helpers.retryAssertion(async () => {
       await page.waitForURL(/\/annonces$/, { timeout: 15000 });
@@ -232,9 +228,9 @@ test.describe('Annonce Wizard E2E Tests (Stabilized)', () => {
   });
 
   test('Validate JSON in step 4 with retry logic', async ({ 
-    page, 
+    authenticatedPage: page, 
     helpers, 
-    dataCleanup 
+    cleanup 
   }) => {
     const annoncesPage = new AnnoncesListPage(helpers, page);
     const wizardPage = new AnnonceWizardPage(helpers, page);
@@ -267,13 +263,13 @@ test.describe('Annonce Wizard E2E Tests (Stabilized)', () => {
     });
 
     const { body: createdAnnonce } = await wizardPage.clickSubmit();
-    dataCleanup.trackAnnonce(createdAnnonce.id);
+    cleanup.trackAnnonce(createdAnnonce.id);
   });
 
   test('Photo management with proper waits', async ({ 
-    page, 
+    authenticatedPage: page, 
     helpers, 
-    dataCleanup 
+    cleanup 
   }) => {
     const annoncesPage = new AnnoncesListPage(helpers, page);
     const wizardPage = new AnnonceWizardPage(helpers, page);
@@ -304,6 +300,6 @@ test.describe('Annonce Wizard E2E Tests (Stabilized)', () => {
     await wizardPage.clickNextStep();
 
     const { body: createdAnnonce } = await wizardPage.clickSubmit();
-    dataCleanup.trackAnnonce(createdAnnonce.id);
+    cleanup.trackAnnonce(createdAnnonce.id);
   });
 });
