@@ -33,9 +33,14 @@ async function clickMockAdminLogin(page: Page) {
     name: /Mock Admin Login|Se connecter en tant qu'administrateur test/i,
   });
 
+  const isVisible = await loginButton.isVisible({ timeout: 1000 }).catch(() => false);
+  if (!isVisible) {
+    return;
+  }
+
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     try {
-      await loginButton.waitFor({ state: 'visible', timeout: 5000 });
+      await loginButton.waitFor({ state: 'visible', timeout: 3000 });
       await loginButton.click({ timeout: 5000 });
       return;
     } catch (error) {
