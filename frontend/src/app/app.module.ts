@@ -78,6 +78,7 @@ import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hi
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
+import { HighlightPipe } from './pipes/highlight.pipe';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
@@ -156,6 +157,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
+    HighlightPipe,
     WhatsappThreadComponent,
     WhatsappMessageInputComponent,
     TemplateSelectionSheetComponent,
