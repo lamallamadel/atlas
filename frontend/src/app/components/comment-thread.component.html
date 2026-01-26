@@ -1,0 +1,176 @@
+<div class="comment-thread-container">
+  <div class="comment-sidebar">
+    <div class="sidebar-header">
+      <h3>
+        Discussions
+        <mat-chip *ngIf="unresolvedCount > 0" class="unresolved-badge">
+          {{ unresolvedCount }}
+        </mat-chip>
+      </h3>
+      <div class="sidebar-actions">
+        <button mat-icon-button (click)="toggleNewThreadForm()" matTooltip="New thread">
+          <mat-icon>add_comment</mat-icon>
+        </button>
+        <button mat-icon-button (click)="toggleResolvedThreads()" 
+                [matTooltip]="showResolvedThreads ? 'Hide resolved' : 'Show resolved'">
+          <mat-icon>{{ showResolvedThreads ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        <button mat-icon-button (click)="exportAllThreads()" matTooltip="Export all">
+          <mat-icon>download</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="showNewThreadForm" class="new-thread-form">
+      <form [formGroup]="newThreadForm" (ngSubmit)="createNewThread()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Title (optional)</mat-label>
+          <input matInput formControlName="title" placeholder="Thread title">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Initial Comment</mat-label>
+          <textarea matInput formControlName="initialComment" rows="3" 
+                    placeholder="Start a discussion..."></textarea>
+        </mat-form-field>
+        <div class="form-actions">
+          <button mat-button type="button" (click)="toggleNewThreadForm()">Cancel</button>
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="newThreadForm.invalid">Create</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="thread-list" *ngIf="!loading">
+      <div *ngIf="visibleThreads.length === 0" class="empty-state">
+        <mat-icon>comment</mat-icon>
+        <p>No discussions yet</p>
+      </div>
+      
+      <div *ngFor="let thread of visibleThreads" 
+           class="thread-item" 
+           [class.selected]="selectedThread?.id === thread.id"
+           [class.resolved]="thread.resolved"
+           (click)="selectThread(thread)"
+           (keydown.enter)="selectThread(thread)"
+           (keydown.space)="selectThread(thread)"
+           tabindex="0"
+           role="button"
+           [attr.aria-label]="'Select thread: ' + (thread.title || 'Untitled Thread')">
+        <div class="thread-header">
+          <div class="thread-title">
+            <mat-icon *ngIf="thread.resolved" class="resolved-icon">check_circle</mat-icon>
+            <strong>{{ thread.title || 'Untitled Thread' }}</strong>
+          </div>
+          <span class="comment-count">{{ thread.comments.length }}</span>
+        </div>
+        <div class="thread-meta">
+          <span class="author">{{ thread.createdBy }}</span>
+          <span class="date">{{ thread.createdAt | date:'short' }}</span>
+        </div>
+        <div class="thread-preview" *ngIf="thread.comments.length > 0">
+          {{ thread.comments[0].content | slice:0:60 }}{{ thread.comments[0].content.length > 60 ? '...' : '' }}
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  </div>
+
+  <div class="comment-main" *ngIf="selectedThread">
+    <div class="thread-detail-header">
+      <div class="thread-info">
+        <h2>{{ selectedThread.title || 'Untitled Thread' }}</h2>
+        <div class="thread-status">
+          <mat-chip *ngIf="selectedThread.resolved" color="accent">
+            Resolved by {{ selectedThread.resolvedBy }} on {{ selectedThread.resolvedAt | date:'short' }}
+          </mat-chip>
+        </div>
+      </div>
+      <div class="thread-actions">
+        <button mat-icon-button [matMenuTriggerFor]="exportMenu" matTooltip="Export">
+          <mat-icon>download</mat-icon>
+        </button>
+        <mat-menu #exportMenu="matMenu">
+          <button mat-menu-item (click)="exportThread(selectedThread, 'text')">
+            <mat-icon>description</mat-icon>
+            <span>Export as Text</span>
+          </button>
+          <button mat-menu-item (click)="exportThread(selectedThread, 'csv')">
+            <mat-icon>table_chart</mat-icon>
+            <span>Export as CSV</span>
+          </button>
+        </mat-menu>
+
+        <button mat-icon-button *ngIf="!selectedThread.resolved" 
+                (click)="resolveThread(selectedThread)" matTooltip="Mark as resolved">
+          <mat-icon>check_circle</mat-icon>
+        </button>
+        <button mat-icon-button *ngIf="selectedThread.resolved" 
+                (click)="unresolveThread(selectedThread)" matTooltip="Reopen">
+          <mat-icon>replay</mat-icon>
+        </button>
+        <button mat-icon-button (click)="deleteThread(selectedThread)" matTooltip="Delete thread">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <div class="comments-container">
+      <div *ngFor="let comment of selectedThread.comments" class="comment">
+        <div class="comment-header">
+          <div class="comment-author">
+            <mat-icon class="avatar-icon">account_circle</mat-icon>
+            <strong>{{ comment.createdBy }}</strong>
+          </div>
+          <span class="comment-date">{{ comment.createdAt | date:'short' }}</span>
+        </div>
+        <div class="comment-content" [innerHTML]="formatComment(comment.content)"></div>
+        <div class="comment-mentions" *ngIf="comment.mentions.length > 0">
+          <mat-icon>alternate_email</mat-icon>
+          <span *ngFor="let mention of comment.mentions" class="mention-tag">@{{ mention }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="add-comment-section">
+      <form [formGroup]="newCommentForm" (ngSubmit)="addComment()">
+        <mat-form-field appearance="outline" class="full-width comment-input-container">
+          <mat-label>Add a comment</mat-label>
+          <textarea #commentInput matInput formControlName="content" rows="3" 
+                    placeholder="Type @ to mention someone..."
+                    (input)="onCommentInput($event)"></textarea>
+          <div class="mention-dropdown" *ngIf="showMentionDropdown">
+            <div *ngFor="let user of filteredUsers" 
+                 class="mention-item" 
+                 (click)="selectMention(user)"
+                 (keydown.enter)="selectMention(user)"
+                 (keydown.space)="selectMention(user)"
+                 tabindex="0"
+                 role="button"
+                 [attr.aria-label]="'Mention user: ' + user">
+              <mat-icon>account_circle</mat-icon>
+              <span>{{ user }}</span>
+            </div>
+          </div>
+        </mat-form-field>
+        <div class="form-actions">
+          <button mat-raised-button color="primary" type="submit" 
+                  [disabled]="newCommentForm.invalid">
+            <mat-icon>send</mat-icon>
+            Post Comment
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="comment-main empty-selection" *ngIf="!selectedThread && !loading">
+    <div class="empty-state-large">
+      <mat-icon>forum</mat-icon>
+      <h3>Select a thread to view comments</h3>
+      <p>Choose a discussion from the sidebar or create a new one</p>
+    </div>
+  </div>
+</div>

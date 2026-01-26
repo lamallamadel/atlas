@@ -224,4 +224,34 @@ public class NotificationService {
 
         return notificationRepository.save(notification);
     }
+
+    @Transactional
+    public void createMentionNotification(
+            String recipient,
+            String mentionedBy,
+            com.example.backend.entity.enums.CommentEntityType entityType,
+            Long entityId,
+            Long commentId) {
+        String message = String.format("%s mentioned you in a comment on %s #%d",
+                mentionedBy, entityType.name().toLowerCase(), entityId);
+        String actionUrl = String.format("/%s/%d/comments/%d",
+                entityType.name().toLowerCase(), entityId, commentId);
+
+        createInAppNotification("default", null, recipient, "New Mention", message, actionUrl);
+    }
+
+    @Transactional
+    public void createCommentNotification(
+            String recipient,
+            String commentedBy,
+            com.example.backend.entity.enums.CommentEntityType entityType,
+            Long entityId,
+            Long commentId) {
+        String message = String.format("%s added a comment to a thread you're participating in on %s #%d",
+                commentedBy, entityType.name().toLowerCase(), entityId);
+        String actionUrl = String.format("/%s/%d/comments/%d",
+                entityType.name().toLowerCase(), entityId, commentId);
+
+        createInAppNotification("default", null, recipient, "New Comment", message, actionUrl);
+    }
 }
