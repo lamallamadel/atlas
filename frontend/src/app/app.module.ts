@@ -117,6 +117,8 @@ import { ExportProgressDialogComponent } from './components/export-progress-dial
 import { NotificationDemoComponent } from './components/notification-demo.component';
 import { AdvancedFiltersComponent } from './components/advanced-filters.component';
 import { AdvancedFiltersDialogComponent } from './components/advanced-filters-dialog.component';
+import { QuickActionsComponent } from './components/quick-actions.component';
+import { VoipConfigDialogComponent } from './components/voip-config-dialog.component';
 
 registerLocaleData(localeFr);
 
@@ -194,7 +196,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ExportProgressDialogComponent,
     NotificationDemoComponent,
     AdvancedFiltersComponent,
-    AdvancedFiltersDialogComponent
+    AdvancedFiltersDialogComponent,
+    QuickActionsComponent,
+    VoipConfigDialogComponent
   ],
   imports: [
     BrowserModule,
