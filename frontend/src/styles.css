@@ -178,6 +178,74 @@ a:hover {
   margin-top: 4px;
 }
 
+/* Enhanced Notification Snackbar Styles */
+.notification-success .mdc-snackbar__surface {
+  background-color: #4caf50 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.4) !important;
+}
+
+.notification-error .mdc-snackbar__surface {
+  background-color: #f44336 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(244, 67, 54, 0.4) !important;
+}
+
+.notification-warning .mdc-snackbar__surface {
+  background-color: #ff9800 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.4) !important;
+}
+
+.notification-info .mdc-snackbar__surface {
+  background-color: #2196f3 !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.4) !important;
+}
+
+/* Dark theme support for snackbars */
+.dark-theme-snackbar.notification-success .mdc-snackbar__surface {
+  background-color: #388e3c !important;
+  box-shadow: 0 4px 16px rgba(56, 142, 60, 0.5) !important;
+}
+
+.dark-theme-snackbar.notification-error .mdc-snackbar__surface {
+  background-color: #d32f2f !important;
+  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.5) !important;
+}
+
+.dark-theme-snackbar.notification-warning .mdc-snackbar__surface {
+  background-color: #f57c00 !important;
+  box-shadow: 0 4px 16px rgba(245, 124, 0, 0.5) !important;
+}
+
+.dark-theme-snackbar.notification-info .mdc-snackbar__surface {
+  background-color: #1976d2 !important;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.5) !important;
+}
+
+/* Snackbar action button styles */
+.notification-success .mat-mdc-button,
+.notification-error .mat-mdc-button,
+.notification-warning .mat-mdc-button,
+.notification-info .mat-mdc-button {
+  color: white !important;
+}
+
+.notification-success .mat-mdc-button:hover,
+.notification-error .mat-mdc-button:hover,
+.notification-warning .mat-mdc-button:hover,
+.notification-info .mat-mdc-button:hover {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+.notification-success .mat-mdc-icon-button,
+.notification-error .mat-mdc-icon-button,
+.notification-warning .mat-mdc-icon-button,
+.notification-info .mat-mdc-icon-button {
+  color: white !important;
+}
+
 .validation-error-container .error-message {
   color: #e74c3c;
   font-size: 12px;

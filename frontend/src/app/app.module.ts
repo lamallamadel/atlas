@@ -114,6 +114,7 @@ import { KanbanBoardComponent } from './components/kanban-board.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
 import { NotificationCenterComponent } from './components/notification-center.component';
 import { ExportProgressDialogComponent } from './components/export-progress-dialog.component';
+import { NotificationDemoComponent } from './components/notification-demo.component';
 
 registerLocaleData(localeFr);
 
@@ -188,7 +189,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     KanbanBoardComponent,
     CalendarViewComponent,
     NotificationCenterComponent,
-    ExportProgressDialogComponent
+    ExportProgressDialogComponent,
+    NotificationDemoComponent
   ],
   imports: [
     BrowserModule,
