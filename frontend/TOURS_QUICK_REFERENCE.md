@@ -113,7 +113,6 @@ onboardingTourService.cancelCurrentTour()
     "shepherd.js": "^11.2.0"
   },
   "devDependencies": {
-    "@types/shepherd.js": "^8.0.0"
   }
 }
 ```

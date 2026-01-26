@@ -41,7 +41,7 @@ Implémentation complète d'un système de tours guidés interactifs avec Shephe
 ### Configuration
 - **`frontend/package.json`**
   - Ajout de `shepherd.js: ^11.2.0` aux dépendances
-  - Ajout de `@types/shepherd.js: ^8.0.0` aux devDependencies
+  - Suppression de `@types/shepherd.js` des devDependencies (types intégrés au package)
 
 - **`frontend/angular.json`**
   - Ajout de `src/styles/shepherd-theme.css` aux styles
@@ -217,7 +217,7 @@ localStorage
 
 ### NPM
 - **shepherd.js** (^11.2.0) - Bibliothèque de tours guidés
-- **@types/shepherd.js** (^8.0.0) - Types TypeScript
+- **shepherd.js** inclut ses propres types TypeScript
 
 ### Angular
 - Aucune dépendance Angular supplémentaire requise
