@@ -60,6 +60,8 @@
     "papaparse": "^5.4.1",
     "rxjs": "~7.8.0",
     "shepherd.js": "^11.2.0",
+    "sockjs-client": "^1.6.1",
+    "stompjs": "^2.3.3",
     "tslib": "^2.3.0",
     "zone.js": "~0.13.0"
   },
@@ -77,6 +79,8 @@
     "@types/jspdf": "^2.0.0",
     "@types/node": "^20.11.0",
     "@types/papaparse": "^5.3.14",
+    "@types/sockjs-client": "^1.5.4",
+    "@types/stompjs": "^2.3.9",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
     "@typescript-eslint/parser": "^5.62.0",
     "eslint": "^8.57.1",

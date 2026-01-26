@@ -83,6 +83,10 @@ import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
+import { CollaborationPresenceComponent } from './components/collaboration-presence.component';
+import { CollaborationCursorComponent } from './components/collaboration-cursor.component';
+import { CollaborationActivityStreamComponent } from './components/collaboration-activity-stream.component';
+import { CollaborationFilterShareComponent } from './components/collaboration-filter-share.component';
 import { HighlightPipe } from './pipes/highlight.pipe';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
@@ -186,6 +190,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     WhatsappMessageInputComponent,
     TemplateSelectionSheetComponent,
     WhatsappMessagingContainerComponent,
+    CollaborationPresenceComponent,
+    CollaborationCursorComponent,
+    CollaborationActivityStreamComponent,
+    CollaborationFilterShareComponent,
     MessagingTabComponent,
     OutboundMessageListComponent,
     OutboundMessageFormComponent,

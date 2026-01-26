@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -14,6 +14,9 @@ import { MessageFormDialogComponent, MessageFormData } from '../../components/me
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 import { AppointmentFormDialogComponent, AppointmentFormData } from '../../components/appointment-form-dialog.component';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
+import { CollaborationService, CollaborationEdit } from '../../services/collaboration.service';
+import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 
 
@@ -50,10 +53,16 @@ export interface WhatsAppTemplate {
   templateUrl: './dossier-detail.component.html',
   styleUrls: ['./dossier-detail.component.css']
 })
-export class DossierDetailComponent implements OnInit {
+export class DossierDetailComponent implements OnInit, OnDestroy {
   dossier: DossierResponse | null = null;
   loading = false;
   error: string | null = null;
+  
+  collaborationEnabled = false;
+  currentUserId = 'user-' + Math.random().toString(36).substr(2, 9);
+  currentUsername = 'Current User';
+  private collaborationSubscriptions: Subscription[] = [];
+  private noteEditTimeout: any;
   
   selectedStatus: DossierStatus | null = null;
   updatingStatus = false;
@@ -166,7 +175,8 @@ export class DossierDetailComponent implements OnInit {
     private router: Router,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private recentNavigationService: RecentNavigationService
+    private recentNavigationService: RecentNavigationService,
+    private collaborationService: CollaborationService
   ) {}
 
   getAvailableStatusOptions(): DossierStatus[] {
@@ -262,6 +272,93 @@ export class DossierDetailComponent implements OnInit {
     this.loadAuditEvents();
     this.loadMockData();
     this.loadWhatsAppMessages();
+    this.initializeCollaboration();
+  }
+
+  async initializeCollaboration(): Promise<void> {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) return;
+
+    const dossierId = parseInt(id, 10);
+    if (isNaN(dossierId)) return;
+
+    try {
+      await this.collaborationService.initializeForDossier(
+        dossierId,
+        this.currentUserId,
+        this.currentUsername
+      );
+      this.collaborationEnabled = true;
+      this.subscribeToCollaborationUpdates();
+    } catch (error) {
+      console.error('Failed to initialize collaboration:', error);
+    }
+  }
+
+  private subscribeToCollaborationUpdates(): void {
+    this.collaborationSubscriptions.push(
+      this.collaborationService.getEditUpdates().subscribe(edit => {
+        this.handleRemoteEdit(edit);
+      })
+    );
+
+    this.collaborationSubscriptions.push(
+      this.collaborationService.getActivityUpdates().subscribe(activity => {
+        this.loadAuditEvents();
+      })
+    );
+  }
+
+  private handleRemoteEdit(edit: CollaborationEdit): void {
+    if (!this.dossier) return;
+
+    if (edit.fieldName === 'notes' && this.dossier.id === edit.dossierId) {
+      this.dossier.notes = edit.newValue as string;
+      this.snackBar.open(
+        `${edit.username} updated notes`,
+        'Close',
+        { duration: 3000, horizontalPosition: 'right', verticalPosition: 'top' }
+      );
+    } else if (edit.fieldName === 'status' && this.dossier.id === edit.dossierId) {
+      this.loadDossier();
+      this.snackBar.open(
+        `${edit.username} changed status to ${edit.newValue}`,
+        'Close',
+        { duration: 3000, horizontalPosition: 'right', verticalPosition: 'top' }
+      );
+    }
+  }
+
+  onNotesInput(event: any): void {
+    if (!this.collaborationEnabled || !this.dossier) return;
+
+    const fieldName = 'notes';
+    const cursorPosition = event.target.selectionStart;
+    
+    this.collaborationService.updateCursor(fieldName, cursorPosition);
+
+    if (this.noteEditTimeout) {
+      clearTimeout(this.noteEditTimeout);
+    }
+
+    this.noteEditTimeout = setTimeout(() => {
+      this.broadcastNotesEdit();
+    }, 1000);
+  }
+
+  private broadcastNotesEdit(): void {
+    if (!this.collaborationEnabled || !this.dossier) return;
+
+    const oldValue = this.dossier.notes;
+    this.collaborationService.broadcastEdit('notes', this.dossier.notes, oldValue);
+  }
+
+  ngOnDestroy(): void {
+    this.collaborationSubscriptions.forEach(sub => sub.unsubscribe());
+    this.collaborationService.leaveDossier();
+    if (this.noteEditTimeout) {
+      clearTimeout(this.noteEditTimeout);
+    }
   }
 
   loadDossier(): void {
