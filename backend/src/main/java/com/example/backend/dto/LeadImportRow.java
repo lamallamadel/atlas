@@ -4,16 +4,16 @@ import com.opencsv.bean.CsvBindByName;
 
 public class LeadImportRow {
 
-    @CsvBindByName(column = "name", required = true)
+    @CsvBindByName(column = "name")
     private String name;
 
-    @CsvBindByName(column = "phone", required = true)
+    @CsvBindByName(column = "phone")
     private String phone;
 
     @CsvBindByName(column = "email")
     private String email;
 
-    @CsvBindByName(column = "source", required = true)
+    @CsvBindByName(column = "source")
     private String source;
 
     @CsvBindByName(column = "lead_source")
