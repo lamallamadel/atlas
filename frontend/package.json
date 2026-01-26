@@ -25,7 +25,9 @@
     "a11y:lighthouse": "npx lighthouse http://localhost:4200 --only-categories=accessibility --view",
     "a11y:pre-commit": "node scripts/a11y-pre-commit.js",
     "lighthouse:ci": "lhci autorun",
-    "prepare": "cd .. && husky install frontend/.husky"
+    "prepare": "cd .. && husky install frontend/.husky",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build"
   },
   "private": true,
   "dependencies": {
