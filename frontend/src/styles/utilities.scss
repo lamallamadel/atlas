@@ -6,6 +6,8 @@
    - Desktop: 1440px
    ======================================== */
 
+@use './typography' as typography;
+
 /* ========================================
    BREAKPOINT VARIABLES
    ======================================== */
@@ -504,7 +506,7 @@ $breakpoint-desktop: 1440px;
   font-weight: var(--font-weight-bold);
 }
 
-// Font size
+// Font size - Modular Scale
 .text-xs {
   font-size: var(--font-size-xs);
 }
@@ -517,6 +519,27 @@ $breakpoint-desktop: 1440px;
   font-size: var(--font-size-base);
 }
 
+.text-1 {
+  font-size: var(--font-size-1);
+}
+
+.text-2 {
+  font-size: var(--font-size-2);
+}
+
+.text-3 {
+  font-size: var(--font-size-3);
+}
+
+.text-4 {
+  font-size: var(--font-size-4);
+}
+
+.text-5 {
+  font-size: var(--font-size-5);
+}
+
+// Legacy aliases
 .text-lg {
   font-size: var(--font-size-lg);
 }
@@ -541,7 +564,52 @@ $breakpoint-desktop: 1440px;
   font-size: var(--font-size-5xl);
 }
 
+// Typography mixins utility classes
+.heading-1 {
+  @include typography.heading-1;
+}
+
+.heading-2 {
+  @include typography.heading-2;
+}
+
+.heading-3 {
+  @include typography.heading-3;
+}
+
+.heading-4 {
+  @include typography.heading-4;
+}
+
+.heading-5 {
+  @include typography.heading-5;
+}
+
+.heading-6 {
+  @include typography.heading-6;
+}
+
+.body-large {
+  @include typography.body-large;
+}
+
+.body-base {
+  @include typography.body-base;
+}
+
+.body-small {
+  @include typography.body-small;
+}
+
 // Line height
+.leading-heading {
+  line-height: var(--line-height-heading);
+}
+
+.leading-body {
+  line-height: var(--line-height-body);
+}
+
 .leading-tight {
   line-height: var(--line-height-tight);
 }
@@ -556,6 +624,15 @@ $breakpoint-desktop: 1440px;
 
 .leading-loose {
   line-height: var(--line-height-loose);
+}
+
+// Letter spacing
+.tracking-tight {
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.tracking-normal {
+  letter-spacing: var(--letter-spacing-normal);
 }
 
 // Text decoration
