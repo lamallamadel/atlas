@@ -19,6 +19,9 @@ import { LeadImportDialogComponent } from '../../components/lead-import-dialog.c
 import { LeadExportDialogComponent } from '../../components/lead-export-dialog.component';
 import { ExportService, ColumnDef } from '../../services/export.service';
 import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
+import { AdvancedFiltersDialogComponent } from '../../components/advanced-filters-dialog.component';
+import { FilterField } from '../../components/advanced-filters.component';
+import { DossierFilterApiService, DossierFilterRequest } from '../../services/dossier-filter-api.service';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -221,6 +224,59 @@ export class DossiersComponent implements OnInit {
         };
   }
 
+  useAdvancedFilter = false;
+  advancedFilterRequest?: DossierFilterRequest;
+
+  advancedFilterFields: FilterField[] = [
+    {
+      key: 'status',
+      label: 'Statut',
+      type: 'select',
+      operators: [
+        { value: 'EQUALS', label: 'Égal à', requiresValue: true },
+        { value: 'IN', label: 'Parmi', requiresValue: true },
+        { value: 'NOT_IN', label: 'Pas parmi', requiresValue: true }
+      ],
+      options: [
+        { value: 'NEW', label: 'Nouveau' },
+        { value: 'QUALIFYING', label: 'Qualification' },
+        { value: 'QUALIFIED', label: 'Qualifié' },
+        { value: 'APPOINTMENT', label: 'Rendez-vous' },
+        { value: 'WON', label: 'Gagné' },
+        { value: 'LOST', label: 'Perdu' }
+      ]
+    },
+    {
+      key: 'leadName',
+      label: 'Nom du prospect',
+      type: 'text',
+      operators: [
+        { value: 'CONTAINS', label: 'Contient', requiresValue: true },
+        { value: 'STARTS_WITH', label: 'Commence par', requiresValue: true },
+        { value: 'IS_NOT_NULL', label: 'N\'est pas vide', requiresValue: false }
+      ]
+    },
+    {
+      key: 'leadPhone',
+      label: 'Téléphone',
+      type: 'text',
+      operators: [
+        { value: 'EQUALS', label: 'Égal à', requiresValue: true },
+        { value: 'CONTAINS', label: 'Contient', requiresValue: true }
+      ]
+    },
+    {
+      key: 'createdAt',
+      label: 'Date de création',
+      type: 'date',
+      operators: [
+        { value: 'EQUALS_TODAY', label: 'Aujourd\'hui', requiresValue: false },
+        { value: 'THIS_WEEK', label: 'Cette semaine', requiresValue: false },
+        { value: 'LESS_THAN_DAYS_AGO', label: 'Moins de X jours', requiresValue: true }
+      ]
+    }
+  ];
+
   constructor(
     private dossierApiService: DossierApiService,
     private annonceApiService: AnnonceApiService,
@@ -231,7 +287,8 @@ export class DossiersComponent implements OnInit {
     private bottomSheet: MatBottomSheet,
     private breakpointObserver: BreakpointObserver,
     private dialog: MatDialog,
-    private exportService: ExportService
+    private exportService: ExportService,
+    private dossierFilterApi: DossierFilterApiService
   ) {}
 
   ngOnInit(): void {
@@ -254,6 +311,9 @@ export class DossiersComponent implements OnInit {
       }
       if (params['source']) {
         this.sourceFilter = params['source'];
+      }
+      if (params['filter']) {
+        this.loadFilterFromUrl(params['filter']);
       }
       this.loadDossiers();
       this.updateAppliedFilters();
@@ -324,12 +384,17 @@ export class DossiersComponent implements OnInit {
   }
 
   loadSavedPresets(): void {
-    this.savedPresets = this.filterPresetService.getPresets(this.FILTER_CONTEXT);
+    this.savedPresets = this.filterPresetService.getPresetsLocally(this.FILTER_CONTEXT);
   }
 
   loadDossiers(): void {
     this.loading = true;
     this.error = null;
+
+    if (this.useAdvancedFilter && this.advancedFilterRequest) {
+      this.loadDossiersAdvanced();
+      return;
+    }
 
     const params: {
       page: number;
@@ -374,6 +439,29 @@ export class DossiersComponent implements OnInit {
         this.error = 'Échec du chargement des dossiers. Veuillez réessayer.';
         this.loading = false;
         console.error('Error loading dossiers:', err);
+      }
+    });
+  }
+
+  loadDossiersAdvanced(): void {
+    if (!this.advancedFilterRequest) return;
+
+    const request = {
+      ...this.advancedFilterRequest,
+      page: this.currentPage,
+      size: this.pageSize
+    };
+
+    this.dossierFilterApi.advancedFilter(request).subscribe({
+      next: (response) => {
+        this.page = response;
+        this.dossiers = response.content;
+        this.loading = false;
+      },
+      error: (err) => {
+        this.error = 'Échec du chargement des dossiers. Veuillez réessayer.';
+        this.loading = false;
+        console.error('Error loading dossiers with advanced filter:', err);
       }
     });
   }
@@ -530,12 +618,12 @@ export class DossiersComponent implements OnInit {
       selectedAnnonceId: this.selectedAnnonceId
     };
 
-    this.filterPresetService.savePreset(this.FILTER_CONTEXT, name, filters);
+    this.filterPresetService.savePresetLocally(this.FILTER_CONTEXT, name, filters);
     this.loadSavedPresets();
   }
 
   loadPreset(preset: FilterPreset): void {
-    const filters = preset.filters;
+    const filters = preset.filterConfig;
     this.selectedStatus = (filters['selectedStatus'] as DossierStatus) || '';
     this.phoneFilter = (filters['phoneFilter'] as string) || '';
     this.annonceIdFilter = (filters['annonceIdFilter'] as string) || '';
@@ -554,7 +642,7 @@ export class DossiersComponent implements OnInit {
   deletePreset(preset: FilterPreset, event: Event): void {
     event.stopPropagation();
     if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
-      this.filterPresetService.deletePreset(this.FILTER_CONTEXT, preset.id);
+      this.filterPresetService.deletePresetLocally(this.FILTER_CONTEXT, preset.name);
       this.loadSavedPresets();
     }
   }
@@ -815,6 +903,57 @@ export class DossiersComponent implements OnInit {
 
   get allDossiersForKanban(): DossierResponse[] {
     return this.dossiers;
+  }
+
+  openAdvancedFilters(): void {
+    const dialogRef = this.dialog.open(AdvancedFiltersDialogComponent, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '90vh',
+      data: {
+        filterType: 'DOSSIER',
+        fields: this.advancedFilterFields,
+        initialFilter: this.advancedFilterRequest ? {
+          conditions: this.advancedFilterRequest.conditions,
+          logicOperator: this.advancedFilterRequest.logicOperator
+        } : undefined
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result && result.filter) {
+        this.applyAdvancedFilter(result.filter);
+      }
+    });
+  }
+
+  applyAdvancedFilter(filter: { conditions: any[]; logicOperator: 'AND' | 'OR' }): void {
+    this.useAdvancedFilter = true;
+    this.advancedFilterRequest = {
+      conditions: filter.conditions,
+      logicOperator: filter.logicOperator
+    };
+    this.clearFilters();
+    this.currentPage = 0;
+    this.loadDossiers();
+  }
+
+  clearAdvancedFilter(): void {
+    this.useAdvancedFilter = false;
+    this.advancedFilterRequest = undefined;
+    this.loadDossiers();
+  }
+
+  loadFilterFromUrl(encodedFilter: string): void {
+    try {
+      const decoded = atob(encodedFilter);
+      const filter = JSON.parse(decoded);
+      if (filter.conditions && filter.logicOperator) {
+        this.applyAdvancedFilter(filter);
+      }
+    } catch (e) {
+      console.error('Error loading filter from URL:', e);
+    }
   }
 
   onExportRequest(event: { format: 'pdf' | 'excel' | 'print'; data: unknown[] }): void {

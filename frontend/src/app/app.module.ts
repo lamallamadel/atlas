@@ -115,6 +115,8 @@ import { CalendarViewComponent } from './components/calendar-view.component';
 import { NotificationCenterComponent } from './components/notification-center.component';
 import { ExportProgressDialogComponent } from './components/export-progress-dialog.component';
 import { NotificationDemoComponent } from './components/notification-demo.component';
+import { AdvancedFiltersComponent } from './components/advanced-filters.component';
+import { AdvancedFiltersDialogComponent } from './components/advanced-filters-dialog.component';
 
 registerLocaleData(localeFr);
 
@@ -190,7 +192,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     CalendarViewComponent,
     NotificationCenterComponent,
     ExportProgressDialogComponent,
-    NotificationDemoComponent
+    NotificationDemoComponent,
+    AdvancedFiltersComponent,
+    AdvancedFiltersDialogComponent
   ],
   imports: [
     BrowserModule,

@@ -4,12 +4,14 @@ import com.example.backend.config.Deprecated;
 import com.example.backend.dto.BulkOperationResponse;
 import com.example.backend.dto.DossierBulkAssignRequest;
 import com.example.backend.dto.DossierCreateRequest;
+import com.example.backend.dto.DossierFilterRequest;
 import com.example.backend.dto.DossierLeadPatchRequest;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusHistoryResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.exception.ErrorResponse;
+import com.example.backend.service.DossierAdvancedFilterService;
 import com.example.backend.service.DossierService;
 import com.example.backend.service.DossierStatusCodeValidationService;
 import com.example.backend.service.DossierStatusHistoryService;
@@ -41,13 +43,16 @@ public class DossierController {
     private final DossierService dossierService;
     private final DossierStatusHistoryService statusHistoryService;
     private final DossierStatusCodeValidationService statusCodeValidationService;
+    private final DossierAdvancedFilterService advancedFilterService;
 
     public DossierController(DossierService dossierService, 
                             DossierStatusHistoryService statusHistoryService,
-                            DossierStatusCodeValidationService statusCodeValidationService) {
+                            DossierStatusCodeValidationService statusCodeValidationService,
+                            DossierAdvancedFilterService advancedFilterService) {
         this.dossierService = dossierService;
         this.statusHistoryService = statusHistoryService;
         this.statusCodeValidationService = statusCodeValidationService;
+        this.advancedFilterService = advancedFilterService;
     }
 
     @PostMapping
@@ -260,6 +265,31 @@ public class DossierController {
             @RequestParam(required = false) String caseType) {
         List<String> allowedStatusCodes = statusCodeValidationService.getAllowedStatusCodesForCaseType(caseType);
         return ResponseEntity.ok(allowedStatusCodes);
+    }
+
+    @PostMapping("/advanced-filter")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Advanced filter dossiers", 
+               description = "Filters dossiers using advanced query builder with AND/OR logic and multiple operators")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Dossiers filtered successfully",
+                    content = @Content(schema = @Schema(implementation = Page.class)))
+    })
+    public ResponseEntity<Page<DossierResponse>> advancedFilter(@Valid @RequestBody DossierFilterRequest filterRequest) {
+        Page<DossierResponse> response = advancedFilterService.filterDossiers(filterRequest);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/advanced-filter/count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Count dossiers with advanced filters", 
+               description = "Returns the count of dossiers matching advanced filter criteria in real-time")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Count retrieved successfully")
+    })
+    public ResponseEntity<Long> countAdvancedFilter(@Valid @RequestBody DossierFilterRequest filterRequest) {
+        Long count = advancedFilterService.countDossiers(filterRequest);
+        return ResponseEntity.ok(count);
     }
 
     private Pageable createPageable(int page, int size, String sort) {

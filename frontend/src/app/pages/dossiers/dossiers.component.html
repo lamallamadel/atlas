@@ -136,6 +136,14 @@
               <div class="filter-actions">
                 <button 
                   mat-raised-button 
+                  color="accent" 
+                  (click)="openAdvancedFilters()" 
+                  aria-label="Ouvrir les filtres avancés">
+                  <mat-icon aria-hidden="true">tune</mat-icon>
+                  Filtres avancés
+                </button>
+                <button 
+                  mat-raised-button 
                   color="primary" 
                   (click)="onFilterChange()" 
                   aria-label="Appliquer les filtres sélectionnés"
@@ -190,7 +198,7 @@
               </div>
 
               <!-- Active Filter Chips -->
-              <div class="active-filters-row" *ngIf="appliedFilters.length > 0" role="region" aria-label="Filtres actifs">
+              <div class="active-filters-row" *ngIf="appliedFilters.length > 0 || useAdvancedFilter" role="region" aria-label="Filtres actifs">
                 <div class="active-filters-header">
                   <span class="filters-label">Filtres actifs :</span>
                   <button mat-button (click)="clearFilters()" class="clear-all-btn" aria-label="Effacer tous les filtres">
@@ -198,6 +206,17 @@
                     Tout effacer
                   </button>
                 </div>
+                <mat-chip-set aria-label="Filtres avancés actifs" *ngIf="useAdvancedFilter">
+                  <mat-chip 
+                    (removed)="clearAdvancedFilter()"
+                    color="accent"
+                    aria-label="Filtre avancé actif">
+                    <strong>Filtre avancé</strong>: {{ advancedFilterRequest?.conditions?.length || 0 }} condition(s)
+                    <button matChipRemove aria-label="Retirer le filtre avancé">
+                      <mat-icon aria-hidden="true">cancel</mat-icon>
+                    </button>
+                  </mat-chip>
+                </mat-chip-set>
                 <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
                   <mat-chip
                     *ngFor="let filter of appliedFilters; trackBy: trackByFilter"
