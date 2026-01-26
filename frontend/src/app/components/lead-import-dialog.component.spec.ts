@@ -8,6 +8,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTableModule } from '@angular/material/table';
 import { MatRadioModule } from '@angular/material/radio';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
@@ -32,7 +33,8 @@ describe('LeadImportDialogComponent', () => {
         MatProgressBarModule,
         MatProgressSpinnerModule,
         MatTableModule,
-        MatRadioModule
+        MatRadioModule,
+        NoopAnimationsModule
       ],
       providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
