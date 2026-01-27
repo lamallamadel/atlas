@@ -59,7 +59,7 @@ interface DemoCard {
             Success! Action completed.
           </div>
           
-          <div *ngIf="errorVisible" @shakeX="errorState" class="error-message">
+          <div *ngIf="errorVisible" [@shakeX]="errorState" class="error-message">
             <mat-icon>error</mat-icon>
             Error! Please try again.
           </div>

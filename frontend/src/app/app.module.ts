@@ -145,6 +145,11 @@ import { ButtonExamplesComponent } from './components/button-examples.component'
 import { ProgressBarComponent } from './components/progress-bar.component';
 import { ReportBuilderComponent } from './components/report-builder.component';
 import { ExecutiveDashboardComponent } from './components/executive-dashboard.component';
+import { MobileBottomNavigationComponent } from './components/mobile-bottom-navigation.component';
+import { SwipeableCardComponent } from './components/swipeable-card.component';
+import { PwaInstallPromptComponent } from './components/pwa-install-prompt.component';
+import { AppShellComponent } from './components/app-shell.component';
+import { OfflineDossiersViewerComponent } from './components/offline-dossiers-viewer.component';
 
 registerLocaleData(localeFr);
 
@@ -249,7 +254,12 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ButtonExamplesComponent,
     ProgressBarComponent,
     ReportBuilderComponent,
-    ExecutiveDashboardComponent
+    ExecutiveDashboardComponent,
+    MobileBottomNavigationComponent,
+    SwipeableCardComponent,
+    PwaInstallPromptComponent,
+    AppShellComponent,
+    OfflineDossiersViewerComponent
   ],
   imports: [
     BrowserModule,

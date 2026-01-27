@@ -301,4 +301,25 @@ export class OfflineStorageService {
       request.onerror = () => reject(request.error);
     });
   }
+
+  async getCachedDossiers(): Promise<any[]> {
+    const data = await this.getCachedData('recent-dossiers');
+    return data ? JSON.parse(data) : [];
+  }
+
+  async cacheDossier(dossier: any): Promise<void> {
+    const cached = await this.getCachedDossiers();
+    const filtered = cached.filter((d: any) => d.id !== dossier.id);
+    filtered.unshift(dossier);
+    const limited = filtered.slice(0, 50);
+    await this.cacheData('recent-dossiers', JSON.stringify(limited), 60 * 60 * 1000);
+  }
+
+  async clearDossierCache(): Promise<void> {
+    await this.deleteCachedData('recent-dossiers');
+  }
+
+  async clearMessageCache(): Promise<void> {
+    await this.deleteCachedData('recent-messages');
+  }
 }

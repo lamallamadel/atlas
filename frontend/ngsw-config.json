@@ -25,17 +25,93 @@
           "/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
         ]
       }
+    },
+    {
+      "name": "fonts",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "resources": {
+        "urls": [
+          "https://fonts.googleapis.com/**",
+          "https://fonts.gstatic.com/**"
+        ]
+      }
     }
   ],
   "dataGroups": [
     {
-      "name": "api-cache",
+      "name": "api-recent-dossiers",
       "urls": [
-        "/api/v1/**"
+        "/api/v1/dossiers",
+        "/api/v1/dossiers?**"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "1h",
+        "timeout": "10s",
+        "strategy": "freshness"
+      }
+    },
+    {
+      "name": "api-recent-messages",
+      "urls": [
+        "/api/v1/messages/**",
+        "/api/v1/dossiers/*/messages"
       ],
       "cacheConfig": {
         "maxSize": 100,
-        "maxAge": "5m",
+        "maxAge": "30m",
+        "timeout": "10s",
+        "strategy": "freshness"
+      }
+    },
+    {
+      "name": "api-dossier-details",
+      "urls": [
+        "/api/v1/dossiers/*"
+      ],
+      "cacheConfig": {
+        "maxSize": 30,
+        "maxAge": "1h",
+        "timeout": "10s",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "api-annonces",
+      "urls": [
+        "/api/v1/annonces",
+        "/api/v1/annonces?**",
+        "/api/v1/annonces/*"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "2h",
+        "timeout": "10s",
+        "strategy": "performance"
+      }
+    },
+    {
+      "name": "api-dashboard",
+      "urls": [
+        "/api/v1/dashboard/**",
+        "/api/v1/kpi/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 20,
+        "maxAge": "15m",
+        "timeout": "10s",
+        "strategy": "freshness"
+      }
+    },
+    {
+      "name": "api-appointments",
+      "urls": [
+        "/api/v1/appointments/**"
+      ],
+      "cacheConfig": {
+        "maxSize": 50,
+        "maxAge": "30m",
         "timeout": "10s",
         "strategy": "freshness"
       }
@@ -43,13 +119,12 @@
     {
       "name": "api-fallback",
       "urls": [
-        "/api/v1/dossiers/**",
-        "/api/v1/annonces/**",
-        "/api/v1/appointments/**"
+        "/api/v1/**"
       ],
       "cacheConfig": {
-        "maxSize": 50,
+        "maxSize": 100,
         "maxAge": "1h",
+        "timeout": "10s",
         "strategy": "performance"
       }
     }
@@ -59,5 +134,6 @@
     "!/**/*.*",
     "!/**/*__*",
     "!/**/*__*/**"
-  ]
+  ],
+  "navigationRequestStrategy": "freshness"
 }

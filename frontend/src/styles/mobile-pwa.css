@@ -1,0 +1,611 @@
+/**
+ * Mobile PWA Styles
+ * Optimized for mobile devices with touch targets, gestures, and safe areas
+ */
+
+/* ===========================
+   Mobile Touch Targets (48x48px minimum)
+   =========================== */
+
+@media (max-width: 767px) {
+  /* Ensure all interactive elements meet 48x48px minimum */
+  button,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  .mat-mdc-button,
+  .mat-mdc-icon-button,
+  .mat-mdc-fab,
+  .mat-mdc-mini-fab,
+  .clickable,
+  [role="button"] {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Icon buttons */
+  .mat-mdc-icon-button {
+    width: 48px !important;
+    height: 48px !important;
+    padding: 12px !important;
+  }
+
+  /* FAB buttons */
+  .mat-mdc-fab {
+    width: 56px !important;
+    height: 56px !important;
+  }
+
+  .mat-mdc-mini-fab {
+    width: 48px !important;
+    height: 48px !important;
+  }
+
+  /* Checkbox and radio touch targets */
+  .mat-mdc-checkbox,
+  .mat-mdc-radio-button {
+    min-width: 48px !important;
+    min-height: 48px !important;
+  }
+
+  /* List items */
+  .mat-mdc-list-item {
+    min-height: 48px !important;
+  }
+
+  /* Table row actions */
+  .table-actions button {
+    min-width: 48px !important;
+    min-height: 48px !important;
+    margin: 0 4px !important;
+  }
+}
+
+/* ===========================
+   Safe Area Insets (notched devices)
+   =========================== */
+
+/* Top safe area */
+.app-toolbar,
+.mat-toolbar {
+  padding-top: env(safe-area-inset-top);
+}
+
+/* Bottom safe area */
+.mobile-bottom-nav,
+.bottom-action-bar {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Side safe areas */
+@supports (padding: env(safe-area-inset-left)) {
+  .app-container,
+  .page-content {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+  }
+}
+
+/* ===========================
+   Mobile Layout Adjustments
+   =========================== */
+
+@media (max-width: 767px) {
+  /* Remove desktop spacing */
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Full-width containers */
+  .container,
+  .page-container {
+    max-width: 100%;
+    padding: 16px;
+  }
+
+  /* Cards full width with minimal margins */
+  .mat-mdc-card {
+    margin: 8px 0;
+    border-radius: 12px;
+  }
+
+  /* Stack form fields vertically */
+  .form-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .form-field,
+  .mat-mdc-form-field {
+    width: 100% !important;
+  }
+
+  /* Mobile-friendly tables */
+  .mat-mdc-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Hide less important columns on mobile */
+  .hide-on-mobile {
+    display: none !important;
+  }
+
+  /* Dialogs full screen on mobile */
+  .mat-mdc-dialog-container {
+    max-width: 100vw !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+  }
+}
+
+/* ===========================
+   Swipe Gestures
+   =========================== */
+
+.swipe-container {
+  touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.swipeable-item {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-neutral-0, #ffffff);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.swipe-action-left,
+.swipe-action-right {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.swipe-action-left {
+  left: 0;
+  background: var(--color-success-500, #4caf50);
+}
+
+.swipe-action-right {
+  right: 0;
+  background: var(--color-error-500, #f44336);
+}
+
+/* ===========================
+   Pull to Refresh
+   =========================== */
+
+.pull-to-refresh {
+  position: relative;
+  overflow: hidden;
+}
+
+.pull-to-refresh-indicator {
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: top 0.3s ease;
+}
+
+.pull-to-refresh-indicator.visible {
+  top: 20px;
+}
+
+/* ===========================
+   Bottom Navigation Spacing
+   =========================== */
+
+@media (max-width: 767px) {
+  .page-content,
+  .main-content {
+    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  }
+
+  /* Floating action button positioning */
+  .fab-bottom-right {
+    bottom: calc(80px + env(safe-area-inset-bottom) + 16px) !important;
+  }
+}
+
+/* ===========================
+   Mobile Sheet/Modal
+   =========================== */
+
+.mobile-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-neutral-0, #ffffff);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  max-height: 90vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  z-index: 1000;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-sheet.open {
+  transform: translateY(0);
+}
+
+.mobile-sheet-handle {
+  width: 40px;
+  height: 4px;
+  background: var(--color-neutral-300, #bdbdbd);
+  border-radius: 2px;
+  margin: 12px auto 8px;
+}
+
+.mobile-sheet-header {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--color-neutral-200, #e0e0e0);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-sheet-content {
+  padding: 24px;
+}
+
+/* ===========================
+   Mobile Action Bar
+   =========================== */
+
+.mobile-action-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--color-neutral-0, #ffffff);
+  border-top: 1px solid var(--color-neutral-200, #e0e0e0);
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 999;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .mobile-action-bar {
+    display: none;
+  }
+}
+
+/* ===========================
+   Mobile Card Optimization
+   =========================== */
+
+@media (max-width: 767px) {
+  .mobile-card {
+    background: var(--color-neutral-0, #ffffff);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+
+  .mobile-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 12px;
+  }
+
+  .mobile-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--color-neutral-900, #212121);
+    margin: 0;
+  }
+
+  .mobile-card-subtitle {
+    font-size: 13px;
+    color: var(--color-neutral-600, #757575);
+    margin: 4px 0 0 0;
+  }
+
+  .mobile-card-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--color-neutral-800, #424242);
+  }
+
+  .mobile-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--color-neutral-200, #e0e0e0);
+  }
+}
+
+/* ===========================
+   Mobile List Optimization
+   =========================== */
+
+@media (max-width: 767px) {
+  .mobile-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .mobile-list-item {
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--color-neutral-200, #e0e0e0);
+    background: var(--color-neutral-0, #ffffff);
+    cursor: pointer;
+    transition: background 0.2s ease;
+    min-height: 64px;
+  }
+
+  .mobile-list-item:active {
+    background: var(--color-neutral-100, #f5f5f5);
+  }
+
+  .mobile-list-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--color-primary-100, #e3f2fd);
+    color: var(--color-primary-600, #2c5aa0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 16px;
+    flex-shrink: 0;
+  }
+
+  .mobile-list-item-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mobile-list-item-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--color-neutral-900, #212121);
+    margin: 0 0 4px 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-list-item-subtitle {
+    font-size: 13px;
+    color: var(--color-neutral-600, #757575);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-list-item-action {
+    margin-left: 8px;
+    flex-shrink: 0;
+  }
+}
+
+/* ===========================
+   Mobile Form Optimization
+   =========================== */
+
+@media (max-width: 767px) {
+  .mobile-form {
+    padding: 0;
+  }
+
+  .mobile-form-section {
+    margin-bottom: 24px;
+  }
+
+  .mobile-form-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-neutral-700, #616161);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 12px 0;
+  }
+
+  .mobile-form-field {
+    margin-bottom: 16px;
+  }
+
+  .mobile-form-field label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--color-neutral-700, #616161);
+    margin-bottom: 8px;
+  }
+
+  .mobile-form-field input,
+  .mobile-form-field textarea,
+  .mobile-form-field select {
+    width: 100%;
+    font-size: 16px;
+    padding: 12px;
+    border: 1px solid var(--color-neutral-300, #bdbdbd);
+    border-radius: 8px;
+    background: var(--color-neutral-0, #ffffff);
+    color: var(--color-neutral-900, #212121);
+  }
+
+  .mobile-form-field input:focus,
+  .mobile-form-field textarea:focus,
+  .mobile-form-field select:focus {
+    outline: none;
+    border-color: var(--color-primary-500, #2c5aa0);
+    box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+  }
+
+  /* Prevent zoom on input focus */
+  .mobile-form-field input,
+  .mobile-form-field textarea,
+  .mobile-form-field select {
+    font-size: 16px !important;
+  }
+}
+
+/* ===========================
+   Mobile Header/Toolbar
+   =========================== */
+
+@media (max-width: 767px) {
+  .mobile-header {
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-neutral-0, #ffffff);
+    border-bottom: 1px solid var(--color-neutral-200, #e0e0e0);
+    padding: 12px 16px;
+    padding-top: calc(12px + env(safe-area-inset-top));
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mobile-header-back {
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobile-header-title {
+    flex: 1;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-neutral-900, #212121);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-header-actions {
+    display: flex;
+    gap: 4px;
+  }
+}
+
+/* ===========================
+   Loading States
+   =========================== */
+
+.mobile-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-200, #e0e0e0) 25%,
+    var(--color-neutral-100, #f5f5f5) 50%,
+    var(--color-neutral-200, #e0e0e0) 75%
+  );
+  background-size: 200% 100%;
+  animation: loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* ===========================
+   Dark Theme Mobile
+   =========================== */
+
+.dark-theme .mobile-card,
+.dark-theme .mobile-list-item,
+.dark-theme .mobile-sheet,
+.dark-theme .mobile-action-bar,
+.dark-theme .mobile-header {
+  background: var(--color-neutral-800, #424242);
+  border-color: var(--color-neutral-700, #616161);
+}
+
+.dark-theme .mobile-card-title,
+.dark-theme .mobile-list-item-title,
+.dark-theme .mobile-header-title {
+  color: var(--color-neutral-0, #ffffff);
+}
+
+.dark-theme .mobile-card-subtitle,
+.dark-theme .mobile-list-item-subtitle {
+  color: var(--color-neutral-400, #bdbdbd);
+}
+
+.dark-theme .mobile-card-content {
+  color: var(--color-neutral-200, #eeeeee);
+}
+
+.dark-theme .mobile-list-item:active {
+  background: var(--color-neutral-700, #616161);
+}
+
+/* ===========================
+   Standalone PWA Mode
+   =========================== */
+
+@media (display-mode: standalone) {
+  /* Hide elements not needed in standalone mode */
+  .hide-in-standalone {
+    display: none !important;
+  }
+
+  /* Adjust spacing for status bar */
+  .app-header {
+    padding-top: env(safe-area-inset-top);
+  }
+
+  /* Full viewport height */
+  .app-container {
+    min-height: 100vh;
+  }
+}
+
+/* iOS specific PWA adjustments */
+@supports (-webkit-touch-callout: none) {
+  .mobile-bottom-nav {
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 20px));
+  }
+
+  .mobile-action-bar {
+    padding-bottom: calc(12px + env(safe-area-inset-bottom, 20px));
+  }
+}

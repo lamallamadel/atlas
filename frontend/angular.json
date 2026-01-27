@@ -33,7 +33,9 @@
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/service-worker.js"
+              "src/service-worker.js",
+              "src/manifest.json",
+              "src/browserconfig.xml"
             ],
             "styles": [
               "src/styles/variables.scss",
