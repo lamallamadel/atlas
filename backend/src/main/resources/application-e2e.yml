@@ -1,6 +1,22 @@
 spring:
   main:
     allow-bean-definition-overriding: true
+
 rate-limit:
   enabled: false
+
+# Security disabled for E2E tests
+app:
+  security:
+    csrf:
+      enabled: false
+    jwt:
+      rotation:
+        enabled: false
+    secret:
+      rotation:
+        enabled: false
+  webhook:
+    signature:
+      enabled: false
 

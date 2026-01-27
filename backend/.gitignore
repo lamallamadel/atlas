@@ -57,3 +57,25 @@ k6-tests/summary.json
 # Performance profiling data
 *.hprof
 *.jfr
+
+### Security ###
+# Jasypt encryption JAR and temporary files
+jasypt-*.jar
+
+# Environment files with secrets
+.env
+.env.local
+.env.security
+*.env
+
+# Security scan reports
+snyk.sarif
+trivy-results.sarif
+*.sarif
+
+# Encryption keys (never commit!)
+*.key
+*.pem
+*.p12
+*.jks
+keystore.*

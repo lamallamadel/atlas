@@ -270,3 +270,36 @@ performance:
       enabled: ${PERFORMANCE_QUERY_PROFILING_ENABLED:false}
   monitoring:
     enabled: ${PERFORMANCE_MONITORING_ENABLED:true}
+
+# Security Configuration
+app:
+  security:
+    csrf:
+      enabled: ${SECURITY_CSRF_ENABLED:true}
+    jwt:
+      rotation:
+        enabled: ${JWT_ROTATION_ENABLED:true}
+        cron: ${JWT_ROTATION_CRON:0 0 3 1 * ?}
+        grace-period-days: ${JWT_GRACE_PERIOD_DAYS:7}
+      cleanup:
+        cron: ${JWT_CLEANUP_CRON:0 0 4 * * ?}
+    secret:
+      rotation:
+        enabled: ${SECRET_ROTATION_ENABLED:true}
+        cron: ${SECRET_ROTATION_CRON:0 0 2 * * ?}
+        overlap-period-hours: ${SECRET_OVERLAP_PERIOD_HOURS:24}
+  webhook:
+    signature:
+      enabled: ${WEBHOOK_SIGNATURE_ENABLED:true}
+
+# Jasypt Encryption Configuration
+jasypt:
+  encryptor:
+    password: ${JASYPT_ENCRYPTOR_PASSWORD:default-dev-password-change-in-production}
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    key-obtention-iterations: 1000
+    pool-size: 1
+    provider-name: SunJCE
+    salt-generator-classname: org.jasypt.salt.RandomSaltGenerator
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+    string-output-type: base64

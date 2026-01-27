@@ -1,6 +1,7 @@
 package com.example.backend.config;
 
 import com.example.backend.filter.CorrelationIdFilter;
+import com.example.backend.filter.CsrfCookieFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +20,9 @@ import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -47,16 +51,69 @@ public class SecurityConfig {
 
     @Value("${spring.profiles.active:}")
     private String activeProfiles;
+    
+    @Value("${app.security.csrf.enabled:true}")
+    private boolean csrfEnabled;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CorrelationIdFilter correlationIdFilter) throws Exception {
-
+    public SecurityFilterChain filterChain(HttpSecurity http, CorrelationIdFilter correlationIdFilter, CsrfCookieFilter csrfCookieFilter) throws Exception {
 
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .csrf(AbstractHttpConfigurer::disable)
-            .anonymous(Customizer.withDefaults())
+            .anonymous(Customizer.withDefaults());
+
+        if (csrfEnabled) {
+            CookieCsrfTokenRepository tokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
+            tokenRepository.setCookieName("XSRF-TOKEN");
+            tokenRepository.setHeaderName("X-XSRF-TOKEN");
+            
+            CsrfTokenRequestAttributeHandler requestHandler = new CsrfTokenRequestAttributeHandler();
+            requestHandler.setCsrfRequestAttributeName("_csrf");
+            
+            http.csrf(csrf -> csrf
+                .csrfTokenRepository(tokenRepository)
+                .csrfTokenRequestHandler(requestHandler)
+                .ignoringRequestMatchers(
+                    "/api/v1/webhooks/**",
+                    "/actuator/**",
+                    "/swagger-ui/**",
+                    "/api-docs/**",
+                    "/v3/api-docs/**"
+                )
+            ).addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class);
+        } else {
+            http.csrf(AbstractHttpConfigurer::disable);
+        }
+        
+        http
+            .headers(headers -> headers
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; " +
+                        "script-src 'self' 'nonce-{nonce}'; " +
+                        "style-src 'self' 'unsafe-inline'; " +
+                        "img-src 'self' data: https:; " +
+                        "font-src 'self' data:; " +
+                        "connect-src 'self'; " +
+                        "frame-ancestors 'none'; " +
+                        "base-uri 'self'; " +
+                        "form-action 'self'")
+                )
+                .frameOptions(frame -> frame.deny())
+                .xssProtection(xss -> xss
+                    .headerValue(org.springframework.security.web.header.writers.XXssProtectionHeaderWriter.HeaderValue.ENABLED_MODE_BLOCK))
+                .contentTypeOptions(Customizer.withDefaults())
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)
+                )
+                .referrerPolicy(referrer -> referrer
+                    .policy(org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
+                )
+                .permissionsPolicy(permissions -> permissions
+                    .policy("geolocation=(), microphone=(), camera=()")
+                )
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/actuator/health/**", "/actuator/info", "/actuator/prometheus").permitAll()
@@ -95,8 +152,8 @@ public class SecurityConfig {
         }
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Org-Id", "X-Correlation-Id"));
-        configuration.setExposedHeaders(List.of("Authorization", "X-Org-Id", "X-Correlation-Id", "Retry-After", "X-RateLimit-Limit-Type", "X-RateLimit-Retry-After"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Org-Id", "X-Correlation-Id", "X-XSRF-TOKEN"));
+        configuration.setExposedHeaders(List.of("Authorization", "X-Org-Id", "X-Correlation-Id", "Retry-After", "X-RateLimit-Limit-Type", "X-RateLimit-Retry-After", "X-XSRF-TOKEN"));
         configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
