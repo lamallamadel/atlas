@@ -155,6 +155,7 @@ import { PwaInstallPromptComponent } from './components/pwa-install-prompt.compo
 import { AppShellComponent } from './components/app-shell.component';
 import { OfflineDossiersViewerComponent } from './components/offline-dossiers-viewer.component';
 import { PhotoGalleryComponent } from './components/photo-gallery.component';
+import { NotificationToastComponent } from './components/notification-toast.component';
 
 registerLocaleData(localeFr);
 
@@ -269,7 +270,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     PwaInstallPromptComponent,
     AppShellComponent,
     OfflineDossiersViewerComponent,
-    PhotoGalleryComponent
+    PhotoGalleryComponent,
+    NotificationToastComponent
   ],
   imports: [
     BrowserModule,
