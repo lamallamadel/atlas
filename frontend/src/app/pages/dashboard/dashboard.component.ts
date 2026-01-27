@@ -23,6 +23,9 @@ interface KpiCard {
   color: string;
   chartData: number[];
   trend: string;
+  trendValue: number;
+  badgeColor?: string;
+  description?: string;
 }
 
 @Component({
@@ -51,7 +54,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       icon: 'home',
       color: '#2196f3',
       chartData: [12, 19, 15, 22, 18, 25, 28],
-      trend: ''
+      trend: '',
+      trendValue: 0,
+      badgeColor: '#e67e22',
+      description: 'Propriétés disponibles'
     },
     dossiersATraiter: {
       title: 'Dossiers à traiter',
@@ -62,7 +68,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       icon: 'folder_open',
       color: '#ff9800',
       chartData: [8, 12, 10, 15, 13, 18, 20],
-      trend: ''
+      trend: '',
+      trendValue: 0,
+      badgeColor: '#4caf50',
+      description: 'Leads en attente'
     }
   };
 
@@ -177,6 +186,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           const annoncesData = trends['annoncesActives'];
           this.kpiCards['annoncesActives'].value = annoncesData.currentValue;
           this.kpiCards['annoncesActives'].trend = this.formatTrend(annoncesData.percentageChange);
+          this.kpiCards['annoncesActives'].trendValue = annoncesData.percentageChange;
           this.kpiCards['annoncesActives'].loading = false;
           this.animateCounter('annoncesActives', annoncesData.currentValue);
           this.updateChart('annoncesActives', annoncesData.currentValue);
@@ -187,6 +197,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           const dossiersData = trends['dossiersATraiter'];
           this.kpiCards['dossiersATraiter'].value = dossiersData.currentValue;
           this.kpiCards['dossiersATraiter'].trend = this.formatTrend(dossiersData.percentageChange);
+          this.kpiCards['dossiersATraiter'].trendValue = dossiersData.percentageChange;
           this.kpiCards['dossiersATraiter'].loading = false;
           this.animateCounter('dossiersATraiter', dossiersData.currentValue);
           this.updateChart('dossiersATraiter', dossiersData.currentValue);
