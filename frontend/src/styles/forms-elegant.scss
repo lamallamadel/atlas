@@ -1,0 +1,691 @@
+/**
+ * Elegant Form Design System
+ * 
+ * Features:
+ * - 24px vertical spacing between fields
+ * - Floating labels with smooth animations
+ * - Helper text (secondary) below fields
+ * - Prefix/suffix icons in inputs
+ * - Inline validation with animated success/error icons
+ * - Progress stepper with connecting lines
+ * - Pronounced focus states (2px solid primary + glow)
+ * - Grouped sections with cards and titles
+ */
+
+/* ===================================
+   FORM SPACING - 24px VERTICAL
+   =================================== */
+
+.elegant-form {
+  .mat-mdc-form-field,
+  .form-field,
+  .form-group {
+    margin-bottom: 24px !important;
+  }
+
+  .form-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .mat-mdc-form-field {
+      flex: 1;
+      margin-bottom: 0 !important;
+    }
+  }
+
+  .form-section {
+    margin-bottom: 32px;
+  }
+}
+
+/* ===================================
+   FLOATING LABELS WITH ANIMATION
+   =================================== */
+
+.elegant-form-field {
+  position: relative;
+  margin-bottom: 24px;
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: 16px 12px 8px 12px;
+    border: 1px solid var(--color-neutral-300);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-base);
+    transition: border-color var(--duration-moderate) var(--ease-out),
+                box-shadow var(--duration-moderate) var(--ease-out);
+    background: var(--color-neutral-0);
+    outline: none;
+
+    &:focus {
+      border-color: var(--color-primary-500);
+      box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
+    }
+
+    &.has-prefix {
+      padding-left: 40px;
+    }
+
+    &.has-suffix {
+      padding-right: 40px;
+    }
+  }
+
+  label {
+    position: absolute;
+    left: 12px;
+    top: 16px;
+    color: var(--color-neutral-600);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-normal);
+    pointer-events: none;
+    transition: all var(--duration-moderate) var(--ease-out);
+    transform-origin: left top;
+    background: var(--color-neutral-0);
+    padding: 0 4px;
+  }
+
+  input:focus ~ label,
+  input:not(:placeholder-shown) ~ label,
+  textarea:focus ~ label,
+  textarea:not(:placeholder-shown) ~ label,
+  select:focus ~ label,
+  select:not([value=""]) ~ label,
+  &.has-value label {
+    top: -8px;
+    font-size: 12px;
+    color: var(--color-primary-500);
+    font-weight: var(--font-weight-medium);
+    transform: translateY(0);
+  }
+
+  input:not(:focus):not(:placeholder-shown) ~ label,
+  textarea:not(:focus):not(:placeholder-shown) ~ label {
+    color: var(--color-neutral-700);
+  }
+}
+
+/* ===================================
+   PREFIX & SUFFIX ICONS
+   =================================== */
+
+.elegant-form-field {
+  .field-prefix,
+  .field-suffix {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-neutral-600);
+    transition: color var(--duration-moderate) var(--ease-out);
+    pointer-events: none;
+
+    mat-icon,
+    .mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .field-prefix {
+    left: 12px;
+  }
+
+  .field-suffix {
+    right: 12px;
+  }
+
+  input:focus ~ .field-prefix,
+  input:focus ~ .field-suffix,
+  textarea:focus ~ .field-prefix,
+  textarea:focus ~ .field-suffix {
+    color: var(--color-primary-500);
+  }
+}
+
+/* ===================================
+   HELPER TEXT (SECONDARY)
+   =================================== */
+
+.elegant-form-field {
+  .field-helper {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    font-size: 12px;
+    color: var(--color-neutral-600);
+    line-height: 1.4;
+
+    mat-icon {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+  }
+
+  &.field-valid .field-helper {
+    color: var(--color-success-700);
+  }
+
+  &.field-error .field-helper {
+    color: var(--color-error-700);
+  }
+}
+
+/* ===================================
+   INLINE VALIDATION WITH ANIMATED ICONS
+   =================================== */
+
+.elegant-form-field {
+  .validation-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity var(--duration-moderate) var(--ease-out),
+                transform var(--duration-moderate) var(--ease-out);
+    pointer-events: none;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  &.field-validating .validation-icon {
+    opacity: 1;
+    color: var(--color-primary-500);
+    animation: spin 1s linear infinite;
+  }
+
+  &.field-valid .validation-icon {
+    opacity: 1;
+    color: var(--color-success-600);
+    animation: scaleIn var(--duration-moderate) var(--ease-bounce);
+  }
+
+  &.field-error .validation-icon {
+    opacity: 1;
+    color: var(--color-error-600);
+    animation: shake var(--duration-moderate) var(--ease-out);
+  }
+
+  &.field-valid input,
+  &.field-valid textarea {
+    border-color: var(--color-success-500);
+  }
+
+  &.field-error input,
+  &.field-error textarea {
+    border-color: var(--color-error-500);
+  }
+
+  &.field-valid input:focus,
+  &.field-valid textarea:focus {
+    border-color: var(--color-success-600);
+    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+  }
+
+  &.field-error input:focus,
+  &.field-error textarea:focus {
+    border-color: var(--color-error-600);
+    box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.2);
+  }
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-error-700);
+  animation: slideDown var(--duration-moderate) var(--ease-out);
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+}
+
+/* ===================================
+   PRONOUNCED FOCUS STATES
+   =================================== */
+
+.elegant-form-field {
+  input:focus,
+  textarea:focus,
+  select:focus {
+    border: 2px solid var(--color-primary-500) !important;
+    box-shadow: 0 0 0 4px var(--color-primary-alpha-20),
+                0 2px 8px rgba(44, 90, 160, 0.15) !important;
+    padding: 15px 11px 7px 11px; /* Adjust for 2px border */
+  }
+
+  input.has-prefix:focus {
+    padding-left: 39px;
+  }
+
+  input.has-suffix:focus {
+    padding-right: 39px;
+  }
+}
+
+/* ===================================
+   FORM SECTIONS WITH CARDS
+   =================================== */
+
+.form-section-card {
+  background: var(--color-neutral-0);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-moderate) var(--ease-out);
+
+  &:hover {
+    box-shadow: var(--shadow-md);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--color-neutral-200);
+
+    mat-icon {
+      color: var(--color-primary-500);
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    .section-title {
+      font-size: var(--font-size-2);
+      font-weight: var(--font-weight-semibold);
+      color: var(--color-neutral-900);
+      margin: 0;
+    }
+
+    .section-subtitle {
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+      margin-top: 4px;
+    }
+  }
+
+  .section-body {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+}
+
+/* ===================================
+   HORIZONTAL PROGRESS STEPPER
+   =================================== */
+
+.elegant-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 32px 0;
+  margin-bottom: 32px;
+  position: relative;
+
+  .stepper-line {
+    position: absolute;
+    top: 48px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--color-neutral-300);
+    z-index: 0;
+
+    .stepper-line-progress {
+      height: 100%;
+      background: var(--color-primary-500);
+      transition: width var(--duration-slow) var(--ease-out);
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        right: -4px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 8px;
+        height: 8px;
+        background: var(--color-primary-500);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--color-primary-alpha-50);
+      }
+    }
+  }
+
+  .stepper-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+    flex: 1;
+    max-width: 150px;
+
+    .step-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--color-neutral-0);
+      border: 2px solid var(--color-neutral-300);
+      color: var(--color-neutral-600);
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-lg);
+      transition: all var(--duration-moderate) var(--ease-out);
+      position: relative;
+
+      mat-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+      }
+    }
+
+    .step-label {
+      margin-top: 12px;
+      font-size: var(--font-size-sm);
+      color: var(--color-neutral-600);
+      text-align: center;
+      font-weight: var(--font-weight-medium);
+      transition: color var(--duration-moderate) var(--ease-out);
+    }
+
+    .step-description {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--color-neutral-500);
+      text-align: center;
+    }
+
+    &.step-active {
+      .step-circle {
+        background: var(--color-primary-500);
+        border-color: var(--color-primary-500);
+        color: var(--color-neutral-0);
+        box-shadow: 0 0 0 4px var(--color-primary-alpha-20),
+                    0 4px 12px rgba(44, 90, 160, 0.3);
+        animation: pulse 2s ease-in-out infinite;
+      }
+
+      .step-label {
+        color: var(--color-primary-500);
+        font-weight: var(--font-weight-semibold);
+      }
+    }
+
+    &.step-completed {
+      .step-circle {
+        background: var(--color-success-600);
+        border-color: var(--color-success-600);
+        color: var(--color-neutral-0);
+      }
+
+      .step-label {
+        color: var(--color-success-700);
+      }
+    }
+
+    &.step-error {
+      .step-circle {
+        background: var(--color-error-600);
+        border-color: var(--color-error-600);
+        color: var(--color-neutral-0);
+      }
+
+      .step-label {
+        color: var(--color-error-700);
+      }
+    }
+  }
+}
+
+/* ===================================
+   MATERIAL FORM FIELD OVERRIDES
+   =================================== */
+
+.elegant-form .mat-mdc-form-field {
+  .mat-mdc-text-field-wrapper {
+    padding-bottom: 0;
+  }
+
+  .mat-mdc-form-field-focus-overlay {
+    display: none;
+  }
+
+  .mdc-text-field--filled {
+    background-color: transparent;
+  }
+
+  .mat-mdc-form-field-subscript-wrapper {
+    margin-top: 6px;
+  }
+
+  .mat-mdc-form-field-hint-wrapper,
+  .mat-mdc-form-field-error-wrapper {
+    padding: 0;
+  }
+
+  &.mat-focused {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-width: 2px !important;
+      border-color: var(--color-primary-500) !important;
+    }
+
+    .mdc-text-field {
+      box-shadow: 0 0 0 4px var(--color-primary-alpha-20),
+                  0 2px 8px rgba(44, 90, 160, 0.15) !important;
+    }
+  }
+
+  &.mat-form-field-invalid {
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: var(--color-error-500) !important;
+    }
+
+    &.mat-focused .mdc-text-field {
+      box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.2),
+                  0 2px 8px rgba(231, 76, 60, 0.15) !important;
+    }
+  }
+
+  .mat-mdc-form-field-icon-prefix,
+  .mat-mdc-form-field-icon-suffix {
+    mat-icon {
+      color: var(--color-neutral-600);
+      transition: color var(--duration-moderate) var(--ease-out);
+    }
+  }
+
+  &.mat-focused {
+    .mat-mdc-form-field-icon-prefix mat-icon,
+    .mat-mdc-form-field-icon-suffix mat-icon {
+      color: var(--color-primary-500);
+    }
+  }
+}
+
+/* ===================================
+   ANIMATIONS
+   =================================== */
+
+@keyframes spin {
+  from {
+    transform: translateY(-50%) rotate(0deg);
+  }
+  to {
+    transform: translateY(-50%) rotate(360deg);
+  }
+}
+
+@keyframes scaleIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-50%) scale(0.5);
+  }
+  50% {
+    transform: translateY(-50%) scale(1.1);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+  }
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateY(-50%) translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateY(-50%) translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateY(-50%) translateX(4px);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   =================================== */
+
+@media (max-width: 768px) {
+  .elegant-form .form-row {
+    flex-direction: column;
+    gap: 0;
+
+    .mat-mdc-form-field {
+      margin-bottom: 24px !important;
+    }
+  }
+
+  .form-section-card {
+    padding: 16px;
+    
+    .section-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .elegant-stepper {
+    padding: 24px 0;
+
+    .stepper-line {
+      display: none;
+    }
+
+    .stepper-step {
+      max-width: 100%;
+
+      .step-circle {
+        width: 40px;
+        height: 40px;
+
+        mat-icon {
+          font-size: 20px;
+          width: 20px;
+          height: 20px;
+        }
+      }
+
+      .step-label {
+        font-size: 11px;
+      }
+
+      .step-description {
+        display: none;
+      }
+    }
+  }
+}
+
+/* ===================================
+   UTILITY CLASSES
+   =================================== */
+
+.full-width {
+  width: 100%;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-neutral-200);
+  justify-content: flex-end;
+  align-items: center;
+
+  button {
+    min-width: 120px;
+  }
+
+  .spacer {
+    flex: 1;
+  }
+}
+
+.form-divider {
+  height: 1px;
+  background: var(--color-neutral-200);
+  margin: 32px 0;
+}
+
+.required-indicator {
+  color: var(--color-error-600);
+  margin-left: 2px;
+  font-weight: var(--font-weight-medium);
+}

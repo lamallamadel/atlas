@@ -5,6 +5,7 @@ export interface FormStep {
   completed: boolean;
   optional?: boolean;
   icon?: string;
+  error?: boolean;
 }
 
 @Component({
@@ -61,5 +62,19 @@ export class FormProgressIndicatorComponent implements OnInit {
       return 'step-completed';
     }
     return 'step-pending';
+  }
+
+  getLineProgress(): number {
+    if (this.steps.length <= 1) {
+      return 0;
+    }
+    
+    // Calculate progress based on current step and completion
+    const totalSteps = this.steps.length - 1;
+    const completedSteps = this.steps.filter((step, index) => step.completed && index < this.currentStep).length;
+    const baseProgress = (completedSteps / totalSteps) * 100;
+    const currentStepProgress = (this.currentStep / totalSteps) * 100;
+    
+    return Math.max(baseProgress, currentStepProgress);
   }
 }

@@ -1,28 +1,33 @@
-<div class="form-progress-container">
+<div class="elegant-stepper-wrapper">
+  <!-- Percentage Progress Bar (Optional) -->
   <div class="progress-bar-wrapper" *ngIf="showPercentage">
-    <mat-progress-bar 
-      mode="determinate" 
-      [value]="progressPercentage"
-      color="primary">
-    </mat-progress-bar>
+    <div class="progress-bar-container">
+      <div class="progress-bar-fill" [style.width.%]="progressPercentage"></div>
+    </div>
     <div class="progress-percentage">{{ progressPercentage }}% complété</div>
   </div>
 
-  <div class="steps-indicator">
-    <div 
-      *ngFor="let step of steps; let i = index" 
-      class="step-item"
-      [ngClass]="getStepClass(i)">
-      <div class="step-marker">
-        <mat-icon [class.completed]="isStepCompleted(i)">
-          {{ getStepIcon(i) }}
-        </mat-icon>
+  <!-- Horizontal Stepper with Connecting Lines -->
+  <div class="elegant-stepper">
+    <div class="stepper-line">
+      <div class="stepper-line-progress" [style.width.%]="getLineProgress()"></div>
+    </div>
+    
+    <div *ngFor="let step of steps; let i = index" 
+         class="stepper-step"
+         [ngClass]="{
+           'step-active': i === currentStep,
+           'step-completed': isStepCompleted(i),
+           'step-error': step.error,
+           'step-pending': !isStepCompleted(i) && i !== currentStep
+         }">
+      <div class="step-circle">
+        <mat-icon *ngIf="isStepCompleted(i) && !step.error">check</mat-icon>
+        <mat-icon *ngIf="step.error">error</mat-icon>
+        <span *ngIf="!isStepCompleted(i) && !step.error">{{ i + 1 }}</span>
       </div>
-      <div class="step-label">
-        {{ step.label }}
-        <span class="optional-badge" *ngIf="step.optional">(optionnel)</span>
-      </div>
-      <div class="step-connector" *ngIf="i < steps.length - 1"></div>
+      <div class="step-label">{{ step.label }}</div>
+      <div class="step-description" *ngIf="step.optional">(optionnel)</div>
     </div>
   </div>
 </div>
