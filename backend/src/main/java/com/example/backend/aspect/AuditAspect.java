@@ -41,7 +41,9 @@ public class AuditAspect {
     @Around("execution(* com.example.backend.service.*Service.create*(..)) || " +
             "execution(* com.example.backend.service.*Service.update*(..)) || " +
             "execution(* com.example.backend.service.*Service.delete*(..)) || " +
-            "execution(* com.example.backend.service.*Service.patch*(..))")
+            "execution(* com.example.backend.service.*Service.patch*(..)) || " +
+            "execution(* com.example.backend.service.UserPreferencesService.setPreferencesByCategory(..)) || " +
+            "execution(* com.example.backend.service.UserPreferencesService.resetPreferencesByCategory(..))")
     public Object auditServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -51,8 +53,9 @@ public class AuditAspect {
         Object before = null;
         Long entityId = null;
 
-        // Only capture BEFORE for update/patch/delete
-        if (methodName.startsWith("update") || methodName.startsWith("patch") || methodName.startsWith("delete")) {
+        // Only capture BEFORE for update/patch/delete/set/reset
+        if (methodName.startsWith("update") || methodName.startsWith("patch") || 
+            methodName.startsWith("delete") || methodName.startsWith("set") || methodName.startsWith("reset")) {
             entityId = extractEntityIdFromArgs(args);
             before = captureBeforeState(joinPoint, entityId);
         }
@@ -102,7 +105,7 @@ public class AuditAspect {
         String lower = methodName.toLowerCase();
         if (lower.startsWith("create")) return AuditAction.CREATED;
         if (lower.startsWith("delete")) return AuditAction.DELETED;
-        if (lower.startsWith("update") || lower.startsWith("patch")) return AuditAction.UPDATED;
+        if (lower.startsWith("update") || lower.startsWith("patch") || lower.startsWith("set") || lower.startsWith("reset")) return AuditAction.UPDATED;
         return AuditAction.UPDATED;
     }
 
@@ -116,6 +119,7 @@ public class AuditAspect {
         if (entityName.contains("consentement")) return AuditEntityType.CONSENTEMENT;
         if (entityName.contains("message")) return AuditEntityType.MESSAGE;
         if (entityName.contains("appointment")) return AuditEntityType.APPOINTMENT;
+        if (entityName.contains("userpreferences")) return AuditEntityType.USER_PREFERENCES;
         if (entityName.contains("user")) return AuditEntityType.USER;
         if (entityName.contains("organization")) return AuditEntityType.ORGANIZATION;
         if (entityName.contains("notification")) return AuditEntityType.NOTIFICATION;
@@ -125,8 +129,13 @@ public class AuditAspect {
     }
 
     private Long extractEntityIdFromArgs(Object[] args) {
-        if (args != null && args.length > 0 && args[0] instanceof Long id) {
-            return id;
+        if (args != null && args.length > 0) {
+            if (args[0] instanceof Long id) {
+                return id;
+            }
+            if (args[0] instanceof String str) {
+                return (long) str.hashCode();
+            }
         }
         return null;
     }
@@ -159,8 +168,22 @@ public class AuditAspect {
         if (entityId == null) return null;
         try {
             Object service = joinPoint.getTarget();
-            Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
-            Object result = getByIdMethod.invoke(service, entityId);
+            Object[] args = joinPoint.getArgs();
+            Object result = null;
+            
+            if (service.getClass().getSimpleName().equals("UserPreferencesService") && args.length >= 2 && args[0] instanceof String) {
+                String userId = (String) args[0];
+                String category = (String) args[1];
+                try {
+                    Method getMethod = service.getClass().getMethod("getPreferencesByCategory", String.class, String.class);
+                    result = getMethod.invoke(service, userId, category);
+                } catch (NoSuchMethodException e) {
+                    return null;
+                }
+            } else {
+                Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
+                result = getByIdMethod.invoke(service, entityId);
+            }
             
             // Convert to map and ensure status field is captured
             Map<String, Object> capturedMap = safeConvertToMap(result);

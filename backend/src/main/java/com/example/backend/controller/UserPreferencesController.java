@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -201,5 +202,71 @@ public class UserPreferencesController {
             ? preferences.getTourProgress() 
             : new java.util.HashMap<>();
         return ResponseEntity.ok(tourProgress);
+    }
+
+    @GetMapping("/{userId}/category/{category}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get preferences by category", 
+               description = "Retrieves user preferences for a specific category (ui, notifications, formats, shortcuts) with inheritance from organization and system defaults")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category preferences retrieved successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid category")
+    })
+    public ResponseEntity<UserPreferencesDTO.CategoryPreferencesResponse> getPreferencesByCategory(
+            @Parameter(description = "User ID", required = true)
+            @PathVariable String userId,
+            @Parameter(description = "Category (ui, notifications, formats, shortcuts)", required = true)
+            @PathVariable String category) {
+        Map<String, Object> preferences = userPreferencesService.getPreferencesByCategory(userId, category);
+        return ResponseEntity.ok(new UserPreferencesDTO.CategoryPreferencesResponse(category, preferences));
+    }
+
+    @PutMapping("/{userId}/category/{category}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Set preferences by category", 
+               description = "Sets user preferences for a specific category with JSON schema validation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category preferences updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid category or preferences schema validation failed")
+    })
+    public ResponseEntity<UserPreferencesDTO.CategoryPreferencesResponse> setPreferencesByCategory(
+            @Parameter(description = "User ID", required = true)
+            @PathVariable String userId,
+            @Parameter(description = "Category (ui, notifications, formats, shortcuts)", required = true)
+            @PathVariable String category,
+            @Valid @RequestBody UserPreferencesDTO.CategoryPreferencesRequest request) {
+        Map<String, Object> updated = userPreferencesService.setPreferencesByCategory(userId, category, request.getPreferences());
+        return ResponseEntity.ok(new UserPreferencesDTO.CategoryPreferencesResponse(category, updated));
+    }
+
+    @DeleteMapping("/{userId}/category/{category}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Reset preferences by category", 
+               description = "Resets user preferences for a specific category to organization/system defaults")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Category preferences reset successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid category")
+    })
+    public ResponseEntity<UserPreferencesDTO.CategoryPreferencesResponse> resetPreferencesByCategory(
+            @Parameter(description = "User ID", required = true)
+            @PathVariable String userId,
+            @Parameter(description = "Category (ui, notifications, formats, shortcuts)", required = true)
+            @PathVariable String category) {
+        Map<String, Object> defaults = userPreferencesService.resetPreferencesByCategory(userId, category);
+        return ResponseEntity.ok(new UserPreferencesDTO.CategoryPreferencesResponse(category, defaults));
+    }
+
+    @GetMapping("/{userId}/all-categories")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get all preferences by categories", 
+               description = "Retrieves all user preferences organized by categories with inheritance applied")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All preferences retrieved successfully")
+    })
+    public ResponseEntity<Map<String, Object>> getAllPreferences(
+            @Parameter(description = "User ID", required = true)
+            @PathVariable String userId) {
+        Map<String, Object> allPreferences = userPreferencesService.getAllPreferences(userId);
+        return ResponseEntity.ok(allPreferences);
     }
 }

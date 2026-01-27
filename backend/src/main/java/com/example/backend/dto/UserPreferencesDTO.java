@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.Map;
 
@@ -93,5 +94,53 @@ public class UserPreferencesDTO {
 
     public void setTourProgress(Map<String, Object> tourProgress) {
         this.tourProgress = tourProgress;
+    }
+
+    @Schema(description = "Request DTO for setting preferences by category")
+    public static class CategoryPreferencesRequest {
+        @NotNull(message = "Preferences cannot be null")
+        @Schema(description = "Preference values for the category")
+        private Map<String, Object> preferences;
+
+        public Map<String, Object> getPreferences() {
+            return preferences;
+        }
+
+        public void setPreferences(Map<String, Object> preferences) {
+            this.preferences = preferences;
+        }
+    }
+
+    @Schema(description = "Response DTO for category preferences")
+    public static class CategoryPreferencesResponse {
+        @Schema(description = "Category name")
+        private String category;
+
+        @Schema(description = "Preference values for the category")
+        private Map<String, Object> preferences;
+
+        public CategoryPreferencesResponse() {
+        }
+
+        public CategoryPreferencesResponse(String category, Map<String, Object> preferences) {
+            this.category = category;
+            this.preferences = preferences;
+        }
+
+        public String getCategory() {
+            return category;
+        }
+
+        public void setCategory(String category) {
+            this.category = category;
+        }
+
+        public Map<String, Object> getPreferences() {
+            return preferences;
+        }
+
+        public void setPreferences(Map<String, Object> preferences) {
+            this.preferences = preferences;
+        }
     }
 }
