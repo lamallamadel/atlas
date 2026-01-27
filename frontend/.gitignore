@@ -52,3 +52,7 @@ Thumbs.db
 /e2e/screenshots/
 /e2e/traces/
 *.zip
+
+# Service Worker / Offline Mode
+.sw-cache/
+sw-debug.log

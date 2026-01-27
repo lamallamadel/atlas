@@ -1,0 +1,175 @@
+<div class="advanced-filters-container">
+  <form [formGroup]="filterForm" class="filter-form">
+    <!-- Logic Operator Toggle -->
+    <div class="logic-operator-section">
+      <label class="logic-label">Conditions:</label>
+      <mat-button-toggle-group formControlName="logicOperator" aria-label="Opérateur logique">
+        <mat-button-toggle value="AND">ET (AND)</mat-button-toggle>
+        <mat-button-toggle value="OR">OU (OR)</mat-button-toggle>
+      </mat-button-toggle-group>
+    </div>
+
+    <!-- Conditions List -->
+    <div formArrayName="conditions" class="conditions-list">
+      <div *ngFor="let condition of conditions.controls; let i = index" 
+           [formGroupName]="i" 
+           class="condition-row">
+        
+        <div class="condition-content">
+          <!-- Field Selector -->
+          <mat-form-field appearance="outline" class="field-selector">
+            <mat-label>Champ</mat-label>
+            <mat-select formControlName="field" (selectionChange)="onFieldChange(i)">
+              <mat-option *ngFor="let field of fields" [value]="field.key">
+                {{ field.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Operator Selector -->
+          <mat-form-field appearance="outline" class="operator-selector">
+            <mat-label>Opérateur</mat-label>
+            <mat-select formControlName="operator" (selectionChange)="onOperatorChange(i)">
+              <mat-option *ngFor="let op of getOperators(i)" [value]="op.value">
+                {{ op.label }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <!-- Value Input (conditional) -->
+          <div *ngIf="requiresValue(i)" class="value-input">
+            <!-- Text Input -->
+            <mat-form-field *ngIf="getFieldType(i) === 'text'" appearance="outline" class="value-field">
+              <mat-label>Valeur</mat-label>
+              <input matInput formControlName="value" placeholder="Entrer une valeur">
+            </mat-form-field>
+
+            <!-- Number Input -->
+            <mat-form-field *ngIf="getFieldType(i) === 'number'" appearance="outline" class="value-field">
+              <mat-label>Valeur</mat-label>
+              <input matInput type="number" formControlName="value" placeholder="Entrer un nombre">
+            </mat-form-field>
+
+            <!-- Date Input -->
+            <mat-form-field *ngIf="getFieldType(i) === 'date'" appearance="outline" class="value-field">
+              <mat-label>Date</mat-label>
+              <input matInput [matDatepicker]="picker" formControlName="value">
+              <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+              <mat-datepicker #picker></mat-datepicker>
+            </mat-form-field>
+
+            <!-- Select Input (Single) -->
+            <mat-form-field *ngIf="getFieldType(i) === 'select' && !isMultiSelect(i)" appearance="outline" class="value-field">
+              <mat-label>Valeur</mat-label>
+              <mat-select formControlName="value">
+                <mat-option *ngFor="let option of getFieldOptions(i)" [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Select Input (Multiple) -->
+            <mat-form-field *ngIf="getFieldType(i) === 'select' && isMultiSelect(i)" appearance="outline" class="value-field">
+              <mat-label>Valeurs</mat-label>
+              <mat-select formControlName="value" multiple>
+                <mat-option *ngFor="let option of getFieldOptions(i)" [value]="option.value">
+                  {{ option.label }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <!-- Boolean Input -->
+            <mat-form-field *ngIf="getFieldType(i) === 'boolean'" appearance="outline" class="value-field">
+              <mat-label>Valeur</mat-label>
+              <mat-select formControlName="value">
+                <mat-option [value]="true">Vrai</mat-option>
+                <mat-option [value]="false">Faux</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <!-- Remove Button -->
+          <button 
+            mat-icon-button 
+            color="warn" 
+            type="button"
+            (click)="removeCondition(i)"
+            [disabled]="conditions.length === 1"
+            class="remove-btn"
+            aria-label="Supprimer la condition">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+
+        <!-- Logic Operator Separator (except for last item) -->
+        <div *ngIf="i < conditions.length - 1" class="logic-separator">
+          <span class="logic-badge">{{ filterForm.get('logicOperator')?.value }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Condition Button -->
+    <div class="add-condition-section">
+      <button 
+        mat-stroked-button 
+        color="primary" 
+        type="button"
+        (click)="addCondition()"
+        aria-label="Ajouter une condition">
+        <mat-icon>add</mat-icon>
+        Ajouter une condition
+      </button>
+    </div>
+
+    <!-- Result Count -->
+    <div class="result-count-section" *ngIf="resultCount !== null || countLoading">
+      <mat-card class="count-card">
+        <mat-card-content>
+          <div class="count-content">
+            <mat-icon *ngIf="!countLoading" class="count-icon">filter_list</mat-icon>
+            <mat-spinner *ngIf="countLoading" diameter="24"></mat-spinner>
+            <span class="count-text" *ngIf="!countLoading">
+              <strong>{{ resultCount }}</strong> résultat(s) trouvé(s)
+            </span>
+            <span class="count-text" *ngIf="countLoading">
+              Calcul en cours...
+            </span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        type="button"
+        (click)="applyFilter()"
+        [disabled]="!filterForm.valid"
+        aria-label="Appliquer les filtres">
+        <mat-icon>check</mat-icon>
+        Appliquer
+      </button>
+
+      <button 
+        mat-button 
+        type="button"
+        (click)="clearFilter()"
+        aria-label="Réinitialiser les filtres">
+        <mat-icon>clear</mat-icon>
+        Réinitialiser
+      </button>
+
+      <button 
+        mat-button 
+        type="button"
+        (click)="copyUrlToClipboard()"
+        [disabled]="!filterForm.valid"
+        aria-label="Copier l'URL du filtre">
+        <mat-icon>link</mat-icon>
+        Partager
+      </button>
+    </div>
+  </form>
+</div>

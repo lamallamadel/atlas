@@ -1,0 +1,320 @@
+.quick-actions-container {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.quick-actions-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1002;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-actions-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.quick-actions-fab.fab-open {
+  transform: rotate(0deg);
+}
+
+.quick-actions-fab mat-icon {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-actions-fab.fab-open mat-icon {
+  transform: rotate(90deg);
+}
+
+.quick-actions-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.quick-actions-backdrop.backdrop-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.quick-actions-menu {
+  position: fixed;
+  bottom: 96px;
+  right: 24px;
+  width: 380px;
+  max-width: calc(100vw - 48px);
+  max-height: calc(100vh - 120px);
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  transform: translateY(20px) scale(0.95);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.quick-actions-menu.menu-open {
+  transform: translateY(0) scale(1);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f5f5f5;
+}
+
+.menu-header h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.menu-content {
+  overflow-y: auto;
+  flex: 1;
+  padding: 16px;
+}
+
+.actions-section {
+  margin-bottom: 24px;
+}
+
+.actions-section:last-child {
+  margin-bottom: 0;
+}
+
+.actions-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 16px;
+  width: 100%;
+  text-align: left;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-button mat-icon {
+  margin-right: 12px;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.action-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.action-label {
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.action-shortcut {
+  font-size: 11px;
+  opacity: 0.7;
+  margin-top: 2px;
+  font-family: 'Courier New', monospace;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.recent-actions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recent-action-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  border-left: 3px solid #3f51b5;
+  transition: background-color 0.2s ease;
+}
+
+.recent-action-item:hover {
+  background: #f0f0f0;
+}
+
+.recent-action-icon {
+  margin-right: 12px;
+  color: #3f51b5;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.recent-action-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.recent-action-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.2;
+}
+
+.recent-action-time {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+.voip-status {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background: #e8f5e9;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.voip-status-icon {
+  color: #4caf50;
+  margin-right: 8px;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.voip-status-text {
+  font-size: 13px;
+  color: #2e7d32;
+  font-weight: 500;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .quick-actions-menu {
+    width: calc(100vw - 48px);
+    bottom: 88px;
+    right: 24px;
+  }
+
+  .quick-actions-fab {
+    bottom: 16px;
+    right: 16px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .quick-actions-menu {
+    background: #1e1e1e;
+    color: #fff;
+  }
+
+  .menu-header {
+    background: #2a2a2a;
+    border-bottom-color: #444;
+  }
+
+  .menu-header h3 {
+    color: #fff;
+  }
+
+  .actions-section h4 {
+    color: #aaa;
+  }
+
+  .recent-action-item {
+    background: #2a2a2a;
+    border-left-color: #7986cb;
+  }
+
+  .recent-action-item:hover {
+    background: #333;
+  }
+
+  .recent-action-icon {
+    color: #7986cb;
+  }
+
+  .recent-action-label {
+    color: #fff;
+  }
+
+  .recent-action-time {
+    color: #aaa;
+  }
+
+  .voip-status {
+    background: #1b5e20;
+  }
+
+  .voip-status-text {
+    color: #81c784;
+  }
+}
+
+/* Animation for action buttons */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(63, 81, 181, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(63, 81, 181, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(63, 81, 181, 0);
+  }
+}
+
+.quick-actions-fab:focus {
+  animation: pulse 1.5s infinite;
+}

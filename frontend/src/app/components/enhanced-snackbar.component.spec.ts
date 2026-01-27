@@ -1,43 +1,38 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatSnackBarRef, MAT_SNACK_BAR_DATA } from '@angular/material/snack-bar';
+import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { EnhancedSnackbarComponent } from './enhanced-snackbar.component';
+import { NotificationConfig } from '../services/notification.service';
 
 describe('EnhancedSnackbarComponent', () => {
   let component: EnhancedSnackbarComponent;
   let fixture: ComponentFixture<EnhancedSnackbarComponent>;
-  let snackBarRef: jasmine.SpyObj<MatSnackBarRef<EnhancedSnackbarComponent>>;
+  let mockSnackBarRef: jasmine.SpyObj<MatSnackBarRef<EnhancedSnackbarComponent>>;
+
+  const mockData: NotificationConfig & { dismissible: boolean } = {
+    message: 'Test message',
+    type: 'success',
+    dismissible: true
+  };
 
   beforeEach(async () => {
-    const snackBarRefSpy = jasmine.createSpyObj('MatSnackBarRef', ['dismiss']);
+    mockSnackBarRef = jasmine.createSpyObj('MatSnackBarRef', ['dismiss']);
 
     await TestBed.configureTestingModule({
-      declarations: [ EnhancedSnackbarComponent ],
+      declarations: [EnhancedSnackbarComponent],
       imports: [
         MatIconModule,
         MatButtonModule,
         BrowserAnimationsModule
       ],
       providers: [
-        { provide: MatSnackBarRef, useValue: snackBarRefSpy },
-        {
-          provide: MAT_SNACK_BAR_DATA,
-          useValue: {
-            message: 'Test message',
-            type: 'success',
-            dismissible: true
-          }
-        }
+        { provide: MAT_SNACK_BAR_DATA, useValue: mockData },
+        { provide: MatSnackBarRef, useValue: mockSnackBarRef }
       ]
-    })
-    .compileComponents();
+    }).compileComponents();
 
-    snackBarRef = TestBed.inject(MatSnackBarRef) as jasmine.SpyObj<MatSnackBarRef<EnhancedSnackbarComponent>>;
-  });
-
-  beforeEach(() => {
     fixture = TestBed.createComponent(EnhancedSnackbarComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -48,24 +43,68 @@ describe('EnhancedSnackbarComponent', () => {
   });
 
   it('should display the message', () => {
-    const compiled = fixture.nativeElement;
-    expect(compiled.querySelector('.snackbar-message').textContent).toContain('Test message');
+    const messageElement = fixture.nativeElement.querySelector('.snackbar-message');
+    expect(messageElement.textContent).toContain('Test message');
+  });
+
+  it('should display success icon for success type', () => {
+    const iconElement = fixture.nativeElement.querySelector('mat-icon');
+    expect(iconElement.textContent).toBe('check_circle');
   });
 
   it('should call dismiss when close button is clicked', () => {
-    component.dismiss();
-    expect(snackBarRef.dismiss).toHaveBeenCalled();
+    const closeButton = fixture.nativeElement.querySelector('.snackbar-close-btn');
+    closeButton.click();
+    expect(mockSnackBarRef.dismiss).toHaveBeenCalled();
   });
 
   it('should execute action callback when action button is clicked', () => {
-    const mockAction = jasmine.createSpy('onAction');
-    component.data.onAction = mockAction;
-    component.data.action = 'Retry';
+    const actionSpy = jasmine.createSpy('action');
+    component.data = {
+      ...mockData,
+      action: 'Annuler',
+      onAction: actionSpy
+    };
     fixture.detectChanges();
 
-    component.onAction();
+    const actionButton = fixture.nativeElement.querySelector('.snackbar-action-btn');
+    actionButton.click();
 
-    expect(mockAction).toHaveBeenCalled();
-    expect(snackBarRef.dismiss).toHaveBeenCalled();
+    expect(actionSpy).toHaveBeenCalled();
+    expect(mockSnackBarRef.dismiss).toHaveBeenCalled();
+  });
+
+  it('should not show action button when no action is provided', () => {
+    component.data = {
+      ...mockData,
+      action: undefined,
+      onAction: undefined
+    };
+    fixture.detectChanges();
+
+    const actionButton = fixture.nativeElement.querySelector('.snackbar-action-btn');
+    expect(actionButton).toBeNull();
+  });
+
+  it('should not show close button when dismissible is false', () => {
+    component.data = {
+      ...mockData,
+      dismissible: false
+    };
+    fixture.detectChanges();
+
+    const closeButton = fixture.nativeElement.querySelector('.snackbar-close-btn');
+    expect(closeButton).toBeNull();
+  });
+
+  it('should have critical class for critical priority', () => {
+    component.data = {
+      ...mockData,
+      priority: 'critical'
+    };
+    fixture.detectChanges();
+
+    const contentElement = fixture.nativeElement.querySelector('.enhanced-snackbar-content');
+    expect(contentElement.classList.contains('critical')).toBe(true);
   });
 });

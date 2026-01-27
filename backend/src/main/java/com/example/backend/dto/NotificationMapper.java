@@ -25,6 +25,9 @@ public class NotificationMapper {
         response.setRetryCount(entity.getRetryCount());
         response.setMaxRetries(entity.getMaxRetries());
         response.setSentAt(entity.getSentAt());
+        response.setReadAt(entity.getReadAt());
+        response.setMessage(entity.getMessage());
+        response.setActionUrl(entity.getActionUrl());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
 

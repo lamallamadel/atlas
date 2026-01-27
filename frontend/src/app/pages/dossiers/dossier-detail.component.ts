@@ -13,6 +13,7 @@ import { PartiePrenanteFormDialogComponent, PartiePrenanteFormData } from '../..
 import { MessageFormDialogComponent, MessageFormData } from '../../components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 import { AppointmentFormDialogComponent, AppointmentFormData } from '../../components/appointment-form-dialog.component';
+import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 
 
@@ -164,7 +165,8 @@ export class DossierDetailComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private recentNavigationService: RecentNavigationService
   ) {}
 
   getAvailableStatusOptions(): DossierStatus[] {
@@ -283,6 +285,15 @@ export class DossierDetailComponent implements OnInit {
         this.dossier = response;
         this.selectedStatus = response.status;
         this.loading = false;
+        
+        // Add to recent navigation
+        this.recentNavigationService.addRecentItem({
+          id: String(response.id),
+          type: 'dossier',
+          title: response.leadName || `Dossier #${response.id}`,
+          subtitle: response.leadPhone || undefined,
+          route: `/dossiers/${response.id}`
+        });
       },
       error: (err) => {
         if (err.status === 404) {

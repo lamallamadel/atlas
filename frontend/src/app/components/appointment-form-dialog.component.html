@@ -1,5 +1,6 @@
-<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true">
+<div @slideIn appFocusTrap role="dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" aria-modal="true">
   <h2 mat-dialog-title id="dialog-title">{{ isEditMode ? 'Modifier' : 'Planifier' }} un rendez-vous</h2>
+  <p id="dialog-description" class="sr-only">Formulaire de {{ isEditMode ? 'modification' : 'planification' }} d'un rendez-vous. Complétez les champs ci-dessous et validez.</p>
 
   <mat-dialog-content>
     <form [formGroup]="appointmentForm" class="appointment-form">

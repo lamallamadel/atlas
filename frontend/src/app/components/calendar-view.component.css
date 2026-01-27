@@ -1,0 +1,279 @@
+.calendar-view-container {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.calendar-card {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.header-row h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.header-actions button mat-icon {
+  margin-right: 4px;
+}
+
+.filters-section {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  min-width: 200px;
+}
+
+.legend-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.legend-title {
+  font-weight: 500;
+  color: #666;
+}
+
+.legend-items {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.legend-label {
+  font-size: 14px;
+  color: #333;
+}
+
+.calendar-wrapper {
+  margin-top: 20px;
+  background: white;
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 20px;
+}
+
+.loading-state p {
+  color: #666;
+  font-size: 16px;
+}
+
+.help-text {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background-color: #e3f2fd;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #1976d2;
+}
+
+.help-text mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-top: 2px;
+}
+
+/* FullCalendar Customization */
+::ng-deep .fc {
+  font-family: 'Roboto', sans-serif;
+}
+
+::ng-deep .fc .fc-button {
+  background-color: #3f51b5;
+  border-color: #3f51b5;
+  text-transform: none;
+  font-weight: 500;
+}
+
+::ng-deep .fc .fc-button:hover {
+  background-color: #303f9f;
+  border-color: #303f9f;
+}
+
+::ng-deep .fc .fc-button:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+}
+
+::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active {
+  background-color: #303f9f;
+  border-color: #303f9f;
+}
+
+::ng-deep .fc-theme-standard .fc-scrollgrid {
+  border-color: #e0e0e0;
+}
+
+::ng-deep .fc-theme-standard td,
+::ng-deep .fc-theme-standard th {
+  border-color: #e0e0e0;
+}
+
+::ng-deep .fc .fc-daygrid-day.fc-day-today {
+  background-color: #fff3e0;
+}
+
+::ng-deep .fc .fc-timegrid-slot {
+  height: 3em;
+}
+
+::ng-deep .fc-event {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  font-size: 13px;
+}
+
+::ng-deep .fc-event:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+::ng-deep .fc-event-title {
+  font-weight: 500;
+}
+
+::ng-deep .fc-event-time {
+  font-weight: 400;
+}
+
+::ng-deep .fc .fc-col-header-cell-cushion {
+  padding: 8px 4px;
+}
+
+::ng-deep .fc .fc-daygrid-day-number {
+  padding: 8px;
+  font-weight: 500;
+}
+
+::ng-deep .fc-direction-ltr .fc-timegrid-slot-label-frame {
+  text-align: center;
+}
+
+::ng-deep .fc .fc-timegrid-slot-label {
+  border-right: 1px solid #e0e0e0;
+}
+
+::ng-deep .fc-businesshours {
+  background-color: rgba(63, 81, 181, 0.03);
+}
+
+::ng-deep .fc .fc-highlight {
+  background-color: rgba(63, 81, 181, 0.1);
+}
+
+@media (max-width: 768px) {
+  .calendar-view-container {
+    padding: 12px;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .filters-section {
+    flex-direction: column;
+  }
+
+  .filter-field {
+    width: 100%;
+  }
+
+  .legend-section {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .legend-items {
+    width: 100%;
+  }
+
+  .calendar-wrapper {
+    padding: 8px;
+  }
+
+  ::ng-deep .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  ::ng-deep .fc .fc-toolbar-chunk {
+    margin: 4px 0;
+  }
+
+  ::ng-deep .fc .fc-button {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .header-actions,
+  .filters-section,
+  .help-text {
+    display: none !important;
+  }
+
+  .calendar-wrapper {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}

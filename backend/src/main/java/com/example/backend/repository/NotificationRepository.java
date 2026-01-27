@@ -28,4 +28,7 @@ public interface NotificationRepository extends JpaRepository<NotificationEntity
         @Param("status") NotificationStatus status,
         Pageable pageable
     );
+
+    @Query("SELECT COUNT(n) FROM NotificationEntity n WHERE n.type = 'IN_APP' AND n.readAt IS NULL")
+    long countUnread();
 }

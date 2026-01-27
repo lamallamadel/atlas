@@ -32,7 +32,8 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              "src/service-worker.js"
             ],
             "styles": [
               "src/styles/variables.scss",
@@ -40,6 +41,7 @@
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
               "src/styles/print.scss",
+              "src/styles/shepherd-theme.css",
               "src/styles.css"
             ],
             "scripts": [],
@@ -49,7 +51,14 @@
               "papaparse",
               "canvg",
               "raf",
-              "rgbcolor"
+              "rgbcolor",
+              "shepherd.js",
+              "@fullcalendar/core",
+              "@fullcalendar/daygrid",
+              "@fullcalendar/timegrid",
+              "@fullcalendar/list",
+              "@fullcalendar/interaction",
+              "@fullcalendar/icalendar"
             ]
           },
           "configurations": {
@@ -121,6 +130,7 @@
               "src/styles/theme-dark.scss",
               "src/styles/utilities.scss",
               "src/styles/print.scss",
+              "src/styles/shepherd-theme.css",
               "src/styles.css"
             ],
             "scripts": []

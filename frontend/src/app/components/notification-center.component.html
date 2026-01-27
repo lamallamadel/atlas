@@ -1,0 +1,111 @@
+<div class="notification-center" role="region" aria-labelledby="notification-center-title" aria-live="polite">
+  <div class="notification-header">
+    <div class="header-title">
+      <mat-icon aria-hidden="true">notifications</mat-icon>
+      <h2 id="notification-center-title">Notifications</h2>
+      <span *ngIf="unreadCount > 0" class="unread-badge" role="status" [attr.aria-label]="unreadCount + ' notifications non lues'">{{ unreadCount }}</span>
+    </div>
+    <button 
+      mat-icon-button 
+      (click)="refresh()" 
+      [disabled]="loading"
+      matTooltip="Actualiser"
+      [attr.aria-busy]="loading"
+      aria-label="Actualiser les notifications">
+      <mat-icon aria-hidden="true">refresh</mat-icon>
+    </button>
+  </div>
+
+  <div class="notification-filters">
+    <mat-button-toggle-group 
+      [value]="selectedType"
+      (change)="onFilterChange($event.value)"
+      aria-label="Filtrer les notifications par type">
+      <mat-button-toggle 
+        *ngFor="let type of notificationTypes" 
+        [value]="type.value"
+        [attr.aria-label]="'Filtrer par ' + type.label">
+        {{ type.label }}
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </div>
+
+  <div class="notification-list" *ngIf="!loading || notifications.length > 0" role="list" aria-label="Liste des notifications">
+    <div *ngIf="groupedNotifications.length === 0 && !loading" class="empty-state" role="status">
+      <mat-icon aria-hidden="true">notifications_none</mat-icon>
+      <p>Aucune notification</p>
+    </div>
+
+    <div *ngFor="let group of groupedNotifications" class="notification-group">
+      <div class="group-header" role="presentation">
+        <span class="group-date">{{ group.displayDate }}</span>
+      </div>
+
+      <div 
+        *ngFor="let notification of group.notifications"
+        class="notification-item"
+        [class.unread]="isUnread(notification)"
+        (click)="onNotificationClick(notification)"
+        role="listitem"
+        tabindex="0"
+        [attr.aria-label]="'Notification: ' + getNotificationTitle(notification) + (isUnread(notification) ? ' - Non lue' : ' - Lue') + ', créée ' + getTimeAgo(notification.createdAt)"
+        (keydown.enter)="onNotificationClick(notification)"
+        (keydown.space)="onNotificationClick(notification)">
+        
+        <div class="notification-icon" aria-hidden="true">
+          <mat-icon [class.unread-icon]="isUnread(notification)">
+            {{ getNotificationIcon(notification.type) }}
+          </mat-icon>
+        </div>
+
+        <div class="notification-content">
+          <div class="notification-title">
+            {{ getNotificationTitle(notification) }}
+          </div>
+          <div class="notification-message" *ngIf="getNotificationMessage(notification)">
+            {{ getNotificationMessage(notification) }}
+          </div>
+          <div class="notification-meta">
+            <span class="notification-time">{{ getTimeAgo(notification.createdAt) }}</span>
+            <span class="notification-type-badge">{{ notification.type }}</span>
+          </div>
+        </div>
+
+        <div class="notification-actions" role="group" aria-label="Actions de notification">
+          <button
+            mat-icon-button
+            *ngIf="!isUnread(notification)"
+            (click)="markAsUnread(notification, $event)"
+            matTooltip="Marquer comme non lu"
+            [attr.aria-label]="'Marquer la notification ' + getNotificationTitle(notification) + ' comme non lue'">
+            <mat-icon aria-hidden="true">mark_email_unread</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            *ngIf="isUnread(notification)"
+            (click)="markAsRead(notification, $event)"
+            matTooltip="Marquer comme lu"
+            [attr.aria-label]="'Marquer la notification ' + getNotificationTitle(notification) + ' comme lue'">
+            <mat-icon aria-hidden="true">mark_email_read</mat-icon>
+          </button>
+        </div>
+
+        <div class="unread-indicator" *ngIf="isUnread(notification)" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="load-more-container" *ngIf="hasMore && !loading">
+      <button 
+        mat-stroked-button 
+        (click)="loadMore()"
+        aria-label="Charger plus de notifications">
+        Charger plus
+      </button>
+    </div>
+  </div>
+
+  <div class="notification-loading" *ngIf="loading && notifications.length === 0" role="status" aria-live="polite">
+    <mat-spinner diameter="40" aria-label="Chargement en cours"></mat-spinner>
+    <p>Chargement des notifications...</p>
+  </div>
+</div>

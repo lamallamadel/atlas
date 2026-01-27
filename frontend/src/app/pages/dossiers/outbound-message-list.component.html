@@ -20,9 +20,11 @@
     <button class="btn-retry" (click)="loadMessages()">Réessayer</button>
   </div>
 
-  <div *ngIf="!loading && messages.length === 0 && !error" class="empty-state">
-    <p class="empty-message">Aucun message envoyé pour le moment</p>
-  </div>
+  <app-empty-state 
+    *ngIf="!loading && messages.length === 0 && !error" 
+    [context]="EmptyStateContext.NO_MESSAGES"
+    [isNewUser]="true">
+  </app-empty-state>
 
   <div *ngIf="messages.length > 0" class="timeline">
     <div *ngFor="let message of messages" class="timeline-item">

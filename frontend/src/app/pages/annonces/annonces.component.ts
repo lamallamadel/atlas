@@ -5,10 +5,14 @@ import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction } from '../../components/generic-table.component';
 import { ActionButtonConfig } from '../../components/empty-state.component';
+import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
+import { MatDialog } from '@angular/material/dialog';
+import { ExportService, ColumnDef } from '../../services/export.service';
+import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
 
 interface AppliedFilter {
@@ -123,15 +127,34 @@ export class AnnoncesComponent implements OnInit {
     { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'primary' }
   ];
 
-  emptyStatePrimaryAction: ActionButtonConfig = {
-    label: 'Créer une annonce',
-    handler: () => this.createAnnonce()
-  };
+  get emptyStateContext(): EmptyStateContext {
+    return this.appliedFilters.length > 0
+      ? EmptyStateContext.NO_ANNONCES_FILTERED
+      : EmptyStateContext.NO_ANNONCES;
+  }
 
-  emptyStateSecondaryAction: ActionButtonConfig = {
-    label: 'Réinitialiser les filtres',
-    handler: () => this.resetFilters()
-  };
+  get isNewUser(): boolean {
+    return this.annonces.length === 0 && this.appliedFilters.length === 0 && this.page?.totalElements === 0;
+  }
+
+  get emptyStatePrimaryAction(): ActionButtonConfig {
+    return {
+      label: 'Créer une annonce',
+      handler: () => this.createAnnonce()
+    };
+  }
+
+  get emptyStateSecondaryAction(): ActionButtonConfig {
+    return this.appliedFilters.length > 0
+      ? {
+          label: 'Réinitialiser les filtres',
+          handler: () => this.resetFilters()
+        }
+      : {
+          label: 'Parcourir les modèles',
+          handler: () => console.log('Browse templates')
+        };
+  }
 
   constructor(
     private annonceApiService: AnnonceApiService,
@@ -139,7 +162,9 @@ export class AnnoncesComponent implements OnInit {
     private route: ActivatedRoute,
     private filterPresetService: FilterPresetService,
     private bottomSheet: MatBottomSheet,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private exportService: ExportService,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -514,5 +539,57 @@ export class AnnoncesComponent implements OnInit {
 
   trackByPageNum(index: number, pageNum: number): number {
     return pageNum;
+  }
+
+  onExportRequest(event: { format: 'pdf' | 'excel' | 'print'; data: unknown[] }): void {
+    const exportColumns: ColumnDef[] = [
+      { key: 'id', header: 'ID', width: 20 },
+      { key: 'title', header: 'Titre', width: 80 },
+      { key: 'category', header: 'Catégorie', width: 40 },
+      { key: 'city', header: 'Ville', width: 40 },
+      { key: 'price', header: 'Prix', width: 30 },
+      { key: 'status', header: 'Statut', width: 30 },
+      { key: 'createdAt', header: 'Créé le', width: 35 },
+      { key: 'updatedAt', header: 'Modifié le', width: 35 }
+    ];
+
+    const dataToExport = event.data.map(item => {
+      const annonce = item as AnnonceResponse;
+      return {
+        id: annonce.id,
+        title: annonce.title || '',
+        category: annonce.category || '-',
+        city: annonce.city || '-',
+        price: annonce.price !== undefined 
+          ? this.priceFormatPipe.transform(annonce.price, annonce.currency || 'EUR')
+          : '-',
+        status: this.getStatusLabel(annonce.status),
+        createdAt: this.dateFormatPipe.transform(annonce.createdAt),
+        updatedAt: this.dateFormatPipe.transform(annonce.updatedAt)
+      };
+    });
+
+    const exportConfig = {
+      title: 'Liste des Annonces',
+      filename: 'annonces',
+      primaryColor: '#2c5aa0',
+      secondaryColor: '#e67e22'
+    };
+
+    this.dialog.open(ExportProgressDialogComponent, {
+      width: '500px',
+      disableClose: true,
+      data: { message: 'Préparation de l\'export...' }
+    });
+
+    const exportPromise = event.format === 'pdf'
+      ? this.exportService.exportToPDF(dataToExport, exportColumns, exportConfig)
+      : event.format === 'excel'
+      ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
+      : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
+
+    exportPromise.catch(error => {
+      console.error('Export error:', error);
+    });
   }
 }

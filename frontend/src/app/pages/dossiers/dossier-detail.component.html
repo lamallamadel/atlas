@@ -29,7 +29,7 @@
             <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
           </div>
           <button
-            class="btn-change-status-secondary"
+            class="btn-change-status-secondary status-change-button"
             (click)="toggleStatusChange()"
             aria-label="Ouvrir le formulaire de changement de statut du dossier"
             (keydown.enter)="toggleStatusChange()"
@@ -99,7 +99,7 @@
           </div>
 
           <button
-            class="btn-update-status"
+            class="btn-update-status update-status-button"
             (click)="updateStatus()"
             [disabled]="updatingStatus || !selectedStatus || isStatusChangeDisabled()"
             aria-label="Enregistrer le nouveau statut du dossier"
@@ -355,7 +355,7 @@
             <div *ngIf="dossier.parties && dossier.parties.length > 0">
               <div class="tab-header-actions">
                 <button 
-                  class="btn-add" 
+                  class="btn-add add-partie-button" 
                   (click)="togglePartieForm()" 
                   aria-label="Ouvrir le formulaire pour ajouter une nouvelle partie prenante au dossier"
                   (keydown.enter)="togglePartieForm()"
@@ -426,7 +426,7 @@
           </div>
         </mat-tab>
 
-        <mat-tab label="Messages" aria-label="Historique des messages échangés">
+        <mat-tab label="Messages" aria-label="Historique des messages échangés" class="messages-tab">
           <div class="tab-content">
             <div class="tab-header-actions">
               <button 
@@ -502,7 +502,7 @@
         </mat-tab>
 
         <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
-          <div class="tab-content">
+          <div class="tab-content appointments-section">
             <div class="tab-header-actions">
               <button 
                 class="btn-add" 
@@ -586,7 +586,7 @@
         </mat-tab>
 
         <mat-tab label="Consentements" aria-label="Gestion des consentements RGPD">
-          <div class="tab-content">
+          <div class="tab-content consentements-section">
             <app-loading-skeleton *ngIf="consentementsLoading" variant="card" [rows]="2" aria-label="Chargement des consentements"></app-loading-skeleton>
 
             <div *ngIf="!consentementsLoading">
@@ -819,4 +819,7 @@
       </mat-tab-group>
     </div>
   </div>
+
+  <!-- Quick Actions Component -->
+  <app-quick-actions *ngIf="dossier" [dossier]="dossier"></app-quick-actions>
 </div>

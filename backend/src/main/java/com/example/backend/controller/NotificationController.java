@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.InAppNotificationRequest;
 import com.example.backend.dto.NotificationCreateRequest;
 import com.example.backend.dto.NotificationMapper;
 import com.example.backend.dto.NotificationResponse;
@@ -85,6 +86,54 @@ public class NotificationController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(notificationMapper.toResponse(notification));
+    }
+
+    @PatchMapping("/{id}/read")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Mark notification as read", description = "Marks a notification as read")
+    public ResponseEntity<NotificationResponse> markAsRead(@PathVariable Long id) {
+        NotificationEntity notification = notificationService.markAsRead(id);
+        if (notification == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(notificationMapper.toResponse(notification));
+    }
+
+    @PatchMapping("/{id}/unread")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Mark notification as unread", description = "Marks a notification as unread")
+    public ResponseEntity<NotificationResponse> markAsUnread(@PathVariable Long id) {
+        NotificationEntity notification = notificationService.markAsUnread(id);
+        if (notification == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(notificationMapper.toResponse(notification));
+    }
+
+    @GetMapping("/unread-count")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Get unread notification count", description = "Returns the count of unread IN_APP notifications")
+    public ResponseEntity<Long> getUnreadCount() {
+        long count = notificationService.getUnreadCount();
+        return ResponseEntity.ok(count);
+    }
+
+    @PostMapping("/in-app")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(summary = "Create in-app notification", description = "Creates a new in-app notification for a user")
+    public ResponseEntity<NotificationResponse> createInAppNotification(@Valid @RequestBody InAppNotificationRequest request) {
+        String orgId = TenantContext.getOrgId();
+        
+        NotificationEntity notification = notificationService.createInAppNotification(
+            orgId,
+            request.getDossierId(),
+            request.getRecipient(),
+            request.getSubject(),
+            request.getMessage(),
+            request.getActionUrl()
+        );
+        
+        return ResponseEntity.status(HttpStatus.CREATED).body(notificationMapper.toResponse(notification));
     }
 
     private Pageable createPageable(int page, int size, String sort) {

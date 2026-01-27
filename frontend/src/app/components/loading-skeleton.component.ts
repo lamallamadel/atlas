@@ -1,6 +1,6 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 
-export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kpi' | 'detail';
+export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kpi' | 'detail' | 'grid' | 'message' | 'timeline';
 
 @Component({
   selector: 'app-loading-skeleton',
@@ -12,6 +12,7 @@ export class LoadingSkeletonComponent {
   @Input() variant: SkeletonVariant = 'card';
   @Input() rows = 3;
   @Input() columns = 8;
+  @Input() animate = true;
 
   get rowsArray(): number[] {
     return Array(this.rows).fill(0).map((_, i) => i);

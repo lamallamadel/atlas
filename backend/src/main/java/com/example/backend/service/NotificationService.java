@@ -167,4 +167,91 @@ public class NotificationService {
             org.springframework.data.domain.Pageable pageable) {
         return notificationRepository.findByFilters(dossierId, type, status, pageable);
     }
+
+    @Transactional
+    public NotificationEntity markAsRead(Long id) {
+        NotificationEntity notification = notificationRepository.findById(id).orElse(null);
+        if (notification != null && notification.getReadAt() == null) {
+            notification.setReadAt(LocalDateTime.now());
+            notification.setUpdatedAt(LocalDateTime.now());
+            return notificationRepository.save(notification);
+        }
+        return notification;
+    }
+
+    @Transactional
+    public NotificationEntity markAsUnread(Long id) {
+        NotificationEntity notification = notificationRepository.findById(id).orElse(null);
+        if (notification != null) {
+            notification.setReadAt(null);
+            notification.setUpdatedAt(LocalDateTime.now());
+            return notificationRepository.save(notification);
+        }
+        return notification;
+    }
+
+    @Transactional(readOnly = true)
+    public long getUnreadCount() {
+        return notificationRepository.countUnread();
+    }
+
+    @Transactional
+    public NotificationEntity createInAppNotification(
+            String orgId,
+            Long dossierId,
+            String recipient,
+            String subject,
+            String message,
+            String actionUrl) {
+
+        NotificationEntity notification = new NotificationEntity();
+        notification.setOrgId(orgId);
+        notification.setDossierId(dossierId);
+        notification.setType(NotificationType.IN_APP);
+        notification.setRecipient(recipient);
+        notification.setSubject(subject);
+        notification.setMessage(message);
+        notification.setActionUrl(actionUrl);
+        notification.setTemplateId("in_app_notification");
+        notification.setStatus(NotificationStatus.SENT);
+        notification.setRetryCount(0);
+        notification.setMaxRetries(0);
+
+        LocalDateTime now = LocalDateTime.now();
+        notification.setCreatedAt(now);
+        notification.setUpdatedAt(now);
+        notification.setSentAt(now);
+
+        return notificationRepository.save(notification);
+    }
+
+    @Transactional
+    public void createMentionNotification(
+            String recipient,
+            String mentionedBy,
+            com.example.backend.entity.enums.CommentEntityType entityType,
+            Long entityId,
+            Long commentId) {
+        String message = String.format("%s mentioned you in a comment on %s #%d",
+                mentionedBy, entityType.name().toLowerCase(), entityId);
+        String actionUrl = String.format("/%s/%d/comments/%d",
+                entityType.name().toLowerCase(), entityId, commentId);
+
+        createInAppNotification("default", null, recipient, "New Mention", message, actionUrl);
+    }
+
+    @Transactional
+    public void createCommentNotification(
+            String recipient,
+            String commentedBy,
+            com.example.backend.entity.enums.CommentEntityType entityType,
+            Long entityId,
+            Long commentId) {
+        String message = String.format("%s added a comment to a thread you're participating in on %s #%d",
+                commentedBy, entityType.name().toLowerCase(), entityId);
+        String actionUrl = String.format("/%s/%d/comments/%d",
+                entityType.name().toLowerCase(), entityId, commentId);
+
+        createInAppNotification("default", null, recipient, "New Comment", message, actionUrl);
+    }
 }

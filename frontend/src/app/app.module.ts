@@ -34,6 +34,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
+import { MatBadgeModule } from '@angular/material/badge';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -74,9 +75,15 @@ import { ApiStatusIndicatorComponent } from './components/api-status-indicator.c
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
 import { HttpAuthInterceptor } from './interceptors/http-auth.interceptor';
 import { FormValidationAnimationDirective } from './directives/form-validation-animation.directive';
+import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hint.directive';
+import { FocusTrapDirective } from './directives/focus-trap.directive';
+import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
+import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
+import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
+import { HighlightPipe } from './pipes/highlight.pipe';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
@@ -99,7 +106,28 @@ import { TaskCardComponent } from './components/task-card.component';
 import { TaskFormDialogComponent } from './components/task-form-dialog.component';
 import { ObservabilityDashboardComponent } from './components/observability-dashboard.component';
 import { WhatsappMessagingUiComponent } from './components/whatsapp-messaging-ui.component';
+import { KeyboardShortcutsComponent } from './components/keyboard-shortcuts.component';
+import { CommandPaletteComponent } from './components/command-palette.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
+import { ConfirmNavigationDialogComponent } from './components/confirm-navigation-dialog.component';
+import { FormProgressIndicatorComponent } from './components/form-progress-indicator.component';
+import { InlineValidationSuggestionComponent } from './components/inline-validation-suggestion.component';
+import { ContextualHintDirective } from './directives/contextual-hint.directive';
+import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
+import { KanbanBoardComponent } from './components/kanban-board.component';
+import { CalendarViewComponent } from './components/calendar-view.component';
+import { NotificationCenterComponent } from './components/notification-center.component';
+import { ExportProgressDialogComponent } from './components/export-progress-dialog.component';
+import { NotificationDemoComponent } from './components/notification-demo.component';
+import { AdvancedFiltersComponent } from './components/advanced-filters.component';
+import { AdvancedFiltersDialogComponent } from './components/advanced-filters-dialog.component';
+import { QuickActionsComponent } from './components/quick-actions.component';
+import { VoipConfigDialogComponent } from './components/voip-config-dialog.component';
+import { OfflineIndicatorComponent } from './components/offline-indicator.component';
+import { OfflineInterceptor } from './interceptors/offline.interceptor';
+import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
+import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
+import { MobileDossierCardComponent } from './components/mobile-dossier-card.component';
 
 registerLocaleData(localeFr);
 
@@ -142,9 +170,15 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     SuccessAnimationComponent,
     ApiStatusIndicatorComponent,
     FormValidationAnimationDirective,
+    KeyboardShortcutHintDirective,
+    FocusTrapDirective,
+    LazyLoadImageDirective,
+    InfiniteScrollDirective,
+    SwipeGestureDirective,
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
+    HighlightPipe,
     WhatsappThreadComponent,
     WhatsappMessageInputComponent,
     TemplateSelectionSheetComponent,
@@ -161,7 +195,27 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     TaskCardComponent,
     TaskFormDialogComponent,
     ObservabilityDashboardComponent,
-    WhatsappMessagingUiComponent
+    WhatsappMessagingUiComponent,
+    KeyboardShortcutsComponent,
+    CommandPaletteComponent,
+    ConfirmNavigationDialogComponent,
+    FormProgressIndicatorComponent,
+    InlineValidationSuggestionComponent,
+    ContextualHintDirective,
+    EnhancedFormExampleComponent,
+    KanbanBoardComponent,
+    CalendarViewComponent,
+    NotificationCenterComponent,
+    ExportProgressDialogComponent,
+    NotificationDemoComponent,
+    AdvancedFiltersComponent,
+    AdvancedFiltersDialogComponent,
+    QuickActionsComponent,
+    VoipConfigDialogComponent,
+    OfflineIndicatorComponent,
+    VirtualScrollListComponent,
+    MobileActionSheetComponent,
+    MobileDossierCardComponent
   ],
   imports: [
     BrowserModule,
@@ -201,6 +255,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatDatepickerModule,
     MatNativeDateModule,
     MatRadioModule,
+    MatBadgeModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,
@@ -228,7 +283,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
       useClass: CorrelationIdInterceptor,
       multi: true
     },
-
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: OfflineInterceptor,
+      multi: true
+    }
   ],
   bootstrap: [AppComponent]
 })

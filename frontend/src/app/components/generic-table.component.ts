@@ -63,11 +63,20 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   @Input() paginationData?: PaginationData;
   @Input() counterSingular = 'élément';
   @Input() counterPlural = 'éléments';
+  @Input() enableExport = false;
+  @Input() exportConfig?: {
+    title?: string;
+    filename?: string;
+    logo?: string;
+    primaryColor?: string;
+    secondaryColor?: string;
+  };
 
   @Output() rowAction = new EventEmitter<{ action: string; row: unknown }>();
   @Output() rowClick = new EventEmitter<unknown>();
   @Output() selectionChange = new EventEmitter<unknown[]>();
   @Output() paginationChange = new EventEmitter<'previous' | 'next'>();
+  @Output() exportRequest = new EventEmitter<{ format: 'pdf' | 'excel' | 'print'; data: unknown[] }>();
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
@@ -283,5 +292,28 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
       'warning': '#ff9800'
     };
     return color ? (colorMap[color] || color) : colorMap['primary'];
+  }
+
+  hasSelection(): boolean {
+    return this.selection.hasValue() && this.selection.selected.length > 0;
+  }
+
+  getSelectedCount(): number {
+    return this.selection.selected.length;
+  }
+
+  exportToPDF(): void {
+    const dataToExport = this.hasSelection() ? this.selection.selected : this.dataSource.data;
+    this.exportRequest.emit({ format: 'pdf', data: dataToExport });
+  }
+
+  exportToExcel(): void {
+    const dataToExport = this.hasSelection() ? this.selection.selected : this.dataSource.data;
+    this.exportRequest.emit({ format: 'excel', data: dataToExport });
+  }
+
+  printTable(): void {
+    const dataToExport = this.hasSelection() ? this.selection.selected : this.dataSource.data;
+    this.exportRequest.emit({ format: 'print', data: dataToExport });
   }
 }
