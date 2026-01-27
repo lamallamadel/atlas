@@ -1,5 +1,6 @@
 package com.example.backend.annotation;
 
+import com.example.backend.config.H2TestConfiguration;
 import com.example.backend.config.PostgresTestcontainersConfiguration;
 import com.example.backend.config.TestExecutionLogger;
 import com.example.backend.config.TestSecurityConfig;
@@ -23,7 +24,7 @@ import static org.springframework.test.context.TestExecutionListeners.MergeMode.
 @AutoConfigureMockMvc
 @Transactional
 @Tag("backend-e2e")
-@Import({TestSecurityConfig.class, PostgresTestcontainersConfiguration.class})
+@Import({TestSecurityConfig.class, PostgresTestcontainersConfiguration.class, H2TestConfiguration.class})
 @TestExecutionListeners(listeners = TestExecutionLogger.class, mergeMode = MERGE_WITH_DEFAULTS)
 public @interface BackendE2ETest {
 }

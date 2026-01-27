@@ -19,8 +19,8 @@ CREATE TABLE filter_preset (
 CREATE INDEX idx_filter_preset_org_id ON filter_preset(org_id);
 CREATE INDEX idx_filter_preset_created_by ON filter_preset(created_by);
 CREATE INDEX idx_filter_preset_type ON filter_preset(filter_type);
-CREATE INDEX idx_filter_preset_shared ON filter_preset(is_shared) WHERE is_shared = true;
-CREATE INDEX idx_filter_preset_predefined ON filter_preset(is_predefined) WHERE is_predefined = true;
+CREATE INDEX idx_filter_preset_shared ON filter_preset(is_shared);
+CREATE INDEX idx_filter_preset_predefined ON filter_preset(is_predefined);
 
 -- Insert predefined filter presets
 INSERT INTO filter_preset (name, filter_type, description, filter_config, is_shared, is_predefined, org_id, created_by)

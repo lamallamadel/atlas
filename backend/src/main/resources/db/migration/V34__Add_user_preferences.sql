@@ -22,8 +22,8 @@ CREATE TABLE user_preferences (
 -- Index for faster lookups by user and org
 CREATE INDEX idx_user_preferences_user_org ON user_preferences(user_id, org_id);
 
--- Index for querying by role template
-CREATE INDEX idx_user_preferences_role_template ON user_preferences(role_template) WHERE role_template IS NOT NULL;
+-- Index for querying by role template (removed partial WHERE clause for H2 compatibility)
+CREATE INDEX idx_user_preferences_role_template ON user_preferences(role_template);
 
 -- Comments for documentation
 COMMENT ON TABLE user_preferences IS 'Stores user-specific preferences including dashboard layouts and widget configurations';

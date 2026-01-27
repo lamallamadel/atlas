@@ -2,7 +2,8 @@
 -- Based on slow query analysis and load testing results
 
 -- Annonce table indexes for common query patterns
-CREATE INDEX IF NOT EXISTS idx_annonce_status_city ON annonce(status, city) WHERE status = 'ACTIVE';
+-- Note: Removed partial WHERE clause for H2 compatibility (H2 doesn't support partial indexes)
+CREATE INDEX IF NOT EXISTS idx_annonce_status_city ON annonce(status, city);
 CREATE INDEX IF NOT EXISTS idx_annonce_type_price ON annonce(type, price);
 CREATE INDEX IF NOT EXISTS idx_annonce_created_at_desc ON annonce(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_annonce_org_status ON annonce(org_id, status);
@@ -43,7 +44,8 @@ CREATE INDEX IF NOT EXISTS idx_partie_prenante_dossier_role ON partie_prenante(d
 
 -- Task table indexes
 CREATE INDEX IF NOT EXISTS idx_task_dossier_status ON task(dossier_id, status);
-CREATE INDEX IF NOT EXISTS idx_task_assigned_due_date ON task(assigned_to, due_date) WHERE status != 'COMPLETED';
+-- Note: Removed partial WHERE clause for H2 compatibility (H2 doesn't support partial indexes)
+CREATE INDEX IF NOT EXISTS idx_task_assigned_due_date ON task(assigned_to, due_date);
 
 -- Comment thread indexes
 CREATE INDEX IF NOT EXISTS idx_comment_thread_dossier ON comment_thread(dossier_id, created_at DESC);
@@ -62,13 +64,12 @@ CREATE INDEX IF NOT EXISTS idx_lead_score_calculated ON lead_score(calculated_at
 -- Referential data indexes for fast lookups
 CREATE INDEX IF NOT EXISTS idx_referential_org_type ON referential(org_id, referential_type, is_active);
 
--- Partial index for active sessions (WhatsApp)
-CREATE INDEX IF NOT EXISTS idx_whatsapp_session_active ON whatsapp_session_window(phone_number, expires_at) 
-    WHERE expires_at > NOW();
+-- Note: Removed partial WHERE clauses for H2 compatibility (H2 doesn't support partial indexes)
+-- Index for active sessions (WhatsApp)
+CREATE INDEX IF NOT EXISTS idx_whatsapp_session_active ON whatsapp_session_window(phone_number, expires_at);
 
--- Partial index for pending rate limits
-CREATE INDEX IF NOT EXISTS idx_whatsapp_rate_limit_pending ON whatsapp_rate_limit(phone_number, window_start) 
-    WHERE used_count < max_count;
+-- Index for pending rate limits
+CREATE INDEX IF NOT EXISTS idx_whatsapp_rate_limit_pending ON whatsapp_rate_limit(phone_number, window_start);
 
 -- Filter preset indexes
 CREATE INDEX IF NOT EXISTS idx_filter_preset_user_entity ON filter_preset(user_id, entity_type, is_default);
@@ -77,13 +78,6 @@ CREATE INDEX IF NOT EXISTS idx_filter_preset_user_entity ON filter_preset(user_i
 CREATE INDEX IF NOT EXISTS idx_document_dossier_created ON document(dossier_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_document_category_created ON document(category, created_at DESC);
 
--- Analyze tables for query planner
-ANALYZE annonce;
-ANALYZE dossier;
-ANALYZE message;
-ANALYZE appointment;
-ANALYZE activity;
-ANALYZE notification;
-ANALYZE outbound_message;
-ANALYZE partie_prenante;
-ANALYZE task;
+-- Note: ANALYZE statements removed for H2 compatibility (H2 doesn't support ANALYZE)
+-- PostgreSQL will automatically analyze tables during autovacuum
+-- For production PostgreSQL, run ANALYZE manually or enable autovacuum

@@ -33,5 +33,3 @@ CREATE INDEX idx_comment_thread_resolved ON comment_thread(resolved);
 CREATE INDEX idx_comment_thread_id ON comment(thread_id);
 CREATE INDEX idx_comment_org_id ON comment(org_id);
 CREATE INDEX idx_comment_created_at ON comment(created_at);
-
-CREATE INDEX idx_comment_content_fulltext ON comment USING gin(to_tsvector('french', content));

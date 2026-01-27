@@ -1,0 +1,24 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+
+rate-limit:
+  enabled: false
+
+cache:
+  redis:
+    enabled: false
+
+app:
+  security:
+    csrf:
+      enabled: false
+    jwt:
+      rotation:
+        enabled: false
+    secret:
+      rotation:
+        enabled: false
+  webhook:
+    signature:
+      enabled: false
