@@ -3,6 +3,7 @@ package com.example.backend.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import java.time.LocalDateTime;
 
 public class RateLimitTierDto {
 
@@ -19,6 +20,10 @@ public class RateLimitTierDto {
     private Integer requestsPerMinute;
 
     private String description;
+
+    private LocalDateTime createdAt;
+
+    private LocalDateTime updatedAt;
 
     public Long getId() {
         return id;
@@ -58,5 +63,21 @@ public class RateLimitTierDto {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }

@@ -1,8 +1,10 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.RateLimitStatsDto;
 import com.example.backend.dto.RateLimitTierDto;
 import com.example.backend.service.RateLimitService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -12,10 +14,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/admin/rate-limits")
-@Tag(name = "Rate Limit Management", description = "Admin API for managing rate limits per organization")
+@Tag(name = "Rate Limit Management", description = "Admin API for managing rate limits per organization and IP addresses")
 @SecurityRequirement(name = "bearerAuth")
 public class RateLimitController {
 
@@ -68,11 +71,44 @@ public class RateLimitController {
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{orgId}/reset")
+    @PostMapping("/org/{orgId}/reset")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Reset rate limit bucket", description = "Clear the rate limit bucket for an organization")
-    public ResponseEntity<Void> resetRateLimitBucket(@PathVariable String orgId) {
+    @Operation(
+            summary = "Reset rate limit bucket for organization",
+            description = "Clear the rate limit bucket for an organization, allowing immediate new requests"
+    )
+    public ResponseEntity<Map<String, String>> resetRateLimitBucketForOrg(
+            @Parameter(description = "Organization ID to reset") @PathVariable String orgId) {
         rateLimitService.clearBucket(orgId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(Map.of(
+                "message", "Rate limit bucket cleared successfully",
+                "orgId", orgId
+        ));
+    }
+
+    @PostMapping("/ip/{ipAddress}/reset")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Reset rate limit bucket for IP address",
+            description = "Clear the rate limit bucket for a specific IP address, allowing immediate new requests"
+    )
+    public ResponseEntity<Map<String, String>> resetRateLimitBucketForIp(
+            @Parameter(description = "IP address to reset (e.g., 192.168.1.1)") @PathVariable String ipAddress) {
+        rateLimitService.clearBucketForIp(ipAddress);
+        return ResponseEntity.ok(Map.of(
+                "message", "Rate limit bucket cleared successfully",
+                "ipAddress", ipAddress
+        ));
+    }
+
+    @GetMapping("/statistics")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Get rate limit statistics",
+            description = "Retrieve comprehensive statistics about rate limiting including hits, rejections, and rates"
+    )
+    public ResponseEntity<RateLimitStatsDto> getRateLimitStatistics() {
+        RateLimitStatsDto stats = rateLimitService.getStatistics();
+        return ResponseEntity.ok(stats);
     }
 }
