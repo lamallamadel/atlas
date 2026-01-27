@@ -1,0 +1,67 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 100
+      minimum-idle: 20
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
+      register-mbeans: true
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+          fetch_size: 100
+        order_inserts: true
+        order_updates: true
+        batch_versioned_data: true
+        generate_statistics: true
+        query:
+          in_clause_parameter_padding: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+    show-sql: false
+  data:
+    redis:
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+cache:
+  redis:
+    enabled: true
+  ttl:
+    annonce: 600
+    dossier: 300
+    funnel-analysis: 1800
+    agent-performance: 1800
+    revenue-forecast: 3600
+    pipeline-summary: 900
+    active-annonces: 180
+    user-preferences: 900
+    referential: 1800
+
+performance:
+  hibernate:
+    statistics:
+      enabled: true
+  query:
+    profiling:
+      enabled: true
+  monitoring:
+    enabled: true
+
+logging:
+  level:
+    com.example.backend.performance: DEBUG
+    com.zaxxer.hikari: DEBUG
+    org.hibernate.SQL: WARN
+    org.hibernate.stat: INFO
+    org.hibernate.type.descriptor.sql.BasicBinder: WARN
