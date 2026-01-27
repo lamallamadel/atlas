@@ -1,3 +1,4 @@
+-- Using ${json_type} placeholder: JSONB for PostgreSQL, JSON for H2
 CREATE TABLE comment_thread (
     id BIGSERIAL PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL,
@@ -17,7 +18,7 @@ CREATE TABLE comment (
     id BIGSERIAL PRIMARY KEY,
     thread_id BIGINT NOT NULL,
     content TEXT NOT NULL,
-    mentions_json JSONB,
+    mentions_json ${json_type},
     org_id VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,

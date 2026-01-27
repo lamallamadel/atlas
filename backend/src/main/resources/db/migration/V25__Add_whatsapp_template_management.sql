@@ -1,4 +1,5 @@
 -- Create whatsapp_template table
+-- Using ${json_type} placeholder: JSONB for PostgreSQL, JSON for H2
 CREATE TABLE whatsapp_template (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,

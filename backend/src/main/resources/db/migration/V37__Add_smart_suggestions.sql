@@ -1,5 +1,6 @@
 -- Smart Suggestions System
 -- Tracks user behavior patterns and provides intelligent next-best-action suggestions
+-- Using ${json_type} placeholder: JSONB for PostgreSQL, JSON for H2
 
 -- User behavior tracking table
 CREATE TABLE user_behavior_pattern (
@@ -29,7 +30,7 @@ CREATE TABLE suggestion_template (
     title VARCHAR(500) NOT NULL,
     description TEXT,
     action_type VARCHAR(100) NOT NULL,
-    action_payload JSONB,
+    action_payload ${json_type},
     priority INTEGER DEFAULT 5,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
@@ -48,7 +49,7 @@ CREATE TABLE message_template (
     channel VARCHAR(50) NOT NULL,
     subject VARCHAR(500),
     content TEXT NOT NULL,
-    variables JSONB,
+    variables ${json_type},
     usage_count INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),

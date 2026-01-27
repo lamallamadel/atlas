@@ -1,10 +1,11 @@
 -- Filter Preset Entity for saving and sharing advanced filter configurations
+-- Using ${json_type} placeholder: JSONB for PostgreSQL, JSON for H2
 CREATE TABLE filter_preset (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     filter_type VARCHAR(50) NOT NULL,
     description TEXT,
-    filter_config JSONB NOT NULL,
+    filter_config ${json_type} NOT NULL,
     is_shared BOOLEAN DEFAULT false,
     is_predefined BOOLEAN DEFAULT false,
     created_by VARCHAR(255),
