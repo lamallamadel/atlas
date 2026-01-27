@@ -1,5 +1,16 @@
-<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate, 'skeleton-card': variant === 'card', 'skeleton-list': variant === 'list', 'skeleton-table': variant === 'table', 'skeleton-form': variant === 'form', 'skeleton-dashboard-kpi': variant === 'dashboard-kpi', 'skeleton-detail': variant === 'detail', 'skeleton-grid': variant === 'grid', 'skeleton-message': variant === 'message', 'skeleton-timeline': variant === 'timeline'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
+<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate, 'skeleton-card': variant === 'card', 'skeleton-list': variant === 'list', 'skeleton-table': variant === 'table', 'skeleton-form': variant === 'form', 'skeleton-dashboard-kpi': variant === 'dashboard-kpi', 'skeleton-detail': variant === 'detail', 'skeleton-grid': variant === 'grid', 'skeleton-message': variant === 'message', 'skeleton-timeline': variant === 'timeline', 'skeleton-spinner': variant === 'spinner'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
   <span class="sr-only">Chargement des données en cours...</span>
+  
+  <!-- Spinner variant -->
+  <div *ngIf="variant === 'spinner'" class="skeleton-spinner-wrapper">
+    <app-spinner 
+      [variant]="spinnerVariant" 
+      [size]="spinnerSize" 
+      [color]="spinnerColor"
+      [message]="spinnerMessage"
+      [timeout]="0">
+    </app-spinner>
+  </div>
   
   <!-- Card variant -->
   <div *ngIf="variant === 'card'" class="skeleton-card" aria-hidden="true">

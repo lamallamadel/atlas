@@ -142,6 +142,7 @@ import { MobileDossierCardComponent } from './components/mobile-dossier-card.com
 import { LogoComponent } from './components/logo.component';
 import { LogoInlineComponent } from './components/logo-inline.component';
 import { CustomSpinnerComponent } from './components/custom-spinner.component';
+import { SpinnerComponent } from './components/spinner.component';
 import { LoadingButtonComponent } from './components/loading-button.component';
 import { AnimationsDemoComponent } from './components/animations-demo.component';
 import { ButtonExamplesComponent } from './components/button-examples.component';
@@ -256,6 +257,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LogoComponent,
     LogoInlineComponent,
     CustomSpinnerComponent,
+    SpinnerComponent,
     LoadingButtonComponent,
     AnimationsDemoComponent,
     ButtonExamplesComponent,
