@@ -194,6 +194,24 @@ storage:
 app:
   env: ${APP_ENV:local}
   version: ${APP_VERSION:@project.version@}
+  security:
+    csrf:
+      enabled: ${SECURITY_CSRF_ENABLED:true}
+    jwt:
+      rotation:
+        enabled: ${JWT_ROTATION_ENABLED:true}
+        cron: ${JWT_ROTATION_CRON:0 0 3 1 * ?}
+        grace-period-days: ${JWT_GRACE_PERIOD_DAYS:7}
+      cleanup:
+        cron: ${JWT_CLEANUP_CRON:0 0 4 * * ?}
+    secret:
+      rotation:
+        enabled: ${SECRET_ROTATION_ENABLED:true}
+        cron: ${SECRET_ROTATION_CRON:0 0 2 * * ?}
+        overlap-period-hours: ${SECRET_OVERLAP_PERIOD_HOURS:24}
+  webhook:
+    signature:
+      enabled: ${WEBHOOK_SIGNATURE_ENABLED:true}
 
 atlas:
   slow-request:
@@ -272,25 +290,7 @@ performance:
     enabled: ${PERFORMANCE_MONITORING_ENABLED:true}
 
 # Security Configuration
-app:
-  security:
-    csrf:
-      enabled: ${SECURITY_CSRF_ENABLED:true}
-    jwt:
-      rotation:
-        enabled: ${JWT_ROTATION_ENABLED:true}
-        cron: ${JWT_ROTATION_CRON:0 0 3 1 * ?}
-        grace-period-days: ${JWT_GRACE_PERIOD_DAYS:7}
-      cleanup:
-        cron: ${JWT_CLEANUP_CRON:0 0 4 * * ?}
-    secret:
-      rotation:
-        enabled: ${SECRET_ROTATION_ENABLED:true}
-        cron: ${SECRET_ROTATION_CRON:0 0 2 * * ?}
-        overlap-period-hours: ${SECRET_OVERLAP_PERIOD_HOURS:24}
-  webhook:
-    signature:
-      enabled: ${WEBHOOK_SIGNATURE_ENABLED:true}
+
 
 # Jasypt Encryption Configuration
 jasypt:
