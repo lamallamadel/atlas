@@ -1,0 +1,177 @@
+.report-builder-container {
+  padding: 20px;
+  position: relative;
+
+  .builder-card, .results-card {
+    margin-bottom: 20px;
+  }
+
+  .builder-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin: 20px 0;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  h3 {
+    margin-bottom: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+
+  .mt-4 {
+    margin-top: 24px;
+  }
+
+  .drop-zone {
+    min-height: 200px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #fafafa;
+    transition: background-color 0.3s;
+
+    &.cdk-drop-list-dragging {
+      background-color: #f0f0f0;
+    }
+
+    &.selected-zone {
+      border-color: #428bca;
+      background-color: #e3f2fd;
+    }
+  }
+
+  .drag-item {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+    margin-bottom: 8px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    cursor: move;
+    transition: all 0.2s;
+
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    &.cdk-drag-preview {
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      opacity: 0.8;
+    }
+
+    &.cdk-drag-placeholder {
+      opacity: 0.3;
+    }
+
+    &.selected-item {
+      border-color: #428bca;
+      background-color: #f8fcff;
+    }
+
+    mat-icon {
+      margin-right: 8px;
+      color: #999;
+    }
+
+    .item-content {
+      flex: 1;
+
+      strong {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 4px;
+      }
+
+      small {
+        display: block;
+        color: #666;
+        font-size: 12px;
+      }
+    }
+
+    button {
+      margin-left: auto;
+    }
+  }
+
+  .empty-message {
+    text-align: center;
+    color: #999;
+    padding: 40px 20px;
+    font-style: italic;
+  }
+
+  .actions-section {
+    margin-top: 24px;
+    display: flex;
+    gap: 12px;
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .export-controls {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+
+    mat-form-field {
+      flex: 0 0 auto;
+      min-width: 200px;
+    }
+
+    button {
+      mat-icon {
+        margin-right: 8px;
+      }
+    }
+  }
+
+  .table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+
+    .report-table {
+      width: 100%;
+      
+      th {
+        background-color: #f5f5f5;
+        font-weight: 600;
+      }
+
+      td, th {
+        padding: 12px;
+        text-align: left;
+      }
+
+      tr:hover {
+        background-color: #fafafa;
+      }
+    }
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+}

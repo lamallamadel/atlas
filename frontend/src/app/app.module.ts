@@ -143,6 +143,8 @@ import { LoadingButtonComponent } from './components/loading-button.component';
 import { AnimationsDemoComponent } from './components/animations-demo.component';
 import { ButtonExamplesComponent } from './components/button-examples.component';
 import { ProgressBarComponent } from './components/progress-bar.component';
+import { ReportBuilderComponent } from './components/report-builder.component';
+import { ExecutiveDashboardComponent } from './components/executive-dashboard.component';
 
 registerLocaleData(localeFr);
 
@@ -245,7 +247,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LoadingButtonComponent,
     AnimationsDemoComponent,
     ButtonExamplesComponent,
-    ProgressBarComponent
+    ProgressBarComponent,
+    ReportBuilderComponent,
+    ExecutiveDashboardComponent
   ],
   imports: [
     BrowserModule,

@@ -49,6 +49,7 @@
               "jspdf",
               "jspdf-autotable",
               "papaparse",
+              "xlsx",
               "canvg",
               "raf",
               "rgbcolor",
