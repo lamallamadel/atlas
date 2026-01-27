@@ -1,0 +1,418 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Design Tokens/Overview" />
+
+<div className="sb-container">
+  <div className="sb-section-title">
+    # Design Tokens Overview
+
+    Design tokens are the visual design atoms of the Atlas Immobilier design system. They are named entities that store visual design attributes as CSS custom properties.
+  </div>
+
+  <div className="sb-section">
+    ## 🎨 What are Design Tokens?
+
+    Design tokens replace hard-coded values (like `#2c5aa0` or `16px`) with meaningful names (`var(--color-primary-500)` or `var(--spacing-4)`). This creates:
+
+    - **Consistency**: Same values used everywhere
+    - **Maintainability**: Change once, update everywhere
+    - **Theming**: Easy dark mode and brand variations
+    - **Documentation**: Self-documenting code
+  </div>
+
+  <div className="sb-section">
+    ## 📦 Token Categories
+
+    ### Colors
+    ```css
+    --color-primary-500: #2c5aa0;
+    --color-success-700: #388e3c;
+    --color-neutral-800: #424242;
+    ```
+
+    Our color system includes:
+    - Primary colors (brand blue)
+    - Secondary/accent colors (brand orange)
+    - Neutral grayscale
+    - Semantic colors (success, warning, error, info)
+    - All WCAG AA compliant
+
+    ### Typography
+    ```css
+    --font-size-base: 0.875rem;    /* 14px */
+    --font-weight-semibold: 600;
+    --line-height-heading: 1.2;
+    --letter-spacing-tight: -0.02em;
+    ```
+
+    Typography tokens cover:
+    - Modular scale font sizes (Perfect Fourth ratio 1.25)
+    - Font weights (300-700)
+    - Line heights for headings and body
+    - Letter spacing for optical balance
+
+    ### Spacing
+    ```css
+    --spacing-4: 1rem;      /* 16px */
+    --spacing-6: 1.5rem;    /* 24px */
+    --spacing-8: 2rem;      /* 32px */
+    ```
+
+    Spacing follows a 4px grid system:
+    - Consistent padding and margins
+    - Predictable gaps between elements
+    - Responsive spacing that scales
+
+    ### Shadows
+    ```css
+    --shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-4: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    ```
+
+    5-level elevation system:
+    - Subtle depth for cards
+    - Floating elements like modals
+    - Smooth hover transitions
+
+    ### Border Radius
+    ```css
+    --radius-lg: 0.5rem;    /* 8px */
+    --radius-xl: 0.75rem;   /* 12px */
+    --radius-full: 9999px;  /* Pills */
+    ```
+
+    Consistent corner rounding:
+    - Standard for buttons and inputs
+    - Large for cards
+    - Full for pills and avatars
+  </div>
+
+  <div className="sb-section">
+    ## 💻 Usage in Code
+
+    ### CSS
+    ```css
+    .my-button {
+      background-color: var(--color-primary-500);
+      color: white;
+      padding: var(--spacing-3) var(--spacing-6);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-2);
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-medium);
+      transition: var(--transition-base);
+    }
+
+    .my-button:hover {
+      box-shadow: var(--shadow-4);
+      transform: translateY(-2px);
+    }
+    ```
+
+    ### SCSS
+    ```scss
+    .card {
+      background: white;
+      padding: var(--spacing-6);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-2);
+
+      &__title {
+        font-size: var(--font-size-2);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-neutral-900);
+        margin-bottom: var(--spacing-3);
+      }
+
+      &--primary {
+        border-left: 4px solid var(--color-primary-500);
+      }
+    }
+    ```
+
+    ### HTML Inline Styles
+    ```html
+    <div style="
+      background: var(--color-neutral-50);
+      padding: var(--spacing-6);
+      border-radius: var(--radius-xl);
+      margin-bottom: var(--spacing-4);
+    ">
+      Content here
+    </div>
+    ```
+  </div>
+
+  <div className="sb-section">
+    ## 🌙 Dark Mode Support
+
+    Design tokens make dark mode trivial. Just override tokens in a `.dark-theme` class:
+
+    ```css
+    .dark-theme {
+      --color-background: #1a1a1a;
+      --color-text: #ffffff;
+      --color-neutral-900: #f5f5f5;
+      --color-neutral-100: #424242;
+      --shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+    }
+    ```
+
+    All components automatically adapt because they use tokens, not hard-coded values.
+  </div>
+
+  <div className="sb-section">
+    ## ✨ Best Practices
+
+    ### Do
+    - Use tokens for all visual properties
+    - Choose semantic names (`--color-error`, not `--color-red`)
+    - Follow the spacing scale (don't invent new values)
+    - Document custom tokens if needed
+
+    ### Don't
+    - Hard-code color values (`#2c5aa0`)
+    - Use arbitrary spacing (`margin: 13px`)
+    - Create one-off tokens for single use
+    - Override tokens unless creating variants
+
+    ### Examples
+
+    #### ✅ Good
+    ```css
+    .success-message {
+      background: var(--color-success-50);
+      color: var(--color-success-800);
+      padding: var(--spacing-4);
+      border-left: 4px solid var(--color-success-500);
+    }
+    ```
+
+    #### ❌ Bad
+    ```css
+    .success-message {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 15px;
+      border-left: 4px solid #4caf50;
+    }
+    ```
+  </div>
+
+  <div className="sb-section">
+    ## 🎯 Token Naming Convention
+
+    Our tokens follow a clear naming pattern:
+
+    ### Color Tokens
+    ```
+    --color-{category}-{variant}
+    
+    Examples:
+    --color-primary-500     (main primary color)
+    --color-success-700     (dark success for text)
+    --color-neutral-100     (light gray)
+    ```
+
+    ### Spacing Tokens
+    ```
+    --spacing-{size}
+    
+    Examples:
+    --spacing-4     (16px, most common)
+    --spacing-6     (24px, card padding)
+    --spacing-8     (32px, section spacing)
+    ```
+
+    ### Shadow Tokens
+    ```
+    --shadow-{level}
+    
+    Examples:
+    --shadow-0      (no shadow)
+    --shadow-2      (default card shadow)
+    --shadow-4      (hover/modal shadow)
+    ```
+
+    ### Typography Tokens
+    ```
+    --font-size-{level}
+    --font-weight-{name}
+    --line-height-{name}
+    
+    Examples:
+    --font-size-base        (14px)
+    --font-weight-semibold  (600)
+    --line-height-body      (1.6)
+    ```
+  </div>
+
+  <div className="sb-section">
+    ## 🔗 Quick Reference
+
+    ### Most Common Tokens
+
+    #### Colors
+    - `--color-primary-500` - Main brand blue
+    - `--color-secondary-500` - Accent orange
+    - `--color-success-700` - Success text (WCAG AA)
+    - `--color-error-700` - Error text (WCAG AA)
+    - `--color-neutral-800` - Body text
+    - `--color-neutral-600` - Secondary text
+
+    #### Spacing
+    - `--spacing-2` (8px) - Tight spacing
+    - `--spacing-4` (16px) - Default spacing ⭐
+    - `--spacing-6` (24px) - Card padding ⭐
+    - `--spacing-8` (32px) - Section spacing
+
+    #### Typography
+    - `--font-size-base` (14px) - Body text ⭐
+    - `--font-size-1` (17.5px) - Large body
+    - `--font-size-2` (21.9px) - Small headings
+    - `--font-weight-medium` (500) - Buttons, labels
+    - `--font-weight-semibold` (600) - Headings
+
+    #### Shadows
+    - `--shadow-2` - Default card shadow ⭐
+    - `--shadow-4` - Hover state
+    - `--shadow-5` - Modals, overlays
+
+    #### Border Radius
+    - `--radius-lg` (8px) - Buttons, inputs
+    - `--radius-xl` (12px) - Cards ⭐
+    - `--radius-full` - Pills, avatars
+  </div>
+
+  <div className="sb-section">
+    ## 📚 Related Documentation
+
+    - [Colors](/story/design-tokens-colors--color-palette) - Full color palette
+    - [Typography](/story/design-tokens-typography--type-scale) - Font system
+    - [Spacing](/story/design-tokens-spacing--spacing-scale) - Spacing scale
+    - [Shadows](/story/design-tokens-shadows--shadow-levels) - Elevation system
+  </div>
+
+  <div className="sb-section">
+    ## 🛠️ Customization
+
+    To customize tokens for your brand:
+
+    1. Create a new CSS file: `custom-tokens.css`
+    2. Override token values:
+    ```css
+    :root {
+      --color-primary-500: #your-brand-color;
+      --font-family-base: 'Your Font', sans-serif;
+    }
+    ```
+    3. Import after `variables.scss`
+    4. All components update automatically
+  </div>
+</div>
+
+<style>
+  {`
+  .sb-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .sb-section {
+    margin-bottom: 48px;
+  }
+
+  .sb-section-title h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-primary-600, #2c5aa0);
+    margin-bottom: 16px;
+  }
+
+  .sb-section h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--color-neutral-900, #212121);
+    border-bottom: 2px solid var(--color-neutral-200, #eeeeee);
+    padding-bottom: 8px;
+  }
+
+  .sb-section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 24px 0 12px 0;
+    color: var(--color-neutral-800, #424242);
+  }
+
+  .sb-section h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 20px 0 10px 0;
+    color: var(--color-neutral-700, #616161);
+  }
+
+  .sb-section p {
+    line-height: 1.6;
+    color: var(--color-neutral-700, #616161);
+    margin-bottom: 16px;
+  }
+
+  .sb-section ul {
+    list-style: disc;
+    padding-left: 24px;
+    line-height: 1.8;
+    color: var(--color-neutral-700, #616161);
+    margin-bottom: 16px;
+  }
+
+  .sb-section pre {
+    background: var(--color-neutral-50, #fafafa);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid var(--color-neutral-200, #eeeeee);
+    margin-bottom: 16px;
+  }
+
+  .sb-section code {
+    background: var(--color-neutral-100, #f5f5f5);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    color: var(--color-primary-700, #1f4782);
+  }
+
+  .dark-theme .sb-section-title h1 {
+    color: var(--color-primary-300, #93a9cc);
+  }
+
+  .dark-theme .sb-section h2,
+  .dark-theme .sb-section h3,
+  .dark-theme .sb-section h4 {
+    color: var(--color-neutral-100, #f5f5f5);
+    border-bottom-color: var(--color-neutral-700, #616161);
+  }
+
+  .dark-theme .sb-section p,
+  .dark-theme .sb-section ul {
+    color: var(--color-neutral-300, #e0e0e0);
+  }
+
+  .dark-theme .sb-section pre {
+    background: var(--color-neutral-800, #424242);
+    color: var(--color-neutral-100, #f5f5f5);
+    border-color: var(--color-neutral-700, #616161);
+  }
+
+  .dark-theme .sb-section code {
+    background: var(--color-neutral-700, #616161);
+    color: var(--color-primary-200, #93a9cc);
+  }
+  `}
+</style>

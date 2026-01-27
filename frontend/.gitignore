@@ -70,3 +70,7 @@ dist/frontend/stats-es5.json
 
 # Source map explorer
 .sourcemap-explorer/
+
+# Storybook
+storybook-static/
+.storybook-out/
