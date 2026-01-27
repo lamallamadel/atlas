@@ -101,7 +101,7 @@ public class WorkflowController {
         }
 
         Pageable pageable = createPageable(page, size, sort);
-        Page<WorkflowDefinitionResponse> response = workflowService.listDefinitions(caseType, isActive, pageable);
+        Page<WorkflowDefinitionResponse> response = workflowService.listDefinitions(caseType, isActive, null, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -117,8 +117,54 @@ public class WorkflowController {
     public ResponseEntity<List<WorkflowDefinitionResponse>> getTransitionsForCaseType(
             @Parameter(description = "Case type code", required = true)
             @PathVariable String caseType) {
-        List<WorkflowDefinitionResponse> response = workflowService.getTransitionsForCaseType(caseType);
+        List<WorkflowDefinitionResponse> response = workflowService.getVersionsByCaseType(caseType);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/definitions/{id}/publish")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Publish workflow", description = "Publishes a workflow definition making it immutable")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Workflow published successfully"),
+            @ApiResponse(responseCode = "404", description = "Workflow not found"),
+            @ApiResponse(responseCode = "400", description = "Workflow validation failed")
+    })
+    public ResponseEntity<WorkflowDefinitionResponse> publishWorkflow(
+            @Parameter(description = "ID of the workflow definition", required = true)
+            @PathVariable Long id) {
+        WorkflowDefinitionResponse response = workflowService.publishWorkflow(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/definitions/{id}/activate")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Activate workflow", description = "Activates a published workflow for use")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Workflow activated successfully"),
+            @ApiResponse(responseCode = "404", description = "Workflow not found"),
+            @ApiResponse(responseCode = "400", description = "Workflow not published")
+    })
+    public ResponseEntity<WorkflowDefinitionResponse> activateWorkflow(
+            @Parameter(description = "ID of the workflow definition", required = true)
+            @PathVariable Long id) {
+        WorkflowDefinitionResponse response = workflowService.activateWorkflow(id);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/definitions/{id}/version")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Create new version", description = "Creates a new version of an existing workflow")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "New version created successfully"),
+            @ApiResponse(responseCode = "404", description = "Parent workflow not found")
+    })
+    public ResponseEntity<WorkflowDefinitionResponse> createNewVersion(
+            @Parameter(description = "ID of the parent workflow", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Version description")
+            @RequestParam(required = false) String description) {
+        WorkflowDefinitionResponse response = workflowService.createNewVersion(id, description);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/definitions/{id}")

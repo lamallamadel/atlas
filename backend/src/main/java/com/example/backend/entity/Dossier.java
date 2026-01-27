@@ -48,6 +48,12 @@ public class Dossier extends BaseEntity {
     @Column(name = "status_code", length = 100)
     private String statusCode;
 
+    @Column(name = "workflow_definition_id")
+    private Long workflowDefinitionId;
+
+    @Column(name = "workflow_version")
+    private Integer workflowVersion;
+
     @Column(name = "loss_reason", length = 100)
     private String lossReason;
 
@@ -213,5 +219,21 @@ public class Dossier extends BaseEntity {
 
     public void setWonReason(String wonReason) {
         this.wonReason = wonReason;
+    }
+
+    public Long getWorkflowDefinitionId() {
+        return workflowDefinitionId;
+    }
+
+    public void setWorkflowDefinitionId(Long workflowDefinitionId) {
+        this.workflowDefinitionId = workflowDefinitionId;
+    }
+
+    public Integer getWorkflowVersion() {
+        return workflowVersion;
+    }
+
+    public void setWorkflowVersion(Integer workflowVersion) {
+        this.workflowVersion = workflowVersion;
     }
 }

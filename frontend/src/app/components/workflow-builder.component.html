@@ -1,0 +1,185 @@
+<div class="workflow-builder-container">
+  <mat-card class="workflow-header">
+    <mat-card-header>
+      <mat-card-title>Workflow Builder</mat-card-title>
+      <mat-card-subtitle>Design and customize workflows with drag-and-drop editor</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="workflowForm" class="workflow-form">
+        <mat-form-field appearance="outline">
+          <mat-label>Workflow Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g., Sales Lead Workflow">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Description</mat-label>
+          <textarea matInput formControlName="description" rows="2"></textarea>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Case Type</mat-label>
+          <mat-select formControlName="caseType">
+            <mat-option *ngFor="let type of caseTypes" [value]="type">{{ type }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </form>
+
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="saveWorkflow()" [disabled]="!workflowForm.valid || states.length === 0">
+          <mat-icon>save</mat-icon> Save Workflow
+        </button>
+        <button mat-raised-button color="accent" (click)="publishWorkflow()" [disabled]="!workflow || workflow.isPublished">
+          <mat-icon>publish</mat-icon> Publish
+        </button>
+        <button mat-raised-button (click)="activateWorkflow()" [disabled]="!workflow || !workflow.isPublished">
+          <mat-icon>play_arrow</mat-icon> Activate
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <div class="builder-layout">
+    <mat-card class="canvas-card">
+      <mat-card-header>
+        <mat-card-title>Visual Editor</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <svg #svgCanvas class="workflow-canvas" width="100%" height="600"></svg>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="sidebar-card">
+      <mat-card-header>
+        <mat-card-title>Properties</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <mat-tab-group>
+          <mat-tab label="States">
+            <div class="tab-content">
+              <button mat-raised-button color="primary" (click)="isAddingState = true" class="add-button">
+                <mat-icon>add_circle</mat-icon> Add State
+              </button>
+
+              <div *ngIf="isAddingState" class="form-section">
+                <h3>New State</h3>
+                <form [formGroup]="stateForm">
+                  <mat-form-field appearance="outline">
+                    <mat-label>State Code</mat-label>
+                    <input matInput formControlName="stateCode" placeholder="e.g., NEW">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>State Name</mat-label>
+                    <input matInput formControlName="stateName" placeholder="e.g., New Lead">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>State Type</mat-label>
+                    <mat-select formControlName="stateType">
+                      <mat-option *ngFor="let type of stateTypes" [value]="type">{{ type | titlecase }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Color</mat-label>
+                    <mat-select formControlName="color">
+                      <mat-option *ngFor="let color of stateColors" [value]="color">
+                        <span [style.color]="color">● {{ color }}</span>
+                      </mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <div class="form-actions">
+                    <button mat-raised-button color="primary" (click)="addState()">Add</button>
+                    <button mat-button (click)="isAddingState = false">Cancel</button>
+                  </div>
+                </form>
+              </div>
+
+              <mat-list *ngIf="states.length > 0">
+                <mat-list-item *ngFor="let state of states" [class.selected]="selectedState?.stateCode === state.stateCode">
+                  <span matListItemTitle>
+                    <span [style.color]="state.color">●</span> {{ state.stateName }}
+                  </span>
+                  <span matListItemLine>{{ state.stateCode }} ({{ state.stateType }})</span>
+                  <button mat-icon-button matListItemMeta (click)="startAddingTransition(state.stateCode)">
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                  <button mat-icon-button matListItemMeta (click)="deleteState(state.stateCode)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-list-item>
+              </mat-list>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Transitions">
+            <div class="tab-content">
+              <button mat-raised-button color="primary" (click)="isAddingTransition = true" class="add-button">
+                <mat-icon>add_circle</mat-icon> Add Transition
+              </button>
+
+              <div *ngIf="isAddingTransition" class="form-section">
+                <h3>New Transition</h3>
+                <form [formGroup]="transitionForm">
+                  <mat-form-field appearance="outline">
+                    <mat-label>From State</mat-label>
+                    <mat-select formControlName="fromState">
+                      <mat-option *ngFor="let state of states" [value]="state.stateCode">{{ state.stateName }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>To State</mat-label>
+                    <mat-select formControlName="toState">
+                      <mat-option *ngFor="let state of states" [value]="state.stateCode">{{ state.stateName }}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Label</mat-label>
+                    <input matInput formControlName="label" placeholder="e.g., Qualify Lead">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Required Fields (comma-separated)</mat-label>
+                    <input matInput formControlName="requiredFields" placeholder="e.g., leadName, leadPhone">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Allowed Roles (comma-separated)</mat-label>
+                    <input matInput formControlName="allowedRoles">
+                  </mat-form-field>
+
+                  <div class="form-actions">
+                    <button mat-raised-button color="primary" (click)="addTransition()">Add</button>
+                    <button mat-button (click)="isAddingTransition = false; transitionSourceState = null">Cancel</button>
+                  </div>
+                </form>
+              </div>
+
+              <mat-list *ngIf="transitions.length > 0">
+                <mat-list-item *ngFor="let transition of transitions">
+                  <span matListItemTitle>{{ transition.label }}</span>
+                  <span matListItemLine>{{ transition.fromState }} → {{ transition.toState }}</span>
+                  <button mat-icon-button matListItemMeta (click)="deleteTransition(transition.fromState, transition.toState)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </mat-list-item>
+              </mat-list>
+            </div>
+          </mat-tab>
+
+          <mat-tab label="Details" *ngIf="selectedState">
+            <div class="tab-content">
+              <h3>{{ selectedState.stateName }}</h3>
+              <p><strong>Code:</strong> {{ selectedState.stateCode }}</p>
+              <p><strong>Type:</strong> {{ selectedState.stateType }}</p>
+              <p><strong>Description:</strong> {{ selectedState.description || 'N/A' }}</p>
+            </div>
+          </mat-tab>
+        </mat-tab-group>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
