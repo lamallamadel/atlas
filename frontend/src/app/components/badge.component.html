@@ -1,0 +1,9 @@
+<span 
+  [class]="getBadgeClasses()"
+  [attr.aria-label]="ariaLabel"
+  role="status">
+  <span *ngIf="dot" [class]="getDotClasses()" aria-hidden="true"></span>
+  <mat-icon *ngIf="showIconLeft" class="badge-icon badge-icon-left" [attr.aria-hidden]="true">{{ icon }}</mat-icon>
+  <span class="badge-content"><ng-content></ng-content></span>
+  <mat-icon *ngIf="showIconRight" class="badge-icon badge-icon-right" [attr.aria-hidden]="true">{{ icon }}</mat-icon>
+</span>

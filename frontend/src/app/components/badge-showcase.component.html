@@ -1,0 +1,381 @@
+<div class="badge-showcase">
+  <div class="showcase-header">
+    <h1>Badge Component System</h1>
+    <p>Comprehensive badge system with variants, sizes, colors, and animations</p>
+  </div>
+
+  <section class="showcase-section">
+    <h2>Real Estate Status Badges</h2>
+    <p class="section-description">Semantic badges for property and deal statuses</p>
+    <div class="badge-grid">
+      <div *ngFor="let example of realEstateExamples" class="badge-example">
+        <app-badge
+          [variant]="example.variant"
+          [color]="example.color"
+          [size]="example.size"
+          [pill]="example.pill || false"
+          [pulse]="example.pulse || false"
+          [dot]="example.dot || false"
+          [icon]="example.icon"
+          [iconPosition]="example.iconPosition || 'left'">
+          {{ example.label }}
+        </app-badge>
+        <span class="example-label">{{ example.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Notification Badges</h2>
+    <p class="section-description">Compact badges for counts, indicators, and alerts</p>
+    <div class="badge-grid">
+      <div *ngFor="let example of notificationExamples" class="badge-example">
+        <app-badge
+          [variant]="example.variant"
+          [color]="example.color"
+          [size]="example.size"
+          [pill]="example.pill || false"
+          [pulse]="example.pulse || false"
+          [dot]="example.dot || false"
+          [icon]="example.icon"
+          [iconPosition]="example.iconPosition || 'left'">
+          {{ example.label }}
+        </app-badge>
+        <span class="example-label">{{ example.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Pill Badges</h2>
+    <p class="section-description">Fully rounded badges for tags and labels</p>
+    <div class="badge-grid">
+      <div *ngFor="let example of pillExamples" class="badge-example">
+        <app-badge
+          [variant]="example.variant"
+          [color]="example.color"
+          [size]="example.size"
+          [pill]="example.pill || false"
+          [pulse]="example.pulse || false"
+          [dot]="example.dot || false"
+          [icon]="example.icon"
+          [iconPosition]="example.iconPosition || 'left'">
+          {{ example.label }}
+        </app-badge>
+        <span class="example-label">{{ example.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Pulse Animations</h2>
+    <p class="section-description">Animated badges for active states and urgent notifications</p>
+    <div class="badge-grid">
+      <div *ngFor="let example of pulseExamples" class="badge-example">
+        <app-badge
+          [variant]="example.variant"
+          [color]="example.color"
+          [size]="example.size"
+          [pill]="example.pill || false"
+          [pulse]="example.pulse || false"
+          [dot]="example.dot || false"
+          [icon]="example.icon"
+          [iconPosition]="example.iconPosition || 'left'">
+          {{ example.label }}
+        </app-badge>
+        <span class="example-label">{{ example.label }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Variants</h2>
+    <p class="section-description">Solid, outline, and soft variants</p>
+    <div class="variant-grid">
+      <div *ngFor="let variant of variants" class="variant-column">
+        <h3>{{ variant | titlecase }}</h3>
+        <div class="badge-list">
+          <app-badge
+            variant="solid"
+            color="primary"
+            size="md"
+            *ngIf="variant === 'solid'">
+            Primary
+          </app-badge>
+          <app-badge
+            variant="solid"
+            color="success"
+            size="md"
+            *ngIf="variant === 'solid'">
+            Success
+          </app-badge>
+          <app-badge
+            variant="solid"
+            color="warning"
+            size="md"
+            *ngIf="variant === 'solid'">
+            Warning
+          </app-badge>
+          <app-badge
+            variant="solid"
+            color="danger"
+            size="md"
+            *ngIf="variant === 'solid'">
+            Danger
+          </app-badge>
+          <app-badge
+            variant="solid"
+            color="info"
+            size="md"
+            *ngIf="variant === 'solid'">
+            Info
+          </app-badge>
+          <app-badge
+            variant="solid"
+            color="neutral"
+            size="md"
+            *ngIf="variant === 'solid'">
+            Neutral
+          </app-badge>
+          
+          <app-badge
+            variant="outline"
+            color="primary"
+            size="md"
+            *ngIf="variant === 'outline'">
+            Primary
+          </app-badge>
+          <app-badge
+            variant="outline"
+            color="success"
+            size="md"
+            *ngIf="variant === 'outline'">
+            Success
+          </app-badge>
+          <app-badge
+            variant="outline"
+            color="warning"
+            size="md"
+            *ngIf="variant === 'outline'">
+            Warning
+          </app-badge>
+          <app-badge
+            variant="outline"
+            color="danger"
+            size="md"
+            *ngIf="variant === 'outline'">
+            Danger
+          </app-badge>
+          <app-badge
+            variant="outline"
+            color="info"
+            size="md"
+            *ngIf="variant === 'outline'">
+            Info
+          </app-badge>
+          <app-badge
+            variant="outline"
+            color="neutral"
+            size="md"
+            *ngIf="variant === 'outline'">
+            Neutral
+          </app-badge>
+          
+          <app-badge
+            variant="soft"
+            color="primary"
+            size="md"
+            *ngIf="variant === 'soft'">
+            Primary
+          </app-badge>
+          <app-badge
+            variant="soft"
+            color="success"
+            size="md"
+            *ngIf="variant === 'soft'">
+            Success
+          </app-badge>
+          <app-badge
+            variant="soft"
+            color="warning"
+            size="md"
+            *ngIf="variant === 'soft'">
+            Warning
+          </app-badge>
+          <app-badge
+            variant="soft"
+            color="danger"
+            size="md"
+            *ngIf="variant === 'soft'">
+            Danger
+          </app-badge>
+          <app-badge
+            variant="soft"
+            color="info"
+            size="md"
+            *ngIf="variant === 'soft'">
+            Info
+          </app-badge>
+          <app-badge
+            variant="soft"
+            color="neutral"
+            size="md"
+            *ngIf="variant === 'soft'">
+            Neutral
+          </app-badge>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Sizes</h2>
+    <p class="section-description">Small, medium, and large sizes</p>
+    <div class="size-demo">
+      <div *ngFor="let size of sizes" class="size-group">
+        <span class="size-label">{{ size | uppercase }}</span>
+        <app-badge variant="solid" color="primary" [size]="size">
+          Badge {{ size | uppercase }}
+        </app-badge>
+        <app-badge variant="soft" color="success" [size]="size" icon="check">
+          With Icon
+        </app-badge>
+        <app-badge variant="soft" color="info" [size]="size" [dot]="true">
+          With Dot
+        </app-badge>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>All Colors</h2>
+    <p class="section-description">Complete color palette with semantic meanings</p>
+    <div class="color-grid">
+      <div *ngFor="let color of colors" class="color-example">
+        <h4>{{ getColorLabel(color) }}</h4>
+        <div class="color-variants">
+          <app-badge variant="solid" [color]="color" size="md">
+            Solid
+          </app-badge>
+          <app-badge variant="outline" [color]="color" size="md">
+            Outline
+          </app-badge>
+          <app-badge variant="soft" [color]="color" size="md">
+            Soft
+          </app-badge>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Icon Positions</h2>
+    <p class="section-description">Icons can be placed on the left or right</p>
+    <div class="icon-demo">
+      <app-badge variant="soft" color="success" size="md" icon="check" iconPosition="left">
+        Icon Left
+      </app-badge>
+      <app-badge variant="soft" color="warning" size="md" icon="warning" iconPosition="right">
+        Icon Right
+      </app-badge>
+      <app-badge variant="solid" color="info" size="md" icon="info" iconPosition="left">
+        Icon Left
+      </app-badge>
+      <app-badge variant="outline" color="danger" size="md" icon="close" iconPosition="right">
+        Icon Right
+      </app-badge>
+    </div>
+  </section>
+
+  <section class="showcase-section dark-mode-preview">
+    <h2>Dark Mode</h2>
+    <p class="section-description">All badges automatically adapt to dark theme</p>
+    <div class="dark-theme dark-mode-container">
+      <div class="badge-grid">
+        <app-badge variant="solid" color="primary" size="md">Primary</app-badge>
+        <app-badge variant="solid" color="success" size="md" icon="check">Success</app-badge>
+        <app-badge variant="soft" color="success-sold" size="md" icon="sell">Vendu</app-badge>
+        <app-badge variant="soft" color="warning-urgent" size="md" icon="warning">Urgent</app-badge>
+        <app-badge variant="outline" color="info" size="md" icon="info">Info</app-badge>
+        <app-badge variant="soft" color="neutral-warmth" size="md">Neutral</app-badge>
+        <app-badge variant="solid" color="danger" size="sm" [pill]="true" [pulse]="true">5</app-badge>
+        <app-badge variant="soft" color="success" size="md" [dot]="true" [pulse]="true">En ligne</app-badge>
+      </div>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Usage Examples</h2>
+    <p class="section-description">Common badge combinations in context</p>
+    
+    <div class="usage-examples">
+      <div class="usage-card">
+        <h4>Property Card</h4>
+        <div class="mock-card">
+          <div class="mock-header">
+            <span class="mock-title">Villa Moderne - Paris 16ème</span>
+            <app-badge variant="soft" color="success-sold" size="md" icon="sell">
+              Vendu
+            </app-badge>
+          </div>
+          <p class="mock-text">3 chambres • 150m² • Jardin</p>
+          <div class="mock-footer">
+            <app-badge variant="soft" color="primary" size="sm" [pill]="true">
+              Premium
+            </app-badge>
+            <app-badge variant="outline" color="neutral-warmth" size="sm">
+              Vente
+            </app-badge>
+          </div>
+        </div>
+      </div>
+
+      <div class="usage-card">
+        <h4>Lead Status</h4>
+        <div class="mock-card">
+          <div class="mock-header">
+            <span class="mock-title">Jean Dupont</span>
+            <app-badge variant="soft" color="warning-critical" size="md" icon="warning" [pulse]="true">
+              Urgent
+            </app-badge>
+          </div>
+          <p class="mock-text">Intéressé par appartement T3</p>
+          <div class="mock-footer">
+            <app-badge variant="soft" color="info" size="sm" [dot]="true">
+              Nouveau
+            </app-badge>
+            <app-badge variant="soft" color="success" size="sm" icon="phone">
+              À rappeler
+            </app-badge>
+          </div>
+        </div>
+      </div>
+
+      <div class="usage-card">
+        <h4>Notification Center</h4>
+        <div class="mock-card">
+          <div class="mock-list">
+            <div class="mock-list-item">
+              <span class="mock-text">Messages</span>
+              <app-badge variant="solid" color="danger" size="sm" [pill]="true" [pulse]="true">
+                8
+              </app-badge>
+            </div>
+            <div class="mock-list-item">
+              <span class="mock-text">Rendez-vous</span>
+              <app-badge variant="soft" color="warning-attention" size="sm" [pill]="true">
+                3
+              </app-badge>
+            </div>
+            <div class="mock-list-item">
+              <span class="mock-text">Tâches</span>
+              <app-badge variant="soft" color="info" size="sm" [pill]="true">
+                12
+              </app-badge>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
