@@ -1,0 +1,143 @@
+{
+  "audit_metadata": {
+    "audit_date": "2024",
+    "scope": "V1 to V37",
+    "total_migrations_audited": 37,
+    "migrations_with_jsonb": 5,
+    "migrations_needing_refactoring": 4,
+    "total_jsonb_occurrences": 8,
+    "jsonb_occurrences_needing_fix": 7
+  },
+  "findings": [
+    {
+      "migration": "V2",
+      "file": "V2__Add_jsonb_and_missing_columns.sql",
+      "line": 1,
+      "column_name": "N/A (comment)",
+      "type_used": "N/A",
+      "needs_refactoring": false,
+      "priority": "Low",
+      "table_name": "N/A",
+      "notes": "Comment only - informational"
+    },
+    {
+      "migration": "V34",
+      "file": "V34__Add_user_preferences.sql",
+      "line": 8,
+      "column_name": "dashboard_layout",
+      "type_used": "JSONB",
+      "needs_refactoring": true,
+      "priority": "High",
+      "table_name": "user_preferences",
+      "notes": "Dashboard layout configuration JSON"
+    },
+    {
+      "migration": "V34",
+      "file": "V34__Add_user_preferences.sql",
+      "line": 9,
+      "column_name": "widget_settings",
+      "type_used": "JSONB",
+      "needs_refactoring": true,
+      "priority": "High",
+      "table_name": "user_preferences",
+      "notes": "Widget settings configuration JSON"
+    },
+    {
+      "migration": "V34",
+      "file": "V34__Add_user_preferences.sql",
+      "line": 10,
+      "column_name": "general_preferences",
+      "type_used": "JSONB",
+      "needs_refactoring": true,
+      "priority": "High",
+      "table_name": "user_preferences",
+      "notes": "General preferences JSON"
+    },
+    {
+      "migration": "V35",
+      "file": "V35__Add_filter_preset_entity.sql",
+      "line": 7,
+      "column_name": "filter_config",
+      "type_used": "JSONB NOT NULL",
+      "needs_refactoring": true,
+      "priority": "High",
+      "table_name": "filter_preset",
+      "notes": "Filter configuration JSON (NOT NULL)"
+    },
+    {
+      "migration": "V36",
+      "file": "V36__Add_comment_threads.sql",
+      "line": 20,
+      "column_name": "mentions_json",
+      "type_used": "JSONB",
+      "needs_refactoring": true,
+      "priority": "Medium",
+      "table_name": "comment",
+      "notes": "User mentions in comments JSON"
+    },
+    {
+      "migration": "V37",
+      "file": "V37__Add_smart_suggestions.sql",
+      "line": 32,
+      "column_name": "action_payload",
+      "type_used": "JSONB",
+      "needs_refactoring": true,
+      "priority": "Medium",
+      "table_name": "suggestion_template",
+      "notes": "Suggestion action payload JSON"
+    },
+    {
+      "migration": "V37",
+      "file": "V37__Add_smart_suggestions.sql",
+      "line": 51,
+      "column_name": "variables",
+      "type_used": "JSONB",
+      "needs_refactoring": true,
+      "priority": "Medium",
+      "table_name": "message_template",
+      "notes": "Message template variables JSON"
+    }
+  ],
+  "refactoring_plan": {
+    "strategy": "Create correction migrations (Option 2)",
+    "high_priority": [
+      {
+        "migration": "V34",
+        "table": "user_preferences",
+        "columns": ["dashboard_layout", "widget_settings", "general_preferences"],
+        "new_migration": "V38__Fix_user_preferences_json_type.sql"
+      },
+      {
+        "migration": "V35",
+        "table": "filter_preset",
+        "columns": ["filter_config"],
+        "new_migration": "V39__Fix_filter_preset_json_type.sql"
+      }
+    ],
+    "medium_priority": [
+      {
+        "migration": "V36",
+        "table": "comment",
+        "columns": ["mentions_json"],
+        "new_migration": "V40__Fix_comment_json_type.sql"
+      },
+      {
+        "migration": "V37",
+        "tables": ["suggestion_template", "message_template"],
+        "columns": ["action_payload", "variables"],
+        "new_migration": "V41__Fix_smart_suggestions_json_type.sql"
+      }
+    ]
+  },
+  "correct_migrations": [
+    "V2__Add_jsonb_and_missing_columns.sql",
+    "V3__Complete_schema_and_constraints.sql",
+    "V6__Add_notification_system.sql",
+    "V13__Add_outbound_messaging.sql",
+    "V16__Add_workflow_engine.sql",
+    "V20__Add_email_integration.sql",
+    "V25__Add_whatsapp_template_management.sql",
+    "V30__Add_activity_metadata_and_new_types.sql",
+    "V32__Add_coop_habitat_bounded_context.sql"
+  ]
+}
