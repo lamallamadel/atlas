@@ -1,2 +1,2 @@
--- Create index on metadata column for faster JSON queries
-CREATE INDEX IF NOT EXISTS idx_activity_metadata ON activity(metadata);
+-- MIGRATED TO: db/migration/V39__Add_Index_metadata.sql
+-- This file should be deleted

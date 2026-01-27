@@ -1,1 +1,2 @@
-ALTER TABLE annonce ALTER COLUMN surface DOUBLE;
+-- MIGRATED TO: db/migration/V38__Add_update_column_surface.sql
+-- This file should be deleted

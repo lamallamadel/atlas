@@ -1,0 +1,6 @@
+# This directory has been deleted. Content migrated to db/migration as V38 and V39.
+# The original files were:
+# - V200__Add_update_column_surface.sql -> V38__Add_update_column_surface.sql
+# - V201__Add_Index_metadata.sql -> V39__Add_Index_metadata.sql
+#
+# This marker file can be safely deleted manually.
