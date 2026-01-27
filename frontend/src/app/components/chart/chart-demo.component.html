@@ -1,0 +1,152 @@
+<div class="chart-demo-container" [class.dark-mode]="darkMode">
+  <div class="chart-demo-header">
+    <h1>Visualisation de Données</h1>
+    <div class="chart-demo-controls">
+      <mat-form-field appearance="outline">
+        <mat-label>Palette de couleurs</mat-label>
+        <mat-select [(ngModel)]="selectedPalette" (selectionChange)="onPaletteChange()">
+          <mat-option *ngFor="let palette of palettes" [value]="palette">
+            {{ palette | titlecase }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <button mat-raised-button (click)="toggleDarkMode()">
+        <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        {{ darkMode ? 'Mode Clair' : 'Mode Sombre' }}
+      </button>
+    </div>
+  </div>
+
+  <div class="chart-kpi-grid">
+    <div class="chart-kpi-card" *ngFor="let kpi of kpiData">
+      <div class="chart-kpi-label">{{ kpi.label }}</div>
+      <div class="chart-kpi-value">{{ kpi.value }}</div>
+      <div class="chart-kpi-trend" [class]="kpi.trendType">
+        <mat-icon>{{ kpi.trendType === 'positive' ? 'trending_up' : 'trending_down' }}</mat-icon>
+        <span>{{ kpi.trend }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <h2>Graphique en Barres</h2>
+    <app-chart
+      type="bar"
+      [labels]="barChartLabels"
+      [datasets]="barChartDatasets"
+      title="Ventes Mensuelles 2024"
+      subtitle="Nombre de transactions par mois"
+      [darkMode]="darkMode"
+      [height]="400"
+      (chartClick)="onChartClick($event)"
+      (exportComplete)="onExportComplete($event)">
+    </app-chart>
+  </div>
+
+  <div class="chart-section">
+    <h2>Graphique Linéaire</h2>
+    <app-chart
+      type="line"
+      [labels]="lineChartLabels"
+      [datasets]="lineChartDatasets"
+      title="Visites Hebdomadaires"
+      subtitle="Nombre de visites par jour"
+      [darkMode]="darkMode"
+      [height]="400"
+      (chartClick)="onChartClick($event)"
+      (exportComplete)="onExportComplete($event)">
+    </app-chart>
+  </div>
+
+  <div class="chart-grid-2col">
+    <div class="chart-section">
+      <h2>Graphique Circulaire</h2>
+      <app-chart
+        type="pie"
+        [labels]="pieChartLabels"
+        [datasets]="pieChartDatasets"
+        title="Répartition par Service"
+        [darkMode]="darkMode"
+        [aspectRatio]="1"
+        [height]="400"
+        (chartClick)="onChartClick($event)">
+      </app-chart>
+    </div>
+
+    <div class="chart-section">
+      <h2>Graphique en Anneau</h2>
+      <app-chart
+        type="doughnut"
+        [labels]="doughnutChartLabels"
+        [datasets]="doughnutChartDatasets"
+        title="Statut des Dossiers"
+        [darkMode]="darkMode"
+        [aspectRatio]="1"
+        [height]="400"
+        (chartClick)="onChartClick($event)">
+      </app-chart>
+    </div>
+  </div>
+
+  <div class="chart-section">
+    <h2>Graphique de Zone</h2>
+    <app-chart
+      type="line"
+      [labels]="areaChartLabels"
+      [datasets]="areaChartDatasets"
+      title="Revenus par Semaine"
+      subtitle="Évolution du chiffre d'affaires"
+      [darkMode]="darkMode"
+      [height]="400"
+      (chartClick)="onChartClick($event)"
+      (exportComplete)="onExportComplete($event)">
+    </app-chart>
+  </div>
+
+  <div class="chart-section">
+    <h2>Graphique Radar</h2>
+    <app-chart
+      type="radar"
+      [labels]="radarChartLabels"
+      [datasets]="radarChartDatasets"
+      title="Performance des Agents"
+      subtitle="Évaluation sur 5 critères"
+      [darkMode]="darkMode"
+      [aspectRatio]="1.5"
+      [height]="400"
+      (chartClick)="onChartClick($event)">
+    </app-chart>
+  </div>
+
+  <div class="chart-section">
+    <h2>Barres Empilées</h2>
+    <app-chart
+      type="bar"
+      [labels]="stackedBarLabels"
+      [datasets]="stackedBarDatasets"
+      title="Ventes par Type de Bien"
+      subtitle="Répartition trimestrielle"
+      [darkMode]="darkMode"
+      [stacked]="true"
+      [height]="400"
+      (chartClick)="onChartClick($event)"
+      (exportComplete)="onExportComplete($event)">
+    </app-chart>
+  </div>
+
+  <div class="chart-section">
+    <h2>Lignes Multiples</h2>
+    <app-chart
+      type="line"
+      [labels]="multiLineLabels"
+      [datasets]="multiLineDatasets"
+      title="Comparaison Annuelle"
+      subtitle="Performance 2023 vs 2024 vs Objectif"
+      [darkMode]="darkMode"
+      [height]="400"
+      (chartClick)="onChartClick($event)"
+      (exportComplete)="onExportComplete($event)">
+    </app-chart>
+  </div>
+</div>

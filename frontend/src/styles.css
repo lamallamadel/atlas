@@ -6,6 +6,7 @@
 @import './styles/_color-utilities.scss';
 @import './styles/cards.scss';
 @import './styles/mobile-pwa.css';
+@import './styles/chart-visualization.scss';
 @import 'shepherd.js/dist/css/shepherd.css';
 
 * {
