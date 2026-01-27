@@ -183,7 +183,7 @@
   </div>
 
   <main class="page-content">
-    <app-loading-skeleton *ngIf="loading" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des annonces"></app-loading-skeleton>
+    <app-skeleton-loader *ngIf="loading" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des annonces"></app-skeleton-loader>
 
     <div *ngIf="error && !loading" class="error-state" role="alert" aria-live="assertive">
       <p class="error-message">{{ error }}</p>

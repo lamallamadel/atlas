@@ -41,7 +41,7 @@
               </mat-card-header>
               
               <mat-card-content>
-                <app-loading-skeleton *ngIf="kpiCards[key].loading" variant="dashboard-kpi" aria-label="Chargement des données"></app-loading-skeleton>
+                <app-skeleton-loader *ngIf="kpiCards[key].loading" variant="dashboard-kpi" aria-label="Chargement des données"></app-skeleton-loader>
                 
                 <div *ngIf="!kpiCards[key].loading" class="kpi-content">
                   <div *ngIf="kpiCards[key].error" class="kpi-error" role="alert" aria-live="assertive">
@@ -129,7 +129,7 @@
                   </mat-button-toggle-group>
                 </div>
 
-                <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-loading-skeleton>
+                <app-skeleton-loader *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-skeleton-loader>
                 
                 <div *ngIf="!loadingRecent && errorRecent" class="kpi-error" role="alert" aria-live="assertive">
                   <mat-icon color="warn" aria-hidden="true">error</mat-icon>
