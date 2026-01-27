@@ -153,6 +153,7 @@ import { SwipeableCardComponent } from './components/swipeable-card.component';
 import { PwaInstallPromptComponent } from './components/pwa-install-prompt.component';
 import { AppShellComponent } from './components/app-shell.component';
 import { OfflineDossiersViewerComponent } from './components/offline-dossiers-viewer.component';
+import { PhotoGalleryComponent } from './components/photo-gallery.component';
 
 registerLocaleData(localeFr);
 
@@ -265,7 +266,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     SwipeableCardComponent,
     PwaInstallPromptComponent,
     AppShellComponent,
-    OfflineDossiersViewerComponent
+    OfflineDossiersViewerComponent,
+    PhotoGalleryComponent
   ],
   imports: [
     BrowserModule,
