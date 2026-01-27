@@ -56,6 +56,7 @@
               "raf",
               "rgbcolor",
               "shepherd.js",
+              "lottie-web",
               "@fullcalendar/core",
               "@fullcalendar/daygrid",
               "@fullcalendar/timegrid",

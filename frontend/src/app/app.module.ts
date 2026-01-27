@@ -156,6 +156,9 @@ import { AppShellComponent } from './components/app-shell.component';
 import { OfflineDossiersViewerComponent } from './components/offline-dossiers-viewer.component';
 import { PhotoGalleryComponent } from './components/photo-gallery.component';
 import { NotificationToastComponent } from './components/notification-toast.component';
+import { LottieAnimationComponent } from './components/lottie-animation.component';
+import { AnimatedEmptyStateComponent } from './components/animated-empty-state.component';
+import { LottieAnimationsDemoComponent } from './components/lottie-animations-demo.component';
 
 registerLocaleData(localeFr);
 
@@ -271,7 +274,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AppShellComponent,
     OfflineDossiersViewerComponent,
     PhotoGalleryComponent,
-    NotificationToastComponent
+    NotificationToastComponent,
+    LottieAnimationComponent,
+    AnimatedEmptyStateComponent,
+    LottieAnimationsDemoComponent
   ],
   imports: [
     BrowserModule,

@@ -57,6 +57,7 @@
     "d3": "^7.8.5",
     "jspdf": "^2.5.1",
     "jspdf-autotable": "^3.8.2",
+    "lottie-web": "^5.12.2",
     "ng2-charts": "^5.0.3",
     "papaparse": "^5.4.1",
     "rxjs": "~7.8.0",
