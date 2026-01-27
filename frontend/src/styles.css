@@ -8,6 +8,7 @@
 @import './styles/mobile-pwa.css';
 @import './styles/chart-visualization.scss';
 @import './styles/forms-elegant.scss';
+@import './styles/rtl.scss';
 @import 'shepherd.js/dist/css/shepherd.css';
 
 * {

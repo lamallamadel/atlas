@@ -89,6 +89,7 @@ import { MaintainScrollDirective } from './directives/maintain-scroll.directive'
 import { DateFormatPipe } from './pipes/date-format.pipe';
 import { PriceFormatPipe } from './pipes/price-format.pipe';
 import { PhoneFormatPipe } from './pipes/phone-format.pipe';
+import { LocalizePipe } from './pipes/localize.pipe';
 import { CollaborationPresenceComponent } from './components/collaboration-presence.component';
 import { CollaborationCursorComponent } from './components/collaboration-cursor.component';
 import { CollaborationActivityStreamComponent } from './components/collaboration-activity-stream.component';
@@ -98,6 +99,8 @@ import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import localeEn from '@angular/common/locales/en';
+import localeEs from '@angular/common/locales/es';
 import { NgChartsModule } from 'ng2-charts';
 import { WhatsappThreadComponent } from './components/whatsapp-thread.component';
 import { WhatsappMessageInputComponent } from './components/whatsapp-message-input.component';
@@ -159,8 +162,11 @@ import { NotificationToastComponent } from './components/notification-toast.comp
 import { LottieAnimationComponent } from './components/lottie-animation.component';
 import { AnimatedEmptyStateComponent } from './components/animated-empty-state.component';
 import { LottieAnimationsDemoComponent } from './components/lottie-animations-demo.component';
+import { LocaleSwitcherComponent } from './components/locale-switcher.component';
 
-registerLocaleData(localeFr);
+registerLocaleData(localeFr, 'fr');
+registerLocaleData(localeEn, 'en');
+registerLocaleData(localeEs, 'es');
 
 export function initAuth(authService: AuthService): () => Promise<void> {
   return () => authService.init();
@@ -215,6 +221,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     DateFormatPipe,
     PriceFormatPipe,
     PhoneFormatPipe,
+    LocalizePipe,
     HighlightPipe,
     WhatsappThreadComponent,
     WhatsappMessageInputComponent,
@@ -277,7 +284,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     NotificationToastComponent,
     LottieAnimationComponent,
     AnimatedEmptyStateComponent,
-    LottieAnimationsDemoComponent
+    LottieAnimationsDemoComponent,
+    LocaleSwitcherComponent
   ],
   imports: [
     BrowserModule,

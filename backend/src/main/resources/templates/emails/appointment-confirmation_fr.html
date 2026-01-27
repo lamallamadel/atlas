@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de rendez-vous</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #1976d2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .details {
+            background-color: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #1976d2;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Confirmation de rendez-vous</h1>
+    </div>
+    
+    <div class="content">
+        <p>Bonjour <span th:text="${clientName}">Client</span>,</p>
+        
+        <p>Votre rendez-vous a été confirmé avec succès.</p>
+        
+        <div class="details">
+            <h3>Détails du rendez-vous</h3>
+            <p><strong>Bien immobilier :</strong> <span th:text="${propertyAddress}">Adresse</span></p>
+            <p><strong>Date :</strong> <span th:text="${appointmentDate}">Date</span></p>
+            <p><strong>Heure :</strong> <span th:text="${appointmentTime}">Heure</span></p>
+            <p><strong>Agent :</strong> <span th:text="${agentName}">Agent</span></p>
+            <p><strong>Téléphone de l'agent :</strong> <span th:text="${agentPhone}">Téléphone</span></p>
+        </div>
+        
+        <p>Si vous avez besoin de reporter ou d'annuler ce rendez-vous, veuillez nous contacter au plus tôt.</p>
+        
+        <a th:href="${dashboardUrl}" class="button">Voir mon tableau de bord</a>
+    </div>
+    
+    <div class="footer">
+        <p>Cordialement,<br/>L'équipe immobilière</p>
+        <p>Cet email a été envoyé automatiquement, merci de ne pas répondre.</p>
+    </div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.UserPreferencesDTO;
+import com.example.backend.dto.UserLocalePreferenceDto;
 import com.example.backend.entity.UserPreferencesEntity;
 import com.example.backend.repository.UserPreferencesRepository;
 import com.example.backend.util.TenantContext;
@@ -250,5 +251,54 @@ public class UserPreferencesService {
         if (dto.getTourProgress() != null) {
             entity.setTourProgress(dto.getTourProgress());
         }
+    }
+
+    @Transactional(readOnly = true)
+    public UserLocalePreferenceDto getUserLocalePreference() {
+        String userId = TenantContext.getUserId();
+        String orgId = TenantContext.getOrgId();
+        
+        UserPreferencesEntity entity = userPreferencesRepository
+                .findByUserIdAndOrgId(userId, orgId)
+                .orElseGet(() -> createDefaultPreferences(userId, orgId));
+
+        String locale = entity.getLanguage() != null ? entity.getLanguage() : "fr";
+        return new UserLocalePreferenceDto(locale);
+    }
+
+    @Transactional
+    public UserLocalePreferenceDto saveUserLocalePreference(UserLocalePreferenceDto preferenceDto) {
+        String userId = TenantContext.getUserId();
+        String orgId = TenantContext.getOrgId();
+        
+        logger.debug("Saving locale preference for userId={}, orgId={}, locale={}", 
+                     userId, orgId, preferenceDto.getLocale());
+
+        UserPreferencesEntity entity = userPreferencesRepository
+                .findByUserIdAndOrgId(userId, orgId)
+                .orElseGet(() -> {
+                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                    newEntity.setUserId(userId);
+                    newEntity.setOrgId(orgId);
+                    return newEntity;
+                });
+
+        entity.setLanguage(preferenceDto.getLocale());
+        
+        Map<String, Object> generalPrefs = entity.getGeneralPreferences();
+        if (generalPrefs == null) {
+            generalPrefs = new HashMap<>();
+        }
+        generalPrefs.put("dateFormat", preferenceDto.getDateFormat());
+        generalPrefs.put("timeFormat", preferenceDto.getTimeFormat());
+        generalPrefs.put("numberFormat", preferenceDto.getNumberFormat());
+        generalPrefs.put("currency", preferenceDto.getCurrency());
+        entity.setGeneralPreferences(generalPrefs);
+
+        userPreferencesRepository.save(entity);
+        logger.info("Locale preference saved for userId={}, orgId={}, locale={}", 
+                    userId, orgId, preferenceDto.getLocale());
+
+        return preferenceDto;
     }
 }

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Cita</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #1976d2;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        .content {
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        .details {
+            background-color: white;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #1976d2;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            font-size: 12px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #1976d2;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Confirmación de Cita</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hola <span th:text="${clientName}">Cliente</span>,</p>
+        
+        <p>Su cita ha sido confirmada con éxito.</p>
+        
+        <div class="details">
+            <h3>Detalles de la Cita</h3>
+            <p><strong>Propiedad:</strong> <span th:text="${propertyAddress}">Dirección</span></p>
+            <p><strong>Fecha:</strong> <span th:text="${appointmentDate}">Fecha</span></p>
+            <p><strong>Hora:</strong> <span th:text="${appointmentTime}">Hora</span></p>
+            <p><strong>Agente:</strong> <span th:text="${agentName}">Agente</span></p>
+            <p><strong>Teléfono del agente:</strong> <span th:text="${agentPhone}">Teléfono</span></p>
+        </div>
+        
+        <p>Si necesita reprogramar o cancelar esta cita, por favor contáctenos lo antes posible.</p>
+        
+        <a th:href="${dashboardUrl}" class="button">Ver Mi Panel</a>
+    </div>
+    
+    <div class="footer">
+        <p>Saludos cordiales,<br/>El Equipo Inmobiliario</p>
+        <p>Este correo electrónico se envió automáticamente, por favor no responda.</p>
+    </div>
+</body>
+</html>

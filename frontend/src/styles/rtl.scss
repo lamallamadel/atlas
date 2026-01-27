@@ -1,0 +1,249 @@
+// RTL (Right-to-Left) Language Support
+// Prepared for Arabic markets
+
+[dir="rtl"] {
+  direction: rtl;
+  text-align: right;
+}
+
+body.rtl {
+  direction: rtl;
+  text-align: right;
+  
+  // Flip margin and padding
+  .ml-1, .mx-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
+  .ml-2, .mx-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+  .ml-3, .mx-3 { margin-left: 0 !important; margin-right: 1rem !important; }
+  .ml-4, .mx-4 { margin-left: 0 !important; margin-right: 1.5rem !important; }
+  .ml-5, .mx-5 { margin-left: 0 !important; margin-right: 3rem !important; }
+  
+  .mr-1, .mx-1 { margin-right: 0 !important; margin-left: 0.25rem !important; }
+  .mr-2, .mx-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+  .mr-3, .mx-3 { margin-right: 0 !important; margin-left: 1rem !important; }
+  .mr-4, .mx-4 { margin-right: 0 !important; margin-left: 1.5rem !important; }
+  .mr-5, .mx-5 { margin-right: 0 !important; margin-left: 3rem !important; }
+  
+  .pl-1, .px-1 { padding-left: 0 !important; padding-right: 0.25rem !important; }
+  .pl-2, .px-2 { padding-left: 0 !important; padding-right: 0.5rem !important; }
+  .pl-3, .px-3 { padding-left: 0 !important; padding-right: 1rem !important; }
+  .pl-4, .px-4 { padding-left: 0 !important; padding-right: 1.5rem !important; }
+  .pl-5, .px-5 { padding-left: 0 !important; padding-right: 3rem !important; }
+  
+  .pr-1, .px-1 { padding-right: 0 !important; padding-left: 0.25rem !important; }
+  .pr-2, .px-2 { padding-right: 0 !important; padding-left: 0.5rem !important; }
+  .pr-3, .px-3 { padding-right: 0 !important; padding-left: 1rem !important; }
+  .pr-4, .px-4 { padding-right: 0 !important; padding-left: 1.5rem !important; }
+  .pr-5, .px-5 { padding-right: 0 !important; padding-left: 3rem !important; }
+
+  // Text alignment
+  .text-left { text-align: right !important; }
+  .text-right { text-align: left !important; }
+
+  // Float
+  .float-left { float: right !important; }
+  .float-right { float: left !important; }
+
+  // Border radius
+  .border-left { border-left: 0 !important; border-right: 1px solid !important; }
+  .border-right { border-right: 0 !important; border-left: 1px solid !important; }
+
+  // Material components
+  .mat-drawer-side.mat-drawer-end {
+    border-right: solid 1px rgba(0, 0, 0, .12);
+    border-left: none;
+  }
+
+  .mat-drawer-side:not(.mat-drawer-end) {
+    border-left: solid 1px rgba(0, 0, 0, .12);
+    border-right: none;
+  }
+
+  .mat-menu-panel {
+    transform-origin: right top;
+  }
+
+  .mat-select-panel {
+    transform-origin: right top;
+  }
+
+  // Icons
+  .mat-icon {
+    &.flip-rtl {
+      transform: scaleX(-1);
+    }
+  }
+
+  // Navigation
+  .mat-toolbar {
+    .mat-toolbar-row,
+    .mat-toolbar-single-row {
+      flex-direction: row-reverse;
+    }
+  }
+
+  // Lists
+  .mat-list-item {
+    flex-direction: row-reverse;
+  }
+
+  .mat-list-item-content {
+    flex-direction: row-reverse;
+  }
+
+  // Forms
+  .mat-form-field-prefix {
+    order: 2;
+  }
+
+  .mat-form-field-suffix {
+    order: 0;
+  }
+
+  // Checkboxes and radios
+  .mat-checkbox-layout {
+    flex-direction: row-reverse;
+  }
+
+  .mat-radio-label {
+    flex-direction: row-reverse;
+  }
+
+  // Chips
+  .mat-chip-list-wrapper {
+    flex-direction: row-reverse;
+  }
+
+  // Steps
+  .mat-stepper-horizontal {
+    flex-direction: row-reverse;
+  }
+
+  .mat-horizontal-stepper-header {
+    flex-direction: row-reverse;
+  }
+
+  // Tabs
+  .mat-tab-labels {
+    flex-direction: row-reverse;
+  }
+
+  // Cards
+  .mat-card-header {
+    flex-direction: row-reverse;
+  }
+
+  // Dialogs
+  .mat-dialog-actions {
+    flex-direction: row-reverse;
+  }
+
+  // Tables
+  .mat-table {
+    direction: rtl;
+  }
+
+  .mat-header-cell,
+  .mat-cell {
+    text-align: right;
+  }
+
+  // Pagination
+  .mat-paginator-container {
+    flex-direction: row-reverse;
+  }
+
+  // Custom components
+  .breadcrumb {
+    flex-direction: row-reverse;
+
+    &::before {
+      content: '\\';
+      transform: none;
+    }
+  }
+
+  .property-card {
+    .property-price {
+      text-align: left;
+    }
+  }
+
+  .dossier-timeline {
+    .timeline-item {
+      &::before {
+        right: auto;
+        left: -10px;
+      }
+    }
+  }
+
+  // Animations - flip horizontal animations for RTL
+  @keyframes slideInRight {
+    from {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideInLeft {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  // Drawer adjustments
+  .mat-drawer {
+    &.mat-drawer-end {
+      right: auto;
+      left: 0;
+    }
+
+    &:not(.mat-drawer-end) {
+      left: auto;
+      right: 0;
+    }
+  }
+}
+
+// RTL-specific utilities
+.rtl-only {
+  display: none;
+}
+
+body.rtl .rtl-only {
+  display: block;
+}
+
+.ltr-only {
+  display: block;
+}
+
+body.rtl .ltr-only {
+  display: none;
+}
+
+// Flip icons for RTL
+body.rtl {
+  .icon-arrow-left::before { content: '→'; }
+  .icon-arrow-right::before { content: '←'; }
+  
+  .mat-icon {
+    &.arrow_forward,
+    &.arrow_back,
+    &.chevron_right,
+    &.chevron_left,
+    &.navigate_next,
+    &.navigate_before {
+      transform: scaleX(-1);
+    }
+  }
+}
