@@ -1,0 +1,183 @@
+name: iOS Mobile CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/mobile-ios-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+
+env:
+  NODE_VERSION: '18'
+  XCODE_VERSION: '15.0'
+
+jobs:
+  build-ios:
+    name: Build iOS App
+    runs-on: macos-13
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Angular app
+        working-directory: frontend
+        run: npm run build:prod
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
+          pod --version
+
+      - name: Sync Capacitor
+        working-directory: frontend
+        run: |
+          npm run cap:sync:ios
+
+      - name: Setup Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: ${{ env.XCODE_VERSION }}
+
+      - name: Cache Pods
+        uses: actions/cache@v3
+        with:
+          path: frontend/ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install iOS dependencies
+        working-directory: frontend/ios/App
+        run: |
+          pod install
+
+      - name: Build iOS app (Debug)
+        if: github.event_name == 'pull_request'
+        working-directory: frontend/ios/App
+        run: |
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'platform=iOS Simulator,name=iPhone 14,OS=17.0' \
+            clean build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive iOS app (Release)
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        working-directory: frontend/ios/App
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          FASTLANE_APPLE_ID: ${{ secrets.APPLE_ID }}
+          FASTLANE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          xcodebuild -workspace App.xcworkspace \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath ${{ runner.temp }}/App.xcarchive \
+            archive
+
+      - name: Export IPA
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        working-directory: frontend/ios/App
+        run: |
+          xcodebuild -exportArchive \
+            -archivePath ${{ runner.temp }}/App.xcarchive \
+            -exportPath ${{ runner.temp }}/export \
+            -exportOptionsPlist ExportOptions.plist
+
+      - name: Upload IPA artifact
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ios-app
+          path: ${{ runner.temp }}/export/*.ipa
+          retention-days: 7
+
+  deploy-testflight:
+    name: Deploy to TestFlight
+    runs-on: macos-13
+    needs: build-ios
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ios-app
+          path: ./build
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: |
+          sudo gem install fastlane
+          fastlane --version
+
+      - name: Upload to TestFlight
+        env:
+          FASTLANE_APPLE_ID: ${{ secrets.APPLE_ID }}
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_API_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+        run: |
+          fastlane pilot upload \
+            --ipa ./build/*.ipa \
+            --skip_waiting_for_build_processing \
+            --changelog "Automated build from CI/CD" \
+            --api_key_path ${{ runner.temp }}/api_key.json
+
+      - name: Notify Slack
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ iOS app successfully deployed to TestFlight",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *iOS App Deployment*\n\nSuccessfully deployed to TestFlight\n\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -8,8 +8,11 @@ import { OfflineQueueService } from './services/offline-queue.service';
 import { LiveAnnouncerService } from './services/live-announcer.service';
 import { PrefetchService } from './services/prefetch.service';
 import { NavigationService } from './services/navigation.service';
+import { NativeAppInitService } from './services/native-app-init.service';
+import { NativePlatformService } from './services/native-platform.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-root',
@@ -31,6 +34,7 @@ export class AppComponent implements OnInit, OnDestroy {
   showLoadingOverlay = false;
   private loadingTimeout: any;
   private subscriptions = new Subscription();
+  public isNativePlatform = Capacitor.isNativePlatform();
 
   constructor(
     private router: Router,
@@ -39,11 +43,18 @@ export class AppComponent implements OnInit, OnDestroy {
     private queueService: OfflineQueueService,
     private liveAnnouncer: LiveAnnouncerService,
     private prefetchService: PrefetchService,
-    private navigationService: NavigationService
+    private navigationService: NavigationService,
+    private nativeAppInit: NativeAppInitService,
+    private platformService: NativePlatformService
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
     this.swService.register();
+
+    // Initialize native app features if running on native platform
+    if (this.isNativePlatform) {
+      await this.nativeAppInit.initialize();
+    }
 
     window.addEventListener('sw-sync-queue', () => {
       this.queueService.syncQueue();
@@ -79,6 +90,11 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
     if (this.loadingTimeout) {
       clearTimeout(this.loadingTimeout);
+    }
+    
+    // Clean up native platform listeners
+    if (this.isNativePlatform) {
+      this.platformService.removeAllListeners();
     }
   }
 
