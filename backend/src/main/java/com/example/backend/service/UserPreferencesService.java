@@ -345,6 +345,53 @@ public class UserPreferencesService {
         return result;
     }
 
+    @Transactional
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
+    public Map<String, Object> resetAllPreferences(String userId) {
+        logger.debug("Resetting all preferences for userId={}", userId);
+        
+        Optional<UserPreferences> optionalPrefs = userPreferencesV2Repository.findByUserId(userId);
+        if (optionalPrefs.isPresent()) {
+            userPreferencesV2Repository.delete(optionalPrefs.get());
+        }
+        
+        Map<String, Object> orgPrefs = getOrganizationPreferencesMap();
+        Map<String, Object> systemPrefs = getSystemPreferencesMap();
+        
+        Map<String, Object> result = new HashMap<>();
+        
+        for (String category : Arrays.asList(CATEGORY_UI, CATEGORY_NOTIFICATIONS, CATEGORY_FORMATS, CATEGORY_SHORTCUTS)) {
+            Map<String, Object> categoryOrgPrefs = extractCategory(orgPrefs, category);
+            Map<String, Object> categorySystemPrefs = extractCategory(systemPrefs, category);
+            
+            result.put(category, mergePreferences(categorySystemPrefs, categoryOrgPrefs, null));
+        }
+        
+        logger.info("All preferences reset for userId={}", userId);
+        return result;
+    }
+
+    public Map<String, Map<String, Object>> getAllSchemas() {
+        Map<String, Map<String, Object>> schemas = new HashMap<>();
+        
+        schemas.put(CATEGORY_UI, parseSchemaString(getUiSchema()));
+        schemas.put(CATEGORY_NOTIFICATIONS, parseSchemaString(getNotificationsSchema()));
+        schemas.put(CATEGORY_FORMATS, parseSchemaString(getFormatsSchema()));
+        schemas.put(CATEGORY_SHORTCUTS, parseSchemaString(getShortcutsSchema()));
+        
+        return schemas;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> parseSchemaString(String schemaJson) {
+        try {
+            return objectMapper.readValue(schemaJson, Map.class);
+        } catch (JsonProcessingException e) {
+            logger.error("Failed to parse schema JSON", e);
+            return new HashMap<>();
+        }
+    }
+
     private void validateCategory(String category) {
         if (!Arrays.asList(CATEGORY_UI, CATEGORY_NOTIFICATIONS, CATEGORY_FORMATS, CATEGORY_SHORTCUTS).contains(category)) {
             throw new IllegalArgumentException("Invalid category: " + category + ". Must be one of: ui, notifications, formats, shortcuts");
