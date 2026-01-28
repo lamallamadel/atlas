@@ -2,6 +2,8 @@ package com.example.backend.config;
 
 import com.example.backend.filter.CorrelationIdFilter;
 import com.example.backend.filter.CsrfCookieFilter;
+import com.example.backend.filter.ApiKeyAuthenticationFilter;
+import com.example.backend.filter.PublicApiRateLimitFilter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,8 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.DelegatingOAuth2TokenValidator;
 import org.springframework.security.oauth2.core.OAuth2TokenValidator;
 import org.springframework.security.oauth2.jwt.*;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
@@ -56,7 +60,10 @@ public class SecurityConfig {
     private boolean csrfEnabled;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, CorrelationIdFilter correlationIdFilter, CsrfCookieFilter csrfCookieFilter) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, CorrelationIdFilter correlationIdFilter, 
+                                          CsrfCookieFilter csrfCookieFilter,
+                                          ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
+                                          PublicApiRateLimitFilter publicApiRateLimitFilter) throws Exception {
 
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -76,6 +83,7 @@ public class SecurityConfig {
                 .csrfTokenRequestHandler(requestHandler)
                 .ignoringRequestMatchers(
                     "/api/v1/webhooks/**",
+                    "/api/public/v1/**",
                     "/actuator/**",
                     "/swagger-ui/**",
                     "/api-docs/**",
@@ -121,6 +129,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/v1/webhooks/**").permitAll()
+                .requestMatchers("/api/public/v1/**").permitAll()
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
@@ -129,7 +138,9 @@ public class SecurityConfig {
                     .decoder(jwtDecoder())
                     .jwtAuthenticationConverter(jwtAuthenticationConverter())
                 )
-            );
+            )
+            .addFilterBefore(apiKeyAuthenticationFilter, BasicAuthenticationFilter.class)
+            .addFilterAfter(publicApiRateLimitFilter, ApiKeyAuthenticationFilter.class);
 
         return http.build();
     }
@@ -328,6 +339,11 @@ public class SecurityConfig {
         }
 
         return Collections.emptyList();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 
 }

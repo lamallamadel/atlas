@@ -1,0 +1,257 @@
+<div class="developer-portal">
+  <div class="header">
+    <h1>Developer Portal</h1>
+    <p>Manage API keys, webhooks, and monitor usage</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button 
+      [class.active]="activeTab === 'api-keys'"
+      (click)="activeTab = 'api-keys'">
+      API Keys
+    </button>
+    <button 
+      [class.active]="activeTab === 'webhooks'"
+      (click)="activeTab = 'webhooks'">
+      Webhooks
+    </button>
+    <button 
+      [class.active]="activeTab === 'usage'"
+      (click)="activeTab = 'usage'">
+      Usage Analytics
+    </button>
+  </div>
+
+  <!-- API Keys Tab -->
+  <div *ngIf="activeTab === 'api-keys'" class="tab-content">
+    <div class="section-header">
+      <h2>API Keys</h2>
+      <button class="btn-primary" (click)="openCreateApiKeyDialog()">
+        Create API Key
+      </button>
+    </div>
+
+    <div class="api-keys-list">
+      <div *ngFor="let key of apiKeys" class="api-key-card">
+        <div class="key-header">
+          <h3>{{ key.name }}</h3>
+          <span [class]="'badge ' + getTierColor(key.tier)">{{ key.tier }}</span>
+          <span [class]="'badge ' + getStatusColor(key.status)">{{ key.status }}</span>
+        </div>
+        <div class="key-details">
+          <p><strong>Prefix:</strong> {{ key.keyPrefix }}...</p>
+          <p *ngIf="key.lastUsedAt"><strong>Last Used:</strong> {{ key.lastUsedAt | date:'short' }}</p>
+          <p *ngIf="key.expiresAt"><strong>Expires:</strong> {{ key.expiresAt | date:'short' }}</p>
+        </div>
+        <div class="key-actions">
+          <button class="btn-secondary" (click)="selectApiKey(key)">View Usage</button>
+          <button class="btn-danger" (click)="revokeApiKey(key.id)" [disabled]="key.status !== 'ACTIVE'">
+            Revoke
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Webhooks Tab -->
+  <div *ngIf="activeTab === 'webhooks'" class="tab-content">
+    <div class="section-header">
+      <h2>Webhook Subscriptions</h2>
+      <button class="btn-primary" (click)="openCreateWebhookDialog()">
+        Create Webhook
+      </button>
+    </div>
+
+    <div class="webhooks-list">
+      <div *ngFor="let webhook of webhooks" class="webhook-card">
+        <div class="webhook-header">
+          <h3>{{ webhook.name }}</h3>
+          <span [class]="'badge ' + getStatusColor(webhook.status)">{{ webhook.status }}</span>
+        </div>
+        <div class="webhook-details">
+          <p><strong>Event:</strong> {{ webhook.eventType }}</p>
+          <p><strong>URL:</strong> {{ webhook.url }}</p>
+          <p><strong>Success Rate:</strong> {{ calculateSuccessRate() }}%</p>
+          <p *ngIf="webhook.lastSuccessAt"><strong>Last Success:</strong> {{ webhook.lastSuccessAt | date:'short' }}</p>
+        </div>
+        <div class="webhook-actions">
+          <button class="btn-secondary" (click)="selectWebhook(webhook)">View Deliveries</button>
+          <button class="btn-secondary" (click)="toggleWebhookStatus(webhook)">
+            {{ webhook.status === WebhookStatus.ACTIVE ? 'Pause' : 'Resume' }}
+          </button>
+          <button class="btn-danger" (click)="deleteWebhook(webhook.id)">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Webhook Details Panel -->
+    <div *ngIf="selectedWebhook" class="webhook-details-panel">
+      <h3>Webhook Details: {{ selectedWebhook.name }}</h3>
+      
+      <div class="secret-section">
+        <p><strong>Signing Secret:</strong></p>
+        <div class="secret-display">
+          <code>{{ selectedWebhook.secret ? selectedWebhook.secret.substring(0, 20) + '...' : 'N/A' }}</code>
+          <button *ngIf="selectedWebhook.secret" class="btn-secondary" (click)="copyWebhookSecret(selectedWebhook.secret)">
+            Copy
+          </button>
+        </div>
+      </div>
+
+      <h4>Recent Deliveries</h4>
+      <div class="deliveries-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Status</th>
+              <th>Attempts</th>
+              <th>Response</th>
+              <th>Last Attempt</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let delivery of webhookDeliveries">
+              <td>{{ delivery.eventType }}</td>
+              <td><span [class]="'badge ' + getDeliveryStatusColor(delivery.status)">{{ delivery.status }}</span></td>
+              <td>{{ delivery.attemptCount }}</td>
+              <td>{{ delivery.responseStatusCode || '-' }}</td>
+              <td>{{ delivery.lastAttemptAt | date:'short' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Usage Analytics Tab -->
+  <div *ngIf="activeTab === 'usage'" class="tab-content">
+    <div class="section-header">
+      <h2>Usage Analytics</h2>
+      <select [(ngModel)]="usageDays" (change)="selectedApiKey && loadApiKeyUsage(selectedApiKey.id)">
+        <option [value]="7">Last 7 days</option>
+        <option [value]="30">Last 30 days</option>
+        <option [value]="90">Last 90 days</option>
+      </select>
+    </div>
+
+    <div class="usage-stats">
+      <div class="stat-card">
+        <h3>Total Requests</h3>
+        <p class="stat-value">{{ getTotalRequests() }}</p>
+      </div>
+      <div class="stat-card">
+        <h3>Success Rate</h3>
+        <p class="stat-value">{{ getSuccessRate() }}%</p>
+      </div>
+      <div class="stat-card">
+        <h3>Avg Response Time</h3>
+        <p class="stat-value">{{ getAverageResponseTime() }}ms</p>
+      </div>
+    </div>
+
+    <div class="usage-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Endpoint</th>
+            <th>Requests</th>
+            <th>Success</th>
+            <th>Errors</th>
+            <th>Avg Time (ms)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let usage of usageData">
+            <td>{{ usage.date | date:'short' }}</td>
+            <td>{{ usage.endpoint }}</td>
+            <td>{{ usage.requestCount }}</td>
+            <td>{{ usage.successCount }}</td>
+            <td>{{ usage.errorCount }}</td>
+            <td>{{ usage.avgResponseTimeMs | number:'1.0-0' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Create API Key Dialog -->
+  <div *ngIf="showCreateApiKeyDialog" class="modal-overlay" (click)="showCreateApiKeyDialog = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Create API Key</h2>
+      
+      <div *ngIf="!newlyCreatedKey">
+        <div class="form-group">
+          <label>Name *</label>
+          <input type="text" [(ngModel)]="newApiKey.name" placeholder="Production API Key">
+        </div>
+
+        <div class="form-group">
+          <label>Tier *</label>
+          <select [(ngModel)]="newApiKey.tier">
+            <option [value]="ApiTier.FREE">Free (60 req/min)</option>
+            <option [value]="ApiTier.PRO">Pro (600 req/min)</option>
+            <option [value]="ApiTier.ENTERPRISE">Enterprise (6000 req/min)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea [(ngModel)]="newApiKey.description" rows="3"></textarea>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn-secondary" (click)="showCreateApiKeyDialog = false">Cancel</button>
+          <button class="btn-primary" (click)="createApiKey()" [disabled]="loading">Create</button>
+        </div>
+      </div>
+
+      <div *ngIf="newlyCreatedKey" class="key-created">
+        <div class="alert alert-warning">
+          <strong>⚠️ Important:</strong> Copy this API key now. You won't be able to see it again!
+        </div>
+        <div class="key-display">
+          <code>{{ newlyCreatedKey }}</code>
+          <button class="btn-primary" (click)="copyApiKey(newlyCreatedKey)">Copy to Clipboard</button>
+        </div>
+        <button class="btn-secondary" (click)="showCreateApiKeyDialog = false">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Create Webhook Dialog -->
+  <div *ngIf="showCreateWebhookDialog" class="modal-overlay" (click)="showCreateWebhookDialog = false">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <h2>Create Webhook</h2>
+
+      <div class="form-group">
+        <label>Name *</label>
+        <input type="text" [(ngModel)]="newWebhook.name" placeholder="Production Webhook">
+      </div>
+
+      <div class="form-group">
+        <label>URL *</label>
+        <input type="url" [(ngModel)]="newWebhook.url" placeholder="https://your-app.com/webhooks">
+      </div>
+
+      <div class="form-group">
+        <label>Event Type *</label>
+        <select [(ngModel)]="newWebhook.eventType">
+          <option *ngFor="let event of webhookEvents" [value]="event">{{ event }}</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Description</label>
+        <textarea [(ngModel)]="newWebhook.description" rows="3"></textarea>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" (click)="showCreateWebhookDialog = false">Cancel</button>
+        <button class="btn-primary" (click)="createWebhook()" [disabled]="loading">Create</button>
+      </div>
+    </div>
+  </div>
+</div>
