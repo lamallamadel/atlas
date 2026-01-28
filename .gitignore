@@ -471,3 +471,41 @@ query-results/
 analytics-exports/
 *.csv
 *.xlsx
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfplan
+terraform/*.tfvars
+!terraform/terraform.tfvars.example
+terraform/modules/**/failover_lambda.zip
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+
+# AWS
+.aws/
+aws-exports.js
+amplify-build-config.json
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Deployment
+deployment-logs/
+rollback-backups/

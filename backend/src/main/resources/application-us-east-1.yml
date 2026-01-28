@@ -1,0 +1,65 @@
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://atlas-production-db-us-east-1.cluster-xxx.us-east-1.rds.amazonaws.com:5432/atlas}
+    username: ${DB_USERNAME:atlas_admin}
+    password: ${DB_PASSWORD}
+  
+  data:
+    redis:
+      host: ${REDIS_HOST:atlas-production-redis-us-east-1.xxx.cache.amazonaws.com}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+      ssl: true
+
+multi-region:
+  current-region: us-east-1
+  replication-enabled: true
+  regions:
+    eu-west-1:
+      name: eu-west-1
+      endpoint: https://eu-west-1.atlas-crm.com
+      db-endpoint: atlas-production-db-eu-west-1.cluster-xxx.eu-west-1.rds.amazonaws.com
+      is-primary: true
+      priority: 1
+    us-east-1:
+      name: us-east-1
+      endpoint: https://us-east-1.atlas-crm.com
+      db-endpoint: atlas-production-db-us-east-1.cluster-xxx.us-east-1.rds.amazonaws.com
+      is-primary: false
+      priority: 2
+    ap-southeast-1:
+      name: ap-southeast-1
+      endpoint: https://ap-southeast-1.atlas-crm.com
+      db-endpoint: atlas-production-db-ap-southeast-1.cluster-xxx.ap-southeast-1.rds.amazonaws.com
+      is-primary: false
+      priority: 3
+  replication:
+    publication-name: atlas_publication
+    subscription-name: atlas_subscription
+    auto-resolve-conflicts: true
+    conflict-resolution-strategy: LAST_WRITE_WINS
+    sync-global-entities: true
+    isolate-regional-data: true
+
+aws:
+  region: us-east-1
+  s3:
+    bucket: atlas-crm-us-east-1
+  cloudwatch:
+    namespace: AtlasCRM/Production
+    enabled: true
+
+management:
+  metrics:
+    export:
+      cloudwatch:
+        namespace: AtlasCRM/Production
+        enabled: true
+        step: 1m
+    tags:
+      region: us-east-1
+      environment: production
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} [region:us-east-1] - %msg%n"

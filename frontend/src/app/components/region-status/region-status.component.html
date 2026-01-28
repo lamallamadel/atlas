@@ -1,0 +1,69 @@
+<div class="region-status-container">
+  <div class="current-region" (click)="toggleRegionSelector()">
+    <span class="region-icon material-icons">language</span>
+    <span class="region-name" *ngIf="currentRegion">{{ currentRegion.displayName }}</span>
+    <span class="region-latency" *ngIf="currentRegion" [ngClass]="getLatencyClass(currentRegion.name)">
+      {{ getLatencyDisplay(currentRegion.name) }}
+    </span>
+    <span class="expand-icon material-icons">{{ showRegionSelector ? 'expand_less' : 'expand_more' }}</span>
+  </div>
+
+  <div class="failover-indicator" *ngIf="failoverInProgress">
+    <span class="spinner"></span>
+    <span>Switching regions...</span>
+  </div>
+
+  <div class="region-selector" *ngIf="showRegionSelector">
+    <div class="region-selector-header">
+      <h3>Select Region</h3>
+      <button class="close-btn" (click)="toggleRegionSelector()">
+        <span class="material-icons">close</span>
+      </button>
+    </div>
+
+    <div class="region-list">
+      <div class="region-item" *ngFor="let region of allRegions"
+           [class.active]="isCurrentRegion(region)"
+           [class.disabled]="failoverInProgress"
+           (click)="switchRegion(region.name)">
+        <div class="region-info">
+          <div class="region-header">
+            <span class="region-title">{{ region.displayName }}</span>
+            <span class="current-badge" *ngIf="isCurrentRegion(region)">CURRENT</span>
+          </div>
+          <div class="region-details">
+            <div class="detail-item">
+              <span class="detail-label">Status:</span>
+              <span class="detail-value" [ngClass]="getRegionStatusClass(region.name)">
+                <span class="material-icons">{{ getRegionStatusIcon(region.name) }}</span>
+                {{ regionHealth.get(region.name)?.healthy ? 'Healthy' : 'Unavailable' }}
+              </span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Latency:</span>
+              <span class="detail-value" [ngClass]="getLatencyClass(region.name)">
+                {{ getLatencyDisplay(region.name) }}
+              </span>
+            </div>
+          </div>
+        </div>
+        <div class="region-action">
+          <button class="select-btn" *ngIf="!isCurrentRegion(region)"
+                  [disabled]="!regionHealth.get(region.name)?.healthy || failoverInProgress">
+            Switch
+          </button>
+          <span class="active-indicator" *ngIf="isCurrentRegion(region)">
+            <span class="material-icons">check</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="region-selector-footer">
+      <button class="test-btn" (click)="testAllRegions()">
+        <span class="material-icons">speed</span> Test All Regions
+      </button>
+      <p class="info-text">Your data is stored in {{ currentRegion?.displayName }} for GDPR compliance.</p>
+    </div>
+  </div>
+</div>
