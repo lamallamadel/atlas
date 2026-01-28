@@ -81,7 +81,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_lead:read')")
     @Operation(summary = "Get current model information")
     public ResponseEntity<Map<String, Object>> getModelInfo() {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         Map<String, Object> info = predictiveService.getModelInfo(orgId);
         return ResponseEntity.ok(info);
     }
@@ -90,7 +90,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_lead:read')")
     @Operation(summary = "Get feature importance from the current model")
     public ResponseEntity<Map<String, Object>> getFeatureImportance() {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         Map<String, Object> importance = predictiveService.getFeatureImportance(orgId);
         return ResponseEntity.ok(importance);
     }
@@ -99,7 +99,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "Train a new model version")
     public ResponseEntity<MLModelVersion> trainModel() {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         MLModelVersion version = trainingService.trainModel(orgId);
         if (version == null) {
             return ResponseEntity.badRequest().build();
@@ -111,7 +111,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "List all model versions")
     public ResponseEntity<List<MLModelVersion>> getModelVersions() {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         List<MLModelVersion> versions = trainingService.getModelVersions(orgId);
         return ResponseEntity.ok(versions);
     }
@@ -120,7 +120,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "Rollback to a previous model version")
     public ResponseEntity<MLModelVersion> rollbackModel(@PathVariable String version) {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         MLModelVersion rolled = trainingService.rollbackToVersion(orgId, version);
         return ResponseEntity.ok(rolled);
     }
@@ -129,7 +129,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "Create A/B test experiment")
     public ResponseEntity<ABTestExperiment> createExperiment(@RequestBody Map<String, Object> request) {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         String experimentName = (String) request.get("experiment_name");
         String description = (String) request.get("description");
         String controlMethod = (String) request.get("control_method");
@@ -148,7 +148,7 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "List A/B test experiments")
     public ResponseEntity<List<ABTestExperiment>> getExperiments() {
-        String orgId = TenantContext.getCurrentTenant();
+        String orgId = TenantContext.getOrgId();
         List<ABTestExperiment> experiments = abTestingService.getExperiments(orgId);
         return ResponseEntity.ok(experiments);
     }
