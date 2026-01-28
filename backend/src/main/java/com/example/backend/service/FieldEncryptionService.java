@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 public class FieldEncryptionService {
 
     private static final Logger logger = LoggerFactory.getLogger(FieldEncryptionService.class);
+
     private final StringEncryptor encryptor;
 
     public FieldEncryptionService(@Qualifier("jasyptStringEncryptor") StringEncryptor encryptor) {
@@ -20,7 +21,6 @@ public class FieldEncryptionService {
         if (plainText == null || plainText.isEmpty()) {
             return plainText;
         }
-        
         try {
             return encryptor.encrypt(plainText);
         } catch (Exception e) {
@@ -33,7 +33,6 @@ public class FieldEncryptionService {
         if (encryptedText == null || encryptedText.isEmpty()) {
             return encryptedText;
         }
-        
         try {
             return encryptor.decrypt(encryptedText);
         } catch (Exception e) {

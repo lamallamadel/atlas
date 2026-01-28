@@ -1,9 +1,14 @@
 package com.example.backend.service;
 
+import com.example.backend.audit.AuditDiffCalculator;
 import com.example.backend.dto.*;
+import com.example.backend.entity.AuditEventEntity;
 import com.example.backend.entity.SystemConfig;
+import com.example.backend.entity.enums.AuditAction;
+import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedAccessException;
+import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.SystemConfigRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -14,13 +19,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class SystemConfigService {
@@ -43,14 +48,20 @@ public class SystemConfigService {
     private final SystemConfigRepository systemConfigRepository;
     private final FieldEncryptionService fieldEncryptionService;
     private final ObjectMapper objectMapper;
+    private final AuditEventRepository auditEventRepository;
+    private final AuditDiffCalculator auditDiffCalculator;
 
     public SystemConfigService(
             SystemConfigRepository systemConfigRepository,
             FieldEncryptionService fieldEncryptionService,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            AuditEventRepository auditEventRepository,
+            AuditDiffCalculator auditDiffCalculator) {
         this.systemConfigRepository = systemConfigRepository;
         this.fieldEncryptionService = fieldEncryptionService;
         this.objectMapper = objectMapper;
+        this.auditEventRepository = auditEventRepository;
+        this.auditDiffCalculator = auditDiffCalculator;
     }
 
     @Transactional(readOnly = true)
@@ -344,5 +355,286 @@ public class SystemConfigService {
 
     private PerformanceSettingsDto getDefaultPerformanceSettings() {
         return new PerformanceSettingsDto(true, 100, 10, 10485760L);
+    }
+
+    @Transactional(readOnly = true)
+    public SystemConfigResponse.ConfigListResponse getAllSystemConfigs() {
+        validateSuperAdminAccess();
+        
+        logger.debug("Getting all system configuration parameters");
+        
+        List<SystemConfig> configs = systemConfigRepository.findAll();
+        List<SystemConfigResponse> responses = configs.stream()
+                .map(this::toConfigResponse)
+                .collect(Collectors.toList());
+        
+        logger.info("Retrieved {} system configuration parameters", responses.size());
+        
+        return new SystemConfigResponse.ConfigListResponse(responses, responses.size());
+    }
+
+    @Transactional
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
+    public SystemConfigResponse updateSystemConfigByKey(String key, String value) {
+        validateSuperAdminAccess();
+        
+        logger.debug("Updating system configuration parameter: {}", key);
+        
+        validateConfigValue(key, value);
+        
+        Optional<SystemConfig> existingOpt = systemConfigRepository.findByKey(key);
+        SystemConfig config;
+        SystemConfig oldConfig = null;
+        
+        if (existingOpt.isPresent()) {
+            config = existingOpt.get();
+            oldConfig = cloneConfig(config);
+            config.setValue(value);
+        } else {
+            config = new SystemConfig();
+            config.setKey(key);
+            config.setValue(value);
+            config.setCategory("CUSTOM");
+            config.setEncrypted(false);
+        }
+        
+        config = systemConfigRepository.save(config);
+        
+        logAuditEvent(config.getId(), AuditAction.UPDATED, oldConfig, config);
+        
+        logger.info("System configuration parameter updated: {} by user: {}", key, extractUserId());
+        
+        return toConfigResponse(config);
+    }
+
+    @Transactional
+    @CacheEvict(value = CACHE_NAME, allEntries = true)
+    public SystemConfigResponse.ConfigReloadResponse reloadConfiguration() {
+        validateSuperAdminAccess();
+        
+        logger.info("Reloading system configuration without restart by user: {}", extractUserId());
+        
+        List<SystemConfig> configs = systemConfigRepository.findAll();
+        int configsReloaded = configs.size();
+        
+        logAuditEvent(null, AuditAction.RELOAD, null, Map.of("configsReloaded", configsReloaded));
+        
+        logger.info("System configuration reloaded successfully: {} parameters", configsReloaded);
+        
+        return new SystemConfigResponse.ConfigReloadResponse(
+            true, 
+            "Configuration reloaded successfully", 
+            configsReloaded
+        );
+    }
+
+    @Transactional(readOnly = true)
+    public SystemConfigResponse.ConfigHealthResponse checkConfigHealth() {
+        validateSuperAdminAccess();
+        
+        logger.debug("Checking system configuration health");
+        
+        List<String> errors = new ArrayList<>();
+        Map<String, Object> details = new HashMap<>();
+        boolean isValid = true;
+        
+        try {
+            NetworkSettingsDto networkSettings = getNetworkSettings();
+            if (networkSettings.getConnectTimeout() != null && networkSettings.getConnectTimeout() < 0) {
+                errors.add("Network connection timeout is negative");
+                isValid = false;
+            }
+            if (networkSettings.getReadTimeout() != null && networkSettings.getReadTimeout() < 0) {
+                errors.add("Network read timeout is negative");
+                isValid = false;
+            }
+            if (networkSettings.getProxyPort() != null && (networkSettings.getProxyPort() < 1 || networkSettings.getProxyPort() > 65535)) {
+                errors.add("Proxy port must be between 1 and 65535");
+                isValid = false;
+            }
+            details.put("networkSettings", "checked");
+        } catch (Exception e) {
+            errors.add("Network settings validation failed: " + e.getMessage());
+            isValid = false;
+            details.put("networkSettings", "error");
+        }
+        
+        try {
+            SecuritySettingsDto securitySettings = getSecuritySettings();
+            if (securitySettings.getSessionTimeout() != null && securitySettings.getSessionTimeout() < 60) {
+                errors.add("Session timeout is too short (minimum 60 seconds)");
+                isValid = false;
+            }
+            if (securitySettings.getMaxLoginAttempts() != null && securitySettings.getMaxLoginAttempts() < 1) {
+                errors.add("Max login attempts must be at least 1");
+                isValid = false;
+            }
+            details.put("securitySettings", "checked");
+        } catch (Exception e) {
+            errors.add("Security settings validation failed: " + e.getMessage());
+            isValid = false;
+            details.put("securitySettings", "error");
+        }
+        
+        try {
+            PerformanceSettingsDto performanceSettings = getPerformanceSettings();
+            if (performanceSettings.getBatchSize() != null && performanceSettings.getBatchSize() < 1) {
+                errors.add("Batch size must be at least 1");
+                isValid = false;
+            }
+            if (performanceSettings.getAsyncPoolSize() != null && performanceSettings.getAsyncPoolSize() < 1) {
+                errors.add("Async pool size must be at least 1");
+                isValid = false;
+            }
+            if (performanceSettings.getMaxFileUploadSize() != null && performanceSettings.getMaxFileUploadSize() < 0) {
+                errors.add("Max file upload size cannot be negative");
+                isValid = false;
+            }
+            details.put("performanceSettings", "checked");
+        } catch (Exception e) {
+            errors.add("Performance settings validation failed: " + e.getMessage());
+            isValid = false;
+            details.put("performanceSettings", "error");
+        }
+        
+        List<SystemConfig> allConfigs = systemConfigRepository.findAll();
+        details.put("totalConfigs", allConfigs.size());
+        details.put("encryptedConfigs", allConfigs.stream().filter(c -> c.getEncrypted() != null && c.getEncrypted()).count());
+        
+        String status = isValid ? "HEALTHY" : "UNHEALTHY";
+        
+        logAuditEvent(null, AuditAction.CONFIG_HEALTH_CHECK, null, Map.of(
+            "status", status,
+            "errorCount", errors.size(),
+            "valid", isValid
+        ));
+        
+        logger.info("System configuration health check completed: status={}, errors={}", status, errors.size());
+        
+        return new SystemConfigResponse.ConfigHealthResponse(isValid, status, errors, details);
+    }
+
+    private SystemConfigResponse toConfigResponse(SystemConfig config) {
+        SystemConfigResponse response = new SystemConfigResponse();
+        response.setId(config.getId());
+        response.setKey(config.getKey());
+        response.setValue(config.getValue());
+        response.setCategory(config.getCategory());
+        response.setEncrypted(config.getEncrypted());
+        response.setCreatedAt(config.getCreatedAt());
+        response.setUpdatedAt(config.getUpdatedAt());
+        return response;
+    }
+
+    private SystemConfig cloneConfig(SystemConfig config) {
+        SystemConfig clone = new SystemConfig();
+        clone.setId(config.getId());
+        clone.setKey(config.getKey());
+        clone.setValue(config.getValue());
+        clone.setCategory(config.getCategory());
+        clone.setEncrypted(config.getEncrypted());
+        clone.setCreatedAt(config.getCreatedAt());
+        clone.setUpdatedAt(config.getUpdatedAt());
+        return clone;
+    }
+
+    private void logAuditEvent(Long entityId, AuditAction action, Object before, Object after) {
+        try {
+            String userId = extractUserId();
+            
+            AuditEventEntity auditEvent = new AuditEventEntity();
+            auditEvent.setEntityType(AuditEntityType.SYSTEM_CONFIG);
+            auditEvent.setEntityId(entityId != null ? entityId : 0L);
+            auditEvent.setAction(action);
+            auditEvent.setUserId(userId);
+            auditEvent.setOrgId("system");
+            
+            Map<String, Object> diff;
+            if (before != null && after != null) {
+                diff = auditDiffCalculator.buildDiff(before, after);
+            } else if (after != null) {
+                diff = new HashMap<>();
+                diff.put("after", after);
+            } else {
+                diff = new HashMap<>();
+            }
+            
+            auditEvent.setDiff(diff);
+            
+            LocalDateTime now = LocalDateTime.now();
+            auditEvent.setCreatedAt(now);
+            auditEvent.setUpdatedAt(now);
+            
+            auditEventRepository.save(auditEvent);
+            
+            logger.info("Audit event logged: entityType={}, action={}, userId={}", 
+                AuditEntityType.SYSTEM_CONFIG, action, userId);
+        } catch (Exception e) {
+            logger.error("Failed to log audit event", e);
+        }
+    }
+
+    private void validateConfigValue(String key, String value) {
+        if (key == null || key.isEmpty()) {
+            throw new IllegalArgumentException("Configuration key cannot be null or empty");
+        }
+        
+        if (value == null) {
+            throw new IllegalArgumentException("Configuration value cannot be null");
+        }
+        
+        if (NETWORK_SETTINGS_KEY.equals(key) || SECURITY_SETTINGS_KEY.equals(key) || PERFORMANCE_SETTINGS_KEY.equals(key)) {
+            try {
+                if (NETWORK_SETTINGS_KEY.equals(key)) {
+                    NetworkSettingsDto settings = objectMapper.readValue(value, NetworkSettingsDto.class);
+                    if (settings.getConnectTimeout() != null && (settings.getConnectTimeout() < 100 || settings.getConnectTimeout() > 300000)) {
+                        throw new IllegalArgumentException("Connect timeout must be between 100 and 300000 milliseconds");
+                    }
+                    if (settings.getReadTimeout() != null && (settings.getReadTimeout() < 100 || settings.getReadTimeout() > 300000)) {
+                        throw new IllegalArgumentException("Read timeout must be between 100 and 300000 milliseconds");
+                    }
+                    if (settings.getProxyPort() != null && (settings.getProxyPort() < 1 || settings.getProxyPort() > 65535)) {
+                        throw new IllegalArgumentException("Proxy port must be between 1 and 65535");
+                    }
+                } else if (SECURITY_SETTINGS_KEY.equals(key)) {
+                    SecuritySettingsDto settings = objectMapper.readValue(value, SecuritySettingsDto.class);
+                    if (settings.getSessionTimeout() != null && settings.getSessionTimeout() < 60) {
+                        throw new IllegalArgumentException("Session timeout must be at least 60 seconds");
+                    }
+                    if (settings.getMaxLoginAttempts() != null && settings.getMaxLoginAttempts() < 1) {
+                        throw new IllegalArgumentException("Max login attempts must be at least 1");
+                    }
+                } else if (PERFORMANCE_SETTINGS_KEY.equals(key)) {
+                    PerformanceSettingsDto settings = objectMapper.readValue(value, PerformanceSettingsDto.class);
+                    if (settings.getBatchSize() != null && settings.getBatchSize() < 1) {
+                        throw new IllegalArgumentException("Batch size must be at least 1");
+                    }
+                    if (settings.getAsyncPoolSize() != null && settings.getAsyncPoolSize() < 1) {
+                        throw new IllegalArgumentException("Async pool size must be at least 1");
+                    }
+                    if (settings.getMaxFileUploadSize() != null && settings.getMaxFileUploadSize() < 0) {
+                        throw new IllegalArgumentException("Max file upload size cannot be negative");
+                    }
+                }
+            } catch (JsonProcessingException e) {
+                logger.error("Invalid JSON format for configuration key: {}", key, e);
+                throw new IllegalArgumentException("Invalid JSON format for configuration value: " + e.getMessage());
+            }
+        }
+        
+        logger.debug("Configuration value validated successfully for key: {}", key);
+    }
+
+    private String extractUserId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            Object principal = authentication.getPrincipal();
+            if (principal instanceof Jwt jwt) {
+                String sub = jwt.getSubject();
+                if (sub != null) return sub;
+            }
+            return authentication.getName();
+        }
+        return "system";
     }
 }

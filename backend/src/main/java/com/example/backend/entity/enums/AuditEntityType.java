@@ -15,7 +15,8 @@ public enum AuditEntityType {
     TASK("task"),
     WHATSAPP_TEMPLATE("whatsapp_template"),
     REFERENTIAL("referential"),
-    USER_PREFERENCES("user_preferences");
+    USER_PREFERENCES("user_preferences"),
+    SYSTEM_CONFIG("system_config");
     private final String value;
 
     AuditEntityType(String value) {

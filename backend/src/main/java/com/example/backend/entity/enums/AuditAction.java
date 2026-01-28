@@ -21,7 +21,9 @@ public enum AuditAction {
     UPDATE("update"),
     DELETE("delete"),
     APPROVE("approve"),
-    REJECT("reject");
+    REJECT("reject"),
+    RELOAD("reload"),
+    CONFIG_HEALTH_CHECK("config_health_check");
 
     private final String value;
 

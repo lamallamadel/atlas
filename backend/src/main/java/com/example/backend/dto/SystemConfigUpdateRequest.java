@@ -1,8 +1,14 @@
 package com.example.backend.dto;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 
 public class SystemConfigUpdateRequest {
+
+    @NotBlank(message = "Key is required")
+    private String key;
+
+    private String value;
 
     @Valid
     private NetworkSettingsDto networkSettings;
@@ -45,5 +51,21 @@ public class SystemConfigUpdateRequest {
 
     public void setPerformanceSettings(PerformanceSettingsDto performanceSettings) {
         this.performanceSettings = performanceSettings;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
     }
 }

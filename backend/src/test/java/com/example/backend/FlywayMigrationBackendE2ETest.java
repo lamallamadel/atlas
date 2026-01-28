@@ -134,11 +134,15 @@ class FlywayMigrationBackendE2ETest {
     @Test
     void testNoSqlSyntaxErrorsInMigrations() {
         MigrationInfoService info = flyway.info();
-        MigrationInfo[] failed = info.failed();
+        MigrationInfo[] all = info.all();
+        
+        long failedCount = Arrays.stream(all)
+            .filter(m -> m.getState().isFailed())
+            .count();
 
-        assertThat(failed)
+        assertThat(failedCount)
             .as("No migrations should have failed due to SQL syntax errors")
-            .isEmpty();
+            .isEqualTo(0);
     }
 
     @Test
@@ -150,8 +154,7 @@ class FlywayMigrationBackendE2ETest {
 
     @Test
     void testFlywayLocationsExcludeMigrationH2() {
-        String[] locations = flyway.getConfiguration().getLocations()
-            .stream()
+        String[] locations = Arrays.stream(flyway.getConfiguration().getLocations())
             .map(Object::toString)
             .toArray(String[]::new);
 
