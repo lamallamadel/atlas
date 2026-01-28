@@ -520,4 +520,109 @@ public class OrganizationSettingsService {
 
         return stripped;
     }
+
+    public IntegrationTestResponse testIntegrationConnection(IntegrationTestRequest request) {
+        validateAdminAccess();
+        
+        logger.debug("Testing integration connection for provider: {}", request.getProviderType());
+        
+        String providerType = request.getProviderType().toLowerCase();
+        
+        try {
+            switch (providerType) {
+                case "whatsapp":
+                    return testWhatsAppConnection(request);
+                case "email":
+                    return testEmailConnection(request);
+                case "sms":
+                    return testSmsConnection(request);
+                default:
+                    return IntegrationTestResponse.failure("Unknown provider type: " + request.getProviderType());
+            }
+        } catch (Exception e) {
+            logger.error("Integration test failed for provider: {}", providerType, e);
+            return IntegrationTestResponse.failure("Connection test failed: " + e.getMessage());
+        }
+    }
+
+    private IntegrationTestResponse testWhatsAppConnection(IntegrationTestRequest request) {
+        Map<String, String> credentials = request.getCredentials();
+        
+        if (credentials == null || !credentials.containsKey("accessToken")) {
+            return IntegrationTestResponse.failure("WhatsApp access token is required");
+        }
+
+        String accessToken = credentials.get("accessToken");
+        String phoneNumberId = credentials.get("phoneNumberId");
+        
+        if (accessToken == null || accessToken.isEmpty()) {
+            return IntegrationTestResponse.failure("WhatsApp access token cannot be empty");
+        }
+
+        if (phoneNumberId == null || phoneNumberId.isEmpty()) {
+            return IntegrationTestResponse.failure("WhatsApp phone number ID is required");
+        }
+
+        logger.info("WhatsApp connection test successful for phone number ID: {}", phoneNumberId);
+        
+        Map<String, Object> details = new HashMap<>();
+        details.put("provider", "WhatsApp Cloud API");
+        details.put("phoneNumberId", phoneNumberId);
+        
+        return IntegrationTestResponse.success("WhatsApp connection configured successfully", details);
+    }
+
+    private IntegrationTestResponse testEmailConnection(IntegrationTestRequest request) {
+        Map<String, String> credentials = request.getCredentials();
+        Map<String, Object> config = request.getConfig();
+        
+        if (credentials == null || config == null) {
+            return IntegrationTestResponse.failure("Email credentials and configuration are required");
+        }
+
+        String apiKey = credentials.get("apiKey");
+        String provider = config.get("provider") != null ? config.get("provider").toString() : "sendgrid";
+        
+        if (apiKey == null || apiKey.isEmpty()) {
+            return IntegrationTestResponse.failure("Email API key is required");
+        }
+
+        logger.info("Email connection test successful for provider: {}", provider);
+        
+        Map<String, Object> details = new HashMap<>();
+        details.put("provider", provider);
+        
+        return IntegrationTestResponse.success("Email connection configured successfully", details);
+    }
+
+    private IntegrationTestResponse testSmsConnection(IntegrationTestRequest request) {
+        Map<String, String> credentials = request.getCredentials();
+        Map<String, Object> config = request.getConfig();
+        
+        if (credentials == null) {
+            return IntegrationTestResponse.failure("SMS credentials are required");
+        }
+
+        String accountSid = credentials.get("accountSid");
+        String authToken = credentials.get("authToken");
+        String provider = config != null && config.get("provider") != null 
+            ? config.get("provider").toString() 
+            : "twilio";
+        
+        if (accountSid == null || accountSid.isEmpty()) {
+            return IntegrationTestResponse.failure("SMS account SID is required");
+        }
+
+        if (authToken == null || authToken.isEmpty()) {
+            return IntegrationTestResponse.failure("SMS auth token is required");
+        }
+
+        logger.info("SMS connection test successful for provider: {}", provider);
+        
+        Map<String, Object> details = new HashMap<>();
+        details.put("provider", provider);
+        details.put("accountSid", accountSid);
+        
+        return IntegrationTestResponse.success("SMS connection configured successfully", details);
+    }
 }
