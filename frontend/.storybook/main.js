@@ -22,5 +22,9 @@ module.exports = {
   staticDirs: ['../src/assets'],
   core: {
     disableTelemetry: true
+  },
+  features: {
+    storyStoreV7: true,
+    buildStoriesJson: true
   }
 };

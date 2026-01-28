@@ -1,270 +1,401 @@
 import { Meta } from '@storybook/blocks';
 
-<Meta title="Introduction/Welcome" />
-
-<div className="sb-container">
-  <div className="sb-section-title">
-    # Atlas Immobilier Design System
-
-    Welcome to the Atlas Immobilier Design System documentation. This comprehensive design system provides guidelines, components, and patterns for building consistent, accessible, and beautiful real estate applications.
-  </div>
-
-  <div className="sb-section">
-    ## 🎯 Purpose
-
-    This design system serves as a single source of truth for:
-    - **Design Tokens**: Colors, typography, spacing, shadows
-    - **Components**: Reusable UI components with consistent styling
-    - **Guidelines**: Best practices and usage patterns
-    - **Accessibility**: WCAG AA compliant components and patterns
-    - **Code Snippets**: Copy-paste ready code examples
-  </div>
-
-  <div className="sb-section">
-    ## 🚀 Quick Start
-
-    ### For Designers
-    1. Browse **Design Tokens** to understand our visual language
-    2. Check **Guidelines** for do's and don'ts
-    3. Review **Components** for available UI elements
-    4. Use the **Accessibility Checklist** for inclusive design
-
-    ### For Developers
-    1. Install dependencies: `npm install`
-    2. Run Storybook: `npm run storybook`
-    3. Browse components and copy code snippets
-    4. Test dark mode and responsive previews
-  </div>
-
-  <div className="sb-section">
-    ## 📖 Documentation Structure
-
-    ### Design Tokens
-    - **Colors**: Primary, secondary, semantic colors, and accessibility compliant palettes
-    - **Typography**: Modular scale, font weights, line heights
-    - **Spacing**: 4px grid system with consistent spacing tokens
-    - **Shadows**: 5-level elevation system for depth and hierarchy
-
-    ### Guidelines
-    - **Accessibility**: WCAG AA compliance, keyboard navigation, screen readers
-    - **Best Practices**: Component usage patterns and anti-patterns
-    - **Do and Don't**: Visual examples of correct and incorrect usage
-
-    ### Components
-    - **Buttons**: Primary, secondary, text, icon buttons
-    - **Forms**: Inputs, selects, checkboxes, validation
-    - **Cards**: Property cards, stats cards, interactive cards
-    - **Badges**: Status badges, count badges, semantic badges
-    - **Illustrations**: Empty states, error states, success states
-  </div>
-
-  <div className="sb-section">
-    ## ✨ Features
-
-    - **Dark Mode Toggle**: Test all components in light and dark themes
-    - **Responsive Preview**: View components on mobile, tablet, and desktop
-    - **Accessibility Checker**: Built-in a11y testing with axe-core
-    - **Interactive Controls**: Modify component properties in real-time
-    - **Code Snippets**: Copy-ready HTML, CSS, and TypeScript code
-    - **Static Export**: Generate static documentation site for team sharing
-  </div>
-
-  <div className="sb-section">
-    ## 🎨 Design Philosophy
-
-    Our design system is built on these principles:
-
-    ### Consistency
-    - Unified visual language across all touchpoints
-    - Predictable component behavior and interactions
-    - Systematic use of colors, spacing, and typography
-
-    ### Accessibility
-    - WCAG AA compliant color contrast ratios (4.5:1 minimum)
-    - Keyboard navigation support for all interactive elements
-    - Screen reader optimized markup and ARIA labels
-    - Focus indicators with 2px solid outlines
-
-    ### Modularity
-    - Composable components that work together seamlessly
-    - Flexible design tokens for easy theming
-    - Reusable patterns and templates
-
-    ### Performance
-    - Optimized bundle sizes with lazy loading
-    - Efficient CSS with design tokens
-    - Minimal JavaScript for interactions
-  </div>
-
-  <div className="sb-section">
-    ## 🛠️ Building Blocks
-
-    ### Design Tokens (CSS Custom Properties)
-    ```css
-    --color-primary-500: #2c5aa0;
-    --spacing-4: 1rem; /* 16px */
-    --shadow-2: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    --radius-xl: 0.75rem; /* 12px */
-    ```
-
-    ### Component Usage
-    ```html
-    <button class="btn btn--primary">
-      Primary Action
-    </button>
-    ```
-
-    ### Angular Components
-    ```typescript
-    import { BadgeComponent } from '@app/components/badge';
-    ```
-  </div>
-
-  <div className="sb-section">
-    ## 📱 Responsive Design
-
-    Our components are built mobile-first with responsive breakpoints:
-    - **Mobile**: 0-575px
-    - **Tablet**: 576-991px
-    - **Desktop**: 992-1199px
-    - **Wide**: 1200px+
-
-    Use the viewport toolbar to test responsive behavior.
-  </div>
-
-  <div className="sb-section">
-    ## 🌙 Dark Mode
-
-    All components support dark mode out of the box. Toggle the background in the toolbar to test dark mode appearance.
-
-    Dark mode is implemented using CSS custom properties and the `.dark-theme` class:
-
-    ```css
-    .dark-theme {
-      --color-background: #1a1a1a;
-      --color-text: #ffffff;
-    }
-    ```
-  </div>
-
-  <div className="sb-section">
-    ## 📤 Export Static Site
-
-    To generate a static documentation site for sharing with your team:
-
-    ```bash
-    npm run build-storybook
-    ```
-
-    This creates a `storybook-static` folder that can be:
-    - Deployed to any static hosting (Netlify, Vercel, S3)
-    - Shared as a zip file
-    - Opened locally in any browser
-  </div>
-
-  <div className="sb-section">
-    ## 🤝 Contributing
-
-    To add new components or update documentation:
-    1. Create a new `.stories.ts` file in `src/stories/`
-    2. Follow the existing story structure and conventions
-    3. Include accessibility checks and responsive previews
-    4. Document all component props and variants
-    5. Provide code snippets for common use cases
-  </div>
-
-  <div className="sb-section">
-    ## 📚 Resources
-
-    - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-    - [Material Design](https://material.io/design)
-    - [Storybook Documentation](https://storybook.js.org/docs)
-    - [Angular Documentation](https://angular.io/docs)
-  </div>
-</div>
+<Meta title="Introduction" />
 
 <style>
   {`
-  .sb-container {
-    margin-bottom: 48px;
-  }
+    .hero {
+      background: linear-gradient(135deg, #2c5aa0 0%, #1f4782 100%);
+      color: white;
+      padding: 48px 32px;
+      border-radius: 16px;
+      margin-bottom: 48px;
+      text-align: center;
+    }
 
-  .sb-section {
-    margin-bottom: 32px;
-  }
+    .hero h1 {
+      margin: 0 0 16px 0;
+      font-size: 42px;
+      font-weight: 700;
+    }
 
-  .sb-section-title {
-    margin-bottom: 32px;
-  }
+    .hero p {
+      margin: 0;
+      font-size: 18px;
+      opacity: 0.95;
+      max-width: 800px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
 
-  .sb-section-title h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--color-primary-600, #2c5aa0);
-    margin-bottom: 16px;
-  }
+    .features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+    }
 
-  .sb-section h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--color-neutral-900, #212121);
-  }
+    .feature-card {
+      background: white;
+      border: 1px solid #e0e0e0;
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
 
-  .sb-section h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--color-neutral-800, #424242);
-  }
+    .feature-card:hover {
+      border-color: #2c5aa0;
+      box-shadow: 0 4px 12px rgba(44, 90, 160, 0.15);
+      transform: translateY(-2px);
+    }
 
-  .sb-section p {
-    line-height: 1.6;
-    color: var(--color-neutral-700, #616161);
-  }
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      background: linear-gradient(135deg, #2c5aa0 0%, #1f4782 100%);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 24px;
+    }
 
-  .sb-section ul {
-    list-style: disc;
-    padding-left: 24px;
-    line-height: 1.8;
-  }
+    .feature-card h3 {
+      margin: 0 0 12px 0;
+      color: #212121;
+      font-size: 18px;
+      font-weight: 600;
+    }
 
-  .sb-section pre {
-    background: var(--color-neutral-100, #f5f5f5);
-    padding: 16px;
-    border-radius: 8px;
-    overflow-x: auto;
-    font-family: 'Monaco', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.5;
-  }
+    .feature-card p {
+      margin: 0;
+      color: #616161;
+      line-height: 1.6;
+      font-size: 14px;
+    }
 
-  .sb-section code {
-    background: var(--color-neutral-100, #f5f5f5);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-family: 'Monaco', 'Courier New', monospace;
-    font-size: 13px;
-  }
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin: 48px 0;
+    }
 
-  .dark-theme .sb-section-title h1 {
-    color: var(--color-primary-300, #93a9cc);
-  }
+    .quick-link {
+      display: block;
+      padding: 16px 20px;
+      background: #f5f5f5;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #2c5aa0;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      text-align: center;
+    }
 
-  .dark-theme .sb-section h2,
-  .dark-theme .sb-section h3 {
-    color: var(--color-neutral-100, #f5f5f5);
-  }
+    .quick-link:hover {
+      background: #e5eaf3;
+      transform: translateY(-2px);
+    }
 
-  .dark-theme .sb-section p,
-  .dark-theme .sb-section ul {
-    color: var(--color-neutral-300, #e0e0e0);
-  }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 24px;
+      margin: 48px 0;
+      padding: 32px;
+      background: #f5f5f5;
+      border-radius: 12px;
+    }
 
-  .dark-theme .sb-section pre,
-  .dark-theme .sb-section code {
-    background: var(--color-neutral-800, #424242);
-    color: var(--color-neutral-100, #f5f5f5);
-  }
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 36px;
+      font-weight: 700;
+      color: #2c5aa0;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      color: #616161;
+      font-weight: 500;
+    }
   `}
 </style>
+
+<div className="hero">
+  <h1>🏢 Atlas Immobilier Design System</h1>
+  <p>
+    A comprehensive design system for real estate management, featuring 50+ documented components, 
+    accessible design tokens, and WCAG AA compliant interfaces.
+  </p>
+</div>
+
+## Welcome to the Design System
+
+This Storybook documents the complete design system for Atlas Immobilier, a professional real estate management platform. 
+Every component, pattern, and guideline has been carefully crafted to ensure consistency, accessibility, and user experience excellence.
+
+<div className="stats">
+  <div className="stat">
+    <div className="stat-number">50+</div>
+    <div className="stat-label">Components</div>
+  </div>
+  <div className="stat">
+    <div className="stat-number">100%</div>
+    <div className="stat-label">WCAG AA</div>
+  </div>
+  <div className="stat">
+    <div className="stat-number">2</div>
+    <div className="stat-label">Themes</div>
+  </div>
+  <div className="stat">
+    <div className="stat-number">4</div>
+    <div className="stat-label">Languages</div>
+  </div>
+</div>
+
+## Key Features
+
+<div className="features">
+  <div className="feature-card">
+    <div className="feature-icon">🎨</div>
+    <h3>Design Tokens</h3>
+    <p>
+      Comprehensive token system covering colors, typography, spacing, shadows, border radius, and animations. 
+      All tokens support light and dark themes.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">♿</div>
+    <h3>Accessibility First</h3>
+    <p>
+      All components meet WCAG AA standards with 4.5:1 minimum contrast ratios, keyboard navigation, 
+      and screen reader support.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">📱</div>
+    <h3>Fully Responsive</h3>
+    <p>
+      Mobile-first design with tested breakpoints for all screen sizes. Components adapt seamlessly 
+      from 375px to 1920px+.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">🌗</div>
+    <h3>Dark Theme</h3>
+    <p>
+      Complete dark theme support with automatic color adjustments while maintaining WCAG AA 
+      contrast requirements.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">🧩</div>
+    <h3>Modular Components</h3>
+    <p>
+      50+ reusable components including buttons, forms, cards, dialogs, charts, loading states, 
+      and empty states.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">📊</div>
+    <h3>Data Visualization</h3>
+    <p>
+      Chart.js integration with accessible color palettes for line, bar, pie, and doughnut charts 
+      with real-time data.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">🎭</div>
+    <h3>Icon System</h3>
+    <p>
+      Custom real estate icon library with Material Icons integration. Searchable icon gallery 
+      with category filtering.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">✨</div>
+    <h3>Animations</h3>
+    <p>
+      Smooth micro-animations and transitions with defined duration scale and easing functions. 
+      Respects prefers-reduced-motion.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">🎯</div>
+    <h3>Interactive Controls</h3>
+    <p>
+      Live component customization with Knobs addon. Modify props in real-time and copy the 
+      generated code.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">📝</div>
+    <h3>Code Snippets</h3>
+    <p>
+      Copy-paste ready code examples for every component including TypeScript, HTML, and CSS. 
+      Import statements included.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">🌍</div>
+    <h3>Internationalization</h3>
+    <p>
+      Full i18n support with French, English, Spanish, and Arabic. RTL layout support for 
+      Arabic language.
+    </p>
+  </div>
+
+  <div className="feature-card">
+    <div className="feature-icon">🚀</div>
+    <h3>Production Ready</h3>
+    <p>
+      Battle-tested components used in production. Optimized for performance with lazy loading 
+      and bundle optimization.
+    </p>
+  </div>
+</div>
+
+## Quick Start
+
+<div className="quick-links">
+  <a href="/?path=/docs/design-tokens-overview--docs" className="quick-link">
+    📐 Design Tokens
+  </a>
+  <a href="/?path=/docs/design-tokens-colors--color-palette" className="quick-link">
+    🎨 Colors
+  </a>
+  <a href="/?path=/docs/design-tokens-typography--type-scale" className="quick-link">
+    📝 Typography
+  </a>
+  <a href="/?path=/docs/components-buttons--button-variants" className="quick-link">
+    🔘 Buttons
+  </a>
+  <a href="/?path=/docs/components-forms--form-elements" className="quick-link">
+    📋 Forms
+  </a>
+  <a href="/?path=/docs/components-dialogs--dialog-types" className="quick-link">
+    💬 Dialogs
+  </a>
+  <a href="/?path=/docs/components-charts--chart-types" className="quick-link">
+    📊 Charts
+  </a>
+  <a href="/?path=/docs/guidelines-accessibility--docs" className="quick-link">
+    ♿ Accessibility
+  </a>
+</div>
+
+## What's in This Storybook?
+
+### 🎨 Design Tokens
+Complete token system for consistent design:
+- **Colors**: Primary, secondary, semantic, and neutral palettes
+- **Typography**: Modular scale, font weights, line heights
+- **Spacing**: 4px grid system with 14 spacing levels
+- **Shadows**: 6 elevation levels for depth
+- **Border Radius**: 9 radius values from subtle to full
+- **Animations**: Duration scale and easing functions
+
+### 🧩 Components
+50+ documented components including:
+- **Buttons**: 6 variants (primary, secondary, outlined, text, icon, FAB)
+- **Forms**: Inputs, selects, textareas, checkboxes, radio buttons with validation
+- **Cards**: Multiple layouts for different content types
+- **Badges**: Status indicators and labels with semantic colors
+- **Dialogs**: Modals, confirmations, form dialogs
+- **Charts**: Line, bar, pie/doughnut with Chart.js
+- **Icons**: Real estate icons and Material Icons
+- **Loading States**: Spinners, skeleton loaders, progress bars
+- **Empty States**: No data, no results, error states
+- **Illustrations**: Lottie animations for engaging UX
+
+### 📚 Guidelines
+Best practices and guidelines for:
+- **Accessibility**: WCAG AA compliance checklist
+- **Usage Patterns**: Do's and don'ts for each component
+- **Code Examples**: TypeScript, HTML, and CSS snippets
+- **Keyboard Navigation**: Keyboard shortcut documentation
+- **Responsive Design**: Breakpoint strategy
+- **Dark Theme**: Theme implementation guidelines
+
+## Technology Stack
+
+- **Angular 16.2**: Modern Angular framework
+- **Angular Material**: Material Design components
+- **TypeScript**: Type-safe development
+- **Chart.js**: Data visualization
+- **Lottie**: Animation library
+- **Storybook 7.6**: Component documentation
+- **SCSS/CSS**: Styling with CSS custom properties
+
+## Browser Support
+
+- Chrome/Edge (last 2 versions)
+- Firefox (last 2 versions)
+- Safari (last 2 versions)
+- Mobile browsers (iOS Safari, Chrome Android)
+
+## Accessibility Standards
+
+All components meet:
+- WCAG 2.1 Level AA
+- 4.5:1 minimum contrast ratio for text
+- 3:1 minimum contrast ratio for UI components
+- Keyboard navigation support
+- Screen reader compatibility
+- Focus indicators (2px solid outline)
+- Touch target size (44×44px minimum)
+
+## Getting Started
+
+1. **Browse Components**: Navigate using the sidebar
+2. **View Stories**: Each component has multiple story variations
+3. **Interactive Controls**: Use the Controls tab to modify props
+4. **Check Accessibility**: View the A11y tab for WCAG compliance
+5. **Copy Code**: Find code snippets in each story
+6. **Test Responsiveness**: Use viewport addon to test different sizes
+7. **Toggle Theme**: Switch between light and dark themes
+
+## Contributing
+
+This design system is actively maintained. To contribute:
+
+1. Follow existing patterns and conventions
+2. Ensure WCAG AA accessibility compliance
+3. Test in both light and dark themes
+4. Provide comprehensive documentation
+5. Include code examples
+6. Add accessibility guidelines
+
+## Support
+
+For questions, issues, or feature requests:
+- Review this documentation
+- Check existing component stories
+- Consult the accessibility guidelines
+- Contact the development team
+
+---
+
+<div style="text-align: center; padding: 32px 0; color: #616161;">
+  <p>Built with ❤️ by the Atlas Immobilier team</p>
+  <p style="font-size: 14px; margin-top: 8px;">
+    <strong>Version:</strong> 1.0.0 | <strong>Last Updated:</strong> 2024
+  </p>
+</div>

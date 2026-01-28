@@ -66,31 +66,33 @@ export const parameters = {
       order: [
         'Introduction',
         'Design Tokens',
-        ['Colors', 'Typography', 'Spacing', 'Shadows', 'Overview'],
+        ['Overview', 'Colors', 'Typography', 'Spacing', 'Shadows', 'Border Radius', 'Animations'],
         'Guidelines',
         ['Accessibility', 'Best Practices', 'Do and Don\'t'],
         'Components',
+        ['Buttons', 'Forms', 'Cards', 'Badges', 'Dialogs', 'Charts', 'Icons', 'Loading States', 'Empty States', 'Illustrations'],
         'Pages',
         '*'
       ],
     },
   },
-  darkMode: {
-    dark: { ...parameters?.backgrounds?.values?.[2], 
-      appBg: '#1a1a1a',
-      appContentBg: '#2d2d2d',
-      barBg: '#2d2d2d',
-      textColor: '#ffffff',
-    },
-    light: { ...parameters?.backgrounds?.values?.[0],
-      appBg: '#ffffff',
-      appContentBg: '#f5f5f5',
-      barBg: '#ffffff',
-      textColor: '#212121',
-    }
-  },
   a11y: {
-    config: {},
+    config: {
+      rules: [
+        {
+          id: 'color-contrast',
+          enabled: true,
+        },
+        {
+          id: 'button-name',
+          enabled: true,
+        },
+        {
+          id: 'aria-allowed-attr',
+          enabled: true,
+        },
+      ]
+    },
     options: {
       checks: { 'color-contrast': { options: { noScroll: true } } },
       restoreScroll: true,
@@ -101,12 +103,14 @@ export const parameters = {
 // Global decorators
 export const decorators = [
   (story, context) => {
-    const isDark = context.globals.backgrounds?.value === '#1a1a1a';
+    const isDark = context.globals.backgrounds?.value === '#1a1a1a' || context.globals.theme === 'dark';
     
     if (isDark) {
       document.body.classList.add('dark-theme');
+      document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.body.classList.remove('dark-theme');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
     
     return story();
@@ -120,8 +124,12 @@ export const globalTypes = {
     defaultValue: 'light',
     toolbar: {
       icon: 'circlehollow',
-      items: ['light', 'dark'],
+      items: [
+        { value: 'light', icon: 'sun', title: 'Light Theme' },
+        { value: 'dark', icon: 'moon', title: 'Dark Theme' }
+      ],
       showName: true,
+      dynamicTitle: true,
     },
   },
 };

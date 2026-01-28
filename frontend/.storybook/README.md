@@ -1,8 +1,42 @@
 # Atlas Immobilier Design System - Storybook
 
-Comprehensive design system documentation with interactive components, design tokens, and accessibility guidelines.
+Comprehensive design system documentation for the Atlas Immobilier real estate management platform.
 
-## 🚀 Quick Start
+## 📚 What's Inside
+
+This Storybook contains comprehensive documentation for:
+
+### Design Tokens
+- **Colors**: Primary, secondary, semantic (success, warning, error, info), and neutral palettes with WCAG AA compliance
+- **Typography**: Modular scale using Perfect Fourth ratio (1.25), font weights, line heights, and letter spacing
+- **Spacing**: 4px-based grid system with consistent spacing scale
+- **Shadows**: 6 elevation levels for depth and hierarchy
+- **Border Radius**: Consistent rounded corners from subtle to fully rounded
+- **Animations**: Duration scale and easing functions for smooth transitions
+
+### Components (50+ documented)
+- **Buttons**: Primary, secondary, outlined, text, icon buttons, and FABs
+- **Forms**: Inputs, selects, textareas, checkboxes, radio buttons with validation
+- **Cards**: Various card layouts and styles
+- **Badges**: Status indicators and labels
+- **Dialogs**: Modals, confirmations, and form dialogs
+- **Charts**: Line, bar, pie/doughnut charts with Chart.js
+- **Icons**: Real estate icon system and Material Icons
+- **Loading States**: Spinners, skeleton loaders, and progress bars
+- **Empty States**: No data, no results, error states
+- **Illustrations**: Lottie animations and SVG illustrations
+
+### Guidelines
+- **Accessibility**: WCAG AA compliance guidelines and keyboard navigation
+- **Best Practices**: Do's and don'ts for each component
+- **Code Examples**: Copy-paste ready code snippets
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ and npm
+- Angular 16.2.0
+- All frontend dependencies installed
 
 ### Running Storybook Locally
 
@@ -12,251 +46,118 @@ npm install
 npm run storybook
 ```
 
-Storybook will open at `http://localhost:6006`
+Storybook will start on http://localhost:6006
 
-### Building Static Documentation
-
-Generate a static site for sharing with your team:
+### Building Static Storybook
 
 ```bash
+cd frontend
 npm run build-storybook
 ```
 
-This creates a `storybook-static` folder that can be:
-- Deployed to Netlify, Vercel, GitHub Pages, or S3
-- Shared as a zip file
-- Opened locally in any browser
+This creates a static build in `frontend/storybook-static/` that can be deployed anywhere.
 
-## 📚 Documentation Structure
+## 📦 Deployment Options
 
-### Design Tokens
-- **Colors**: Primary, secondary, semantic colors with WCAG AA compliance
-- **Typography**: Modular scale, font weights, line heights, letter spacing
-- **Spacing**: 4px grid system with consistent spacing tokens
-- **Shadows**: 5-level elevation system for depth and hierarchy
-
-### Components
-- **Buttons**: All variants (primary, secondary, outlined, text, icon, FAB)
-- **Forms**: Inputs, selects, checkboxes, radios with validation
-- **Cards**: Property cards, stats cards, interactive cards
-- **Badges**: Status badges, count badges, tags
-- **Illustrations**: Empty states, error states, success states, loading
-
-### Guidelines
-- **Accessibility Checklist**: Comprehensive WCAG 2.1 AA compliance guide
-- **Best Practices**: Component usage patterns and anti-patterns
-- **Do and Don't**: Visual examples of correct and incorrect usage
-
-## ✨ Features
-
-### Dark Mode Toggle
-Test all components in light and dark themes using the backgrounds toolbar.
-
-### Responsive Preview
-View components on different screen sizes using the viewport toolbar:
-- Mobile (375px)
-- Tablet (768px)
-- Desktop (1280px)
-- Wide (1920px)
-
-### Accessibility Testing
-Built-in accessibility checker using axe-core:
-- Click the "Accessibility" tab in any story
-- Review violations and passes
-- Get guidance on fixes
-
-### Interactive Controls
-Modify component properties in real-time using the "Controls" tab.
-
-### Code Snippets
-Every story includes copy-ready code examples for HTML, CSS, and TypeScript.
-
-## 🎨 Using the Design System
-
-### Installing Dependencies
-
-The design system uses Angular Material. Ensure it's installed:
+### Option 1: GitHub Pages
 
 ```bash
-npm install @angular/material @angular/cdk
-```
-
-### Importing Components
-
-```typescript
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-
-@NgModule({
-  imports: [
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule
-  ]
-})
-export class YourModule { }
-```
-
-### Using Design Tokens
-
-All design tokens are available as CSS custom properties:
-
-```css
-.my-component {
-  color: var(--color-primary-500);
-  padding: var(--spacing-6);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-2);
-  font-size: var(--font-size-base);
-  transition: var(--transition-base);
-}
-```
-
-### Example Button
-
-```html
-<button mat-raised-button color="primary">
-  <mat-icon>add</mat-icon>
-  Create Dossier
-</button>
-```
-
-### Example Form Field
-
-```html
-<mat-form-field appearance="outline">
-  <mat-label>Email *</mat-label>
-  <input matInput type="email" required>
-  <mat-icon matPrefix>email</mat-icon>
-  <mat-hint>We'll never share your email</mat-hint>
-  <mat-error>Please enter a valid email</mat-error>
-</mat-form-field>
-```
-
-### Example Badge
-
-```html
-<span class="badge badge--success">
-  Active
-</span>
-```
-
-```css
-.badge {
-  display: inline-flex;
-  align-items: center;
-  padding: 6px 12px;
-  border-radius: var(--radius-full);
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.badge--success {
-  background: var(--color-success-100);
-  color: var(--color-success-800);
-}
-```
-
-## 🧪 Testing
-
-### Accessibility Testing
-
-1. Run Storybook: `npm run storybook`
-2. Navigate to any component story
-3. Click the "Accessibility" tab
-4. Review violations and warnings
-5. Fix issues and re-test
-
-### Visual Regression Testing
-
-Storybook can be integrated with:
-- Chromatic (automated visual testing)
-- Percy (visual review platform)
-- Playwright (E2E + visual testing)
-
-## 🎯 Accessibility Standards
-
-All components meet WCAG 2.1 Level AA standards:
-- **Color Contrast**: 4.5:1 for normal text, 3:1 for large text
-- **Keyboard Navigation**: All interactive elements keyboard accessible
-- **Focus Indicators**: 2px solid outline with 3:1 contrast ratio
-- **Screen Reader Support**: Proper ARIA labels and semantic HTML
-- **Touch Targets**: 44×44px minimum on mobile
-
-## 📤 Deployment
-
-### Deploying to Netlify
-
-1. Build static site: `npm run build-storybook`
-2. Deploy `storybook-static` folder to Netlify
-3. Configure custom domain if needed
-
-```bash
-# Using Netlify CLI
-npm install -g netlify-cli
-netlify deploy --dir=storybook-static --prod
-```
-
-### Deploying to Vercel
-
-```bash
-# Using Vercel CLI
-npm install -g vercel
-cd storybook-static
-vercel --prod
-```
-
-### Deploying to GitHub Pages
-
-```bash
-# Build static site
+# Build storybook
 npm run build-storybook
 
-# Deploy to gh-pages branch
+# Deploy to GitHub Pages (from frontend directory)
+# Requires gh-pages package: npm install --save-dev gh-pages
 npx gh-pages -d storybook-static
 ```
 
-### Deploying to AWS S3
+### Option 2: Netlify
+
+1. Connect your repository to Netlify
+2. Set build command: `cd frontend && npm install && npm run build-storybook`
+3. Set publish directory: `frontend/storybook-static`
+4. Deploy!
+
+### Option 3: Vercel
 
 ```bash
-# Build static site
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy from frontend directory
+cd frontend
+npm run build-storybook
+vercel --prod storybook-static
+```
+
+### Option 4: AWS S3 + CloudFront
+
+```bash
+# Build storybook
 npm run build-storybook
 
 # Upload to S3
-aws s3 sync storybook-static s3://your-bucket-name --acl public-read
+aws s3 sync storybook-static/ s3://your-bucket-name --delete
+
+# Invalidate CloudFront cache
+aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
 ```
 
-## 🤝 Contributing
+### Option 5: Azure Static Web Apps
 
-### Adding New Components
+```bash
+# Build storybook
+npm run build-storybook
 
-1. Create a new story file: `src/stories/ComponentName.stories.ts`
-2. Follow the existing story structure
-3. Include all component variants
-4. Add code examples
-5. Document accessibility considerations
-6. Test with axe DevTools
+# Deploy using Azure CLI
+az staticwebapp create \
+  --name atlas-storybook \
+  --resource-group your-resource-group \
+  --source storybook-static \
+  --location "westus2"
+```
 
-### Story Template
+### Option 6: Self-Hosted (Docker)
+
+Create `Dockerfile` in frontend directory:
+
+```dockerfile
+FROM node:18-alpine as builder
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build-storybook
+
+FROM nginx:alpine
+COPY --from=builder /app/storybook-static /usr/share/nginx/html
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+Build and run:
+
+```bash
+docker build -t atlas-storybook .
+docker run -p 8080:80 atlas-storybook
+```
+
+## 🎨 Customization
+
+### Adding New Stories
+
+Create a new story file in `frontend/src/stories/`:
 
 ```typescript
 import { Meta, StoryObj } from '@storybook/angular';
-import { moduleMetadata } from '@storybook/angular';
 
 const meta: Meta = {
   title: 'Components/YourComponent',
   tags: ['autodocs'],
-  decorators: [
-    moduleMetadata({
-      imports: [/* your imports */],
-    }),
-  ],
   parameters: {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Component description here',
+        component: 'Description of your component',
       },
     },
   },
@@ -267,98 +168,207 @@ type Story = StoryObj;
 
 export const Default: Story = {
   render: () => ({
-    template: `
-      <!-- Your component HTML -->
-    `,
+    template: `<your-component></your-component>`,
   }),
 };
 ```
 
-### Adding Documentation Pages
+### Modifying Theme
 
-Create `.mdx` files in `src/stories/` for documentation pages:
+Edit `.storybook/preview.js` to customize:
+- Background colors
+- Viewport sizes
+- Global decorators
+- Theme toggle behavior
 
-```mdx
-import { Meta } from '@storybook/blocks';
+### Adding Addons
 
-<Meta title="Your Category/Page Title" />
-
-# Your Page Title
-
-Content here...
+Install addon:
+```bash
+npm install --save-dev @storybook/addon-example
 ```
 
-## 🛠️ Configuration
-
-### Storybook Configuration Files
-
-- `.storybook/main.js` - Addons and story locations
-- `.storybook/preview.js` - Global decorators and parameters
-- `.storybook/README.md` - This file
-
-### Customizing Theme
-
-Edit `.storybook/preview.js` to customize Storybook theme:
-
+Add to `.storybook/main.js`:
 ```javascript
-export const parameters = {
-  darkMode: {
-    dark: { /* dark theme config */ },
-    light: { /* light theme config */ }
-  }
+module.exports = {
+  addons: [
+    // ... existing addons
+    '@storybook/addon-example',
+  ],
 };
 ```
 
-## 📚 Resources
+## 🔧 Configuration
 
-- [Storybook Documentation](https://storybook.js.org/docs)
-- [Angular Material](https://material.angular.io/)
-- [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
-- [MDN Web Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
+### Storybook Configuration Files
+
+- **`.storybook/main.js`**: Main Storybook configuration
+  - Story locations
+  - Addon registration
+  - Framework settings
+  - Static directories
+
+- **`.storybook/preview.js`**: Preview configuration
+  - Global parameters
+  - Decorators
+  - Theme configuration
+  - Accessibility settings
+
+### Accessibility Testing
+
+The Storybook includes automated WCAG validation via `@storybook/addon-a11y`:
+
+1. Run Storybook locally
+2. Navigate to any component story
+3. Click the "Accessibility" tab in the addons panel
+4. Review violations and warnings
+5. Fix issues and verify
+
+### Interactive Controls
+
+All component stories include interactive controls (Knobs addon):
+
+1. View any component story
+2. Click the "Controls" tab in the addons panel
+3. Modify component props in real-time
+4. See changes immediately
+5. Copy code snippets with modified values
+
+## 📖 Documentation Structure
+
+```
+Design Tokens/
+├── Overview (Introduction to design tokens)
+├── Colors (Color palette with WCAG AA compliance)
+├── Typography (Font system and modular scale)
+├── Spacing (4px grid system)
+├── Shadows (Elevation levels)
+├── Border Radius (Rounded corners)
+└── Animations (Timing and easing)
+
+Guidelines/
+├── Accessibility (WCAG AA guidelines)
+├── Best Practices (Do's and don'ts)
+└── Do and Don't (Visual examples)
+
+Components/
+├── Buttons
+├── Forms
+├── Cards
+├── Badges
+├── Dialogs
+├── Charts
+├── Icons
+├── Loading States
+├── Empty States
+└── Illustrations
+```
+
+## 🌗 Dark Theme Support
+
+All components support dark theme:
+
+1. Use the theme toggle in the Storybook toolbar
+2. Switch between "light" and "dark" themes
+3. All components automatically adapt
+4. Design tokens are overridden for dark theme
+5. Maintains WCAG AA contrast ratios
+
+## 🔍 Search and Navigation
+
+- **Sidebar**: Browse all stories by category
+- **Search**: Press `/` to search stories
+- **Keyboard Navigation**: 
+  - `←` `→` Navigate between stories
+  - `/` Focus search
+  - `ESC` Clear search
+
+## 📱 Responsive Testing
+
+Use viewport addon to test components at different screen sizes:
+
+- Mobile (375px)
+- Tablet (768px)
+- Desktop (1280px)
+- Wide (1920px)
+
+## 🤝 Contributing
+
+1. Create new story files in `frontend/src/stories/`
+2. Follow existing naming conventions
+3. Include comprehensive examples
+4. Add accessibility guidelines
+5. Document code snippets
+6. Test in both light and dark themes
+
+## 📝 Code Snippet Format
+
+All component stories include copy-paste ready code:
+
+```typescript
+// TypeScript
+import { Component } from '@angular/core';
+
+// HTML
+<component-name [prop]="value"></component-name>
+
+// CSS
+.component-name {
+  property: value;
+}
+```
+
+## 🎯 Best Practices
+
+1. **Consistency**: Use design tokens instead of hardcoded values
+2. **Accessibility**: All components meet WCAG AA standards
+3. **Responsiveness**: Test on multiple screen sizes
+4. **Dark Theme**: Ensure components work in both themes
+5. **Documentation**: Include clear descriptions and examples
+6. **Code Quality**: Follow Angular best practices
 
 ## 🐛 Troubleshooting
 
-### Storybook won't start
+### Storybook Won't Start
 
 ```bash
-# Clear cache
-rm -rf node_modules/.cache
-
-# Reinstall dependencies
-npm ci
-
-# Try again
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json
+npm install
 npm run storybook
 ```
 
-### Build fails
+### Build Errors
 
 ```bash
-# Check Node version (requires 16+)
-node --version
+# Ensure all peer dependencies are installed
+npm install --legacy-peer-deps
 
-# Update dependencies
-npm update
-
-# Try clean build
-npm run build-storybook -- --loglevel debug
+# Rebuild
+npm run build-storybook
 ```
 
-### Components not rendering
+### Dark Theme Not Working
 
-1. Check that all imports are correct
-2. Verify Angular modules are imported in `moduleMetadata`
-3. Check browser console for errors
-4. Clear Storybook cache
+Check that:
+1. Global decorator is applied in `.storybook/preview.js`
+2. CSS variables are defined in `styles.css`
+3. Dark theme class is applied to body
 
 ## 📧 Support
 
 For questions or issues:
-- Check the accessibility checklist
-- Review existing component stories
-- Consult the Angular Material documentation
-- Open an issue in the project repository
+- Open an issue in the repository
+- Contact the development team
+- Review existing documentation
 
-## 📝 License
+## 🔗 Links
+
+- [Storybook Documentation](https://storybook.js.org/docs/angular/get-started/introduction)
+- [Angular Material](https://material.angular.io/)
+- [WCAG Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
+- [Chart.js](https://www.chartjs.org/)
+
+## 📄 License
 
 This design system is part of the Atlas Immobilier project.

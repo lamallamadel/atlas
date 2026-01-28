@@ -40,6 +40,8 @@
     "prepare": "cd .. && husky install frontend/.husky",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
+    "build-storybook:analyze": "storybook build --webpack-stats-json",
+    "deploy-storybook": "npm run build-storybook && gh-pages -d storybook-static",
     "cap:init": "cap init",
     "cap:add:ios": "cap add ios",
     "cap:add:android": "cap add android",
