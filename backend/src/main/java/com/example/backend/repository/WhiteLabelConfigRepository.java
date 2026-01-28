@@ -9,7 +9,4 @@ import java.util.Optional;
 @Repository
 public interface WhiteLabelConfigRepository extends JpaRepository<WhiteLabelConfigEntity, Long> {
     Optional<WhiteLabelConfigEntity> findByOrgId(String orgId);
-    Optional<WhiteLabelConfigEntity> findByCustomDomain(String customDomain);
-    boolean existsByOrgId(String orgId);
-    void deleteByOrgId(String orgId);
 }

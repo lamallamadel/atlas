@@ -39,4 +39,10 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, Long> 
         @Param("endDate") LocalDateTime endDate, 
         Pageable pageable
     );
+    
+    @Query("SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility ORDER BY a.createdAt DESC")
+    java.util.List<ActivityEntity> findByDossierIdAndVisibilityOrderByCreatedAtDesc(
+        @Param("dossierId") Long dossierId, 
+        @Param("visibility") ActivityVisibility visibility
+    );
 }
