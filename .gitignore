@@ -463,3 +463,11 @@ ml-service/*.log
 ml-service/.pytest_cache/
 ml-service/**/*.pkl
 ml-service/**/*.joblib
+
+# Analytics and BI
+metabase-data/
+report-exports/
+query-results/
+analytics-exports/
+*.csv
+*.xlsx
