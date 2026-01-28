@@ -163,6 +163,7 @@ import { LottieAnimationComponent } from './components/lottie-animation.componen
 import { AnimatedEmptyStateComponent } from './components/animated-empty-state.component';
 import { LottieAnimationsDemoComponent } from './components/lottie-animations-demo.component';
 import { LocaleSwitcherComponent } from './components/locale-switcher.component';
+import { SettingsPageComponent } from './components/settings-page.component';
 
 registerLocaleData(localeFr, 'fr');
 registerLocaleData(localeEn, 'en');
@@ -285,7 +286,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LottieAnimationComponent,
     AnimatedEmptyStateComponent,
     LottieAnimationsDemoComponent,
-    LocaleSwitcherComponent
+    LocaleSwitcherComponent,
+    SettingsPageComponent
   ],
   imports: [
     BrowserModule,

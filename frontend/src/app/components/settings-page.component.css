@@ -1,0 +1,545 @@
+.settings-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+  background-color: #f5f5f5;
+  min-height: 100vh;
+}
+
+.dark-theme .settings-page {
+  background-color: #1e1e1e;
+}
+
+.settings-header {
+  margin-bottom: 32px;
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme .settings-header {
+  background: #2d2d2d;
+}
+
+.settings-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  font-weight: 500;
+  color: #1976d2;
+}
+
+.dark-theme .settings-title {
+  color: #64b5f6;
+}
+
+.settings-title mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.settings-subtitle {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.dark-theme .settings-subtitle {
+  color: #aaa;
+}
+
+.settings-progress {
+  margin-bottom: 24px;
+}
+
+.settings-tabs {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 24px;
+}
+
+.dark-theme .settings-tabs {
+  background: #2d2d2d;
+}
+
+.tab-icon {
+  margin-right: 8px;
+}
+
+.tab-content {
+  padding: 24px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.settings-card {
+  margin-bottom: 24px;
+  border-radius: 8px;
+}
+
+.settings-card mat-card-header {
+  margin-bottom: 24px;
+}
+
+.settings-card mat-card-title {
+  font-size: 20px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.settings-card mat-card-subtitle {
+  font-size: 14px;
+  color: #666;
+}
+
+.dark-theme .settings-card mat-card-subtitle {
+  color: #aaa;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.checkbox-group mat-checkbox {
+  display: block;
+}
+
+.checkbox-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.checkbox-label p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+  font-weight: normal;
+}
+
+.dark-theme .checkbox-label p {
+  color: #aaa;
+}
+
+.notification-channels {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+}
+
+.notification-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.notification-info mat-icon {
+  color: #1976d2;
+}
+
+.dark-theme .notification-info mat-icon {
+  color: #64b5f6;
+}
+
+.notification-info div {
+  flex: 1;
+}
+
+.notification-info strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.notification-info p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.dark-theme .notification-info p {
+  color: #aaa;
+}
+
+.theme-selector {
+  margin-bottom: 24px;
+}
+
+.theme-toggle-group {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.theme-toggle-group mat-button-toggle {
+  height: 80px;
+}
+
+.theme-toggle-group mat-button-toggle mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+  margin-bottom: 8px;
+}
+
+.theme-toggle-group mat-button-toggle span {
+  display: block;
+  font-size: 14px;
+}
+
+.preview-card {
+  padding: 24px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.preview-card.dark-preview {
+  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+}
+
+.preview-card h3 {
+  margin: 0 0 8px 0;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.preview-card p {
+  margin: 0 0 16px 0;
+  opacity: 0.9;
+}
+
+.preview-box {
+  background: #f5f5f5;
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 16px;
+}
+
+.dark-theme .preview-box {
+  background: #1e1e1e;
+}
+
+.preview-box h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #666;
+}
+
+.dark-theme .preview-box h4 {
+  color: #aaa;
+}
+
+.preview-content p {
+  margin: 8px 0;
+  font-size: 14px;
+}
+
+.section-divider {
+  margin: 24px 0;
+}
+
+.shortcuts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.shortcut-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.shortcut-info {
+  flex: 1;
+}
+
+.shortcut-info strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.shortcut-info p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.dark-theme .shortcut-info p {
+  color: #aaa;
+}
+
+.shortcut-input {
+  width: 150px;
+}
+
+.shortcuts-hint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+  padding: 12px;
+  background: #e3f2fd;
+  border-radius: 4px;
+  color: #1976d2;
+  font-size: 13px;
+}
+
+.dark-theme .shortcuts-hint {
+  background: rgba(25, 118, 210, 0.1);
+  color: #64b5f6;
+}
+
+.shortcuts-hint mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+kbd {
+  display: inline-block;
+  padding: 2px 6px;
+  background: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  font-family: monospace;
+  font-size: 12px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.dark-theme kbd {
+  background: #2d2d2d;
+  border-color: #555;
+  color: #fff;
+}
+
+.integration-item {
+  padding: 16px 0;
+}
+
+.integration-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.integration-header mat-icon {
+  color: #1976d2;
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+.dark-theme .integration-header mat-icon {
+  color: #64b5f6;
+}
+
+.integration-header > div {
+  flex: 1;
+}
+
+.integration-header strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.integration-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #666;
+}
+
+.dark-theme .integration-header p {
+  color: #aaa;
+}
+
+.integration-config {
+  width: 100%;
+  margin-left: 48px;
+}
+
+.system-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.warn-text {
+  color: #f44336 !important;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  bottom: 24px;
+}
+
+.dark-theme .settings-actions {
+  background: #2d2d2d;
+}
+
+.actions-right {
+  display: flex;
+  gap: 12px;
+}
+
+.button-spinner {
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.settings-actions button mat-icon {
+  margin-right: 8px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .settings-page {
+    padding: 16px;
+  }
+
+  .settings-header {
+    padding: 16px;
+  }
+
+  .settings-title {
+    font-size: 24px;
+  }
+
+  .tab-content {
+    padding: 16px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .theme-toggle-group {
+    grid-template-columns: 1fr;
+  }
+
+  .shortcut-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .shortcut-input {
+    width: 100%;
+  }
+
+  .settings-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .actions-right {
+    width: 100%;
+  }
+
+  .actions-right button {
+    flex: 1;
+  }
+}
+
+/* Animations */
+mat-card {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Form validation feedback */
+mat-form-field.ng-invalid.ng-touched .mat-form-field-outline {
+  border-color: #f44336;
+}
+
+mat-form-field.ng-valid.ng-touched .mat-form-field-outline {
+  border-color: #4caf50;
+}
+
+/* Hover effects */
+.notification-item:hover,
+.integration-item:hover {
+  background-color: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+}
+
+.dark-theme .notification-item:hover,
+.dark-theme .integration-item:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Button states */
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Smooth transitions */
+mat-slide-toggle,
+mat-checkbox,
+mat-button-toggle {
+  transition: all 0.2s ease;
+}

@@ -1,0 +1,517 @@
+<div class="settings-page">
+  <div class="settings-header">
+    <h1 class="settings-title">
+      <mat-icon>settings</mat-icon>
+      Paramètres
+    </h1>
+    <p class="settings-subtitle">Personnalisez votre expérience utilisateur</p>
+  </div>
+
+  <mat-progress-bar *ngIf="loading" mode="indeterminate" class="settings-progress"></mat-progress-bar>
+
+  <mat-tab-group 
+    [(selectedIndex)]="selectedTabIndex" 
+    (selectedIndexChange)="onTabChange($event)"
+    class="settings-tabs"
+    animationDuration="300ms">
+    
+    <!-- Préférences Tab -->
+    <mat-tab *ngFor="let tab of tabs" [label]="tab.label">
+      <ng-template mat-tab-label>
+        <mat-icon class="tab-icon">{{ tab.icon }}</mat-icon>
+        <span>{{ tab.label }}</span>
+      </ng-template>
+
+      <div class="tab-content">
+        <!-- Préférences -->
+        <div *ngIf="tab.value === 'preferences'" [formGroup]="preferencesForm">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Préférences générales</mat-card-title>
+              <mat-card-subtitle>Configurez vos préférences d'utilisation</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="form-grid">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Langue</mat-label>
+                  <mat-select formControlName="language">
+                    <mat-option *ngFor="let lang of languages" [value]="lang.value">
+                      {{ lang.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>language</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Mode d'affichage dossiers</mat-label>
+                  <mat-select formControlName="dossierViewMode">
+                    <mat-option value="list">Liste</mat-option>
+                    <mat-option value="kanban">Kanban</mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>view_list</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Densité d'affichage</mat-label>
+                  <mat-select formControlName="density">
+                    <mat-option *ngFor="let density of densities" [value]="density.value">
+                      {{ density.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>view_compact</mat-icon>
+                  <mat-hint>{{ getDensityDescription() }}</mat-hint>
+                </mat-form-field>
+
+                <div class="checkbox-group">
+                  <mat-checkbox formControlName="sidebarCollapsed">
+                    Barre latérale réduite par défaut
+                  </mat-checkbox>
+                  
+                  <mat-checkbox formControlName="animationsEnabled">
+                    Activer les animations
+                  </mat-checkbox>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Notifications -->
+        <div *ngIf="tab.value === 'notifications'" [formGroup]="notificationsForm">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Canaux de notification</mat-card-title>
+              <mat-card-subtitle>Choisissez comment recevoir les notifications</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="notification-channels">
+                <div class="notification-item">
+                  <div class="notification-info">
+                    <mat-icon>email</mat-icon>
+                    <div>
+                      <strong>Email</strong>
+                      <p>Recevez des notifications par email</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="emailEnabled"></mat-slide-toggle>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="notification-item">
+                  <div class="notification-info">
+                    <mat-icon>notifications_active</mat-icon>
+                    <div>
+                      <strong>Notifications push</strong>
+                      <p>Notifications dans le navigateur</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="pushEnabled"></mat-slide-toggle>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="notification-item">
+                  <div class="notification-info">
+                    <mat-icon>sms</mat-icon>
+                    <div>
+                      <strong>SMS</strong>
+                      <p>Recevez des alertes par SMS</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="smsEnabled"></mat-slide-toggle>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="notification-item">
+                  <div class="notification-info">
+                    <mat-icon>campaign</mat-icon>
+                    <div>
+                      <strong>Dans l'application</strong>
+                      <p>Notifications dans l'interface</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="inAppEnabled"></mat-slide-toggle>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="notification-item">
+                  <div class="notification-info">
+                    <mat-icon>volume_up</mat-icon>
+                    <div>
+                      <strong>Son</strong>
+                      <p>Sons de notification</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="soundEnabled"></mat-slide-toggle>
+                </div>
+
+                <mat-divider></mat-divider>
+
+                <div class="notification-item">
+                  <div class="notification-info">
+                    <mat-icon>desktop_windows</mat-icon>
+                    <div>
+                      <strong>Bureau</strong>
+                      <p>Notifications système</p>
+                    </div>
+                  </div>
+                  <mat-slide-toggle formControlName="desktopEnabled"></mat-slide-toggle>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Types de notification</mat-card-title>
+              <mat-card-subtitle>Configurez les notifications par catégorie</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="checkbox-group">
+                <mat-checkbox formControlName="dossierUpdates">
+                  <div class="checkbox-label">
+                    <strong>Mises à jour des dossiers</strong>
+                    <p>Notifications lors de modifications de dossiers</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="taskReminders">
+                  <div class="checkbox-label">
+                    <strong>Rappels de tâches</strong>
+                    <p>Alertes pour les tâches à venir et en retard</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="appointmentReminders">
+                  <div class="checkbox-label">
+                    <strong>Rappels de rendez-vous</strong>
+                    <p>Notifications avant les rendez-vous</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="systemAlerts">
+                  <div class="checkbox-label">
+                    <strong>Alertes système</strong>
+                    <p>Messages importants du système</p>
+                  </div>
+                </mat-checkbox>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Apparence -->
+        <div *ngIf="tab.value === 'appearance'" [formGroup]="appearanceForm">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Thème et apparence</mat-card-title>
+              <mat-card-subtitle>Personnalisez l'apparence de l'application</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="theme-selector">
+                <mat-button-toggle-group formControlName="theme" name="theme" class="theme-toggle-group">
+                  <mat-button-toggle *ngFor="let theme of themes" [value]="theme.value">
+                    <mat-icon>{{ theme.icon }}</mat-icon>
+                    <span>{{ theme.label }}</span>
+                  </mat-button-toggle>
+                </mat-button-toggle-group>
+              </div>
+
+              <div class="preview-card" [class.dark-preview]="previewTheme === 'dark'">
+                <h3>Aperçu</h3>
+                <p>Voici à quoi ressemblera l'application</p>
+                <button mat-raised-button color="primary">Bouton d'exemple</button>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Formats de date et heure</mat-card-title>
+              <mat-card-subtitle>Configurez l'affichage des dates et heures</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="form-grid">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Format de date</mat-label>
+                  <mat-select formControlName="dateFormat">
+                    <mat-option *ngFor="let format of dateFormats" [value]="format.value">
+                      {{ format.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>calendar_today</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Format d'heure</mat-label>
+                  <mat-select formControlName="timeFormat">
+                    <mat-option *ngFor="let format of timeFormats" [value]="format.value">
+                      {{ format.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>access_time</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Fuseau horaire</mat-label>
+                  <mat-select formControlName="timezone">
+                    <mat-option *ngFor="let tz of timezones" [value]="tz.value">
+                      {{ tz.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>public</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Devise</mat-label>
+                  <mat-select formControlName="currency">
+                    <mat-option *ngFor="let currency of currencies" [value]="currency.value">
+                      {{ currency.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-icon matPrefix>euro</mat-icon>
+                </mat-form-field>
+              </div>
+
+              <div class="preview-box">
+                <h4>Aperçu en direct</h4>
+                <div class="preview-content">
+                  <p><strong>Date :</strong> {{ getFormattedPreviewDate() }}</p>
+                  <p><strong>Heure :</strong> {{ getFormattedPreviewTime() }}</p>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Raccourcis -->
+        <div *ngIf="tab.value === 'shortcuts'" [formGroup]="shortcutsForm">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Raccourcis clavier</mat-card-title>
+              <mat-card-subtitle>Configurez les raccourcis clavier pour naviguer plus rapidement</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="checkbox-group">
+                <mat-checkbox formControlName="keyboardShortcutsEnabled">
+                  <strong>Activer les raccourcis clavier</strong>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="showShortcutHints">
+                  <strong>Afficher les indices de raccourcis</strong>
+                </mat-checkbox>
+              </div>
+
+              <mat-divider class="section-divider"></mat-divider>
+
+              <div class="shortcuts-list">
+                <div class="shortcut-item">
+                  <div class="shortcut-info">
+                    <strong>Recherche</strong>
+                    <p>Focus sur la barre de recherche</p>
+                  </div>
+                  <mat-form-field appearance="outline" class="shortcut-input">
+                    <input matInput formControlName="searchShortcut" readonly>
+                  </mat-form-field>
+                </div>
+
+                <div class="shortcut-item">
+                  <div class="shortcut-info">
+                    <strong>Palette de commandes</strong>
+                    <p>Ouvrir le menu de commandes</p>
+                  </div>
+                  <mat-form-field appearance="outline" class="shortcut-input">
+                    <input matInput formControlName="commandPaletteShortcut" readonly>
+                  </mat-form-field>
+                </div>
+
+                <div class="shortcut-item">
+                  <div class="shortcut-info">
+                    <strong>Aller aux annonces</strong>
+                    <p>Navigation rapide vers les annonces</p>
+                  </div>
+                  <mat-form-field appearance="outline" class="shortcut-input">
+                    <input matInput formControlName="navigateAnnouncesShortcut" readonly>
+                  </mat-form-field>
+                </div>
+
+                <div class="shortcut-item">
+                  <div class="shortcut-info">
+                    <strong>Aller aux dossiers</strong>
+                    <p>Navigation rapide vers les dossiers</p>
+                  </div>
+                  <mat-form-field appearance="outline" class="shortcut-input">
+                    <input matInput formControlName="navigateDossiersShortcut" readonly>
+                  </mat-form-field>
+                </div>
+              </div>
+
+              <mat-hint class="shortcuts-hint">
+                <mat-icon>info</mat-icon>
+                Appuyez sur <kbd>?</kbd> n'importe où pour voir tous les raccourcis disponibles
+              </mat-hint>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Intégrations (Admin) -->
+        <div *ngIf="tab.value === 'integrations' && isAdmin" [formGroup]="integrationsForm">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Intégrations tierces</mat-card-title>
+              <mat-card-subtitle>Connectez des services externes</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="integration-item">
+                <div class="integration-header">
+                  <mat-icon>calendar_today</mat-icon>
+                  <div>
+                    <strong>Synchronisation calendrier</strong>
+                    <p>Synchronisez vos rendez-vous avec votre calendrier</p>
+                  </div>
+                  <mat-slide-toggle formControlName="calendarSyncEnabled"></mat-slide-toggle>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="getFormControlValue(integrationsForm, 'calendarSyncEnabled')" class="integration-config">
+                  <mat-label>Fournisseur de calendrier</mat-label>
+                  <mat-select formControlName="calendarProvider">
+                    <mat-option value="google">Google Calendar</mat-option>
+                    <mat-option value="outlook">Outlook Calendar</mat-option>
+                    <mat-option value="apple">Apple Calendar</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="integration-item">
+                <div class="integration-header">
+                  <mat-icon>email</mat-icon>
+                  <div>
+                    <strong>Intégration email</strong>
+                    <p>Synchronisez vos emails professionnels</p>
+                  </div>
+                  <mat-slide-toggle formControlName="emailIntegrationEnabled"></mat-slide-toggle>
+                </div>
+                <mat-form-field appearance="outline" *ngIf="getFormControlValue(integrationsForm, 'emailIntegrationEnabled')" class="integration-config">
+                  <mat-label>Fournisseur email</mat-label>
+                  <mat-select formControlName="emailProvider">
+                    <mat-option value="outlook">Outlook</mat-option>
+                    <mat-option value="gmail">Gmail</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="integration-item">
+                <div class="integration-header">
+                  <mat-icon>chat</mat-icon>
+                  <div>
+                    <strong>WhatsApp Business</strong>
+                    <p>Messagerie WhatsApp intégrée</p>
+                  </div>
+                  <mat-slide-toggle formControlName="whatsappEnabled"></mat-slide-toggle>
+                </div>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <div class="integration-item">
+                <div class="integration-header">
+                  <mat-icon>phone</mat-icon>
+                  <div>
+                    <strong>VoIP</strong>
+                    <p>Appels téléphoniques intégrés</p>
+                  </div>
+                  <mat-slide-toggle formControlName="voipEnabled"></mat-slide-toggle>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+
+        <!-- Système (Super Admin) -->
+        <div *ngIf="tab.value === 'system' && isSuperAdmin" [formGroup]="systemForm">
+          <mat-card class="settings-card">
+            <mat-card-header>
+              <mat-card-title>Paramètres système</mat-card-title>
+              <mat-card-subtitle>Configuration avancée du système</mat-card-subtitle>
+            </mat-card-header>
+            <mat-card-content>
+              <div class="system-settings">
+                <mat-checkbox formControlName="debugMode">
+                  <div class="checkbox-label">
+                    <strong>Mode débogage</strong>
+                    <p>Active les logs détaillés (performance réduite)</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="performanceMonitoring">
+                  <div class="checkbox-label">
+                    <strong>Surveillance des performances</strong>
+                    <p>Collecte des métriques de performance</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="errorReporting">
+                  <div class="checkbox-label">
+                    <strong>Rapport d'erreurs</strong>
+                    <p>Envoi automatique des erreurs au serveur</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="analyticsEnabled">
+                  <div class="checkbox-label">
+                    <strong>Analyses</strong>
+                    <p>Collecte de données d'utilisation anonymes</p>
+                  </div>
+                </mat-checkbox>
+
+                <mat-checkbox formControlName="maintenanceMode" color="warn">
+                  <div class="checkbox-label">
+                    <strong>Mode maintenance</strong>
+                    <p class="warn-text">⚠️ Bloque l'accès pour tous les utilisateurs sauf super-admins</p>
+                  </div>
+                </mat-checkbox>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+
+  <!-- Action Buttons -->
+  <div class="settings-actions">
+    <button 
+      mat-button 
+      (click)="onRestoreDefaults()"
+      [disabled]="loading || saving">
+      <mat-icon>restore</mat-icon>
+      Restaurer par défaut
+    </button>
+
+    <div class="actions-right">
+      <button 
+        mat-stroked-button 
+        (click)="onCancel()"
+        [disabled]="!hasUnsavedChanges() || loading || saving">
+        Annuler
+      </button>
+
+      <button 
+        mat-raised-button 
+        color="primary"
+        (click)="onSave()"
+        [disabled]="!hasUnsavedChanges() || !areFormsValid() || loading || saving">
+        <mat-spinner *ngIf="saving" diameter="20" class="button-spinner"></mat-spinner>
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        <span *ngIf="!saving">Enregistrer</span>
+        <span *ngIf="saving">Enregistrement...</span>
+      </button>
+    </div>
+  </div>
+</div>

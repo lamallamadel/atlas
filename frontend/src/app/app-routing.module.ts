@@ -15,6 +15,7 @@ import { ObservabilityDashboardComponent } from './components/observability-dash
 import { SearchComponent } from './pages/search/search.component';
 import { TaskListComponent } from './components/task-list.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
+import { SettingsPageComponent } from './components/settings-page.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -41,6 +42,7 @@ const routes: Routes = [
       { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
       { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
       { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } },
+      { path: 'settings', component: SettingsPageComponent, data: { animation: 'SettingsPage' } },
       { 
         path: 'workflow-admin', 
         loadChildren: () => import('./pages/workflow-admin/workflow-admin.module').then(m => m.WorkflowAdminModule),
