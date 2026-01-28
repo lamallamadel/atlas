@@ -1,0 +1,261 @@
+<div class="ui-preferences-form">
+  <mat-card class="preferences-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon class="title-icon">palette</mat-icon>
+        Préférences d'interface
+      </mat-card-title>
+      <mat-card-subtitle>
+        Personnalisez votre expérience utilisateur
+      </mat-card-subtitle>
+    </mat-card-header>
+
+    <mat-progress-bar 
+      *ngIf="loading" 
+      mode="indeterminate" 
+      class="loading-bar">
+    </mat-progress-bar>
+
+    <mat-card-content>
+      <form [formGroup]="preferencesForm" class="preferences-form-content">
+        
+        <!-- Theme Selector -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>brightness_6</mat-icon>
+            Thème
+          </h3>
+          
+          <mat-radio-group 
+            formControlName="theme" 
+            class="theme-radio-group">
+            <mat-radio-button 
+              *ngFor="let theme of themes" 
+              [value]="theme.value"
+              class="theme-radio-button">
+              <div class="radio-content">
+                <mat-icon>{{ theme.icon }}</mat-icon>
+                <span>{{ theme.label }}</span>
+              </div>
+            </mat-radio-button>
+          </mat-radio-group>
+
+          <mat-hint class="hint-text">
+            <mat-icon class="hint-icon">info</mat-icon>
+            Le mode Auto s'adapte automatiquement aux préférences de votre système
+          </mat-hint>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Language Selector -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>language</mat-icon>
+            Langue
+          </h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Langue de l'interface</mat-label>
+            <mat-select formControlName="language">
+              <mat-option *ngFor="let lang of languages" [value]="lang.value">
+                <span class="language-option">
+                  <span class="flag">{{ lang.flag }}</span>
+                  <span>{{ lang.label }}</span>
+                </span>
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix>translate</mat-icon>
+            <mat-hint>La langue sera appliquée à toute l'application</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Density Selector -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>view_compact</mat-icon>
+            Densité d'affichage
+          </h3>
+          
+          <mat-button-toggle-group 
+            formControlName="density" 
+            class="density-toggle-group">
+            <mat-button-toggle 
+              *ngFor="let density of densities" 
+              [value]="density.value"
+              class="density-toggle">
+              <div class="toggle-content">
+                <mat-icon>{{ density.icon }}</mat-icon>
+                <div class="toggle-text">
+                  <strong>{{ density.label }}</strong>
+                  <small>{{ density.description }}</small>
+                </div>
+              </div>
+            </mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Default Route Selector -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>home</mat-icon>
+            Page par défaut
+          </h3>
+          
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Page d'accueil au démarrage</mat-label>
+            <input 
+              type="text"
+              matInput 
+              formControlName="defaultRouteInput"
+              [matAutocomplete]="auto"
+              placeholder="Rechercher une page...">
+            <mat-icon matPrefix>search</mat-icon>
+            <mat-autocomplete 
+              #auto="matAutocomplete"
+              (optionSelected)="onRouteSelected($event.option.value)">
+              <mat-option 
+                *ngFor="let route of filteredRoutes" 
+                [value]="route"
+                class="route-option">
+                <mat-icon class="route-icon">{{ route.icon }}</mat-icon>
+                <span>{{ route.label }}</span>
+                <small class="route-path">{{ route.path }}</small>
+              </mat-option>
+            </mat-autocomplete>
+            <mat-hint>Cette page s'ouvrira automatiquement à la connexion</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Sync Devices Option -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>sync</mat-icon>
+            Synchronisation
+          </h3>
+          
+          <div class="sync-option">
+            <mat-checkbox formControlName="syncDevices" class="sync-checkbox">
+              <div class="checkbox-content">
+                <strong>Synchroniser les préférences sur tous les appareils</strong>
+                <p class="checkbox-description">
+                  Vos préférences seront automatiquement appliquées sur tous vos appareils connectés
+                </p>
+              </div>
+            </mat-checkbox>
+            
+            <div class="sync-info" *ngIf="syncDevices">
+              <mat-icon class="info-icon" color="primary">cloud_done</mat-icon>
+              <span class="info-text">Synchronisation active</span>
+            </div>
+          </div>
+        </div>
+
+        <mat-divider class="section-divider"></mat-divider>
+
+        <!-- Preview Zone -->
+        <div class="form-section">
+          <h3 class="section-title">
+            <mat-icon>preview</mat-icon>
+            Aperçu en temps réel
+          </h3>
+          
+          <div [class]="getPreviewClasses()">
+            <div class="preview-header">
+              <mat-icon class="preview-icon">visibility</mat-icon>
+              <h4>{{ getPreviewText().welcome }}</h4>
+            </div>
+            
+            <div class="preview-content">
+              <p>{{ getPreviewText().description }}</p>
+              
+              <div class="preview-details">
+                <div class="preview-item">
+                  <mat-icon>palette</mat-icon>
+                  <span>Thème : <strong>{{ getThemeLabel() }}</strong></span>
+                </div>
+                
+                <div class="preview-item">
+                  <mat-icon>language</mat-icon>
+                  <span>Langue : <strong>{{ getLanguageLabel() }}</strong></span>
+                </div>
+                
+                <div class="preview-item">
+                  <mat-icon>view_compact</mat-icon>
+                  <span>Densité : <strong>{{ getDensityLabel() }}</strong></span>
+                </div>
+                
+                <div class="preview-item" *ngIf="getSelectedRoute() as route">
+                  <mat-icon>{{ route.icon }}</mat-icon>
+                  <span>Page par défaut : <strong>{{ route.label }}</strong></span>
+                </div>
+              </div>
+              
+              <div class="preview-actions">
+                <button mat-raised-button color="primary" type="button">
+                  <mat-icon>touch_app</mat-icon>
+                  {{ getPreviewText().button }}
+                </button>
+                
+                <button mat-stroked-button type="button">
+                  <mat-icon>info</mat-icon>
+                  Voir plus
+                </button>
+              </div>
+              
+              <div class="preview-cards">
+                <mat-card class="sample-card">
+                  <mat-card-content>
+                    <div class="card-content">
+                      <mat-icon>insert_chart</mat-icon>
+                      <div>
+                        <h5>Exemple de carte</h5>
+                        <p>Cet aperçu montre comment l'interface s'adapte à vos préférences</p>
+                      </div>
+                    </div>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+            </div>
+            
+            <div class="preview-footer">
+              <mat-icon class="footer-icon">info_outline</mat-icon>
+              <small>Les changements seront appliqués après sauvegarde</small>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </mat-card-content>
+
+    <!-- Action Buttons -->
+    <mat-card-actions class="card-actions">
+      <button 
+        mat-button 
+        type="button"
+        (click)="onCancel()"
+        [disabled]="!hasUnsavedChanges() || loading || saving">
+        <mat-icon>cancel</mat-icon>
+        Annuler
+      </button>
+
+      <button 
+        mat-raised-button 
+        color="primary"
+        type="button"
+        (click)="onSave()"
+        [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
+        <mat-spinner *ngIf="saving" diameter="20" class="button-spinner"></mat-spinner>
+        <mat-icon *ngIf="!saving">save</mat-icon>
+        <span *ngIf="!saving">Enregistrer</span>
+        <span *ngIf="saving">Enregistrement...</span>
+      </button>
+    </mat-card-actions>
+  </mat-card>
+</div>

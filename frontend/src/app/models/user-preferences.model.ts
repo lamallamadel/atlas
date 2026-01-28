@@ -7,14 +7,16 @@ export interface UserPreferences {
 }
 
 export interface UiPreferences {
-  theme?: string;
+  theme?: 'light' | 'dark' | 'auto';
   language?: string;
   dossierViewMode?: 'list' | 'kanban';
   sidebarCollapsed?: boolean;
   dashboardLayout?: DashboardLayout;
   widgetSettings?: WidgetSettings;
-  density?: 'compact' | 'normal' | 'comfortable';
+  density?: 'compact' | 'comfortable' | 'spacious';
   animationsEnabled?: boolean;
+  defaultRoute?: string;
+  syncDevices?: boolean;
   [key: string]: unknown;
 }
 
@@ -91,8 +93,10 @@ export const DEFAULT_PREFERENCES: UserPreferences = {
     language: 'fr',
     dossierViewMode: 'list',
     sidebarCollapsed: false,
-    density: 'normal',
-    animationsEnabled: true
+    density: 'comfortable',
+    animationsEnabled: true,
+    defaultRoute: '/dashboard',
+    syncDevices: true
   },
   notifications: {
     emailEnabled: true,

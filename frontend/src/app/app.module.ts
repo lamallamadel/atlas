@@ -164,6 +164,7 @@ import { AnimatedEmptyStateComponent } from './components/animated-empty-state.c
 import { LottieAnimationsDemoComponent } from './components/lottie-animations-demo.component';
 import { LocaleSwitcherComponent } from './components/locale-switcher.component';
 import { SettingsPageComponent } from './components/settings-page.component';
+import { UiPreferencesFormComponent } from './components/ui-preferences-form.component';
 
 registerLocaleData(localeFr, 'fr');
 registerLocaleData(localeEn, 'en');
@@ -287,7 +288,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AnimatedEmptyStateComponent,
     LottieAnimationsDemoComponent,
     LocaleSwitcherComponent,
-    SettingsPageComponent
+    SettingsPageComponent,
+    UiPreferencesFormComponent
   ],
   imports: [
     BrowserModule,
