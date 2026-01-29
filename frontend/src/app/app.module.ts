@@ -35,6 +35,8 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, MAT_DATE_LOCALE } from '@angular/material/core';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatBadgeModule } from '@angular/material/badge';
+import { MatSliderModule } from '@angular/material/slider';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 import { ScrollingModule } from '@angular/cdk/scrolling';
@@ -165,6 +167,7 @@ import { LottieAnimationsDemoComponent } from './components/lottie-animations-de
 import { LocaleSwitcherComponent } from './components/locale-switcher.component';
 import { SettingsPageComponent } from './components/settings-page.component';
 import { UiPreferencesFormComponent } from './components/ui-preferences-form.component';
+import { NotificationPreferencesFormComponent } from './components/notification-preferences-form.component';
 
 registerLocaleData(localeFr, 'fr');
 registerLocaleData(localeEn, 'en');
@@ -289,7 +292,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LottieAnimationsDemoComponent,
     LocaleSwitcherComponent,
     SettingsPageComponent,
-    UiPreferencesFormComponent
+    UiPreferencesFormComponent,
+    NotificationPreferencesFormComponent
   ],
   imports: [
     BrowserModule,
@@ -330,6 +334,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     MatNativeDateModule,
     MatRadioModule,
     MatBadgeModule,
+    MatSliderModule,
+    MatSlideToggleModule,
     DragDropModule,
     LayoutModule,
     ScrollingModule,

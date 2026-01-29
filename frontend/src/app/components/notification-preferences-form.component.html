@@ -1,0 +1,267 @@
+<div class="notification-preferences-form" [formGroup]="preferencesForm">
+  <mat-progress-bar *ngIf="loading" mode="indeterminate" class="loading-bar"></mat-progress-bar>
+
+  <!-- Channels Section -->
+  <mat-card class="preferences-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>settings_input_antenna</mat-icon>
+        Canaux de notification
+      </mat-card-title>
+      <mat-card-subtitle>
+        Choisissez comment recevoir vos notifications ({{ getEnabledChannelsCount() }}/{{ channels.length }} actifs)
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="channels-grid">
+        <div *ngFor="let channel of channels" class="channel-item">
+          <div class="channel-info">
+            <mat-icon [class.channel-icon-active]="channel.enabled">{{ channel.icon }}</mat-icon>
+            <div class="channel-text">
+              <strong>{{ channel.label }}</strong>
+              <p class="channel-description">{{ channel.description }}</p>
+            </div>
+          </div>
+          <mat-slide-toggle 
+            [formControlName]="channel.id + 'Enabled'"
+            color="primary"
+            [attr.aria-label]="'Activer ' + channel.label">
+          </mat-slide-toggle>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Notification Types Section -->
+  <mat-card class="preferences-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>filter_list</mat-icon>
+        Types de notification
+      </mat-card-title>
+      <mat-card-subtitle>
+        Sélectionnez les événements pour lesquels vous souhaitez être notifié ({{ getEnabledTypesCount() }}/{{ notificationTypes.length }} actifs)
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="types-grid">
+        <div *ngFor="let type of notificationTypes" class="type-item">
+          <div class="type-info">
+            <mat-icon [class.type-icon-active]="type.enabled">{{ type.icon }}</mat-icon>
+            <div class="type-text">
+              <strong>{{ type.label }}</strong>
+              <p class="type-description">{{ type.description }}</p>
+            </div>
+          </div>
+          <mat-slide-toggle 
+            [formControlName]="type.id + 'Enabled'"
+            color="primary"
+            [attr.aria-label]="'Activer ' + type.label">
+          </mat-slide-toggle>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Quiet Hours Section -->
+  <mat-card class="preferences-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>bedtime</mat-icon>
+        Heures de silence
+      </mat-card-title>
+      <mat-card-subtitle>
+        Définissez une plage horaire pendant laquelle vous ne souhaitez pas recevoir de notifications
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="quiet-hours-toggle">
+        <div class="toggle-info">
+          <strong>Activer les heures de silence</strong>
+          <p *ngIf="quietHoursEnabled && !isQuietHoursActive()" class="quiet-status">
+            <mat-icon>schedule</mat-icon>
+            Silencieux de {{ getQuietHoursDisplay() }}
+          </p>
+          <p *ngIf="quietHoursEnabled && isQuietHoursActive()" class="quiet-status active">
+            <mat-icon>bedtime</mat-icon>
+            Mode silencieux actif
+          </p>
+        </div>
+        <mat-slide-toggle 
+          formControlName="quietHoursEnabled"
+          color="primary"
+          aria-label="Activer les heures de silence">
+        </mat-slide-toggle>
+      </div>
+
+      <div *ngIf="quietHoursEnabled" class="quiet-hours-config" [@slideDown]>
+        <div class="slider-section">
+          <label class="slider-label" for="quietHoursStartSlider">
+            <mat-icon>wb_twilight</mat-icon>
+            Début du silence : <strong>{{ formatQuietHoursLabel(quietHoursStart) }}</strong>
+          </label>
+          <mat-slider
+            class="quiet-hours-slider"
+            [min]="0"
+            [max]="23"
+            [step]="1"
+            [discrete]="true"
+            [showTickMarks]="true"
+            color="primary">
+            <input id="quietHoursStartSlider" matSliderThumb formControlName="quietHoursStart">
+          </mat-slider>
+        </div>
+
+        <div class="slider-section">
+          <label class="slider-label" for="quietHoursEndSlider">
+            <mat-icon>wb_sunny</mat-icon>
+            Fin du silence : <strong>{{ formatQuietHoursLabel(quietHoursEnd) }}</strong>
+          </label>
+          <mat-slider
+            class="quiet-hours-slider"
+            [min]="0"
+            [max]="23"
+            [step]="1"
+            [discrete]="true"
+            [showTickMarks]="true"
+            color="primary">
+            <input id="quietHoursEndSlider" matSliderThumb formControlName="quietHoursEnd">
+          </mat-slider>
+        </div>
+
+        <mat-hint class="quiet-hours-hint">
+          <mat-icon>info</mat-icon>
+          Les notifications seront suspendues de {{ getQuietHoursDisplay() }}
+        </mat-hint>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Digest Frequency Section -->
+  <mat-card class="preferences-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>schedule_send</mat-icon>
+        Fréquence de groupement
+      </mat-card-title>
+      <mat-card-subtitle>
+        Choisissez la fréquence à laquelle vous souhaitez recevoir vos notifications
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-radio-group formControlName="digestFrequency" class="digest-frequency-group">
+        <mat-radio-button 
+          *ngFor="let freq of digestFrequencies" 
+          [value]="freq.value"
+          class="digest-frequency-option">
+          <div class="frequency-content">
+            <div class="frequency-header">
+              <mat-icon>{{ freq.icon }}</mat-icon>
+              <strong>{{ freq.label }}</strong>
+            </div>
+            <p class="frequency-description">{{ freq.description }}</p>
+          </div>
+        </mat-radio-button>
+      </mat-radio-group>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Preview Section -->
+  <mat-card class="preferences-card preview-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>visibility</mat-icon>
+        Aperçu des notifications
+      </mat-card-title>
+      <mat-card-subtitle>
+        Voici comment vos notifications apparaîtront avec les paramètres actuels
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="preview-summary">
+        <div class="summary-item">
+          <mat-icon>settings_input_antenna</mat-icon>
+          <div>
+            <strong>{{ getEnabledChannelsCount() }}</strong>
+            <span>canaux actifs</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <mat-icon>filter_list</mat-icon>
+          <div>
+            <strong>{{ getEnabledTypesCount() }}</strong>
+            <span>types activés</span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <mat-icon>{{ getDigestFrequencyIcon() }}</mat-icon>
+          <div>
+            <strong>{{ getDigestFrequencyLabel() }}</strong>
+            <span>fréquence</span>
+          </div>
+        </div>
+        <div class="summary-item" *ngIf="quietHoursEnabled">
+          <mat-icon [class.active]="isQuietHoursActive()">bedtime</mat-icon>
+          <div>
+            <strong>{{ getQuietHoursDisplay() }}</strong>
+            <span>heures de silence</span>
+          </div>
+        </div>
+      </div>
+
+      <mat-divider class="preview-divider"></mat-divider>
+
+      <div class="preview-notifications" *ngIf="exampleNotifications.length > 0">
+        <h4 class="preview-title">
+          <mat-icon>notifications</mat-icon>
+          Exemples de notifications
+        </h4>
+        <div class="notification-examples">
+          <div *ngFor="let notification of exampleNotifications" class="notification-example">
+            <div class="notification-icon">
+              <mat-icon [class]="'notification-icon-' + notification.type">{{ notification.icon }}</mat-icon>
+            </div>
+            <div class="notification-content">
+              <div class="notification-header">
+                <strong>{{ notification.title }}</strong>
+                <span class="notification-time">{{ getRelativeTime(notification.timestamp) }}</span>
+              </div>
+              <p class="notification-message">{{ notification.message }}</p>
+              <div class="notification-channels">
+                <mat-icon *ngFor="let icon of getActiveChannelIcons()" class="channel-badge">{{ icon }}</mat-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div *ngIf="exampleNotifications.length === 0" class="no-notifications">
+        <mat-icon>notifications_off</mat-icon>
+        <p>Aucune notification ne sera affichée avec ces paramètres</p>
+        <p class="hint-text">Activez au moins un type de notification pour voir des exemples</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Action Buttons -->
+  <div class="form-actions">
+    <button 
+      mat-button 
+      (click)="onCancel()"
+      [disabled]="!hasUnsavedChanges() || loading || saving">
+      <mat-icon>cancel</mat-icon>
+      Annuler
+    </button>
+
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="onSave()"
+      [disabled]="!hasUnsavedChanges() || !preferencesForm.valid || loading || saving">
+      <mat-spinner *ngIf="saving" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!saving">save</mat-icon>
+      <span *ngIf="!saving">Enregistrer</span>
+      <span *ngIf="saving">Enregistrement...</span>
+    </button>
+  </div>
+</div>
