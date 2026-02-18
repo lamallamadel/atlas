@@ -8,7 +8,7 @@ echo ========================================
 echo.
 
 echo Setting Java 17 environment...
-set "JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot"
+set "C:/Program Files/Eclipse Adoptium/jdk-17.0.18.8-hotspot"
 set "PATH=%JAVA_HOME%\bin;%PATH%"
 
 echo Verifying Java version...
