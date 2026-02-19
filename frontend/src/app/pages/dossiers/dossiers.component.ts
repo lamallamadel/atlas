@@ -25,7 +25,7 @@ import { ExportService, ColumnDef } from '../../services/export.service';
 import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
 import { AdvancedFiltersDialogComponent } from '../../components/advanced-filters-dialog.component';
 import { FilterField } from '../../components/advanced-filters.component';
-import { DossierFilterApiService, DossierFilterRequest } from '../../services/dossier-filter-api.service';
+import { DossierFilterApiService, DossierFilterRequest, FilterCondition } from '../../services/dossier-filter-api.service';
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
@@ -844,7 +844,7 @@ export class DossiersComponent implements OnInit {
   }
 
   trackByPreset(index: number, preset: FilterPreset): string {
-    return preset.id;
+    return preset.name;
   }
 
   trackByFilter(index: number, filter: AppliedFilter): string {
@@ -936,7 +936,7 @@ export class DossiersComponent implements OnInit {
     });
   }
 
-  applyAdvancedFilter(filter: { conditions: unknown[]; logicOperator: 'AND' | 'OR' }): void {
+  applyAdvancedFilter(filter: { conditions: FilterCondition[]; logicOperator: 'AND' | 'OR' }): void {
     this.useAdvancedFilter = true;
     this.advancedFilterRequest = {
       conditions: filter.conditions,
@@ -1072,7 +1072,7 @@ export class DossiersComponent implements OnInit {
             });
             this.loadDossiers();
           },
-          error: (err) => {
+          error: (err: unknown) => {
             this.snackBar.open('Erreur lors de la suppression du dossier', 'Fermer', {
               duration: 5000,
               panelClass: ['error-snackbar']

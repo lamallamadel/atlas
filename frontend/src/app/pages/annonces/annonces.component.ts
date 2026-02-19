@@ -197,7 +197,7 @@ export class AnnoncesComponent implements OnInit {
   }
 
   loadSavedPresets(): void {
-    this.savedPresets = this.filterPresetService.getPresets(this.FILTER_CONTEXT);
+    this.savedPresets = this.filterPresetService.getPresetsLocally(this.FILTER_CONTEXT);
   }
 
   loadAnnonces(): void {
@@ -390,12 +390,12 @@ export class AnnoncesComponent implements OnInit {
       selectedType: this.selectedType
     };
 
-    this.filterPresetService.savePreset(this.FILTER_CONTEXT, name, filters);
+    this.filterPresetService.savePresetLocally(this.FILTER_CONTEXT, name, filters);
     this.loadSavedPresets();
   }
 
   loadPreset(preset: FilterPreset): void {
-    const filters = preset.filters;
+    const filters = preset.filterConfig;
     this.searchQuery = (filters['searchQuery'] as string) || '';
     this.selectedStatus = (filters['selectedStatus'] as AnnonceStatus) || '';
     this.selectedCity = (filters['selectedCity'] as string) || '';
@@ -407,7 +407,7 @@ export class AnnoncesComponent implements OnInit {
   deletePreset(preset: FilterPreset, event: Event): void {
     event.stopPropagation();
     if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
-      this.filterPresetService.deletePreset(this.FILTER_CONTEXT, preset.id);
+      this.filterPresetService.deletePresetLocally(this.FILTER_CONTEXT, preset.name);
       this.loadSavedPresets();
     }
   }
@@ -530,7 +530,7 @@ export class AnnoncesComponent implements OnInit {
   }
 
   trackByPreset(index: number, preset: FilterPreset): string {
-    return preset.id;
+    return preset.name;
   }
 
   trackByFilter(index: number, filter: AppliedFilter): string {

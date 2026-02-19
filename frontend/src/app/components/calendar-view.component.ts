@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 import { FullCalendarComponent } from '@fullcalendar/angular';
-import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg } from '@fullcalendar/core';
+import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg, EventChangeArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
@@ -307,7 +307,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleEventResize(resizeInfo: EventDropArg): void {
+  handleEventResize(resizeInfo: EventChangeArg): void {
     const appointmentId = parseInt(resizeInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 

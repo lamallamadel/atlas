@@ -211,6 +211,10 @@ export class DossierApiService {
       );
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
   bulkAssign(request: DossierBulkAssignRequest): Observable<BulkOperationResponse> {
     return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-assign`, request);
   }

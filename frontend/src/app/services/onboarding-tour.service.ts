@@ -71,8 +71,8 @@ export class OnboardingTourService {
 
   private setupRouteListener(): void {
     this.router.events
-      .pipe(filter(event => event instanceof NavigationEnd))
-      .subscribe((event: NavigationEnd) => {
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
         this.checkAutoStartTour(event.url);
       });
   }
