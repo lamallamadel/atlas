@@ -36,14 +36,17 @@ npm run e2e:ui        # Interactive Playwright UI mode
 
 ### Full Stack Orchestration
 ```bash
-make up       # Start infra (Docker) + frontend
-make down     # Stop everything
-make test     # Run all backend + frontend tests
-make build    # Build backend JAR + frontend dist
-make status   # Health check all services
+# Linux/Mac
+./atlas up        # Start infra (Docker) + frontend
+./atlas down      # Stop everything
+./atlas test      # Run all backend + frontend tests
+./atlas build     # Build backend JAR + frontend dist
+./atlas status    # Health check all services
+./atlas logs      # View logs (all | backend | frontend | db)
+./atlas reset     # Reset database
 ```
 
-Or use `./dev up` / `.\dev.ps1 up` (cross-platform dev script).
+**Windows:** Use `AtlasDevConsole.ps1` — a WPF graphical dashboard that auto-discovers all commands, profiles, and services from the repo.
 
 ### Infrastructure (from `infra/`)
 ```bash
