@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -16,13 +17,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
-
 /**
  * Enriches MDC with request/user context and logs slow requests.
- * 
- * Named bean: "atlasRequestContextFilter" to avoid conflict with Spring Boot's
- * default RequestContextFilter (spring.main.allow-bean-definition-overriding not needed)
+ *
+ * <p>Named bean: "atlasRequestContextFilter" to avoid conflict with Spring Boot's default
+ * RequestContextFilter (spring.main.allow-bean-definition-overriding not needed)
  */
 @Component("atlasRequestContextFilter")
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
@@ -32,13 +31,15 @@ public class RequestContextFilter extends OncePerRequestFilter {
 
     private final long slowThresholdMs;
 
-    public RequestContextFilter(@Value("${atlas.slow-request.threshold-ms:1500}") long slowThresholdMs) {
+    public RequestContextFilter(
+            @Value("${atlas.slow-request.threshold-ms:1500}") long slowThresholdMs) {
         this.slowThresholdMs = slowThresholdMs;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-        throws ServletException, IOException {
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
 
         long start = System.currentTimeMillis();
 

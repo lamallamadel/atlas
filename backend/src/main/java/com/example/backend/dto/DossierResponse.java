@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +19,10 @@ public class DossierResponse {
     @Schema(description = "Associated annonce ID", example = "1", nullable = true)
     private Long annonceId;
 
-    @Schema(description = "Associated annonce title", example = "Beautiful Apartment", nullable = true)
+    @Schema(
+            description = "Associated annonce title",
+            example = "Beautiful Apartment",
+            nullable = true)
     private String annonceTitle;
 
     @Schema(description = "Lead phone number", example = "+33612345678", nullable = true)
@@ -35,7 +37,10 @@ public class DossierResponse {
     @Schema(description = "Lead source", example = "Website", nullable = true)
     private String leadSource;
 
-    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    @Schema(
+            description = "Dossier notes",
+            example = "Customer interested in property X",
+            nullable = true)
     private String notes;
 
     @Schema(description = "Current status of the dossier", example = "NEW")
@@ -65,7 +70,9 @@ public class DossierResponse {
     @Schema(description = "Timestamp when the dossier was created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
 
-    @Schema(description = "Timestamp when the dossier was last updated", example = "2024-01-01T12:00:00")
+    @Schema(
+            description = "Timestamp when the dossier was last updated",
+            example = "2024-01-01T12:00:00")
     private LocalDateTime updatedAt;
 
     @Schema(description = "User who created the dossier", nullable = true)
@@ -77,8 +84,7 @@ public class DossierResponse {
     @Schema(description = "ID of existing open dossier if duplicate found", nullable = true)
     private Long existingOpenDossierId;
 
-    public DossierResponse() {
-    }
+    public DossierResponse() {}
 
     public Long getId() {
         return id;

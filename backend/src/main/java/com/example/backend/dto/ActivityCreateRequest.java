@@ -4,7 +4,6 @@ import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.ActivityVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 @Schema(description = "Request to create a new activity")

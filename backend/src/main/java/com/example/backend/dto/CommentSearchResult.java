@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.CommentEntityType;
-
 import java.time.LocalDateTime;
 
 public class CommentSearchResult {

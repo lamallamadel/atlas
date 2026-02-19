@@ -5,18 +5,12 @@ import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.MessageEntity;
 import com.example.backend.entity.enums.AppointmentStatus;
-import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.AnnonceAnalyticsRepository;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
@@ -25,6 +19,10 @@ import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReportingService {
@@ -34,10 +32,11 @@ public class ReportingService {
     private final MessageRepository messageRepository;
     private final AnnonceAnalyticsRepository annonceAnalyticsRepository;
 
-    public ReportingService(DossierRepository dossierRepository,
-                          AppointmentRepository appointmentRepository,
-                          MessageRepository messageRepository,
-                          AnnonceAnalyticsRepository annonceAnalyticsRepository) {
+    public ReportingService(
+            DossierRepository dossierRepository,
+            AppointmentRepository appointmentRepository,
+            MessageRepository messageRepository,
+            AnnonceAnalyticsRepository annonceAnalyticsRepository) {
         this.dossierRepository = dossierRepository;
         this.appointmentRepository = appointmentRepository;
         this.messageRepository = messageRepository;
@@ -66,8 +65,9 @@ public class ReportingService {
         List<Dossier> allDossiers = dossierRepository.findAll();
         long totalDossiers = allDossiers.size();
 
-        Map<DossierStatus, Long> statusCounts = allDossiers.stream()
-            .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
+        Map<DossierStatus, Long> statusCounts =
+                allDossiers.stream()
+                        .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
 
         List<PipelineStageMetricsDto> stageMetrics = new ArrayList<>();
         for (DossierStatus status : DossierStatus.values()) {
@@ -88,12 +88,14 @@ public class ReportingService {
 
     @Cacheable(value = "funnelAnalysis", key = "#orgId + '_' + #from + '_' + #to")
     @Transactional(readOnly = true)
-    public FunnelAnalysisResponse generateFunnelAnalysis(LocalDateTime from, LocalDateTime to, String orgId) {
+    public FunnelAnalysisResponse generateFunnelAnalysis(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         FunnelAnalysisResponse response = new FunnelAnalysisResponse();
 
         response.setConversionRateBySource(calculateConversionRateBySource(from, to, orgId));
 
-        FunnelAnalysisResponse.FunnelStageMetrics funnelMetrics = calculateFunnelStageMetrics(from, to, orgId);
+        FunnelAnalysisResponse.FunnelStageMetrics funnelMetrics =
+                calculateFunnelStageMetrics(from, to, orgId);
         response.setOverallFunnelMetrics(funnelMetrics);
 
         return response;
@@ -103,14 +105,18 @@ public class ReportingService {
     @Transactional(readOnly = true)
     public Map<String, FunnelAnalysisResponse.FunnelStageMetrics> generateConversionFunnelBySource(
             LocalDateTime from, LocalDateTime to, String orgId) {
-        
+
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
-        Map<String, List<Dossier>> dossiersBySource = dossiers.stream()
-            .collect(Collectors.groupingBy(d -> 
-                d.getSource() != null ? d.getSource().name() : "UNKNOWN"
-            ));
+        Map<String, List<Dossier>> dossiersBySource =
+                dossiers.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        d ->
+                                                d.getSource() != null
+                                                        ? d.getSource().name()
+                                                        : "UNKNOWN"));
 
         Map<String, FunnelAnalysisResponse.FunnelStageMetrics> funnelBySource = new HashMap<>();
 
@@ -118,18 +124,22 @@ public class ReportingService {
             String source = entry.getKey();
             List<Dossier> sourceDossiers = entry.getValue();
 
-            FunnelAnalysisResponse.FunnelStageMetrics metrics = calculateFunnelMetricsForDossiers(sourceDossiers);
+            FunnelAnalysisResponse.FunnelStageMetrics metrics =
+                    calculateFunnelMetricsForDossiers(sourceDossiers);
             funnelBySource.put(source, metrics);
         }
 
         return funnelBySource;
     }
 
-    @Cacheable(value = "conversionFunnelByPeriod", key = "#orgId + '_' + #from + '_' + #to + '_' + #periodType")
+    @Cacheable(
+            value = "conversionFunnelByPeriod",
+            key = "#orgId + '_' + #from + '_' + #to + '_' + #periodType")
     @Transactional(readOnly = true)
-    public Map<String, FunnelAnalysisResponse.FunnelStageMetrics> generateConversionFunnelByTimePeriod(
-            LocalDateTime from, LocalDateTime to, String orgId, String periodType) {
-        
+    public Map<String, FunnelAnalysisResponse.FunnelStageMetrics>
+            generateConversionFunnelByTimePeriod(
+                    LocalDateTime from, LocalDateTime to, String orgId, String periodType) {
+
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
@@ -146,7 +156,8 @@ public class ReportingService {
             String period = entry.getKey();
             List<Dossier> periodDossiers = entry.getValue();
 
-            FunnelAnalysisResponse.FunnelStageMetrics metrics = calculateFunnelMetricsForDossiers(periodDossiers);
+            FunnelAnalysisResponse.FunnelStageMetrics metrics =
+                    calculateFunnelMetricsForDossiers(periodDossiers);
             funnelByPeriod.put(period, metrics);
         }
 
@@ -155,15 +166,17 @@ public class ReportingService {
 
     @Cacheable(value = "agentPerformance", key = "#orgId + '_' + #from + '_' + #to")
     @Transactional(readOnly = true)
-    public AgentPerformanceResponse generateAgentPerformance(LocalDateTime from, LocalDateTime to, String orgId) {
+    public AgentPerformanceResponse generateAgentPerformance(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         AgentPerformanceResponse response = new AgentPerformanceResponse();
 
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
-        Map<String, List<Dossier>> dossiersByAgent = dossiers.stream()
-            .filter(d -> d.getCreatedBy() != null && !d.getCreatedBy().isEmpty())
-            .collect(Collectors.groupingBy(Dossier::getCreatedBy));
+        Map<String, List<Dossier>> dossiersByAgent =
+                dossiers.stream()
+                        .filter(d -> d.getCreatedBy() != null && !d.getCreatedBy().isEmpty())
+                        .collect(Collectors.groupingBy(Dossier::getCreatedBy));
 
         List<AgentPerformanceResponse.AgentMetrics> agentMetrics = new ArrayList<>();
 
@@ -175,42 +188,50 @@ public class ReportingService {
             Long messagesSent = countAgentMessagesSent(agentDossiers);
             Long appointmentsScheduled = countAgentAppointmentsScheduled(agentDossiers);
             Long dossiersAssigned = (long) agentDossiers.size();
-            Long dossiersWon = agentDossiers.stream()
-                .filter(d -> d.getStatus() == DossierStatus.WON)
-                .count();
+            Long dossiersWon =
+                    agentDossiers.stream().filter(d -> d.getStatus() == DossierStatus.WON).count();
 
-            agentMetrics.add(new AgentPerformanceResponse.AgentMetrics(
-                agentId, avgResponseTime, messagesSent, appointmentsScheduled,
-                dossiersAssigned, dossiersWon
-            ));
+            agentMetrics.add(
+                    new AgentPerformanceResponse.AgentMetrics(
+                            agentId,
+                            avgResponseTime,
+                            messagesSent,
+                            appointmentsScheduled,
+                            dossiersAssigned,
+                            dossiersWon));
         }
 
         response.setAgentMetrics(agentMetrics);
 
-        AgentPerformanceResponse.AggregateMetrics aggregateMetrics = calculateAggregateMetrics(agentMetrics);
+        AgentPerformanceResponse.AggregateMetrics aggregateMetrics =
+                calculateAggregateMetrics(agentMetrics);
         response.setAggregateMetrics(aggregateMetrics);
 
         return response;
     }
 
-    @Cacheable(value = "agentMetricsDetailed", key = "#agentId + '_' + #from + '_' + #to + '_' + #orgId")
+    @Cacheable(
+            value = "agentMetricsDetailed",
+            key = "#agentId + '_' + #from + '_' + #to + '_' + #orgId")
     @Transactional(readOnly = true)
     public AgentPerformanceResponse.AgentMetrics generateDetailedAgentMetrics(
             String agentId, LocalDateTime from, LocalDateTime to, String orgId) {
-        
-        Specification<Dossier> spec = (root, query, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
-            
-            if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
-            }
-            if (to != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), to));
-            }
-            predicates.add(cb.equal(root.get("createdBy"), agentId));
-            
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
+
+        Specification<Dossier> spec =
+                (root, query, cb) -> {
+                    List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+
+                    if (from != null) {
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+                    }
+                    if (to != null) {
+                        predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), to));
+                    }
+                    predicates.add(cb.equal(root.get("createdBy"), agentId));
+
+                    return cb.and(
+                            predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+                };
 
         List<Dossier> agentDossiers = dossierRepository.findAll(spec);
 
@@ -218,14 +239,16 @@ public class ReportingService {
         Long messagesSent = countAgentMessagesSent(agentDossiers);
         Long appointmentsScheduled = countAgentAppointmentsScheduled(agentDossiers);
         Long dossiersAssigned = (long) agentDossiers.size();
-        Long dossiersWon = agentDossiers.stream()
-            .filter(d -> d.getStatus() == DossierStatus.WON)
-            .count();
+        Long dossiersWon =
+                agentDossiers.stream().filter(d -> d.getStatus() == DossierStatus.WON).count();
 
         return new AgentPerformanceResponse.AgentMetrics(
-            agentId, avgResponseTime, messagesSent, appointmentsScheduled,
-            dossiersAssigned, dossiersWon
-        );
+                agentId,
+                avgResponseTime,
+                messagesSent,
+                appointmentsScheduled,
+                dossiersAssigned,
+                dossiersWon);
     }
 
     @Cacheable(value = "revenueForecast", key = "#orgId")
@@ -234,18 +257,21 @@ public class ReportingService {
         RevenueForecastResponse response = new RevenueForecastResponse();
 
         BigDecimal totalPipelineValue = annonceAnalyticsRepository.getTotalPipelineValue(orgId);
-        response.setTotalPipelineValue(totalPipelineValue != null ? totalPipelineValue : BigDecimal.ZERO);
+        response.setTotalPipelineValue(
+                totalPipelineValue != null ? totalPipelineValue : BigDecimal.ZERO);
 
         Long activeOpportunities = annonceAnalyticsRepository.getActiveOpportunitiesCount(orgId);
-        response.setTotalOpportunities(activeOpportunities != null ? activeOpportunities.intValue() : 0);
+        response.setTotalOpportunities(
+                activeOpportunities != null ? activeOpportunities.intValue() : 0);
 
         LocalDateTime sixMonthsAgo = LocalDateTime.now().minusMonths(6);
-        List<Object[]> conversionData = annonceAnalyticsRepository.getConversionRatesBySource(orgId, sixMonthsAgo);
-        
+        List<Object[]> conversionData =
+                annonceAnalyticsRepository.getConversionRatesBySource(orgId, sixMonthsAgo);
+
         Map<String, Double> conversionRatesBySource = new HashMap<>();
         double totalWon = 0;
         double totalDossiers = 0;
-        
+
         for (Object[] row : conversionData) {
             String source = row[0] != null ? row[0].toString() : "UNKNOWN";
             Long total = ((Number) row[1]).longValue();
@@ -270,8 +296,9 @@ public class ReportingService {
             BigDecimal totalValue = (BigDecimal) row[2];
 
             Double weight = getStageWeight(status);
-            RevenueForecastResponse.PipelineStageValue stageValue = 
-                new RevenueForecastResponse.PipelineStageValue(status, count, totalValue, weight);
+            RevenueForecastResponse.PipelineStageValue stageValue =
+                    new RevenueForecastResponse.PipelineStageValue(
+                            status, count, totalValue, weight);
             pipelineByStage.add(stageValue);
             totalWeightedValue = totalWeightedValue.add(stageValue.getWeightedValue());
         }
@@ -288,9 +315,9 @@ public class ReportingService {
 
             Double historicalRate = conversionRatesBySource.getOrDefault(source, avgConversionRate);
 
-            forecastBySource.add(new RevenueForecastResponse.SourceForecast(
-                source, count, totalValue, historicalRate
-            ));
+            forecastBySource.add(
+                    new RevenueForecastResponse.SourceForecast(
+                            source, count, totalValue, historicalRate));
         }
 
         response.setForecastBySource(forecastBySource);
@@ -307,50 +334,65 @@ public class ReportingService {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime threeMonthsAgo = now.minusMonths(3);
-        
-        List<Object[]> historicalWonDeals = annonceAnalyticsRepository.getConversionRatesBySource(orgId, threeMonthsAgo);
-        
+
+        List<Object[]> historicalWonDeals =
+                annonceAnalyticsRepository.getConversionRatesBySource(orgId, threeMonthsAgo);
+
         double avgConversionRate = response.getAverageConversionRate();
         BigDecimal avgPipelineValue = response.getTotalPipelineValue();
         int totalOpportunities = response.getTotalOpportunities();
 
-        response.setProjection30Days(calculateRevenueProjection(30, avgConversionRate, avgPipelineValue, totalOpportunities));
-        response.setProjection60Days(calculateRevenueProjection(60, avgConversionRate, avgPipelineValue, totalOpportunities));
-        response.setProjection90Days(calculateRevenueProjection(90, avgConversionRate, avgPipelineValue, totalOpportunities));
+        response.setProjection30Days(
+                calculateRevenueProjection(
+                        30, avgConversionRate, avgPipelineValue, totalOpportunities));
+        response.setProjection60Days(
+                calculateRevenueProjection(
+                        60, avgConversionRate, avgPipelineValue, totalOpportunities));
+        response.setProjection90Days(
+                calculateRevenueProjection(
+                        90, avgConversionRate, avgPipelineValue, totalOpportunities));
 
         return response;
     }
 
     private RevenueForecastResponse.RevenueForecastProjection calculateRevenueProjection(
-            int days, double avgConversionRate, BigDecimal totalPipelineValue, int totalOpportunities) {
-        
+            int days,
+            double avgConversionRate,
+            BigDecimal totalPipelineValue,
+            int totalOpportunities) {
+
         double timeFactor = days / 90.0;
         double adjustedConversionRate = avgConversionRate * timeFactor;
-        
-        BigDecimal estimatedRevenue = totalPipelineValue
-            .multiply(BigDecimal.valueOf(adjustedConversionRate / 100.0))
-            .setScale(2, RoundingMode.HALF_UP);
-        
-        BigDecimal conservativeRevenue = estimatedRevenue
-            .multiply(BigDecimal.valueOf(0.7))
-            .setScale(2, RoundingMode.HALF_UP);
-        
-        BigDecimal optimisticRevenue = estimatedRevenue
-            .multiply(BigDecimal.valueOf(1.3))
-            .setScale(2, RoundingMode.HALF_UP);
-        
+
+        BigDecimal estimatedRevenue =
+                totalPipelineValue
+                        .multiply(BigDecimal.valueOf(adjustedConversionRate / 100.0))
+                        .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal conservativeRevenue =
+                estimatedRevenue
+                        .multiply(BigDecimal.valueOf(0.7))
+                        .setScale(2, RoundingMode.HALF_UP);
+
+        BigDecimal optimisticRevenue =
+                estimatedRevenue
+                        .multiply(BigDecimal.valueOf(1.3))
+                        .setScale(2, RoundingMode.HALF_UP);
+
         int expectedDeals = (int) Math.round(totalOpportunities * adjustedConversionRate / 100.0);
 
         return new RevenueForecastResponse.RevenueForecastProjection(
-            days, estimatedRevenue, conservativeRevenue, optimisticRevenue, expectedDeals
-        );
+                days, estimatedRevenue, conservativeRevenue, optimisticRevenue, expectedDeals);
     }
 
-    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelMetricsForDossiers(List<Dossier> dossiers) {
-        Map<DossierStatus, Long> statusCounts = dossiers.stream()
-            .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
+    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelMetricsForDossiers(
+            List<Dossier> dossiers) {
+        Map<DossierStatus, Long> statusCounts =
+                dossiers.stream()
+                        .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
 
-        FunnelAnalysisResponse.FunnelStageMetrics metrics = new FunnelAnalysisResponse.FunnelStageMetrics();
+        FunnelAnalysisResponse.FunnelStageMetrics metrics =
+                new FunnelAnalysisResponse.FunnelStageMetrics();
 
         Long newCount = statusCounts.getOrDefault(DossierStatus.NEW, 0L);
         Long qualifyingCount = statusCounts.getOrDefault(DossierStatus.QUALIFYING, 0L);
@@ -367,12 +409,16 @@ public class ReportingService {
         metrics.setLostCount(lostCount);
 
         metrics.setNewToQualifyingRate(newCount > 0 ? (qualifyingCount * 100.0 / newCount) : 0.0);
-        metrics.setQualifyingToQualifiedRate(qualifyingCount > 0 ? (qualifiedCount * 100.0 / qualifyingCount) : 0.0);
-        metrics.setQualifiedToAppointmentRate(qualifiedCount > 0 ? (appointmentCount * 100.0 / qualifiedCount) : 0.0);
-        metrics.setAppointmentToWonRate(appointmentCount > 0 ? (wonCount * 100.0 / appointmentCount) : 0.0);
+        metrics.setQualifyingToQualifiedRate(
+                qualifyingCount > 0 ? (qualifiedCount * 100.0 / qualifyingCount) : 0.0);
+        metrics.setQualifiedToAppointmentRate(
+                qualifiedCount > 0 ? (appointmentCount * 100.0 / qualifiedCount) : 0.0);
+        metrics.setAppointmentToWonRate(
+                appointmentCount > 0 ? (wonCount * 100.0 / appointmentCount) : 0.0);
 
         Long totalDossiers = (long) dossiers.size();
-        metrics.setOverallConversionRate(totalDossiers > 0 ? (wonCount * 100.0 / totalDossiers) : 0.0);
+        metrics.setOverallConversionRate(
+                totalDossiers > 0 ? (wonCount * 100.0 / totalDossiers) : 0.0);
 
         return metrics;
     }
@@ -382,8 +428,9 @@ public class ReportingService {
             case "DAILY":
                 return dateTime.toLocalDate().toString();
             case "WEEKLY":
-                return dateTime.toLocalDate().getYear() + "-W" + 
-                       ((dateTime.getDayOfYear() - 1) / 7 + 1);
+                return dateTime.toLocalDate().getYear()
+                        + "-W"
+                        + ((dateTime.getDayOfYear() - 1) / 7 + 1);
             case "MONTHLY":
                 return YearMonth.from(dateTime).toString();
             case "QUARTERLY":
@@ -396,7 +443,8 @@ public class ReportingService {
         }
     }
 
-    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelStageMetrics(LocalDateTime from, LocalDateTime to, String orgId) {
+    private FunnelAnalysisResponse.FunnelStageMetrics calculateFunnelStageMetrics(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
         List<Dossier> dossiers = dossierRepository.findAll(spec);
         return calculateFunnelMetricsForDossiers(dossiers);
@@ -408,22 +456,25 @@ public class ReportingService {
         for (Dossier dossier : dossiers) {
             LocalDateTime dossierCreatedAt = dossier.getCreatedAt();
 
-            Specification<MessageEntity> messageSpec = (root, query, cb) -> {
-                return cb.and(
-                    cb.equal(root.get("dossier").get("id"), dossier.getId()),
-                    cb.equal(root.get("direction"), MessageDirection.OUTBOUND)
-                );
-            };
+            Specification<MessageEntity> messageSpec =
+                    (root, query, cb) -> {
+                        return cb.and(
+                                cb.equal(root.get("dossier").get("id"), dossier.getId()),
+                                cb.equal(root.get("direction"), MessageDirection.OUTBOUND));
+                    };
 
             List<MessageEntity> outboundMessages = messageRepository.findAll(messageSpec);
 
             if (!outboundMessages.isEmpty()) {
-                MessageEntity firstResponse = outboundMessages.stream()
-                    .min(Comparator.comparing(MessageEntity::getTimestamp))
-                    .orElse(null);
+                MessageEntity firstResponse =
+                        outboundMessages.stream()
+                                .min(Comparator.comparing(MessageEntity::getTimestamp))
+                                .orElse(null);
 
-                if (firstResponse != null && firstResponse.getTimestamp().isAfter(dossierCreatedAt)) {
-                    Duration duration = Duration.between(dossierCreatedAt, firstResponse.getTimestamp());
+                if (firstResponse != null
+                        && firstResponse.getTimestamp().isAfter(dossierCreatedAt)) {
+                    Duration duration =
+                            Duration.between(dossierCreatedAt, firstResponse.getTimestamp());
                     double hours = duration.toMinutes() / 60.0;
                     responseTimes.add(hours);
                 }
@@ -434,51 +485,46 @@ public class ReportingService {
             return 0.0;
         }
 
-        return responseTimes.stream()
-            .mapToDouble(Double::doubleValue)
-            .average()
-            .orElse(0.0);
+        return responseTimes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
     private Long countAgentMessagesSent(List<Dossier> dossiers) {
-        List<Long> dossierIds = dossiers.stream()
-            .map(Dossier::getId)
-            .collect(Collectors.toList());
+        List<Long> dossierIds = dossiers.stream().map(Dossier::getId).collect(Collectors.toList());
 
         if (dossierIds.isEmpty()) {
             return 0L;
         }
 
-        Specification<MessageEntity> spec = (root, query, cb) -> {
-            return cb.and(
-                root.get("dossier").get("id").in(dossierIds),
-                cb.equal(root.get("direction"), MessageDirection.OUTBOUND)
-            );
-        };
+        Specification<MessageEntity> spec =
+                (root, query, cb) -> {
+                    return cb.and(
+                            root.get("dossier").get("id").in(dossierIds),
+                            cb.equal(root.get("direction"), MessageDirection.OUTBOUND));
+                };
 
         return messageRepository.count(spec);
     }
 
     private Long countAgentAppointmentsScheduled(List<Dossier> dossiers) {
-        List<Long> dossierIds = dossiers.stream()
-            .map(Dossier::getId)
-            .collect(Collectors.toList());
+        List<Long> dossierIds = dossiers.stream().map(Dossier::getId).collect(Collectors.toList());
 
         if (dossierIds.isEmpty()) {
             return 0L;
         }
 
-        Specification<AppointmentEntity> spec = (root, query, cb) -> {
-            return root.get("dossier").get("id").in(dossierIds);
-        };
+        Specification<AppointmentEntity> spec =
+                (root, query, cb) -> {
+                    return root.get("dossier").get("id").in(dossierIds);
+                };
 
         return appointmentRepository.count(spec);
     }
 
     private AgentPerformanceResponse.AggregateMetrics calculateAggregateMetrics(
             List<AgentPerformanceResponse.AgentMetrics> agentMetrics) {
-        
-        AgentPerformanceResponse.AggregateMetrics aggregate = new AgentPerformanceResponse.AggregateMetrics();
+
+        AgentPerformanceResponse.AggregateMetrics aggregate =
+                new AgentPerformanceResponse.AggregateMetrics();
 
         if (agentMetrics.isEmpty()) {
             aggregate.setAverageResponseTimeHours(0.0);
@@ -490,26 +536,32 @@ public class ReportingService {
             return aggregate;
         }
 
-        double avgResponseTime = agentMetrics.stream()
-            .mapToDouble(AgentPerformanceResponse.AgentMetrics::getAverageResponseTimeHours)
-            .average()
-            .orElse(0.0);
+        double avgResponseTime =
+                agentMetrics.stream()
+                        .mapToDouble(
+                                AgentPerformanceResponse.AgentMetrics::getAverageResponseTimeHours)
+                        .average()
+                        .orElse(0.0);
 
-        Long totalMessages = agentMetrics.stream()
-            .mapToLong(AgentPerformanceResponse.AgentMetrics::getMessagesSent)
-            .sum();
+        Long totalMessages =
+                agentMetrics.stream()
+                        .mapToLong(AgentPerformanceResponse.AgentMetrics::getMessagesSent)
+                        .sum();
 
-        Long totalAppointments = agentMetrics.stream()
-            .mapToLong(AgentPerformanceResponse.AgentMetrics::getAppointmentsScheduled)
-            .sum();
+        Long totalAppointments =
+                agentMetrics.stream()
+                        .mapToLong(AgentPerformanceResponse.AgentMetrics::getAppointmentsScheduled)
+                        .sum();
 
-        Long totalAssigned = agentMetrics.stream()
-            .mapToLong(AgentPerformanceResponse.AgentMetrics::getDossiersAssigned)
-            .sum();
+        Long totalAssigned =
+                agentMetrics.stream()
+                        .mapToLong(AgentPerformanceResponse.AgentMetrics::getDossiersAssigned)
+                        .sum();
 
-        Long totalWon = agentMetrics.stream()
-            .mapToLong(AgentPerformanceResponse.AgentMetrics::getDossiersWon)
-            .sum();
+        Long totalWon =
+                agentMetrics.stream()
+                        .mapToLong(AgentPerformanceResponse.AgentMetrics::getDossiersWon)
+                        .sum();
 
         Double overallWinRate = totalAssigned > 0 ? (totalWon * 100.0 / totalAssigned) : 0.0;
 
@@ -549,19 +601,26 @@ public class ReportingService {
         };
     }
 
-    private List<ConversionRateBySourceDto> calculateConversionRateBySource(LocalDateTime from, LocalDateTime to, String orgId) {
+    private List<ConversionRateBySourceDto> calculateConversionRateBySource(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
 
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
-        Map<String, Map<String, Long>> sourceStats = dossiers.stream()
-            .collect(Collectors.groupingBy(
-                d -> d.getSource() != null ? d.getSource().name() : "UNKNOWN",
-                Collectors.groupingBy(
-                    d -> d.getStatus() == DossierStatus.WON ? "won" : "other",
-                    Collectors.counting()
-                )
-            ));
+        Map<String, Map<String, Long>> sourceStats =
+                dossiers.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        d ->
+                                                d.getSource() != null
+                                                        ? d.getSource().name()
+                                                        : "UNKNOWN",
+                                        Collectors.groupingBy(
+                                                d ->
+                                                        d.getStatus() == DossierStatus.WON
+                                                                ? "won"
+                                                                : "other",
+                                                Collectors.counting())));
 
         List<ConversionRateBySourceDto> result = new ArrayList<>();
         for (Map.Entry<String, Map<String, Long>> entry : sourceStats.entrySet()) {
@@ -576,7 +635,8 @@ public class ReportingService {
         return result;
     }
 
-    private Double calculateAverageResponseTime(LocalDateTime from, LocalDateTime to, String orgId) {
+    private Double calculateAverageResponseTime(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
 
         List<Dossier> dossiers = dossierRepository.findAll(spec);
@@ -586,22 +646,25 @@ public class ReportingService {
         for (Dossier dossier : dossiers) {
             LocalDateTime dossierCreatedAt = dossier.getCreatedAt();
 
-            Specification<MessageEntity> messageSpec = (root, query, cb) -> {
-                return cb.and(
-                    cb.equal(root.get("dossier").get("id"), dossier.getId()),
-                    cb.equal(root.get("direction"), MessageDirection.OUTBOUND)
-                );
-            };
+            Specification<MessageEntity> messageSpec =
+                    (root, query, cb) -> {
+                        return cb.and(
+                                cb.equal(root.get("dossier").get("id"), dossier.getId()),
+                                cb.equal(root.get("direction"), MessageDirection.OUTBOUND));
+                    };
 
             List<MessageEntity> outboundMessages = messageRepository.findAll(messageSpec);
 
             if (!outboundMessages.isEmpty()) {
-                MessageEntity firstResponse = outboundMessages.stream()
-                    .min(Comparator.comparing(MessageEntity::getTimestamp))
-                    .orElse(null);
+                MessageEntity firstResponse =
+                        outboundMessages.stream()
+                                .min(Comparator.comparing(MessageEntity::getTimestamp))
+                                .orElse(null);
 
-                if (firstResponse != null && firstResponse.getTimestamp().isAfter(dossierCreatedAt)) {
-                    Duration duration = Duration.between(dossierCreatedAt, firstResponse.getTimestamp());
+                if (firstResponse != null
+                        && firstResponse.getTimestamp().isAfter(dossierCreatedAt)) {
+                    Duration duration =
+                            Duration.between(dossierCreatedAt, firstResponse.getTimestamp());
                     double hours = duration.toMinutes() / 60.0;
                     responseTimes.add(hours);
                 }
@@ -612,27 +675,29 @@ public class ReportingService {
             return 0.0;
         }
 
-        return responseTimes.stream()
-            .mapToDouble(Double::doubleValue)
-            .average()
-            .orElse(0.0);
+        return responseTimes.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
-    private Double calculateAppointmentShowRate(LocalDateTime from, LocalDateTime to, String orgId) {
-        Specification<AppointmentEntity> spec = (root, query, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+    private Double calculateAppointmentShowRate(
+            LocalDateTime from, LocalDateTime to, String orgId) {
+        Specification<AppointmentEntity> spec =
+                (root, query, cb) -> {
+                    List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
 
-            if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("startTime"), from));
-            }
-            if (to != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("startTime"), to));
-            }
+                    if (from != null) {
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("startTime"), from));
+                    }
+                    if (to != null) {
+                        predicates.add(cb.lessThanOrEqualTo(root.get("startTime"), to));
+                    }
 
-            predicates.add(root.get("status").in(AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED));
+                    predicates.add(
+                            root.get("status")
+                                    .in(AppointmentStatus.COMPLETED, AppointmentStatus.CANCELLED));
 
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
+                    return cb.and(
+                            predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+                };
 
         List<AppointmentEntity> appointments = appointmentRepository.findAll(spec);
 
@@ -640,28 +705,31 @@ public class ReportingService {
             return 0.0;
         }
 
-        long completedCount = appointments.stream()
-            .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
-            .count();
+        long completedCount =
+                appointments.stream()
+                        .filter(a -> a.getStatus() == AppointmentStatus.COMPLETED)
+                        .count();
 
         return (completedCount * 100.0) / appointments.size();
     }
 
     private Double calculatePipelineVelocity(LocalDateTime from, LocalDateTime to, String orgId) {
-        Specification<Dossier> spec = (root, query, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+        Specification<Dossier> spec =
+                (root, query, cb) -> {
+                    List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
 
-            if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
-            }
-            if (to != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), to));
-            }
+                    if (from != null) {
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("createdAt"), from));
+                    }
+                    if (to != null) {
+                        predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), to));
+                    }
 
-            predicates.add(cb.equal(root.get("status"), DossierStatus.WON));
+                    predicates.add(cb.equal(root.get("status"), DossierStatus.WON));
 
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
+                    return cb.and(
+                            predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+                };
 
         List<Dossier> wonDossiers = dossierRepository.findAll(spec);
 
@@ -677,61 +745,65 @@ public class ReportingService {
             velocities.add(days);
         }
 
-        return velocities.stream()
-            .mapToDouble(Double::doubleValue)
-            .average()
-            .orElse(0.0);
+        return velocities.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
-    private List<TimeSeriesDataPointDto> calculateDossierCreationTimeSeries(LocalDateTime from, LocalDateTime to, String orgId) {
+    private List<TimeSeriesDataPointDto> calculateDossierCreationTimeSeries(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
 
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
-        Map<LocalDate, Long> dailyCounts = dossiers.stream()
-            .collect(Collectors.groupingBy(
-                d -> d.getCreatedAt().toLocalDate(),
-                Collectors.counting()
-            ));
+        Map<LocalDate, Long> dailyCounts =
+                dossiers.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        d -> d.getCreatedAt().toLocalDate(),
+                                        Collectors.counting()));
 
         return dailyCounts.entrySet().stream()
-            .map(e -> new TimeSeriesDataPointDto(e.getKey(), e.getValue()))
-            .sorted(Comparator.comparing(TimeSeriesDataPointDto::getDate))
-            .collect(Collectors.toList());
+                .map(e -> new TimeSeriesDataPointDto(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(TimeSeriesDataPointDto::getDate))
+                .collect(Collectors.toList());
     }
 
-    private List<TimeSeriesDataPointDto> calculateConversionTimeSeries(LocalDateTime from, LocalDateTime to, String orgId) {
-        Specification<Dossier> spec = (root, query, cb) -> {
-            List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
+    private List<TimeSeriesDataPointDto> calculateConversionTimeSeries(
+            LocalDateTime from, LocalDateTime to, String orgId) {
+        Specification<Dossier> spec =
+                (root, query, cb) -> {
+                    List<jakarta.persistence.criteria.Predicate> predicates = new ArrayList<>();
 
-            if (from != null) {
-                predicates.add(cb.greaterThanOrEqualTo(root.get("updatedAt"), from));
-            }
-            if (to != null) {
-                predicates.add(cb.lessThanOrEqualTo(root.get("updatedAt"), to));
-            }
+                    if (from != null) {
+                        predicates.add(cb.greaterThanOrEqualTo(root.get("updatedAt"), from));
+                    }
+                    if (to != null) {
+                        predicates.add(cb.lessThanOrEqualTo(root.get("updatedAt"), to));
+                    }
 
-            predicates.add(cb.equal(root.get("status"), DossierStatus.WON));
+                    predicates.add(cb.equal(root.get("status"), DossierStatus.WON));
 
-            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
-        };
+                    return cb.and(
+                            predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+                };
 
         List<Dossier> wonDossiers = dossierRepository.findAll(spec);
 
-        Map<LocalDate, Long> dailyCounts = wonDossiers.stream()
-            .collect(Collectors.groupingBy(
-                d -> d.getUpdatedAt().toLocalDate(),
-                Collectors.counting()
-            ));
+        Map<LocalDate, Long> dailyCounts =
+                wonDossiers.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        d -> d.getUpdatedAt().toLocalDate(),
+                                        Collectors.counting()));
 
         return dailyCounts.entrySet().stream()
-            .map(e -> new TimeSeriesDataPointDto(e.getKey(), e.getValue()))
-            .sorted(Comparator.comparing(TimeSeriesDataPointDto::getDate))
-            .collect(Collectors.toList());
+                .map(e -> new TimeSeriesDataPointDto(e.getKey(), e.getValue()))
+                .sorted(Comparator.comparing(TimeSeriesDataPointDto::getDate))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public Map<String, Object> generateAnalyticsData(LocalDateTime from, LocalDateTime to, String orgId) {
+    public Map<String, Object> generateAnalyticsData(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Map<String, Object> analyticsData = new HashMap<>();
 
         AgentPerformanceResponse agentPerformance = generateAgentPerformance(from, to, orgId);
@@ -747,21 +819,26 @@ public class ReportingService {
         analyticsData.put("conversionFunnel", conversionFunnel);
 
         Map<String, String> dateRange = new HashMap<>();
-        dateRange.put("from", from != null ? from.toLocalDate().toString() : LocalDate.now().minusDays(30).toString());
+        dateRange.put(
+                "from",
+                from != null
+                        ? from.toLocalDate().toString()
+                        : LocalDate.now().minusDays(30).toString());
         dateRange.put("to", to != null ? to.toLocalDate().toString() : LocalDate.now().toString());
         analyticsData.put("dateRange", dateRange);
 
         return analyticsData;
     }
 
-    private List<Map<String, Object>> generateMockRevenueForecast(LocalDateTime from, LocalDateTime to) {
+    private List<Map<String, Object>> generateMockRevenueForecast(
+            LocalDateTime from, LocalDateTime to) {
         List<Map<String, Object>> forecast = new ArrayList<>();
-        
+
         LocalDate startDate = from != null ? from.toLocalDate() : LocalDate.now().minusDays(30);
         LocalDate endDate = to != null ? to.toLocalDate() : LocalDate.now();
-        
+
         Random random = new Random(42);
-        
+
         for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(7)) {
             Map<String, Object> dataPoint = new HashMap<>();
             dataPoint.put("date", date.toString());
@@ -770,26 +847,35 @@ public class ReportingService {
             dataPoint.put("pipelineValue", 200000 + random.nextInt(300000));
             forecast.add(dataPoint);
         }
-        
+
         return forecast;
     }
 
-    private List<Map<String, Object>> calculateLeadSourcesData(LocalDateTime from, LocalDateTime to, String orgId) {
+    private List<Map<String, Object>> calculateLeadSourcesData(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
-        Map<String, Long> sourceCounts = dossiers.stream()
-            .collect(Collectors.groupingBy(
-                d -> d.getLeadSource() != null ? d.getLeadSource() : "UNKNOWN",
-                Collectors.counting()
-            ));
+        Map<String, Long> sourceCounts =
+                dossiers.stream()
+                        .collect(
+                                Collectors.groupingBy(
+                                        d ->
+                                                d.getLeadSource() != null
+                                                        ? d.getLeadSource()
+                                                        : "UNKNOWN",
+                                        Collectors.counting()));
 
-        Map<String, Long> sourceWonCounts = dossiers.stream()
-            .filter(d -> d.getStatus() == DossierStatus.WON)
-            .collect(Collectors.groupingBy(
-                d -> d.getLeadSource() != null ? d.getLeadSource() : "UNKNOWN",
-                Collectors.counting()
-            ));
+        Map<String, Long> sourceWonCounts =
+                dossiers.stream()
+                        .filter(d -> d.getStatus() == DossierStatus.WON)
+                        .collect(
+                                Collectors.groupingBy(
+                                        d ->
+                                                d.getLeadSource() != null
+                                                        ? d.getLeadSource()
+                                                        : "UNKNOWN",
+                                        Collectors.counting()));
 
         long totalDossiers = dossiers.size();
 
@@ -799,7 +885,7 @@ public class ReportingService {
             String source = entry.getKey();
             Long count = entry.getValue();
             Long wonCount = sourceWonCounts.getOrDefault(source, 0L);
-            
+
             sourceData.put("source", source);
             sourceData.put("count", count);
             sourceData.put("percentage", totalDossiers > 0 ? (count * 100.0 / totalDossiers) : 0.0);
@@ -808,36 +894,38 @@ public class ReportingService {
         }
 
         return leadSources.stream()
-            .sorted((a, b) -> Long.compare((Long) b.get("count"), (Long) a.get("count")))
-            .collect(Collectors.toList());
+                .sorted((a, b) -> Long.compare((Long) b.get("count"), (Long) a.get("count")))
+                .collect(Collectors.toList());
     }
 
-    private List<Map<String, Object>> calculateConversionFunnelData(LocalDateTime from, LocalDateTime to, String orgId) {
+    private List<Map<String, Object>> calculateConversionFunnelData(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         Specification<Dossier> spec = buildDateRangeSpec(from, to);
         List<Dossier> dossiers = dossierRepository.findAll(spec);
 
-        Map<DossierStatus, Long> statusCounts = dossiers.stream()
-            .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
+        Map<DossierStatus, Long> statusCounts =
+                dossiers.stream()
+                        .collect(Collectors.groupingBy(Dossier::getStatus, Collectors.counting()));
 
         List<Map<String, Object>> funnelData = new ArrayList<>();
         DossierStatus[] statusOrder = {
-            DossierStatus.NEW, 
-            DossierStatus.QUALIFYING, 
-            DossierStatus.QUALIFIED, 
-            DossierStatus.APPOINTMENT, 
+            DossierStatus.NEW,
+            DossierStatus.QUALIFYING,
+            DossierStatus.QUALIFIED,
+            DossierStatus.APPOINTMENT,
             DossierStatus.WON
         };
 
         long previousCount = dossiers.size();
-        
+
         for (int i = 0; i < statusOrder.length; i++) {
             DossierStatus status = statusOrder[i];
             Long count = statusCounts.getOrDefault(status, 0L);
-            
+
             Map<String, Object> stageData = new HashMap<>();
             stageData.put("stage", status.name());
             stageData.put("count", count);
-            
+
             if (i == 0) {
                 stageData.put("conversionRate", 100.0);
                 stageData.put("dropOffRate", 0.0);
@@ -847,7 +935,7 @@ public class ReportingService {
                 stageData.put("conversionRate", conversionRate);
                 stageData.put("dropOffRate", dropOffRate);
             }
-            
+
             funnelData.add(stageData);
             previousCount = count;
         }

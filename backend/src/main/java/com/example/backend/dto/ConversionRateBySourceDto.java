@@ -6,8 +6,7 @@ public class ConversionRateBySourceDto {
     private Long wonDossiers;
     private Double conversionRate;
 
-    public ConversionRateBySourceDto() {
-    }
+    public ConversionRateBySourceDto() {}
 
     public ConversionRateBySourceDto(String source, Long totalDossiers, Long wonDossiers) {
         this.source = source;

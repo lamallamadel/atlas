@@ -1,9 +1,9 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.util.Map;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import java.util.Map;
 
 @Entity
 @Table(name = "suggestion_template")

@@ -1,5 +1,7 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -16,18 +18,14 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class CorrelationIdIdempotenceTest {
 
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
-    @LocalServerPort
-    private int port;
+    @LocalServerPort private int port;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    @Autowired private TestRestTemplate restTemplate;
 
     private ListAppender<ILoggingEvent> listAppender;
     private Logger logger;
@@ -56,20 +54,22 @@ class CorrelationIdIdempotenceTest {
         headers.set(CORRELATION_ID_HEADER, providedCorrelationId);
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+        ResponseEntity<String> response =
+                restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
         assertThat(response.getHeaders().getFirst(CORRELATION_ID_HEADER))
                 .isEqualTo(providedCorrelationId);
 
-        boolean foundInLogs = listAppender.list.stream()
-                .anyMatch(event -> {
-                    String correlationId = event.getMDCPropertyMap().get("correlationId");
-                    return providedCorrelationId.equals(correlationId);
-                });
+        boolean foundInLogs =
+                listAppender.list.stream()
+                        .anyMatch(
+                                event -> {
+                                    String correlationId =
+                                            event.getMDCPropertyMap().get("correlationId");
+                                    return providedCorrelationId.equals(correlationId);
+                                });
 
-        assertThat(foundInLogs)
-                .as("Correlation ID should appear in logs")
-                .isTrue();
+        assertThat(foundInLogs).as("Correlation ID should appear in logs").isTrue();
     }
 
     @Test
@@ -87,16 +87,18 @@ class CorrelationIdIdempotenceTest {
 
         assertThat(correlationId)
                 .as("Generated correlation ID should be a valid UUID format")
-                .matches("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
+                .matches(
+                        "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
 
-        boolean foundInLogs = listAppender.list.stream()
-                .anyMatch(event -> {
-                    String logCorrelationId = event.getMDCPropertyMap().get("correlationId");
-                    return correlationId.equals(logCorrelationId);
-                });
+        boolean foundInLogs =
+                listAppender.list.stream()
+                        .anyMatch(
+                                event -> {
+                                    String logCorrelationId =
+                                            event.getMDCPropertyMap().get("correlationId");
+                                    return correlationId.equals(logCorrelationId);
+                                });
 
-        assertThat(foundInLogs)
-                .as("Generated correlation ID should appear in logs")
-                .isTrue();
+        assertThat(foundInLogs).as("Generated correlation ID should appear in logs").isTrue();
     }
 }

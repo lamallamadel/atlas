@@ -1,10 +1,13 @@
 package com.example.backend.filter;
 
 import com.example.backend.util.TenantContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -12,26 +15,19 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.MDC;
-
-import java.io.IOException;
 
 /**
  * Tenant isolation filter that extracts the X-Org-Id header and sets it in TenantContext.
- * 
- * This filter runs at HIGHEST_PRECEDENCE - 100 to ensure it executes before the Spring Security
- * filter chain. This is critical because:
- * 1. It needs to extract the X-Org-Id header before security validation
- * 2. It sets up the TenantContext that is used throughout the request
- * 3. It ensures proper cleanup in a finally block, even if security checks fail
- * 
- * The X-Org-Id header is mandatory for all /api/** endpoints except:
- * - /actuator/** (monitoring endpoints)
- * - /swagger-ui/** (API documentation)
- * - /api/v1/webhooks/** (webhook endpoints)
- * 
- * Missing or empty X-Org-Id header results in HTTP 400 Bad Request.
+ *
+ * <p>This filter runs at HIGHEST_PRECEDENCE - 100 to ensure it executes before the Spring Security
+ * filter chain. This is critical because: 1. It needs to extract the X-Org-Id header before
+ * security validation 2. It sets up the TenantContext that is used throughout the request 3. It
+ * ensures proper cleanup in a finally block, even if security checks fail
+ *
+ * <p>The X-Org-Id header is mandatory for all /api/** endpoints except: - /actuator/** (monitoring
+ * endpoints) - /swagger-ui/** (API documentation) - /api/v1/webhooks/** (webhook endpoints)
+ *
+ * <p>Missing or empty X-Org-Id header results in HTTP 400 Bad Request.
  */
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE - 100)
@@ -45,7 +41,8 @@ public class TenantFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         String path = request.getRequestURI();
@@ -59,10 +56,10 @@ public class TenantFilter extends OncePerRequestFilter {
             String orgId = request.getHeader(ORG_ID_HEADER);
 
             if (orgId == null || orgId.trim().isEmpty()) {
-                ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                        HttpStatus.BAD_REQUEST,
-                        "Missing required header: " + ORG_ID_HEADER
-                );
+                ProblemDetail problemDetail =
+                        ProblemDetail.forStatusAndDetail(
+                                HttpStatus.BAD_REQUEST,
+                                "Missing required header: " + ORG_ID_HEADER);
                 problemDetail.setTitle("Bad Request");
 
                 response.setStatus(HttpStatus.BAD_REQUEST.value());
@@ -93,5 +90,4 @@ public class TenantFilter extends OncePerRequestFilter {
                 || path.startsWith("/v3/api-docs/")
                 || path.startsWith("/api/v1/webhooks/");
     }
-
 }

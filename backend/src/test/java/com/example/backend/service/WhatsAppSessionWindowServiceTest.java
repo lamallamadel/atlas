@@ -1,7 +1,13 @@
 package com.example.backend.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.example.backend.entity.WhatsAppSessionWindow;
 import com.example.backend.repository.WhatsAppSessionWindowRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -10,21 +16,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class WhatsAppSessionWindowServiceTest {
 
-    @Mock
-    private WhatsAppSessionWindowRepository sessionWindowRepository;
+    @Mock private WhatsAppSessionWindowRepository sessionWindowRepository;
 
-    @InjectMocks
-    private WhatsAppSessionWindowService service;
+    @InjectMocks private WhatsAppSessionWindowService service;
 
     private String orgId = "test-org";
     private String phoneNumber = "+1234567890";
@@ -38,11 +35,12 @@ class WhatsAppSessionWindowServiceTest {
     @Test
     void updateSessionWindow_CreatesNewSession_WhenNoneExists() {
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
         service.updateSessionWindow(orgId, phoneNumber, inboundTime);
 
-        ArgumentCaptor<WhatsAppSessionWindow> captor = ArgumentCaptor.forClass(WhatsAppSessionWindow.class);
+        ArgumentCaptor<WhatsAppSessionWindow> captor =
+                ArgumentCaptor.forClass(WhatsAppSessionWindow.class);
         verify(sessionWindowRepository).save(captor.capture());
 
         WhatsAppSessionWindow saved = captor.getValue();
@@ -63,7 +61,7 @@ class WhatsAppSessionWindowServiceTest {
         existing.setLastInboundMessageAt(inboundTime.minusHours(2));
 
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.of(existing));
+                .thenReturn(Optional.of(existing));
 
         service.updateSessionWindow(orgId, phoneNumber, inboundTime);
 
@@ -80,7 +78,7 @@ class WhatsAppSessionWindowServiceTest {
         session.setWindowExpiresAt(LocalDateTime.now().plusHours(23));
 
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.of(session));
+                .thenReturn(Optional.of(session));
 
         boolean result = service.isWithinSessionWindow(orgId, phoneNumber);
 
@@ -94,7 +92,7 @@ class WhatsAppSessionWindowServiceTest {
         session.setWindowExpiresAt(LocalDateTime.now().minusHours(1));
 
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.of(session));
+                .thenReturn(Optional.of(session));
 
         boolean result = service.isWithinSessionWindow(orgId, phoneNumber);
 
@@ -104,7 +102,7 @@ class WhatsAppSessionWindowServiceTest {
     @Test
     void isWithinSessionWindow_ReturnsFalse_WhenNoSession() {
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
         boolean result = service.isWithinSessionWindow(orgId, phoneNumber);
 
@@ -118,7 +116,7 @@ class WhatsAppSessionWindowServiceTest {
         session.setWindowExpiresAt(LocalDateTime.now().plusHours(23));
 
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.of(session));
+                .thenReturn(Optional.of(session));
 
         service.recordOutboundMessage(orgId, phoneNumber);
 
@@ -133,7 +131,7 @@ class WhatsAppSessionWindowServiceTest {
         session.setWindowExpiresAt(expiry);
 
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(orgId, phoneNumber))
-            .thenReturn(Optional.of(session));
+                .thenReturn(Optional.of(session));
 
         Optional<LocalDateTime> result = service.getSessionWindowExpiry(orgId, phoneNumber);
 
@@ -151,7 +149,7 @@ class WhatsAppSessionWindowServiceTest {
     @Test
     void normalizesPhoneNumbers() {
         when(sessionWindowRepository.findByOrgIdAndPhoneNumber(eq(orgId), eq("+1234567890")))
-            .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
         service.updateSessionWindow(orgId, "1234567890", inboundTime);
 

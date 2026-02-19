@@ -1,11 +1,10 @@
 package com.example.backend.dto.v2;
 
 import com.example.backend.entity.Annonce;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.ZoneOffset;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AnnonceMapperV2 {
@@ -35,12 +34,15 @@ public class AnnonceMapperV2 {
         AnnonceResponseV2.PricingInfoV2 pricing = new AnnonceResponseV2.PricingInfoV2();
         pricing.setAmount(annonce.getPrice());
         pricing.setCurrency(annonce.getCurrency());
-        if (annonce.getPrice() != null && annonce.getSurface() != null && annonce.getSurface() > 0) {
-            BigDecimal pricePerSqm = annonce.getPrice().divide(
-                BigDecimal.valueOf(annonce.getSurface()), 
-                2, 
-                RoundingMode.HALF_UP
-            );
+        if (annonce.getPrice() != null
+                && annonce.getSurface() != null
+                && annonce.getSurface() > 0) {
+            BigDecimal pricePerSqm =
+                    annonce.getPrice()
+                            .divide(
+                                    BigDecimal.valueOf(annonce.getSurface()),
+                                    2,
+                                    RoundingMode.HALF_UP);
             pricing.setPricePerSqm(pricePerSqm);
         }
         response.setPricing(pricing);

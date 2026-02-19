@@ -30,7 +30,8 @@ public class CoopProjectController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new cooperative project")
-    public ResponseEntity<CoopProjectResponse> create(@Valid @RequestBody CoopProjectRequest request) {
+    public ResponseEntity<CoopProjectResponse> create(
+            @Valid @RequestBody CoopProjectRequest request) {
         CoopProjectResponse response = coopProjectService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -61,8 +62,7 @@ public class CoopProjectController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update cooperative project")
     public ResponseEntity<CoopProjectResponse> update(
-            @PathVariable Long id,
-            @Valid @RequestBody CoopProjectRequest request) {
+            @PathVariable Long id, @Valid @RequestBody CoopProjectRequest request) {
         CoopProjectResponse response = coopProjectService.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -78,9 +78,10 @@ public class CoopProjectController {
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+        Sort.Direction direction =
+                sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
         return PageRequest.of(page, size, Sort.by(direction, property));
     }
 }

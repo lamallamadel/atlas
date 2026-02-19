@@ -5,7 +5,6 @@ import com.example.backend.entity.enums.MessageDirection;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 
 @Schema(description = "Request body for creating a new message")
@@ -23,7 +22,10 @@ public class MessageCreateRequest {
     @NotNull(message = "Direction is required")
     private MessageDirection direction;
 
-    @Schema(description = "Message content", example = "Hello, I am interested in this property", required = true)
+    @Schema(
+            description = "Message content",
+            example = "Hello, I am interested in this property",
+            required = true)
     @NotBlank(message = "Content is required and cannot be blank")
     private String content;
 
@@ -31,8 +33,7 @@ public class MessageCreateRequest {
     @NotNull(message = "Timestamp is required")
     private LocalDateTime timestamp;
 
-    public MessageCreateRequest() {
-    }
+    public MessageCreateRequest() {}
 
     public Long getDossierId() {
         return dossierId;

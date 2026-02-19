@@ -5,19 +5,19 @@ import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.repository.OutboundMessageRepository;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-
 @Service
 public class OutboundMessageMetricsService {
 
-    private static final Logger logger = LoggerFactory.getLogger(OutboundMessageMetricsService.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(OutboundMessageMetricsService.class);
 
     private final OutboundMessageRepository outboundMessageRepository;
     private final MeterRegistry registry;
@@ -29,8 +29,7 @@ public class OutboundMessageMetricsService {
     private final AtomicLong totalQueuedMessages = new AtomicLong(0);
 
     public OutboundMessageMetricsService(
-            OutboundMessageRepository outboundMessageRepository,
-            MeterRegistry registry) {
+            OutboundMessageRepository outboundMessageRepository, MeterRegistry registry) {
         this.outboundMessageRepository = outboundMessageRepository;
         this.registry = registry;
         initializeGauges();
@@ -41,7 +40,7 @@ public class OutboundMessageMetricsService {
             String statusKey = status.name().toLowerCase();
             AtomicLong gauge = new AtomicLong(0);
             queueDepthByStatus.put(statusKey, gauge);
-            
+
             Gauge.builder("outbound_message_queue_depth", gauge, AtomicLong::get)
                     .tag("status", statusKey)
                     .description("Number of outbound messages by status")
@@ -50,7 +49,7 @@ public class OutboundMessageMetricsService {
 
         for (MessageChannel channel : MessageChannel.values()) {
             String channelKey = channel.name().toLowerCase();
-            
+
             AtomicLong queueGauge = new AtomicLong(0);
             queueDepthByChannel.put(channelKey, queueGauge);
             Gauge.builder("outbound_message_queue_depth_by_channel", queueGauge, AtomicLong::get)
@@ -67,7 +66,10 @@ public class OutboundMessageMetricsService {
                     .register(registry);
         }
 
-        Gauge.builder("outbound_message_dead_letter_queue_size", deadLetterQueueSize, AtomicLong::get)
+        Gauge.builder(
+                        "outbound_message_dead_letter_queue_size",
+                        deadLetterQueueSize,
+                        AtomicLong::get)
                 .description("Number of permanently failed messages in dead letter queue")
                 .register(registry);
 
@@ -88,7 +90,7 @@ public class OutboundMessageMetricsService {
                 if (gauge != null) {
                     gauge.set(count);
                 }
-                
+
                 if (status == OutboundMessageStatus.QUEUED) {
                     totalQueuedMessages.set(count);
                 } else if (status == OutboundMessageStatus.FAILED) {
@@ -98,24 +100,28 @@ public class OutboundMessageMetricsService {
 
             for (MessageChannel channel : MessageChannel.values()) {
                 String channelKey = channel.name().toLowerCase();
-                
-                long queuedCount = outboundMessageRepository.countByStatusAndChannel(
-                        OutboundMessageStatus.QUEUED, channel);
+
+                long queuedCount =
+                        outboundMessageRepository.countByStatusAndChannel(
+                                OutboundMessageStatus.QUEUED, channel);
                 AtomicLong queueGauge = queueDepthByChannel.get(channelKey);
                 if (queueGauge != null) {
                     queueGauge.set(queuedCount);
                 }
 
-                long retryCount = outboundMessageRepository.countByChannelAndAttemptCountGreaterThan(
-                        channel, 0);
+                long retryCount =
+                        outboundMessageRepository.countByChannelAndAttemptCountGreaterThan(
+                                channel, 0);
                 AtomicLong retryGauge = retryCountsByChannel.get(channelKey);
                 if (retryGauge != null) {
                     retryGauge.set(retryCount);
                 }
             }
 
-            logger.debug("Updated outbound message metrics: totalQueued={}, deadLetter={}", 
-                    totalQueuedMessages.get(), deadLetterQueueSize.get());
+            logger.debug(
+                    "Updated outbound message metrics: totalQueued={}, deadLetter={}",
+                    totalQueuedMessages.get(),
+                    deadLetterQueueSize.get());
 
         } catch (Exception e) {
             logger.error("Error updating outbound message metrics", e);

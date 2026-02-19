@@ -3,15 +3,14 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "annonce")
@@ -67,6 +66,12 @@ public class Annonce extends BaseEntity {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "meta_json")
     private Map<String, Object> meta = new HashMap<>();
+
+    @Column(name = "ai_score")
+    private Integer aiScore;
+
+    @Column(name = "ai_score_details", columnDefinition = "TEXT")
+    private String aiScoreDetails;
 
     public Long getId() {
         return id;
@@ -178,5 +183,21 @@ public class Annonce extends BaseEntity {
 
     public void setRulesJson(Map<String, Object> rulesJson) {
         this.rulesJson = rulesJson;
+    }
+
+    public Integer getAiScore() {
+        return aiScore;
+    }
+
+    public void setAiScore(Integer aiScore) {
+        this.aiScore = aiScore;
+    }
+
+    public String getAiScoreDetails() {
+        return aiScoreDetails;
+    }
+
+    public void setAiScoreDetails(String aiScoreDetails) {
+        this.aiScoreDetails = aiScoreDetails;
     }
 }

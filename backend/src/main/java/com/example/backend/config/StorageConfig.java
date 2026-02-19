@@ -17,7 +17,7 @@ public class StorageConfig {
     public FileStorageStrategy fileStorageStrategy(
             LocalFileStorageStrategy localFileStorageStrategy,
             S3FileStorageStrategy s3FileStorageStrategy) {
-        
+
         if ("s3FileStorage".equals(storageStrategy)) {
             return s3FileStorageStrategy;
         }

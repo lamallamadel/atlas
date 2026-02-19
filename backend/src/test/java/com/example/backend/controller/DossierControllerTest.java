@@ -1,7 +1,10 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.dto.DossierCreateRequest;
-import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
 import com.example.backend.dto.PartiePrenanteRequest;
 import com.example.backend.entity.Annonce;
@@ -14,6 +17,7 @@ import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +28,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,25 +42,20 @@ class DossierControllerTest {
     private static final String ORG_ID = "org123";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private PartiePrenanteRepository partiePrenanteRepository;
+    @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     @BeforeEach
@@ -103,9 +96,11 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -114,7 +109,8 @@ class DossierControllerTest {
     }
 
     @Test
-    void create_WithDuplicatePhoneInQualifiedStatus_ReturnsExistingOpenDossierId() throws Exception {
+    void create_WithDuplicatePhoneInQualifiedStatus_ReturnsExistingOpenDossierId()
+            throws Exception {
         String duplicatePhone = "+33698765432";
 
         Dossier qualifiedDossier = new Dossier();
@@ -144,15 +140,18 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").value(qualifiedDossier.getId()));
     }
 
     @Test
-    void create_WithDuplicatePhoneInAppointmentStatus_ReturnsExistingOpenDossierId() throws Exception {
+    void create_WithDuplicatePhoneInAppointmentStatus_ReturnsExistingOpenDossierId()
+            throws Exception {
         String duplicatePhone = "+33687654321";
 
         Dossier appointmentDossier = new Dossier();
@@ -182,15 +181,18 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").value(appointmentDossier.getId()));
     }
 
     @Test
-    void create_WithDuplicatePhoneInWonStatus_DoesNotReturnExistingOpenDossierId() throws Exception {
+    void create_WithDuplicatePhoneInWonStatus_DoesNotReturnExistingOpenDossierId()
+            throws Exception {
         String duplicatePhone = "+33676543210";
 
         Dossier wonDossier = new Dossier();
@@ -220,15 +222,18 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
     }
 
     @Test
-    void create_WithDuplicatePhoneInLostStatus_DoesNotReturnExistingOpenDossierId() throws Exception {
+    void create_WithDuplicatePhoneInLostStatus_DoesNotReturnExistingOpenDossierId()
+            throws Exception {
         String duplicatePhone = "+33665432109";
 
         Dossier lostDossier = new Dossier();
@@ -258,9 +263,11 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
     }
@@ -278,9 +285,11 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
     }
@@ -292,9 +301,11 @@ class DossierControllerTest {
         request.setLeadName("No Party User");
         request.setInitialParty(null);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
     }
@@ -312,9 +323,11 @@ class DossierControllerTest {
         initialParty.setLastName("Phone");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist());
     }
@@ -366,9 +379,11 @@ class DossierControllerTest {
         initialParty.setLastName("User");
         request.setInitialParty(initialParty);
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.existingOpenDossierId").exists())
                 .andExpect(jsonPath("$.existingOpenDossierId").isNumber());
@@ -381,9 +396,11 @@ class DossierControllerTest {
         request.setLeadName("John Doe");
         request.setLeadSource("Website");
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -399,10 +416,11 @@ class DossierControllerTest {
         DossierCreateRequest request = new DossierCreateRequest();
         request.setLeadPhone("+33612345678");
 
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        post("/api/v1/dossiers")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(header().string(CORRELATION_ID_HEADER, CORRELATION_ID))
                 .andExpect(jsonPath("$.detail", containsString("Missing required header")));
@@ -425,11 +443,14 @@ class DossierControllerTest {
         request.setLeadPhone("+33612345678");
         request.setAnnonceId(archivedAnnonce.getId());
 
-        mockMvc.perform(withHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
+                .andExpect(
+                        jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
     }
 
     @Test
@@ -451,8 +472,7 @@ class DossierControllerTest {
 
     @Test
     void getById_NonExistingId_Returns404() throws Exception {
-        mockMvc.perform(withHeaders(get("/api/v1/dossiers/999")))
-                .andExpect(status().isNotFound());
+        mockMvc.perform(withHeaders(get("/api/v1/dossiers/999"))).andExpect(status().isNotFound());
     }
 
     @Test
@@ -466,9 +486,11 @@ class DossierControllerTest {
         DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
         patchRequest.setStatus(DossierStatus.QUALIFIED);
 
-        mockMvc.perform(withHeaders(patch("/api/v1/dossiers/" + dossier.getId() + "/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchRequest))))
+        mockMvc.perform(
+                        withHeaders(
+                                patch("/api/v1/dossiers/" + dossier.getId() + "/status")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(patchRequest))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dossier.getId()))
                 .andExpect(jsonPath("$.status").value("QUALIFIED"));
@@ -479,9 +501,11 @@ class DossierControllerTest {
         DossierStatusPatchRequest patchRequest = new DossierStatusPatchRequest();
         patchRequest.setStatus(DossierStatus.QUALIFIED);
 
-        mockMvc.perform(withHeaders(patch("/api/v1/dossiers/999/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchRequest))))
+        mockMvc.perform(
+                        withHeaders(
+                                patch("/api/v1/dossiers/999/status")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(patchRequest))))
                 .andExpect(status().isNotFound());
     }
 
@@ -526,8 +550,7 @@ class DossierControllerTest {
         dossier2.setStatus(DossierStatus.NEW);
         dossierRepository.save(dossier2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/dossiers")
-                        .param("status", "QUALIFIED")))
+        mockMvc.perform(withHeaders(get("/api/v1/dossiers").param("status", "QUALIFIED")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].status").value("QUALIFIED"))

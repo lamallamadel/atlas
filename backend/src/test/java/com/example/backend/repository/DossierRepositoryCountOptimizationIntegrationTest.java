@@ -1,7 +1,12 @@
 package com.example.backend.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.DossierStatus;
+import jakarta.persistence.EntityManager;
+import java.util.Arrays;
+import java.util.List;
 import org.hibernate.Session;
 import org.hibernate.stat.Statistics;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,26 +16,17 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
-import jakarta.persistence.EntityManager;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
- * Integration test to verify that DossierRepository COUNT queries use
- * projection
- * and do not trigger unnecessary entity hydration, ensuring minimal overhead.
+ * Integration test to verify that DossierRepository COUNT queries use projection and do not trigger
+ * unnecessary entity hydration, ensuring minimal overhead.
  */
 @DataJpaTest
 @ActiveProfiles("test")
 class DossierRepositoryCountOptimizationIntegrationTest {
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private TestEntityManager testEntityManager;
+    @Autowired private TestEntityManager testEntityManager;
 
     @BeforeEach
     void setUp() {
@@ -49,8 +45,15 @@ class DossierRepositoryCountOptimizationIntegrationTest {
     void getPendingCount_shouldUseCountProjection_notLoadEntities() {
         // Given: Create test data with multiple dossiers
         for (int i = 0; i < 50; i++) {
-            Dossier dossier = createDossier("org1", "+3361234567" + i,
-                    i % 3 == 0 ? DossierStatus.NEW : i % 3 == 1 ? DossierStatus.QUALIFIED : DossierStatus.APPOINTMENT);
+            Dossier dossier =
+                    createDossier(
+                            "org1",
+                            "+3361234567" + i,
+                            i % 3 == 0
+                                    ? DossierStatus.NEW
+                                    : i % 3 == 1
+                                            ? DossierStatus.QUALIFIED
+                                            : DossierStatus.APPOINTMENT);
             testEntityManager.persist(dossier);
         }
         testEntityManager.flush();
@@ -83,11 +86,17 @@ class DossierRepositoryCountOptimizationIntegrationTest {
     void getPendingCountByOrgId_shouldUseCountProjection_notLoadEntities() {
         // Given: Create test data for multiple organizations
         for (int i = 0; i < 30; i++) {
-            Dossier dossier = createDossier(i % 2 == 0 ? "org1" : "org2",
-                    "+3361234567" + i,
-                    i % 4 == 0 ? DossierStatus.NEW
-                            : i % 4 == 1 ? DossierStatus.QUALIFIED
-                                    : i % 4 == 2 ? DossierStatus.APPOINTMENT : DossierStatus.WON);
+            Dossier dossier =
+                    createDossier(
+                            i % 2 == 0 ? "org1" : "org2",
+                            "+3361234567" + i,
+                            i % 4 == 0
+                                    ? DossierStatus.NEW
+                                    : i % 4 == 1
+                                            ? DossierStatus.QUALIFIED
+                                            : i % 4 == 2
+                                                    ? DossierStatus.APPOINTMENT
+                                                    : DossierStatus.WON);
             testEntityManager.persist(dossier);
         }
         testEntityManager.flush();
@@ -120,8 +129,11 @@ class DossierRepositoryCountOptimizationIntegrationTest {
     void countByStatusIn_shouldUseCountProjection_notLoadEntities() {
         // Given: Create test data
         for (int i = 0; i < 40; i++) {
-            Dossier dossier = createDossier("org1", "+3361234567" + i,
-                    DossierStatus.values()[i % DossierStatus.values().length]);
+            Dossier dossier =
+                    createDossier(
+                            "org1",
+                            "+3361234567" + i,
+                            DossierStatus.values()[i % DossierStatus.values().length]);
             testEntityManager.persist(dossier);
         }
         testEntityManager.flush();
@@ -206,8 +218,9 @@ class DossierRepositoryCountOptimizationIntegrationTest {
         stats.clear();
 
         // When: Call countByStatusAndCreatedAtAfter
-        Long count = dossierRepository.countByStatusAndCreatedAtAfter(
-                DossierStatus.NEW, now.minusDays(10).minusSeconds(1));
+        Long count =
+                dossierRepository.countByStatusAndCreatedAtAfter(
+                        DossierStatus.NEW, now.minusDays(10).minusSeconds(1));
 
         // Then: Verify count is correct
         assertThat(count).isEqualTo(11);
@@ -244,7 +257,9 @@ class DossierRepositoryCountOptimizationIntegrationTest {
 
         // When: Call countByStatusInAndCreatedAtAfter
         List<DossierStatus> statuses = Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED);
-        Long count = dossierRepository.countByStatusInAndCreatedAtAfter(statuses, now.minusDays(15).minusSeconds(1));
+        Long count =
+                dossierRepository.countByStatusInAndCreatedAtAfter(
+                        statuses, now.minusDays(15).minusSeconds(1));
 
         // Then: Verify count is correct
         assertThat(count).isEqualTo(16);
@@ -265,8 +280,10 @@ class DossierRepositoryCountOptimizationIntegrationTest {
         // Given: Create test data with various statuses and dates
         java.time.LocalDateTime now = java.time.LocalDateTime.now();
         for (int i = 0; i < 50; i++) {
-            DossierStatus status = i % 3 == 0 ? DossierStatus.NEW
-                    : i % 3 == 1 ? DossierStatus.QUALIFIED : DossierStatus.APPOINTMENT;
+            DossierStatus status =
+                    i % 3 == 0
+                            ? DossierStatus.NEW
+                            : i % 3 == 1 ? DossierStatus.QUALIFIED : DossierStatus.APPOINTMENT;
             Dossier dossier = createDossier("org1", "+3361234567" + i, status);
             dossier.setCreatedAt(now.minusDays(i));
             testEntityManager.persist(dossier);
@@ -282,8 +299,9 @@ class DossierRepositoryCountOptimizationIntegrationTest {
 
         // When: Call countByStatusInAndCreatedAtBetween
         List<DossierStatus> statuses = Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED);
-        Long count = dossierRepository.countByStatusInAndCreatedAtBetween(
-                statuses, now.minusDays(20), now.minusDays(5));
+        Long count =
+                dossierRepository.countByStatusInAndCreatedAtBetween(
+                        statuses, now.minusDays(20), now.minusDays(5));
 
         // Then: Verify count is correct (between days 5-20, inclusive)
         assertThat(count).isEqualTo(10); // Days 5-15 inclusive = 11 days, ~7 matching
@@ -304,7 +322,8 @@ class DossierRepositoryCountOptimizationIntegrationTest {
         // Given: Create a large dataset (1000 dossiers)
         for (int i = 0; i < 1000; i++) {
             DossierStatus status = DossierStatus.values()[i % DossierStatus.values().length];
-            Dossier dossier = createDossier("org" + (i % 10), "+3361234" + String.format("%06d", i), status);
+            Dossier dossier =
+                    createDossier("org" + (i % 10), "+3361234" + String.format("%06d", i), status);
             testEntityManager.persist(dossier);
 
             // Flush periodically to avoid memory issues

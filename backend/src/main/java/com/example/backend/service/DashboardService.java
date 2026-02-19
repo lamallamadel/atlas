@@ -8,16 +8,15 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class DashboardService {
@@ -26,7 +25,10 @@ public class DashboardService {
     private final DossierRepository dossierRepository;
     private final DossierMapper dossierMapper;
 
-    public DashboardService(AnnonceRepository annonceRepository, DossierRepository dossierRepository, DossierMapper dossierMapper) {
+    public DashboardService(
+            AnnonceRepository annonceRepository,
+            DossierRepository dossierRepository,
+            DossierMapper dossierMapper) {
         this.annonceRepository = annonceRepository;
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
@@ -36,18 +38,22 @@ public class DashboardService {
     public KpiCardDto getActiveAnnoncesCount(String period) {
         Long currentCount;
         Long previousCount;
-        
+
         if (period == null) {
             currentCount = annonceRepository.countByStatus(AnnonceStatus.ACTIVE);
             previousCount = currentCount;
         } else {
             LocalDateTime startDate = getStartDateForPeriod(period);
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
-            
-            currentCount = annonceRepository.countByStatusAndCreatedAtAfter(AnnonceStatus.ACTIVE, startDate);
-            previousCount = annonceRepository.countByStatusAndCreatedAtBetween(AnnonceStatus.ACTIVE, previousStartDate, startDate);
+
+            currentCount =
+                    annonceRepository.countByStatusAndCreatedAtAfter(
+                            AnnonceStatus.ACTIVE, startDate);
+            previousCount =
+                    annonceRepository.countByStatusAndCreatedAtBetween(
+                            AnnonceStatus.ACTIVE, previousStartDate, startDate);
         }
-        
+
         String trend = calculateTrend(currentCount, previousCount);
         return new KpiCardDto(currentCount, trend);
     }
@@ -57,25 +63,28 @@ public class DashboardService {
         List<DossierStatus> statusList = Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED);
         Long currentCount;
         Long previousCount;
-        
+
         if (period == null) {
             currentCount = dossierRepository.countByStatusIn(statusList);
             previousCount = currentCount;
         } else {
             LocalDateTime startDate = getStartDateForPeriod(period);
             LocalDateTime previousStartDate = getPreviousStartDateForPeriod(period, startDate);
-            
-            currentCount = dossierRepository.countByStatusInAndCreatedAtAfter(statusList, startDate);
-            previousCount = dossierRepository.countByStatusInAndCreatedAtBetween(statusList, previousStartDate, startDate);
+
+            currentCount =
+                    dossierRepository.countByStatusInAndCreatedAtAfter(statusList, startDate);
+            previousCount =
+                    dossierRepository.countByStatusInAndCreatedAtBetween(
+                            statusList, previousStartDate, startDate);
         }
-        
+
         String trend = calculateTrend(currentCount, previousCount);
         return new KpiCardDto(currentCount, trend);
     }
-    
+
     private LocalDateTime getStartDateForPeriod(String period) {
         LocalDateTime now = LocalDateTime.now();
-        
+
         switch (period) {
             case "TODAY":
                 return now.toLocalDate().atStartOfDay();
@@ -88,7 +97,8 @@ public class DashboardService {
         }
     }
 
-    private LocalDateTime getPreviousStartDateForPeriod(String period, LocalDateTime currentStartDate) {
+    private LocalDateTime getPreviousStartDateForPeriod(
+            String period, LocalDateTime currentStartDate) {
         switch (period) {
             case "TODAY":
                 return currentStartDate.minusDays(1);
@@ -108,9 +118,9 @@ public class DashboardService {
             }
             return "0%";
         }
-        
+
         double percentageChange = ((double) (currentValue - previousValue) / previousValue) * 100;
-        
+
         if (percentageChange > 0) {
             return String.format("+%.0f%%", percentageChange);
         } else if (percentageChange < 0) {
@@ -124,8 +134,6 @@ public class DashboardService {
     public List<DossierResponse> getRecentDossiers() {
         Pageable pageable = PageRequest.of(0, 5, Sort.by(Sort.Direction.DESC, "createdAt"));
         List<Dossier> recentDossiers = dossierRepository.findAll(pageable).getContent();
-        return recentDossiers.stream()
-                .map(dossierMapper::toResponse)
-                .collect(Collectors.toList());
+        return recentDossiers.stream().map(dossierMapper::toResponse).collect(Collectors.toList());
     }
 }

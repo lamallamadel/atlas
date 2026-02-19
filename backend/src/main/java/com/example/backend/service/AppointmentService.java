@@ -7,10 +7,15 @@ import com.example.backend.dto.AppointmentUpdateRequest;
 import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.util.TenantContext;
-import com.example.backend.observability.MetricsService;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -18,12 +23,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class AppointmentService {
@@ -35,10 +34,11 @@ public class AppointmentService {
     private final MetricsService metricsService;
     private final ActivityService activityService;
 
-    public AppointmentService(AppointmentRepository appointmentRepository, 
-                            AppointmentMapper appointmentMapper, 
-                            MetricsService metricsService,
-                            ActivityService activityService) {
+    public AppointmentService(
+            AppointmentRepository appointmentRepository,
+            AppointmentMapper appointmentMapper,
+            MetricsService metricsService,
+            ActivityService activityService) {
         this.appointmentRepository = appointmentRepository;
         this.appointmentMapper = appointmentMapper;
         this.metricsService = metricsService;
@@ -58,20 +58,20 @@ public class AppointmentService {
         appointment.setCreatedAt(now);
         appointment.setUpdatedAt(now);
 
-        List<String> warnings = checkOverlappingAppointments(
-                appointment.getAssignedTo(),
-                appointment.getStartTime(),
-                appointment.getEndTime(),
-                null
-        );
+        List<String> warnings =
+                checkOverlappingAppointments(
+                        appointment.getAssignedTo(),
+                        appointment.getStartTime(),
+                        appointment.getEndTime(),
+                        null);
 
         AppointmentEntity saved = appointmentRepository.save(appointment);
         metricsService.incrementAppointmentsCreated();
-        
+
         if (saved.getStatus() == AppointmentStatus.SCHEDULED) {
             logAppointmentScheduledActivity(saved);
         }
-        
+
         AppointmentResponse response = appointmentMapper.toResponse(saved);
 
         if (!warnings.isEmpty()) {
@@ -88,8 +88,13 @@ public class AppointmentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        AppointmentEntity appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + id));
+        AppointmentEntity appointment =
+                appointmentRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Appointment not found with id: " + id));
 
         if (!orgId.equals(appointment.getOrgId())) {
             throw new EntityNotFoundException("Appointment not found with id: " + id);
@@ -105,8 +110,13 @@ public class AppointmentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        AppointmentEntity appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + id));
+        AppointmentEntity appointment =
+                appointmentRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Appointment not found with id: " + id));
 
         if (!orgId.equals(appointment.getOrgId())) {
             throw new EntityNotFoundException("Appointment not found with id: " + id);
@@ -127,11 +137,14 @@ public class AppointmentService {
         AppointmentResponse response = appointmentMapper.toResponse(updated);
 
         // Business metrics: completion & duration
-        if (oldStatus != AppointmentStatus.COMPLETED && updated.getStatus() == AppointmentStatus.COMPLETED) {
+        if (oldStatus != AppointmentStatus.COMPLETED
+                && updated.getStatus() == AppointmentStatus.COMPLETED) {
             metricsService.incrementAppointmentsCompleted();
-            metricsService.recordAppointmentDurationSeconds( -updated.getStartTime().getSecond() + updated.getEndTime().getSecond());
+            metricsService.recordAppointmentDurationSeconds(
+                    -updated.getStartTime().getSecond() + updated.getEndTime().getSecond());
             logAppointmentCompletedActivity(updated);
-        } else if (oldStatus != AppointmentStatus.SCHEDULED && updated.getStatus() == AppointmentStatus.SCHEDULED) {
+        } else if (oldStatus != AppointmentStatus.SCHEDULED
+                && updated.getStatus() == AppointmentStatus.SCHEDULED) {
             logAppointmentScheduledActivity(updated);
         }
 
@@ -149,8 +162,13 @@ public class AppointmentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        AppointmentEntity appointment = appointmentRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Appointment not found with id: " + id));
+        AppointmentEntity appointment =
+                appointmentRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Appointment not found with id: " + id));
 
         if (!orgId.equals(appointment.getOrgId())) {
             throw new EntityNotFoundException("Appointment not found with id: " + id);
@@ -159,60 +177,54 @@ public class AppointmentService {
         appointmentRepository.delete(appointment);
     }
 
-   @Transactional(readOnly = true)
-public Page<AppointmentResponse> listByDossier(
-        Long dossierId,
-        LocalDateTime fromDate,
-        LocalDateTime toDate,
-        String assignedTo,
-        AppointmentStatus status,
-        Pageable pageable
-) {
-    String orgId = TenantContext.getOrgId();
-    if (orgId == null) {
-        throw new IllegalStateException("Organization ID not found in context");
+    @Transactional(readOnly = true)
+    public Page<AppointmentResponse> listByDossier(
+            Long dossierId,
+            LocalDateTime fromDate,
+            LocalDateTime toDate,
+            String assignedTo,
+            AppointmentStatus status,
+            Pageable pageable) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Specification<AppointmentEntity> spec =
+                Specification.where((root, query, cb) -> cb.equal(root.get("orgId"), orgId));
+
+        if (dossierId != null) {
+            spec =
+                    spec.and(
+                            (root, query, cb) ->
+                                    cb.equal(root.get("dossier").get("id"), dossierId));
+        }
+
+        if (fromDate != null) {
+            spec =
+                    spec.and(
+                            (root, query, cb) ->
+                                    cb.greaterThanOrEqualTo(root.get("startTime"), fromDate));
+        }
+
+        if (toDate != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("endTime"), toDate));
+        }
+
+        if (assignedTo != null && !assignedTo.trim().isEmpty()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("assignedTo"), assignedTo));
+        }
+
+        if (status != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("status"), status));
+        }
+
+        Page<AppointmentEntity> appointments = appointmentRepository.findAll(spec, pageable);
+        return appointments.map(appointmentMapper::toResponse);
     }
-
-    Specification<AppointmentEntity> spec = Specification.where(
-            (root, query, cb) -> cb.equal(root.get("orgId"), orgId)
-    );
-
-    if (dossierId != null) {
-        spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("dossier").get("id"), dossierId));
-    }
-
-    if (fromDate != null) {
-        spec = spec.and((root, query, cb) ->
-                cb.greaterThanOrEqualTo(root.get("startTime"), fromDate));
-    }
-
-    if (toDate != null) {
-        spec = spec.and((root, query, cb) ->
-                cb.lessThanOrEqualTo(root.get("endTime"), toDate));
-    }
-
-    if (assignedTo != null && !assignedTo.trim().isEmpty()) {
-        spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("assignedTo"), assignedTo));
-    }
-
-    if (status != null) {
-        spec = spec.and((root, query, cb) ->
-                cb.equal(root.get("status"), status));
-    }
-
-    Page<AppointmentEntity> appointments = appointmentRepository.findAll(spec, pageable);
-    return appointments.map(appointmentMapper::toResponse);
-}
-
 
     private List<String> checkOverlappingAppointments(
-            String assignedTo,
-            LocalDateTime startTime,
-            LocalDateTime endTime,
-            Long excludeId
-    ) {
+            String assignedTo, LocalDateTime startTime, LocalDateTime endTime, Long excludeId) {
         List<String> warnings = new ArrayList<>();
 
         if (assignedTo == null || assignedTo.trim().isEmpty()) {
@@ -221,16 +233,16 @@ public Page<AppointmentResponse> listByDossier(
 
         Long excludeIdToUse = excludeId != null ? excludeId : -1L;
 
-        List<AppointmentEntity> overlapping = appointmentRepository.findOverlappingAppointments(
-                assignedTo,
-                startTime,
-                endTime,
-                excludeIdToUse
-        );
+        List<AppointmentEntity> overlapping =
+                appointmentRepository.findOverlappingAppointments(
+                        assignedTo, startTime, endTime, excludeIdToUse);
 
         if (!overlapping.isEmpty()) {
-            warnings.add("This appointment overlaps with " + overlapping.size() +
-                    " existing appointment(s) for " + assignedTo);
+            warnings.add(
+                    "This appointment overlaps with "
+                            + overlapping.size()
+                            + " existing appointment(s) for "
+                            + assignedTo);
         }
 
         return warnings;
@@ -239,12 +251,13 @@ public Page<AppointmentResponse> listByDossier(
     private void logAppointmentScheduledActivity(AppointmentEntity appointment) {
         if (activityService != null && appointment.getDossier() != null) {
             try {
-                String description = String.format("Appointment scheduled for %s", 
-                    appointment.getStartTime());
-                if (appointment.getLocation() != null && !appointment.getLocation().trim().isEmpty()) {
+                String description =
+                        String.format("Appointment scheduled for %s", appointment.getStartTime());
+                if (appointment.getLocation() != null
+                        && !appointment.getLocation().trim().isEmpty()) {
                     description += " at " + appointment.getLocation();
                 }
-                
+
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("appointmentId", appointment.getId());
                 metadata.put("status", appointment.getStatus().name());
@@ -257,16 +270,18 @@ public Page<AppointmentResponse> listByDossier(
                     metadata.put("assignedTo", appointment.getAssignedTo());
                 }
                 metadata.put("timestamp", LocalDateTime.now().toString());
-                
+
                 activityService.logActivity(
-                    appointment.getDossier().getId(),
-                    ActivityType.APPOINTMENT_SCHEDULED,
-                    description,
-                    metadata
-                );
+                        appointment.getDossier().getId(),
+                        ActivityType.APPOINTMENT_SCHEDULED,
+                        description,
+                        metadata);
             } catch (Exception e) {
-                logger.warn("Failed to log APPOINTMENT_SCHEDULED activity for appointment {}: {}", 
-                    appointment.getId(), e.getMessage(), e);
+                logger.warn(
+                        "Failed to log APPOINTMENT_SCHEDULED activity for appointment {}: {}",
+                        appointment.getId(),
+                        e.getMessage(),
+                        e);
             }
         }
     }
@@ -274,9 +289,13 @@ public Page<AppointmentResponse> listByDossier(
     private void logAppointmentCompletedActivity(AppointmentEntity appointment) {
         if (activityService != null && appointment.getDossier() != null) {
             try {
-                String description = String.format("Appointment completed at %s", 
-                    appointment.getLocation() != null ? appointment.getLocation() : "location not specified");
-                
+                String description =
+                        String.format(
+                                "Appointment completed at %s",
+                                appointment.getLocation() != null
+                                        ? appointment.getLocation()
+                                        : "location not specified");
+
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("appointmentId", appointment.getId());
                 metadata.put("status", appointment.getStatus().name());
@@ -292,16 +311,18 @@ public Page<AppointmentResponse> listByDossier(
                     metadata.put("notes", appointment.getNotes());
                 }
                 metadata.put("timestamp", LocalDateTime.now().toString());
-                
+
                 activityService.logActivity(
-                    appointment.getDossier().getId(),
-                    ActivityType.APPOINTMENT_COMPLETED,
-                    description,
-                    metadata
-                );
+                        appointment.getDossier().getId(),
+                        ActivityType.APPOINTMENT_COMPLETED,
+                        description,
+                        metadata);
             } catch (Exception e) {
-                logger.warn("Failed to log APPOINTMENT_COMPLETED activity for appointment {}: {}", 
-                    appointment.getId(), e.getMessage(), e);
+                logger.warn(
+                        "Failed to log APPOINTMENT_COMPLETED activity for appointment {}: {}",
+                        appointment.getId(),
+                        e.getMessage(),
+                        e);
             }
         }
     }

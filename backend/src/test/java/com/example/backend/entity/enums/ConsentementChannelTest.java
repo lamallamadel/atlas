@@ -1,9 +1,9 @@
 package com.example.backend.entity.enums;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class ConsentementChannelTest {
 
@@ -31,7 +31,8 @@ class ConsentementChannelTest {
 
     @Test
     void testFromValueThrowsException() {
-        assertThrows(IllegalArgumentException.class, () -> ConsentementChannel.fromValue("invalid"));
+        assertThrows(
+                IllegalArgumentException.class, () -> ConsentementChannel.fromValue("invalid"));
     }
 
     @Test
@@ -42,7 +43,8 @@ class ConsentementChannelTest {
 
     @Test
     void testJsonDeserialization() throws Exception {
-        ConsentementChannel channel = objectMapper.readValue("\"EMAIL\"", ConsentementChannel.class);
+        ConsentementChannel channel =
+                objectMapper.readValue("\"EMAIL\"", ConsentementChannel.class);
         assertEquals(ConsentementChannel.EMAIL, channel);
     }
 }

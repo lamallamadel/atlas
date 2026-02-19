@@ -1,17 +1,15 @@
 package com.example.backend.entity.search;
 
+import java.time.LocalDateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
-import java.time.LocalDateTime;
-
 @Document(indexName = "dossiers")
 public class DossierDocument {
 
-    @Id
-    private Long id;
+    @Id private Long id;
 
     @Field(type = FieldType.Keyword)
     private String orgId;

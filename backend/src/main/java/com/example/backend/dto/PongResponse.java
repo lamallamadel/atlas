@@ -4,8 +4,7 @@ public class PongResponse {
 
     private String message;
 
-    public PongResponse() {
-    }
+    public PongResponse() {}
 
     public PongResponse(String message) {
         this.message = message;

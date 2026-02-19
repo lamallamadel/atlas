@@ -1,5 +1,7 @@
 package com.example.backend.aspect;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
@@ -15,6 +17,9 @@ import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.service.AnnonceService;
 import com.example.backend.service.DossierService;
 import com.example.backend.util.TenantContext;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,15 +28,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 /**
- * Integration tests for AuditAspect to verify audit event persistence
- * and diff calculation for various service operations.
+ * Integration tests for AuditAspect to verify audit event persistence and diff calculation for
+ * various service operations.
  */
 @SpringBootTest
 @ActiveProfiles("test")
@@ -40,14 +39,11 @@ class AuditAspectIntegrationTest {
 
     private static final String DEFAULT_ORG = "org-integration-test";
 
-    @Autowired
-    private AnnonceService annonceService;
+    @Autowired private AnnonceService annonceService;
 
-    @Autowired
-    private DossierService dossierService;
+    @Autowired private DossierService dossierService;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
     @BeforeEach
     void setUp() {
@@ -102,7 +98,7 @@ class AuditAspectIntegrationTest {
 
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
-        
+
         assertThat(diff).isNotNull();
         assertThat(diff).containsKey("after");
         assertThat(diff).doesNotContainKey("before");
@@ -123,15 +119,15 @@ class AuditAspectIntegrationTest {
         AnnonceCreateRequest request = createBasicAnnonceRequest();
         request.setTitle("Complex Fields Test");
         request.setPhotos(List.of("photo1.jpg", "photo2.jpg", "photo3.jpg"));
-        request.setRulesJson(Map.of(
-            "minAge", 21,
-            "petsAllowed", true,
-            "smokingAllowed", false
-        ));
-        request.setMeta(Map.of(
-            "priority", "high",
-            "source", "website"
-        ));
+        request.setRulesJson(
+                Map.of(
+                        "minAge", 21,
+                        "petsAllowed", true,
+                        "smokingAllowed", false));
+        request.setMeta(
+                Map.of(
+                        "priority", "high",
+                        "source", "website"));
 
         // When
         AnnonceResponse response = annonceService.create(request);
@@ -143,17 +139,17 @@ class AuditAspectIntegrationTest {
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
         Map<String, Object> afterData = (Map<String, Object>) diff.get("after");
-        
+
         assertThat(afterData).containsKey("photos");
         assertThat(afterData).containsKey("rulesJson");
         assertThat(afterData).containsKey("meta");
-        
+
         List<?> photos = (List<?>) afterData.get("photos");
         assertThat(photos).hasSize(3);
-        
-	        @SuppressWarnings("unchecked")
-	        Map<String, Object> rulesJson = (Map<String, Object>) afterData.get("rulesJson");
-	        assertThat(rulesJson).containsKeys("minAge", "petsAllowed", "smokingAllowed");
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> rulesJson = (Map<String, Object>) afterData.get("rulesJson");
+        assertThat(rulesJson).containsKeys("minAge", "petsAllowed", "smokingAllowed");
     }
 
     @Test
@@ -175,7 +171,7 @@ class AuditAspectIntegrationTest {
         AuditEventEntity auditEvent = auditEvents.get(0);
         assertThat(auditEvent.getAction()).isEqualTo(AuditAction.CREATED);
         assertThat(auditEvent.getEntityId()).isEqualTo(response.getId());
-        
+
         Map<String, Object> diff = auditEvent.getDiff();
         Map<String, Object> afterData = (Map<String, Object>) diff.get("after");
         assertThat(afterData).isNotNull();
@@ -222,9 +218,9 @@ class AuditAspectIntegrationTest {
 
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
-        
+
         assertThat(diff).containsKey("after");
-        
+
         Map<String, Object> afterData = (Map<String, Object>) diff.get("after");
         assertThat(afterData).isNotNull();
         assertThat(afterData.get("id")).isEqualTo(response.getId().intValue());
@@ -280,7 +276,7 @@ class AuditAspectIntegrationTest {
 
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
-        
+
         assertThat(diff).isNotNull();
         assertThat(diff).containsKey("changes");
         assertThat(diff).doesNotContainKey("after");
@@ -364,7 +360,7 @@ class AuditAspectIntegrationTest {
 
         AuditEventEntity auditEvent = auditEvents.get(0);
         assertThat(auditEvent.getAction()).isEqualTo(AuditAction.UPDATED);
-        
+
         Map<String, Object> diff = auditEvent.getDiff();
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
         Map<String, Object> statusChange = (Map<String, Object>) changes.get("status");
@@ -395,16 +391,16 @@ class AuditAspectIntegrationTest {
         AuditEventEntity auditEvent = auditEvents.get(0);
         assertThat(auditEvent.getAction()).isEqualTo(AuditAction.UPDATED);
         assertThat(auditEvent.getEntityType()).isEqualTo(AuditEntityType.DOSSIER);
-        
+
         Map<String, Object> diff = auditEvent.getDiff();
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
         assertThat(changes).containsKey("leadName");
         assertThat(changes).containsKey("leadPhone");
-        
+
         Map<String, Object> nameChange = (Map<String, Object>) changes.get("leadName");
         assertThat(nameChange).containsEntry("before", "Original Name");
         assertThat(nameChange).containsEntry("after", "Updated Name");
-        
+
         Map<String, Object> phoneChange = (Map<String, Object>) changes.get("leadPhone");
         assertThat(phoneChange).containsEntry("before", "+33655555555");
         assertThat(phoneChange).containsEntry("after", "+33666666666");
@@ -454,7 +450,7 @@ class AuditAspectIntegrationTest {
         AuditEventEntity auditEvent = auditEvents.get(0);
         assertThat(auditEvent.getEntityId()).isNotNull();
         assertThat(auditEvent.getEntityId()).isEqualTo(created.getId());
-        
+
         Map<String, Object> diff = auditEvent.getDiff();
         assertThat(diff).isNotNull();
         assertThat(diff).containsKey("before");
@@ -488,7 +484,7 @@ class AuditAspectIntegrationTest {
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
         Map<String, Object> beforeData = (Map<String, Object>) diff.get("before");
-        
+
         assertThat(beforeData).containsKey("photos");
         assertThat(beforeData).containsKey("rulesJson");
         assertThat(beforeData.get("title")).isEqualTo("Complex Delete Test");
@@ -578,12 +574,10 @@ class AuditAspectIntegrationTest {
             // Then
             assertThat(allEvents).hasSize(2);
 
-            long org1Count = allEvents.stream()
-                    .filter(event -> "ORG1".equals(event.getOrgId()))
-                    .count();
-            long org2Count = allEvents.stream()
-                    .filter(event -> "ORG2".equals(event.getOrgId()))
-                    .count();
+            long org1Count =
+                    allEvents.stream().filter(event -> "ORG1".equals(event.getOrgId())).count();
+            long org2Count =
+                    allEvents.stream().filter(event -> "ORG2".equals(event.getOrgId())).count();
 
             assertThat(org1Count).isEqualTo(1);
             assertThat(org2Count).isEqualTo(1);
@@ -614,17 +608,19 @@ class AuditAspectIntegrationTest {
 
             // Then
             assertThat(allEvents).hasSize(2);
-            
-            AuditEventEntity eventA = allEvents.stream()
-                    .filter(e -> e.getEntityId().equals(orgA.getId()))
-                    .findFirst()
-                    .orElseThrow();
+
+            AuditEventEntity eventA =
+                    allEvents.stream()
+                            .filter(e -> e.getEntityId().equals(orgA.getId()))
+                            .findFirst()
+                            .orElseThrow();
             assertThat(eventA.getOrgId()).isEqualTo("ORG_A");
 
-            AuditEventEntity eventB = allEvents.stream()
-                    .filter(e -> e.getEntityId().equals(orgB.getId()))
-                    .findFirst()
-                    .orElseThrow();
+            AuditEventEntity eventB =
+                    allEvents.stream()
+                            .filter(e -> e.getEntityId().equals(orgB.getId()))
+                            .findFirst()
+                            .orElseThrow();
             assertThat(eventB.getOrgId()).isEqualTo("ORG_B");
         } finally {
             TenantContext.clear();
@@ -661,7 +657,7 @@ class AuditAspectIntegrationTest {
         // Then - Verify entityId was correctly extracted from result
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         AuditEventEntity auditEvent = auditEvents.get(0);
         assertThat(auditEvent.getEntityId()).isNotNull();
         assertThat(auditEvent.getEntityId()).isEqualTo(response.getId());
@@ -673,7 +669,7 @@ class AuditAspectIntegrationTest {
         AnnonceCreateRequest createRequest = createBasicAnnonceRequest();
         createRequest.setTitle("Action Determination Test");
         AnnonceResponse created = annonceService.create(createRequest);
-        
+
         auditEventRepository.deleteAll();
 
         // When - Test update action
@@ -745,7 +741,7 @@ class AuditAspectIntegrationTest {
         // Then - Before state should be captured
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         Map<String, Object> diff = auditEvents.get(0).getDiff();
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
         assertThat(changes).isNotNull();
@@ -773,10 +769,10 @@ class AuditAspectIntegrationTest {
         // Then
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         Map<String, Object> diff = auditEvents.get(0).getDiff();
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
-        
+
         assertThat(changes).hasSize(3); // title, description, price
         assertThat(changes).containsKeys("title", "description", "price");
     }
@@ -805,37 +801,34 @@ class AuditAspectIntegrationTest {
         // Given
         AnnonceCreateRequest request1 = createBasicAnnonceRequest();
         request1.setTitle("First Annonce");
-        
+
         // When - Create first
         AnnonceResponse created1 = annonceService.create(request1);
-        
+
         // When - Update
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Updated First");
         annonceService.update(created1.getId(), updateRequest);
-        
+
         // When - Create second
         AnnonceCreateRequest request2 = createBasicAnnonceRequest();
         request2.setTitle("Second Annonce");
         annonceService.create(request2);
-        
+
         // When - Delete first
         annonceService.delete(created1.getId());
 
         // Then - All operations should have audit events
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(4); // 2 creates, 1 update, 1 delete
-        
-        long createCount = auditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.CREATED)
-                .count();
-        long updateCount = auditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.UPDATED)
-                .count();
-        long deleteCount = auditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.DELETED)
-                .count();
-        
+
+        long createCount =
+                auditEvents.stream().filter(e -> e.getAction() == AuditAction.CREATED).count();
+        long updateCount =
+                auditEvents.stream().filter(e -> e.getAction() == AuditAction.UPDATED).count();
+        long deleteCount =
+                auditEvents.stream().filter(e -> e.getAction() == AuditAction.DELETED).count();
+
         assertThat(createCount).isEqualTo(2);
         assertThat(updateCount).isEqualTo(1);
         assertThat(deleteCount).isEqualTo(1);
@@ -862,14 +855,12 @@ class AuditAspectIntegrationTest {
         // Then - All operations should be audited
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(3); // 1 create, 2 updates (status and lead)
-        
-        long createCount = auditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.CREATED)
-                .count();
-        long updateCount = auditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.UPDATED)
-                .count();
-        
+
+        long createCount =
+                auditEvents.stream().filter(e -> e.getAction() == AuditAction.CREATED).count();
+        long updateCount =
+                auditEvents.stream().filter(e -> e.getAction() == AuditAction.UPDATED).count();
+
         assertThat(createCount).isEqualTo(1);
         assertThat(updateCount).isEqualTo(2);
     }
@@ -879,7 +870,7 @@ class AuditAspectIntegrationTest {
         // Given
         AnnonceCreateRequest annonceRequest = createBasicAnnonceRequest();
         annonceRequest.setTitle("Entity Type Annonce");
-        
+
         DossierCreateRequest dossierRequest = new DossierCreateRequest();
         dossierRequest.setLeadName("Entity Type Dossier");
         dossierRequest.setLeadPhone("+33711111111");
@@ -891,14 +882,18 @@ class AuditAspectIntegrationTest {
         // Then
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(2);
-        
-        assertThat(auditEvents.stream()
-                .filter(e -> e.getEntityType() == AuditEntityType.ANNONCE)
-                .count()).isEqualTo(1);
-        
-        assertThat(auditEvents.stream()
-                .filter(e -> e.getEntityType() == AuditEntityType.DOSSIER)
-                .count()).isEqualTo(1);
+
+        assertThat(
+                        auditEvents.stream()
+                                .filter(e -> e.getEntityType() == AuditEntityType.ANNONCE)
+                                .count())
+                .isEqualTo(1);
+
+        assertThat(
+                        auditEvents.stream()
+                                .filter(e -> e.getEntityType() == AuditEntityType.DOSSIER)
+                                .count())
+                .isEqualTo(1);
     }
 
     @Test
@@ -913,7 +908,7 @@ class AuditAspectIntegrationTest {
         // Then - Should handle null before state and create proper CREATED diff
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
         assertThat(diff).containsKey("after");
@@ -937,12 +932,12 @@ class AuditAspectIntegrationTest {
         // Then - Before state should be captured
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         AuditEventEntity auditEvent = auditEvents.get(0);
         Map<String, Object> diff = auditEvent.getDiff();
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
         Map<String, Object> statusChange = (Map<String, Object>) changes.get("status");
-        
+
         assertThat(statusChange.get("before")).isNotNull();
         assertThat(statusChange.get("after")).isNotNull();
     }
@@ -1003,10 +998,10 @@ class AuditAspectIntegrationTest {
         // Then - Only changed fields should be in diff
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         Map<String, Object> diff = auditEvents.get(0).getDiff();
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
-        
+
         assertThat(changes).containsKey("title");
         // updatedAt and updatedBy will also be in changes, but not city or description if unchanged
     }
@@ -1016,28 +1011,28 @@ class AuditAspectIntegrationTest {
         // Given - Complete lifecycle: create, update, update status, delete
         AnnonceCreateRequest createRequest = createBasicAnnonceRequest();
         createRequest.setTitle("Complete Workflow");
-        
+
         // When - Create
         AnnonceResponse created = annonceService.create(createRequest);
-        
+
         // When - Update
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Workflow Updated");
         annonceService.update(created.getId(), updateRequest);
-        
+
         // When - Delete
         annonceService.delete(created.getId());
 
         // Then - Complete audit trail
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(3);
-        
+
         assertThat(auditEvents.get(0).getAction()).isEqualTo(AuditAction.CREATED);
         assertThat(auditEvents.get(0).getDiff()).containsKey("after");
-        
+
         assertThat(auditEvents.get(1).getAction()).isEqualTo(AuditAction.UPDATED);
         assertThat(auditEvents.get(1).getDiff()).containsKey("changes");
-        
+
         assertThat(auditEvents.get(2).getAction()).isEqualTo(AuditAction.DELETED);
         assertThat(auditEvents.get(2).getDiff()).containsKey("before");
     }
@@ -1064,14 +1059,22 @@ class AuditAspectIntegrationTest {
         // Then - All fields should be in the after diff
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(1);
-        
+
         Map<String, Object> diff = auditEvents.get(0).getDiff();
         Map<String, Object> afterData = (Map<String, Object>) diff.get("after");
-        
-        assertThat(afterData).containsKeys(
-            "id", "title", "description", "category", "city", 
-            "address", "surface", "price", "currency", "orgId"
-        );
+
+        assertThat(afterData)
+                .containsKeys(
+                        "id",
+                        "title",
+                        "description",
+                        "category",
+                        "city",
+                        "address",
+                        "surface",
+                        "price",
+                        "currency",
+                        "orgId");
     }
 
     // ========== Helper Methods ==========

@@ -3,12 +3,11 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.MessageDirection;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @Entity
 @Table(name = "message")

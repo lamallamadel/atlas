@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.LotStatus;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Map;

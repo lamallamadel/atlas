@@ -5,7 +5,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Map;
@@ -40,7 +39,10 @@ public class CoopProjectRequest {
 
     private LocalDate completionDate;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Total budget must be greater than or equal to 0")
+    @DecimalMin(
+            value = "0.0",
+            inclusive = true,
+            message = "Total budget must be greater than or equal to 0")
     private BigDecimal totalBudget;
 
     @Size(max = 3, message = "Currency must not exceed 3 characters")

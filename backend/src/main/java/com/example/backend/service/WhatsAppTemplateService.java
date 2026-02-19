@@ -7,11 +7,9 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.TemplateVariableRepository;
 import com.example.backend.repository.WhatsAppTemplateRepository;
 import com.example.backend.util.TenantContext;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class WhatsAppTemplateService {
@@ -41,15 +39,22 @@ public class WhatsAppTemplateService {
 
     @Transactional(readOnly = true)
     public WhatsAppTemplate getTemplateById(Long id) {
-        return templateRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Template not found with id: " + id));
+        return templateRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Template not found with id: " + id));
     }
 
     @Transactional(readOnly = true)
     public WhatsAppTemplate getTemplateByNameAndLanguage(String name, String language) {
-        return templateRepository.findByNameAndLanguage(name, language)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Template not found with name: %s and language: %s", name, language)));
+        return templateRepository
+                .findByNameAndLanguage(name, language)
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        String.format(
+                                                "Template not found with name: %s and language: %s",
+                                                name, language)));
     }
 
     @Transactional
@@ -61,9 +66,11 @@ public class WhatsAppTemplateService {
 
         validationService.validateTemplateFormat(template);
 
-        if (templateRepository.existsByNameAndLanguage(template.getName(), template.getLanguage())) {
+        if (templateRepository.existsByNameAndLanguage(
+                template.getName(), template.getLanguage())) {
             throw new IllegalArgumentException(
-                    String.format("Template already exists with name: %s and language: %s",
+                    String.format(
+                            "Template already exists with name: %s and language: %s",
                             template.getName(), template.getLanguage()));
         }
 
@@ -116,9 +123,9 @@ public class WhatsAppTemplateService {
     @Transactional
     public WhatsAppTemplate activateTemplate(Long id) {
         WhatsAppTemplate template = getTemplateById(id);
-        
+
         validationService.validateTemplateFormat(template);
-        
+
         template.setStatus(TemplateStatus.ACTIVE);
         return templateRepository.save(template);
     }
@@ -133,9 +140,9 @@ public class WhatsAppTemplateService {
     @Transactional
     public WhatsAppTemplate submitForApproval(Long id) {
         WhatsAppTemplate template = getTemplateById(id);
-        
+
         validationService.validateTemplateFormat(template);
-        
+
         template.setStatus(TemplateStatus.PENDING_APPROVAL);
         return templateRepository.save(template);
     }
@@ -143,11 +150,12 @@ public class WhatsAppTemplateService {
     @Transactional
     public WhatsAppTemplate approveTemplate(Long id, String whatsAppTemplateId) {
         WhatsAppTemplate template = getTemplateById(id);
-        
+
         if (template.getStatus() != TemplateStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Template must be in PENDING_APPROVAL status to be approved");
+            throw new IllegalStateException(
+                    "Template must be in PENDING_APPROVAL status to be approved");
         }
-        
+
         template.setStatus(TemplateStatus.ACTIVE);
         template.setWhatsAppTemplateId(whatsAppTemplateId);
         template.setRejectionReason(null);
@@ -157,11 +165,12 @@ public class WhatsAppTemplateService {
     @Transactional
     public WhatsAppTemplate rejectTemplate(Long id, String rejectionReason) {
         WhatsAppTemplate template = getTemplateById(id);
-        
+
         if (template.getStatus() != TemplateStatus.PENDING_APPROVAL) {
-            throw new IllegalStateException("Template must be in PENDING_APPROVAL status to be rejected");
+            throw new IllegalStateException(
+                    "Template must be in PENDING_APPROVAL status to be rejected");
         }
-        
+
         template.setStatus(TemplateStatus.REJECTED);
         template.setRejectionReason(rejectionReason);
         return templateRepository.save(template);
@@ -170,11 +179,12 @@ public class WhatsAppTemplateService {
     @Transactional
     public void deleteTemplate(Long id) {
         WhatsAppTemplate template = getTemplateById(id);
-        
+
         if (template.getStatus() == TemplateStatus.ACTIVE) {
-            throw new IllegalStateException("Cannot delete an active template. Please deactivate it first.");
+            throw new IllegalStateException(
+                    "Cannot delete an active template. Please deactivate it first.");
         }
-        
+
         templateRepository.delete(template);
     }
 

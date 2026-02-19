@@ -1,35 +1,31 @@
 package com.example.backend.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
+import java.io.StringWriter;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.io.StringWriter;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 class LeadExportServiceTest {
 
-    @Mock
-    private DossierRepository dossierRepository;
+    @Mock private DossierRepository dossierRepository;
 
-    @InjectMocks
-    private LeadExportService leadExportService;
+    @InjectMocks private LeadExportService leadExportService;
 
     private AutoCloseable closeable;
 
@@ -86,8 +82,7 @@ class LeadExportServiceTest {
                 LocalDateTime.now().minusDays(7),
                 LocalDateTime.now(),
                 DossierSource.WEB,
-                columns
-        );
+                columns);
 
         String output = writer.toString();
         assertNotNull(output);
@@ -132,11 +127,22 @@ class LeadExportServiceTest {
                 .thenReturn(Arrays.asList(dossier));
 
         StringWriter writer = new StringWriter();
-        List<String> columns = Arrays.asList(
-                "id", "name", "phone", "email", "source", "lead_source",
-                "status", "score", "notes", "annonce_id", "case_type",
-                "status_code", "created_at", "updated_at"
-        );
+        List<String> columns =
+                Arrays.asList(
+                        "id",
+                        "name",
+                        "phone",
+                        "email",
+                        "source",
+                        "lead_source",
+                        "status",
+                        "score",
+                        "notes",
+                        "annonce_id",
+                        "case_type",
+                        "status_code",
+                        "created_at",
+                        "updated_at");
 
         leadExportService.exportLeads(writer, null, null, null, null, columns);
 
@@ -153,8 +159,7 @@ class LeadExportServiceTest {
 
     @Test
     void testExportLeads_EmptyResults() throws Exception {
-        when(dossierRepository.findAll(any(Specification.class)))
-                .thenReturn(Arrays.asList());
+        when(dossierRepository.findAll(any(Specification.class))).thenReturn(Arrays.asList());
 
         StringWriter writer = new StringWriter();
         List<String> columns = Arrays.asList("id", "name", "phone");
@@ -177,9 +182,11 @@ class LeadExportServiceTest {
         StringWriter writer = new StringWriter();
         List<String> columns = Arrays.asList("id", "name");
 
-        assertThrows(IllegalStateException.class, () -> {
-            leadExportService.exportLeads(writer, null, null, null, null, columns);
-        });
+        assertThrows(
+                IllegalStateException.class,
+                () -> {
+                    leadExportService.exportLeads(writer, null, null, null, null, columns);
+                });
     }
 
     private Dossier createTestDossier(Long id, String name, String phone, String email) {

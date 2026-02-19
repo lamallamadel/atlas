@@ -9,6 +9,10 @@ import com.example.backend.repository.DocumentRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import java.io.InputStream;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,29 +25,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
 @Service
 public class DocumentService {
 
     private static final Logger logger = LoggerFactory.getLogger(DocumentService.class);
 
-    private static final List<String> ALLOWED_CONTENT_TYPES = Arrays.asList(
-            "application/pdf",
-            "image/jpeg",
-            "image/jpg",
-            "image/png",
-            "image/gif",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "application/vnd.ms-excel",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "text/plain",
-            "text/csv"
-    );
+    private static final List<String> ALLOWED_CONTENT_TYPES =
+            Arrays.asList(
+                    "application/pdf",
+                    "image/jpeg",
+                    "image/jpg",
+                    "image/png",
+                    "image/gif",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "text/plain",
+                    "text/csv");
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -73,8 +72,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -90,7 +94,9 @@ public class DocumentService {
             long size = file.getSize();
 
             InputStream inputStream = file.getInputStream();
-            String storagePath = fileStorageStrategy.store(orgId, dossierId, fileName, inputStream, size, contentType);
+            String storagePath =
+                    fileStorageStrategy.store(
+                            orgId, dossierId, fileName, inputStream, size, contentType);
 
             DocumentEntity document = new DocumentEntity();
             document.setOrgId(orgId);
@@ -109,8 +115,12 @@ public class DocumentService {
 
             DocumentEntity saved = documentRepository.save(document);
 
-            logger.info("Document uploaded successfully: id={}, fileName={}, dossierId={}, category={}", 
-                    saved.getId(), fileName, dossierId, category);
+            logger.info(
+                    "Document uploaded successfully: id={}, fileName={}, dossierId={}, category={}",
+                    saved.getId(),
+                    fileName,
+                    dossierId,
+                    category);
 
             return documentMapper.toResponse(saved);
         } catch (Exception e) {
@@ -126,8 +136,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        DocumentEntity document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
+        DocumentEntity document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Document not found with id: " + documentId));
 
         if (!orgId.equals(document.getOrgId())) {
             throw new EntityNotFoundException("Document not found with id: " + documentId);
@@ -143,8 +158,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        DocumentEntity document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
+        DocumentEntity document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Document not found with id: " + documentId));
 
         if (!orgId.equals(document.getOrgId())) {
             throw new EntityNotFoundException("Document not found with id: " + documentId);
@@ -154,7 +174,10 @@ public class DocumentService {
 
         documentRepository.delete(document);
 
-        logger.info("Document deleted successfully: id={}, fileName={}", documentId, document.getFileName());
+        logger.info(
+                "Document deleted successfully: id={}, fileName={}",
+                documentId,
+                document.getFileName());
     }
 
     @Transactional(readOnly = true)
@@ -164,8 +187,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        DocumentEntity document = documentRepository.findById(documentId)
-                .orElseThrow(() -> new EntityNotFoundException("Document not found with id: " + documentId));
+        DocumentEntity document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Document not found with id: " + documentId));
 
         if (!orgId.equals(document.getOrgId())) {
             throw new EntityNotFoundException("Document not found with id: " + documentId);
@@ -181,8 +209,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -198,7 +231,8 @@ public class DocumentService {
         }
 
         if (file.getSize() > maxFileSize) {
-            throw new FileValidationException("File size exceeds maximum allowed size of " + maxFileSize + " bytes");
+            throw new FileValidationException(
+                    "File size exceeds maximum allowed size of " + maxFileSize + " bytes");
         }
 
         String contentType = file.getContentType();

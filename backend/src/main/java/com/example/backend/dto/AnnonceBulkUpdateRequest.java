@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AnnonceStatus;
 import jakarta.validation.constraints.NotEmpty;
-
 import java.util.List;
 
 public class AnnonceBulkUpdateRequest {

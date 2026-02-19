@@ -2,7 +2,6 @@ package com.example.backend.exception;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,10 +18,14 @@ public class ProblemDetail {
     @Schema(description = "HTTP status code", example = "400")
     private int status;
 
-    @Schema(description = "Human-readable explanation specific to this occurrence", example = "Validation failed for the request")
+    @Schema(
+            description = "Human-readable explanation specific to this occurrence",
+            example = "Validation failed for the request")
     private String detail;
 
-    @Schema(description = "URI reference that identifies the specific occurrence", example = "/api/users/123")
+    @Schema(
+            description = "URI reference that identifies the specific occurrence",
+            example = "/api/users/123")
     private String instance;
 
     @Schema(description = "Additional properties for extensibility")

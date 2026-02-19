@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-
 import java.util.Map;
 
 @Schema(description = "Request body for creating or updating a workflow definition")
@@ -30,7 +29,9 @@ public class WorkflowDefinitionRequest {
     @Schema(description = "JSON object defining conditions for this transition", nullable = true)
     private Map<String, Object> conditionsJson;
 
-    @Schema(description = "JSON object defining required fields for this transition", nullable = true)
+    @Schema(
+            description = "JSON object defining required fields for this transition",
+            nullable = true)
     private Map<String, Object> requiredFieldsJson;
 
     public String getCaseType() {

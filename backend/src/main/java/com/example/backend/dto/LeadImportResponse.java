@@ -73,8 +73,7 @@ public class LeadImportResponse {
         private String field;
         private String message;
 
-        public ValidationError() {
-        }
+        public ValidationError() {}
 
         public ValidationError(int row, String field, String message) {
             this.row = row;

@@ -33,39 +33,51 @@ public class AuditEventController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(
-        summary = "List audit events",
-        description = "Retrieves a paginated list of audit events. Filter by entity (type and ID) OR by dossier ID. Results are sorted by creation timestamp in descending order by default."
-    )
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Audit events retrieved successfully",
-                    content = @Content(schema = @Schema(implementation = Page.class))),
-            @ApiResponse(responseCode = "400", description = "Invalid request parameters",
-                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
-    })
+            summary = "List audit events",
+            description =
+                    "Retrieves a paginated list of audit events. Filter by entity (type and ID) OR by dossier ID. Results are sorted by creation timestamp in descending order by default.")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Audit events retrieved successfully",
+                        content = @Content(schema = @Schema(implementation = Page.class))),
+                @ApiResponse(
+                        responseCode = "400",
+                        description = "Invalid request parameters",
+                        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
     public ResponseEntity<Page<AuditEventResponse>> list(
             @Parameter(description = "Filter by entity type (e.g., DOSSIER, ANNONCE)")
-            @RequestParam(required = false) AuditEntityType entityType,
+                    @RequestParam(required = false)
+                    AuditEntityType entityType,
             @Parameter(description = "Filter by entity ID (must be used with entityType)")
-            @RequestParam(required = false) Long entityId,
-            @Parameter(description = "Filter by dossier ID")
-            @RequestParam(required = false) Long dossierId,
-            @Parameter(description = "Page number (0-indexed)")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size")
-            @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "Sort criteria in format: property(,asc|desc). Default sort order is descending.")
-            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+                    @RequestParam(required = false)
+                    Long entityId,
+            @Parameter(description = "Filter by dossier ID") @RequestParam(required = false)
+                    Long dossierId,
+            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0")
+                    int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
+            @Parameter(
+                            description =
+                                    "Sort criteria in format: property(,asc|desc). Default sort order is descending.")
+                    @RequestParam(defaultValue = "createdAt,desc")
+                    String sort) {
 
         Pageable pageable = createPageable(page, size, sort);
 
         if (dossierId != null) {
-            Page<AuditEventResponse> response = auditEventService.listByDossier(dossierId, pageable);
+            Page<AuditEventResponse> response =
+                    auditEventService.listByDossier(dossierId, pageable);
             return ResponseEntity.ok(response);
         } else if (entityType != null && entityId != null) {
-            Page<AuditEventResponse> response = auditEventService.listByEntity(entityType, entityId, pageable);
+            Page<AuditEventResponse> response =
+                    auditEventService.listByEntity(entityType, entityId, pageable);
             return ResponseEntity.ok(response);
         } else {
-            throw new IllegalArgumentException("Either dossierId or both entityType and entityId must be provided");
+            throw new IllegalArgumentException(
+                    "Either dossierId or both entityType and entityId must be provided");
         }
     }
 
@@ -88,5 +100,4 @@ public class AuditEventController {
 
         return PageRequest.of(page, size, primary);
     }
-
 }

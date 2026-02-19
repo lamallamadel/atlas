@@ -19,7 +19,8 @@ public class ConsentementMapper {
         ConsentementResponse response = new ConsentementResponse();
         response.setId(consentement.getId());
         response.setOrgId(consentement.getOrgId());
-        response.setDossierId(consentement.getDossier() != null ? consentement.getDossier().getId() : null);
+        response.setDossierId(
+                consentement.getDossier() != null ? consentement.getDossier().getId() : null);
         response.setChannel(consentement.getChannel());
         response.setConsentType(consentement.getConsentType());
         response.setStatus(consentement.getStatus());

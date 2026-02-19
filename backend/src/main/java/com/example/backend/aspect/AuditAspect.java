@@ -7,15 +7,6 @@ import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.time.LocalDateTime;
@@ -24,7 +15,14 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
 
 @Aspect
 @Component
@@ -38,10 +36,11 @@ public class AuditAspect {
         this.objectMapper = objectMapper;
     }
 
-    @Around("execution(* com.example.backend.service.*Service.create*(..)) || " +
-            "execution(* com.example.backend.service.*Service.update*(..)) || " +
-            "execution(* com.example.backend.service.*Service.delete*(..)) || " +
-            "execution(* com.example.backend.service.*Service.patch*(..))")
+    @Around(
+            "execution(* com.example.backend.service.*Service.create*(..)) || "
+                    + "execution(* com.example.backend.service.*Service.update*(..)) || "
+                    + "execution(* com.example.backend.service.*Service.delete*(..)) || "
+                    + "execution(* com.example.backend.service.*Service.patch*(..))")
     public Object auditServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
         Method method = signature.getMethod();
@@ -52,7 +51,9 @@ public class AuditAspect {
         Long entityId = null;
 
         // Only capture BEFORE for update/patch/delete
-        if (methodName.startsWith("update") || methodName.startsWith("patch") || methodName.startsWith("delete")) {
+        if (methodName.startsWith("update")
+                || methodName.startsWith("patch")
+                || methodName.startsWith("delete")) {
             entityId = extractEntityIdFromArgs(args);
             before = captureBeforeState(joinPoint, entityId);
         }
@@ -161,16 +162,16 @@ public class AuditAspect {
             Object service = joinPoint.getTarget();
             Method getByIdMethod = service.getClass().getMethod("getById", Long.class);
             Object result = getByIdMethod.invoke(service, entityId);
-            
+
             // Convert to map and ensure status field is captured
             Map<String, Object> capturedMap = safeConvertToMap(result);
-            
+
             if (capturedMap != null && result != null) {
                 // Explicitly check for getStatus() method and add status if present
                 try {
                     Method getStatusMethod = result.getClass().getMethod("getStatus");
                     Object statusValue = getStatusMethod.invoke(result);
-                    
+
                     // Only add if not already present in the map
                     if (statusValue != null && !capturedMap.containsKey("status")) {
                         // Convert enum to string if applicable
@@ -180,11 +181,13 @@ public class AuditAspect {
                             capturedMap.put("status", statusValue);
                         }
                     }
-                } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                } catch (NoSuchMethodException
+                        | IllegalAccessException
+                        | InvocationTargetException e) {
                     // No getStatus() method or unable to access it, continue without status
                 }
             }
-            
+
             return capturedMap != null ? capturedMap : result;
         } catch (Exception e) {
             return null;
@@ -192,10 +195,8 @@ public class AuditAspect {
     }
 
     /**
-     * Minimal diff contract aligned with tests:
-     * - CREATED  -> { "after": <map> }
-     * - DELETED  -> { "before": <map> }
-     * - UPDATED  -> { "changes": { field: {before, after} } }
+     * Minimal diff contract aligned with tests: - CREATED -> { "after": <map> } - DELETED -> {
+     * "before": <map> } - UPDATED -> { "changes": { field: {before, after} } }
      */
     private Map<String, Object> buildMinimalDiff(AuditAction action, Object before, Object after) {
         if (action == AuditAction.CREATED) {
@@ -240,18 +241,21 @@ public class AuditAspect {
         if (obj == null) return null;
 
         try {
-            Map<String, Object> map = objectMapper.convertValue(obj, new TypeReference<LinkedHashMap<String, Object>>() {});
-            
+            Map<String, Object> map =
+                    objectMapper.convertValue(
+                            obj, new TypeReference<LinkedHashMap<String, Object>>() {});
+
             // Ensure enum values are converted to strings
             if (map != null) {
-                map.replaceAll((key, value) -> {
-                    if (value instanceof Enum<?>) {
-                        return ((Enum<?>) value).name();
-                    }
-                    return value;
-                });
+                map.replaceAll(
+                        (key, value) -> {
+                            if (value instanceof Enum<?>) {
+                                return ((Enum<?>) value).name();
+                            }
+                            return value;
+                        });
             }
-            
+
             return map;
         } catch (Exception e) {
             // Keep non-null for tests expecting presence of before/after snapshots
@@ -264,9 +268,8 @@ public class AuditAspect {
     }
 
     /**
-     * Tests expect numeric IDs as Integer (e.g. 12) not Long (12L) in diff maps.
-     * Convert values for keys "id" or "*Id" from Long -> Integer when safe.
-     * Also walks nested maps/lists.
+     * Tests expect numeric IDs as Integer (e.g. 12) not Long (12L) in diff maps. Convert values for
+     * keys "id" or "*Id" from Long -> Integer when safe. Also walks nested maps/lists.
      */
     @SuppressWarnings("unchecked")
     private Object normalizeIds(Object value) {
@@ -280,7 +283,10 @@ public class AuditAspect {
 
                 Object normalized = normalizeIds(v);
 
-                if (isIdKey(key) && normalized instanceof Long l && l >= Integer.MIN_VALUE && l <= Integer.MAX_VALUE) {
+                if (isIdKey(key)
+                        && normalized instanceof Long l
+                        && l >= Integer.MIN_VALUE
+                        && l <= Integer.MAX_VALUE) {
                     normalized = l.intValue();
                 }
 
@@ -300,7 +306,10 @@ public class AuditAspect {
     }
 
     private boolean isIdKey(String key) {
-        return "id".equalsIgnoreCase(key) || key.endsWith("Id") || key.endsWith("ID") || key.endsWith("id");
+        return "id".equalsIgnoreCase(key)
+                || key.endsWith("Id")
+                || key.endsWith("ID")
+                || key.endsWith("id");
     }
 
     @SuppressWarnings("unchecked")

@@ -96,6 +96,10 @@ services:
 
       APP_ENV: ${APP_ENV:-docker}
       APP_VERSION: ${APP_VERSION:-@project.version@}
+
+      BRAIN_SCORING_URL: http://scoring-service:8000
+      BRAIN_DUPLI_URL: http://dupli-service:8001
+      BRAIN_API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
     volumes:
       - backend_logs:/var/log/atlas
     healthcheck:
@@ -201,6 +205,41 @@ services:
       - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
     depends_on:
       - prometheus
+
+  scoring-service:
+    build:
+      context: ../brain/scoring-service
+      dockerfile: Dockerfile
+    container_name: brain_scoring
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_SCORING_PORT:-8000}:8000"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  dupli-service:
+    build:
+      context: ../brain/dupli-service
+      dockerfile: Dockerfile
+    container_name: brain_dupli
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_DUPLI_PORT:-8001}:8001"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+      SEUIL_DOUBLON: ${BRAIN_DUPLI_SEUIL:-0.85}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
 volumes:
   postgres_data:

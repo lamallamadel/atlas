@@ -2,13 +2,12 @@ package com.example.backend.audit;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Component;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import org.springframework.stereotype.Component;
 
 @Component
 public class AuditDiffCalculator {
@@ -52,7 +51,8 @@ public class AuditDiffCalculator {
         if (value == null) return null;
         try {
             // Produces full snapshot incl. complex fields
-            return objectMapper.convertValue(value, new TypeReference<LinkedHashMap<String, Object>>() {});
+            return objectMapper.convertValue(
+                    value, new TypeReference<LinkedHashMap<String, Object>>() {});
         } catch (Exception e) {
             // Never return null; tests require not-null diff in many places.
             Map<String, Object> fallback = new LinkedHashMap<>();

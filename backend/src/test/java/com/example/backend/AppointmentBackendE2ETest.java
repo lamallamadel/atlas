@@ -1,5 +1,10 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.AppointmentCreateRequest;
@@ -15,20 +20,14 @@ import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.utils.BackendE2ETestDataBuilder;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @BackendE2ETest
 @WithMockUser(roles = {"PRO"})
@@ -37,17 +36,13 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     private static final String ORG_ID = "org123";
     private static final String USER_ID = "user123";
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    @Autowired private AppointmentRepository appointmentRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
-    @Autowired
-    private BackendE2ETestDataBuilder testDataBuilder;
+    @Autowired private BackendE2ETestDataBuilder testDataBuilder;
 
     private Dossier testDossier;
 
@@ -61,12 +56,14 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         testDataBuilder.withOrgId(ORG_ID);
 
         // Create fresh known test data
-        testDossier = testDataBuilder.dossierBuilder()
-                .withOrgId(ORG_ID)
-                .withLeadPhone("+33612345678")
-                .withLeadName("Test User")
-                .withStatus(DossierStatus.NEW)
-                .persist();
+        testDossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withOrgId(ORG_ID)
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("Test User")
+                        .withStatus(DossierStatus.NEW)
+                        .persist();
     }
 
     @AfterEach
@@ -89,9 +86,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         request.setNotes("Initial consultation");
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        mockMvc.perform(withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -114,19 +112,23 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         request.setEndTime(LocalDateTime.of(2024, 6, 15, 10, 0));
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        mockMvc.perform(withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail").value(containsString("Start time must be before end time")));
+                .andExpect(
+                        jsonPath("$.detail")
+                                .value(containsString("Start time must be before end time")));
     }
 
     @Test
     void create_OverlappingAppointment_ReturnsCreatedWithWarning() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create first appointment using testDataBuilder
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
@@ -142,9 +144,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         request.setAssignedTo("agent@example.com");
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        mockMvc.perform(withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.warnings").exists())
@@ -156,9 +159,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void create_OverlappingAppointmentDifferentAssignee_NoWarning() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create first appointment using testDataBuilder
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
@@ -174,9 +178,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         request.setAssignedTo("agent2@example.com");
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        mockMvc.perform(withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.warnings").doesNotExist());
     }
@@ -184,9 +189,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void create_NoAssignedTo_NoOverlapWarning() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create first appointment with assignee using testDataBuilder
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
@@ -201,9 +207,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         request.setEndTime(LocalDateTime.of(2024, 6, 15, 11, 30));
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        mockMvc.perform(withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.warnings").doesNotExist());
     }
@@ -216,11 +223,15 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         request.setEndTime(LocalDateTime.of(2024, 6, 15, 11, 0));
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        String response = mockMvc.perform(withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andReturn().getResponse().getContentAsString();
+        String response =
+                mockMvc.perform(
+                                withTenantHeaders(post("/api/v1/appointments"), ORG_ID)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         Long appointmentId = objectMapper.readTree(response).get("id").asLong();
 
@@ -241,20 +252,24 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void update_StatusTransition_ScheduledToCompleted_Success() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStatus(AppointmentStatus.COMPLETED);
 
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(appointment.getId()))
                 .andExpect(jsonPath("$.status").value("COMPLETED"));
@@ -263,20 +278,24 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void update_StatusTransition_CompletedToCancelled_Success() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.COMPLETED)
-                .persist();
+
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.COMPLETED)
+                        .persist();
 
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStatus(AppointmentStatus.CANCELLED);
 
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(appointment.getId()))
                 .andExpect(jsonPath("$.status").value("CANCELLED"));
@@ -285,22 +304,26 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void update_StatusTransition_CreatesAuditTrail() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         auditEventRepository.deleteAll(); // Clear any creation audit events
 
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStatus(AppointmentStatus.COMPLETED);
 
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -318,35 +341,41 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void update_MultipleStatusTransitions_CreatesMultipleAuditTrails() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         auditEventRepository.deleteAll(); // Clear creation audit
 
         // Transition 1: SCHEDULED -> COMPLETED
         AppointmentUpdateRequest request1 = new AppointmentUpdateRequest();
         request1.setStatus(AppointmentStatus.COMPLETED);
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request1)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request1)))
                 .andExpect(status().isOk());
 
         // Transition 2: COMPLETED -> CANCELLED
         AppointmentUpdateRequest request2 = new AppointmentUpdateRequest();
         request2.setStatus(AppointmentStatus.CANCELLED);
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request2)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isOk());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(2);
-	final Long expectedId = appointment.getId();
+        final Long expectedId = appointment.getId();
         assertThat(auditEvents).allMatch(event -> event.getAction() == AuditAction.UPDATED);
         assertThat(auditEvents).allMatch(event -> event.getEntityId().equals(expectedId));
     }
@@ -354,9 +383,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void update_WithOverlap_ReturnsWarning() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create first appointment
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 15, 14, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 15, 15, 0))
@@ -365,22 +395,26 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
                 .persist();
 
         // Create second appointment
-        AppointmentEntity appointment2 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withAssignedTo("agent@example.com")
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+        AppointmentEntity appointment2 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withAssignedTo("agent@example.com")
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         // Update second appointment to overlap with first
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStartTime(LocalDateTime.of(2024, 6, 15, 14, 30));
         request.setEndTime(LocalDateTime.of(2024, 6, 15, 15, 30));
 
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment2.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment2.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.warnings").exists())
                 .andExpect(jsonPath("$.warnings").isArray())
@@ -392,24 +426,28 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_FilterByFromDate_ReturnsOnlyAppointmentsAfterDate() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create appointments at different times
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 10, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 10, 11, 0))
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        AppointmentEntity appointment2 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 20, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 20, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+        AppointmentEntity appointment2 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 20, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 20, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("from", "2024-06-15T00:00:00"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("from", "2024-06-15T00:00:00"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -419,23 +457,27 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_FilterByToDate_ReturnsOnlyAppointmentsBeforeDate() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment1 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 10, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 10, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
 
-        testDataBuilder.appointmentBuilder()
+        AppointmentEntity appointment1 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 10, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 10, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 20, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 20, 11, 0))
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("to", "2024-06-15T23:59:59"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("to", "2024-06-15T23:59:59"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -445,31 +487,36 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_FilterByDateRange_ReturnsAppointmentsInRange() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        testDataBuilder.appointmentBuilder()
+
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 5, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 5, 11, 0))
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        AppointmentEntity appointment2 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+        AppointmentEntity appointment2 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 25, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 25, 11, 0))
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("from", "2024-06-10T00:00:00")
-                        .param("to", "2024-06-20T23:59:59"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("from", "2024-06-10T00:00:00")
+                                .param("to", "2024-06-20T23:59:59"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -479,30 +526,35 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_FilterByStatus_ReturnsOnlyMatchingStatus() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity scheduled = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
 
-        testDataBuilder.appointmentBuilder()
+        AppointmentEntity scheduled =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 16, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 16, 11, 0))
                 .withStatus(AppointmentStatus.COMPLETED)
                 .persist();
 
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 17, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 17, 11, 0))
                 .withStatus(AppointmentStatus.CANCELLED)
                 .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("status", "SCHEDULED"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("status", "SCHEDULED"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -513,16 +565,19 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_FilterByAssignedTo_ReturnsOnlyMatchingAssignee() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment1 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withAssignedTo("agent1@example.com")
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
 
-        testDataBuilder.appointmentBuilder()
+        AppointmentEntity appointment1 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withAssignedTo("agent1@example.com")
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 16, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 16, 11, 0))
@@ -530,8 +585,9 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("assignedTo", "agent1@example.com"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("assignedTo", "agent1@example.com"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -542,30 +598,36 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_FilterByDossierId_ReturnsOnlyAppointmentsForDossier() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        Dossier dossier2 = testDataBuilder.dossierBuilder()
-                .withOrgId(ORG_ID)
-                .withLeadPhone("+33698765432")
-                .withLeadName("Another User")
-                .withStatus(DossierStatus.NEW)
-                .persist();
 
-        AppointmentEntity appointment1 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+        Dossier dossier2 =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withOrgId(ORG_ID)
+                        .withLeadPhone("+33698765432")
+                        .withLeadName("Another User")
+                        .withStatus(DossierStatus.NEW)
+                        .persist();
 
-        testDataBuilder.appointmentBuilder()
+        AppointmentEntity appointment1 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(dossier2)
                 .withStartTime(LocalDateTime.of(2024, 6, 16, 10, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 16, 11, 0))
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("dossierId", testDossier.getId().toString()))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("dossierId", testDossier.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -575,10 +637,11 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_WithPagination_ReturnsCorrectPage() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create 5 appointments
         for (int i = 0; i < 5; i++) {
-            testDataBuilder.appointmentBuilder()
+            testDataBuilder
+                    .appointmentBuilder()
                     .withDossier(testDossier)
                     .withStartTime(LocalDateTime.of(2024, 6, 15 + i, 10, 0))
                     .withEndTime(LocalDateTime.of(2024, 6, 15 + i, 11, 0))
@@ -586,9 +649,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
                     .persist();
         }
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("page", "0")
-                        .param("size", "2"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("page", "0")
+                                .param("size", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -596,9 +660,10 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.totalPages").value(3))
                 .andExpect(jsonPath("$.number").value(0));
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("page", "1")
-                        .param("size", "2"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("page", "1")
+                                .param("size", "2"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -608,18 +673,21 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void list_MultipleFilters_AppliesAllFilters() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
+
         // Create various appointments
-        AppointmentEntity target = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withAssignedTo("agent@example.com")
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+        AppointmentEntity target =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withAssignedTo("agent@example.com")
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         // Different assignee
-        testDataBuilder.appointmentBuilder()
+        testDataBuilder
+                .appointmentBuilder()
                 .withDossier(testDossier)
                 .withStartTime(LocalDateTime.of(2024, 6, 15, 14, 0))
                 .withEndTime(LocalDateTime.of(2024, 6, 15, 15, 0))
@@ -627,11 +695,12 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
                 .withStatus(AppointmentStatus.SCHEDULED)
                 .persist();
 
-        mockMvc.perform(withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
-                        .param("assignedTo", "agent@example.com")
-                        .param("status", "SCHEDULED")
-                        .param("from", "2024-06-10T00:00:00")
-                        .param("to", "2024-06-20T23:59:59"))
+        mockMvc.perform(
+                        withTenantHeaders(get("/api/v1/appointments"), ORG_ID)
+                                .param("assignedTo", "agent@example.com")
+                                .param("status", "SCHEDULED")
+                                .param("from", "2024-06-10T00:00:00")
+                                .param("to", "2024-06-20T23:59:59"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content", hasSize(1)))
@@ -644,15 +713,19 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @WithMockUser(roles = {"ADMIN"})
     void delete_AsAdmin_Returns204() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
 
-        mockMvc.perform(withTenantHeaders(delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        mockMvc.perform(
+                        withTenantHeaders(
+                                delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
                 .andExpect(status().isNoContent());
 
         assertThat(appointmentRepository.findById(appointment.getId())).isEmpty();
@@ -662,15 +735,19 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @WithMockUser(roles = {"PRO"})
     void delete_AsPro_Returns403() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
 
-        mockMvc.perform(withTenantHeaders(delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        mockMvc.perform(
+                        withTenantHeaders(
+                                delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
                 .andExpect(status().isForbidden());
 
         assertThat(appointmentRepository.findById(appointment.getId())).isPresent();
@@ -680,17 +757,21 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @WithMockUser(roles = {"ADMIN"})
     void delete_CreatesAuditTrail() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         auditEventRepository.deleteAll(); // Clear creation audit
 
-        mockMvc.perform(withTenantHeaders(delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
                 .andExpect(status().isNoContent());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -717,60 +798,71 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void auditTrail_TracksAllStatusTransitions() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+
+        AppointmentEntity appointment =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         auditEventRepository.deleteAll();
 
         // Transition 1: SCHEDULED -> COMPLETED
         AppointmentUpdateRequest request1 = new AppointmentUpdateRequest();
         request1.setStatus(AppointmentStatus.COMPLETED);
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request1)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request1)))
                 .andExpect(status().isOk());
 
         // Transition 2: COMPLETED -> CANCELLED
         AppointmentUpdateRequest request2 = new AppointmentUpdateRequest();
         request2.setStatus(AppointmentStatus.CANCELLED);
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request2)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isOk());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(2);
 
         // Verify both transitions are tracked
-        assertThat(auditEvents).allMatch(event -> 
-                event.getEntityType() == AuditEntityType.APPOINTMENT &&
-                event.getEntityId().equals(appointment.getId()) &&
-                event.getAction() == AuditAction.UPDATED
-        );
+        assertThat(auditEvents)
+                .allMatch(
+                        event ->
+                                event.getEntityType() == AuditEntityType.APPOINTMENT
+                                        && event.getEntityId().equals(appointment.getId())
+                                        && event.getAction() == AuditAction.UPDATED);
     }
 
     @Test
     void auditTrail_DifferentAppointments_TrackedSeparately() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        
-        AppointmentEntity appointment1 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
 
-        AppointmentEntity appointment2 = testDataBuilder.appointmentBuilder()
-                .withDossier(testDossier)
-                .withStartTime(LocalDateTime.of(2024, 6, 16, 10, 0))
-                .withEndTime(LocalDateTime.of(2024, 6, 16, 11, 0))
-                .withStatus(AppointmentStatus.SCHEDULED)
-                .persist();
+        AppointmentEntity appointment1 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 15, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 15, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
+
+        AppointmentEntity appointment2 =
+                testDataBuilder
+                        .appointmentBuilder()
+                        .withDossier(testDossier)
+                        .withStartTime(LocalDateTime.of(2024, 6, 16, 10, 0))
+                        .withEndTime(LocalDateTime.of(2024, 6, 16, 11, 0))
+                        .withStatus(AppointmentStatus.SCHEDULED)
+                        .persist();
 
         auditEventRepository.deleteAll();
 
@@ -778,26 +870,32 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStatus(AppointmentStatus.COMPLETED);
 
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment1.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment1.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(withTenantHeaders(put("/api/v1/appointments/" + appointment2.getId()), ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        put("/api/v1/appointments/" + appointment2.getId()), ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
         assertThat(auditEvents).hasSize(2);
 
         // Verify each appointment has its own audit trail
-        long count1 = auditEvents.stream()
-                .filter(event -> event.getEntityId().equals(appointment1.getId()))
-                .count();
-        long count2 = auditEvents.stream()
-                .filter(event -> event.getEntityId().equals(appointment2.getId()))
-                .count();
+        long count1 =
+                auditEvents.stream()
+                        .filter(event -> event.getEntityId().equals(appointment1.getId()))
+                        .count();
+        long count2 =
+                auditEvents.stream()
+                        .filter(event -> event.getEntityId().equals(appointment2.getId()))
+                        .count();
 
         assertThat(count1).isEqualTo(1);
         assertThat(count2).isEqualTo(1);

@@ -1,0 +1,47 @@
+name: Brain CI
+
+on:
+  pull_request:
+    paths:
+      - 'brain/**'
+  push:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'brain/**'
+
+jobs:
+  scoring-service:
+    name: Test scoring-service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+          cache-dependency-path: brain/scoring-service/requirements.txt
+
+      - name: Install dependencies
+        run: pip install -r brain/scoring-service/requirements.txt
+
+      - name: Run tests
+        run: python -m pytest brain/scoring-service/test_scoring.py -v
+
+  dupli-service-syntax:
+    name: Syntax check dupli-service
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install lightweight deps (no model download)
+        run: pip install fastapi==0.115.0 pydantic==2.8.0 pydantic-settings==2.4.0
+
+      - name: Syntax check
+        run: python -m py_compile brain/dupli-service/main.py && echo "Syntax OK"

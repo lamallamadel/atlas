@@ -1,5 +1,9 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.dto.PartiePrenanteCreateRequest;
 import com.example.backend.dto.PartiePrenanteUpdateRequest;
 import com.example.backend.entity.Dossier;
@@ -9,6 +13,8 @@ import com.example.backend.entity.enums.PartiePrenanteRole;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +25,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,28 +39,25 @@ class PartiePrenanteControllerTest {
     private static final String OTHER_ORG_ID = "org456";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private PartiePrenanteRepository partiePrenanteRepository;
+    @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withOtherOrgHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, OTHER_ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withOtherOrgHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, OTHER_ORG_ID)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     @BeforeEach
@@ -93,9 +89,11 @@ class PartiePrenanteControllerTest {
         meta.put("key", "value");
         request.setMeta(meta);
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -127,9 +125,11 @@ class PartiePrenanteControllerTest {
         request.setFirstName("Bob");
         request.setLastName("Brown");
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -144,9 +144,11 @@ class PartiePrenanteControllerTest {
         request.setFirstName("Jane");
         request.setLastName("Smith");
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -164,9 +166,11 @@ class PartiePrenanteControllerTest {
         request.setFirstName("Jane");
         request.setLastName("Smith");
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -184,9 +188,11 @@ class PartiePrenanteControllerTest {
         request.setRole("BUYER");
         request.setEmail("invalid-email");
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -199,9 +205,11 @@ class PartiePrenanteControllerTest {
         request.setFirstName("Jane");
         request.setLastName("Smith");
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -220,9 +228,11 @@ class PartiePrenanteControllerTest {
         request.setFirstName("Jane");
         request.setLastName("Smith");
 
-        mockMvc.perform(withHeaders(post("/api/v1/parties-prenantes")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/parties-prenantes")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -311,9 +321,11 @@ class PartiePrenanteControllerTest {
         request.setPhone("+33699999999");
         request.setAddress("456 Oak Ave, Lyon");
 
-        mockMvc.perform(withHeaders(put("/api/v1/parties-prenantes/" + entity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(entity.getId()))
@@ -346,9 +358,11 @@ class PartiePrenanteControllerTest {
         request.setRole("NOTARY");
         request.setFirstName("Updated");
 
-        mockMvc.perform(withHeaders(put("/api/v1/parties-prenantes/" + entity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.role").value("NOTARY"))
                 .andExpect(jsonPath("$.firstName").value("Updated"));
@@ -361,9 +375,11 @@ class PartiePrenanteControllerTest {
         request.setRole("SELLER");
         request.setFirstName("Janet");
 
-        mockMvc.perform(withHeaders(put("/api/v1/parties-prenantes/999")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/parties-prenantes/999")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -388,9 +404,11 @@ class PartiePrenanteControllerTest {
         request.setRole("SELLER");
         request.setFirstName("Janet");
 
-        mockMvc.perform(withHeaders(put("/api/v1/parties-prenantes/" + entity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -413,9 +431,11 @@ class PartiePrenanteControllerTest {
         PartiePrenanteUpdateRequest request = new PartiePrenanteUpdateRequest();
         request.setFirstName("Janet");
 
-        mockMvc.perform(withHeaders(put("/api/v1/parties-prenantes/" + entity.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -528,8 +548,10 @@ class PartiePrenanteControllerTest {
         entity3.setLastName("Brown");
         partiePrenanteRepository.save(entity3);
 
-        mockMvc.perform(withHeaders(get("/api/v1/parties-prenantes")
-                        .param("dossierId", dossier1.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/parties-prenantes")
+                                        .param("dossierId", dossier1.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -560,8 +582,10 @@ class PartiePrenanteControllerTest {
         entity2.setFirstName("Alice");
         partiePrenanteRepository.save(entity2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/parties-prenantes")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/parties-prenantes")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)));
     }
@@ -575,8 +599,10 @@ class PartiePrenanteControllerTest {
         dossier.setStatus(DossierStatus.NEW);
         dossier = dossierRepository.save(dossier);
 
-        mockMvc.perform(withHeaders(get("/api/v1/parties-prenantes")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/parties-prenantes")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(0)));
@@ -585,8 +611,7 @@ class PartiePrenanteControllerTest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void listByDossier_NonExistingDossier_Returns404() throws Exception {
-        mockMvc.perform(withHeaders(get("/api/v1/parties-prenantes")
-                        .param("dossierId", "999")))
+        mockMvc.perform(withHeaders(get("/api/v1/parties-prenantes").param("dossierId", "999")))
                 .andExpect(status().isNotFound());
     }
 
@@ -606,8 +631,10 @@ class PartiePrenanteControllerTest {
         entity.setFirstName("Jane");
         partiePrenanteRepository.save(entity);
 
-        mockMvc.perform(withHeaders(get("/api/v1/parties-prenantes")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/parties-prenantes")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isNotFound());
     }
 }

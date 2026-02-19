@@ -4,11 +4,10 @@ import com.example.backend.entity.*;
 import com.example.backend.entity.enums.*;
 import com.example.backend.repository.*;
 import com.example.backend.util.TenantContext;
-import org.springframework.stereotype.Component;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.stereotype.Component;
 
 @Component
 public class BackendE2ETestDataBuilder {
@@ -106,51 +105,58 @@ public class BackendE2ETestDataBuilder {
 
     public void cleanupByOrgId(String orgId) {
         // Delete notifications for the specific orgId
-        List<NotificationEntity> notifications = notificationRepository.findAll().stream()
-                .filter(n -> orgId.equals(n.getOrgId()))
-                .toList();
+        List<NotificationEntity> notifications =
+                notificationRepository.findAll().stream()
+                        .filter(n -> orgId.equals(n.getOrgId()))
+                        .toList();
         notificationRepository.deleteAll(notifications);
         notifications.forEach(n -> createdNotificationIds.remove(n.getId()));
 
         // Delete consentements for the specific orgId
-        List<ConsentementEntity> consentements = consentementRepository.findAll().stream()
-                .filter(c -> orgId.equals(c.getOrgId()))
-                .toList();
+        List<ConsentementEntity> consentements =
+                consentementRepository.findAll().stream()
+                        .filter(c -> orgId.equals(c.getOrgId()))
+                        .toList();
         consentementRepository.deleteAll(consentements);
         consentements.forEach(c -> createdConsentementIds.remove(c.getId()));
 
         // Delete appointments for the specific orgId
-        List<AppointmentEntity> appointments = appointmentRepository.findAll().stream()
-                .filter(a -> orgId.equals(a.getOrgId()))
-                .toList();
+        List<AppointmentEntity> appointments =
+                appointmentRepository.findAll().stream()
+                        .filter(a -> orgId.equals(a.getOrgId()))
+                        .toList();
         appointmentRepository.deleteAll(appointments);
         appointments.forEach(a -> createdAppointmentIds.remove(a.getId()));
 
         // Delete messages for the specific orgId
-        List<MessageEntity> messages = messageRepository.findAll().stream()
-                .filter(m -> orgId.equals(m.getOrgId()))
-                .toList();
+        List<MessageEntity> messages =
+                messageRepository.findAll().stream()
+                        .filter(m -> orgId.equals(m.getOrgId()))
+                        .toList();
         messageRepository.deleteAll(messages);
         messages.forEach(m -> createdMessageIds.remove(m.getId()));
 
         // Delete parties prenantes for the specific orgId
-        List<PartiePrenanteEntity> parties = partiePrenanteRepository.findAll().stream()
-                .filter(p -> orgId.equals(p.getOrgId()))
-                .toList();
+        List<PartiePrenanteEntity> parties =
+                partiePrenanteRepository.findAll().stream()
+                        .filter(p -> orgId.equals(p.getOrgId()))
+                        .toList();
         partiePrenanteRepository.deleteAll(parties);
         parties.forEach(p -> createdPartiePrenanteIds.remove(p.getId()));
 
         // Delete dossiers for the specific orgId
-        List<Dossier> dossiers = dossierRepository.findAll().stream()
-                .filter(d -> orgId.equals(d.getOrgId()))
-                .toList();
+        List<Dossier> dossiers =
+                dossierRepository.findAll().stream()
+                        .filter(d -> orgId.equals(d.getOrgId()))
+                        .toList();
         dossierRepository.deleteAll(dossiers);
         dossiers.forEach(d -> createdDossierIds.remove(d.getId()));
 
         // Delete annonces for the specific orgId
-        List<Annonce> annonces = annonceRepository.findAll().stream()
-                .filter(a -> orgId.equals(a.getOrgId()))
-                .toList();
+        List<Annonce> annonces =
+                annonceRepository.findAll().stream()
+                        .filter(a -> orgId.equals(a.getOrgId()))
+                        .toList();
         annonceRepository.deleteAll(annonces);
         annonces.forEach(a -> createdAnnonceIds.remove(a.getId()));
     }
@@ -291,11 +297,11 @@ public class BackendE2ETestDataBuilder {
 
         public Annonce build() {
             if (withPhotos && annonce.getPhotos() == null) {
-                annonce.setPhotos(Arrays.asList(
-                    "https://example.com/photo1.jpg",
-                    "https://example.com/photo2.jpg",
-                    "https://example.com/photo3.jpg"
-                ));
+                annonce.setPhotos(
+                        Arrays.asList(
+                                "https://example.com/photo1.jpg",
+                                "https://example.com/photo2.jpg",
+                                "https://example.com/photo3.jpg"));
             }
 
             if (withRulesJson && annonce.getRulesJson() == null) {
@@ -407,11 +413,12 @@ public class BackendE2ETestDataBuilder {
             createdDossierIds.add(saved.getId());
 
             if (withInitialParty) {
-                PartiePrenanteEntity party = partiePrenanteBuilder()
-                    .withDossier(saved)
-                    .withRole(initialPartyRole)
-                    .withName("Initial", "Party")
-                    .persist();
+                PartiePrenanteEntity party =
+                        partiePrenanteBuilder()
+                                .withDossier(saved)
+                                .withRole(initialPartyRole)
+                                .withName("Initial", "Party")
+                                .persist();
             }
 
             return saved;
@@ -506,15 +513,17 @@ public class BackendE2ETestDataBuilder {
 
         public PartiePrenanteEntity persist() {
             if (partiePrenante.getDossier() == null) {
-                throw new IllegalStateException("PartiePrenanteEntity must have a Dossier set before persisting");
+                throw new IllegalStateException(
+                        "PartiePrenanteEntity must have a Dossier set before persisting");
             }
-            
+
             if (partiePrenante.getName() == null) {
                 if (partiePrenante.getFirstName() != null && partiePrenante.getLastName() != null) {
-                    partiePrenante.setName(partiePrenante.getFirstName() + " " + partiePrenante.getLastName());
+                    partiePrenante.setName(
+                            partiePrenante.getFirstName() + " " + partiePrenante.getLastName());
                 }
             }
-            
+
             partiePrenante.setOrgId(resolveOrgId(explicitOrgId));
             PartiePrenanteEntity saved = partiePrenanteRepository.save(build());
             createdPartiePrenanteIds.add(saved.getId());
@@ -588,7 +597,8 @@ public class BackendE2ETestDataBuilder {
 
         public MessageEntity persist() {
             if (message.getDossier() == null) {
-                throw new IllegalStateException("MessageEntity must have a Dossier set before persisting");
+                throw new IllegalStateException(
+                        "MessageEntity must have a Dossier set before persisting");
             }
             message.setOrgId(resolveOrgId(explicitOrgId));
             MessageEntity saved = messageRepository.save(build());
@@ -605,7 +615,11 @@ public class BackendE2ETestDataBuilder {
 
         public AppointmentBuilder() {
             LocalDateTime now = LocalDateTime.now();
-            LocalDateTime startTime = now.plusDays(1 + random.nextInt(7)).withHour(9 + random.nextInt(8)).withMinute(0).withSecond(0);
+            LocalDateTime startTime =
+                    now.plusDays(1 + random.nextInt(7))
+                            .withHour(9 + random.nextInt(8))
+                            .withMinute(0)
+                            .withSecond(0);
             LocalDateTime endTime = startTime.plusHours(1);
 
             appointment.setStatus(AppointmentStatus.SCHEDULED);
@@ -613,7 +627,8 @@ public class BackendE2ETestDataBuilder {
             appointment.setEndTime(endTime);
             appointment.setLocation(random.nextInt(100) + " Meeting Street, Paris");
             appointment.setAssignedTo("agent-" + random.nextInt(10));
-            appointment.setNotes("Appointment notes - " + UUID.randomUUID().toString().substring(0, 8));
+            appointment.setNotes(
+                    "Appointment notes - " + UUID.randomUUID().toString().substring(0, 8));
             appointment.setCreatedBy("test-user");
             appointment.setUpdatedBy("test-user");
         }
@@ -679,7 +694,8 @@ public class BackendE2ETestDataBuilder {
 
         public AppointmentEntity persist() {
             if (appointment.getDossier() == null) {
-                throw new IllegalStateException("AppointmentEntity must have a Dossier set before persisting");
+                throw new IllegalStateException(
+                        "AppointmentEntity must have a Dossier set before persisting");
             }
             appointment.setOrgId(resolveOrgId(explicitOrgId));
             AppointmentEntity saved = appointmentRepository.save(build());
@@ -739,7 +755,8 @@ public class BackendE2ETestDataBuilder {
 
         public ConsentementEntity persist() {
             if (consentement.getDossier() == null) {
-                throw new IllegalStateException("ConsentementEntity must have a Dossier set before persisting");
+                throw new IllegalStateException(
+                        "ConsentementEntity must have a Dossier set before persisting");
             }
             consentement.setOrgId(resolveOrgId(explicitOrgId));
             ConsentementEntity saved = consentementRepository.save(build());
@@ -758,7 +775,8 @@ public class BackendE2ETestDataBuilder {
             notification.setStatus(NotificationStatus.PENDING);
             notification.setTemplateId("template-" + random.nextInt(10));
             notification.setRecipient(randomEmail());
-            notification.setSubject("Test Notification - " + UUID.randomUUID().toString().substring(0, 8));
+            notification.setSubject(
+                    "Test Notification - " + UUID.randomUUID().toString().substring(0, 8));
             notification.setRetryCount(0);
             notification.setMaxRetries(3);
 

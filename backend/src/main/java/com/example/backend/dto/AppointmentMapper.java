@@ -19,28 +19,36 @@ public class AppointmentMapper {
 
     public AppointmentEntity toEntity(AppointmentCreateRequest request) {
         AppointmentEntity appointment = new AppointmentEntity();
-        
+
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
         appointment.setOrgId(orgId);
 
-        Dossier dossier = dossierRepository.findById(request.getDossierId())
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
-        
+        Dossier dossier =
+                dossierRepository
+                        .findById(request.getDossierId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: "
+                                                        + request.getDossierId()));
+
         if (!orgId.equals(dossier.getOrgId())) {
-            throw new EntityNotFoundException("Dossier not found with id: " + request.getDossierId());
+            throw new EntityNotFoundException(
+                    "Dossier not found with id: " + request.getDossierId());
         }
-        
+
         appointment.setDossier(dossier);
         appointment.setStartTime(request.getStartTime());
         appointment.setEndTime(request.getEndTime());
         appointment.setLocation(request.getLocation());
         appointment.setAssignedTo(request.getAssignedTo());
         appointment.setNotes(request.getNotes());
-        appointment.setStatus(request.getStatus() != null ? request.getStatus() : AppointmentStatus.SCHEDULED);
-        
+        appointment.setStatus(
+                request.getStatus() != null ? request.getStatus() : AppointmentStatus.SCHEDULED);
+
         return appointment;
     }
 
@@ -69,7 +77,8 @@ public class AppointmentMapper {
         AppointmentResponse response = new AppointmentResponse();
         response.setId(appointment.getId());
         response.setOrgId(appointment.getOrgId());
-        response.setDossierId(appointment.getDossier() != null ? appointment.getDossier().getId() : null);
+        response.setDossierId(
+                appointment.getDossier() != null ? appointment.getDossier().getId() : null);
         response.setStartTime(appointment.getStartTime());
         response.setEndTime(appointment.getEndTime());
         response.setLocation(appointment.getLocation());

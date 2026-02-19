@@ -9,5 +9,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Deprecated {
     String sunsetDate();
+
     String deprecationMessage() default "This endpoint is deprecated and will be removed.";
 }

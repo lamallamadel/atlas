@@ -5,12 +5,11 @@ import com.example.backend.dto.CursorPageResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.*;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import org.springframework.data.domain.Sort;
+import org.springframework.stereotype.Service;
 
 @Service
 public class CursorPaginationService {
@@ -79,12 +78,7 @@ public class CursorPaginationService {
         }
 
         return new CursorPageResponse<>(
-                results,
-                nextCursor,
-                previousCursor,
-                hasNext,
-                pageRequest.getCursor() != null
-        );
+                results, nextCursor, previousCursor, hasNext, pageRequest.getCursor() != null);
     }
 
     private String encodeCursor(Object value) {
@@ -105,7 +99,8 @@ public class CursorPaginationService {
 
     private Object getFieldValue(Object entity, String fieldName) {
         try {
-            String methodName = "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
+            String methodName =
+                    "get" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
             return entity.getClass().getMethod(methodName).invoke(entity);
         } catch (Exception e) {
             return null;

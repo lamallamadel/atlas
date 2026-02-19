@@ -17,8 +17,7 @@ public class DossierLeadPatchRequest {
     @Size(max = 50, message = "Lead phone must not exceed 50 characters")
     private String leadPhone;
 
-    public DossierLeadPatchRequest() {
-    }
+    public DossierLeadPatchRequest() {}
 
     public String getLeadName() {
         return leadName;

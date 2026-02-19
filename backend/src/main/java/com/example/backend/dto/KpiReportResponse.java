@@ -46,7 +46,8 @@ public class KpiReportResponse {
         return dossierCreationTimeSeries;
     }
 
-    public void setDossierCreationTimeSeries(List<TimeSeriesDataPointDto> dossierCreationTimeSeries) {
+    public void setDossierCreationTimeSeries(
+            List<TimeSeriesDataPointDto> dossierCreationTimeSeries) {
         this.dossierCreationTimeSeries = dossierCreationTimeSeries;
     }
 

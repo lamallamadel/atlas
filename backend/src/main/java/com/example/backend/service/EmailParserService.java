@@ -1,13 +1,12 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.EmailWebhookPayload;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 @Service
 public class EmailParserService {
@@ -36,11 +35,11 @@ public class EmailParserService {
 
         String htmlContent = payload.getHtml();
         String textContent = payload.getText();
-        
+
         if (payload.getStrippedHtml() != null && !payload.getStrippedHtml().isEmpty()) {
             htmlContent = payload.getStrippedHtml();
         }
-        
+
         if (payload.getStrippedText() != null && !payload.getStrippedText().isEmpty()) {
             textContent = payload.getStrippedText();
         }

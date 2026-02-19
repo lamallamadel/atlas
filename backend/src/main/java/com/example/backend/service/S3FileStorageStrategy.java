@@ -1,5 +1,9 @@
 package com.example.backend.service;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,11 +14,6 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
 
 @Component("s3FileStorage")
 public class S3FileStorageStrategy implements FileStorageStrategy {
@@ -37,23 +36,31 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
 
     private S3Client getS3Client() {
         if (s3Client == null) {
-            if (accessKey != null && !accessKey.isEmpty() && secretKey != null && !secretKey.isEmpty()) {
+            if (accessKey != null
+                    && !accessKey.isEmpty()
+                    && secretKey != null
+                    && !secretKey.isEmpty()) {
                 AwsBasicCredentials credentials = AwsBasicCredentials.create(accessKey, secretKey);
-                s3Client = S3Client.builder()
-                        .region(Region.of(region))
-                        .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                        .build();
+                s3Client =
+                        S3Client.builder()
+                                .region(Region.of(region))
+                                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                                .build();
             } else {
-                s3Client = S3Client.builder()
-                        .region(Region.of(region))
-                        .build();
+                s3Client = S3Client.builder().region(Region.of(region)).build();
             }
         }
         return s3Client;
     }
 
     @Override
-    public String store(String orgId, Long dossierId, String fileName, InputStream inputStream, long size, String contentType) {
+    public String store(
+            String orgId,
+            Long dossierId,
+            String fileName,
+            InputStream inputStream,
+            long size,
+            String contentType) {
         try {
             String sanitizedFileName = sanitizeFileName(fileName);
             String uniqueFileName = UUID.randomUUID().toString() + "_" + sanitizedFileName;
@@ -61,12 +68,13 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
 
             byte[] bytes = inputStream.readAllBytes();
 
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(s3Key)
-                    .contentType(contentType)
-                    .contentLength((long) bytes.length)
-                    .build();
+            PutObjectRequest putObjectRequest =
+                    PutObjectRequest.builder()
+                            .bucket(bucketName)
+                            .key(s3Key)
+                            .contentType(contentType)
+                            .contentLength((long) bytes.length)
+                            .build();
 
             getS3Client().putObject(putObjectRequest, RequestBody.fromBytes(bytes));
 
@@ -84,10 +92,8 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
     @Override
     public InputStream retrieve(String storagePath) {
         try {
-            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(storagePath)
-                    .build();
+            GetObjectRequest getObjectRequest =
+                    GetObjectRequest.builder().bucket(bucketName).key(storagePath).build();
 
             byte[] bytes = getS3Client().getObjectAsBytes(getObjectRequest).asByteArray();
             return new ByteArrayInputStream(bytes);
@@ -100,10 +106,8 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
     @Override
     public void delete(String storagePath) {
         try {
-            DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(storagePath)
-                    .build();
+            DeleteObjectRequest deleteObjectRequest =
+                    DeleteObjectRequest.builder().bucket(bucketName).key(storagePath).build();
 
             getS3Client().deleteObject(deleteObjectRequest);
             logger.info("File deleted successfully from S3: {}", storagePath);
@@ -116,10 +120,8 @@ public class S3FileStorageStrategy implements FileStorageStrategy {
     @Override
     public boolean exists(String storagePath) {
         try {
-            HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(storagePath)
-                    .build();
+            HeadObjectRequest headObjectRequest =
+                    HeadObjectRequest.builder().bucket(bucketName).key(storagePath).build();
 
             getS3Client().headObject(headObjectRequest);
             return true;

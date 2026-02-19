@@ -21,9 +21,9 @@ public class PartiePrenanteMapper {
     }
 
     /**
-     * Convenience mapper used when a partie prenante is embedded in other requests
-     * (e.g., dossier creation). In that case, the dossier association is handled by
-     * the caller and no dossierId field is available/needed.
+     * Convenience mapper used when a partie prenante is embedded in other requests (e.g., dossier
+     * creation). In that case, the dossier association is handled by the caller and no dossierId
+     * field is available/needed.
      */
     public PartiePrenanteEntity toEntity(PartiePrenanteRequest request) {
         PartiePrenanteEntity entity = new PartiePrenanteEntity();

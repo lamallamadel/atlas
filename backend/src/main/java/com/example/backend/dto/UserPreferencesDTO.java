@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.Map;
 
 @Schema(description = "User preferences data transfer object")

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 public class StartupIndexAuditListener implements ApplicationListener<ApplicationReadyEvent> {
 
     private final DatabaseIndexAudit databaseIndexAudit;
-    
+
     @Value("${database.index-audit.enabled:true}")
     private boolean indexAuditEnabled;
 

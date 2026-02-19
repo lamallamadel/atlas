@@ -10,12 +10,11 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class PartiePrenanteService {
@@ -24,9 +23,10 @@ public class PartiePrenanteService {
     private final DossierRepository dossierRepository;
     private final PartiePrenanteMapper partiePrenanteMapper;
 
-    public PartiePrenanteService(PartiePrenanteRepository partiePrenanteRepository,
-                                  DossierRepository dossierRepository,
-                                  PartiePrenanteMapper partiePrenanteMapper) {
+    public PartiePrenanteService(
+            PartiePrenanteRepository partiePrenanteRepository,
+            DossierRepository dossierRepository,
+            PartiePrenanteMapper partiePrenanteMapper) {
         this.partiePrenanteRepository = partiePrenanteRepository;
         this.dossierRepository = dossierRepository;
         this.partiePrenanteMapper = partiePrenanteMapper;
@@ -41,11 +41,18 @@ public class PartiePrenanteService {
 
         validateNameFields(request);
 
-        Dossier dossier = dossierRepository.findById(request.getDossierId())
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
+        Dossier dossier =
+                dossierRepository
+                        .findById(request.getDossierId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: "
+                                                        + request.getDossierId()));
 
         if (!orgId.equals(dossier.getOrgId())) {
-            throw new EntityNotFoundException("Dossier not found with id: " + request.getDossierId());
+            throw new EntityNotFoundException(
+                    "Dossier not found with id: " + request.getDossierId());
         }
 
         PartiePrenanteEntity entity = partiePrenanteMapper.toEntity(request);
@@ -56,7 +63,9 @@ public class PartiePrenanteService {
         entity.setCreatedAt(now);
         entity.setUpdatedAt(now);
 
-        if (entity.getName() == null && entity.getFirstName() != null && entity.getLastName() != null) {
+        if (entity.getName() == null
+                && entity.getFirstName() != null
+                && entity.getLastName() != null) {
             entity.setName(entity.getFirstName() + " " + entity.getLastName());
         }
 
@@ -66,11 +75,14 @@ public class PartiePrenanteService {
 
     private void validateNameFields(PartiePrenanteCreateRequest request) {
         boolean hasName = request.getName() != null && !request.getName().trim().isEmpty();
-        boolean hasFirstName = request.getFirstName() != null && !request.getFirstName().trim().isEmpty();
-        boolean hasLastName = request.getLastName() != null && !request.getLastName().trim().isEmpty();
+        boolean hasFirstName =
+                request.getFirstName() != null && !request.getFirstName().trim().isEmpty();
+        boolean hasLastName =
+                request.getLastName() != null && !request.getLastName().trim().isEmpty();
 
         if (!hasName && !(hasFirstName && hasLastName)) {
-            throw new IllegalArgumentException("Either name or both firstName and lastName must be provided");
+            throw new IllegalArgumentException(
+                    "Either name or both firstName and lastName must be provided");
         }
     }
 
@@ -81,8 +93,13 @@ public class PartiePrenanteService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        PartiePrenanteEntity entity = partiePrenanteRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Partie prenante not found with id: " + id));
+        PartiePrenanteEntity entity =
+                partiePrenanteRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Partie prenante not found with id: " + id));
 
         if (!orgId.equals(entity.getOrgId())) {
             throw new EntityNotFoundException("Partie prenante not found with id: " + id);
@@ -101,8 +118,13 @@ public class PartiePrenanteService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        PartiePrenanteEntity entity = partiePrenanteRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Partie prenante not found with id: " + id));
+        PartiePrenanteEntity entity =
+                partiePrenanteRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Partie prenante not found with id: " + id));
 
         if (!orgId.equals(entity.getOrgId())) {
             throw new EntityNotFoundException("Partie prenante not found with id: " + id);
@@ -118,8 +140,13 @@ public class PartiePrenanteService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        PartiePrenanteEntity entity = partiePrenanteRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Partie prenante not found with id: " + id));
+        PartiePrenanteEntity entity =
+                partiePrenanteRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Partie prenante not found with id: " + id));
 
         if (!orgId.equals(entity.getOrgId())) {
             throw new EntityNotFoundException("Partie prenante not found with id: " + id);
@@ -135,16 +162,19 @@ public class PartiePrenanteService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
         }
 
         List<PartiePrenanteEntity> entities = partiePrenanteRepository.findByDossierId(dossierId);
-        return entities.stream()
-                .map(partiePrenanteMapper::toResponse)
-                .collect(Collectors.toList());
+        return entities.stream().map(partiePrenanteMapper::toResponse).collect(Collectors.toList());
     }
 }

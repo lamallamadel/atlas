@@ -7,6 +7,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
 
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE - 50)
@@ -28,14 +27,18 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private final ObjectMapper objectMapper;
     private final RateLimitConfig rateLimitConfig;
 
-    public RateLimitFilter(RateLimitService rateLimitService, ObjectMapper objectMapper, RateLimitConfig rateLimitConfig) {
+    public RateLimitFilter(
+            RateLimitService rateLimitService,
+            ObjectMapper objectMapper,
+            RateLimitConfig rateLimitConfig) {
         this.rateLimitService = rateLimitService;
         this.objectMapper = objectMapper;
         this.rateLimitConfig = rateLimitConfig;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
         if (!rateLimitConfig.getEnabled()) {
@@ -57,10 +60,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 boolean allowed = rateLimitService.tryConsume(orgId);
 
                 if (!allowed) {
-                    ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                            HttpStatus.TOO_MANY_REQUESTS,
-                            "Rate limit exceeded. Please try again later."
-                    );
+                    ProblemDetail problemDetail =
+                            ProblemDetail.forStatusAndDetail(
+                                    HttpStatus.TOO_MANY_REQUESTS,
+                                    "Rate limit exceeded. Please try again later.");
                     problemDetail.setTitle("Too Many Requests");
 
                     response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());

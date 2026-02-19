@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DossierStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 
 @Schema(description = "Response object for dossier status history")
@@ -23,7 +22,9 @@ public class DossierStatusHistoryResponse {
     @Schema(description = "User ID who performed the transition", example = "user123")
     private String userId;
 
-    @Schema(description = "Reason for the transition", example = "Client qualified after initial call")
+    @Schema(
+            description = "Reason for the transition",
+            example = "Client qualified after initial call")
     private String reason;
 
     @Schema(description = "Timestamp when the transition occurred", example = "2024-01-15T10:30:00")

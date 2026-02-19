@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cache.Cache;
@@ -23,10 +25,6 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.time.Duration;
-import java.util.HashMap;
-import java.util.Map;
-
 @Configuration
 @EnableCaching
 public class CacheConfig implements CachingConfigurer {
@@ -41,7 +39,10 @@ public class CacheConfig implements CachingConfigurer {
     private boolean redisEnabled;
 
     @Bean
-    @ConditionalOnProperty(name = "cache.redis.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(
+            name = "cache.redis.enabled",
+            havingValue = "true",
+            matchIfMissing = true)
     public RedisConnectionFactory redisConnectionFactory() {
         LettuceConnectionFactory factory = new LettuceConnectionFactory(redisHost, redisPort);
         factory.afterPropertiesSet();
@@ -50,25 +51,31 @@ public class CacheConfig implements CachingConfigurer {
 
     @Bean
     @Primary
-    @ConditionalOnProperty(name = "cache.redis.enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnProperty(
+            name = "cache.redis.enabled",
+            havingValue = "true",
+            matchIfMissing = true)
     public CacheManager redisCacheManager(RedisConnectionFactory connectionFactory) {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
         objectMapper.activateDefaultTyping(
-            BasicPolymorphicTypeValidator.builder()
-                .allowIfBaseType(Object.class)
-                .build(),
-            ObjectMapper.DefaultTyping.NON_FINAL,
-            JsonTypeInfo.As.PROPERTY
-        );
+                BasicPolymorphicTypeValidator.builder().allowIfBaseType(Object.class).build(),
+                ObjectMapper.DefaultTyping.NON_FINAL,
+                JsonTypeInfo.As.PROPERTY);
 
-        GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
+        GenericJackson2JsonRedisSerializer serializer =
+                new GenericJackson2JsonRedisSerializer(objectMapper);
 
-        RedisCacheConfiguration defaultConfig = RedisCacheConfiguration.defaultCacheConfig()
-            .entryTtl(Duration.ofMinutes(30))
-            .serializeKeysWith(RedisSerializationContext.SerializationPair.fromSerializer(new StringRedisSerializer()))
-            .serializeValuesWith(RedisSerializationContext.SerializationPair.fromSerializer(serializer))
-            .disableCachingNullValues();
+        RedisCacheConfiguration defaultConfig =
+                RedisCacheConfiguration.defaultCacheConfig()
+                        .entryTtl(Duration.ofMinutes(30))
+                        .serializeKeysWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(
+                                        new StringRedisSerializer()))
+                        .serializeValuesWith(
+                                RedisSerializationContext.SerializationPair.fromSerializer(
+                                        serializer))
+                        .disableCachingNullValues();
 
         Map<String, RedisCacheConfiguration> cacheConfigurations = new HashMap<>();
 
@@ -78,35 +85,45 @@ public class CacheConfig implements CachingConfigurer {
         cacheConfigurations.put("agentPerformance", defaultConfig.entryTtl(Duration.ofHours(1)));
         cacheConfigurations.put("revenueForecast", defaultConfig.entryTtl(Duration.ofHours(1)));
         cacheConfigurations.put("pipelineSummary", defaultConfig.entryTtl(Duration.ofMinutes(30)));
-        cacheConfigurations.put("conversionFunnelBySource", defaultConfig.entryTtl(Duration.ofHours(1)));
-        cacheConfigurations.put("conversionFunnelByPeriod", defaultConfig.entryTtl(Duration.ofHours(1)));
-        cacheConfigurations.put("agentMetricsDetailed", defaultConfig.entryTtl(Duration.ofHours(1)));
+        cacheConfigurations.put(
+                "conversionFunnelBySource", defaultConfig.entryTtl(Duration.ofHours(1)));
+        cacheConfigurations.put(
+                "conversionFunnelByPeriod", defaultConfig.entryTtl(Duration.ofHours(1)));
+        cacheConfigurations.put(
+                "agentMetricsDetailed", defaultConfig.entryTtl(Duration.ofHours(1)));
         cacheConfigurations.put("revenueProjections", defaultConfig.entryTtl(Duration.ofHours(1)));
 
         return RedisCacheManager.builder(connectionFactory)
-            .cacheDefaults(defaultConfig)
-            .withInitialCacheConfigurations(cacheConfigurations)
-            .transactionAware()
-            .build();
+                .cacheDefaults(defaultConfig)
+                .withInitialCacheConfigurations(cacheConfigurations)
+                .transactionAware()
+                .build();
     }
-
 
     @Bean
     @Override
     public CacheErrorHandler errorHandler() {
         return new CacheErrorHandler() {
             @Override
-            public void handleCacheGetError(RuntimeException e, Cache cache, Object key) { /* swallow */ }
+            public void handleCacheGetError(RuntimeException e, Cache cache, Object key) {
+                /* swallow */
+            }
 
             @Override
-            public void handleCachePutError(RuntimeException e, Cache cache, Object key, Object value) { /* swallow */ }
+            public void handleCachePutError(
+                    RuntimeException e, Cache cache, Object key, Object value) {
+                /* swallow */
+            }
 
             @Override
-            public void handleCacheEvictError(RuntimeException e, Cache cache, Object key) { /* swallow */ }
+            public void handleCacheEvictError(RuntimeException e, Cache cache, Object key) {
+                /* swallow */
+            }
 
             @Override
-            public void handleCacheClearError(RuntimeException e, Cache cache) { /* swallow */ }
+            public void handleCacheClearError(RuntimeException e, Cache cache) {
+                /* swallow */
+            }
         };
     }
-
 }

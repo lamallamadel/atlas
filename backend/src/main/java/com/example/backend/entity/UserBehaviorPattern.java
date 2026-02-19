@@ -4,10 +4,17 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "user_behavior_pattern",
-    uniqueConstraints = @UniqueConstraint(
-        columnNames = {"org_id", "user_id", "action_type", "context_type", "context_id"}
-    ))
+@Table(
+        name = "user_behavior_pattern",
+        uniqueConstraints =
+                @UniqueConstraint(
+                        columnNames = {
+                            "org_id",
+                            "user_id",
+                            "action_type",
+                            "context_type",
+                            "context_id"
+                        }))
 public class UserBehaviorPattern extends BaseEntity {
 
     @Id

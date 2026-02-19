@@ -25,8 +25,7 @@ public class LeadImportRow {
     @CsvBindByName(column = "score")
     private String score;
 
-    public LeadImportRow() {
-    }
+    public LeadImportRow() {}
 
     public String getName() {
         return name;

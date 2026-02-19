@@ -2,6 +2,8 @@ package com.example.backend.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -14,16 +16,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
     private static final String PROBLEM_JSON_MEDIA_TYPE = "application/problem+json";
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ProblemDetail> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleValidation(
+            MethodArgumentNotValidException ex, HttpServletRequest request) {
 
         // Keep stable ordering + first message per field
         Map<String, String> errors = new LinkedHashMap<>();
@@ -37,43 +37,39 @@ public class GlobalExceptionHandler {
             detail = errors.values().iterator().next();
         }
 
-        ProblemDetail pd = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                detail,
-                request.getRequestURI()
-        );
+        ProblemDetail pd =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        detail,
+                        request.getRequestURI());
 
         // Preserve your existing payload shape:
         // { ..., "properties": { "errors": { field: message } } }
         pd.addProperty("errors", errors);
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(pd);
     }
 
     /**
-     * Covers Jackson deserialization errors (e.g. invalid enum value in JSON).
-     * Without this, it falls into the generic handler and returns 500.
+     * Covers Jackson deserialization errors (e.g. invalid enum value in JSON). Without this, it
+     * falls into the generic handler and returns 500.
      */
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ProblemDetail> handleHttpMessageNotReadable(
-            HttpMessageNotReadableException ex,
-            HttpServletRequest request
-    ) {
-        ProblemDetail pd = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                "Invalid request body",
-                request.getRequestURI()
-        );
+            HttpMessageNotReadableException ex, HttpServletRequest request) {
+        ProblemDetail pd =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Invalid request body",
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(pd);
     }
@@ -81,16 +77,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleEntityNotFoundException(
             EntityNotFoundException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Not Found",
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Not Found",
+                        HttpStatus.NOT_FOUND.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -98,16 +93,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ProblemDetail> handleResourceNotFoundException(
             ResourceNotFoundException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Not Found",
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Not Found",
+                        HttpStatus.NOT_FOUND.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -115,16 +109,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ProblemDetail> handleAccessDeniedException(
             AccessDeniedException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Forbidden",
-                HttpStatus.FORBIDDEN.value(),
-                "Access is denied",
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Forbidden",
+                        HttpStatus.FORBIDDEN.value(),
+                        "Access is denied",
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -132,16 +125,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AuthenticationException.class)
     public ResponseEntity<ProblemDetail> handleAuthenticationException(
             AuthenticationException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Unauthorized",
-                HttpStatus.UNAUTHORIZED.value(),
-                "Authentication failed",
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Unauthorized",
+                        HttpStatus.UNAUTHORIZED.value(),
+                        "Authentication failed",
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -149,16 +141,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> handleIllegalArgumentException(
             IllegalArgumentException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -166,16 +157,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidStatusTransitionException.class)
     public ResponseEntity<ProblemDetail> handleInvalidStatusTransitionException(
             InvalidStatusTransitionException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -183,17 +173,17 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(WorkflowValidationException.class)
     public ResponseEntity<ProblemDetail> handleWorkflowValidationException(
             WorkflowValidationException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Workflow Validation Failed",
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Workflow Validation Failed",
+                        HttpStatus.BAD_REQUEST.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
         if (ex.getValidationErrors() != null) {
             problemDetail.addProperty("validationErrors", ex.getValidationErrors());
-            
+
             Map<String, Object> errors = ex.getValidationErrors();
             if (errors.containsKey("missingRequiredFields")) {
                 problemDetail.addProperty("errorType", "MISSING_REQUIRED_FIELDS");
@@ -208,8 +198,7 @@ public class GlobalExceptionHandler {
             }
         }
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -217,16 +206,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TenantHeaderMissingException.class)
     public ResponseEntity<ProblemDetail> handleTenantHeaderMissingException(
             TenantHeaderMissingException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                "Missing organization context",
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Missing organization context",
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -234,16 +222,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CrossTenantAccessException.class)
     public ResponseEntity<ProblemDetail> handleCrossTenantAccessException(
             CrossTenantAccessException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Not Found",
-                HttpStatus.NOT_FOUND.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Not Found",
+                        HttpStatus.NOT_FOUND.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
@@ -251,37 +238,33 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(FileValidationException.class)
     public ResponseEntity<ProblemDetail> handleFileValidationException(
             FileValidationException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ProblemDetail> handleTypeMismatch(
-            MethodArgumentTypeMismatchException ex,
-            HttpServletRequest request
-    ) {
-        ProblemDetail pd = new ProblemDetail(
-                "about:blank",
-                "Bad Request",
-                HttpStatus.BAD_REQUEST.value(),
-                "Invalid parameter value",
-                request.getRequestURI()
-        );
+            MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+        ProblemDetail pd =
+                new ProblemDetail(
+                        "about:blank",
+                        "Bad Request",
+                        HttpStatus.BAD_REQUEST.value(),
+                        "Invalid parameter value",
+                        request.getRequestURI());
         pd.addProperty("parameter", ex.getName());
         pd.addProperty("value", String.valueOf(ex.getValue()));
 
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(pd);
     }
@@ -289,16 +272,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGenericException(
             Exception ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Internal Server Error",
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "An unexpected error occurred",
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Internal Server Error",
+                        HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                        "An unexpected error occurred",
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }

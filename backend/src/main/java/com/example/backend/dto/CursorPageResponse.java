@@ -10,10 +10,14 @@ public class CursorPageResponse<T> {
     private boolean hasPrevious;
     private int size;
 
-    public CursorPageResponse() {
-    }
+    public CursorPageResponse() {}
 
-    public CursorPageResponse(List<T> content, String nextCursor, String previousCursor, boolean hasNext, boolean hasPrevious) {
+    public CursorPageResponse(
+            List<T> content,
+            String nextCursor,
+            String previousCursor,
+            boolean hasNext,
+            boolean hasPrevious) {
         this.content = content;
         this.nextCursor = nextCursor;
         this.previousCursor = previousCursor;

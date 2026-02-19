@@ -2,12 +2,11 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.CommentEntityType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Filter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Filter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "comment_thread")
@@ -39,7 +38,11 @@ public class CommentThreadEntity extends BaseEntity {
     @Column(name = "resolved_by", length = 255)
     private String resolvedBy;
 
-    @OneToMany(mappedBy = "thread", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(
+            mappedBy = "thread",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<CommentEntity> comments = new ArrayList<>();
 
     public Long getId() {

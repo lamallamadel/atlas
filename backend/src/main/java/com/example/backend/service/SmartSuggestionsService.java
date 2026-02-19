@@ -6,15 +6,14 @@ import com.example.backend.entity.enums.AppointmentStatus;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.*;
 import com.example.backend.util.TenantContext;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SmartSuggestionsService {
@@ -52,8 +51,8 @@ public class SmartSuggestionsService {
         String orgId = TenantContext.getOrgId();
         String userId = getCurrentUserId();
 
-        Optional<UserBehaviorPattern> existing = behaviorRepository
-                .findByOrgIdAndUserIdAndActionTypeAndContextTypeAndContextId(
+        Optional<UserBehaviorPattern> existing =
+                behaviorRepository.findByOrgIdAndUserIdAndActionTypeAndContextTypeAndContextId(
                         orgId, userId, actionType, contextType, contextId);
 
         if (existing.isPresent()) {
@@ -78,8 +77,10 @@ public class SmartSuggestionsService {
         String orgId = TenantContext.getOrgId();
         String userId = getCurrentUserId();
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new RuntimeException("Dossier not found"));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(() -> new RuntimeException("Dossier not found"));
 
         List<SmartSuggestionResponse> suggestions = new ArrayList<>();
 
@@ -89,8 +90,15 @@ public class SmartSuggestionsService {
         suggestions.addAll(getBehaviorBasedSuggestions(userId, orgId, dossierId));
 
         return suggestions.stream()
-                .sorted(Comparator.comparing(SmartSuggestionResponse::getPriority).reversed()
-                        .thenComparing(s -> s.getConfidenceScore() != null ? s.getConfidenceScore() : 0.0, Comparator.reverseOrder()))
+                .sorted(
+                        Comparator.comparing(SmartSuggestionResponse::getPriority)
+                                .reversed()
+                                .thenComparing(
+                                        s ->
+                                                s.getConfidenceScore() != null
+                                                        ? s.getConfidenceScore()
+                                                        : 0.0,
+                                        Comparator.reverseOrder()))
                 .limit(5)
                 .collect(Collectors.toList());
     }
@@ -99,13 +107,18 @@ public class SmartSuggestionsService {
         List<SmartSuggestionResponse> suggestions = new ArrayList<>();
 
         if (dossier.getStatus() == DossierStatus.NEW) {
-            suggestions.addAll(mapTemplatesToSuggestions(
-                    suggestionTemplateRepository.findActiveByTrigger(orgId, "STATUS_NEW"),
-                    0.8, "Dossier en statut NEW"));
+            suggestions.addAll(
+                    mapTemplatesToSuggestions(
+                            suggestionTemplateRepository.findActiveByTrigger(orgId, "STATUS_NEW"),
+                            0.8,
+                            "Dossier en statut NEW"));
         } else if (dossier.getStatus() == DossierStatus.QUALIFIED) {
-            suggestions.addAll(mapTemplatesToSuggestions(
-                    suggestionTemplateRepository.findActiveByTrigger(orgId, "STATUS_QUALIFIED"),
-                    0.9, "Dossier qualifié"));
+            suggestions.addAll(
+                    mapTemplatesToSuggestions(
+                            suggestionTemplateRepository.findActiveByTrigger(
+                                    orgId, "STATUS_QUALIFIED"),
+                            0.9,
+                            "Dossier qualifié"));
         }
 
         return suggestions;
@@ -115,53 +128,71 @@ public class SmartSuggestionsService {
         List<SmartSuggestionResponse> suggestions = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
 
-        LocalDateTime lastActivity = activityRepository
-                .findByDossierIdOrderByCreatedAtDesc(dossier.getId(), 
-                        org.springframework.data.domain.PageRequest.of(0, 1))
-                .stream()
-                .findFirst()
-                .map(ActivityEntity::getCreatedAt)
-                .orElse(dossier.getCreatedAt());
+        LocalDateTime lastActivity =
+                activityRepository
+                        .findByDossierIdOrderByCreatedAtDesc(
+                                dossier.getId(),
+                                org.springframework.data.domain.PageRequest.of(0, 1))
+                        .stream()
+                        .findFirst()
+                        .map(ActivityEntity::getCreatedAt)
+                        .orElse(dossier.getCreatedAt());
 
         long daysSinceActivity = ChronoUnit.DAYS.between(lastActivity, now);
 
         if (daysSinceActivity >= 7) {
-            suggestions.addAll(mapTemplatesToSuggestions(
-                    suggestionTemplateRepository.findActiveByTrigger(orgId, "NO_ACTIVITY_7_DAYS"),
-                    0.95, "Aucune activité depuis " + daysSinceActivity + " jours"));
+            suggestions.addAll(
+                    mapTemplatesToSuggestions(
+                            suggestionTemplateRepository.findActiveByTrigger(
+                                    orgId, "NO_ACTIVITY_7_DAYS"),
+                            0.95,
+                            "Aucune activité depuis " + daysSinceActivity + " jours"));
         } else if (daysSinceActivity >= 3) {
-            suggestions.addAll(mapTemplatesToSuggestions(
-                    suggestionTemplateRepository.findActiveByTrigger(orgId, "DOSSIER_INACTIVE_3_DAYS"),
-                    0.85, "Inactif depuis " + daysSinceActivity + " jours"));
+            suggestions.addAll(
+                    mapTemplatesToSuggestions(
+                            suggestionTemplateRepository.findActiveByTrigger(
+                                    orgId, "DOSSIER_INACTIVE_3_DAYS"),
+                            0.85,
+                            "Inactif depuis " + daysSinceActivity + " jours"));
         }
 
         return suggestions;
     }
 
-    private List<SmartSuggestionResponse> getAppointmentBasedSuggestions(Dossier dossier, String orgId) {
+    private List<SmartSuggestionResponse> getAppointmentBasedSuggestions(
+            Dossier dossier, String orgId) {
         List<SmartSuggestionResponse> suggestions = new ArrayList<>();
 
-        List<AppointmentEntity> recentAppointments = dossier.getAppointments().stream()
-                .filter(apt -> apt.getStatus() == AppointmentStatus.COMPLETED)
-                .filter(apt -> ChronoUnit.HOURS.between(apt.getEndTime(), LocalDateTime.now()) <= 24)
-                .collect(Collectors.toList());
+        List<AppointmentEntity> recentAppointments =
+                dossier.getAppointments().stream()
+                        .filter(apt -> apt.getStatus() == AppointmentStatus.COMPLETED)
+                        .filter(
+                                apt ->
+                                        ChronoUnit.HOURS.between(
+                                                        apt.getEndTime(), LocalDateTime.now())
+                                                <= 24)
+                        .collect(Collectors.toList());
 
         if (!recentAppointments.isEmpty()) {
-            suggestions.addAll(mapTemplatesToSuggestions(
-                    suggestionTemplateRepository.findActiveByTrigger(orgId, "APPOINTMENT_COMPLETED"),
-                    0.9, "Rendez-vous récemment complété"));
+            suggestions.addAll(
+                    mapTemplatesToSuggestions(
+                            suggestionTemplateRepository.findActiveByTrigger(
+                                    orgId, "APPOINTMENT_COMPLETED"),
+                            0.9,
+                            "Rendez-vous récemment complété"));
         }
 
         return suggestions;
     }
 
-    private List<SmartSuggestionResponse> getBehaviorBasedSuggestions(String userId, String orgId, Long dossierId) {
+    private List<SmartSuggestionResponse> getBehaviorBasedSuggestions(
+            String userId, String orgId, Long dossierId) {
         List<SmartSuggestionResponse> suggestions = new ArrayList<>();
 
-        List<UserBehaviorPattern> patterns = behaviorRepository
-                .findTopPatternsByUser(orgId, userId).stream()
-                .limit(3)
-                .collect(Collectors.toList());
+        List<UserBehaviorPattern> patterns =
+                behaviorRepository.findTopPatternsByUser(orgId, userId).stream()
+                        .limit(3)
+                        .collect(Collectors.toList());
 
         for (UserBehaviorPattern pattern : patterns) {
             SmartSuggestionResponse suggestion = new SmartSuggestionResponse();
@@ -171,7 +202,8 @@ public class SmartSuggestionsService {
             suggestion.setActionType(pattern.getActionType());
             suggestion.setPriority(5);
             suggestion.setConfidenceScore(calculateBehaviorConfidence(pattern));
-            suggestion.setReason("Basé sur vos habitudes (" + pattern.getFrequencyCount() + " fois)");
+            suggestion.setReason(
+                    "Basé sur vos habitudes (" + pattern.getFrequencyCount() + " fois)");
             suggestions.add(suggestion);
         }
 
@@ -180,25 +212,33 @@ public class SmartSuggestionsService {
 
     private List<SmartSuggestionResponse> mapTemplatesToSuggestions(
             List<SuggestionTemplate> templates, double confidence, String reason) {
-        return templates.stream().map(template -> {
-            SmartSuggestionResponse response = new SmartSuggestionResponse();
-            response.setId(template.getId());
-            response.setSuggestionType(template.getSuggestionType());
-            response.setTitle(template.getTitle());
-            response.setDescription(template.getDescription());
-            response.setActionType(template.getActionType());
-            response.setActionPayload(template.getActionPayload());
-            response.setPriority(template.getPriority());
-            response.setConfidenceScore(adjustConfidenceWithFeedback(template, confidence));
-            response.setReason(reason);
-            return response;
-        }).collect(Collectors.toList());
+        return templates.stream()
+                .map(
+                        template -> {
+                            SmartSuggestionResponse response = new SmartSuggestionResponse();
+                            response.setId(template.getId());
+                            response.setSuggestionType(template.getSuggestionType());
+                            response.setTitle(template.getTitle());
+                            response.setDescription(template.getDescription());
+                            response.setActionType(template.getActionType());
+                            response.setActionPayload(template.getActionPayload());
+                            response.setPriority(template.getPriority());
+                            response.setConfidenceScore(
+                                    adjustConfidenceWithFeedback(template, confidence));
+                            response.setReason(reason);
+                            return response;
+                        })
+                .collect(Collectors.toList());
     }
 
-    private double adjustConfidenceWithFeedback(SuggestionTemplate template, double baseConfidence) {
+    private double adjustConfidenceWithFeedback(
+            SuggestionTemplate template, double baseConfidence) {
         String orgId = TenantContext.getOrgId();
-        Long accepted = feedbackRepository.countAcceptedBySuggestionType(orgId, template.getSuggestionType());
-        Long total = feedbackRepository.countTotalBySuggestionType(orgId, template.getSuggestionType());
+        Long accepted =
+                feedbackRepository.countAcceptedBySuggestionType(
+                        orgId, template.getSuggestionType());
+        Long total =
+                feedbackRepository.countTotalBySuggestionType(orgId, template.getSuggestionType());
 
         if (total == 0) {
             return baseConfidence;
@@ -209,7 +249,8 @@ public class SmartSuggestionsService {
     }
 
     private double calculateBehaviorConfidence(UserBehaviorPattern pattern) {
-        long daysSinceLastUse = ChronoUnit.DAYS.between(pattern.getLastPerformedAt(), LocalDateTime.now());
+        long daysSinceLastUse =
+                ChronoUnit.DAYS.between(pattern.getLastPerformedAt(), LocalDateTime.now());
         double recencyScore = Math.max(0, 1.0 - (daysSinceLastUse / 30.0));
         double frequencyScore = Math.min(1.0, pattern.getFrequencyCount() / 20.0);
         return (recencyScore * 0.6) + (frequencyScore * 0.4);
@@ -228,22 +269,31 @@ public class SmartSuggestionsService {
             templates = messageTemplateRepository.findAllActiveTemplates(orgId);
         }
 
-        return templates.stream().map(this::mapToMessageTemplateResponse).collect(Collectors.toList());
+        return templates.stream()
+                .map(this::mapToMessageTemplateResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public PrefilledMessageResponse getPrefilledMessage(Long templateId, Long dossierId) {
         String orgId = TenantContext.getOrgId();
 
-        MessageTemplate template = messageTemplateRepository.findById(templateId)
-                .orElseThrow(() -> new RuntimeException("Template not found"));
+        MessageTemplate template =
+                messageTemplateRepository
+                        .findById(templateId)
+                        .orElseThrow(() -> new RuntimeException("Template not found"));
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new RuntimeException("Dossier not found"));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(() -> new RuntimeException("Dossier not found"));
 
         Map<String, String> variables = buildVariablesMap(dossier);
         String filledContent = fillTemplate(template.getContent(), variables);
-        String filledSubject = template.getSubject() != null ? fillTemplate(template.getSubject(), variables) : null;
+        String filledSubject =
+                template.getSubject() != null
+                        ? fillTemplate(template.getSubject(), variables)
+                        : null;
 
         PrefilledMessageResponse response = new PrefilledMessageResponse();
         response.setTemplateId(templateId);
@@ -257,15 +307,21 @@ public class SmartSuggestionsService {
 
     @Transactional
     public void recordTemplateUsage(Long templateId) {
-        MessageTemplate template = messageTemplateRepository.findById(templateId)
-                .orElseThrow(() -> new RuntimeException("Template not found"));
+        MessageTemplate template =
+                messageTemplateRepository
+                        .findById(templateId)
+                        .orElseThrow(() -> new RuntimeException("Template not found"));
         template.incrementUsageCount();
         messageTemplateRepository.save(template);
     }
 
     @Transactional
-    public void submitFeedback(String suggestionType, String contextType, Long contextId, 
-                              boolean wasAccepted, String feedbackText) {
+    public void submitFeedback(
+            String suggestionType,
+            String contextType,
+            Long contextId,
+            boolean wasAccepted,
+            String feedbackText) {
         String orgId = TenantContext.getOrgId();
         String userId = getCurrentUserId();
 
@@ -288,10 +344,19 @@ public class SmartSuggestionsService {
         variables.put("leadEmail", dossier.getLeadEmail() != null ? dossier.getLeadEmail() : "");
 
         if (dossier.getAnnonceId() != null) {
-            annonceRepository.findById(dossier.getAnnonceId()).ifPresent(annonce -> {
-                variables.put("annonceTitle", annonce.getTitle() != null ? annonce.getTitle() : "le bien");
-                variables.put("annonceCity", annonce.getCity() != null ? annonce.getCity() : "");
-            });
+            annonceRepository
+                    .findById(dossier.getAnnonceId())
+                    .ifPresent(
+                            annonce -> {
+                                variables.put(
+                                        "annonceTitle",
+                                        annonce.getTitle() != null
+                                                ? annonce.getTitle()
+                                                : "le bien");
+                                variables.put(
+                                        "annonceCity",
+                                        annonce.getCity() != null ? annonce.getCity() : "");
+                            });
         } else {
             variables.put("annonceTitle", "le bien");
             variables.put("annonceCity", "");

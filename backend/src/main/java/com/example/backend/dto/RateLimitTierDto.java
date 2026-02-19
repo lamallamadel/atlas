@@ -8,15 +8,11 @@ public class RateLimitTierDto {
 
     private Long id;
 
-    @NotBlank
-    private String orgId;
+    @NotBlank private String orgId;
 
-    @NotBlank
-    private String tierName;
+    @NotBlank private String tierName;
 
-    @NotNull
-    @Positive
-    private Integer requestsPerMinute;
+    @NotNull @Positive private Integer requestsPerMinute;
 
     private String description;
 

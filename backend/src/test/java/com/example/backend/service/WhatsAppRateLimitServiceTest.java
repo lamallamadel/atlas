@@ -1,30 +1,25 @@
 package com.example.backend.service;
 
-import com.example.backend.entity.WhatsAppRateLimit;
-import com.example.backend.repository.WhatsAppRateLimitRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.example.backend.entity.WhatsAppRateLimit;
+import com.example.backend.repository.WhatsAppRateLimitRepository;
+import java.time.LocalDateTime;
+import java.util.Optional;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 @ExtendWith(MockitoExtension.class)
 class WhatsAppRateLimitServiceTest {
 
-    @Mock
-    private WhatsAppRateLimitRepository rateLimitRepository;
+    @Mock private WhatsAppRateLimitRepository rateLimitRepository;
 
-    @InjectMocks
-    private WhatsAppRateLimitService service;
+    @InjectMocks private WhatsAppRateLimitService service;
 
     private String orgId = "test-org";
 
@@ -32,7 +27,7 @@ class WhatsAppRateLimitServiceTest {
     void checkAndConsumeQuota_CreatesNewRateLimit_WhenNoneExists() {
         when(rateLimitRepository.findByOrgId(orgId)).thenReturn(Optional.empty());
         when(rateLimitRepository.save(any(WhatsAppRateLimit.class)))
-            .thenAnswer(invocation -> invocation.getArgument(0));
+                .thenAnswer(invocation -> invocation.getArgument(0));
 
         boolean result = service.checkAndConsumeQuota(orgId);
 

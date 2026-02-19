@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AppointmentStatus;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,8 +21,7 @@ public class AppointmentResponse {
     private String updatedBy;
     private List<String> warnings;
 
-    public AppointmentResponse() {
-    }
+    public AppointmentResponse() {}
 
     public Long getId() {
         return id;

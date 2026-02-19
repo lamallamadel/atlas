@@ -1,11 +1,10 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Filter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Filter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "coop_group")

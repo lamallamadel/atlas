@@ -1,7 +1,11 @@
 package com.example.backend.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
+
 import com.example.backend.entity.WhatsAppProviderConfig;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -11,20 +15,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class WhatsAppWebhookSignatureValidatorTest {
 
-    @Mock
-    private WhatsAppProviderConfigRepository providerConfigRepository;
+    @Mock private WhatsAppProviderConfigRepository providerConfigRepository;
 
-    @InjectMocks
-    private WhatsAppWebhookSignatureValidator validator;
+    @InjectMocks private WhatsAppWebhookSignatureValidator validator;
 
     private String orgId = "test-org";
     private String webhookSecret = "test-secret-key";
@@ -139,9 +136,12 @@ class WhatsAppWebhookSignatureValidatorTest {
     void validateSignature_ProtectsAgainstTimingAttacks() {
         when(providerConfigRepository.findByOrgId(orgId)).thenReturn(Optional.of(config));
 
-        String validSignature = "sha256=6f54e7d3b6e3c3b2f1d8a9c4b5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4";
-        String invalidSignature1 = "sha256=0000000000000000000000000000000000000000000000000000000000000000";
-        String invalidSignature2 = "sha256=6f54e7d3b6e3c3b2f1d8a9c4b5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e5";
+        String validSignature =
+                "sha256=6f54e7d3b6e3c3b2f1d8a9c4b5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4";
+        String invalidSignature1 =
+                "sha256=0000000000000000000000000000000000000000000000000000000000000000";
+        String invalidSignature2 =
+                "sha256=6f54e7d3b6e3c3b2f1d8a9c4b5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e5";
 
         long start1 = System.nanoTime();
         validator.validateSignature(payload, invalidSignature1, orgId);
@@ -152,6 +152,7 @@ class WhatsAppWebhookSignatureValidatorTest {
         long duration2 = System.nanoTime() - start2;
 
         double ratio = (double) Math.max(duration1, duration2) / Math.min(duration1, duration2);
-        assertTrue(ratio < 10.0, "Timing difference too large, might be vulnerable to timing attacks");
+        assertTrue(
+                ratio < 10.0, "Timing difference too large, might be vulnerable to timing attacks");
     }
 }

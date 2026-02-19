@@ -7,7 +7,8 @@ public class UserDisplayInfo {
     private final String lastName;
     private final String email;
 
-    public UserDisplayInfo(String userId, String displayName, String firstName, String lastName, String email) {
+    public UserDisplayInfo(
+            String userId, String displayName, String firstName, String lastName, String email) {
         this.userId = userId;
         this.displayName = displayName;
         this.firstName = firstName;

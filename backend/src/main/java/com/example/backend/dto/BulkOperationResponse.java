@@ -13,7 +13,8 @@ public class BulkOperationResponse {
         this.errors = new ArrayList<>();
     }
 
-    public BulkOperationResponse(int successCount, int failureCount, List<BulkOperationError> errors) {
+    public BulkOperationResponse(
+            int successCount, int failureCount, List<BulkOperationError> errors) {
         this.successCount = successCount;
         this.failureCount = failureCount;
         this.errors = errors != null ? errors : new ArrayList<>();
@@ -51,8 +52,7 @@ public class BulkOperationResponse {
         private Long id;
         private String message;
 
-        public BulkOperationError() {
-        }
+        public BulkOperationError() {}
 
         public BulkOperationError(Long id, String message) {
             this.id = id;

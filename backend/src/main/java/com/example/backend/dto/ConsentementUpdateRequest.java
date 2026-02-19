@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 public class ConsentementUpdateRequest {
@@ -16,8 +15,7 @@ public class ConsentementUpdateRequest {
 
     private Map<String, Object> meta;
 
-    public ConsentementUpdateRequest() {
-    }
+    public ConsentementUpdateRequest() {}
 
     public ConsentementChannel getChannel() {
         return channel;

@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -29,7 +28,9 @@ public class WorkflowDefinitionResponse {
     @Schema(description = "JSON object defining conditions for this transition", nullable = true)
     private Map<String, Object> conditionsJson;
 
-    @Schema(description = "JSON object defining required fields for this transition", nullable = true)
+    @Schema(
+            description = "JSON object defining required fields for this transition",
+            nullable = true)
     private Map<String, Object> requiredFieldsJson;
 
     @Schema(description = "Timestamp when created", example = "2024-01-01T12:00:00")

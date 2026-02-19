@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import java.time.Duration;
 import org.flywaydb.core.api.callback.Callback;
 import org.flywaydb.core.api.callback.Context;
 import org.flywaydb.core.api.callback.Event;
@@ -17,14 +18,13 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
-
 @TestConfiguration
 @Profile("backend-e2e-postgres")
 @Order(Integer.MIN_VALUE)
 public class PostgresTestcontainersConfiguration {
 
-    private static final Logger log = LoggerFactory.getLogger(PostgresTestcontainersConfiguration.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(PostgresTestcontainersConfiguration.class);
 
     @Bean
     @ServiceConnection
@@ -38,14 +38,16 @@ public class PostgresTestcontainersConfiguration {
 
         long containerStartTime = System.currentTimeMillis();
 
-        PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"))
-                .withReuse(true)
-                .withDatabaseName("testdb")
-                .withUsername("test")
-                .withPassword("test")
-                .withEnv("POSTGRES_INITDB_ARGS", "-E UTF8")
-                .withStartupTimeout(Duration.ofMinutes(2))
-                .waitingFor(Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)));
+        PostgreSQLContainer<?> container =
+                new PostgreSQLContainer<>(DockerImageName.parse("postgres:15-alpine"))
+                        .withReuse(true)
+                        .withDatabaseName("testdb")
+                        .withUsername("test")
+                        .withPassword("test")
+                        .withEnv("POSTGRES_INITDB_ARGS", "-E UTF8")
+                        .withStartupTimeout(Duration.ofMinutes(2))
+                        .waitingFor(
+                                Wait.forListeningPort().withStartupTimeout(Duration.ofMinutes(2)));
 
         log.info("Starting PostgreSQL container with image: postgres:15-alpine");
         log.info("Container reuse enabled: true");
@@ -58,11 +60,15 @@ public class PostgresTestcontainersConfiguration {
         log.info("║ PostgreSQL Testcontainer Started Successfully                              ║");
         log.info("╠════════════════════════════════════════════════════════════════════════════╣");
         log.info("║ Container Details:                                                          ║");
-        log.info("║   • Container ID: {}", String.format("%-56s", container.getContainerId()) + "║");
+        log.info(
+                "║   • Container ID: {}", String.format("%-56s", container.getContainerId()) + "║");
         log.info("║   • JDBC URL: {}", String.format("%-60s", container.getJdbcUrl()) + "║");
         log.info("║   • Database: {}", String.format("%-62s", container.getDatabaseName()) + "║");
         log.info("║   • Username: {}", String.format("%-62s", container.getUsername()) + "║");
-        log.info("║   • Host:Port: {}:{}", String.format("%-55s", container.getHost() + ":" + container.getFirstMappedPort()) + "║");
+        log.info(
+                "║   • Host:Port: {}:{}",
+                String.format("%-55s", container.getHost() + ":" + container.getFirstMappedPort())
+                        + "║");
         log.info("║   • Startup Time: {} ms", String.format("%-56s", containerDuration) + "║");
         log.info("║   • Reusable: true                                                          ║");
         log.info("╚════════════════════════════════════════════════════════════════════════════╝");
@@ -70,14 +76,21 @@ public class PostgresTestcontainersConfiguration {
         System.setProperty("flyway.placeholders.json_type", "JSONB");
         log.info("Set Flyway placeholder: json_type=JSONB");
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            if (container.isRunning()) {
-                log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-                log.info("║ PostgreSQL Testcontainer Shutdown Hook Triggered                          ║");
-                log.info("║ Container will persist (reuse enabled)                                     ║");
-                log.info("╚════════════════════════════════════════════════════════════════════════════╝");
-            }
-        }));
+        Runtime.getRuntime()
+                .addShutdownHook(
+                        new Thread(
+                                () -> {
+                                    if (container.isRunning()) {
+                                        log.info(
+                                                "╔════════════════════════════════════════════════════════════════════════════╗");
+                                        log.info(
+                                                "║ PostgreSQL Testcontainer Shutdown Hook Triggered                          ║");
+                                        log.info(
+                                                "║ Container will persist (reuse enabled)                                     ║");
+                                        log.info(
+                                                "╚════════════════════════════════════════════════════════════════════════════╝");
+                                    }
+                                }));
 
         if (container.isRunning()) {
             log.info("Container health check: PASSED");
@@ -91,9 +104,12 @@ public class PostgresTestcontainersConfiguration {
     @Bean
     public FlywayConfigurationCustomizer flywayConfigurationCustomizer() {
         return configuration -> {
-            log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-            log.info("║ STEP 3: Configuring Flyway with Custom Callback                            ║");
-            log.info("╚════════════════════════════════════════════════════════════════════════════╝");
+            log.info(
+                    "╔════════════════════════════════════════════════════════════════════════════╗");
+            log.info(
+                    "║ STEP 3: Configuring Flyway with Custom Callback                            ║");
+            log.info(
+                    "╚════════════════════════════════════════════════════════════════════════════╝");
             configuration.callbacks(new FlywayTestCallback());
         };
     }
@@ -101,32 +117,42 @@ public class PostgresTestcontainersConfiguration {
     @Bean
     public ApplicationListener<ApplicationReadyEvent> applicationReadyListener() {
         return event -> {
-            log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-            log.info("║ STEP 6: Spring Application Context Ready - Tests Can Begin                 ║");
-            log.info("╠════════════════════════════════════════════════════════════════════════════╣");
-            log.info("║ ✓ PostgreSQL Container: RUNNING                                            ║");
-            log.info("║ ✓ DataSource: CONFIGURED                                                    ║");
-            log.info("║ ✓ Flyway Migrations: COMPLETED                                              ║");
-            log.info("║ ✓ Application Context: INITIALIZED                                          ║");
-            log.info("║                                                                             ║");
-            log.info("║ Test execution can now proceed safely.                                      ║");
-            log.info("╚════════════════════════════════════════════════════════════════════════════╝");
+            log.info(
+                    "╔════════════════════════════════════════════════════════════════════════════╗");
+            log.info(
+                    "║ STEP 6: Spring Application Context Ready - Tests Can Begin                 ║");
+            log.info(
+                    "╠════════════════════════════════════════════════════════════════════════════╣");
+            log.info(
+                    "║ ✓ PostgreSQL Container: RUNNING                                            ║");
+            log.info(
+                    "║ ✓ DataSource: CONFIGURED                                                    ║");
+            log.info(
+                    "║ ✓ Flyway Migrations: COMPLETED                                              ║");
+            log.info(
+                    "║ ✓ Application Context: INITIALIZED                                          ║");
+            log.info(
+                    "║                                                                             ║");
+            log.info(
+                    "║ Test execution can now proceed safely.                                      ║");
+            log.info(
+                    "╚════════════════════════════════════════════════════════════════════════════╝");
         };
     }
 
     private static class FlywayTestCallback implements Callback {
-        
+
         private static final Logger callbackLog = LoggerFactory.getLogger(FlywayTestCallback.class);
         private long migrationStartTime;
         private int migrationCount = 0;
 
         @Override
         public boolean supports(Event event, Context context) {
-            return event == Event.BEFORE_MIGRATE 
-                || event == Event.AFTER_MIGRATE 
-                || event == Event.BEFORE_EACH_MIGRATE
-                || event == Event.AFTER_EACH_MIGRATE
-                || event == Event.AFTER_MIGRATE_ERROR;
+            return event == Event.BEFORE_MIGRATE
+                    || event == Event.AFTER_MIGRATE
+                    || event == Event.BEFORE_EACH_MIGRATE
+                    || event == Event.AFTER_EACH_MIGRATE
+                    || event == Event.AFTER_MIGRATE_ERROR;
         }
 
         @Override
@@ -139,51 +165,85 @@ public class PostgresTestcontainersConfiguration {
             switch (event) {
                 case BEFORE_MIGRATE:
                     migrationStartTime = System.currentTimeMillis();
-                    callbackLog.info("╔════════════════════════════════════════════════════════════════════════════╗");
-                    callbackLog.info("║ STEP 4: Starting Flyway Database Migrations                                ║");
-                    callbackLog.info("╠════════════════════════════════════════════════════════════════════════════╣");
-                    callbackLog.info("║ Schema: {}", String.format("%-64s", context.getConfiguration().getDefaultSchema()) + "║");
-                    callbackLog.info("║ Locations: {}", String.format("%-59s", java.util.Arrays.toString(context.getConfiguration().getLocations())) + "║");
-                    callbackLog.info("╚════════════════════════════════════════════════════════════════════════════╝");
+                    callbackLog.info(
+                            "╔════════════════════════════════════════════════════════════════════════════╗");
+                    callbackLog.info(
+                            "║ STEP 4: Starting Flyway Database Migrations                                ║");
+                    callbackLog.info(
+                            "╠════════════════════════════════════════════════════════════════════════════╣");
+                    callbackLog.info(
+                            "║ Schema: {}",
+                            String.format("%-64s", context.getConfiguration().getDefaultSchema())
+                                    + "║");
+                    callbackLog.info(
+                            "║ Locations: {}",
+                            String.format(
+                                            "%-59s",
+                                            java.util.Arrays.toString(
+                                                    context.getConfiguration().getLocations()))
+                                    + "║");
+                    callbackLog.info(
+                            "╚════════════════════════════════════════════════════════════════════════════╝");
                     break;
-                    
+
                 case BEFORE_EACH_MIGRATE:
                     migrationCount++;
-                    String version = context.getMigrationInfo() != null && context.getMigrationInfo().getVersion() != null 
-                        ? context.getMigrationInfo().getVersion().toString() 
-                        : "UNKNOWN";
-                    String description = context.getMigrationInfo() != null 
-                        ? context.getMigrationInfo().getDescription() 
-                        : "No description";
-                    callbackLog.info("  → Executing Migration #{}: V{} - {}", migrationCount, version, description);
+                    String version =
+                            context.getMigrationInfo() != null
+                                            && context.getMigrationInfo().getVersion() != null
+                                    ? context.getMigrationInfo().getVersion().toString()
+                                    : "UNKNOWN";
+                    String description =
+                            context.getMigrationInfo() != null
+                                    ? context.getMigrationInfo().getDescription()
+                                    : "No description";
+                    callbackLog.info(
+                            "  → Executing Migration #{}: V{} - {}",
+                            migrationCount,
+                            version,
+                            description);
                     break;
-                    
+
                 case AFTER_EACH_MIGRATE:
                     callbackLog.info("  ✓ Migration completed successfully");
                     break;
-                    
+
                 case AFTER_MIGRATE:
                     long duration = System.currentTimeMillis() - migrationStartTime;
-                    callbackLog.info("╔════════════════════════════════════════════════════════════════════════════╗");
-                    callbackLog.info("║ Flyway Migrations Completed Successfully                                   ║");
-                    callbackLog.info("╠════════════════════════════════════════════════════════════════════════════╣");
-                    callbackLog.info("║ Total Migrations: {}", String.format("%-58s", migrationCount) + "║");
+                    callbackLog.info(
+                            "╔════════════════════════════════════════════════════════════════════════════╗");
+                    callbackLog.info(
+                            "║ Flyway Migrations Completed Successfully                                   ║");
+                    callbackLog.info(
+                            "╠════════════════════════════════════════════════════════════════════════════╣");
+                    callbackLog.info(
+                            "║ Total Migrations: {}", String.format("%-58s", migrationCount) + "║");
                     callbackLog.info("║ Duration: {} ms", String.format("%-62s", duration) + "║");
-                    callbackLog.info("╚════════════════════════════════════════════════════════════════════════════╝");
-                    callbackLog.info("╔════════════════════════════════════════════════════════════════════════════╗");
-                    callbackLog.info("║ STEP 5: Initializing Spring Application Context                            ║");
-                    callbackLog.info("║ → Loading Spring Beans                                                      ║");
-                    callbackLog.info("║ → Initializing JPA EntityManager                                            ║");
-                    callbackLog.info("║ → Setting up Transaction Management                                         ║");
-                    callbackLog.info("╚════════════════════════════════════════════════════════════════════════════╝");
+                    callbackLog.info(
+                            "╚════════════════════════════════════════════════════════════════════════════╝");
+                    callbackLog.info(
+                            "╔════════════════════════════════════════════════════════════════════════════╗");
+                    callbackLog.info(
+                            "║ STEP 5: Initializing Spring Application Context                            ║");
+                    callbackLog.info(
+                            "║ → Loading Spring Beans                                                      ║");
+                    callbackLog.info(
+                            "║ → Initializing JPA EntityManager                                            ║");
+                    callbackLog.info(
+                            "║ → Setting up Transaction Management                                         ║");
+                    callbackLog.info(
+                            "╚════════════════════════════════════════════════════════════════════════════╝");
                     break;
-                    
+
                 case AFTER_MIGRATE_ERROR:
-                    callbackLog.error("╔════════════════════════════════════════════════════════════════════════════╗");
-                    callbackLog.error("║ ❌ FLYWAY MIGRATION ERROR                                                  ║");
-                    callbackLog.error("╚════════════════════════════════════════════════════════════════════════════╝");
+                    callbackLog.error(
+                            "╔════════════════════════════════════════════════════════════════════════════╗");
+                    callbackLog.error(
+                            "║ ❌ FLYWAY MIGRATION ERROR                                                  ║");
+                    callbackLog.error(
+                            "╚════════════════════════════════════════════════════════════════════════════╝");
                     break;
-                    
+
                 default:
                     break;
             }

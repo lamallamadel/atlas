@@ -5,13 +5,12 @@ import com.example.backend.entity.enums.CommentEntityType;
 import com.example.backend.service.CommentExportService;
 import com.example.backend.service.CommentService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -45,8 +44,7 @@ public class CommentController {
 
     @GetMapping("/threads")
     public ResponseEntity<List<CommentThreadDTO>> getThreadsForEntity(
-            @RequestParam CommentEntityType entityType,
-            @RequestParam Long entityId) {
+            @RequestParam CommentEntityType entityType, @RequestParam Long entityId) {
         List<CommentThreadDTO> threads = commentService.getThreadsForEntity(entityType, entityId);
         return ResponseEntity.ok(threads);
     }
@@ -87,8 +85,7 @@ public class CommentController {
 
     @GetMapping("/count/unresolved")
     public ResponseEntity<Long> countUnresolvedThreads(
-            @RequestParam CommentEntityType entityType,
-            @RequestParam Long entityId) {
+            @RequestParam CommentEntityType entityType, @RequestParam Long entityId) {
         long count = commentService.countUnresolvedThreads(entityType, entityId);
         return ResponseEntity.ok(count);
     }
@@ -107,8 +104,7 @@ public class CommentController {
 
     @GetMapping("/export/threads/{threadId}")
     public ResponseEntity<byte[]> exportThread(
-            @PathVariable Long threadId,
-            @RequestParam(defaultValue = "text") String format) {
+            @PathVariable Long threadId, @RequestParam(defaultValue = "text") String format) {
         byte[] content;
         String filename;
         MediaType mediaType;
@@ -127,15 +123,12 @@ public class CommentController {
         headers.setContentType(mediaType);
         headers.setContentDispositionFormData("attachment", filename);
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(content);
+        return ResponseEntity.ok().headers(headers).body(content);
     }
 
     @GetMapping("/export/entity")
     public ResponseEntity<byte[]> exportAllThreadsForEntity(
-            @RequestParam CommentEntityType entityType,
-            @RequestParam Long entityId) {
+            @RequestParam CommentEntityType entityType, @RequestParam Long entityId) {
         byte[] content = exportService.exportAllThreadsForEntity(entityType, entityId);
         String filename = "comments-" + entityType.name().toLowerCase() + "-" + entityId + ".txt";
 
@@ -143,8 +136,6 @@ public class CommentController {
         headers.setContentType(MediaType.TEXT_PLAIN);
         headers.setContentDispositionFormData("attachment", filename);
 
-        return ResponseEntity.ok()
-                .headers(headers)
-                .body(content);
+        return ResponseEntity.ok().headers(headers).body(content);
     }
 }

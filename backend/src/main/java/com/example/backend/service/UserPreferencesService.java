@@ -4,13 +4,12 @@ import com.example.backend.dto.UserPreferencesDTO;
 import com.example.backend.entity.UserPreferencesEntity;
 import com.example.backend.repository.UserPreferencesRepository;
 import com.example.backend.util.TenantContext;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class UserPreferencesService {
@@ -28,9 +27,10 @@ public class UserPreferencesService {
         String orgId = TenantContext.getOrgId();
         logger.debug("Fetching preferences for userId={}, orgId={}", userId, orgId);
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> createDefaultPreferences(userId, orgId));
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(() -> createDefaultPreferences(userId, orgId));
 
         return toDTO(entity);
     }
@@ -40,14 +40,16 @@ public class UserPreferencesService {
         String orgId = TenantContext.getOrgId();
         logger.debug("Saving preferences for userId={}, orgId={}", userId, orgId);
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> {
-                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
-                    newEntity.setUserId(userId);
-                    newEntity.setOrgId(orgId);
-                    return newEntity;
-                });
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                                    newEntity.setUserId(userId);
+                                    newEntity.setOrgId(orgId);
+                                    return newEntity;
+                                });
 
         updateEntityFromDTO(entity, dto);
         UserPreferencesEntity saved = userPreferencesRepository.save(entity);
@@ -61,14 +63,16 @@ public class UserPreferencesService {
         String orgId = TenantContext.getOrgId();
         logger.debug("Updating dashboard layout for userId={}, orgId={}", userId, orgId);
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> {
-                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
-                    newEntity.setUserId(userId);
-                    newEntity.setOrgId(orgId);
-                    return newEntity;
-                });
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                                    newEntity.setUserId(userId);
+                                    newEntity.setOrgId(orgId);
+                                    return newEntity;
+                                });
 
         entity.setDashboardLayout(layout);
         UserPreferencesEntity saved = userPreferencesRepository.save(entity);
@@ -81,14 +85,16 @@ public class UserPreferencesService {
         String orgId = TenantContext.getOrgId();
         logger.debug("Updating widget settings for userId={}, orgId={}", userId, orgId);
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> {
-                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
-                    newEntity.setUserId(userId);
-                    newEntity.setOrgId(orgId);
-                    return newEntity;
-                });
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                                    newEntity.setUserId(userId);
+                                    newEntity.setOrgId(orgId);
+                                    return newEntity;
+                                });
 
         entity.setWidgetSettings(settings);
         UserPreferencesEntity saved = userPreferencesRepository.save(entity);
@@ -106,18 +112,21 @@ public class UserPreferencesService {
     @Transactional
     public UserPreferencesDTO applyRoleTemplate(String userId, String roleTemplate) {
         String orgId = TenantContext.getOrgId();
-        logger.debug("Applying role template '{}' for userId={}, orgId={}", roleTemplate, userId, orgId);
+        logger.debug(
+                "Applying role template '{}' for userId={}, orgId={}", roleTemplate, userId, orgId);
 
         Map<String, Object> templateLayout = getTemplateLayout(roleTemplate);
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> {
-                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
-                    newEntity.setUserId(userId);
-                    newEntity.setOrgId(orgId);
-                    return newEntity;
-                });
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                                    newEntity.setUserId(userId);
+                                    newEntity.setOrgId(orgId);
+                                    return newEntity;
+                                });
 
         entity.setDashboardLayout(templateLayout);
         entity.setRoleTemplate(roleTemplate);
@@ -143,42 +152,50 @@ public class UserPreferencesService {
 
         switch (roleTemplate.toLowerCase()) {
             case "agent":
-                layout.put("widgets", new Object[]{
-                    createWidget("my-tasks", 0, 0, 6, 4),
-                    createWidget("recent-dossiers", 6, 0, 6, 4),
-                    createWidget("today-appointments", 0, 4, 6, 3),
-                    createWidget("kpi-conversion", 6, 4, 3, 3),
-                    createWidget("kpi-response-time", 9, 4, 3, 3)
-                });
+                layout.put(
+                        "widgets",
+                        new Object[] {
+                            createWidget("my-tasks", 0, 0, 6, 4),
+                            createWidget("recent-dossiers", 6, 0, 6, 4),
+                            createWidget("today-appointments", 0, 4, 6, 3),
+                            createWidget("kpi-conversion", 6, 4, 3, 3),
+                            createWidget("kpi-response-time", 9, 4, 3, 3)
+                        });
                 break;
 
             case "manager":
-                layout.put("widgets", new Object[]{
-                    createWidget("kpi-team-performance", 0, 0, 4, 3),
-                    createWidget("kpi-conversion-rate", 4, 0, 4, 3),
-                    createWidget("kpi-revenue", 8, 0, 4, 3),
-                    createWidget("team-activity", 0, 3, 6, 4),
-                    createWidget("pipeline-chart", 6, 3, 6, 4),
-                    createWidget("top-agents", 0, 7, 4, 3),
-                    createWidget("recent-deals", 4, 7, 8, 3)
-                });
+                layout.put(
+                        "widgets",
+                        new Object[] {
+                            createWidget("kpi-team-performance", 0, 0, 4, 3),
+                            createWidget("kpi-conversion-rate", 4, 0, 4, 3),
+                            createWidget("kpi-revenue", 8, 0, 4, 3),
+                            createWidget("team-activity", 0, 3, 6, 4),
+                            createWidget("pipeline-chart", 6, 3, 6, 4),
+                            createWidget("top-agents", 0, 7, 4, 3),
+                            createWidget("recent-deals", 4, 7, 8, 3)
+                        });
                 break;
 
             case "admin":
-                layout.put("widgets", new Object[]{
-                    createWidget("system-health", 0, 0, 6, 3),
-                    createWidget("user-activity", 6, 0, 6, 3),
-                    createWidget("kpi-overview", 0, 3, 12, 3),
-                    createWidget("recent-users", 0, 6, 6, 4),
-                    createWidget("audit-log", 6, 6, 6, 4)
-                });
+                layout.put(
+                        "widgets",
+                        new Object[] {
+                            createWidget("system-health", 0, 0, 6, 3),
+                            createWidget("user-activity", 6, 0, 6, 3),
+                            createWidget("kpi-overview", 0, 3, 12, 3),
+                            createWidget("recent-users", 0, 6, 6, 4),
+                            createWidget("audit-log", 6, 6, 6, 4)
+                        });
                 break;
 
             default:
-                layout.put("widgets", new Object[]{
-                    createWidget("welcome", 0, 0, 12, 2),
-                    createWidget("quick-stats", 0, 2, 12, 3)
-                });
+                layout.put(
+                        "widgets",
+                        new Object[] {
+                            createWidget("welcome", 0, 0, 12, 2),
+                            createWidget("quick-stats", 0, 2, 12, 3)
+                        });
         }
 
         return layout;

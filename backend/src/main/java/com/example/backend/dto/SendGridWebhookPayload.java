@@ -1,8 +1,6 @@
 package com.example.backend.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
 import java.util.Map;
 
 public class SendGridWebhookPayload {

@@ -1,5 +1,10 @@
 package com.example.backend.filter;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.example.backend.util.TenantContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,18 +14,12 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 class TenantFilterTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
@@ -36,8 +35,7 @@ class TenantFilterTest {
     void whenXOrgIdHeaderPresent_injectsOrgIdIntoContext() throws Exception {
         String orgId = "TEST-ORG-123";
 
-        mockMvc.perform(get("/api/v1/annonces")
-                        .header("X-Org-Id", orgId))
+        mockMvc.perform(get("/api/v1/annonces").header("X-Org-Id", orgId))
                 .andExpect(status().isOk());
 
         assertThat(TenantContext.getOrgId()).isNull();
@@ -46,8 +44,7 @@ class TenantFilterTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void whenXOrgIdHeaderEmpty_returns400() throws Exception {
-        mockMvc.perform(get("/api/v1/annonces")
-                        .header("X-Org-Id", ""))
+        mockMvc.perform(get("/api/v1/annonces").header("X-Org-Id", ""))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("Missing required header: X-Org-Id"));
     }
@@ -55,15 +52,13 @@ class TenantFilterTest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void whenXOrgIdHeaderWhitespace_returns400() throws Exception {
-        mockMvc.perform(get("/api/v1/annonces")
-                        .header("X-Org-Id", "   "))
+        mockMvc.perform(get("/api/v1/annonces").header("X-Org-Id", "   "))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("Missing required header: X-Org-Id"));
     }
 
     @Test
     void whenNonApiEndpoint_doesNotRequireXOrgIdHeader() throws Exception {
-        mockMvc.perform(get("/actuator/health"))
-                .andExpect(status().isOk());
+        mockMvc.perform(get("/actuator/health")).andExpect(status().isOk());
     }
 }

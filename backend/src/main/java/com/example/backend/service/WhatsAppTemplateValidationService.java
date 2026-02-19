@@ -1,12 +1,11 @@
 package com.example.backend.service;
 
 import com.example.backend.entity.WhatsAppTemplate;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.springframework.stereotype.Service;
 
 @Service
 public class WhatsAppTemplateValidationService {
@@ -19,7 +18,7 @@ public class WhatsAppTemplateValidationService {
     private static final int MAX_BUTTONS = 10;
     private static final int MAX_QUICK_REPLY_BUTTONS = 3;
     private static final int MAX_CALL_TO_ACTION_BUTTONS = 2;
-    
+
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{(\\d+)\\}\\}");
     private static final Pattern LANGUAGE_CODE_PATTERN = Pattern.compile("^[a-z]{2}(_[A-Z]{2})?$");
 
@@ -41,7 +40,9 @@ public class WhatsAppTemplateValidationService {
 
         if (name.length() > MAX_TEMPLATE_NAME_LENGTH) {
             throw new IllegalArgumentException(
-                    String.format("Template name exceeds maximum length of %d characters", MAX_TEMPLATE_NAME_LENGTH));
+                    String.format(
+                            "Template name exceeds maximum length of %d characters",
+                            MAX_TEMPLATE_NAME_LENGTH));
         }
 
         if (!name.matches("^[a-z0-9_]+$")) {
@@ -69,7 +70,8 @@ public class WhatsAppTemplateValidationService {
 
     private void validateComponents(List<Map<String, Object>> components) {
         if (components == null || components.isEmpty()) {
-            throw new IllegalArgumentException("Template must have at least one component (body is required)");
+            throw new IllegalArgumentException(
+                    "Template must have at least one component (body is required)");
         }
 
         boolean hasBody = false;
@@ -79,7 +81,7 @@ public class WhatsAppTemplateValidationService {
 
         for (Map<String, Object> component : components) {
             String type = (String) component.get("type");
-            
+
             if (type == null) {
                 throw new IllegalArgumentException("Component type is required");
             }
@@ -87,36 +89,40 @@ public class WhatsAppTemplateValidationService {
             switch (type.toUpperCase()) {
                 case "HEADER":
                     if (hasHeader) {
-                        throw new IllegalArgumentException("Template can only have one header component");
+                        throw new IllegalArgumentException(
+                                "Template can only have one header component");
                     }
                     validateHeaderComponent(component);
                     hasHeader = true;
                     break;
-                    
+
                 case "BODY":
                     if (hasBody) {
-                        throw new IllegalArgumentException("Template can only have one body component");
+                        throw new IllegalArgumentException(
+                                "Template can only have one body component");
                     }
                     validateBodyComponent(component);
                     hasBody = true;
                     break;
-                    
+
                 case "FOOTER":
                     if (hasFooter) {
-                        throw new IllegalArgumentException("Template can only have one footer component");
+                        throw new IllegalArgumentException(
+                                "Template can only have one footer component");
                     }
                     validateFooterComponent(component);
                     hasFooter = true;
                     break;
-                    
+
                 case "BUTTONS":
                     if (hasButtons) {
-                        throw new IllegalArgumentException("Template can only have one buttons component");
+                        throw new IllegalArgumentException(
+                                "Template can only have one buttons component");
                     }
                     validateButtonsComponent(component);
                     hasButtons = true;
                     break;
-                    
+
                 default:
                     throw new IllegalArgumentException("Unknown component type: " + type);
             }
@@ -129,7 +135,7 @@ public class WhatsAppTemplateValidationService {
 
     private void validateHeaderComponent(Map<String, Object> component) {
         String format = (String) component.get("format");
-        
+
         if (format == null) {
             throw new IllegalArgumentException("Header format is required");
         }
@@ -142,16 +148,18 @@ public class WhatsAppTemplateValidationService {
                 }
                 if (text.length() > MAX_HEADER_LENGTH) {
                     throw new IllegalArgumentException(
-                            String.format("Header text exceeds maximum length of %d characters", MAX_HEADER_LENGTH));
+                            String.format(
+                                    "Header text exceeds maximum length of %d characters",
+                                    MAX_HEADER_LENGTH));
                 }
                 validateVariables(text, "header");
                 break;
-                
+
             case "IMAGE":
             case "VIDEO":
             case "DOCUMENT":
                 break;
-                
+
             default:
                 throw new IllegalArgumentException("Invalid header format: " + format);
         }
@@ -159,14 +167,15 @@ public class WhatsAppTemplateValidationService {
 
     private void validateBodyComponent(Map<String, Object> component) {
         String text = (String) component.get("text");
-        
+
         if (text == null || text.trim().isEmpty()) {
             throw new IllegalArgumentException("Body text is required");
         }
 
         if (text.length() > MAX_BODY_LENGTH) {
             throw new IllegalArgumentException(
-                    String.format("Body text exceeds maximum length of %d characters", MAX_BODY_LENGTH));
+                    String.format(
+                            "Body text exceeds maximum length of %d characters", MAX_BODY_LENGTH));
         }
 
         validateVariables(text, "body");
@@ -174,14 +183,16 @@ public class WhatsAppTemplateValidationService {
 
     private void validateFooterComponent(Map<String, Object> component) {
         String text = (String) component.get("text");
-        
+
         if (text == null || text.trim().isEmpty()) {
             throw new IllegalArgumentException("Footer text is required");
         }
 
         if (text.length() > MAX_FOOTER_LENGTH) {
             throw new IllegalArgumentException(
-                    String.format("Footer text exceeds maximum length of %d characters", MAX_FOOTER_LENGTH));
+                    String.format(
+                            "Footer text exceeds maximum length of %d characters",
+                            MAX_FOOTER_LENGTH));
         }
 
         if (text.contains("{{")) {
@@ -192,7 +203,7 @@ public class WhatsAppTemplateValidationService {
     @SuppressWarnings("unchecked")
     private void validateButtonsComponent(Map<String, Object> component) {
         Object buttonsObj = component.get("buttons");
-        
+
         if (!(buttonsObj instanceof List)) {
             throw new IllegalArgumentException("Buttons must be a list");
         }
@@ -221,7 +232,9 @@ public class WhatsAppTemplateValidationService {
 
             if (text != null && text.length() > MAX_BUTTON_TEXT_LENGTH) {
                 throw new IllegalArgumentException(
-                        String.format("Button text exceeds maximum length of %d characters", MAX_BUTTON_TEXT_LENGTH));
+                        String.format(
+                                "Button text exceeds maximum length of %d characters",
+                                MAX_BUTTON_TEXT_LENGTH));
             }
 
             switch (type.toUpperCase()) {
@@ -229,20 +242,24 @@ public class WhatsAppTemplateValidationService {
                     quickReplyCount++;
                     if (quickReplyCount > MAX_QUICK_REPLY_BUTTONS) {
                         throw new IllegalArgumentException(
-                                String.format("Maximum of %d quick reply buttons allowed", MAX_QUICK_REPLY_BUTTONS));
+                                String.format(
+                                        "Maximum of %d quick reply buttons allowed",
+                                        MAX_QUICK_REPLY_BUTTONS));
                     }
                     break;
-                    
+
                 case "URL":
                 case "PHONE_NUMBER":
                     callToActionCount++;
                     if (callToActionCount > MAX_CALL_TO_ACTION_BUTTONS) {
                         throw new IllegalArgumentException(
-                                String.format("Maximum of %d call-to-action buttons allowed", MAX_CALL_TO_ACTION_BUTTONS));
+                                String.format(
+                                        "Maximum of %d call-to-action buttons allowed",
+                                        MAX_CALL_TO_ACTION_BUTTONS));
                     }
                     validateCallToActionButton(button, type);
                     break;
-                    
+
                 default:
                     throw new IllegalArgumentException("Invalid button type: " + type);
             }
@@ -258,7 +275,8 @@ public class WhatsAppTemplateValidationService {
         } else if ("PHONE_NUMBER".equalsIgnoreCase(type)) {
             String phoneNumber = (String) button.get("phone_number");
             if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
-                throw new IllegalArgumentException("Phone number is required for phone number button");
+                throw new IllegalArgumentException(
+                        "Phone number is required for phone number button");
             }
         }
     }
@@ -269,13 +287,14 @@ public class WhatsAppTemplateValidationService {
 
         while (matcher.find()) {
             int position = Integer.parseInt(matcher.group(1));
-            
+
             if (position != expectedPosition) {
                 throw new IllegalArgumentException(
-                        String.format("Variables in %s must be sequential starting from {{1}}. Found {{%d}} but expected {{%d}}",
+                        String.format(
+                                "Variables in %s must be sequential starting from {{1}}. Found {{%d}} but expected {{%d}}",
                                 componentName, position, expectedPosition));
             }
-            
+
             expectedPosition++;
         }
     }

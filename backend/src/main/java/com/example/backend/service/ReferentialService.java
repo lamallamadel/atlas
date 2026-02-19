@@ -6,10 +6,9 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.ReferentialRepository;
 import com.example.backend.repository.ReferentialVersionRepository;
 import com.example.backend.util.TenantContext;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 public class ReferentialService {
@@ -17,8 +16,9 @@ public class ReferentialService {
     private final ReferentialRepository referentialRepository;
     private final ReferentialVersionRepository versionRepository;
 
-    public ReferentialService(ReferentialRepository referentialRepository,
-                             ReferentialVersionRepository versionRepository) {
+    public ReferentialService(
+            ReferentialRepository referentialRepository,
+            ReferentialVersionRepository versionRepository) {
         this.referentialRepository = referentialRepository;
         this.versionRepository = versionRepository;
     }
@@ -35,15 +35,24 @@ public class ReferentialService {
 
     @Transactional(readOnly = true)
     public ReferentialEntity getById(Long id) {
-        return referentialRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Referential not found with id: " + id));
+        return referentialRepository
+                .findById(id)
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        "Referential not found with id: " + id));
     }
 
     @Transactional(readOnly = true)
     public ReferentialEntity getByCategoryAndCode(String category, String code) {
-        return referentialRepository.findByCategoryAndCode(category, code)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Referential not found with category: %s and code: %s", category, code)));
+        return referentialRepository
+                .findByCategoryAndCode(category, code)
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        String.format(
+                                                "Referential not found with category: %s and code: %s",
+                                                category, code)));
     }
 
     @Transactional
@@ -55,18 +64,19 @@ public class ReferentialService {
 
         if (referentialRepository.existsByCategoryAndCode(entity.getCategory(), entity.getCode())) {
             throw new IllegalArgumentException(
-                    String.format("Referential already exists with category: %s and code: %s",
+                    String.format(
+                            "Referential already exists with category: %s and code: %s",
                             entity.getCategory(), entity.getCode()));
         }
 
         entity.setOrgId(orgId);
         entity.setVersion(1L);
         entity.setLastChangeType("CREATED");
-        
+
         ReferentialEntity saved = referentialRepository.save(entity);
-        
+
         createVersion(saved, ReferentialVersionEntity.ReferentialChangeType.CREATED, null);
-        
+
         return saved;
     }
 
@@ -84,28 +94,29 @@ public class ReferentialService {
         }
 
         boolean activeChanged = !existing.getIsActive().equals(updatedEntity.getIsActive());
-        
+
         existing.setLabel(updatedEntity.getLabel());
         existing.setDescription(updatedEntity.getDescription());
         existing.setDisplayOrder(updatedEntity.getDisplayOrder());
         existing.setIsActive(updatedEntity.getIsActive());
         existing.setVersion(existing.getVersion() + 1);
-        
+
         ReferentialVersionEntity.ReferentialChangeType changeType;
         if (activeChanged) {
-            changeType = updatedEntity.getIsActive() 
-                ? ReferentialVersionEntity.ReferentialChangeType.ACTIVATED 
-                : ReferentialVersionEntity.ReferentialChangeType.DEACTIVATED;
+            changeType =
+                    updatedEntity.getIsActive()
+                            ? ReferentialVersionEntity.ReferentialChangeType.ACTIVATED
+                            : ReferentialVersionEntity.ReferentialChangeType.DEACTIVATED;
         } else {
             changeType = ReferentialVersionEntity.ReferentialChangeType.UPDATED;
         }
-        
+
         existing.setLastChangeType(changeType.name());
-        
+
         ReferentialEntity saved = referentialRepository.save(existing);
-        
+
         createVersion(saved, changeType, changeReason);
-        
+
         return saved;
     }
 
@@ -122,7 +133,8 @@ public class ReferentialService {
             throw new IllegalStateException("Cannot delete system-defined referential items");
         }
 
-        createVersion(existing, ReferentialVersionEntity.ReferentialChangeType.DELETED, changeReason);
+        createVersion(
+                existing, ReferentialVersionEntity.ReferentialChangeType.DELETED, changeReason);
 
         referentialRepository.delete(existing);
     }
@@ -142,7 +154,10 @@ public class ReferentialService {
         return versionRepository.findByCategoryOrderByCreatedAtDesc(category);
     }
 
-    private void createVersion(ReferentialEntity entity, ReferentialVersionEntity.ReferentialChangeType changeType, String changeReason) {
+    private void createVersion(
+            ReferentialEntity entity,
+            ReferentialVersionEntity.ReferentialChangeType changeType,
+            String changeReason) {
         ReferentialVersionEntity version = new ReferentialVersionEntity();
         version.setOrgId(entity.getOrgId());
         version.setReferentialId(entity.getId());
@@ -155,7 +170,7 @@ public class ReferentialService {
         version.setIsSystem(entity.getIsSystem());
         version.setChangeType(changeType);
         version.setChangeReason(changeReason);
-        
+
         versionRepository.save(version);
     }
 }

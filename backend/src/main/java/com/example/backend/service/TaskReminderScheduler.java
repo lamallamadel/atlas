@@ -6,17 +6,16 @@ import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
 import com.example.backend.repository.NotificationRepository;
 import com.example.backend.repository.TaskRepository;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class TaskReminderScheduler {
@@ -51,23 +50,29 @@ public class TaskReminderScheduler {
             logger.info("Starting overdue task reminder check");
             LocalDateTime now = LocalDateTime.now();
 
-            List<TaskEntity> overdueTasks = taskRepository.findAll((root, query, cb) -> 
-                cb.and(
-                    cb.or(
-                        cb.equal(root.get("status"), com.example.backend.entity.enums.TaskStatus.TODO),
-                        cb.equal(root.get("status"), com.example.backend.entity.enums.TaskStatus.IN_PROGRESS)
-                    ),
-                    cb.isNotNull(root.get("dueDate")),
-                    cb.lessThan(root.get("dueDate"), now)
-                )
-            );
+            List<TaskEntity> overdueTasks =
+                    taskRepository.findAll(
+                            (root, query, cb) ->
+                                    cb.and(
+                                            cb.or(
+                                                    cb.equal(
+                                                            root.get("status"),
+                                                            com.example.backend.entity.enums
+                                                                    .TaskStatus.TODO),
+                                                    cb.equal(
+                                                            root.get("status"),
+                                                            com.example.backend.entity.enums
+                                                                    .TaskStatus.IN_PROGRESS)),
+                                            cb.isNotNull(root.get("dueDate")),
+                                            cb.lessThan(root.get("dueDate"), now)));
 
             if (overdueTasks.isEmpty()) {
                 logger.info("No overdue tasks found");
                 return;
             }
 
-            logger.info("Found {} overdue tasks, creating reminder notifications", overdueTasks.size());
+            logger.info(
+                    "Found {} overdue tasks, creating reminder notifications", overdueTasks.size());
             int notificationsCreated = 0;
 
             for (TaskEntity task : overdueTasks) {
@@ -75,16 +80,25 @@ public class TaskReminderScheduler {
                     if (task.getAssignedTo() != null && !task.getAssignedTo().trim().isEmpty()) {
                         createReminderNotification(task);
                         notificationsCreated++;
-                        
-                        auditEventService.logEvent("TASK", task.getId(), "UPDATED", 
-                            String.format("Overdue reminder sent for task: %s", task.getTitle()));
+
+                        auditEventService.logEvent(
+                                "TASK",
+                                task.getId(),
+                                "UPDATED",
+                                String.format(
+                                        "Overdue reminder sent for task: %s", task.getTitle()));
                     }
                 } catch (Exception e) {
-                    logger.error("Failed to create reminder for task {}: {}", task.getId(), e.getMessage(), e);
+                    logger.error(
+                            "Failed to create reminder for task {}: {}",
+                            task.getId(),
+                            e.getMessage(),
+                            e);
                 }
             }
 
-            logger.info("Created {} reminder notifications for overdue tasks", notificationsCreated);
+            logger.info(
+                    "Created {} reminder notifications for overdue tasks", notificationsCreated);
 
         } catch (Exception e) {
             logger.error("Error in task reminder scheduler: {}", e.getMessage(), e);
@@ -118,7 +132,10 @@ public class TaskReminderScheduler {
         notification.setUpdatedAt(now);
 
         notificationRepository.save(notification);
-        
-        logger.debug("Created reminder notification for task {} assigned to {}", task.getId(), task.getAssignedTo());
+
+        logger.debug(
+                "Created reminder notification for task {} assigned to {}",
+                task.getId(),
+                task.getAssignedTo());
     }
 }

@@ -21,7 +21,10 @@ public class ReferentialUpdateRequest {
     @Schema(description = "Is active", example = "true", nullable = true, defaultValue = "true")
     private Boolean isActive = true;
 
-    @Schema(description = "Reason for this change (for audit trail)", example = "Updated to reflect new business process", nullable = true)
+    @Schema(
+            description = "Reason for this change (for audit trail)",
+            example = "Updated to reflect new business process",
+            nullable = true)
     private String changeReason;
 
     public String getLabel() {

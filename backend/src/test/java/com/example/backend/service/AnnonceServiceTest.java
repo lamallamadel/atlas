@@ -1,5 +1,8 @@
 package com.example.backend.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.AnnonceUpdateRequest;
@@ -8,6 +11,8 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.util.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,12 +24,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -32,11 +31,9 @@ class AnnonceServiceTest {
 
     private static final String DEFAULT_ORG = "org123";
 
-    @Autowired
-    private AnnonceService annonceService;
+    @Autowired private AnnonceService annonceService;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
     @BeforeEach
     void setUp() {
@@ -52,11 +49,11 @@ class AnnonceServiceTest {
     @Test
     void create_WithPhotos_PersistsCorrectly() {
         AnnonceCreateRequest request = createBasicRequest();
-        List<String> photos = Arrays.asList(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
-        );
+        List<String> photos =
+                Arrays.asList(
+                        "https://example.com/photo1.jpg",
+                        "https://example.com/photo2.jpg",
+                        "https://example.com/photo3.jpg");
         request.setPhotos(photos);
 
         AnnonceResponse response = annonceService.create(request);
@@ -64,20 +61,20 @@ class AnnonceServiceTest {
         assertThat(response.getId()).isNotNull();
         assertThat(response.getPhotos()).isNotNull();
         assertThat(response.getPhotos()).hasSize(3);
-        assertThat(response.getPhotos()).containsExactlyInAnyOrder(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
-        );
+        assertThat(response.getPhotos())
+                .containsExactlyInAnyOrder(
+                        "https://example.com/photo1.jpg",
+                        "https://example.com/photo2.jpg",
+                        "https://example.com/photo3.jpg");
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
         assertThat(persisted.getPhotos()).isNotNull();
         assertThat(persisted.getPhotos()).hasSize(3);
-        assertThat(persisted.getPhotos()).containsExactlyInAnyOrder(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
-        );
+        assertThat(persisted.getPhotos())
+                .containsExactlyInAnyOrder(
+                        "https://example.com/photo1.jpg",
+                        "https://example.com/photo2.jpg",
+                        "https://example.com/photo3.jpg");
     }
 
     @Test
@@ -115,11 +112,12 @@ class AnnonceServiceTest {
         Map<String, Object> rules = new HashMap<>();
         rules.put("visitingHours", Map.of("start", "09:00", "end", "18:00"));
         rules.put("allowedPets", Arrays.asList("cat", "dog"));
-        rules.put("amenities", Map.of(
-            "wifi", true,
-            "parking", true,
-            "pool", false
-        ));
+        rules.put(
+                "amenities",
+                Map.of(
+                        "wifi", true,
+                        "parking", true,
+                        "pool", false));
         request.setRulesJson(rules);
 
         AnnonceResponse response = annonceService.create(request);
@@ -133,16 +131,15 @@ class AnnonceServiceTest {
 
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
         assertThat(persisted.getRulesJson()).isNotNull();
-        assertThat(persisted.getRulesJson()).containsKeys("visitingHours", "allowedPets", "amenities");
+        assertThat(persisted.getRulesJson())
+                .containsKeys("visitingHours", "allowedPets", "amenities");
     }
 
     @Test
     void create_WithBothPhotosAndRules_PersistsBothCorrectly() {
         AnnonceCreateRequest request = createBasicRequest();
-        request.setPhotos(Arrays.asList(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg"
-        ));
+        request.setPhotos(
+                Arrays.asList("https://example.com/photo1.jpg", "https://example.com/photo2.jpg"));
 
         Map<String, Object> rules = new HashMap<>();
         rules.put("minAge", 21);
@@ -198,10 +195,8 @@ class AnnonceServiceTest {
         AnnonceResponse created = annonceService.create(createRequest);
 
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
-        updateRequest.setPhotos(Arrays.asList(
-            "https://example.com/new1.jpg",
-            "https://example.com/new2.jpg"
-        ));
+        updateRequest.setPhotos(
+                Arrays.asList("https://example.com/new1.jpg", "https://example.com/new2.jpg"));
 
         AnnonceResponse updated = annonceService.update(created.getId(), updateRequest);
 
@@ -267,8 +262,8 @@ class AnnonceServiceTest {
     @Test
     void getById_NotFound_ThrowsEntityNotFoundException() {
         assertThatThrownBy(() -> annonceService.getById(999L))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Annonce not found with id: 999");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Annonce not found with id: 999");
     }
 
     @Test
@@ -293,8 +288,8 @@ class AnnonceServiceTest {
         updateRequest.setTitle("Updated Title");
 
         assertThatThrownBy(() -> annonceService.update(999L, updateRequest))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Annonce not found with id: 999");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Annonce not found with id: 999");
     }
 
     @Test
@@ -320,7 +315,8 @@ class AnnonceServiceTest {
         annonceService.update(published.getId(), updateRequest);
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<AnnonceResponse> result = annonceService.list(AnnonceStatus.DRAFT, null, null, null, pageable);
+        Page<AnnonceResponse> result =
+                annonceService.list(AnnonceStatus.DRAFT, null, null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
@@ -339,7 +335,8 @@ class AnnonceServiceTest {
         annonceService.create(request2);
 
         Pageable pageable = PageRequest.of(0, 20);
-        Page<AnnonceResponse> result = annonceService.list(null, "Electronics", null, null, pageable);
+        Page<AnnonceResponse> result =
+                annonceService.list(null, "Electronics", null, null, pageable);
 
         assertThat(result).isNotNull();
         assertThat(result.getContent()).hasSize(1);
@@ -358,8 +355,8 @@ class AnnonceServiceTest {
         updateRequest.setTitle("New Title");
 
         assertThatThrownBy(() -> annonceService.update(created.getId(), updateRequest))
-            .isInstanceOf(IllegalStateException.class)
-            .hasMessageContaining("Cannot update an archived annonce");
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessageContaining("Cannot update an archived annonce");
     }
 
     @Test
@@ -394,8 +391,8 @@ class AnnonceServiceTest {
 
             TenantContext.setOrgId("ORG1");
             assertThatThrownBy(() -> annonceService.getById(org2Response.getId()))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Annonce not found with id: " + org2Response.getId());
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + org2Response.getId());
 
             AnnonceResponse org1Retrieved = annonceService.getById(org1Response.getId());
             assertThat(org1Retrieved.getId()).isEqualTo(org1Response.getId());
@@ -415,8 +412,8 @@ class AnnonceServiceTest {
 
             TenantContext.setOrgId("ORG2");
             assertThatThrownBy(() -> annonceService.getById(org1Response.getId()))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Annonce not found with id: " + org1Response.getId());
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + org1Response.getId());
         } finally {
             TenantContext.clear();
         }
@@ -434,8 +431,8 @@ class AnnonceServiceTest {
             updateRequest.setTitle("Hacked Title");
 
             assertThatThrownBy(() -> annonceService.update(org1Response.getId(), updateRequest))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Annonce not found with id: " + org1Response.getId());
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + org1Response.getId());
         } finally {
             TenantContext.clear();
         }

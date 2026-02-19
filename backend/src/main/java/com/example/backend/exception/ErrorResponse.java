@@ -1,7 +1,6 @@
 package com.example.backend.exception;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -20,10 +19,10 @@ public class ErrorResponse {
     @Schema(description = "Field-level validation errors", nullable = true)
     private Map<String, String> errors;
 
-    public ErrorResponse() {
-    }
+    public ErrorResponse() {}
 
-    public ErrorResponse(int status, String message, LocalDateTime timestamp, Map<String, String> errors) {
+    public ErrorResponse(
+            int status, String message, LocalDateTime timestamp, Map<String, String> errors) {
         this.status = status;
         this.message = message;
         this.timestamp = timestamp;

@@ -20,9 +20,10 @@ public class DossierStatusHistoryService {
     private final DossierRepository dossierRepository;
     private final DossierStatusHistoryMapper historyMapper;
 
-    public DossierStatusHistoryService(DossierStatusHistoryRepository historyRepository,
-                                      DossierRepository dossierRepository,
-                                      DossierStatusHistoryMapper historyMapper) {
+    public DossierStatusHistoryService(
+            DossierStatusHistoryRepository historyRepository,
+            DossierRepository dossierRepository,
+            DossierStatusHistoryMapper historyMapper) {
         this.historyRepository = historyRepository;
         this.dossierRepository = dossierRepository;
         this.historyMapper = historyMapper;
@@ -35,8 +36,13 @@ public class DossierStatusHistoryService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);

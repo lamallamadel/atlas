@@ -5,13 +5,12 @@ import com.example.backend.entity.CommentThreadEntity;
 import com.example.backend.entity.enums.CommentEntityType;
 import com.example.backend.repository.CommentRepository;
 import com.example.backend.repository.CommentThreadRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommentExportService {
@@ -19,20 +18,24 @@ public class CommentExportService {
     private final CommentThreadRepository threadRepository;
     private final CommentRepository commentRepository;
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    public CommentExportService(CommentThreadRepository threadRepository,
-                                CommentRepository commentRepository) {
+    public CommentExportService(
+            CommentThreadRepository threadRepository, CommentRepository commentRepository) {
         this.threadRepository = threadRepository;
         this.commentRepository = commentRepository;
     }
 
     @Transactional(readOnly = true)
     public byte[] exportThreadToText(Long threadId) {
-        CommentThreadEntity thread = threadRepository.findById(threadId)
-                .orElseThrow(() -> new RuntimeException("Thread not found: " + threadId));
+        CommentThreadEntity thread =
+                threadRepository
+                        .findById(threadId)
+                        .orElseThrow(() -> new RuntimeException("Thread not found: " + threadId));
 
-        List<CommentEntity> comments = commentRepository.findByThreadIdOrderByCreatedAtAsc(threadId);
+        List<CommentEntity> comments =
+                commentRepository.findByThreadIdOrderByCreatedAtAsc(threadId);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);
@@ -49,9 +52,14 @@ public class CommentExportService {
         writer.println("Entity ID: " + thread.getEntityId());
         writer.println("Status: " + (thread.getResolved() ? "RESOLVED" : "OPEN"));
         if (thread.getResolved()) {
-            writer.println("Resolved At: " + (thread.getResolvedAt() != null ? 
-                    thread.getResolvedAt().format(DATE_FORMATTER) : "N/A"));
-            writer.println("Resolved By: " + (thread.getResolvedBy() != null ? thread.getResolvedBy() : "N/A"));
+            writer.println(
+                    "Resolved At: "
+                            + (thread.getResolvedAt() != null
+                                    ? thread.getResolvedAt().format(DATE_FORMATTER)
+                                    : "N/A"));
+            writer.println(
+                    "Resolved By: "
+                            + (thread.getResolvedBy() != null ? thread.getResolvedBy() : "N/A"));
         }
         writer.println("Created At: " + thread.getCreatedAt().format(DATE_FORMATTER));
         writer.println("Created By: " + thread.getCreatedBy());
@@ -88,8 +96,9 @@ public class CommentExportService {
 
     @Transactional(readOnly = true)
     public byte[] exportAllThreadsForEntity(CommentEntityType entityType, Long entityId) {
-        List<CommentThreadEntity> threads = threadRepository
-                .findByEntityTypeAndEntityIdOrderByCreatedAtDesc(entityType, entityId);
+        List<CommentThreadEntity> threads =
+                threadRepository.findByEntityTypeAndEntityIdOrderByCreatedAtDesc(
+                        entityType, entityId);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);
@@ -105,7 +114,8 @@ public class CommentExportService {
 
         for (int i = 0; i < threads.size(); i++) {
             CommentThreadEntity thread = threads.get(i);
-            List<CommentEntity> comments = commentRepository.findByThreadIdOrderByCreatedAtAsc(thread.getId());
+            List<CommentEntity> comments =
+                    commentRepository.findByThreadIdOrderByCreatedAtAsc(thread.getId());
 
             writer.println("=".repeat(80));
             writer.println("THREAD #" + (i + 1));
@@ -117,9 +127,16 @@ public class CommentExportService {
             }
             writer.println("Status: " + (thread.getResolved() ? "RESOLVED" : "OPEN"));
             if (thread.getResolved()) {
-                writer.println("Resolved At: " + (thread.getResolvedAt() != null ? 
-                        thread.getResolvedAt().format(DATE_FORMATTER) : "N/A"));
-                writer.println("Resolved By: " + (thread.getResolvedBy() != null ? thread.getResolvedBy() : "N/A"));
+                writer.println(
+                        "Resolved At: "
+                                + (thread.getResolvedAt() != null
+                                        ? thread.getResolvedAt().format(DATE_FORMATTER)
+                                        : "N/A"));
+                writer.println(
+                        "Resolved By: "
+                                + (thread.getResolvedBy() != null
+                                        ? thread.getResolvedBy()
+                                        : "N/A"));
             }
             writer.println("Created At: " + thread.getCreatedAt().format(DATE_FORMATTER));
             writer.println("Created By: " + thread.getCreatedBy());
@@ -153,10 +170,13 @@ public class CommentExportService {
 
     @Transactional(readOnly = true)
     public byte[] exportThreadToCsv(Long threadId) {
-        CommentThreadEntity thread = threadRepository.findById(threadId)
-                .orElseThrow(() -> new RuntimeException("Thread not found: " + threadId));
+        CommentThreadEntity thread =
+                threadRepository
+                        .findById(threadId)
+                        .orElseThrow(() -> new RuntimeException("Thread not found: " + threadId));
 
-        List<CommentEntity> comments = commentRepository.findByThreadIdOrderByCreatedAtAsc(threadId);
+        List<CommentEntity> comments =
+                commentRepository.findByThreadIdOrderByCreatedAtAsc(threadId);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         PrintWriter writer = new PrintWriter(baos);
@@ -174,7 +194,10 @@ public class CommentExportService {
             writer.print(",");
             writer.print(escapeCSV(comment.getContent()));
             writer.print(",");
-            writer.print(comment.getMentions() != null ? escapeCSV(String.join(";", comment.getMentions())) : "");
+            writer.print(
+                    comment.getMentions() != null
+                            ? escapeCSV(String.join(";", comment.getMentions()))
+                            : "");
             writer.println();
         }
 

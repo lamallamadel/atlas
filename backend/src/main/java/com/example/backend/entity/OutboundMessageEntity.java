@@ -3,18 +3,19 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import jakarta.persistence.*;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.util.Map;
-
 @Entity
-@Table(name = "outbound_message", 
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_outbound_idempotency", columnNames = {"org_id", "idempotency_key"})
-    }
-)
+@Table(
+        name = "outbound_message",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_outbound_idempotency",
+                    columnNames = {"org_id", "idempotency_key"})
+        })
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class OutboundMessageEntity extends BaseEntity {
 

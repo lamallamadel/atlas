@@ -3,7 +3,6 @@ package com.example.backend.dto.v2;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +23,10 @@ public class DossierResponseV2 {
     @Schema(description = "Lead contact information")
     private LeadInfoV2 lead;
 
-    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    @Schema(
+            description = "Dossier notes",
+            example = "Customer interested in property X",
+            nullable = true)
     private String notes;
 
     @Schema(description = "Current status of the dossier", example = "NEW")
@@ -60,10 +62,10 @@ public class DossierResponseV2 {
     public static class AnnonceInfoV2 {
         @Schema(description = "Annonce ID", example = "1")
         private Long id;
-        
+
         @Schema(description = "Annonce title", example = "Beautiful Apartment")
         private String title;
-        
+
         @Schema(description = "Annonce city", example = "Paris")
         private String city;
 
@@ -95,10 +97,10 @@ public class DossierResponseV2 {
     public static class LeadInfoV2 {
         @Schema(description = "Lead phone number", example = "+33612345678")
         private String phone;
-        
+
         @Schema(description = "Lead name", example = "John Doe")
         private String name;
-        
+
         @Schema(description = "Lead source", example = "Website")
         private String source;
 
@@ -130,13 +132,15 @@ public class DossierResponseV2 {
     public static class AuditInfoV2 {
         @Schema(description = "Timestamp when created (ISO-8601)", example = "2024-01-01T12:00:00Z")
         private Instant createdAt;
-        
-        @Schema(description = "Timestamp when last updated (ISO-8601)", example = "2024-01-01T12:00:00Z")
+
+        @Schema(
+                description = "Timestamp when last updated (ISO-8601)",
+                example = "2024-01-01T12:00:00Z")
         private Instant updatedAt;
-        
+
         @Schema(description = "User who created the resource")
         private String createdBy;
-        
+
         @Schema(description = "User who last updated the resource")
         private String updatedBy;
 

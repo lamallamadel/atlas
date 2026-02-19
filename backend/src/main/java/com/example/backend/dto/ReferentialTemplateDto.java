@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.util.List;
 
 @Schema(description = "Referential template for import/export")
@@ -10,7 +9,9 @@ public class ReferentialTemplateDto {
     @Schema(description = "Template name", example = "Real Estate CRM Default")
     private String templateName;
 
-    @Schema(description = "Template description", example = "Default referential values for real estate CRM")
+    @Schema(
+            description = "Template description",
+            example = "Default referential values for real estate CRM")
     private String templateDescription;
 
     @Schema(description = "Template version", example = "1.0")
@@ -53,22 +54,22 @@ public class ReferentialTemplateDto {
 
     @Schema(description = "Referential template item")
     public static class ReferentialTemplateItem {
-        
+
         @Schema(description = "Category", example = "CASE_TYPE")
         private String category;
-        
+
         @Schema(description = "Code", example = "CRM_LEAD_BUY")
         private String code;
-        
+
         @Schema(description = "Label", example = "Prospect Achat")
         private String label;
-        
+
         @Schema(description = "Description", example = "Lead for property purchase")
         private String description;
-        
+
         @Schema(description = "Display order", example = "1")
         private Integer displayOrder;
-        
+
         @Schema(description = "Is active", example = "true")
         private Boolean isActive;
 

@@ -1,12 +1,11 @@
 package com.example.backend.utils;
 
-import org.springframework.stereotype.Component;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.UUID;
+import org.springframework.stereotype.Component;
 
 @Component
 public class DatabaseCompatibilityHelper {
@@ -22,7 +21,8 @@ public class DatabaseCompatibilityHelper {
     }
 
     public boolean isPostgres() {
-        return "postgres".equalsIgnoreCase(databaseType) || "postgresql".equalsIgnoreCase(databaseType);
+        return "postgres".equalsIgnoreCase(databaseType)
+                || "postgresql".equalsIgnoreCase(databaseType);
     }
 
     public UUID generateUUID() {
@@ -32,7 +32,8 @@ public class DatabaseCompatibilityHelper {
     public Timestamp normalizeTimestamp(Instant instant) {
         if (isH2()) {
             LocalDateTime localDateTime = LocalDateTime.ofInstant(instant, ZoneId.systemDefault());
-            localDateTime = localDateTime.withNano((localDateTime.getNano() / 1_000_000) * 1_000_000);
+            localDateTime =
+                    localDateTime.withNano((localDateTime.getNano() / 1_000_000) * 1_000_000);
             return Timestamp.valueOf(localDateTime);
         }
         return Timestamp.from(instant);
@@ -52,7 +53,7 @@ public class DatabaseCompatibilityHelper {
         if (instant1 == null || instant2 == null) {
             return false;
         }
-        
+
         long diff = Math.abs(instant1.toEpochMilli() - instant2.toEpochMilli());
         return diff <= toleranceMillis;
     }

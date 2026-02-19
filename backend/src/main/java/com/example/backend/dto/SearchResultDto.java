@@ -11,10 +11,16 @@ public class SearchResultDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public SearchResultDto() {
-    }
+    public SearchResultDto() {}
 
-    public SearchResultDto(Long id, String type, String title, String description, Double relevanceScore, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public SearchResultDto(
+            Long id,
+            String type,
+            String title,
+            String description,
+            Double relevanceScore,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.id = id;
         this.type = type;
         this.title = title;

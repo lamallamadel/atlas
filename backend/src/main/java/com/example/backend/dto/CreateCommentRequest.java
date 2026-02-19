@@ -2,16 +2,13 @@ package com.example.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class CreateCommentRequest {
-    @NotNull
-    private Long threadId;
+    @NotNull private Long threadId;
 
-    @NotBlank
-    private String content;
+    @NotBlank private String content;
 
     private List<String> mentions = new ArrayList<>();
 

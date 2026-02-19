@@ -3,6 +3,8 @@ package com.example.backend.service;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.SmsProviderConfig;
 import com.example.backend.repository.SmsProviderConfigRepository;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -11,9 +13,6 @@ import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.sns.SnsClient;
 import software.amazon.awssdk.services.sns.model.*;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class AwsSnsSmsProvider implements OutboundMessageProvider {
@@ -39,19 +38,31 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
     public ProviderSendResult send(OutboundMessageEntity message) {
         SnsClient snsClient = null;
         try {
-            SmsProviderConfig config = providerConfigRepository.findByOrgId(message.getOrgId())
-                .orElseThrow(() -> new IllegalStateException("SMS provider config not found for org: " + message.getOrgId()));
+            SmsProviderConfig config =
+                    providerConfigRepository
+                            .findByOrgId(message.getOrgId())
+                            .orElseThrow(
+                                    () ->
+                                            new IllegalStateException(
+                                                    "SMS provider config not found for org: "
+                                                            + message.getOrgId()));
 
             if (!config.isEnabled()) {
-                return ProviderSendResult.failure("PROVIDER_DISABLED", "SMS provider is disabled for this organization", false, null);
+                return ProviderSendResult.failure(
+                        "PROVIDER_DISABLED",
+                        "SMS provider is disabled for this organization",
+                        false,
+                        null);
             }
 
             if (!"AWS_SNS".equalsIgnoreCase(config.getProviderType())) {
-                return ProviderSendResult.failure("INVALID_PROVIDER", "Provider type is not AWS_SNS", false, null);
+                return ProviderSendResult.failure(
+                        "INVALID_PROVIDER", "Provider type is not AWS_SNS", false, null);
             }
 
             if (!rateLimitService.checkAndConsumeQuota(message.getOrgId())) {
-                return ProviderSendResult.failure("QUOTA_EXCEEDED", "SMS quota exceeded or rate limited", true, null);
+                return ProviderSendResult.failure(
+                        "QUOTA_EXCEEDED", "SMS quota exceeded or rate limited", true, null);
             }
 
             validateSmsMessage(message);
@@ -60,15 +71,20 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
 
             PublishRequest publishRequest = buildPublishRequest(message, config);
 
-            logger.info("Sending SMS via AWS SNS: orgId={}, messageId={}, to={}",
-                message.getOrgId(), message.getId(), message.getTo());
+            logger.info(
+                    "Sending SMS via AWS SNS: orgId={}, messageId={}, to={}",
+                    message.getOrgId(),
+                    message.getId(),
+                    message.getTo());
 
             PublishResponse response = snsClient.publish(publishRequest);
 
             String providerMessageId = response.messageId();
 
-            logger.info("SMS sent via AWS SNS successfully: messageId={}, providerMessageId={}",
-                message.getId(), providerMessageId);
+            logger.info(
+                    "SMS sent via AWS SNS successfully: messageId={}, providerMessageId={}",
+                    message.getId(),
+                    providerMessageId);
 
             Map<String, Object> responseData = new HashMap<>();
             responseData.put("messageId", providerMessageId);
@@ -77,8 +93,12 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
             return ProviderSendResult.success(providerMessageId, responseData);
 
         } catch (InvalidParameterException e) {
-            logger.error("Invalid parameter for AWS SNS: messageId={}, error={}", message.getId(), e.getMessage());
-            return ProviderSendResult.failure("AWS_INVALID_PARAMETER", e.awsErrorDetails().errorMessage(), false, null);
+            logger.error(
+                    "Invalid parameter for AWS SNS: messageId={}, error={}",
+                    message.getId(),
+                    e.getMessage());
+            return ProviderSendResult.failure(
+                    "AWS_INVALID_PARAMETER", e.awsErrorDetails().errorMessage(), false, null);
 
         } catch (KmsThrottlingException e) {
             logger.warn("AWS SNS throttling for orgId={}: {}", message.getOrgId(), e.getMessage());
@@ -86,15 +106,19 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
             return ProviderSendResult.failure("AWS_THROTTLING", "Rate limit exceeded", true, null);
 
         } catch (InternalErrorException e) {
-            logger.error("AWS SNS internal error for messageId={}: {}", message.getId(), e.getMessage());
-            return ProviderSendResult.failure("AWS_INTERNAL_ERROR", "Internal AWS service error", true, null);
+            logger.error(
+                    "AWS SNS internal error for messageId={}: {}", message.getId(), e.getMessage());
+            return ProviderSendResult.failure(
+                    "AWS_INTERNAL_ERROR", "Internal AWS service error", true, null);
 
         } catch (SnsException e) {
             return handleSnsException(e, message);
 
         } catch (Exception e) {
-            logger.error("Unexpected error sending SMS via AWS SNS: messageId={}", message.getId(), e);
-            return ProviderSendResult.failure("UNEXPECTED_ERROR", sanitizeErrorMessage(e.getMessage()), true, null);
+            logger.error(
+                    "Unexpected error sending SMS via AWS SNS: messageId={}", message.getId(), e);
+            return ProviderSendResult.failure(
+                    "UNEXPECTED_ERROR", sanitizeErrorMessage(e.getMessage()), true, null);
 
         } finally {
             if (snsClient != null) {
@@ -118,61 +142,64 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
     }
 
     private SnsClient createSnsClient(SmsProviderConfig config) {
-        AwsBasicCredentials credentials = AwsBasicCredentials.create(
-            config.getAwsAccessKeyEncrypted(),
-            config.getAwsSecretKeyEncrypted()
-        );
+        AwsBasicCredentials credentials =
+                AwsBasicCredentials.create(
+                        config.getAwsAccessKeyEncrypted(), config.getAwsSecretKeyEncrypted());
 
-        Region region = config.getAwsRegion() != null
-            ? Region.of(config.getAwsRegion())
-            : Region.US_EAST_1;
+        Region region =
+                config.getAwsRegion() != null ? Region.of(config.getAwsRegion()) : Region.US_EAST_1;
 
         return SnsClient.builder()
-            .region(region)
-            .credentialsProvider(StaticCredentialsProvider.create(credentials))
-            .build();
+                .region(region)
+                .credentialsProvider(StaticCredentialsProvider.create(credentials))
+                .build();
     }
 
-    private PublishRequest buildPublishRequest(OutboundMessageEntity message, SmsProviderConfig config) {
+    private PublishRequest buildPublishRequest(
+            OutboundMessageEntity message, SmsProviderConfig config) {
         String messageBody = extractMessageBody(message);
         String phoneNumber = normalizePhoneNumber(message.getTo());
 
         Map<String, MessageAttributeValue> messageAttributes = new HashMap<>();
 
-        messageAttributes.put("AWS.SNS.SMS.SMSType",
-            MessageAttributeValue.builder()
-                .dataType("String")
-                .stringValue("Transactional")
-                .build());
+        messageAttributes.put(
+                "AWS.SNS.SMS.SMSType",
+                MessageAttributeValue.builder()
+                        .dataType("String")
+                        .stringValue("Transactional")
+                        .build());
 
         if (config.getAwsSenderId() != null && !config.getAwsSenderId().isEmpty()) {
-            messageAttributes.put("AWS.SNS.SMS.SenderID",
-                MessageAttributeValue.builder()
-                    .dataType("String")
-                    .stringValue(config.getAwsSenderId())
-                    .build());
+            messageAttributes.put(
+                    "AWS.SNS.SMS.SenderID",
+                    MessageAttributeValue.builder()
+                            .dataType("String")
+                            .stringValue(config.getAwsSenderId())
+                            .build());
         }
 
-        messageAttributes.put("IdempotencyKey",
-            MessageAttributeValue.builder()
-                .dataType("String")
-                .stringValue(message.getIdempotencyKey())
-                .build());
+        messageAttributes.put(
+                "IdempotencyKey",
+                MessageAttributeValue.builder()
+                        .dataType("String")
+                        .stringValue(message.getIdempotencyKey())
+                        .build());
 
         Map<String, Object> payloadJson = message.getPayloadJson();
         if (payloadJson != null && payloadJson.containsKey("maxPrice")) {
-            messageAttributes.put("AWS.SNS.SMS.MaxPrice",
-                MessageAttributeValue.builder()
-                    .dataType("Number")
-                    .stringValue(String.valueOf(payloadJson.get("maxPrice")))
-                    .build());
+            messageAttributes.put(
+                    "AWS.SNS.SMS.MaxPrice",
+                    MessageAttributeValue.builder()
+                            .dataType("Number")
+                            .stringValue(String.valueOf(payloadJson.get("maxPrice")))
+                            .build());
         }
 
         return PublishRequest.builder()
-            .phoneNumber(phoneNumber)
-            .message(messageBody)
-            .messageAttributes(messageAttributes)
-            .build();
+                .phoneNumber(phoneNumber)
+                .message(messageBody)
+                .messageAttributes(messageAttributes)
+                .build();
     }
 
     private void validateSmsMessage(OutboundMessageEntity message) {
@@ -186,7 +213,8 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
         }
 
         if (messageBody.length() > MAX_SMS_LENGTH) {
-            throw new IllegalArgumentException("Message exceeds maximum length of " + MAX_SMS_LENGTH + " characters");
+            throw new IllegalArgumentException(
+                    "Message exceeds maximum length of " + MAX_SMS_LENGTH + " characters");
         }
     }
 
@@ -201,9 +229,8 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
         logger.error("AWS SNS exception for messageId={}: {}", message.getId(), e.getMessage());
 
         String errorCode = extractAwsErrorCode(e);
-        String errorMessage = e.awsErrorDetails() != null
-            ? e.awsErrorDetails().errorMessage()
-            : e.getMessage();
+        String errorMessage =
+                e.awsErrorDetails() != null ? e.awsErrorDetails().errorMessage() : e.getMessage();
 
         SmsErrorMapper.ErrorInfo errorInfo = errorMapper.getErrorInfo(errorCode);
 
@@ -211,15 +238,18 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
             rateLimitService.handleRateLimitError(message.getOrgId(), null);
         }
 
-        logger.warn("AWS SNS error for messageId={}: code={}, message={}, retryable={}",
-            message.getId(), errorCode, errorMessage, errorInfo.isRetryable());
+        logger.warn(
+                "AWS SNS error for messageId={}: code={}, message={}, retryable={}",
+                message.getId(),
+                errorCode,
+                errorMessage,
+                errorInfo.isRetryable());
 
         return ProviderSendResult.failure(
-            errorCode != null ? errorCode : "AWS_UNKNOWN",
-            errorMessage != null ? errorMessage : "Unknown AWS error",
-            errorInfo.isRetryable(),
-            null
-        );
+                errorCode != null ? errorCode : "AWS_UNKNOWN",
+                errorMessage != null ? errorMessage : "Unknown AWS error",
+                errorInfo.isRetryable(),
+                null);
     }
 
     private String extractAwsErrorCode(SnsException e) {
@@ -265,7 +295,9 @@ public class AwsSnsSmsProvider implements OutboundMessageProvider {
             message = message.substring(0, 500) + "...";
         }
 
-        message = message.replaceAll("(?i)(key|secret|password|credential)\\s*[:=]\\s*[^\\s,}]+", "$1=***");
+        message =
+                message.replaceAll(
+                        "(?i)(key|secret|password|credential)\\s*[:=]\\s*[^\\s,}]+", "$1=***");
 
         return message;
     }

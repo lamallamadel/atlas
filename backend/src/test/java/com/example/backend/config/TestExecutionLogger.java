@@ -14,11 +14,17 @@ public class TestExecutionLogger implements TestExecutionListener {
     @Override
     public void beforeTestClass(TestContext testContext) {
         if (!contextPrepared) {
-            log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-            log.info("║ Test Execution Starting                                                     ║");
-            log.info("╠════════════════════════════════════════════════════════════════════════════╣");
-            log.info("║ Test Class: {}", String.format("%-62s", testContext.getTestClass().getSimpleName()) + "║");
-            log.info("╚════════════════════════════════════════════════════════════════════════════╝");
+            log.info(
+                    "╔════════════════════════════════════════════════════════════════════════════╗");
+            log.info(
+                    "║ Test Execution Starting                                                     ║");
+            log.info(
+                    "╠════════════════════════════════════════════════════════════════════════════╣");
+            log.info(
+                    "║ Test Class: {}",
+                    String.format("%-62s", testContext.getTestClass().getSimpleName()) + "║");
+            log.info(
+                    "╚════════════════════════════════════════════════════════════════════════════╝");
         }
     }
 
@@ -45,14 +51,19 @@ public class TestExecutionLogger implements TestExecutionListener {
         if (testContext.getTestException() == null) {
             log.info("✓ Test completed successfully: {}", testMethod);
         } else {
-            log.error("✗ Test failed: {} - {}", testMethod, testContext.getTestException().getMessage());
+            log.error(
+                    "✗ Test failed: {} - {}",
+                    testMethod,
+                    testContext.getTestException().getMessage());
         }
     }
 
     @Override
     public void afterTestClass(TestContext testContext) {
         log.info("╔════════════════════════════════════════════════════════════════════════════╗");
-        log.info("║ Test Class Completed: {}", String.format("%-54s", testContext.getTestClass().getSimpleName()) + "║");
+        log.info(
+                "║ Test Class Completed: {}",
+                String.format("%-54s", testContext.getTestClass().getSimpleName()) + "║");
         log.info("║ Total Tests Executed: {}", String.format("%-54s", testCount) + "║");
         log.info("╚════════════════════════════════════════════════════════════════════════════╝");
     }

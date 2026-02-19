@@ -5,7 +5,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Schema(description = "Request body for creating a new dossier")
@@ -26,7 +25,10 @@ public class DossierCreateRequest {
     @Size(max = 100, message = "Lead source must not exceed 100 characters")
     private String leadSource;
 
-    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    @Schema(
+            description = "Dossier notes",
+            example = "Customer interested in property X",
+            nullable = true)
     private String notes;
 
     @Schema(description = "Dossier score (0-100)", example = "75", nullable = true)
@@ -34,7 +36,11 @@ public class DossierCreateRequest {
     @Max(value = 100, message = "Score must be between 0 and 100")
     private Integer score;
 
-    @Schema(description = "Dossier source", example = "WEB", nullable = true, defaultValue = "UNKNOWN")
+    @Schema(
+            description = "Dossier source",
+            example = "WEB",
+            nullable = true,
+            defaultValue = "UNKNOWN")
     private DossierSource source;
 
     @Schema(description = "Case type code", example = "CRM_LEAD_BUY", nullable = true)
@@ -57,8 +63,7 @@ public class DossierCreateRequest {
     @Valid
     private PartiePrenanteRequest initialParty;
 
-    public DossierCreateRequest() {
-    }
+    public DossierCreateRequest() {}
 
     public Long getAnnonceId() {
         return annonceId;

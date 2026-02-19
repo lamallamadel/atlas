@@ -6,8 +6,7 @@ public class TimeSeriesDataPointDto {
     private LocalDate date;
     private Long value;
 
-    public TimeSeriesDataPointDto() {
-    }
+    public TimeSeriesDataPointDto() {}
 
     public TimeSeriesDataPointDto(LocalDate date, Long value) {
         this.date = date;

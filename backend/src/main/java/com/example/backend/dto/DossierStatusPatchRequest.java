@@ -23,11 +23,12 @@ public class DossierStatusPatchRequest {
     @Schema(description = "User ID performing the status change", example = "user123")
     private String userId;
 
-    @Schema(description = "Reason for the status change", example = "Client qualified after initial call")
+    @Schema(
+            description = "Reason for the status change",
+            example = "Client qualified after initial call")
     private String reason;
 
-    public DossierStatusPatchRequest() {
-    }
+    public DossierStatusPatchRequest() {}
 
     public DossierStatus getStatus() {
         return status;

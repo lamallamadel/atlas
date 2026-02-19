@@ -12,6 +12,11 @@ import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -20,12 +25,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class ConsentementService {
@@ -55,11 +54,18 @@ public class ConsentementService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(request.getDossierId())
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
+        Dossier dossier =
+                dossierRepository
+                        .findById(request.getDossierId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: "
+                                                        + request.getDossierId()));
 
         if (!orgId.equals(dossier.getOrgId())) {
-            throw new EntityNotFoundException("Dossier not found with id: " + request.getDossierId());
+            throw new EntityNotFoundException(
+                    "Dossier not found with id: " + request.getDossierId());
         }
 
         ConsentementEntity consentement = consentementMapper.toEntity(request);
@@ -70,18 +76,21 @@ public class ConsentementService {
         consentement.setCreatedAt(now);
         consentement.setUpdatedAt(now);
 
-        Map<String, Object> meta = consentement.getMeta() != null ? new HashMap<>(consentement.getMeta()) : new HashMap<>();
+        Map<String, Object> meta =
+                consentement.getMeta() != null
+                        ? new HashMap<>(consentement.getMeta())
+                        : new HashMap<>();
         meta.put("previousStatus", null);
         meta.put("changedBy", orgId);
         meta.put("changedAt", now.toString());
         consentement.setMeta(meta);
 
         ConsentementEntity saved = consentementRepository.save(consentement);
-        
+
         if (saved.getStatus() == ConsentementStatus.GRANTED) {
             logConsentGrantedActivity(saved);
         }
-        
+
         return consentementMapper.toResponse(saved);
     }
 
@@ -92,8 +101,13 @@ public class ConsentementService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        ConsentementEntity consentement = consentementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Consentement not found with id: " + id));
+        ConsentementEntity consentement =
+                consentementRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Consentement not found with id: " + id));
 
         if (!orgId.equals(consentement.getOrgId())) {
             throw new EntityNotFoundException("Consentement not found with id: " + id);
@@ -104,7 +118,10 @@ public class ConsentementService {
         consentement.setChannel(request.getChannel());
         consentement.setStatus(request.getStatus());
 
-        Map<String, Object> meta = consentement.getMeta() != null ? new HashMap<>(consentement.getMeta()) : new HashMap<>();
+        Map<String, Object> meta =
+                consentement.getMeta() != null
+                        ? new HashMap<>(consentement.getMeta())
+                        : new HashMap<>();
         if (request.getMeta() != null) {
             meta.putAll(request.getMeta());
         }
@@ -115,13 +132,15 @@ public class ConsentementService {
 
         consentement.setUpdatedAt(LocalDateTime.now());
         ConsentementEntity updated = consentementRepository.save(consentement);
-        
-        if (previousStatus != ConsentementStatus.GRANTED && updated.getStatus() == ConsentementStatus.GRANTED) {
+
+        if (previousStatus != ConsentementStatus.GRANTED
+                && updated.getStatus() == ConsentementStatus.GRANTED) {
             logConsentGrantedActivity(updated);
-        } else if (previousStatus == ConsentementStatus.GRANTED && updated.getStatus() == ConsentementStatus.REVOKED) {
+        } else if (previousStatus == ConsentementStatus.GRANTED
+                && updated.getStatus() == ConsentementStatus.REVOKED) {
             logConsentRevokedActivity(updated, previousStatus);
         }
-        
+
         return consentementMapper.toResponse(updated);
     }
 
@@ -132,8 +151,13 @@ public class ConsentementService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        ConsentementEntity consentement = consentementRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Consentement not found with id: " + id));
+        ConsentementEntity consentement =
+                consentementRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Consentement not found with id: " + id));
 
         if (!orgId.equals(consentement.getOrgId())) {
             throw new EntityNotFoundException("Consentement not found with id: " + id);
@@ -149,8 +173,13 @@ public class ConsentementService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -163,14 +192,20 @@ public class ConsentementService {
     }
 
     @Transactional(readOnly = true)
-    public List<ConsentementResponse> listByDossierAndChannel(Long dossierId, com.example.backend.entity.enums.ConsentementChannel channel) {
+    public List<ConsentementResponse> listByDossierAndChannel(
+            Long dossierId, com.example.backend.entity.enums.ConsentementChannel channel) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -178,7 +213,9 @@ public class ConsentementService {
 
         List<ConsentementEntity> consentements;
         if (channel != null) {
-            consentements = consentementRepository.findByDossierIdAndChannelOrderByUpdatedAtDesc(dossierId, channel);
+            consentements =
+                    consentementRepository.findByDossierIdAndChannelOrderByUpdatedAtDesc(
+                            dossierId, channel);
         } else {
             consentements = consentementRepository.findByDossierIdOrderByUpdatedAtDesc(dossierId);
         }
@@ -189,25 +226,34 @@ public class ConsentementService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ConsentementResponse> listByDossierAndChannelPaginated(Long dossierId, 
-            com.example.backend.entity.enums.ConsentementChannel channel, int page, int size) {
+    public Page<ConsentementResponse> listByDossierAndChannelPaginated(
+            Long dossierId,
+            com.example.backend.entity.enums.ConsentementChannel channel,
+            int page,
+            int size) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
         }
 
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        
+
         Page<ConsentementEntity> consentements;
         if (channel != null) {
-            consentements = consentementRepository.findByDossierIdAndChannel(dossierId, channel, pageable);
+            consentements =
+                    consentementRepository.findByDossierIdAndChannel(dossierId, channel, pageable);
         } else {
             consentements = consentementRepository.findByDossierId(dossierId, pageable);
         }
@@ -218,9 +264,11 @@ public class ConsentementService {
     private void logConsentGrantedActivity(ConsentementEntity consentement) {
         if (activityService != null && consentement.getDossier() != null) {
             try {
-                String description = String.format("Consent granted for %s via %s", 
-                    consentement.getConsentType(), consentement.getChannel());
-                
+                String description =
+                        String.format(
+                                "Consent granted for %s via %s",
+                                consentement.getConsentType(), consentement.getChannel());
+
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("consentementId", consentement.getId());
                 metadata.put("channel", consentement.getChannel().name());
@@ -230,26 +278,31 @@ public class ConsentementService {
                     metadata.put("consentMeta", consentement.getMeta());
                 }
                 metadata.put("timestamp", LocalDateTime.now().toString());
-                
+
                 activityService.logActivity(
-                    consentement.getDossier().getId(),
-                    ActivityType.CONSENT_GRANTED,
-                    description,
-                    metadata
-                );
+                        consentement.getDossier().getId(),
+                        ActivityType.CONSENT_GRANTED,
+                        description,
+                        metadata);
             } catch (Exception e) {
-                logger.warn("Failed to log CONSENT_GRANTED activity for consentement {}: {}", 
-                    consentement.getId(), e.getMessage(), e);
+                logger.warn(
+                        "Failed to log CONSENT_GRANTED activity for consentement {}: {}",
+                        consentement.getId(),
+                        e.getMessage(),
+                        e);
             }
         }
     }
 
-    private void logConsentRevokedActivity(ConsentementEntity consentement, ConsentementStatus previousStatus) {
+    private void logConsentRevokedActivity(
+            ConsentementEntity consentement, ConsentementStatus previousStatus) {
         if (activityService != null && consentement.getDossier() != null) {
             try {
-                String description = String.format("Consent revoked for %s via %s", 
-                    consentement.getConsentType(), consentement.getChannel());
-                
+                String description =
+                        String.format(
+                                "Consent revoked for %s via %s",
+                                consentement.getConsentType(), consentement.getChannel());
+
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("consentementId", consentement.getId());
                 metadata.put("channel", consentement.getChannel().name());
@@ -260,16 +313,18 @@ public class ConsentementService {
                     metadata.put("consentMeta", consentement.getMeta());
                 }
                 metadata.put("timestamp", LocalDateTime.now().toString());
-                
+
                 activityService.logActivity(
-                    consentement.getDossier().getId(),
-                    ActivityType.CONSENT_REVOKED,
-                    description,
-                    metadata
-                );
+                        consentement.getDossier().getId(),
+                        ActivityType.CONSENT_REVOKED,
+                        description,
+                        metadata);
             } catch (Exception e) {
-                logger.warn("Failed to log CONSENT_REVOKED activity for consentement {}: {}", 
-                    consentement.getId(), e.getMessage(), e);
+                logger.warn(
+                        "Failed to log CONSENT_REVOKED activity for consentement {}: {}",
+                        consentement.getId(),
+                        e.getMessage(),
+                        e);
             }
         }
     }

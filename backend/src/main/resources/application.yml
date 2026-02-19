@@ -176,6 +176,16 @@ atlas:
   metrics:
     include-org-id: ${ATLAS_METRICS_INCLUDE_ORG_ID:false}
 
+brain:
+  scoring:
+    base-url: ${BRAIN_SCORING_URL:http://localhost:8000}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_SCORING_TIMEOUT:5}
+  dupli:
+    base-url: ${BRAIN_DUPLI_URL:http://localhost:8001}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_DUPLI_TIMEOUT:30}
+
 management:
   endpoints:
     web:
