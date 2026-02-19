@@ -259,12 +259,21 @@ export class MyTasksWidgetComponent extends CardWidgetBaseComponent {
 
     const statusFilter = this.config.settings?.['status'] as string || 'PENDING,IN_PROGRESS';
 
-    this.taskService.getAllTasks()
+    this.taskService.list({ size: 50 })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (tasks) => {
+        next: (page) => {
           const statuses = statusFilter.split(',');
-          this.tasks = tasks.filter(t => statuses.includes(t.status)).slice(0, 10);
+          this.tasks = page.content
+            .filter((t: { status: string }) => statuses.includes(t.status))
+            .slice(0, 10)
+            .map((t: { id: number; title: string; priority: string; dueDate?: string; status: string }) => ({
+              id: t.id,
+              title: t.title,
+              priority: t.priority,
+              dueDate: t.dueDate || '',
+              status: t.status
+            }));
           this.setLoading(false);
         },
         error: () => {

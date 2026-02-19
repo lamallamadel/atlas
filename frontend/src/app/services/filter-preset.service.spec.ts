@@ -23,41 +23,41 @@ describe('FilterPresetService', () => {
     const name = 'My Preset';
     const filters = { status: 'ACTIVE', city: 'Paris' };
 
-    service.savePreset(context, name, filters);
-    const presets = service.getPresets(context);
+    service.savePresetLocally(context, name, filters);
+    const presets = service.getPresetsLocally(context);
 
     expect(presets.length).toBe(1);
     expect(presets[0].name).toBe(name);
-    expect(presets[0].filters).toEqual(filters);
+    expect(presets[0].filterConfig).toEqual(filters);
   });
 
   it('should get empty array when no presets exist', () => {
-    const presets = service.getPresets('non-existent');
+    const presets = service.getPresetsLocally('non-existent');
     expect(presets).toEqual([]);
   });
 
   it('should delete a preset', () => {
     const context = 'test-context';
-    service.savePreset(context, 'Preset 1', { a: 1 });
-    service.savePreset(context, 'Preset 2', { b: 2 });
+    service.savePresetLocally(context, 'Preset 1', { a: 1 });
+    service.savePresetLocally(context, 'Preset 2', { b: 2 });
 
-    let presets = service.getPresets(context);
+    let presets = service.getPresetsLocally(context);
     expect(presets.length).toBe(2);
 
-    const idToDelete = presets[0].id;
-    service.deletePreset(context, idToDelete);
+    const nameToDelete = presets[0].name;
+    service.deletePresetLocally(context, nameToDelete);
 
-    presets = service.getPresets(context);
+    presets = service.getPresetsLocally(context);
     expect(presets.length).toBe(1);
     expect(presets[0].name).toBe('Preset 2');
   });
 
   it('should handle multiple contexts independently', () => {
-    service.savePreset('context1', 'Preset A', { x: 1 });
-    service.savePreset('context2', 'Preset B', { y: 2 });
+    service.savePresetLocally('context1', 'Preset A', { x: 1 });
+    service.savePresetLocally('context2', 'Preset B', { y: 2 });
 
-    const presets1 = service.getPresets('context1');
-    const presets2 = service.getPresets('context2');
+    const presets1 = service.getPresetsLocally('context1');
+    const presets2 = service.getPresetsLocally('context2');
 
     expect(presets1.length).toBe(1);
     expect(presets2.length).toBe(1);
@@ -67,9 +67,9 @@ describe('FilterPresetService', () => {
 
   it('should preserve dates when saving and loading', () => {
     const context = 'test-context';
-    service.savePreset(context, 'Test', {});
-    
-    const presets = service.getPresets(context);
+    service.savePresetLocally(context, 'Test', {});
+
+    const presets = service.getPresetsLocally(context);
     expect(presets[0].createdAt).toBeInstanceOf(Date);
   });
 });

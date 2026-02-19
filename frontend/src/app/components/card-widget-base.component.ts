@@ -5,6 +5,10 @@ export interface WidgetConfig {
   id: string;
   type: string;
   title?: string;
+  x?: number;
+  y?: number;
+  cols?: number;
+  rows?: number;
   refreshInterval?: number;
   settings?: Record<string, unknown>;
 }

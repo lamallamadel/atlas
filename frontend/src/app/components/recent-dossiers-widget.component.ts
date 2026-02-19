@@ -232,11 +232,18 @@ export class RecentDossiersWidgetComponent extends CardWidgetBaseComponent {
 
     const limit = this.config.settings?.['limit'] as number || 5;
 
-    this.dossierService.searchDossiers('', { sort: '-createdAt', limit })
+    this.dossierService.list({ size: limit, sort: 'createdAt,desc' })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
-          this.dossiers = response.content || [];
+          this.dossiers = (response.content || []).map((d: { id: number; leadName?: string; leadPhone?: string; status: string; createdAt: string }) => ({
+            id: d.id,
+            leadName: d.leadName || '',
+            leadEmail: '',
+            leadPhone: d.leadPhone || '',
+            status: d.status,
+            createdAt: d.createdAt
+          }));
           this.setLoading(false);
         },
         error: () => {

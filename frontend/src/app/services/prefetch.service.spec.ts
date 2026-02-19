@@ -12,8 +12,7 @@ describe('PrefetchService', () => {
   let mockAnnonceApiService: jasmine.SpyObj<AnnonceApiService>;
 
   beforeEach(() => {
-    mockRouter = jasmine.createSpyObj('Router', ['events']);
-    mockRouter.events = of();
+    mockRouter = jasmine.createSpyObj('Router', ['navigate'], { events: of() });
     mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['list']);
     mockAnnonceApiService = jasmine.createSpyObj('AnnonceApiService', ['list']);
 

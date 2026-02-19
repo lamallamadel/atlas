@@ -6,6 +6,7 @@ import { tap } from 'rxjs/operators';
 export interface WidgetConfig {
   id: string;
   type: string;
+  title?: string;
   x: number;
   y: number;
   cols: number;

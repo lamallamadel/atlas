@@ -27,12 +27,13 @@ describe('QuickActionsComponent', () => {
 
   const mockDossier: DossierResponse = {
     id: 1,
+    orgId: 'org-1',
     status: DossierStatus.NEW,
     leadName: 'John Doe',
     leadPhone: '+33612345678',
     leadSource: 'Website',
     score: 80,
-    annonceId: null,
+    annonceId: undefined,
     parties: [],
     createdAt: '2024-01-01T10:00:00Z',
     updatedAt: '2024-01-01T10:00:00Z'
