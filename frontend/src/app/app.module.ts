@@ -43,9 +43,6 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AnnoncesComponent } from './pages/annonces/annonces.component';
-import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
-import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
@@ -117,9 +114,6 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AppComponent,
     AppLayoutComponent,
     DashboardComponent,
-    AnnoncesComponent,
-    AnnonceCreateComponent,
-    AnnonceDetailComponent,
     LoginComponent,
     AccessDeniedComponent,
     SessionExpiredComponent,

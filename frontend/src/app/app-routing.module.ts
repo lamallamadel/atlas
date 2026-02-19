@@ -2,9 +2,6 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AnnoncesComponent } from './pages/annonces/annonces.component';
-import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
-import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
@@ -33,10 +30,11 @@ const routes: Routes = [
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
       { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
       { path: 'calendar', component: CalendarViewComponent, data: { animation: 'CalendarPage' } },
-      { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
-      { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
-      { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
-      { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
+      {
+        path: 'annonces',
+        loadChildren: () => import('./pages/annonces/annonces.module').then(m => m.AnnoncesModule),
+        data: { animation: 'AnnoncesPage' }
+      },
       {
         path: 'dossiers',
         loadChildren: () => import('./pages/dossiers/dossiers.module').then(m => m.DossiersModule),
