@@ -1,7 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
@@ -24,7 +23,11 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent, data: { animation: 'DashboardPage' } },
+      {
+        path: 'dashboard',
+        loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule),
+        data: { animation: 'DashboardPage' }
+      },
       { path: 'reports', component: ReportsDashboardComponent, data: { animation: 'ReportsPage' } },
       { path: 'observability', component: ObservabilityDashboardComponent, data: { animation: 'ObservabilityPage' } },
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },

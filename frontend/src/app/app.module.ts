@@ -42,7 +42,6 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
@@ -113,7 +112,6 @@ export function initAuth(authService: AuthService): () => Promise<void> {
   declarations: [
     AppComponent,
     AppLayoutComponent,
-    DashboardComponent,
     LoginComponent,
     AccessDeniedComponent,
     SessionExpiredComponent,
