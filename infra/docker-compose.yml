@@ -99,6 +99,7 @@ services:
 
       BRAIN_SCORING_URL: http://scoring-service:8000
       BRAIN_DUPLI_URL: http://dupli-service:8001
+      BRAIN_FRAUD_URL: http://fraud-service:8002
       BRAIN_API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
     volumes:
       - backend_logs:/var/log/atlas
@@ -240,6 +241,23 @@ services:
       timeout: 10s
       retries: 5
       start_period: 120s
+
+  fraud-service:
+    build:
+      context: ../brain/fraud-service
+      dockerfile: Dockerfile
+    container_name: brain_fraud
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_FRAUD_PORT:-8002}:8002"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
 
 volumes:
   postgres_data:

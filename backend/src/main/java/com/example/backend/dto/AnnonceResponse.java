@@ -25,6 +25,8 @@ public class AnnonceResponse {
     private Map<String, Object> rulesJson;
     private Map<String, Object> meta;
     private Integer aiScore;
+    private Integer fraudScore;
+    private String fraudStatut;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -158,6 +160,22 @@ public class AnnonceResponse {
 
     public void setAiScore(Integer aiScore) {
         this.aiScore = aiScore;
+    }
+
+    public Integer getFraudScore() {
+        return fraudScore;
+    }
+
+    public void setFraudScore(Integer fraudScore) {
+        this.fraudScore = fraudScore;
+    }
+
+    public String getFraudStatut() {
+        return fraudStatut;
+    }
+
+    public void setFraudStatut(String fraudStatut) {
+        this.fraudStatut = fraudStatut;
     }
 
     public LocalDateTime getCreatedAt() {

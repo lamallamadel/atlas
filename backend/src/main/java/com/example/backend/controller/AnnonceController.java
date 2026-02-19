@@ -335,6 +335,34 @@ public class AnnonceController {
         return ResponseEntity.ok(results);
     }
 
+    @PostMapping("/{id}/fraud")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Trigger fraud analysis",
+            description = "Triggers asynchronous fraud detection for an annonce")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "202",
+                        description = "Fraud analysis triggered (asynchronous)",
+                        content = @Content),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Annonce not found",
+                        content = @Content)
+            })
+    public ResponseEntity<Void> triggerFraud(@PathVariable Long id) {
+        try {
+            annonceService.getById(id);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+        if (brainScoringService != null) {
+            brainScoringService.triggerFraudAsync(id);
+        }
+        return ResponseEntity.accepted().build();
+    }
+
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];

@@ -9,6 +9,7 @@ public class BrainProperties {
 
     private ServiceConfig scoring = new ServiceConfig();
     private ServiceConfig dupli = new ServiceConfig();
+    private ServiceConfig fraud = new ServiceConfig();
 
     public ServiceConfig getScoring() {
         return scoring;
@@ -24,6 +25,14 @@ public class BrainProperties {
 
     public void setDupli(ServiceConfig dupli) {
         this.dupli = dupli;
+    }
+
+    public ServiceConfig getFraud() {
+        return fraud;
+    }
+
+    public void setFraud(ServiceConfig fraud) {
+        this.fraud = fraud;
     }
 
     public static class ServiceConfig {

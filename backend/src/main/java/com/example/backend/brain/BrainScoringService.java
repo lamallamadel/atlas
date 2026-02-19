@@ -3,6 +3,7 @@ package com.example.backend.brain;
 import com.example.backend.brain.dto.BienScoreRequest;
 import com.example.backend.brain.dto.DoublonResultDto;
 import com.example.backend.brain.dto.DupliAnnonceDto;
+import com.example.backend.brain.dto.FraudRequest;
 import com.example.backend.entity.Annonce;
 import com.example.backend.repository.AnnonceRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -83,5 +84,41 @@ public class BrainScoringService {
     public CompletableFuture<List<DoublonResultDto>> detectDuplicatesAsync(
             List<DupliAnnonceDto> annonces) {
         return CompletableFuture.completedFuture(brainClientService.detectDuplicates(annonces));
+    }
+
+    @Async("brainTaskExecutor")
+    @Transactional
+    public void triggerFraudAsync(Long annonceId) {
+        try {
+            Annonce annonce = annonceRepository.findById(annonceId).orElse(null);
+            if (annonce == null) {
+                return;
+            }
+            if (annonce.getPrice() == null
+                    || annonce.getSurface() == null
+                    || annonce.getSurface() <= 0) {
+                log.debug(
+                        "Skipping fraud analysis for annonce {} — missing price or surface",
+                        annonceId);
+                return;
+            }
+
+            FraudRequest req = FraudRequest.from(annonce);
+            brainClientService
+                    .analyzeFraud(req)
+                    .ifPresent(
+                            result -> {
+                                annonce.setFraudScore(result.getScoreFraude());
+                                annonce.setFraudStatut(result.getStatut());
+                                annonceRepository.save(annonce);
+                                log.info(
+                                        "Fraud analysis for annonce {}: {} (score: {})",
+                                        annonceId,
+                                        result.getStatut(),
+                                        result.getScoreFraude());
+                            });
+        } catch (Exception e) {
+            log.warn("Failed to analyze fraud for annonce {}: {}", annonceId, e.getMessage());
+        }
     }
 }

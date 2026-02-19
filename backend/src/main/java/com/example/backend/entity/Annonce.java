@@ -73,6 +73,12 @@ public class Annonce extends BaseEntity {
     @Column(name = "ai_score_details", columnDefinition = "TEXT")
     private String aiScoreDetails;
 
+    @Column(name = "fraud_score")
+    private Integer fraudScore;
+
+    @Column(name = "fraud_statut", length = 20)
+    private String fraudStatut;
+
     public Long getId() {
         return id;
     }
@@ -199,5 +205,21 @@ public class Annonce extends BaseEntity {
 
     public void setAiScoreDetails(String aiScoreDetails) {
         this.aiScoreDetails = aiScoreDetails;
+    }
+
+    public Integer getFraudScore() {
+        return fraudScore;
+    }
+
+    public void setFraudScore(Integer fraudScore) {
+        this.fraudScore = fraudScore;
+    }
+
+    public String getFraudStatut() {
+        return fraudStatut;
+    }
+
+    public void setFraudStatut(String fraudStatut) {
+        this.fraudStatut = fraudStatut;
     }
 }

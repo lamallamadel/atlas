@@ -4,6 +4,8 @@ import com.example.backend.brain.dto.BienScoreRequest;
 import com.example.backend.brain.dto.BienScoreResponse;
 import com.example.backend.brain.dto.DoublonResultDto;
 import com.example.backend.brain.dto.DupliAnnonceDto;
+import com.example.backend.brain.dto.FraudRequest;
+import com.example.backend.brain.dto.FraudResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +69,24 @@ public class BrainClientService {
         } catch (Exception e) {
             log.warn("Dupli service unavailable: {}", e.getMessage());
             return List.of();
+        }
+    }
+
+    public Optional<FraudResponse> analyzeFraud(FraudRequest request) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getFraud().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            ResponseEntity<FraudResponse> response =
+                    restTemplate.postForEntity(
+                            properties.getFraud().getBaseUrl() + "/api/fraud/analyser",
+                            new HttpEntity<>(request, headers),
+                            FraudResponse.class);
+            return Optional.ofNullable(response.getBody());
+        } catch (Exception e) {
+            log.warn("Fraud service unavailable: {}", e.getMessage());
+            return Optional.empty();
         }
     }
 }
