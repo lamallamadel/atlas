@@ -441,3 +441,6 @@ backend/run-maven-install.js
 
 # Agent-created setup script (current session)
 setup-repo-packages.ps1
+
+# Local tool configs
+.gordonrc

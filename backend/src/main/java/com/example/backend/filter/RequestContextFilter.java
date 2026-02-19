@@ -20,8 +20,11 @@ import java.io.IOException;
 
 /**
  * Enriches MDC with request/user context and logs slow requests.
+ * 
+ * Named bean: "atlasRequestContextFilter" to avoid conflict with Spring Boot's
+ * default RequestContextFilter (spring.main.allow-bean-definition-overriding not needed)
  */
-@Component
+@Component("atlasRequestContextFilter")
 @Order(Ordered.HIGHEST_PRECEDENCE + 10)
 public class RequestContextFilter extends OncePerRequestFilter {
 
