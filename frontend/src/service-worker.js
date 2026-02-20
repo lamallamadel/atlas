@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `offline-cache-${CACHE_VERSION}`;
 const API_CACHE_NAME = `api-cache-${CACHE_VERSION}`;
 const STATIC_CACHE_NAME = `static-cache-${CACHE_VERSION}`;
@@ -178,8 +178,11 @@ async function staleWhileRevalidate(request, cacheName) {
   
   const fetchPromise = fetch(request).then((networkResponse) => {
     if (networkResponse && networkResponse.status === 200) {
-      const cache = caches.open(cacheName);
-      cache.then((c) => c.put(request, networkResponse.clone()));
+      // Clone synchronously before any async operation — cloning after the body
+      // is consumed (e.g. inside a deferred cache.then callback) throws
+      // "Response body is already used".
+      const cloned = networkResponse.clone();
+      caches.open(cacheName).then((c) => c.put(request, cloned));
     }
     return networkResponse;
   }).catch((error) => {
