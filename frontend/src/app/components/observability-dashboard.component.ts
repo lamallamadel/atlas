@@ -1,9 +1,7 @@
 import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { ReportingApiService, ObservabilityMetrics } from '../services/reporting-api.service';
-import { interval, Subject } from 'rxjs';
-import { takeUntil, switchMap, startWith } from 'rxjs/operators';
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-declare const Chart: any;
+import { interval, Subject, EMPTY } from 'rxjs';
+import { takeUntil, switchMap, startWith, catchError } from 'rxjs/operators';
 
 interface TimeSeriesPoint {
   timestamp: Date;
@@ -30,6 +28,8 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
   private queueDepthHistory: TimeSeriesPoint[] = [];
   private readonly maxHistoryPoints = 60; // Keep last 60 data points (1 hour if refresh is 1 min)
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private ChartClass: any = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private queueTimeSeriesChart: any = null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -71,7 +71,10 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
 
   private async loadChartJs(): Promise<void> {
     try {
-      await import('chart.js/auto');
+      const module = await import('chart.js/auto');
+      // chart.js/auto exports Chart as a named export in ESM — store it so we
+      // don't rely on an undeclared global variable.
+      this.ChartClass = (module as any).Chart ?? module.default ?? module;
     } catch (error) {
       console.error('Failed to load Chart.js:', error);
     }
@@ -98,10 +101,16 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
         takeUntil(this.destroy$),
         startWith(0),
         switchMap(() => {
-          if (this.autoRefresh) {
-            return this.reportingService.getObservabilityMetrics(this.dateFrom, this.dateTo);
+          if (!this.autoRefresh) {
+            return EMPTY;
           }
-          return [];
+          return this.reportingService.getObservabilityMetrics(this.dateFrom, this.dateTo).pipe(
+            // Absorb per-tick errors so the interval keeps running on the next tick.
+            catchError(err => {
+              this.error = 'Erreur de chargement: ' + (err.message || err.status || 'inconnue');
+              return EMPTY;
+            })
+          );
         })
       )
       .subscribe({
@@ -113,10 +122,6 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
             this.updateAllCharts();
             this.error = null;
           }
-        },
-        error: (err) => {
-          this.error = 'Failed to load metrics: ' + err.message;
-          this.loading = false;
         }
       });
   }
@@ -187,7 +192,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
   }
 
   private updateAllCharts(): void {
-    if (!this.metrics || !this.chartsInitialized) return;
+    if (!this.metrics || !this.chartsInitialized || !this.ChartClass) return;
 
     this.updateQueueTimeSeriesChart();
     this.updateLatencyHistogramChart();
@@ -268,7 +273,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     if (this.queueTimeSeriesChart) {
       this.queueTimeSeriesChart.destroy();
     }
-    this.queueTimeSeriesChart = new Chart(ctx, config);
+    this.queueTimeSeriesChart = new this.ChartClass(ctx, config);
   }
 
   private updateLatencyHistogramChart(): void {
@@ -342,7 +347,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     if (this.latencyHistogramChart) {
       this.latencyHistogramChart.destroy();
     }
-    this.latencyHistogramChart = new Chart(ctx, config);
+    this.latencyHistogramChart = new this.ChartClass(ctx, config);
   }
 
   private updateFailureStackedChart(): void {
@@ -408,7 +413,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     if (this.failureStackedChart) {
       this.failureStackedChart.destroy();
     }
-    this.failureStackedChart = new Chart(ctx, config);
+    this.failureStackedChart = new this.ChartClass(ctx, config);
   }
 
   private updateErrorCodeChart(): void {
@@ -463,7 +468,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     if (this.errorCodeChart) {
       this.errorCodeChart.destroy();
     }
-    this.errorCodeChart = new Chart(ctx, config);
+    this.errorCodeChart = new this.ChartClass(ctx, config);
   }
 
   private updateDlqChart(): void {
@@ -557,7 +562,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     if (this.dlqChart) {
       this.dlqChart.destroy();
     }
-    this.dlqChart = new Chart(ctx, config);
+    this.dlqChart = new this.ChartClass(ctx, config);
   }
 
   private updateQuotaChart(): void {
@@ -652,7 +657,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
     if (this.quotaChart) {
       this.quotaChart.destroy();
     }
-    this.quotaChart = new Chart(ctx, config);
+    this.quotaChart = new this.ChartClass(ctx, config);
   }
 
   private getChannelColor(index: number, alpha = 1): string {
