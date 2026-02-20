@@ -96,6 +96,7 @@ import { AdvancedFiltersDialogComponent } from './components/advanced-filters-di
 import { VoipConfigDialogComponent } from './components/voip-config-dialog.component';
 import { OfflineIndicatorComponent } from './components/offline-indicator.component';
 import { OfflineInterceptor } from './interceptors/offline.interceptor';
+import { HttpCacheInterceptor } from './interceptors/http-cache.interceptor';
 import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
 import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
 import { WaterfallChartComponent } from './components/waterfall-chart.component';
@@ -236,6 +237,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: OfflineInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpCacheInterceptor,
       multi: true
     }
   ],
