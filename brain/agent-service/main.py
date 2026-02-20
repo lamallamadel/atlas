@@ -66,6 +66,15 @@ def parse_with_rules(query: str) -> AgentResponse:
             actions=[], engine="rules"
         )
     
+    # Nouvelle règle pour l'Agent WhatsApp (Prise de RDV)
+    if "rendez-vous" in query_lower or "rdv" in query_lower or "visiter" in query_lower:
+        return AgentResponse(
+            intent_type="SCHEDULE_APPOINTMENT", confidence=0.9, params={},
+            answer="Parfait, je vais m'occuper d'organiser cette visite. Êtes-vous disponible la semaine prochaine ?",
+            actions=[{"type": "CREATE_APPOINTMENT", "params": {"status": "REQUESTED"}}], 
+            engine="rules"
+        )
+    
     return AgentResponse(
         intent_type="UNKNOWN", confidence=0.0, params={},
         answer="Je ne suis pas sûr de comprendre. Pouvez-vous reformuler ?",
@@ -76,7 +85,7 @@ async def process_with_ollama(query: str) -> AgentResponse:
     prompt = f"""Tu es Atlas IA, un agent immobilier.
 Analyse cette requête utilisateur : "{query}"
 Réponds UNIQUEMENT avec ce JSON valide:
-{{"intent_type": "SEARCH|CREATE|STATUS_CHANGE|SEND_MESSAGE|NAVIGATE|UNKNOWN", "confidence": 0.9, "params": {{"city": "...", "propertyType": "..."}}, "answer": "Ta réponse textuelle à l'utilisateur", "actions": []}}
+{{"intent_type": "SEARCH|CREATE|STATUS_CHANGE|SEND_MESSAGE|NAVIGATE|SCHEDULE_APPOINTMENT|UNKNOWN", "confidence": 0.9, "params": {{"city": "...", "propertyType": "..."}}, "answer": "Ta réponse textuelle à l'utilisateur", "actions": []}}
 """
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
