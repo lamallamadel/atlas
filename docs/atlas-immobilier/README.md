@@ -19,14 +19,16 @@ Cette version consolide le **MVP Week 1 → Week 3** (fondations + CRUD + sécur
 - **Sécurité** : Resource Server OAuth2/JWT (Keycloak) + mapping des rôles.
 - **Multi-tenancy** : isolation stricte par `org_id` (header `X-Org-Id` + filtre Hibernate) + tests cross-tenant.
 
-### Backlog déjà spécifié (Advanced CRM)
-- **Messagerie / suivi des communications** (timeline d’activité)
-- **Audit trail** (journal de changements)
-- **Gestion des consentements** (RGPD / opt-in / opt-out)
-- **Workflow Dossier** (machine à états + transitions)
-- **Recherche & reporting** (full-text PostgreSQL + KPIs)
-- **Notifications** (email/SMS, templates, async)
-- **Qualité / prod readiness** (tests, CI, couverture, observabilité)
+### Livrables réalisés (Advanced CRM & Phase 2 Agentic Commerce)
+- **Messagerie / suivi des communications** (timeline d’activité) ✅
+- **Audit trail** (journal de changements) ✅
+- **Gestion des consentements** (RGPD / opt-in / opt-out) ✅
+- **Workflow Dossier** (machine à états + transitions) ✅
+- **Recherche & reporting** (full-text PostgreSQL + KPIs) ✅
+- **Notifications** (email/SMS, templates, async) ✅
+- **Qualité / prod readiness** (tests E2E Playwright, CI GitHub Actions, observables) ✅
+- **IA Agentique (Phase 2)** : Coach Virtuel (Nudging), Chatbot IA WhatsApp, Génération de Contrats (LLM), Yield Management dynamique, Détection de Fraude/Doublons. ✅
+- **UX/UI Calm & Mobile** : Bento Grids, Swipe-Friendly UI, palette de commandes CMD+K. ✅
 
 ## Organisation
 - `01_cadrage/` : vision, objectifs, scope, personas

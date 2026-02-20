@@ -21,34 +21,51 @@ Les sprints ci-dessous décrivent la suite logique (Advanced CRM).
 - Tests d’isolation cross-tenant
 
 ## Sprint B — Workflow Dossier
+- ✅ Terminé
 - DossierWorkflowService (transitions + guards)
 - Endpoint transitions
 - UI : dropdown transitions autorisées
 - Tests transitions
 
 ## Sprint C — Consentements
+- ✅ Terminé
 - ConsentementService + endpoints
 - UI : checkboxes/badges
 - Enforcement : blocage messages sortants
 - Tests consentements
 
 ## Sprint D — Messagerie / Timeline
+- ✅ Terminé
 - MessageEntity + endpoints
 - UI timeline + filtres
 - Activité dans détail dossier
 - Tests FE + E2E
 
 ## Sprint E — Audit trail
+- ✅ Terminé
 - Entity listeners + AuditEventEntity
 - Endpoints audit read-only
 - UI audit trail
 - Tests audit
 
 ## Sprint F — Reporting & Notifications
+- ✅ Terminé
 - Full-text + dashboard KPIs
 - Page reporting (charts)
 - NotificationService + templates + async
 - Observabilité + monitoring endpoints
+
+## Sprint G — Agent IA & WhatsApp (Phase 2 Agentic)
+- ✅ Terminé
+- NLP Backend `agent-service` connecté au Front (CMD+K / Chat)
+- WhatsApp inbound & outbound via Twilio
+
+## Sprint H — Automatisation & IA (Phase 2 Agentic)
+- ✅ Terminé
+- Coach Virtuel (Nudging)
+- Validation et parsing IA de documents (Amiante / DPE)
+- Scoring Fraude et Doublons sur `Annonces`
+- Job autoscale Yield Management
 
 ## Piste produit (TO-BE) — Sprint(s) “Coop Habitat”
 
