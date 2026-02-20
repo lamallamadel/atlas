@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, NgZone } from '@angular/core';
 import { ReportingApiService, ObservabilityMetrics } from '../services/reporting-api.service';
 import { interval, Subject, EMPTY } from 'rxjs';
 import { takeUntil, switchMap, startWith, catchError } from 'rxjs/operators';
@@ -47,7 +47,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
 
   private destroy$ = new Subject<void>();
 
-  constructor(private reportingService: ReportingApiService) {
+  constructor(private reportingService: ReportingApiService, private ngZone: NgZone) {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
@@ -61,13 +61,15 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
   }
 
   ngAfterViewInit(): void {
-    setTimeout(async () => {
-      await this.loadChartJs();
-      this.chartsInitialized = true;
-      if (this.metrics) {
-        this.updateAllCharts();
-      }
-    }, 100);
+    this.ngZone.runOutsideAngular(() => {
+      setTimeout(async () => {
+        await this.loadChartJs();
+        this.chartsInitialized = true;
+        if (this.metrics) {
+          this.updateAllCharts();
+        }
+      }, 100);
+    });
   }
 
   private async loadChartJs(): Promise<void> {
@@ -197,12 +199,14 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
   private updateAllCharts(): void {
     if (!this.metrics || !this.chartsInitialized || !this.ChartClass) return;
 
-    this.updateQueueTimeSeriesChart();
-    this.updateLatencyHistogramChart();
-    this.updateFailureStackedChart();
-    this.updateErrorCodeChart();
-    this.updateDlqChart();
-    this.updateQuotaChart();
+    this.ngZone.runOutsideAngular(() => {
+      this.updateQueueTimeSeriesChart();
+      this.updateLatencyHistogramChart();
+      this.updateFailureStackedChart();
+      this.updateErrorCodeChart();
+      this.updateDlqChart();
+      this.updateQuotaChart();
+    });
   }
 
   private updateQueueTimeSeriesChart(): void {
