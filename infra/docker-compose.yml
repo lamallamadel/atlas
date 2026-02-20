@@ -322,8 +322,6 @@ services:
       API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
       OLLAMA_ENABLED: ${OLLAMA_ENABLED:-false}
-    depends_on:
-      - ollama
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')" ]
       interval: 30s
