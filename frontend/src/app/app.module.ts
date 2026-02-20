@@ -98,6 +98,7 @@ import { OfflineIndicatorComponent } from './components/offline-indicator.compon
 import { OfflineInterceptor } from './interceptors/offline.interceptor';
 import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
 import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
+import { WaterfallChartComponent } from './components/waterfall-chart.component';
 import { DossierSharedModule } from './pages/dossiers/dossier-shared.module';
 import { SharedPipesModule } from './shared/shared-pipes.module';
 import { SharedComponentsModule } from './shared/shared-components.module';
@@ -158,7 +159,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     VoipConfigDialogComponent,
     OfflineIndicatorComponent,
     VirtualScrollListComponent,
-    MobileActionSheetComponent
+    MobileActionSheetComponent,
+    WaterfallChartComponent
   ],
   imports: [
     BrowserModule,

@@ -219,13 +219,13 @@ export class DossiersComponent implements OnInit {
   get emptyStateSecondaryAction(): ActionButtonConfig {
     return this.appliedFilters.length > 0
       ? {
-          label: 'Réinitialiser les filtres',
-          handler: () => this.clearFilters()
-        }
+        label: 'Réinitialiser les filtres',
+        handler: () => this.clearFilters()
+      }
       : {
-          label: 'Importer des dossiers',
-          handler: () => this.openImportDialog()
-        };
+        label: 'Importer des dossiers',
+        handler: () => this.openImportDialog()
+      };
   }
 
   useAdvancedFilter = false;
@@ -294,7 +294,7 @@ export class DossiersComponent implements OnInit {
     private exportService: ExportService,
     private dossierFilterApi: DossierFilterApiService,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.setupAnnonceAutocomplete();
@@ -303,13 +303,13 @@ export class DossiersComponent implements OnInit {
     this.setupQuickFilter();
 
     this.configureColumns();
-    
+
     this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => {
         this.isMobile = result.matches;
         this.configureColumns();
       });
-    
+
     this.route.queryParams.subscribe(params => {
       if (params['status']) {
         this.selectedStatus = params['status'] as DossierStatus;
@@ -520,10 +520,10 @@ export class DossiersComponent implements OnInit {
 
     if (this.selectedAnnonceId !== null) {
       const annonceValue = this.annonceSearchControl.value;
-      const displayValue = typeof annonceValue === 'object' && annonceValue 
+      const displayValue = typeof annonceValue === 'object' && annonceValue
         ? this.displayAnnonceFn(annonceValue)
         : `ID: ${this.selectedAnnonceId}`;
-      
+
       this.appliedFilters.push({
         key: 'annonceId',
         label: 'Annonce',
@@ -633,13 +633,13 @@ export class DossiersComponent implements OnInit {
     this.phoneFilter = (filters['phoneFilter'] as string) || '';
     this.annonceIdFilter = (filters['annonceIdFilter'] as string) || '';
     this.selectedAnnonceId = (filters['selectedAnnonceId'] as number) || null;
-    
+
     if (this.annonceIdFilter) {
       this.annonceSearchControl.setValue(this.annonceIdFilter, { emitEvent: false });
     } else {
       this.annonceSearchControl.setValue('', { emitEvent: false });
     }
-    
+
     this.onFilterChange();
     this.showPresetMenu = false;
   }
@@ -1007,8 +1007,8 @@ export class DossiersComponent implements OnInit {
     const exportPromise = event.format === 'pdf'
       ? this.exportService.exportToPDF(dataToExport, exportColumns, exportConfig)
       : event.format === 'excel'
-      ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
-      : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
+        ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
+        : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
 
     exportPromise.catch(error => {
       console.error('Export error:', error);
@@ -1029,7 +1029,38 @@ export class DossiersComponent implements OnInit {
       case 'delete':
         this.confirmDeleteDossier(action.dossier);
         break;
+      case 'archive':
+        this.archiveDossier(action.dossier);
+        break;
     }
+  }
+
+  archiveDossier(dossier: DossierResponse): void {
+    // Archive = mark as LOST ("Pas intéressé") — swipe-left Atlas 2026 action
+    this.dossierApiService.patchStatus(dossier.id, DossierStatus.LOST).subscribe({
+      next: () => {
+        const snackRef = this.snackBar.open(
+          `${dossier.leadName || 'Dossier'} archivé`,
+          'Annuler',
+          { duration: 5000, panelClass: ['warning-snackbar'] }
+        );
+        snackRef.onAction().subscribe(() => {
+          // Undo: restore previous status
+          this.dossierApiService.patchStatus(dossier.id, dossier.status).subscribe({
+            next: () => this.loadDossiers(),
+            error: (err: unknown) => console.error('Undo archive failed:', err)
+          });
+        });
+        this.loadDossiers();
+      },
+      error: (err: unknown) => {
+        this.snackBar.open('Erreur lors de l\'archivage', 'Fermer', {
+          duration: 4000,
+          panelClass: ['error-snackbar']
+        });
+        console.error('Archive error:', err);
+      }
+    });
   }
 
   handleMobileCall(dossier: DossierResponse): void {
