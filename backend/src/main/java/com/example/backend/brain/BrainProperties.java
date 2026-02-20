@@ -10,6 +10,10 @@ public class BrainProperties {
     private ServiceConfig scoring = new ServiceConfig();
     private ServiceConfig dupli = new ServiceConfig();
     private ServiceConfig fraud = new ServiceConfig();
+    private ServiceConfig match = new ServiceConfig();
+    private ServiceConfig proposal = new ServiceConfig();
+    private ServiceConfig nego = new ServiceConfig();
+    private ServiceConfig agent = new ServiceConfig();
 
     public ServiceConfig getScoring() {
         return scoring;
@@ -33,6 +37,38 @@ public class BrainProperties {
 
     public void setFraud(ServiceConfig fraud) {
         this.fraud = fraud;
+    }
+
+    public ServiceConfig getMatch() {
+        return match;
+    }
+
+    public void setMatch(ServiceConfig match) {
+        this.match = match;
+    }
+
+    public ServiceConfig getProposal() {
+        return proposal;
+    }
+
+    public void setProposal(ServiceConfig proposal) {
+        this.proposal = proposal;
+    }
+
+    public ServiceConfig getNego() {
+        return nego;
+    }
+
+    public void setNego(ServiceConfig nego) {
+        this.nego = nego;
+    }
+
+    public ServiceConfig getAgent() {
+        return agent;
+    }
+
+    public void setAgent(ServiceConfig agent) {
+        this.agent = agent;
     }
 
     public static class ServiceConfig {

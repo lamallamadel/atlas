@@ -12,7 +12,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atlas} -d ${POSTGRES_DB:-atlas}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-atlas} -d ${POSTGRES_DB:-atlas}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,7 +27,7 @@ services:
     volumes:
       - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: [ "CMD", "redis-cli", "ping" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -36,7 +36,7 @@ services:
     image: quay.io/keycloak/keycloak:24.0.5
     container_name: keycloak_app
     restart: unless-stopped
-    command: ["start-dev", "--import-realm"]
+    command: [ "start-dev", "--import-realm" ]
     environment:
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
@@ -51,11 +51,11 @@ services:
       postgres:
         condition: service_healthy
     healthcheck:
-        test: ["CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080 && echo ok >/dev/null'"]
-        interval: 10s
-        timeout: 5s
-        retries: 15
-        start_period: 90s
+      test: [ "CMD-SHELL", "bash -lc 'exec 3<>/dev/tcp/127.0.0.1/8080 && echo ok >/dev/null'" ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 90s
 
   backend:
     build:
@@ -104,7 +104,7 @@ services:
     volumes:
       - backend_logs:/var/log/atlas
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q UP"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health | grep -q UP" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -136,7 +136,7 @@ services:
     volumes:
       - elasticsearch_data:/usr/share/elasticsearch/data
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow >/dev/null || exit 1"]
+      test: [ "CMD-SHELL", "curl -fsS http://localhost:9200/_cluster/health?wait_for_status=yellow >/dev/null || exit 1" ]
       interval: 30s
       timeout: 10s
       retries: 10
@@ -171,7 +171,7 @@ services:
     container_name: filebeat
     restart: unless-stopped
     user: root
-    command: ["filebeat", "-e", "--strict.perms=false"]
+    command: [ "filebeat", "-e", "--strict.perms=false" ]
     volumes:
       - ./elk/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
       - backend_logs:/var/log/atlas:ro
@@ -218,7 +218,7 @@ services:
     environment:
       API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -236,7 +236,7 @@ services:
       API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
       SEUIL_DOUBLON: ${BRAIN_DUPLI_SEUIL:-0.85}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -253,11 +253,93 @@ services:
     environment:
       API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  match-service:
+    build:
+      context: ../brain/match-service
+      dockerfile: Dockerfile
+    container_name: brain_match
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_MATCH_PORT:-8003}:8003"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  proposal-service:
+    build:
+      context: ../brain/proposal-service
+      dockerfile: Dockerfile
+    container_name: brain_proposal
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_PROPOSAL_PORT:-8004}:8004"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8004/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  nego-service:
+    build:
+      context: ../brain/nego-service
+      dockerfile: Dockerfile
+    container_name: brain_nego
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_NEGO_PORT:-8005}:8005"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8005/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  agent-service:
+    build:
+      context: ../brain/agent-service
+      dockerfile: Dockerfile
+    container_name: brain_agent
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_AGENT_PORT:-8006}:8006"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+      OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
+      OLLAMA_ENABLED: ${OLLAMA_ENABLED:-false}
+    depends_on:
+      - ollama
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    profiles: [ "ai" ]
 
   nginx:
     image: nginx:1.27-alpine
@@ -289,3 +371,5 @@ volumes:
     name: prometheus_data
   grafana_data:
     name: grafana_data
+  ollama_data:
+    name: ollama_data

@@ -189,6 +189,22 @@ brain:
     base-url: ${BRAIN_FRAUD_URL:http://localhost:8002}
     api-key: ${BRAIN_API_KEY:change-me-in-production}
     timeout-seconds: ${BRAIN_FRAUD_TIMEOUT:5}
+  match:
+    base-url: ${BRAIN_MATCH_URL:http://localhost:8003}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_MATCH_TIMEOUT:10}
+  proposal:
+    base-url: ${BRAIN_PROPOSAL_URL:http://localhost:8004}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_PROPOSAL_TIMEOUT:15}
+  nego:
+    base-url: ${BRAIN_NEGO_URL:http://localhost:8005}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_NEGO_TIMEOUT:5}
+  agent:
+    base-url: ${BRAIN_AGENT_URL:http://localhost:8006}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_AGENT_TIMEOUT:15}
 
 management:
   endpoints:

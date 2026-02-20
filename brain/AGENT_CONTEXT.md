@@ -29,10 +29,11 @@ brain/nom-service/
 ### Ports assignés
 - scoring-service  : 8000 ✅ fait
 - dupli-service    : 8001 ✅ fait
-- fraud-service    : 8002 🔜 à faire
-- match-service    : 8003 🔜 à faire
-- proposal-service : 8004 🔜 à faire
-- nego-service     : 8005 🔜 à faire
+- fraud-service    : 8002 ✅ fait
+- match-service    : 8003 ✅ fait
+- proposal-service : 8004 ✅ fait
+- nego-service     : 8005 ✅ fait
+- agent-service    : 8006 ✅ fait (Agent IA Conversationnel + Ollama)
 
 ### Intégration Spring Boot
 - WebClient avec X-API-Key header
@@ -48,16 +49,11 @@ avec son port, API_KEY depuis .env, et atlas-network
 - scoring : prix/m², étage, surface, proximité mer → score 0-100
 - dupli : TF-IDF cosine similarity, seuil 0.30
 
-## Prochain service à créer : fraud-service :8002
-Détection :
-- Prix anormalement bas par rapport au marché
-- Vendeur avec historique suspect
-- Incohérence surface/prix/localisation
-```
+## Statut actuel
+Tous les services de la roadmap initiale ont été implémentés (scoring, dupli, fraud, match, proposal, nego).
+Un nouveau service `agent-service` a été ajouté pour gérer le routage NLP et l'intégration Ollama.
 
----
-
-Maintenant dans Claude Code tu dis juste :
-```
-Lis AGENT_CONTEXT.md et crée le fraud-service 
-en suivant exactement le même pattern que scoring-service
+## Prochaines étapes (Evolution)
+- Affiner les prompts LLM dans `agent-service`
+- Entraîner des modèles spécifiques pour le `match-service` (au lieu du random actuel)
+- Intégrer un vrai LLM pour le `proposal-service` (génération d'emails)
