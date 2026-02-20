@@ -149,6 +149,11 @@ export interface BulkOperationError {
   message: string;
 }
 
+export interface ContractGenerateResponse {
+  contractText: string;
+  confidence: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -234,5 +239,9 @@ export class DossierApiService {
     return this.list({ status: DossierStatus.NEW, size: 1 }).pipe(
       map(page => page.totalElements)
     );
+  }
+
+  generateContract(id: number): Observable<ContractGenerateResponse> {
+    return this.http.post<ContractGenerateResponse>(`${this.apiUrl}/${id}/contract/generate`, {});
   }
 }

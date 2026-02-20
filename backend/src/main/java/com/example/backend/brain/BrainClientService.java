@@ -14,6 +14,10 @@ import com.example.backend.brain.dto.NegoRequest;
 import com.example.backend.brain.dto.NegoResponse;
 import com.example.backend.brain.dto.AgentBrainRequest;
 import com.example.backend.brain.dto.AgentBrainResponse;
+import com.example.backend.brain.dto.DocumentVerifyRequest;
+import com.example.backend.brain.dto.DocumentVerifyResponse;
+import com.example.backend.brain.dto.ContractGenerateRequest;
+import com.example.backend.brain.dto.ContractGenerateResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -159,6 +163,40 @@ public class BrainClientService {
             return Optional.ofNullable(response.getBody());
         } catch (Exception e) {
             log.warn("Agent service unavailable: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<DocumentVerifyResponse> verifyDocument(DocumentVerifyRequest request) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getDocument().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            ResponseEntity<DocumentVerifyResponse> response = restTemplate.postForEntity(
+                    properties.getDocument().getBaseUrl() + "/api/document/verify",
+                    new HttpEntity<>(request, headers),
+                    DocumentVerifyResponse.class);
+            return Optional.ofNullable(response.getBody());
+        } catch (Exception e) {
+            log.warn("Document service unavailable (verify): {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    public Optional<ContractGenerateResponse> generateContract(ContractGenerateRequest request) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.set(API_KEY_HEADER, properties.getDocument().getApiKey());
+            headers.setContentType(MediaType.APPLICATION_JSON);
+
+            ResponseEntity<ContractGenerateResponse> response = restTemplate.postForEntity(
+                    properties.getDocument().getBaseUrl() + "/api/document/generate-contract",
+                    new HttpEntity<>(request, headers),
+                    ContractGenerateResponse.class);
+            return Optional.ofNullable(response.getBody());
+        } catch (Exception e) {
+            log.warn("Document service unavailable (generate): {}", e.getMessage());
             return Optional.empty();
         }
     }

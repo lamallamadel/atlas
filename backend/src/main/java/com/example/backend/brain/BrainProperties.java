@@ -14,6 +14,7 @@ public class BrainProperties {
     private ServiceConfig proposal = new ServiceConfig();
     private ServiceConfig nego = new ServiceConfig();
     private ServiceConfig agent = new ServiceConfig();
+    private ServiceConfig document = new ServiceConfig();
 
     public ServiceConfig getScoring() {
         return scoring;
@@ -69,6 +70,14 @@ public class BrainProperties {
 
     public void setAgent(ServiceConfig agent) {
         this.agent = agent;
+    }
+
+    public ServiceConfig getDocument() {
+        return document;
+    }
+
+    public void setDocument(ServiceConfig document) {
+        this.document = document;
     }
 
     public static class ServiceConfig {

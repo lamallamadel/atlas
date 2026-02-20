@@ -108,6 +108,11 @@ export class DossierDetailComponent implements OnInit {
   whatsappConsentStatus: ConsentementStatus | null = null;
   MessageDeliveryStatus = MessageDeliveryStatus;
 
+  generatingContract = false;
+  contractGeneratedSuccess: string | null = null;
+  contractGeneratedError: string | null = null;
+  contractText: string | null = null;
+
   whatsappTemplates: WhatsAppTemplate[] = [
     {
       id: 'greeting',
@@ -713,6 +718,33 @@ export class DossierDetailComponent implements OnInit {
           panelClass: ['error-snackbar']
         });
         console.error('Error updating lead:', err);
+      }
+    });
+  }
+
+  generateContract(): void {
+    if (!this.dossier) return;
+    this.generatingContract = true;
+    this.contractGeneratedSuccess = null;
+    this.contractGeneratedError = null;
+    this.contractText = null;
+
+    this.dossierApiService.generateContract(this.dossier.id).subscribe({
+      next: (response) => {
+        this.generatingContract = false;
+        this.contractText = response.contractText;
+        this.contractGeneratedSuccess = `Compromis généré avec succès par l'IA Atlas (Indice de confiance : ${response.confidence}%)`;
+        this.snackBar.open('Compromis généré avec succès !', 'Fermer', {
+          duration: 3000,
+          horizontalPosition: 'center',
+          verticalPosition: 'top',
+          panelClass: ['success-snackbar']
+        });
+      },
+      error: (err) => {
+        this.generatingContract = false;
+        this.contractGeneratedError = "Erreur lors de la génération du compromis de vente.";
+        console.error('Error generating contract:', err);
       }
     });
   }

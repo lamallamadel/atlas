@@ -644,6 +644,28 @@
 
         <mat-tab label="Documents" aria-label="Gestion des documents du dossier">
           <div class="tab-content">
+            <div class="tab-header-actions" style="margin-bottom: 20px;">
+              <button class="btn-add" (click)="generateContract()" [disabled]="generatingContract"
+                aria-label="Générer un compromis IA">
+                <span class="btn-icon" aria-hidden="true" *ngIf="generatingContract" class="spinner-small"></span>
+                <span class="btn-icon" aria-hidden="true" *ngIf="!generatingContract">✨</span>
+                {{ generatingContract ? 'Génération en cours...' : 'Générer le compromis (IA Atlas)' }}
+              </button>
+            </div>
+
+            <div *ngIf="contractGeneratedSuccess" class="success-message slide-in-top" style="margin-bottom: 20px;">
+              {{ contractGeneratedSuccess }}
+
+              <div *ngIf="contractText"
+                style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; color: var(--text-color); font-size: 0.9em; line-height: 1.5; border-left: 4px solid var(--accent-color);">
+                {{ contractText }}
+              </div>
+            </div>
+
+            <div *ngIf="contractGeneratedError" class="error-message slide-in-top" style="margin-bottom: 20px;">
+              {{ contractGeneratedError }}
+            </div>
+
             <app-document-list [dossierId]="dossier.id"></app-document-list>
           </div>
         </mat-tab>

@@ -214,6 +214,14 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+    proposal-service:
+      base-url: "http://localhost:8002"
+    nego-service:
+      base-url: "http://localhost:8003"
+    agent-service:
+      base-url: "http://localhost:8004"
+    document-service:
+      base-url: "http://localhost:8005"
     info:
       enabled: true
     prometheus:

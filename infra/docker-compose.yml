@@ -317,13 +317,30 @@ services:
     container_name: brain_agent
     restart: unless-stopped
     ports:
-      - "${BRAIN_AGENT_PORT:-8006}:8006"
+      - "${BRAIN_AGENT_PORT:-8006}:8000"
     environment:
       API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
       OLLAMA_ENABLED: ${OLLAMA_ENABLED:-false}
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8006/health')" ]
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+
+  document-service:
+    build:
+      context: ../brain/document-service
+      dockerfile: Dockerfile
+    container_name: brain_document
+    restart: unless-stopped
+    ports:
+      - "${BRAIN_DOCUMENT_PORT:-8007}:8000"
+    environment:
+      API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
+    healthcheck:
+      test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
       timeout: 10s
       retries: 3
