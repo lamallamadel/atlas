@@ -54,7 +54,7 @@ export class DossierDetailComponent implements OnInit {
   dossier: DossierResponse | null = null;
   loading = false;
   error: string | null = null;
-  
+
   selectedStatus: DossierStatus | null = null;
   updatingStatus = false;
   successMessage: string | null = null;
@@ -107,7 +107,7 @@ export class DossierDetailComponent implements OnInit {
   sendingWhatsAppMessage = false;
   whatsappConsentStatus: ConsentementStatus | null = null;
   MessageDeliveryStatus = MessageDeliveryStatus;
-  
+
   whatsappTemplates: WhatsAppTemplate[] = [
     {
       id: 'greeting',
@@ -167,7 +167,7 @@ export class DossierDetailComponent implements OnInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private recentNavigationService: RecentNavigationService
-  ) {}
+  ) { }
 
   getAvailableStatusOptions(): DossierStatus[] {
     if (!this.dossier) {
@@ -180,35 +180,35 @@ export class DossierDetailComponent implements OnInit {
       case DossierStatus.WON:
       case DossierStatus.LOST:
         return [currentStatus];
-      
+
       case DossierStatus.NEW:
         return [
           DossierStatus.NEW,
           DossierStatus.QUALIFYING,
           DossierStatus.LOST
         ];
-      
+
       case DossierStatus.QUALIFYING:
         return [
           DossierStatus.QUALIFYING,
           DossierStatus.QUALIFIED,
           DossierStatus.LOST
         ];
-      
+
       case DossierStatus.QUALIFIED:
         return [
           DossierStatus.QUALIFIED,
           DossierStatus.APPOINTMENT,
           DossierStatus.LOST
         ];
-      
+
       case DossierStatus.APPOINTMENT:
         return [
           DossierStatus.APPOINTMENT,
           DossierStatus.WON,
           DossierStatus.LOST
         ];
-      
+
       default:
         return this.statusOptions;
     }
@@ -218,8 +218,8 @@ export class DossierDetailComponent implements OnInit {
     if (!this.dossier) {
       return false;
     }
-    return this.dossier.status === DossierStatus.WON || 
-           this.dossier.status === DossierStatus.LOST;
+    return this.dossier.status === DossierStatus.WON ||
+      this.dossier.status === DossierStatus.LOST;
   }
 
   getStatusChangeTooltip(): string {
@@ -230,7 +230,7 @@ export class DossierDetailComponent implements OnInit {
     if (this.dossier.status === DossierStatus.WON) {
       return 'Le statut GAGNÉ est terminal et ne peut pas être modifié';
     }
-    
+
     if (this.dossier.status === DossierStatus.LOST) {
       return 'Le statut PERDU est terminal et ne peut pas être modifié';
     }
@@ -285,7 +285,7 @@ export class DossierDetailComponent implements OnInit {
         this.dossier = response;
         this.selectedStatus = response.status;
         this.loading = false;
-        
+
         // Add to recent navigation
         this.recentNavigationService.addRecentItem({
           id: String(response.id),
@@ -574,7 +574,7 @@ export class DossierDetailComponent implements OnInit {
           panelClass: ['success-snackbar']
         });
         this.loadDossier();
-        
+
         setTimeout(() => {
           this.successMessage = null;
           this.showStatusChange = false;
@@ -592,6 +592,25 @@ export class DossierDetailComponent implements OnInit {
         console.error('Error updating status:', err);
       }
     });
+  }
+
+  getVirtualCoachNudge(): string | null {
+    if (!this.dossier) return null;
+
+    const acts = this.dossier.recentActivities || [];
+    const views = acts.filter(a => a.activityType === 'PROPERTY_VIEW' || a.activityType === 'VIEW_PROPERTY');
+    const score = this.dossier.score || 0;
+
+    // Behavioral Nudge Logic
+    if (views.length >= 3 && score >= 20 && this.dossier.status === DossierStatus.NEW) {
+      return `Ce prospect a consulté l'annonce ${views.length} fois récemment et a un score d'intérêt élevé (${score}). Il est extrêmement actif : appelez-le immédiatement pour le qualifier !`;
+    }
+
+    if (score >= 50 && (this.dossier.status === DossierStatus.QUALIFYING || this.dossier.status === DossierStatus.QUALIFIED)) {
+      return `Le prospect est très chaud (Score: ${score}). Ne perdez pas l'élan, proposez-lui une visite dès maintenant.`;
+    }
+
+    return null;
   }
 
   goBack(): void {
@@ -678,7 +697,7 @@ export class DossierDetailComponent implements OnInit {
           panelClass: ['success-snackbar']
         });
         this.loadDossier();
-        
+
         setTimeout(() => {
           this.leadSuccessMessage = null;
           this.showLeadForm = false;
@@ -1423,14 +1442,14 @@ export class DossierDetailComponent implements OnInit {
       return false;
     }
     const emptyFields = [];
-    
+
     if (!this.dossier.leadName) {
       emptyFields.push('leadName');
     }
     if (!this.dossier.leadSource) {
       emptyFields.push('leadSource');
     }
-    
+
     return emptyFields.length > 0;
   }
 
@@ -1439,14 +1458,14 @@ export class DossierDetailComponent implements OnInit {
       return '';
     }
     const emptyFields = [];
-    
+
     if (!this.dossier.leadName) {
       emptyFields.push('Nom du prospect');
     }
     if (!this.dossier.leadSource) {
       emptyFields.push('Source du prospect');
     }
-    
+
     return emptyFields.join(', ');
   }
 
@@ -1462,11 +1481,11 @@ export class DossierDetailComponent implements OnInit {
     }
 
     this.loadingWhatsAppMessages = true;
-    this.messageApiService.list({ 
-      dossierId, 
+    this.messageApiService.list({
+      dossierId,
       channel: MessageChannel.WHATSAPP,
-      size: 100, 
-      sort: 'timestamp,asc' 
+      size: 100,
+      sort: 'timestamp,asc'
     }).subscribe({
       next: (response) => {
         this.whatsappMessages = response.content;

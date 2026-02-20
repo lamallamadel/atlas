@@ -48,6 +48,14 @@ export interface PartiePrenanteResponse {
   updatedAt: string;
 }
 
+export interface LeadActivityResponse {
+  id: number;
+  activityType: string;
+  description: string;
+  scoreImpact: number;
+  createdAt: string;
+}
+
 export interface DossierResponse {
   id: number;
   orgId: string;
@@ -60,6 +68,7 @@ export interface DossierResponse {
   score?: number;
   source?: DossierSource;
   parties?: PartiePrenanteResponse[];
+  recentActivities?: LeadActivityResponse[];
   existingOpenDossierId?: number;
   createdAt: string;
   updatedAt: string;
