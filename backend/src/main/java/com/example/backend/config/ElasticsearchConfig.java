@@ -7,9 +7,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
+import org.springframework.data.repository.config.BootstrapMode;
 
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.example.backend.repository.search")
+@EnableElasticsearchRepositories(
+        basePackages = "com.example.backend.repository.search",
+        bootstrapMode = BootstrapMode.LAZY)
 @ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
