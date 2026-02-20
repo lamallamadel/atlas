@@ -5,6 +5,7 @@ import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { RecentNavigationService, RecentItem } from '../services/recent-navigation.service';
 import { ThemeService } from '../services/theme.service';
+import { AiAgentService } from '../services/ai-agent.service';
 import { Observable, Subject, debounceTime, distinctUntilChanged, switchMap, of, takeUntil, filter } from 'rxjs';
 import { DossierCreateDialogComponent } from '../pages/dossiers/dossier-create-dialog.component';
 
@@ -64,7 +65,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     private keyboardShortcutService: KeyboardShortcutService,
     private searchApiService: SearchApiService,
     private recentNavigationService: RecentNavigationService,
-    private themeService: ThemeService
+    private themeService: ThemeService,
+    private agentService: AiAgentService
   ) {
     this.visible$ = this.keyboardShortcutService.commandPaletteVisible$;
   }
@@ -435,10 +437,42 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
       });
 
       items = [...scoredContextual, ...scoredGlobal, ...searchResults];
+
+      // ── Agent mode: inject "Ask the agent" when query looks like NL ──
+      const isNaturalLanguage = this.looksLikeNaturalLanguage(this.searchQuery.trim());
+      const hasResults = items.length > 0;
+      if (isNaturalLanguage || !hasResults) {
+        const agentCommand: CommandItem = {
+          id: 'ask-agent',
+          label: `Demander à Atlas IA : « ${this.searchQuery.trim()} »`,
+          description: 'Analyse en langage naturel — recherche, création, navigation…',
+          icon: 'auto_awesome',
+          category: 'Agent IA',
+          keywords: [],
+          action: () => {
+            this.close();
+            this.agentService.openPanel(this.searchQuery.trim());
+          }
+        };
+        // Always show agent option first
+        items = [agentCommand, ...items];
+      }
     }
 
     this.filteredItems = items;
     this.selectedIndex = 0;
+  }
+
+  /**
+   * Detects if the query is likely natural language rather than a command keyword.
+   * Heuristics: ≥3 words, OR starts with a known agent verb, OR contains proper nouns.
+   */
+  private looksLikeNaturalLanguage(query: string): boolean {
+    const wordCount = query.split(/\s+/).length;
+    if (wordCount >= 3) return true;
+    const agentVerbs = ['trouve', 'crée', 'envoie', 'cherche', 'montre', 'affiche', 'contacte', 'appelle'];
+    const qLower = query.toLowerCase();
+    return agentVerbs.some(v => qLower.startsWith(v));
   }
 
   /**
