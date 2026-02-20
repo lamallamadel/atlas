@@ -59,6 +59,7 @@ ALTER TABLE import_job_entity ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 ALTER TABLE message_entity ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
 ALTER TABLE message_entity ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 
+-- message_template now has created_by/updated_by from V37, but these are safe no-ops
 ALTER TABLE message_template ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
 ALTER TABLE message_template ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 

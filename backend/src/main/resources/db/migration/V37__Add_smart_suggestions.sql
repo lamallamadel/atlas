@@ -13,6 +13,8 @@ CREATE TABLE user_behavior_pattern (
     last_performed_at TIMESTAMP NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255),
     CONSTRAINT unique_user_behavior UNIQUE (org_id, user_id, action_type, context_type, context_id)
 );
 
@@ -33,7 +35,9 @@ CREATE TABLE suggestion_template (
     priority INTEGER DEFAULT 5,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
 );
 
 CREATE INDEX idx_suggestion_template_trigger ON suggestion_template(org_id, trigger_condition, is_active);
@@ -52,7 +56,9 @@ CREATE TABLE message_template (
     usage_count INTEGER DEFAULT 0,
     is_active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
 );
 
 CREATE INDEX idx_message_template_category ON message_template(org_id, category, is_active);
@@ -68,7 +74,9 @@ CREATE TABLE suggestion_feedback (
     context_id BIGINT,
     was_accepted BOOLEAN NOT NULL,
     feedback_text TEXT,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    created_by VARCHAR(255),
+    updated_by VARCHAR(255)
 );
 
 CREATE INDEX idx_suggestion_feedback_user ON suggestion_feedback(org_id, user_id);
