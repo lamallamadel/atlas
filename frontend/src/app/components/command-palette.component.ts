@@ -1,10 +1,11 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { Router, NavigationEnd } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { RecentNavigationService, RecentItem } from '../services/recent-navigation.service';
-import { Observable, Subject, debounceTime, distinctUntilChanged, switchMap, of, takeUntil } from 'rxjs';
+import { ThemeService } from '../services/theme.service';
+import { Observable, Subject, debounceTime, distinctUntilChanged, switchMap, of, takeUntil, filter } from 'rxjs';
 import { DossierCreateDialogComponent } from '../pages/dossiers/dossier-create-dialog.component';
 
 interface CommandItem {
@@ -16,6 +17,8 @@ interface CommandItem {
   category: string;
   keywords?: string[];
   shortcut?: string;
+  /** Score assigned during fuzzy sort (transient, not stored) */
+  _score?: number;
 }
 
 type PaletteItem = CommandItem | SearchResult | RecentItem;
@@ -23,6 +26,13 @@ type PaletteItem = CommandItem | SearchResult | RecentItem;
 interface GroupedItems {
   category: string;
   items: PaletteItem[];
+}
+
+/** Result of a fuzzy match including highlight segments */
+interface FuzzyResult {
+  score: number;
+  /** Array of [text, isMatch] tuples for highlight rendering */
+  segments: Array<{ text: string; match: boolean }>;
 }
 
 @Component({
@@ -36,10 +46,15 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
   visible$: Observable<boolean>;
   searchQuery = '';
   globalCommands: CommandItem[] = [];
+  contextualCommands: CommandItem[] = [];
   filteredItems: PaletteItem[] = [];
   selectedIndex = 0;
   isSearching = false;
 
+  /** Map of itemId → highlight segments for the current query */
+  highlightMap = new Map<string, Array<{ text: string; match: boolean }>>();
+
+  private currentRoute = '';
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
 
@@ -48,7 +63,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     private dialog: MatDialog,
     private keyboardShortcutService: KeyboardShortcutService,
     private searchApiService: SearchApiService,
-    private recentNavigationService: RecentNavigationService
+    private recentNavigationService: RecentNavigationService,
+    private themeService: ThemeService
   ) {
     this.visible$ = this.keyboardShortcutService.commandPaletteVisible$;
   }
@@ -56,7 +72,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
   ngOnInit(): void {
     this.initializeGlobalCommands();
     this.initializeSearch();
-    
+    this.watchRoute();
+
     this.visible$.pipe(takeUntil(this.destroy$)).subscribe(visible => {
       if (visible) {
         setTimeout(() => {
@@ -74,9 +91,7 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
       .pipe(takeUntil(this.destroy$))
       .subscribe(visible => {
         if (visible && this.commandInput) {
-          setTimeout(() => {
-            this.commandInput.nativeElement.focus();
-          }, 100);
+          setTimeout(() => this.commandInput.nativeElement.focus(), 100);
         }
       });
   }
@@ -86,15 +101,167 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     this.destroy$.complete();
   }
 
+  // ─────────────────────────────────────────────────────────────
+  // Route watcher → contextual command injection
+  // ─────────────────────────────────────────────────────────────
+  private watchRoute(): void {
+    // Capture initial route
+    this.currentRoute = this.router.url;
+    this.buildContextualCommands();
+
+    this.router.events.pipe(
+      filter(e => e instanceof NavigationEnd),
+      takeUntil(this.destroy$)
+    ).subscribe((e: NavigationEnd) => {
+      this.currentRoute = e.urlAfterRedirects || e.url;
+      this.buildContextualCommands();
+    });
+  }
+
+  /**
+   * Builds context-sensitive commands based on the current URL.
+   * These appear at the top of the palette as "Actions contextuelles".
+   */
+  private buildContextualCommands(): void {
+    const route = this.currentRoute;
+    const commands: CommandItem[] = [];
+
+    // ── Dossier detail page ──────────────────────────────────
+    const dossierMatch = route.match(/\/dossiers\/(\d+)/);
+    if (dossierMatch) {
+      const id = dossierMatch[1];
+      commands.push(
+        {
+          id: 'ctx-add-note',
+          label: 'Ajouter une note',
+          description: 'Ajouter une note à ce dossier',
+          icon: 'note_add',
+          category: 'Actions contextuelles',
+          keywords: ['note', 'commentaire'],
+          shortcut: 'n',
+          action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'add-note' } })
+        },
+        {
+          id: 'ctx-schedule-visit',
+          label: 'Planifier une visite',
+          description: 'Créer un rendez-vous de visite pour ce prospect',
+          icon: 'event',
+          category: 'Actions contextuelles',
+          keywords: ['rdv', 'visite', 'rendez-vous'],
+          action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'schedule-visit' } })
+        },
+        {
+          id: 'ctx-send-message',
+          label: 'Envoyer un message',
+          description: 'Contacter ce prospect via WhatsApp ou SMS',
+          icon: 'send',
+          category: 'Actions contextuelles',
+          keywords: ['message', 'whatsapp', 'sms', 'envoyer'],
+          action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'send-message' } })
+        },
+        {
+          id: 'ctx-change-status',
+          label: 'Changer le statut',
+          description: 'Modifier le statut du dossier',
+          icon: 'sync_alt',
+          category: 'Actions contextuelles',
+          keywords: ['statut', 'status', 'changer'],
+          action: () => this.router.navigate(['/dossiers', id], { queryParams: { action: 'change-status' } })
+        }
+      );
+    }
+
+    // ── Annonce detail page ──────────────────────────────────
+    const annonceMatch = route.match(/\/annonces\/(\d+)/);
+    if (annonceMatch) {
+      const id = annonceMatch[1];
+      commands.push(
+        {
+          id: 'ctx-edit-annonce',
+          label: 'Modifier cette annonce',
+          description: 'Éditer les détails de l\'annonce',
+          icon: 'edit',
+          category: 'Actions contextuelles',
+          keywords: ['éditer', 'modifier', 'annonce'],
+          action: () => this.router.navigate(['/annonces', id, 'edit'])
+        },
+        {
+          id: 'ctx-create-dossier-for-annonce',
+          label: 'Créer un lead pour cette annonce',
+          description: 'Ouvrir un nouveau dossier lié à cette annonce',
+          icon: 'person_add',
+          category: 'Actions contextuelles',
+          keywords: ['lead', 'dossier', 'nouveau'],
+          action: () => this.openCreateDossierDialog()
+        }
+      );
+    }
+
+    // ── Dossiers list page ───────────────────────────────────
+    if (route.startsWith('/dossiers') && !dossierMatch) {
+      commands.push(
+        {
+          id: 'ctx-new-lead',
+          label: 'Nouveau lead / dossier',
+          description: 'Créer un nouveau prospect immédiatement',
+          icon: 'person_add',
+          category: 'Actions contextuelles',
+          keywords: ['lead', 'nouveau', 'créer', 'prospect'],
+          shortcut: 'c',
+          action: () => this.openCreateDossierDialog()
+        },
+        {
+          id: 'ctx-export-leads',
+          label: 'Exporter les leads',
+          description: 'Exporter la liste en CSV ou PDF',
+          icon: 'download',
+          category: 'Actions contextuelles',
+          keywords: ['export', 'csv', 'pdf', 'télécharger'],
+          action: () => this.router.navigate(['/dossiers'], { queryParams: { action: 'export' } })
+        }
+      );
+    }
+
+    // ── Dashboard ────────────────────────────────────────────
+    if (route.startsWith('/dashboard')) {
+      commands.push({
+        id: 'ctx-customize-dashboard',
+        label: 'Personnaliser le tableau de bord',
+        description: 'Réorganiser les widgets par glisser-déposer',
+        icon: 'dashboard_customize',
+        category: 'Actions contextuelles',
+        keywords: ['widget', 'dashboard', 'personnaliser'],
+        action: () => this.router.navigate(['/dashboard'], { queryParams: { action: 'customize' } })
+      });
+    }
+
+    // ── Calendar ─────────────────────────────────────────────
+    if (route.startsWith('/calendar')) {
+      commands.push({
+        id: 'ctx-new-appointment',
+        label: 'Nouveau rendez-vous',
+        description: 'Planifier un rendez-vous directement',
+        icon: 'event_available',
+        category: 'Actions contextuelles',
+        keywords: ['rdv', 'rendez-vous', 'agenda', 'nouveau'],
+        shortcut: 'r',
+        action: () => this.router.navigate(['/calendar'], { queryParams: { action: 'new-appointment' } })
+      });
+    }
+
+    this.contextualCommands = commands;
+  }
+
   private initializeGlobalCommands(): void {
     this.globalCommands = [
+      // ── Actions ─────────────────────────────────────────────
       {
         id: 'create-dossier',
         label: 'Créer un nouveau dossier',
         description: 'Ouvrir le formulaire de création de dossier',
         icon: 'create_new_folder',
         category: 'Actions',
-        keywords: ['nouveau', 'créer', 'dossier', 'lead'],
+        keywords: ['nouveau', 'créer', 'dossier', 'lead', 'prospect'],
         shortcut: 'Ctrl+Shift+D',
         action: () => this.openCreateDossierDialog()
       },
@@ -104,10 +271,22 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
         description: 'Créer une nouvelle annonce immobilière',
         icon: 'add_circle',
         category: 'Actions',
-        keywords: ['nouveau', 'créer', 'annonce', 'propriété'],
+        keywords: ['nouveau', 'créer', 'annonce', 'propriété', 'bien'],
         shortcut: 'Ctrl+Shift+A',
         action: () => this.navigateTo('/annonces/new')
       },
+      // ── Système ─────────────────────────────────────────────
+      {
+        id: 'toggle-dark-mode',
+        label: 'Basculer le mode sombre',
+        description: () => `Mode actuel : ${this.themeService.isDarkTheme() ? 'Sombre 🌙' : 'Clair ☀️'} — cliquez pour basculer`,
+        icon: () => this.themeService.isDarkTheme() ? 'light_mode' : 'dark_mode',
+        category: 'Système',
+        keywords: ['dark', 'sombre', 'thème', 'mode', 'light', 'clair', 'nuit'],
+        shortcut: 'Ctrl+\\',
+        action: () => this.themeService.toggleTheme()
+      } as unknown as CommandItem,
+      // ── Navigation ──────────────────────────────────────────
       {
         id: 'nav-dashboard',
         label: 'Tableau de bord',
@@ -121,20 +300,20 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
       {
         id: 'nav-annonces',
         label: 'Annonces',
-        description: 'Liste de toutes les annonces',
+        description: 'Liste de toutes les annonces immobilières',
         icon: 'campaign',
         category: 'Navigation',
-        keywords: ['propriété', 'bien', 'annonce'],
+        keywords: ['propriété', 'bien', 'annonce', 'liste'],
         shortcut: 'g+a',
         action: () => this.navigateTo('/annonces')
       },
       {
         id: 'nav-dossiers',
-        label: 'Dossiers',
-        description: 'Liste de tous les dossiers',
+        label: 'Dossiers / Leads',
+        description: 'Liste de tous les dossiers et prospects',
         icon: 'folder',
         category: 'Navigation',
-        keywords: ['leads', 'clients', 'dossiers'],
+        keywords: ['leads', 'clients', 'dossiers', 'prospects'],
         shortcut: 'g+d',
         action: () => this.navigateTo('/dossiers')
       },
@@ -160,39 +339,41 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
       },
       {
         id: 'nav-reports',
-        label: 'Rapports',
-        description: 'Voir les rapports et KPIs',
+        label: 'Rapports & KPIs',
+        description: 'Statistiques et tableaux de bord analytiques',
         icon: 'insights',
         category: 'Navigation',
-        keywords: ['statistiques', 'analytics', 'rapports'],
+        keywords: ['statistiques', 'analytics', 'rapports', 'kpi', 'chiffres'],
+        shortcut: 'g+r',
         action: () => this.navigateTo('/reports')
-      },
-      {
-        id: 'nav-observability',
-        label: 'Observabilité',
-        description: 'Dashboard d\'observabilité système',
-        icon: 'analytics',
-        category: 'Navigation',
-        keywords: ['monitoring', 'logs', 'metrics'],
-        action: () => this.navigateTo('/observability')
       },
       {
         id: 'nav-search',
         label: 'Recherche globale',
-        description: 'Rechercher des annonces et dossiers',
+        description: 'Rechercher des annonces, dossiers, contacts',
         icon: 'search',
         category: 'Navigation',
-        keywords: ['chercher', 'trouver', 'search'],
+        keywords: ['chercher', 'trouver', 'search', 'recherche'],
         shortcut: '/',
         action: () => this.navigateTo('/search')
       },
+      {
+        id: 'nav-observability',
+        label: 'Observabilité système',
+        description: 'Dashboard de monitoring et métriques',
+        icon: 'analytics',
+        category: 'Navigation',
+        keywords: ['monitoring', 'logs', 'metrics', 'système'],
+        action: () => this.navigateTo('/observability')
+      },
+      // ── Aide ────────────────────────────────────────────────
       {
         id: 'show-shortcuts',
         label: 'Raccourcis clavier',
         description: 'Voir tous les raccourcis disponibles',
         icon: 'keyboard',
         category: 'Aide',
-        keywords: ['aide', 'help', 'shortcuts'],
+        keywords: ['aide', 'help', 'shortcuts', 'raccourcis'],
         shortcut: '?',
         action: () => {
           this.close();
@@ -222,8 +403,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
 
   onSearchChange(): void {
     this.searchSubject.next(this.searchQuery);
-    
-    // Immediate local filtering for better responsiveness
+
+    // Immediate local filtering for responsiveness
     if (!this.searchQuery || this.searchQuery.length < 2) {
       this.updateFilteredItems();
     }
@@ -231,49 +412,128 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
 
   private updateFilteredItems(searchResults: SearchResult[] = []): void {
     const query = this.searchQuery.toLowerCase().trim();
-    
+    this.highlightMap.clear();
+
     let items: PaletteItem[] = [];
 
     if (!query) {
-      // Show recent items when no query
+      // No query: contextual first, then recent, then global commands
       const recentItems = this.recentNavigationService.getRecentItems();
-      items = [...recentItems, ...this.globalCommands];
+      items = [...this.contextualCommands, ...recentItems, ...this.globalCommands];
     } else {
-      // Fuzzy filter global commands
-      const filteredCommands = this.globalCommands.filter(cmd =>
-        this.fuzzyMatch(query, cmd.label) ||
-        this.fuzzyMatch(query, cmd.description) ||
-        this.fuzzyMatch(query, cmd.category) ||
-        cmd.keywords?.some(keyword => this.fuzzyMatch(query, keyword))
-      );
+      // Score + filter contextual commands
+      const scoredContextual = this.scoreAndFilter(this.contextualCommands, query);
+      // Score + filter global commands
+      const scoredGlobal = this.scoreAndFilter(this.globalCommands, query);
 
-      // Combine filtered commands with search results
-      items = [...filteredCommands, ...searchResults];
+      // Build highlight map for all matched commands
+      [...scoredContextual, ...scoredGlobal].forEach(cmd => {
+        const result = this.fuzzyScore(query, cmd.label);
+        if (result.score > 0) {
+          this.highlightMap.set(cmd.id, result.segments);
+        }
+      });
+
+      items = [...scoredContextual, ...scoredGlobal, ...searchResults];
     }
 
     this.filteredItems = items;
     this.selectedIndex = 0;
   }
 
-  private fuzzyMatch(query: string, text: string): boolean {
-    if (!text) return false;
-    
+  /**
+   * Scores all commands against the query and returns them sorted by relevance desc.
+   * Commands scoring 0 are excluded.
+   */
+  private scoreAndFilter(commands: CommandItem[], query: string): CommandItem[] {
+    return commands
+      .map(cmd => {
+        const scores = [
+          this.fuzzyScore(query, cmd.label).score * 3,          // label weighted ×3
+          this.fuzzyScore(query, cmd.description).score * 1.5,  // description ×1.5
+          this.fuzzyScore(query, cmd.category).score,
+          ...(cmd.keywords || []).map(k => this.fuzzyScore(query, k).score * 2)
+        ];
+        const best = Math.max(...scores);
+        return { cmd, score: best };
+      })
+      .filter(({ score }) => score > 0)
+      .sort((a, b) => b.score - a.score)
+      .map(({ cmd }) => cmd);
+  }
+
+  /**
+   * Returns a relevance score (0 = no match) plus highlight segments.
+   * Scoring:
+   *  - Exact start match  = 100
+   *  - Substring match    = 70 + (proximity to start)
+   *  - Fuzzy char match   = 10 + ratio of chars matched
+   */
+  private fuzzyScore(query: string, text: string): FuzzyResult {
+    if (!text || !query) return { score: 0, segments: [{ text, match: false }] };
+
     const textLower = text.toLowerCase();
     const queryLower = query.toLowerCase();
-    
-    // Simple substring match
-    if (textLower.includes(queryLower)) {
-      return true;
+
+    // ── Exact start match ────────────────────────────────────
+    if (textLower.startsWith(queryLower)) {
+      return {
+        score: 100,
+        segments: [
+          { text: text.slice(0, query.length), match: true },
+          { text: text.slice(query.length), match: false }
+        ]
+      };
     }
-    
-    // Fuzzy matching: check if all characters of query appear in order
-    let queryIndex = 0;
-    for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
-      if (textLower[i] === queryLower[queryIndex]) {
-        queryIndex++;
+
+    // ── Substring match ──────────────────────────────────────
+    const idx = textLower.indexOf(queryLower);
+    if (idx !== -1) {
+      const proximity = Math.max(0, 50 - idx); // higher score if closer to start
+      return {
+        score: 70 + proximity,
+        segments: [
+          { text: text.slice(0, idx), match: false },
+          { text: text.slice(idx, idx + query.length), match: true },
+          { text: text.slice(idx + query.length), match: false }
+        ]
+      };
+    }
+
+    // ── Fuzzy char match ─────────────────────────────────────
+    let qi = 0;
+    const segments: Array<{ text: string; match: boolean }> = [];
+    let buf = '';
+    let lastMatch = false;
+
+    for (let i = 0; i < text.length && qi < queryLower.length; i++) {
+      const isMatch = text[i].toLowerCase() === queryLower[qi];
+      if (isMatch !== lastMatch) {
+        if (buf) segments.push({ text: buf, match: lastMatch });
+        buf = '';
+        lastMatch = isMatch;
       }
+      buf += text[i];
+      if (isMatch) qi++;
     }
-    return queryIndex === queryLower.length;
+    // remaining text after last match char
+    if (buf) segments.push({ text: buf, match: lastMatch });
+    if (qi < text.length) {
+      segments.push({ text: text.slice(qi), match: false });
+    }
+
+    if (qi === queryLower.length) {
+      const ratio = queryLower.length / textLower.length;
+      return { score: 10 + Math.round(ratio * 30), segments };
+    }
+
+    return { score: 0, segments: [{ text, match: false }] };
+  }
+
+  /** Get highlight segments for a given command id (populated after updateFilteredItems) */
+  getHighlightSegments(item: PaletteItem): Array<{ text: string; match: boolean }> | null {
+    if (!this.searchQuery || !this.isCommandItem(item)) return null;
+    return this.highlightMap.get(item.id) || null;
   }
 
   onKeyDown(event: KeyboardEvent): void {
@@ -334,6 +594,7 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     this.filteredItems = [];
     this.selectedIndex = 0;
     this.isSearching = false;
+    this.highlightMap.clear();
   }
 
   private navigateTo(path: string): void {
@@ -357,10 +618,13 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
 
   getGroupedItems(): GroupedItems[] {
     const groups = new Map<string, PaletteItem[]>();
-    
+
+    // Fixed category order for clarity
+    const ORDER = ['Actions contextuelles', 'Récents', 'Actions', 'Système', 'Navigation', 'Aide', 'Annonces trouvées', 'Dossiers trouvés', 'Autres'];
+
     this.filteredItems.forEach(item => {
       let category = 'Autres';
-      
+
       if (this.isCommandItem(item)) {
         category = item.category;
       } else if (this.isSearchResult(item)) {
@@ -368,56 +632,52 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
       } else if (this.isRecentItem(item)) {
         category = 'Récents';
       }
-      
+
       if (!groups.has(category)) {
         groups.set(category, []);
       }
       groups.get(category)?.push(item);
     });
 
-    return Array.from(groups.entries()).map(([category, items]) => ({
-      category,
-      items
-    }));
+    // Sort categories by predefined order
+    return ORDER
+      .filter(cat => groups.has(cat))
+      .map(cat => ({ category: cat, items: groups.get(cat)! }));
   }
 
   getItemLabel(item: PaletteItem): string {
-    if (this.isCommandItem(item)) {
-      return item.label;
-    } else if (this.isSearchResult(item)) {
-      return item.title;
-    } else if (this.isRecentItem(item)) {
-      return item.title;
-    }
+    if (this.isCommandItem(item)) return item.label;
+    if (this.isSearchResult(item)) return item.title;
+    if (this.isRecentItem(item)) return item.title;
     return '';
   }
 
   getItemDescription(item: PaletteItem): string {
     if (this.isCommandItem(item)) {
-      return item.description;
-    } else if (this.isSearchResult(item)) {
-      return item.description || '';
-    } else if (this.isRecentItem(item)) {
-      return item.subtitle || '';
+      // Support dynamic descriptions (functions)
+      return typeof (item as any)._descFn === 'function'
+        ? (item as any)._descFn()
+        : item.description;
     }
+    if (this.isSearchResult(item)) return item.description || '';
+    if (this.isRecentItem(item)) return item.subtitle || '';
     return '';
   }
 
   getItemIcon(item: PaletteItem): string {
     if (this.isCommandItem(item)) {
-      return item.icon;
-    } else if (this.isSearchResult(item)) {
-      return item.type === 'ANNONCE' ? 'campaign' : 'folder';
-    } else if (this.isRecentItem(item)) {
-      return item.type === 'annonce' ? 'campaign' : 'folder';
+      // Support dynamic icons (functions)
+      return typeof (item as any)._iconFn === 'function'
+        ? (item as any)._iconFn()
+        : item.icon;
     }
+    if (this.isSearchResult(item)) return item.type === 'ANNONCE' ? 'campaign' : 'folder';
+    if (this.isRecentItem(item)) return item.type === 'annonce' ? 'campaign' : 'folder';
     return 'help';
   }
 
   getItemShortcut(item: PaletteItem): string | undefined {
-    if (this.isCommandItem(item)) {
-      return item.shortcut;
-    }
+    if (this.isCommandItem(item)) return item.shortcut;
     return undefined;
   }
 
