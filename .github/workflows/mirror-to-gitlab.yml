@@ -1,0 +1,36 @@
+name: Mirror to GitLab
+
+# Pushes every master commit to GitLab, which then triggers .gitlab-ci.yml
+on:
+  push:
+    branches:
+      - master
+
+concurrency:
+  group: mirror-to-gitlab
+  cancel-in-progress: true
+
+jobs:
+  mirror:
+    name: Push to GitLab
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so --mirror works correctly
+
+      - name: Set up SSH agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.GITLAB_SSH_KEY }}
+
+      - name: Add GitLab to known hosts
+        run: ssh-keyscan -H gitlab.com >> ~/.ssh/known_hosts
+
+      - name: Push mirror to GitLab
+        run: |
+          git remote add gitlab ${{ secrets.GITLAB_REPO_URL }}
+          git push gitlab master --force

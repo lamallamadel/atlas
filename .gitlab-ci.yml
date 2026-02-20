@@ -1,0 +1,133 @@
+# ─────────────────────────────────────────────────────────────
+# Atlas Immobilier — GitLab CI/CD → Hetzner deploy
+#
+# Stages:
+#   build   — Angular production bundle (only when frontend changes)
+#   deploy  — rsync dist + nginx reload / docker compose build + up
+#
+# Required CI/CD variables (Settings → CI/CD → Variables):
+#   DEPLOY_SSH_KEY   — private ed25519 key for lamal@46.225.187.158
+# ─────────────────────────────────────────────────────────────
+
+stages:
+  - build
+  - deploy
+
+variables:
+  DEPLOY_HOST: "46.225.187.158"
+  DEPLOY_USER: "lamal"
+  DEPLOY_DIR:  "/opt/atlas"
+
+# ── Reusable SSH setup ────────────────────────────────────────
+.ssh_setup:
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq rsync openssh-client 2>/dev/null
+    - eval $(ssh-agent -s)
+    - echo "$DEPLOY_SSH_KEY" | tr -d '\r' | ssh-add -
+    - mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+    - chmod 644 ~/.ssh/known_hosts
+
+# ─────────────────────────────────────────────────────────────
+# FRONTEND
+# ─────────────────────────────────────────────────────────────
+
+build-frontend:
+  stage: build
+  image: node:18-alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+        - infra/nginx.conf
+        - .gitlab-ci.yml
+  cache:
+    key: "npm-$CI_COMMIT_REF_SLUG"
+    paths:
+      - frontend/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend
+    - npm ci --prefer-offline
+    - npm run build
+  artifacts:
+    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - frontend/dist/frontend/
+    expire_in: 1 hour
+
+deploy-frontend:
+  stage: deploy
+  image: debian:bookworm-slim
+  needs:
+    - job: build-frontend
+      artifacts: true
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+        - infra/nginx.conf
+        - .gitlab-ci.yml
+  extends: .ssh_setup
+  script:
+    - echo "→ Syncing dist to $DEPLOY_HOST…"
+    - rsync -az --delete --checksum
+        frontend/dist/frontend/
+        "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DIR/frontend/dist/frontend/"
+    - echo "→ Reloading Nginx…"
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" "
+        set -e
+        cd $DEPLOY_DIR && git pull origin master --quiet
+        docker exec nginx nginx -s reload
+        echo '✓ Nginx reloaded'
+      "
+  environment:
+    name: production/frontend
+    url: https://afroware.app
+
+# ─────────────────────────────────────────────────────────────
+# BACKEND
+# ─────────────────────────────────────────────────────────────
+
+deploy-backend:
+  stage: deploy
+  image: debian:bookworm-slim
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+        - infra/docker-compose.yml
+        - .gitlab-ci.yml
+  extends: .ssh_setup
+  script:
+    - echo "→ Pulling code and rebuilding backend on $DEPLOY_HOST…"
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" "
+        set -e
+        cd $DEPLOY_DIR
+        git pull origin master --quiet
+        cd infra
+        docker compose build backend
+        docker compose up -d backend
+        echo '✓ Backend container restarted'
+      "
+    - echo "→ Waiting for health check…"
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" "
+        for i in \$(seq 1 24); do
+          STATUS=\$(docker inspect --format='{{.State.Health.Status}}' backend_app 2>/dev/null || echo 'unknown')
+          printf '  [%d/24] backend_app: %s\n' \"\$i\" \"\$STATUS\"
+          if [ \"\$STATUS\" = 'healthy' ]; then
+            echo '✓ Backend is healthy'
+            exit 0
+          fi
+          sleep 5
+        done
+        echo '✗ Backend did not become healthy within 2 minutes'
+        docker logs backend_app --tail=40
+        exit 1
+      "
+  environment:
+    name: production/backend
+    url: https://api.afroware.app
