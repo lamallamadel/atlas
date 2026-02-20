@@ -24,6 +24,10 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     List<CommentEntity> findByCreatedBy(@Param("username") String username);
 
     @Query(
-            "SELECT c FROM CommentEntity c WHERE :username MEMBER OF c.mentions ORDER BY c.createdAt DESC")
+            value =
+                    "SELECT c.* FROM comment c "
+                            + "WHERE c.mentions_json @> jsonb_build_array(CAST(:username AS text)) "
+                            + "ORDER BY c.created_at DESC",
+            nativeQuery = true)
     List<CommentEntity> findByMention(@Param("username") String username);
 }
