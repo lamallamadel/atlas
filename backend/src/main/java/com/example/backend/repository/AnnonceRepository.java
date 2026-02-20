@@ -18,6 +18,8 @@ public interface AnnonceRepository
 
         List<Annonce> findTop50ByOrgIdOrderByCreatedAtDesc(String orgId);
 
+        List<Annonce> findByStatusAndOrgId(AnnonceStatus status, String orgId);
+
         @Query("SELECT DISTINCT a.city FROM Annonce a WHERE a.city IS NOT NULL ORDER BY a.city")
         List<String> findDistinctCities();
 

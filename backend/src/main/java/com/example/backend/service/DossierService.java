@@ -39,12 +39,14 @@ public class DossierService {
     private final DossierMapper dossierMapper;
     private final AnnonceRepository annonceRepository;
     private final DossierStatusTransitionService transitionService;
-    @Nullable private final SearchService searchService;
+    @Nullable
+    private final SearchService searchService;
     private final MetricsService metricsService;
     private final WorkflowValidationService workflowValidationService;
     private final PartiePrenanteService partiePrenanteService;
     private final jakarta.persistence.EntityManager entityManager;
     private final DossierStatusCodeValidationService statusCodeValidationService;
+    private final com.example.backend.brain.BrainClientService brainClientService;
 
     public DossierService(
             DossierRepository dossierRepository,
@@ -56,7 +58,8 @@ public class DossierService {
             WorkflowValidationService workflowValidationService,
             PartiePrenanteService partiePrenanteService,
             jakarta.persistence.EntityManager entityManager,
-            DossierStatusCodeValidationService statusCodeValidationService) {
+            DossierStatusCodeValidationService statusCodeValidationService,
+            @Autowired(required = false) @Nullable com.example.backend.brain.BrainClientService brainClientService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
@@ -67,6 +70,7 @@ public class DossierService {
         this.partiePrenanteService = partiePrenanteService;
         this.entityManager = entityManager;
         this.statusCodeValidationService = statusCodeValidationService;
+        this.brainClientService = brainClientService;
     }
 
     @Transactional
@@ -77,14 +81,12 @@ public class DossierService {
         }
 
         if (request.getAnnonceId() != null) {
-            Annonce annonce =
-                    annonceRepository
-                            .findById(request.getAnnonceId())
-                            .orElseThrow(
-                                    () ->
-                                            new EntityNotFoundException(
-                                                    "Annonce not found with id: "
-                                                            + request.getAnnonceId()));
+            Annonce annonce = annonceRepository
+                    .findById(request.getAnnonceId())
+                    .orElseThrow(
+                            () -> new EntityNotFoundException(
+                                    "Annonce not found with id: "
+                                            + request.getAnnonceId()));
 
             if (!orgId.equals(annonce.getOrgId())) {
                 throw new EntityNotFoundException(
@@ -135,13 +137,11 @@ public class DossierService {
             entityManager.clear();
 
             final Long savedId = saved.getId();
-            saved =
-                    dossierRepository
-                            .findByIdWithParties(savedId)
-                            .orElseThrow(
-                                    () ->
-                                            new EntityNotFoundException(
-                                                    "Dossier not found with id: " + savedId));
+            saved = dossierRepository
+                    .findByIdWithParties(savedId)
+                    .orElseThrow(
+                            () -> new EntityNotFoundException(
+                                    "Dossier not found with id: " + savedId));
         }
 
         if (saved.getSource() != null) {
@@ -158,9 +158,7 @@ public class DossierService {
         return dossierMapper.toResponse(saved);
     }
 
-    @Cacheable(
-            value = "dossier",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @Cacheable(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional(readOnly = true)
     public DossierResponse getById(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -168,13 +166,11 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier =
-                dossierRepository
-                        .findByIdWithRelations(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Dossier not found with id: " + id));
+        Dossier dossier = dossierRepository
+                .findByIdWithRelations(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
@@ -189,33 +185,25 @@ public class DossierService {
         Specification<Dossier> spec = Specification.where(null);
 
         if (status != null) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("status"), status));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
 
         if (leadPhone != null && !leadPhone.trim().isEmpty()) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("leadPhone"), leadPhone));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("leadPhone"), leadPhone));
         }
 
         if (annonceId != null) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("annonceId"), annonceId));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("annonceId"), annonceId));
         }
 
         Page<Dossier> dossiers = dossierRepository.findAll(spec, pageable);
         return dossiers.map(dossierMapper::toResponse);
     }
 
-    @CacheEvict(
-            value = "dossier",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public DossierResponse patchStatus(Long id, DossierStatusPatchRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -223,13 +211,11 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier =
-                dossierRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Dossier not found with id: " + id));
+        Dossier dossier = dossierRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
@@ -256,8 +242,7 @@ public class DossierService {
                     dossier.getCaseType(), request.getStatusCode());
             dossier.setStatusCode(request.getStatusCode());
         } else {
-            String derivedStatusCode =
-                    statusCodeValidationService.deriveStatusCodeFromEnumStatus(newStatus);
+            String derivedStatusCode = statusCodeValidationService.deriveStatusCodeFromEnumStatus(newStatus);
             dossier.setStatusCode(derivedStatusCode);
         }
 
@@ -281,9 +266,7 @@ public class DossierService {
         return dossierMapper.toResponse(updated);
     }
 
-    @CacheEvict(
-            value = "dossier",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public DossierResponse patchLead(Long id, DossierLeadPatchRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -291,13 +274,11 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier =
-                dossierRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Dossier not found with id: " + id));
+        Dossier dossier = dossierRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
@@ -320,10 +301,9 @@ public class DossierService {
         }
 
         List<DossierStatus> excludedStatuses = Arrays.asList(DossierStatus.WON, DossierStatus.LOST);
-        List<Dossier> leadPhoneDuplicates =
-                dossierRepository.findByLeadPhoneAndStatusNotIn(phone, excludedStatuses);
-        List<Dossier> partyPhoneDuplicates =
-                dossierRepository.findByPartiesPhoneAndStatusNotIn(phone, excludedStatuses);
+        List<Dossier> leadPhoneDuplicates = dossierRepository.findByLeadPhoneAndStatusNotIn(phone, excludedStatuses);
+        List<Dossier> partyPhoneDuplicates = dossierRepository.findByPartiesPhoneAndStatusNotIn(phone,
+                excludedStatuses);
 
         List<Dossier> allDuplicates = new ArrayList<>();
         allDuplicates.addAll(leadPhoneDuplicates);
@@ -350,13 +330,11 @@ public class DossierService {
 
         for (Long id : request.getIds()) {
             try {
-                Dossier dossier =
-                        dossierRepository
-                                .findById(id)
-                                .orElseThrow(
-                                        () ->
-                                                new EntityNotFoundException(
-                                                        "Dossier not found with id: " + id));
+                Dossier dossier = dossierRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(
+                                        "Dossier not found with id: " + id));
 
                 if (!orgId.equals(dossier.getOrgId())) {
                     throw new EntityNotFoundException("Dossier not found with id: " + id);
@@ -397,9 +375,7 @@ public class DossierService {
         return new BulkOperationResponse(successCount, failureCount, errors);
     }
 
-    @CacheEvict(
-            value = "dossier",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @CacheEvict(value = "dossier", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public void delete(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -407,13 +383,11 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier =
-                dossierRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Dossier not found with id: " + id));
+        Dossier dossier = dossierRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
@@ -432,13 +406,11 @@ public class DossierService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier =
-                dossierRepository
-                        .findByIdWithRelations(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Dossier not found with id: " + id));
+        Dossier dossier = dossierRepository
+                .findByIdWithRelations(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Dossier not found with id: " + id));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
@@ -453,26 +425,66 @@ public class DossierService {
         Specification<Dossier> spec = Specification.where(null);
 
         if (status != null) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("status"), status));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
 
         if (leadPhone != null && !leadPhone.trim().isEmpty()) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("leadPhone"), leadPhone));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("leadPhone"), leadPhone));
         }
 
         if (annonceId != null) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("annonceId"), annonceId));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("annonceId"), annonceId));
         }
 
         return dossierRepository.findAll(spec, pageable);
+    }
+
+    @Transactional(readOnly = true)
+    public com.example.backend.brain.dto.MatchResponse matchOffMarket(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        Dossier dossier = dossierRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Dossier not found: " + id));
+
+        if (!orgId.equals(dossier.getOrgId())) {
+            throw new EntityNotFoundException("Dossier not found: " + id);
+        }
+
+        List<Annonce> offMarketAnnonces = annonceRepository.findByStatusAndOrgId(AnnonceStatus.DRAFT, orgId);
+
+        com.example.backend.brain.dto.MatchRequest request = new com.example.backend.brain.dto.MatchRequest();
+        request.setClientId(dossier.getId());
+
+        java.util.Map<String, Object> prefs = new java.util.HashMap<>();
+        prefs.put("budget", 0);
+        prefs.put("city", "");
+        if (dossier.getNotes() != null) {
+            prefs.put("notes", dossier.getNotes());
+        }
+        request.setPreferences(prefs);
+
+        List<java.util.Map<String, Object>> biensList = offMarketAnnonces.stream().map(a -> {
+            java.util.Map<String, Object> map = new java.util.HashMap<>();
+            map.put("id", a.getId());
+            map.put("title", a.getTitle());
+            map.put("description", a.getDescription());
+            map.put("price", a.getPrice());
+            map.put("city", a.getCity());
+            map.put("type", a.getType() != null ? a.getType().name() : "");
+            return map;
+        }).collect(Collectors.toList());
+
+        request.setBiens(biensList);
+
+        if (this.brainClientService != null) {
+            return this.brainClientService.calculateMatch(request).orElse(null);
+        }
+        return null;
     }
 }
