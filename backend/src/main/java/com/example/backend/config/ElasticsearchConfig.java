@@ -7,12 +7,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.elc.ElasticsearchConfiguration;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
-import org.springframework.data.repository.config.BootstrapMode;
 
 @Configuration
-@EnableElasticsearchRepositories(
-        basePackages = "com.example.backend.repository.search",
-        bootstrapMode = BootstrapMode.LAZY)
+@EnableElasticsearchRepositories(basePackages = "com.example.backend.repository.search")
 @ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
@@ -27,17 +24,19 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
-        ClientConfiguration.MaybeSecureClientConfigurationBuilder builder =
-                ClientConfiguration.builder()
-                        .connectedTo(
-                                elasticsearchUris.replace("http://", "").replace("https://", ""))
-                        .withConnectTimeout(Duration.ofSeconds(10))
-                        .withSocketTimeout(Duration.ofSeconds(30));
+        String hosts = elasticsearchUris.replace("http://", "").replace("https://", "");
+        ClientConfiguration.MaybeSecureClientConfigurationBuilder base =
+                ClientConfiguration.builder().connectedTo(hosts);
 
         if (username != null && !username.isEmpty()) {
-            builder.withBasicAuth(username, password);
+            return base.withBasicAuth(username, password)
+                    .withConnectTimeout(Duration.ofSeconds(10))
+                    .withSocketTimeout(Duration.ofSeconds(30))
+                    .build();
         }
 
-        return builder.build();
+        return base.withConnectTimeout(Duration.ofSeconds(10))
+                .withSocketTimeout(Duration.ofSeconds(30))
+                .build();
     }
 }
