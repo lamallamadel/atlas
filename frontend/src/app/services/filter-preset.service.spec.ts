@@ -1,11 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { FilterPresetService } from './filter-preset.service';
 
 describe('FilterPresetService', () => {
   let service: FilterPresetService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule]
+    });
     service = TestBed.inject(FilterPresetService);
     localStorage.clear();
   });

@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -168,7 +168,7 @@ describe('CommandPaletteComponent', () => {
 
   it('should perform fuzzy search matching', () => {
     expect(component['fuzzyMatch']('dos', 'dossier')).toBeTruthy();
-    expect(component['fuzzyMatch']('crt', 'créer')).toBeTruthy();
+    expect(component['fuzzyMatch']('cre', 'créer')).toBeTruthy(); // fuzzy finds c,r,e (non-accented) in order
     expect(component['fuzzyMatch']('xyz', 'dossier')).toBeFalsy();
   });
 
@@ -235,15 +235,14 @@ describe('CommandPaletteComponent', () => {
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces/1']);
   });
 
-  it('should call search service when query length >= 2', (done) => {
+  it('should call search service when query length >= 2', fakeAsync(() => {
     component.searchQuery = 'te';
     component.onSearchChange();
-    
-    setTimeout(() => {
-      expect(mockSearchService.autocomplete).toHaveBeenCalledWith('te');
-      done();
-    }, 350);
-  });
+
+    tick(350);
+
+    expect(mockSearchService.autocomplete).toHaveBeenCalledWith('te');
+  }));
 
   it('should show recent items when no query', () => {
     const recentItems = [{

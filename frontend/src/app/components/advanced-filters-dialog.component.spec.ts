@@ -10,6 +10,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { AdvancedFiltersDialogComponent } from './advanced-filters-dialog.component';
 import { AdvancedFiltersComponent } from './advanced-filters.component';
@@ -44,7 +45,8 @@ describe('AdvancedFiltersDialogComponent', () => {
         MatInputModule,
         MatSelectModule,
         MatIconModule,
-        MatCheckboxModule
+        MatCheckboxModule,
+        MatButtonToggleModule
       ],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },

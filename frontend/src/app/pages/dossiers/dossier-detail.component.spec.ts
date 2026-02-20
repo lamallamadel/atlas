@@ -3,9 +3,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError } from 'rxjs';
+import { of, throwError, EMPTY } from 'rxjs';
 
 import { DossierDetailComponent } from './dossier-detail.component';
+import { RecentNavigationService } from '../../services/recent-navigation.service';
 import { DossierApiService, DossierResponse, DossierStatus } from '../../services/dossier-api.service';
 import { PartiePrenanteApiService } from '../../services/partie-prenante-api.service';
 import { MessageApiService } from '../../services/message-api.service';
@@ -146,7 +147,7 @@ describe('DossierDetailComponent', () => {
     appointmentApiService = jasmine.createSpyObj<AppointmentApiService>('AppointmentApiService', ['list', 'create', 'update', 'delete']);
     consentementApiService = jasmine.createSpyObj<ConsentementApiService>('ConsentementApiService', ['list', 'create', 'update', 'delete']);
     auditEventApiService = jasmine.createSpyObj<AuditEventApiService>('AuditEventApiService', ['list', 'listByDossier', 'create']);
-    router = jasmine.createSpyObj<Router>('Router', ['navigate']);
+    router = jasmine.createSpyObj<Router>('Router', ['navigate'], { events: EMPTY });
     snackBar = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
     dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 
@@ -171,7 +172,8 @@ describe('DossierDetailComponent', () => {
         { provide: Router, useValue: router },
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: MatSnackBar, useValue: snackBar },
-        { provide: MatDialog, useValue: dialog }
+        { provide: MatDialog, useValue: dialog },
+        { provide: RecentNavigationService, useValue: jasmine.createSpyObj('RecentNavigationService', ['addRecentItem']) }
       ],
       // If more unknown components appear in template, this prevents NG0304 noise.
       schemas: [NO_ERRORS_SCHEMA]

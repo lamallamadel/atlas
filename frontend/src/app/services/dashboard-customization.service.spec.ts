@@ -75,7 +75,16 @@ describe('DashboardCustomizationService', () => {
   it('should remove widget from layout', () => {
     const widget: WidgetConfig = { id: 'widget-1', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 };
     service.addWidget(widget);
-    service.removeWidget('widget-1');
+
+    // addWidget generates a new ID, so retrieve it
+    let addedId = '';
+    service.layout$.subscribe(layout => {
+      if (layout.widgets.length > 0) {
+        addedId = layout.widgets[0].id;
+      }
+    });
+
+    service.removeWidget(addedId);
 
     service.layout$.subscribe(layout => {
       expect(layout.widgets.length).toBe(0);

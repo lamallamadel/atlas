@@ -1,9 +1,13 @@
 import { TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NotificationService } from './notification.service';
 import { ThemeService } from './theme.service';
+import { EnhancedSnackbarComponent } from '../components/enhanced-snackbar.component';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -12,9 +16,15 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      declarations: [
+        EnhancedSnackbarComponent
+      ],
       imports: [
+        CommonModule,
         HttpClientTestingModule,
         MatSnackBarModule,
+        MatIconModule,
+        MatButtonModule,
         BrowserAnimationsModule
       ],
       providers: [
@@ -74,8 +84,10 @@ describe('NotificationService', () => {
     service.info('Info 1');
     service.info('Info 2');
     service.critical('Critical message');
-    
+
     expect(service.getQueueLength()).toBeGreaterThan(0);
+
+    httpMock.expectOne('/api/v1/observability/client-errors').flush({});
   });
 
   it('should clear queue', () => {

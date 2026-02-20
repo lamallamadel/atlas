@@ -238,6 +238,9 @@ describe('GlobalSearchBarComponent', () => {
   it('should handle Escape key to close dropdown', () => {
     component.searchQuery = 'test';
     component.showDropdown = true;
+    component.flatResults = [
+      { id: 1, type: 'annonce', title: 'Test', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' }
+    ];
 
     const event = new KeyboardEvent('keydown', { key: 'Escape' });
     component.handleKeyboardShortcut(event);

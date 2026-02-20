@@ -114,6 +114,7 @@ describe('QuickActionsComponent', () => {
   });
 
   it('should call client when VoIP is configured and phone available', () => {
+    fixture.detectChanges(); // triggers ngOnInit, sets voipConfigured
     component.callClient();
     expect(mockVoipService.initiateCall).toHaveBeenCalledWith('+33612345678', 'John Doe');
   });

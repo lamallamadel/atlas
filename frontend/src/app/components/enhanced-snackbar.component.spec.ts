@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -23,6 +24,7 @@ describe('EnhancedSnackbarComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [EnhancedSnackbarComponent],
       imports: [
+        CommonModule,
         MatIconModule,
         MatButtonModule,
         BrowserAnimationsModule

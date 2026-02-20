@@ -1,10 +1,11 @@
 import { Component, Input, Pipe, PipeTransform } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError, EMPTY } from 'rxjs';
 
 import { AnnonceDetailComponent } from './annonce-detail.component';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
+import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 @Component({ selector: 'app-badge-status', template: '' })
 class BadgeStatusStubComponent {
@@ -57,7 +58,7 @@ describe('AnnonceDetailComponent', () => {
 
   beforeEach(async () => {
     mockAnnonceApiService = jasmine.createSpyObj('AnnonceApiService', ['getById']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate'], { events: EMPTY });
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
@@ -65,6 +66,8 @@ describe('AnnonceDetailComponent', () => {
         }
       }
     };
+
+    const mockRecentNavService = jasmine.createSpyObj('RecentNavigationService', ['addRecentItem']);
 
     await TestBed.configureTestingModule({
       declarations: [
@@ -76,7 +79,8 @@ describe('AnnonceDetailComponent', () => {
       providers: [
         { provide: AnnonceApiService, useValue: mockAnnonceApiService },
         { provide: Router, useValue: mockRouter },
-        { provide: ActivatedRoute, useValue: mockActivatedRoute }
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        { provide: RecentNavigationService, useValue: mockRecentNavService }
       ]
     }).compileComponents();
 

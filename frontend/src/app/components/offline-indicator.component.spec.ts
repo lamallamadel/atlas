@@ -4,6 +4,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { OfflineIndicatorComponent } from './offline-indicator.component';
 import { OfflineService } from '../services/offline.service';
 import { OfflineQueueService } from '../services/offline-queue.service';
@@ -22,13 +23,14 @@ describe('OfflineIndicatorComponent', () => {
         MatIconModule,
         MatButtonModule,
         MatProgressBarModule,
-        HttpClientTestingModule
+        HttpClientTestingModule,
+        MatSnackBarModule
       ],
       providers: [
         OfflineService,
         OfflineQueueService,
         OfflineStorageService,
-        NotificationService
+        { provide: NotificationService, useValue: jasmine.createSpyObj('NotificationService', ['success', 'error', 'info', 'warning', 'critical']) }
       ]
     }).compileComponents();
 
