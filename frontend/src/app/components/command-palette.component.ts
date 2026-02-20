@@ -114,8 +114,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     this.router.events.pipe(
       filter(e => e instanceof NavigationEnd),
       takeUntil(this.destroy$)
-    ).subscribe((e: NavigationEnd) => {
-      this.currentRoute = e.urlAfterRedirects || e.url;
+    ).subscribe((e) => {
+      this.currentRoute = (e as NavigationEnd).url;
       this.buildContextualCommands();
     });
   }

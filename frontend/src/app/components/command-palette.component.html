@@ -88,7 +88,7 @@
                 {{ getItemDescription(item) }}
               </div>
             </div>
-            <div class="command-shortcut" *ngIf="getItemShortcut(item)" aria-label="Raccourci: {{ getItemShortcut(item) }}">
+            <div class="command-shortcut" *ngIf="getItemShortcut(item)" [attr.aria-label]="'Raccourci: ' + getItemShortcut(item)">
               <kbd>{{ getItemShortcut(item) }}</kbd>
             </div>
           </div>

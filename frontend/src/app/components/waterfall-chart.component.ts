@@ -51,7 +51,7 @@ export interface WaterfallEntry {
         <span class="waterfall-subtitle" *ngIf="subtitle">{{ subtitle }}</span>
       </div>
       <div class="waterfall-canvas-container">
-        <canvas #chartCanvas aria-label="{{ title || 'Waterfall chart' }}" role="img"></canvas>
+        <canvas #chartCanvas [attr.aria-label]="title || 'Waterfall chart'" role="img"></canvas>
       </div>
       <div class="waterfall-legend">
         <span class="legend-item positive">
