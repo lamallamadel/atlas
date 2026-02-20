@@ -88,6 +88,64 @@ public class BrainScoringService {
 
     @Async("brainTaskExecutor")
     @Transactional
+    public void triggerDuplicateCheckAsync(Long annonceId) {
+        try {
+            Annonce annonce = annonceRepository.findById(annonceId).orElse(null);
+            if (annonce == null) {
+                return;
+            }
+
+            List<Annonce> recentAnnonces = annonceRepository.findTop50ByOrgIdOrderByCreatedAtDesc(annonce.getOrgId());
+
+            List<DupliAnnonceDto> dupliDtos = recentAnnonces.stream()
+                    .map(
+                            a -> new DupliAnnonceDto(
+                                    a.getId(),
+                                    a.getTitle(),
+                                    a.getDescription() != null
+                                            ? a.getDescription()
+                                            : ""))
+                    .toList();
+
+            if (dupliDtos.size() < 2) {
+                return;
+            }
+
+            List<DoublonResultDto> doublons = brainClientService.detectDuplicates(dupliDtos);
+
+            for (DoublonResultDto doublon : doublons) {
+                if (doublon.getAnnonce1().equals(annonceId)
+                        || doublon.getAnnonce2().equals(annonceId)) {
+                    log.info(
+                            "Duplicate detected for annonce {}: similarity={}, status={}",
+                            annonceId,
+                            doublon.getSimilarite(),
+                            doublon.getStatut());
+
+                    if ("DOUBLON_CERTAIN".equals(doublon.getStatut())) {
+                        annonce.setFraudStatut("FRAUDULEUX");
+                        annonce.setFraudScore(Math.max(
+                                annonce.getFraudScore() != null ? annonce.getFraudScore() : 0, 90));
+                        annonceRepository.save(annonce);
+                    } else if ("DOUBLON_PROBABLE".equals(doublon.getStatut())) {
+                        if (annonce.getFraudStatut() == null
+                                || "SAIN".equals(annonce.getFraudStatut())) {
+                            annonce.setFraudStatut("SUSPECT");
+                            annonce.setFraudScore(Math.max(
+                                    annonce.getFraudScore() != null ? annonce.getFraudScore() : 0,
+                                    50));
+                            annonceRepository.save(annonce);
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to check duplicates for annonce {}: {}", annonceId, e.getMessage());
+        }
+    }
+
+    @Async("brainTaskExecutor")
+    @Transactional
     public void triggerFraudAsync(Long annonceId) {
         try {
             Annonce annonce = annonceRepository.findById(annonceId).orElse(null);

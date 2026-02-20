@@ -35,9 +35,11 @@ public class AnnonceService {
 
     private final AnnonceRepository annonceRepository;
     private final AnnonceMapper annonceMapper;
-    @Nullable private final SearchService searchService;
+    @Nullable
+    private final SearchService searchService;
     private final MetricsService metricsService;
-    @Nullable private final BrainScoringService brainScoringService;
+    @Nullable
+    private final BrainScoringService brainScoringService;
 
     public AnnonceService(
             AnnonceRepository annonceRepository,
@@ -60,13 +62,13 @@ public class AnnonceService {
         }
 
         // Soft duplicate detection
-        Optional<Annonce> existing =
-                annonceRepository.findByTitleAndCityAndAddress(
-                        request.getTitle(), request.getCity(), request.getAddress());
+        Optional<Annonce> existing = annonceRepository.findByTitleAndCityAndAddress(
+                request.getTitle(), request.getCity(), request.getAddress());
 
         if (existing.isPresent()) {
             // In a real scenario, we might want to return a specific response or Header
-            // For now, we'll just log it or we could throw a custom exception that the controller
+            // For now, we'll just log it or we could throw a custom exception that the
+            // controller
             // handles
             // The requirement says "returning existing dossier ID" or similar warning.
             // I'll add a log and continue, or I could return a special object.
@@ -88,13 +90,13 @@ public class AnnonceService {
         }
         if (brainScoringService != null) {
             brainScoringService.triggerScoringAsync(saved.getId());
+            brainScoringService.triggerFraudAsync(saved.getId());
+            brainScoringService.triggerDuplicateCheckAsync(saved.getId());
         }
         return annonceMapper.toResponse(saved);
     }
 
-    @Cacheable(
-            value = "annonce",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @Cacheable(value = "annonce", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional(readOnly = true)
     public AnnonceResponse getById(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -102,13 +104,11 @@ public class AnnonceService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Annonce annonce =
-                annonceRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Annonce not found with id: " + id));
+        Annonce annonce = annonceRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Annonce not found with id: " + id));
 
         if (!orgId.equals(annonce.getOrgId())) {
             throw new EntityNotFoundException("Annonce not found with id: " + id);
@@ -118,9 +118,7 @@ public class AnnonceService {
         return annonceMapper.toResponse(annonce);
     }
 
-    @CacheEvict(
-            value = "annonce",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @CacheEvict(value = "annonce", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public AnnonceResponse update(Long id, AnnonceUpdateRequest request) {
         String orgId = TenantContext.getOrgId();
@@ -128,13 +126,11 @@ public class AnnonceService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Annonce annonce =
-                annonceRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Annonce not found with id: " + id));
+        Annonce annonce = annonceRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Annonce not found with id: " + id));
 
         if (!orgId.equals(annonce.getOrgId())) {
             throw new EntityNotFoundException("Annonce not found with id: " + id);
@@ -156,6 +152,11 @@ public class AnnonceService {
         if (searchService != null) {
             searchService.indexAnnonce(updated);
         }
+        if (brainScoringService != null) {
+            brainScoringService.triggerScoringAsync(updated.getId());
+            brainScoringService.triggerFraudAsync(updated.getId());
+            brainScoringService.triggerDuplicateCheckAsync(updated.getId());
+        }
         return annonceMapper.toResponse(updated);
     }
 
@@ -172,46 +173,38 @@ public class AnnonceService {
         Specification<Annonce> spec = (root, query, cb) -> cb.equal(root.get("orgId"), orgId);
 
         if (status != null) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("status"), status));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
 
         if (q != null && !q.trim().isEmpty()) {
             String searchPattern = "%" + q.toLowerCase() + "%";
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.or(
-                                            criteriaBuilder.like(
-                                                    criteriaBuilder.lower(root.get("title")),
-                                                    searchPattern),
-                                            criteriaBuilder.like(
-                                                    criteriaBuilder.lower(root.get("description")),
-                                                    searchPattern),
-                                            criteriaBuilder.like(
-                                                    criteriaBuilder.lower(root.get("category")),
-                                                    searchPattern),
-                                            criteriaBuilder.like(
-                                                    criteriaBuilder.lower(root.get("city")),
-                                                    searchPattern)));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.or(
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get("title")),
+                                    searchPattern),
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get("description")),
+                                    searchPattern),
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get("category")),
+                                    searchPattern),
+                            criteriaBuilder.like(
+                                    criteriaBuilder.lower(root.get("city")),
+                                    searchPattern)));
         }
 
         if (city != null && !city.trim().isEmpty()) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("city"), city));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("city"), city));
         }
 
         if (type != null && !type.trim().isEmpty()) {
             try {
                 AnnonceType annonceType = AnnonceType.valueOf(type.toUpperCase());
-                spec =
-                        spec.and(
-                                (root, query, criteriaBuilder) ->
-                                        criteriaBuilder.equal(root.get("type"), annonceType));
+                spec = spec.and(
+                        (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("type"), annonceType));
             } catch (IllegalArgumentException e) {
             }
         }
@@ -225,9 +218,7 @@ public class AnnonceService {
         return annonceRepository.findDistinctCities();
     }
 
-    @CacheEvict(
-            value = "annonce",
-            key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
+    @CacheEvict(value = "annonce", key = "#id + '_' + T(com.example.backend.util.TenantContext).getOrgId()")
     @Transactional
     public void delete(Long id) {
         String orgId = TenantContext.getOrgId();
@@ -235,13 +226,11 @@ public class AnnonceService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Annonce annonce =
-                annonceRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Annonce not found with id: " + id));
+        Annonce annonce = annonceRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Annonce not found with id: " + id));
 
         if (!orgId.equals(annonce.getOrgId())) {
             throw new EntityNotFoundException("Annonce not found with id: " + id);
@@ -263,13 +252,11 @@ public class AnnonceService {
 
         for (Long id : request.getIds()) {
             try {
-                Annonce annonce =
-                        annonceRepository
-                                .findById(id)
-                                .orElseThrow(
-                                        () ->
-                                                new EntityNotFoundException(
-                                                        "Annonce not found with id: " + id));
+                Annonce annonce = annonceRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () -> new EntityNotFoundException(
+                                        "Annonce not found with id: " + id));
 
                 if (!orgId.equals(annonce.getOrgId())) {
                     throw new EntityNotFoundException("Annonce not found with id: " + id);
@@ -344,13 +331,11 @@ public class AnnonceService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Annonce annonce =
-                annonceRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Annonce not found with id: " + id));
+        Annonce annonce = annonceRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Annonce not found with id: " + id));
 
         if (!orgId.equals(annonce.getOrgId())) {
             throw new EntityNotFoundException("Annonce not found with id: " + id);
@@ -365,47 +350,40 @@ public class AnnonceService {
         Specification<Annonce> spec = Specification.where(null);
 
         if (status != null) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("status"), status));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status));
         }
 
         if (q != null && !q.trim().isEmpty()) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) -> {
-                                String searchPattern = "%" + q.toLowerCase() + "%";
-                                return criteriaBuilder.or(
-                                        criteriaBuilder.like(
-                                                criteriaBuilder.lower(root.get("title")),
-                                                searchPattern),
-                                        criteriaBuilder.like(
-                                                criteriaBuilder.lower(root.get("description")),
-                                                searchPattern),
-                                        criteriaBuilder.like(
-                                                criteriaBuilder.lower(root.get("category")),
-                                                searchPattern),
-                                        criteriaBuilder.like(
-                                                criteriaBuilder.lower(root.get("city")),
-                                                searchPattern));
-                            });
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> {
+                        String searchPattern = "%" + q.toLowerCase() + "%";
+                        return criteriaBuilder.or(
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(root.get("title")),
+                                        searchPattern),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(root.get("description")),
+                                        searchPattern),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(root.get("category")),
+                                        searchPattern),
+                                criteriaBuilder.like(
+                                        criteriaBuilder.lower(root.get("city")),
+                                        searchPattern));
+                    });
         }
 
         if (city != null && !city.trim().isEmpty()) {
-            spec =
-                    spec.and(
-                            (root, query, criteriaBuilder) ->
-                                    criteriaBuilder.equal(root.get("city"), city));
+            spec = spec.and(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("city"), city));
         }
 
         if (type != null && !type.trim().isEmpty()) {
             try {
                 AnnonceType annonceType = AnnonceType.valueOf(type.toUpperCase());
-                spec =
-                        spec.and(
-                                (root, query, criteriaBuilder) ->
-                                        criteriaBuilder.equal(root.get("type"), annonceType));
+                spec = spec.and(
+                        (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("type"), annonceType));
             } catch (IllegalArgumentException e) {
             }
         }

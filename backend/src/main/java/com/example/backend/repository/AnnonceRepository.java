@@ -13,41 +13,39 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AnnonceRepository
-        extends JpaRepository<Annonce, Long>, JpaSpecificationExecutor<Annonce> {
-    Optional<Annonce> findByTitleAndCityAndAddress(String title, String city, String address);
+                extends JpaRepository<Annonce, Long>, JpaSpecificationExecutor<Annonce> {
+        Optional<Annonce> findByTitleAndCityAndAddress(String title, String city, String address);
 
-    @Query("SELECT DISTINCT a.city FROM Annonce a WHERE a.city IS NOT NULL ORDER BY a.city")
-    List<String> findDistinctCities();
+        List<Annonce> findTop50ByOrgIdOrderByCreatedAtDesc(String orgId);
 
-    Long countByStatus(AnnonceStatus status);
+        @Query("SELECT DISTINCT a.city FROM Annonce a WHERE a.city IS NOT NULL ORDER BY a.city")
+        List<String> findDistinctCities();
 
-    @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId")
-    Long countByStatusAndOrgId(@Param("status") AnnonceStatus status, @Param("orgId") String orgId);
+        Long countByStatus(AnnonceStatus status);
 
-    @Query(
-            "SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate")
-    Long countByStatusAndCreatedAtAfter(
-            @Param("status") AnnonceStatus status, @Param("startDate") LocalDateTime startDate);
+        @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId")
+        Long countByStatusAndOrgId(@Param("status") AnnonceStatus status, @Param("orgId") String orgId);
 
-    @Query(
-            "SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate")
-    Long countByStatusAndCreatedAtAfter(
-            @Param("status") AnnonceStatus status,
-            @Param("orgId") String orgId,
-            @Param("startDate") LocalDateTime startDate);
+        @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate")
+        Long countByStatusAndCreatedAtAfter(
+                        @Param("status") AnnonceStatus status, @Param("startDate") LocalDateTime startDate);
 
-    @Query(
-            "SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) < :endDate")
-    Long countByStatusAndCreatedAtBetween(
-            @Param("status") AnnonceStatus status,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+        @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate")
+        Long countByStatusAndCreatedAtAfter(
+                        @Param("status") AnnonceStatus status,
+                        @Param("orgId") String orgId,
+                        @Param("startDate") LocalDateTime startDate);
 
-    @Query(
-            "SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) < :endDate")
-    Long countByStatusAndCreatedAtBetween(
-            @Param("status") AnnonceStatus status,
-            @Param("orgId") String orgId,
-            @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate);
+        @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) < :endDate")
+        Long countByStatusAndCreatedAtBetween(
+                        @Param("status") AnnonceStatus status,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
+
+        @Query("SELECT COUNT(a) FROM Annonce a WHERE a.status = :status AND a.orgId = :orgId AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) >= :startDate AND COALESCE(a.createdAt, CURRENT_TIMESTAMP) < :endDate")
+        Long countByStatusAndCreatedAtBetween(
+                        @Param("status") AnnonceStatus status,
+                        @Param("orgId") String orgId,
+                        @Param("startDate") LocalDateTime startDate,
+                        @Param("endDate") LocalDateTime endDate);
 }

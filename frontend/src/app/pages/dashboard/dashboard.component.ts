@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
+import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
 import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DossierCreateDialogComponent } from '../dossiers/dossier-create-dialog.component';
@@ -33,10 +34,10 @@ interface KpiCard {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
-  
+
   selectedPeriod$ = new BehaviorSubject<string>('TODAY');
   selectedDossierFilter$ = new BehaviorSubject<string>('A_TRAITER');
-  
+
   isHandset = false;
   isTablet = false;
   isDesktop = false;
@@ -70,9 +71,12 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   loadingRecent = false;
   errorRecent = '';
 
+  yieldAnnonces: AnnonceResponse[] = [];
+  loadingYield = false;
+
   @ViewChild('annoncesChart') annoncesChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('dossiersChart') dossiersChartRef!: ElementRef<HTMLCanvasElement>;
-  
+
   private annoncesChart?: Chart;
   private dossiersChart?: Chart;
 
@@ -81,7 +85,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     private router: Router,
     private ariaAnnouncer: AriaLiveAnnouncerService,
     private breakpointObserver: BreakpointObserver,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private annonceApiService: AnnonceApiService
   ) { }
 
   ngOnInit(): void {
@@ -150,7 +155,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    
+
     if (this.annoncesChart) {
       this.annoncesChart.destroy();
     }
@@ -162,6 +167,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   loadKpis(): void {
     this.loadTrends();
     this.loadRecentDossiers();
+    this.loadYieldAnnonces();
   }
 
   loadTrends(): void {
@@ -232,6 +238,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  loadYieldAnnonces(): void {
+    this.loadingYield = true;
+    this.annonceApiService.list({ size: 100, sort: 'updatedAt,desc' }).subscribe({
+      next: (page) => {
+        this.yieldAnnonces = page.content.filter(a => a.aiScoreDetails && a.aiScoreDetails.includes('Yield Management'));
+        this.loadingYield = false;
+      },
+      error: () => {
+        this.loadingYield = false;
+      }
+    });
+  }
+
   animateCounter(cardKey: string, targetValue: number): void {
     const duration = 1000;
     const steps = 60;
@@ -292,7 +311,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   async createChart(canvas: HTMLCanvasElement, card: KpiCard): Promise<Chart> {
     const chartModule = await import('chart.js/auto');
     const Chart = chartModule.Chart;
-    
+
     const config: ChartConfiguration = {
       type: 'line',
       data: {
@@ -369,13 +388,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   navigateToAnnoncesActives(): void {
-    this.router.navigate(['/annonces'], { 
+    this.router.navigate(['/annonces'], {
       queryParams: { status: 'ACTIVE' }
     });
   }
 
   navigateToDossiersATraiter(): void {
-    this.router.navigate(['/dossiers'], { 
+    this.router.navigate(['/dossiers'], {
       queryParams: { status: 'NEW' }
     });
   }
@@ -414,7 +433,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       event.preventDefault();
       event.stopPropagation();
     }
-    
+
     if (cardKey === 'annoncesActives') {
       this.navigateToAnnoncesActives();
     } else if (cardKey === 'dossiersATraiter') {
@@ -469,7 +488,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     try {
       const Papa = await import('papaparse');
-      
+
       const csvData = this.recentDossiers.map(dossier => ({
         ID: dossier.id,
         'Lead Name': dossier.leadName,
@@ -479,20 +498,20 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }));
 
       const csv = Papa.unparse(csvData);
-      
+
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', `dossiers_${new Date().toISOString()}.csv`);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       this.ariaAnnouncer.announcePolite('Export CSV terminé avec succès');
     } catch (error) {
       console.error('Failed to export CSV:', error);
@@ -514,13 +533,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         import('jspdf'),
         import('jspdf-autotable')
       ]);
-      
+
       const { jsPDF: JsPDFClass } = jsPDF;
       const doc = new JsPDFClass();
 
       doc.setFontSize(18);
       doc.text('Dashboard Report', 14, 20);
-      
+
       doc.setFontSize(12);
       doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
 
@@ -570,7 +589,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       doc.save(`dashboard_report_${new Date().toISOString()}.pdf`);
-      
+
       this.ariaAnnouncer.announcePolite('Export PDF terminé avec succès');
     } catch (error) {
       console.error('Failed to export PDF:', error);

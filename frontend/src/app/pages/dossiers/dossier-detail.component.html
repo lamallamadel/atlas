@@ -62,7 +62,14 @@
           <span class="coach-icon">💡</span>
         </div>
         <div class="coach-content">
-          <h4 class="coach-title">Coach Virtuel Atlas</h4>
+          <div class="coach-header-row">
+            <h4 class="coach-title">Coach Virtuel Atlas</h4>
+            <mat-icon class="explainer-icon"
+              matTooltip="Ce conseil est généré dynamiquement par l'algorithme d'analyse comportementale de l'IA, basé sur la fréquence d'ouverture des emails et les consultations récentes de la propriété liées à ce dossier."
+              matTooltipPosition="right">
+              help_outline
+            </mat-icon>
+          </div>
           <p class="coach-message">{{ getVirtualCoachNudge() }}</p>
         </div>
       </div>

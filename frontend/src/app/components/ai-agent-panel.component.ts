@@ -1,11 +1,11 @@
 import {
-    Component,
-    OnInit,
-    OnDestroy,
-    ViewChild,
-    ElementRef,
-    AfterViewChecked,
-    HostListener
+  Component,
+  OnInit,
+  OnDestroy,
+  ViewChild,
+  ElementRef,
+  AfterViewChecked,
+  HostListener
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -22,8 +22,8 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
  *   <app-ai-agent-panel></app-ai-agent-panel>
  */
 @Component({
-    selector: 'app-ai-agent-panel',
-    template: `
+  selector: 'app-ai-agent-panel',
+  template: `
     <div
       class="ai-panel-fab"
       *ngIf="!(panelOpen$ | async)"
@@ -52,12 +52,20 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
           <div class="ai-panel-avatar">
             <mat-icon>auto_awesome</mat-icon>
           </div>
-          <div>
-            <div class="ai-panel-title" id="ai-panel-title">Atlas IA</div>
-            <div class="ai-panel-status">
-              <span class="status-dot"></span>
-              En ligne
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div>
+              <div class="ai-panel-title" id="ai-panel-title">Atlas IA</div>
+              <div class="ai-panel-status">
+                <span class="status-dot"></span>
+                En ligne
+              </div>
             </div>
+            <mat-icon 
+              style="font-size: 16px; height: 16px; width: 16px; color: rgba(255,255,255,0.7); cursor: help;"
+              matTooltip="Modèle de langage (LLM) spécialisé dans l'immobilier, capable d'exécuter des actions métier via le microservice agent-service."
+              matTooltipPosition="right">
+              help_outline
+            </mat-icon>
           </div>
         </div>
         <div class="ai-panel-actions">
@@ -173,7 +181,7 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
       </div>
     </div>
   `,
-    styles: [`
+  styles: [`
     /* ── FAB button ───────────────────────────────────────── */
     .ai-panel-fab {
       position: fixed;
@@ -574,125 +582,125 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
   `]
 })
 export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecked {
-    @ViewChild('conversationEl') conversationEl?: ElementRef<HTMLDivElement>;
-    @ViewChild('inputEl') inputEl?: ElementRef<HTMLTextAreaElement>;
+  @ViewChild('conversationEl') conversationEl?: ElementRef<HTMLDivElement>;
+  @ViewChild('inputEl') inputEl?: ElementRef<HTMLTextAreaElement>;
 
-    panelOpen$ = this.agentService.panelOpen$;
-    messages$ = this.agentService.messages$;
-    inputValue = '';
-    private shouldScroll = false;
-    private destroy$ = new Subject<void>();
+  panelOpen$ = this.agentService.panelOpen$;
+  messages$ = this.agentService.messages$;
+  inputValue = '';
+  private shouldScroll = false;
+  private destroy$ = new Subject<void>();
 
-    examples = [
-        'Trouve des T3 à Casablanca',
-        'Crée un dossier pour Ahmed',
-        'Envoie un message à M. Alami',
-        'Montre les dossiers en cours'
-    ];
+  examples = [
+    'Trouve des T3 à Casablanca',
+    'Crée un dossier pour Ahmed',
+    'Envoie un message à M. Alami',
+    'Montre les dossiers en cours'
+  ];
 
-    constructor(private agentService: AiAgentService) { }
+  constructor(private agentService: AiAgentService) { }
 
-    ngOnInit(): void {
-        // Auto-fill query from CMD+K
-        this.agentService.pendingQuery$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(q => {
-                if (q) {
-                    this.inputValue = q;
-                    setTimeout(() => {
-                        this.adjustHeight();
-                        this.inputEl?.nativeElement?.focus();
-                    }, 150);
-                }
-            });
-
-        // Scroll on new messages
-        this.agentService.messages$
-            .pipe(takeUntil(this.destroy$))
-            .subscribe(() => { this.shouldScroll = true; });
-    }
-
-    ngAfterViewChecked(): void {
-        if (this.shouldScroll) {
-            this.scrollToBottom();
-            this.shouldScroll = false;
+  ngOnInit(): void {
+    // Auto-fill query from CMD+K
+    this.agentService.pendingQuery$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(q => {
+        if (q) {
+          this.inputValue = q;
+          setTimeout(() => {
+            this.adjustHeight();
+            this.inputEl?.nativeElement?.focus();
+          }, 150);
         }
-    }
+      });
 
-    ngOnDestroy(): void {
-        this.destroy$.next();
-        this.destroy$.complete();
-    }
+    // Scroll on new messages
+    this.agentService.messages$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => { this.shouldScroll = true; });
+  }
 
-    @HostListener('document:keydown.escape')
-    onEscape(): void {
-        if (this.agentService['_panelOpen$']?.value) {
-            this.closePanel();
-        }
+  ngAfterViewChecked(): void {
+    if (this.shouldScroll) {
+      this.scrollToBottom();
+      this.shouldScroll = false;
     }
+  }
 
-    @HostListener('document:keydown.alt.a', ['$event'])
-    onAltA(e: KeyboardEvent): void {
-        e.preventDefault();
-        this.agentService.togglePanel();
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (this.agentService['_panelOpen$']?.value) {
+      this.closePanel();
     }
+  }
 
-    openPanel(): void { this.agentService.openPanel(); }
-    closePanel(): void { this.agentService.closePanel(); }
-    clearConversation(): void { this.agentService.clearConversation(); }
+  @HostListener('document:keydown.alt.a', ['$event'])
+  onAltA(e: KeyboardEvent): void {
+    e.preventDefault();
+    this.agentService.togglePanel();
+  }
 
-    submit(): void {
-        const query = this.inputValue.trim();
-        if (!query) return;
-        this.inputValue = '';
-        this.agentService.processQuery(query)
-            .pipe(takeUntil(this.destroy$))
-            .subscribe();
-        setTimeout(() => this.adjustHeight(), 0);
+  openPanel(): void { this.agentService.openPanel(); }
+  closePanel(): void { this.agentService.closePanel(); }
+  clearConversation(): void { this.agentService.clearConversation(); }
+
+  submit(): void {
+    const query = this.inputValue.trim();
+    if (!query) return;
+    this.inputValue = '';
+    this.agentService.processQuery(query)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe();
+    setTimeout(() => this.adjustHeight(), 0);
+  }
+
+  submitExample(ex: string): void {
+    this.inputValue = ex;
+    this.submit();
+  }
+
+  onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      this.submit();
     }
+  }
 
-    submitExample(ex: string): void {
-        this.inputValue = ex;
-        this.submit();
-    }
+  onInput(): void {
+    this.adjustHeight();
+  }
 
-    onKeyDown(event: KeyboardEvent): void {
-        if (event.key === 'Enter' && !event.shiftKey) {
-            event.preventDefault();
-            this.submit();
-        }
-    }
+  executeAction(action: AgentAction): void {
+    action.handler();
+    this.closePanel();
+  }
 
-    onInput(): void {
-        this.adjustHeight();
-    }
+  formatMessage(content: string): string {
+    // Markdown-lite: ** → bold, * → italic, newlines → <br>
+    return content
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/\n/g, '<br>');
+  }
 
-    executeAction(action: AgentAction): void {
-        action.handler();
-        this.closePanel();
-    }
+  trackById(_: number, msg: AgentMessage): string {
+    return msg.id;
+  }
 
-    formatMessage(content: string): string {
-        // Markdown-lite: ** → bold, * → italic, newlines → <br>
-        return content
-            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.+?)\*/g, '<em>$1</em>')
-            .replace(/\n/g, '<br>');
-    }
+  private adjustHeight(): void {
+    const ta = this.inputEl?.nativeElement;
+    if (!ta) return;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 96) + 'px';
+  }
 
-    trackById(_: number, msg: AgentMessage): string {
-        return msg.id;
-    }
-
-    private adjustHeight(): void {
-        const ta = this.inputEl?.nativeElement;
-        if (!ta) return;
-        ta.style.height = 'auto';
-        ta.style.height = Math.min(ta.scrollHeight, 96) + 'px';
-    }
-
-    private scrollToBottom(): void {
-        const el = this.conversationEl?.nativeElement;
-        if (el) el.scrollTop = el.scrollHeight;
-    }
+  private scrollToBottom(): void {
+    const el = this.conversationEl?.nativeElement;
+    if (el) el.scrollTop = el.scrollHeight;
+  }
 }

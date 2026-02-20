@@ -60,6 +60,10 @@ public interface DossierRepository
 
         List<Dossier> findByStatusCode(String statusCode);
 
+        @Query("SELECT COUNT(d) FROM Dossier d WHERE d.annonceId = :annonceId AND d.createdAt >= :startDate")
+        Long countByAnnonceIdAndCreatedAtAfter(
+                        @Param("annonceId") Long annonceId, @Param("startDate") LocalDateTime startDate);
+
         Long countByStatusIn(List<DossierStatus> statuses);
 
         @Query("SELECT COUNT(d) FROM Dossier d WHERE d.status = :status AND d.createdAt >= :startDate")

@@ -25,6 +25,7 @@ public class AnnonceResponse {
     private Map<String, Object> rulesJson;
     private Map<String, Object> meta;
     private Integer aiScore;
+    private String aiScoreDetails;
     private Integer fraudScore;
     private String fraudStatut;
     private LocalDateTime createdAt;
@@ -32,7 +33,8 @@ public class AnnonceResponse {
     private String createdBy;
     private String updatedBy;
 
-    public AnnonceResponse() {}
+    public AnnonceResponse() {
+    }
 
     public Long getId() {
         return id;
@@ -160,6 +162,14 @@ public class AnnonceResponse {
 
     public void setAiScore(Integer aiScore) {
         this.aiScore = aiScore;
+    }
+
+    public String getAiScoreDetails() {
+        return aiScoreDetails;
+    }
+
+    public void setAiScoreDetails(String aiScoreDetails) {
+        this.aiScoreDetails = aiScoreDetails;
     }
 
     public Integer getFraudScore() {

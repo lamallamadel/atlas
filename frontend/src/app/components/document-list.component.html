@@ -65,7 +65,8 @@
               {{ getCategoryLabel(document.category) }}
             </span>
             <span *ngIf="getAiStatusText(document.contentType)" [class]="getAiStatusClass(document.contentType)"
-              [matTooltip]="'Analyse IA du document'">
+              [matTooltip]="'Analyse sémantique du texte extrait (OCR) de votre document via notre microservice d\'Intelligence Artificielle (document-service)'"
+              matTooltipPosition="above" style="cursor:help;">
               IA Atlas: {{ getAiStatusText(document.contentType) }}
             </span>
           </div>

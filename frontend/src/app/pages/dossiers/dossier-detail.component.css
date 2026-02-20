@@ -190,6 +190,26 @@
   gap: var(--spacing-1);
 }
 
+.coach-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.explainer-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  color: var(--color-primary-500);
+  cursor: help;
+  opacity: 0.8;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.explainer-icon:hover {
+  opacity: 1;
+}
+
 .coach-title {
   margin: 0;
   font-size: var(--font-size-sm);

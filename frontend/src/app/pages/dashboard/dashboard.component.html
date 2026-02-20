@@ -1,9 +1,7 @@
 <div class="page-container">
   <div class="page-header">
     <h1 class="page-title">Tableau de bord</h1>
-    <mat-button-toggle-group 
-      [value]="selectedPeriod$ | async" 
-      (change)="onPeriodChange($event.value)"
+    <mat-button-toggle-group [value]="selectedPeriod$ | async" (change)="onPeriodChange($event.value)"
       aria-label="Sélecteur de période">
       <mat-button-toggle value="TODAY">Aujourd'hui</mat-button-toggle>
       <mat-button-toggle value="LAST_7_DAYS">7 jours</mat-button-toggle>
@@ -16,39 +14,34 @@
       <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
       <div class="grid-container">
         <div class="grid-row">
-          <div 
-            *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey"
-            class="grid-col-12 grid-col-md-6 grid-col-lg-3"
+          <div *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey" class="grid-col-12 grid-col-md-6 grid-col-lg-3"
             [@itemAnimation]>
-            <mat-card 
-              class="kpi-card"
-              [class.loading]="kpiCards[key].loading"
-              [class.clickable]="!kpiCards[key].loading && !kpiCards[key].error"
-              (click)="onKpiCardClick(key)"
-              (keydown.enter)="onKpiCardClick(key, $event)"
-              (keydown.space)="onKpiCardClick(key, $event)"
-              [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1"
-              role="button"
+            <mat-card class="kpi-card" [class.loading]="kpiCards[key].loading"
+              [class.clickable]="!kpiCards[key].loading && !kpiCards[key].error" (click)="onKpiCardClick(key)"
+              (keydown.enter)="onKpiCardClick(key, $event)" (keydown.space)="onKpiCardClick(key, $event)"
+              [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1" role="button"
               [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)"
               [attr.aria-disabled]="kpiCards[key].loading || kpiCards[key].error ? 'true' : 'false'">
               <mat-card-header>
-                <div mat-card-avatar class="kpi-icon-container" [style.background-color]="kpiCards[key].color" aria-hidden="true">
+                <div mat-card-avatar class="kpi-icon-container" [style.background-color]="kpiCards[key].color"
+                  aria-hidden="true">
                   <mat-icon class="kpi-icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
                 </div>
                 <mat-card-title class="kpi-card-title">
                   <h3>{{kpiCards[key].title}}</h3>
                 </mat-card-title>
               </mat-card-header>
-              
+
               <mat-card-content>
-                <app-loading-skeleton *ngIf="kpiCards[key].loading" variant="dashboard-kpi" aria-label="Chargement des données"></app-loading-skeleton>
-                
+                <app-loading-skeleton *ngIf="kpiCards[key].loading" variant="dashboard-kpi"
+                  aria-label="Chargement des données"></app-loading-skeleton>
+
                 <div *ngIf="!kpiCards[key].loading" class="kpi-content">
                   <div *ngIf="kpiCards[key].error" class="kpi-error" role="alert" aria-live="assertive">
                     <mat-icon color="warn" aria-hidden="true">error</mat-icon>
                     <span>{{kpiCards[key].error}}</span>
                   </div>
-                  
+
                   <div *ngIf="!kpiCards[key].error" class="kpi-value-container">
                     <div class="kpi-value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
                       {{kpiCards[key].displayValue}}
@@ -56,24 +49,16 @@
                     <div class="kpi-period" *ngIf="selectedPeriod$ | async as period">
                       sur {{getPeriodLabel(period)}}
                     </div>
-                    <div class="kpi-trend" *ngIf="kpiCards[key].trend" [class.positive]="kpiCards[key].trend.startsWith('+')" [class.negative]="kpiCards[key].trend.startsWith('-')">
+                    <div class="kpi-trend" *ngIf="kpiCards[key].trend"
+                      [class.positive]="kpiCards[key].trend.startsWith('+')"
+                      [class.negative]="kpiCards[key].trend.startsWith('-')">
                       {{kpiCards[key].trend}} vs période précédente
                     </div>
                     <div class="kpi-chart-container" aria-hidden="true">
-                      <canvas 
-                        [id]="'chart-' + key"
-                        #annoncesChart 
-                        *ngIf="key === 'annoncesActives'"
-                        class="kpi-chart"
-                        role="img"
-                        [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
-                      <canvas 
-                        [id]="'chart-' + key"
-                        #dossiersChart 
-                        *ngIf="key === 'dossiersATraiter'"
-                        class="kpi-chart"
-                        role="img"
-                        [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                      <canvas [id]="'chart-' + key" #annoncesChart *ngIf="key === 'annoncesActives'" class="kpi-chart"
+                        role="img" [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                      <canvas [id]="'chart-' + key" #dossiersChart *ngIf="key === 'dossiersATraiter'" class="kpi-chart"
+                        role="img" [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
                     </div>
                   </div>
                 </div>
@@ -100,57 +85,46 @@
                   <h3 id="recent-dossiers-title">Derniers dossiers</h3>
                 </mat-card-title>
                 <div class="export-actions">
-                  <button mat-icon-button 
-                          (click)="exportToCSV()" 
-                          [disabled]="isExportingToCSV || recentDossiers.length === 0"
-                          matTooltip="Exporter en CSV"
-                          aria-label="Exporter les dossiers en CSV">
+                  <button mat-icon-button (click)="exportToCSV()"
+                    [disabled]="isExportingToCSV || recentDossiers.length === 0" matTooltip="Exporter en CSV"
+                    aria-label="Exporter les dossiers en CSV">
                     <mat-icon>file_download</mat-icon>
                   </button>
-                  <button mat-icon-button 
-                          (click)="exportToPDF()" 
-                          [disabled]="isExportingToPDF || recentDossiers.length === 0"
-                          matTooltip="Exporter en PDF"
-                          aria-label="Exporter les dossiers en PDF">
+                  <button mat-icon-button (click)="exportToPDF()"
+                    [disabled]="isExportingToPDF || recentDossiers.length === 0" matTooltip="Exporter en PDF"
+                    aria-label="Exporter les dossiers en PDF">
                     <mat-icon>picture_as_pdf</mat-icon>
                   </button>
                 </div>
               </mat-card-header>
-              
+
               <mat-card-content class="scrollable-content">
                 <div class="dossiers-filters">
-                  <mat-button-toggle-group 
-                    [value]="selectedDossierFilter$ | async" 
-                    (change)="onDossierFilterChange($event.value)"
-                    aria-label="Filtre des dossiers">
+                  <mat-button-toggle-group [value]="selectedDossierFilter$ | async"
+                    (change)="onDossierFilterChange($event.value)" aria-label="Filtre des dossiers">
                     <mat-button-toggle value="A_TRAITER">À traiter</mat-button-toggle>
                     <mat-button-toggle value="RECENTS">Récents</mat-button-toggle>
                     <mat-button-toggle value="ASSIGNES">Assignés à moi</mat-button-toggle>
                   </mat-button-toggle-group>
                 </div>
 
-                <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-loading-skeleton>
-                
+                <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"
+                  aria-label="Chargement des dossiers récents"></app-loading-skeleton>
+
                 <div *ngIf="!loadingRecent && errorRecent" class="kpi-error" role="alert" aria-live="assertive">
                   <mat-icon color="warn" aria-hidden="true">error</mat-icon>
                   <span>{{errorRecent}}</span>
                 </div>
-                
-                <app-empty-state
-                  *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0"
-                  message="Aucun dossier récent"
-                  [primaryAction]="getEmptyStatePrimaryAction()"
+
+                <app-empty-state *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0"
+                  message="Aucun dossier récent" [primaryAction]="getEmptyStatePrimaryAction()"
                   [secondaryAction]="getEmptyStateSecondaryAction()">
                 </app-empty-state>
-                
-                <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list" role="list" [@listStaggerAnimation]="recentDossiers.length">
-                  <mat-card 
-                    *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" 
-                    class="dossier-item" 
-                    [@itemAnimation] 
-                    appearance="outlined" 
-                    role="listitem"
-                    tabindex="0"
+
+                <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list"
+                  role="list" [@listStaggerAnimation]="recentDossiers.length">
+                  <mat-card *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" class="dossier-item"
+                    [@itemAnimation] appearance="outlined" role="listitem" tabindex="0"
                     [attr.aria-label]="'Dossier ' + dossier.id + ', ' + (dossier.leadName || 'Sans nom')">
                     <mat-card-content>
                       <div class="dossier-info">
@@ -188,6 +162,62 @@
           </div>
 
 
+        </div>
+      </div>
+    </section>
+
+    <!-- Ligne 3: Yield Management Alerts -->
+    <section aria-labelledby="yield-section-title" class="dashboard-section" *ngIf="yieldAnnonces.length > 0">
+      <h2 id="yield-section-title" class="sr-only">Ajustements de Prix (Yield)</h2>
+      <div class="grid-container">
+        <div class="grid-row">
+          <div class="grid-col-12">
+            <mat-card class="section-card" appearance="outlined">
+              <mat-card-header>
+                <div mat-card-avatar class="kpi-icon-container" style="background-color: #f44336;" aria-hidden="true">
+                  <mat-icon class="kpi-icon" aria-hidden="true">trending_up</mat-icon>
+                </div>
+                <mat-card-title class="kpi-card-title">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <h3>Ajustements de Prix (Yield Management)</h3>
+                    <mat-icon
+                      style="font-size: 18px; height: 18px; width: 18px; color: var(--color-neutral-400); cursor: help;"
+                      matTooltip="Calcul dynamique automatisé (Yield) de recommandations de prix à la hausse ou à la baisse basé sur le volume d'interactions mesuré sur l'annonce ces 7 et 30 derniers jours."
+                      matTooltipPosition="right">
+                      help_outline
+                    </mat-icon>
+                  </div>
+                </mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <div class="dossiers-list" role="list">
+                  <mat-card *ngFor="let annonce of yieldAnnonces" class="dossier-item" appearance="outlined"
+                    role="listitem">
+                    <mat-card-content>
+                      <div class="dossier-info">
+                        <div class="dossier-field">
+                          <mat-icon class="field-icon" aria-hidden="true">house</mat-icon>
+                          <span class="field-label">Annonce:</span>
+                          <span class="field-value">{{annonce.title}}</span>
+                        </div>
+                        <div class="dossier-field">
+                          <mat-icon class="field-icon" aria-hidden="true">euro</mat-icon>
+                          <span class="field-label">Prix Actuel:</span>
+                          <span class="field-value">{{annonce.price}} {{annonce.currency}}</span>
+                        </div>
+                        <div class="dossier-field">
+                          <mat-icon class="field-icon" style="color:#ff9800" aria-hidden="true">warning</mat-icon>
+                          <span class="field-label">Alerte:</span>
+                          <span class="field-value"
+                            style="color:#d32f2f; font-weight: 500;">{{annonce.aiScoreDetails}}</span>
+                        </div>
+                      </div>
+                    </mat-card-content>
+                  </mat-card>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </div>
         </div>
       </div>
     </section>
