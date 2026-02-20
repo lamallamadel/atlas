@@ -66,6 +66,9 @@ public class Dossier extends BaseEntity {
     @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AppointmentEntity> appointments = new ArrayList<>();
 
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LeadActivity> activities = new ArrayList<>();
+
     public Long getId() {
         return id;
     }
@@ -212,5 +215,23 @@ public class Dossier extends BaseEntity {
 
     public void setWonReason(String wonReason) {
         this.wonReason = wonReason;
+    }
+
+    public List<LeadActivity> getActivities() {
+        return activities;
+    }
+
+    public void setActivities(List<LeadActivity> activities) {
+        this.activities = activities;
+    }
+
+    public void addActivity(LeadActivity activity) {
+        activities.add(activity);
+        activity.setDossier(this);
+    }
+
+    public void removeActivity(LeadActivity activity) {
+        activities.remove(activity);
+        activity.setDossier(null);
     }
 }
