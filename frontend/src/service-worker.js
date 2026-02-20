@@ -73,6 +73,16 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // Pass cross-origin requests (e.g. Keycloak discovery doc, JWKS) through without interference.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Never cache the OIDC callback route — the auth code in the URL must reach Angular fresh.
+  if (url.pathname.startsWith('/auth/')) {
+    return;
+  }
+
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(handleApiRequest(request));
   } else if (isStaticAsset(url.pathname)) {
