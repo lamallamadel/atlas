@@ -3,10 +3,10 @@ export const environment = {
   apiBaseUrl: '/api',
   oidc: {
     enabled: true,
-    issuer: 'http://localhost:8081/realms/myrealm',
+    issuer: 'https://identity.afroware.app/realms/myrealm',
     clientId: 'atlas-frontend',
     scope: 'openid profile email',
-    requireHttps: false,
+    requireHttps: true,
     redirectUri: (typeof window !== 'undefined' ? window.location.origin : '') + '/auth/callback'
   }
 };
