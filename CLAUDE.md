@@ -99,7 +99,17 @@ docker-compose down
 - **interceptors/** — HTTP interceptors (auth token, org-id, correlation-id)
 
 ### Default Ports
-Frontend: 4200 | Backend: 8080 | Keycloak: 8081 | Adminer: 8082 | PostgreSQL: 5432 | Redis: 6379 | Elasticsearch: 9200 | Kibana: 5601 | Prometheus: 9090 | Grafana: 3000
+Frontend: 4200 | Backend: 8080 | Keycloak: 8081 | Adminer: 8082 | PostgreSQL: 5432 | Redis: 6379 | Elasticsearch: 9200 | Kibana: 5601 | Prometheus: 9090 | Grafana: 3000 | Nginx: 80/443
+
+### Production URLs (via Nginx reverse proxy + Cloudflare)
+- `afroware.app` — Frontend (Angular) + Backend API (`/api/`, `/actuator/`)
+- `api.afroware.app` — Backend API (direct access)
+- `identity.afroware.app` — Keycloak (IAM/OIDC)
+- `db.afroware.app` — Adminer (database admin)
+- `grafana.afroware.app` — Grafana (monitoring dashboards)
+- `logs.afroware.app` — Kibana (log explorer)
+
+SSL is terminated by Cloudflare (Full Strict mode) with Origin certificates mounted at `/etc/ssl/cloudflare/` on the server.
 
 ## Code Style
 
