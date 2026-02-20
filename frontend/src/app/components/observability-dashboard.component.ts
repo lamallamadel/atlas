@@ -15,6 +15,7 @@ interface TimeSeriesPoint {
 })
 export class ObservabilityDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   metrics: ObservabilityMetrics | null = null;
+  channelNames: string[] = [];
   loading = false;
   error: string | null = null;
   autoRefresh = true;
@@ -117,6 +118,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
         next: (metrics) => {
           if (metrics) {
             this.metrics = metrics;
+            this.channelNames = Object.keys(metrics.queueMetrics.queueDepthByChannel);
             this.lastUpdated = new Date();
             this.addToHistory(metrics);
             this.updateAllCharts();
@@ -148,6 +150,7 @@ export class ObservabilityDashboardComponent implements OnInit, OnDestroy, After
       .subscribe({
         next: (metrics) => {
           this.metrics = metrics;
+          this.channelNames = Object.keys(metrics.queueMetrics.queueDepthByChannel);
           this.lastUpdated = new Date();
           this.addToHistory(metrics);
           this.updateAllCharts();
