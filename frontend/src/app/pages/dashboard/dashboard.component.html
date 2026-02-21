@@ -14,7 +14,7 @@
       <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
       <div class="grid-container">
         <div class="grid-row">
-          <div *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey" class="grid-col-12 grid-col-md-6 grid-col-lg-3"
+          <div *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey" class="grid-col-12 grid-col-md-6 grid-col-lg-4"
             [@itemAnimation]>
             <mat-card class="kpi-card" [class.loading]="kpiCards[key].loading"
               [class.clickable]="!kpiCards[key].loading && !kpiCards[key].error" (click)="onKpiCardClick(key)"
@@ -59,6 +59,9 @@
                         role="img" [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
                       <canvas [id]="'chart-' + key" #dossiersChart *ngIf="key === 'dossiersATraiter'" class="kpi-chart"
                         role="img" [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                      <canvas [id]="'chart-' + key" #conversionWhatsAppChart *ngIf="key === 'conversionWhatsApp'"
+                        class="kpi-chart" role="img"
+                        [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
                     </div>
                   </div>
                 </div>

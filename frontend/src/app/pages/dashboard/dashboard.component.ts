@@ -44,7 +44,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   kpiCards: { [key: string]: KpiCard } = {
     annoncesActives: {
-      title: 'Annonces actives',
+      title: 'Biens en Portefeuille',
       value: 0,
       displayValue: 0,
       loading: true,
@@ -55,14 +55,25 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       trend: ''
     },
     dossiersATraiter: {
-      title: 'Dossiers à traiter',
+      title: 'Leads Actifs',
       value: 0,
       displayValue: 0,
       loading: true,
       error: '',
-      icon: 'folder_open',
+      icon: 'person_add',
       color: '#ff9800',
       chartData: [8, 12, 10, 15, 13, 18, 20],
+      trend: ''
+    },
+    conversionWhatsApp: {
+      title: 'Conversion WhatsApp %',
+      value: 0,
+      displayValue: 0,
+      loading: true,
+      error: '',
+      icon: 'connect_without_contact',
+      color: '#25D366',
+      chartData: [4, 6, 8, 10, 15, 18, 24],
       trend: ''
     }
   };
@@ -76,9 +87,11 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @ViewChild('annoncesChart') annoncesChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('dossiersChart') dossiersChartRef!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('conversionWhatsAppChart') conversionWhatsAppChartRef!: ElementRef<HTMLCanvasElement>;
 
   private annoncesChart?: Chart;
   private dossiersChart?: Chart;
+  private conversionWhatsAppChart?: Chart;
 
   constructor(
     private dashboardKpiService: DashboardKpiService,
@@ -162,6 +175,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.dossiersChart) {
       this.dossiersChart.destroy();
     }
+    if (this.conversionWhatsAppChart) {
+      this.conversionWhatsAppChart.destroy();
+    }
   }
 
   loadKpis(): void {
@@ -176,6 +192,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.kpiCards['dossiersATraiter'].loading = true;
     this.kpiCards['dossiersATraiter'].error = '';
 
+    this.kpiCards['conversionWhatsApp'].loading = true;
+    this.kpiCards['conversionWhatsApp'].error = '';
+
     const period = this.selectedPeriod$.value;
     this.dashboardKpiService.getTrends(period).subscribe({
       next: (trends) => {
@@ -186,7 +205,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           this.kpiCards['annoncesActives'].loading = false;
           this.animateCounter('annoncesActives', annoncesData.currentValue);
           this.updateChart('annoncesActives', annoncesData.currentValue);
-          this.ariaAnnouncer.announcePolite(`${annoncesData.currentValue} annonces actives chargées`);
+          this.ariaAnnouncer.announcePolite(`${annoncesData.currentValue} biens chargés`);
         }
 
         if (trends['dossiersATraiter']) {
@@ -196,14 +215,24 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           this.kpiCards['dossiersATraiter'].loading = false;
           this.animateCounter('dossiersATraiter', dossiersData.currentValue);
           this.updateChart('dossiersATraiter', dossiersData.currentValue);
-          this.ariaAnnouncer.announcePolite(`${dossiersData.currentValue} dossiers à traiter chargés`);
+          this.ariaAnnouncer.announcePolite(`${dossiersData.currentValue} leads chargés`);
         }
+
+        // Mock WhatsApp Conversion Rate
+        const mockConversion = period === 'TODAY' ? 12 : period === 'LAST_7_DAYS' ? 18 : 24;
+        this.kpiCards['conversionWhatsApp'].value = mockConversion;
+        this.kpiCards['conversionWhatsApp'].trend = '+15%';
+        this.kpiCards['conversionWhatsApp'].loading = false;
+        this.animateCounter('conversionWhatsApp', mockConversion);
+        this.updateChart('conversionWhatsApp', mockConversion);
       },
       error: () => {
         this.kpiCards['annoncesActives'].loading = false;
         this.kpiCards['annoncesActives'].error = 'Erreur lors du chargement des données';
         this.kpiCards['dossiersATraiter'].loading = false;
         this.kpiCards['dossiersATraiter'].error = 'Erreur lors du chargement des données';
+        this.kpiCards['conversionWhatsApp'].loading = false;
+        this.kpiCards['conversionWhatsApp'].error = 'Erreur serveur';
         this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des données du tableau de bord');
       }
     });
@@ -289,6 +318,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (cardKey === 'dossiersATraiter' && this.dossiersChart) {
       this.dossiersChart.data.datasets[0].data = [...card.chartData];
       this.dossiersChart.update('none');
+    } else if (cardKey === 'conversionWhatsApp' && this.conversionWhatsAppChart) {
+      this.conversionWhatsAppChart.data.datasets[0].data = [...card.chartData];
+      this.conversionWhatsAppChart.update('none');
     }
   }
 
@@ -304,6 +336,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       this.dossiersChart = await this.createChart(
         this.dossiersChartRef.nativeElement,
         this.kpiCards['dossiersATraiter']
+      );
+    }
+
+    if (this.conversionWhatsAppChartRef) {
+      this.conversionWhatsAppChart = await this.createChart(
+        this.conversionWhatsAppChartRef.nativeElement,
+        this.kpiCards['conversionWhatsApp']
       );
     }
   }
