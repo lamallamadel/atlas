@@ -109,6 +109,9 @@
   font-size: var(--font-size-sm);
   font-weight: var(--font-weight-medium);
   color: var(--color-neutral-700);
+  white-space: nowrap;
+  overflow: visible !important;
+  text-overflow: unset !important;
 }
 
 ::ng-deep .annonce-stepper .mat-step-label-selected {
@@ -144,6 +147,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -176,8 +180,15 @@
   width: calc(50% - var(--spacing-2));
 }
 
+::ng-deep .step-form .mat-form-field.full-grid-width {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
 .form-row {
   display: flex;
+  flex-wrap: wrap;
+  /* Allow wrapping for better responsive behavior */
   gap: var(--spacing-4);
   margin-bottom: var(--spacing-4);
 }

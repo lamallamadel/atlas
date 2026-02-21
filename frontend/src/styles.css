@@ -139,6 +139,52 @@ a:hover {
   line-height: 16px;
 }
 
+/* Global Badge Styles (Annonces) */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background-color: var(--color-neutral-100);
+  color: var(--color-neutral-700);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  /* Slight elevation */
+}
+
+/* Specific Badge States */
+.badge-status.badge-active {
+  background-color: rgba(16, 185, 129, 0.15);
+  /* emerald-500 */
+  color: #059669;
+  /* emerald-600 */
+}
+
+.badge-status.badge-draft {
+  background-color: rgba(156, 163, 175, 0.15);
+  /* gray-400 */
+  color: #4b5563;
+  /* gray-600 */
+}
+
+.badge-status.badge-paused {
+  background-color: rgba(245, 158, 11, 0.15);
+  /* amber-500 */
+  color: #d97706;
+  /* amber-600 */
+}
+
+.badge-status.badge-archived {
+  background-color: rgba(239, 68, 68, 0.15);
+  /* red-500 */
+  color: #dc2626;
+  /* red-600 */
+}
+
 /* Global kebab menu button styles */
 .kebab-menu-button {
   transition: all 150ms ease;
