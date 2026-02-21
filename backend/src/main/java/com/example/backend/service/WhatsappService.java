@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import com.example.backend.entity.Annonce;
+import com.example.backend.repository.AnnonceRepository;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class WhatsappService {
 
     private final DossierRepository dossierRepository;
+    private final AnnonceRepository annonceRepository;
     private final AiAgentService aiAgentService;
     private final RestTemplate restTemplate;
 
@@ -35,9 +38,11 @@ public class WhatsappService {
     @Value("${twilio.whatsapp-number:}")
     private String twilioWhatsappNumber; // e.g. "whatsapp:+14155238886"
 
-    public WhatsappService(DossierRepository dossierRepository, AiAgentService aiAgentService,
+    public WhatsappService(DossierRepository dossierRepository, AnnonceRepository annonceRepository,
+            AiAgentService aiAgentService,
             RestTemplate restTemplate) {
         this.dossierRepository = dossierRepository;
+        this.annonceRepository = annonceRepository;
         this.aiAgentService = aiAgentService;
         this.restTemplate = restTemplate;
     }
@@ -46,50 +51,73 @@ public class WhatsappService {
     public void processIncomingMessage(String from, String to, String body) {
         String phoneExtracted = from.replace("whatsapp:", "");
 
-        // 1. Find or create dossier based on the phone number
-        Dossier dossier = getOrCreateDossier(phoneExtracted);
-
-        // 2. Call the Brain Agent Service for intent interpretation & response
-        // generation
+        // 1. Call the Brain Agent Service FIRST to extract intent and parameters
         AiAgentRequest agentRequest = new AiAgentRequest();
         agentRequest.setQuery(body);
-        if (dossier != null) {
-            agentRequest.setConversationId("whatsapp_" + dossier.getId());
-        }
+        agentRequest.setConversationId("whatsapp_" + phoneExtracted);
 
+        AiAgentResponse response = null;
         try {
-            AiAgentResponse response = aiAgentService.process(agentRequest);
-
-            // 3. Send the AI response back to the user via Twilio API
-            if (response != null && response.getAnswer() != null && !response.getAnswer().isEmpty()) {
-                sendWhatsappMessage(from, response.getAnswer());
-
-                // If the agent determined a tool was called successfully (e.g. Schedule
-                // Appointment),
-                // we could also read `response.getActions()` and execute Spring Boot logic
-                // here.
-            }
+            response = aiAgentService.process(agentRequest);
         } catch (Exception e) {
             System.err.println("Error processing WhatsApp message via Brain: " + e.getMessage());
-            // Fallback gracefully
             sendWhatsappMessage(from,
                     "Désolé, je rencontre des difficultés techniques. Un conseiller va prendre le relais sous peu.");
+            return;
+        }
+
+        // 2. Extract orgId and annonceId from intent if available
+        String orgId = "agency_a_tenant"; // Default for MVP B2B Launch if not found
+        Long extractedAnnonceId = null;
+
+        if (response != null && response.getIntent() != null && response.getIntent().getParams() != null) {
+            Object idObj = response.getIntent().getParams().get("annonce_id");
+            if (idObj != null) {
+                try {
+                    extractedAnnonceId = Long.parseLong(idObj.toString());
+                    Annonce annonce = annonceRepository.findById(extractedAnnonceId).orElse(null);
+                    if (annonce != null) {
+                        orgId = annonce.getOrgId();
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to parse annonce_id: " + idObj);
+                }
+            }
+        }
+
+        // 3. Find or create dossier based on the phone number and correct orgId
+        Dossier dossier = getOrCreateDossier(phoneExtracted, orgId, extractedAnnonceId);
+
+        // 4. Send the AI response back to the user via Twilio API
+        if (response != null && response.getAnswer() != null && !response.getAnswer().isEmpty()) {
+            sendWhatsappMessage(from, response.getAnswer());
         }
     }
 
-    private Dossier getOrCreateDossier(String phone) {
-        // Look up by phone
-        Dossier dossier = dossierRepository.findByLeadPhone(phone).stream().findFirst().orElse(null);
+    private Dossier getOrCreateDossier(String phone, String orgId, Long annonceId) {
+        // Look up by phone and orgId (since the same prospect could contact multiple
+        // agencies)
+        Dossier dossier = dossierRepository.findByLeadPhone(phone).stream()
+                .filter(d -> orgId.equals(d.getOrgId()))
+                .findFirst().orElse(null);
 
         if (dossier == null) {
-            // Create a new prospect (Lead) since we don't know them
+            // Create a new prospect (Lead) since we don't know them in this agency
             dossier = new Dossier();
+            dossier.setOrgId(orgId);
             dossier.setLeadPhone(phone);
             dossier.setSource(DossierSource.SOCIAL_MEDIA);
             dossier.setStatus(DossierStatus.NEW);
             dossier.setScore(10); // initial hotness
             dossier.setNotes("Source: WhatsApp Inbound Campaign");
 
+            if (annonceId != null) {
+                dossier.setAnnonceId(annonceId);
+            }
+
+            dossier = dossierRepository.save(dossier);
+        } else if (dossier.getAnnonceId() == null && annonceId != null) {
+            dossier.setAnnonceId(annonceId);
             dossier = dossierRepository.save(dossier);
         }
 
