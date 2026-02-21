@@ -159,8 +159,15 @@ export class AiAgentService {
         // Low-confidence or UNKNOWN → call backend, fallback to local response
         this.addTypingIndicator();
         return this.callBackend(query).pipe(
-            map(serverIntent => serverIntent ?? intent),
-            catchError(() => of(intent))
+            map(serverIntent => {
+                const finalIntent = serverIntent ?? intent;
+                this.dispatchIntent(finalIntent);
+                return finalIntent;
+            }),
+            catchError(() => {
+                this.dispatchIntent(intent);
+                return of(intent);
+            })
         );
     }
 
@@ -393,7 +400,10 @@ export class AiAgentService {
     private callBackend(query: string): Observable<AgentIntent | null> {
         return this.http.post<{ intent: AgentIntent }>(this.API_URL, { query }).pipe(
             map(res => res?.intent ?? null),
-            catchError(() => of(null))
+            catchError((err) => {
+                console.error("AI Backend Error/Timeout:", err);
+                return of(null);
+            })
         );
     }
 
