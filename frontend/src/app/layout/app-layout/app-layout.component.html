@@ -158,18 +158,94 @@
             </div>
           </div>
           <mat-divider role="separator"></mat-divider>
+          
+          <button mat-menu-item [matMenuTriggerFor]="toursSubMenu" aria-label="Guides interactifs">
+            <mat-icon aria-hidden="true">school</mat-icon>
+            <span>Guides interactifs</span>
+            <mat-icon class="submenu-arrow" aria-hidden="true">chevron_right</mat-icon>
+          </button>
+          
+          <mat-divider role="separator"></mat-divider>
           <button mat-menu-item (click)="logout()" aria-label="Se déconnecter de l'application">
             <mat-icon aria-hidden="true">logout</mat-icon>
             <span>Déconnexion</span>
           </button>
         </mat-menu>
+
+        <mat-menu #toursSubMenu="matMenu" class="tours-submenu" aria-label="Menu des guides">
+          <div class="tour-menu-header" mat-menu-item disabled>
+            <div class="tour-progress-badge">
+              <mat-icon aria-hidden="true">timeline</mat-icon>
+              <span>{{ tourCompletionPercentage }}% complété</span>
+            </div>
+          </div>
+          <mat-divider role="separator"></mat-divider>
+          
+          <button mat-menu-item (click)="viewAllTours()" aria-label="Voir tous les guides">
+            <mat-icon aria-hidden="true">format_list_bulleted</mat-icon>
+            <span>Voir tous les guides</span>
+          </button>
+          
+          <mat-divider role="separator"></mat-divider>
+          
+          <button mat-menu-item (click)="startQuickTour('dashboard-overview')" aria-label="Démarrer le guide du dashboard">
+            <mat-icon aria-hidden="true">dashboard</mat-icon>
+            <span>Dashboard</span>
+            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('dashboard-overview')" aria-hidden="true">check_circle</mat-icon>
+          </button>
+          
+          <button mat-menu-item (click)="startQuickTour('create-dossier')" aria-label="Démarrer le guide de création de dossier">
+            <mat-icon aria-hidden="true">add_box</mat-icon>
+            <span>Créer un dossier</span>
+            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('create-dossier')" aria-hidden="true">check_circle</mat-icon>
+          </button>
+          
+          <button mat-menu-item (click)="startQuickTour('message-workflow')" aria-label="Démarrer le guide de messagerie">
+            <mat-icon aria-hidden="true">message</mat-icon>
+            <span>Messagerie</span>
+            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('message-workflow')" aria-hidden="true">check_circle</mat-icon>
+          </button>
+          
+          <button mat-menu-item (click)="startQuickTour('status-transitions')" aria-label="Démarrer le guide de workflow">
+            <mat-icon aria-hidden="true">sync_alt</mat-icon>
+            <span>Workflow de statut</span>
+            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('status-transitions')" aria-hidden="true">check_circle</mat-icon>
+          </button>
+          
+          <button mat-menu-item (click)="startQuickTour('reports')" aria-label="Démarrer le guide des rapports">
+            <mat-icon aria-hidden="true">assessment</mat-icon>
+            <span>Rapports</span>
+            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('reports')" aria-hidden="true">check_circle</mat-icon>
+          </button>
+          
+          <mat-divider role="separator"></mat-divider>
+          
+          <button mat-menu-item (click)="skipAllTours()" aria-label="Ignorer tous les guides">
+            <mat-icon aria-hidden="true">cancel</mat-icon>
+            <span>Ignorer tous les guides</span>
+          </button>
+          
+          <button mat-menu-item (click)="restartAllTours()" aria-label="Redémarrer tous les guides">
+            <mat-icon aria-hidden="true">restart_alt</mat-icon>
+            <span>Redémarrer tous les guides</span>
+          </button>
+        </mat-menu>
       </div>
     </mat-toolbar>
 
-    <main id="main-content" class="main-content" role="main" tabindex="-1">
+    <main id="main-content" class="main-content" role="main" tabindex="-1" appMaintainScroll>
       <div [@routeFadeSlideAnimation]="prepareRoute(outlet)">
         <router-outlet #outlet="outlet"></router-outlet>
       </div>
     </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <app-mobile-bottom-navigation></app-mobile-bottom-navigation>
+
+    <!-- PWA Install Prompt -->
+    <app-pwa-install-prompt></app-pwa-install-prompt>
+
+    <!-- App Shell for instant loading -->
+    <app-shell></app-shell>
   </mat-sidenav-content>
 </mat-sidenav-container>

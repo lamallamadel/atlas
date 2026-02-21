@@ -43,6 +43,10 @@ public class UserPreferencesEntity extends BaseEntity {
     @Column(name = "role_template", length = 50)
     private String roleTemplate;
 
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "tour_progress", columnDefinition = "jsonb")
+    private Map<String, Object> tourProgress;
+
     public Long getId() {
         return id;
     }
@@ -105,5 +109,13 @@ public class UserPreferencesEntity extends BaseEntity {
 
     public void setRoleTemplate(String roleTemplate) {
         this.roleTemplate = roleTemplate;
+    }
+
+    public Map<String, Object> getTourProgress() {
+        return tourProgress;
+    }
+
+    public void setTourProgress(Map<String, Object> tourProgress) {
+        this.tourProgress = tourProgress;
     }
 }

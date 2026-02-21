@@ -14,8 +14,10 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -26,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OutboundJobWorker {
 
     private static final Logger logger = LoggerFactory.getLogger(OutboundJobWorker.class);
-    private static final int[] BACKOFF_MINUTES = {1, 5, 15, 60, 360};
+    private static final int[] BACKOFF_MINUTES = { 1, 5, 15, 60, 360 };
 
     private final OutboundMessageRepository outboundMessageRepository;
     private final OutboundAttemptRepository outboundAttemptRepository;
@@ -66,12 +68,15 @@ public class OutboundJobWorker {
             return;
         }
 
+        String workerCorrelationId = "worker-" + UUID.randomUUID().toString();
+        MDC.put("correlationId", workerCorrelationId);
+        MDC.put("workerType", "outbound-job");
+
         try {
             recoverStaleMessages();
 
-            List<OutboundMessageEntity> messages =
-                    outboundMessageRepository.findPendingMessages(
-                            OutboundMessageStatus.QUEUED, PageRequest.of(0, batchSize));
+            List<OutboundMessageEntity> messages = outboundMessageRepository.findPendingMessages(
+                    OutboundMessageStatus.QUEUED, PageRequest.of(0, batchSize));
 
             if (messages.isEmpty()) {
                 return;
@@ -80,6 +85,11 @@ public class OutboundJobWorker {
             logger.info("Processing {} pending outbound messages", messages.size());
 
             for (OutboundMessageEntity message : messages) {
+                String messageCorrelationId = "msg-" + message.getId() + "-" + UUID.randomUUID().toString();
+                MDC.put("correlationId", messageCorrelationId);
+                MDC.put("messageId", String.valueOf(message.getId()));
+                MDC.put("channel", message.getChannel().name());
+
                 try {
                     if (isReadyForProcessing(message)) {
                         processMessage(message);
@@ -89,23 +99,27 @@ public class OutboundJobWorker {
                                 message.getId());
                     }
                 } catch (Exception e) {
-                    logger.error(
-                            "Error processing message {}: {}", message.getId(), e.getMessage(), e);
+                    logger.error("Error processing message {}: {}", message.getId(), e.getMessage(), e);
+                } finally {
+                    MDC.remove("messageId");
+                    MDC.remove("channel");
                 }
             }
 
         } catch (Exception e) {
             logger.error("Error in outbound job worker: {}", e.getMessage(), e);
+        } finally {
+            MDC.remove("correlationId");
+            MDC.remove("workerType");
         }
     }
 
     private void recoverStaleMessages() {
         LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(10);
-        List<OutboundMessageEntity> staleMessages =
-                outboundMessageRepository.findStaleMessages(
-                        OutboundMessageStatus.SENDING,
-                        staleThreshold,
-                        PageRequest.of(0, batchSize));
+        List<OutboundMessageEntity> staleMessages = outboundMessageRepository.findStaleMessages(
+                OutboundMessageStatus.SENDING,
+                staleThreshold,
+                PageRequest.of(0, batchSize));
 
         if (!staleMessages.isEmpty()) {
             logger.warn(
@@ -124,9 +138,8 @@ public class OutboundJobWorker {
             return true;
         }
 
-        List<OutboundAttemptEntity> attempts =
-                outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(
-                        message.getId());
+        List<OutboundAttemptEntity> attempts = outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(
+                message.getId());
         if (attempts.isEmpty()) {
             return true;
         }
@@ -345,10 +358,9 @@ public class OutboundJobWorker {
     private void logMessageSentActivity(OutboundMessageEntity message, ProviderSendResult result) {
         if (activityService != null && message.getDossierId() != null) {
             try {
-                String description =
-                        String.format(
-                                "Outbound %s message sent to %s",
-                                message.getChannel(), message.getTo());
+                String description = String.format(
+                        "Outbound %s message sent to %s",
+                        message.getChannel(), message.getTo());
 
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("outboundMessageId", message.getId());
@@ -374,10 +386,9 @@ public class OutboundJobWorker {
             OutboundMessageEntity message, String errorCode, String errorMessage, String reason) {
         if (activityService != null && message.getDossierId() != null) {
             try {
-                String description =
-                        String.format(
-                                "Outbound %s message failed: %s",
-                                message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
+                String description = String.format(
+                        "Outbound %s message failed: %s",
+                        message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
 
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("outboundMessageId", message.getId());

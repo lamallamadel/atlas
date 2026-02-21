@@ -9,9 +9,66 @@
     </mat-button-toggle-group>
   </div>
   <div class="page-content">
-    <!-- Ligne 1: KPI Cards (2-4 cards) -->
     <section aria-labelledby="kpi-section-title" class="dashboard-section">
       <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
+
+      <div class="kpi-grid">
+        <div 
+          *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey"
+          class="kpi-card-wrapper"
+          [@itemAnimation]>
+          <div 
+            class="kpi-card"
+            [class.kpi-card--loading]="kpiCards[key].loading"
+            [class.kpi-card--clickable]="!kpiCards[key].loading && !kpiCards[key].error"
+            [class.kpi-card--error]="kpiCards[key].error"
+            (click)="onKpiCardClick(key)"
+            (keydown.enter)="onKpiCardClick(key, $event)"
+            (keydown.space)="onKpiCardClick(key, $event)"
+            [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1"
+            role="button"
+            [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)"
+            [attr.aria-disabled]="kpiCards[key].loading || kpiCards[key].error ? 'true' : 'false'">
+            
+            <div class="kpi-card__header">
+              <div class="kpi-card__icon-container" [style.background]="'linear-gradient(135deg, ' + kpiCards[key].color + ' 0%, ' + kpiCards[key].color + 'cc 100%)'">
+                <mat-icon class="kpi-card__icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
+                <div class="kpi-card__badge" [style.background-color]="kpiCards[key].badgeColor" aria-hidden="true"></div>
+              </div>
+              <div class="kpi-card__title-section">
+                <h3 class="kpi-card__title">{{kpiCards[key].title}}</h3>
+                <p class="kpi-card__description" *ngIf="kpiCards[key].description">{{kpiCards[key].description}}</p>
+              </div>
+            </div>
+            
+            <app-skeleton-loader *ngIf="kpiCards[key].loading" variant="dashboard-kpi" aria-label="Chargement des données"></app-skeleton-loader>
+            
+            <div *ngIf="!kpiCards[key].loading" class="kpi-card__content">
+              <div *ngIf="kpiCards[key].error" class="kpi-card__error" role="alert" aria-live="assertive">
+                <mat-icon color="warn" aria-hidden="true">error</mat-icon>
+                <span>{{kpiCards[key].error}}</span>
+              </div>
+              
+              <div *ngIf="!kpiCards[key].error" class="kpi-card__body">
+                <div class="kpi-card__metric">
+                  <span class="kpi-card__value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
+                    {{kpiCards[key].displayValue}}
+                  </span>
+                  <span class="kpi-card__label" *ngIf="selectedPeriod$ | async as period">
+                    sur {{getPeriodLabel(period)}}
+                  </span>
+                </div>
+                
+                <div class="kpi-card__trend" *ngIf="kpiCards[key].trend">
+                  <div class="kpi-card__trend-indicator" 
+                       [class.kpi-card__trend-indicator--positive]="kpiCards[key].trendValue > 0"
+                       [class.kpi-card__trend-indicator--negative]="kpiCards[key].trendValue < 0"
+                       [class.kpi-card__trend-indicator--neutral]="kpiCards[key].trendValue === 0">
+                    <mat-icon class="kpi-card__trend-icon" aria-hidden="true">
+                      {{kpiCards[key].trendValue > 0 ? 'trending_up' : kpiCards[key].trendValue < 0 ? 'trending_down' : 'trending_flat'}}
+                    </mat-icon>
+                    <span class="kpi-card__trend-value">{{kpiCards[key].trend}}</span>
+
       <div class="grid-container">
         <div class="grid-row">
           <div *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey" class="grid-col-12 grid-col-md-6 grid-col-lg-4"
@@ -63,21 +120,37 @@
                         class="kpi-chart" role="img"
                         [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
                     </div>
+
                   </div>
                 </div>
-              </mat-card-content>
-            </mat-card>
+                
+                <div class="kpi-card__chart" aria-hidden="true">
+                  <canvas 
+                    [id]="'chart-' + key"
+                    #annoncesChart 
+                    *ngIf="key === 'annoncesActives'"
+                    class="kpi-card__sparkline"
+                    role="img"
+                    [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                  <canvas 
+                    [id]="'chart-' + key"
+                    #dossiersChart 
+                    *ngIf="key === 'dossiersATraiter'"
+                    class="kpi-card__sparkline"
+                    role="img"
+                    [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- Ligne 2: Liste dossiers récents -->
     <section aria-labelledby="dossiers-section-title" class="dashboard-section">
       <h2 id="dossiers-section-title" class="sr-only">Dossiers récents</h2>
       <div class="grid-container">
         <div class="grid-row">
-          <!-- Liste des dossiers récents -->
           <div class="grid-col-12">
             <mat-card class="section-card scrollable-card" aria-labelledby="recent-dossiers-title">
               <mat-card-header>
@@ -111,8 +184,13 @@
                   </mat-button-toggle-group>
                 </div>
 
+
+                <app-skeleton-loader *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-skeleton-loader>
+                
+
                 <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"
                   aria-label="Chargement des dossiers récents"></app-loading-skeleton>
+
 
                 <div *ngIf="!loadingRecent && errorRecent" class="kpi-error" role="alert" aria-live="assertive">
                   <mat-icon color="warn" aria-hidden="true">error</mat-icon>

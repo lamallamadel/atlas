@@ -1,0 +1,55 @@
+<div class="animated-empty-state-container" role="status" aria-live="polite">
+  <div class="animated-empty-state-content">
+    <!-- Lottie Animation -->
+    <div class="animated-empty-state-animation">
+      <app-lottie-animation
+        [animationType]="animationType"
+        [width]="animationWidth"
+        [height]="animationHeight"
+        [loop]="loop"
+        [autoplay]="true"
+        [showControls]="showControls"
+        (error)="onAnimationError($event)">
+      </app-lottie-animation>
+    </div>
+    
+    <!-- Title -->
+    <h3 class="animated-empty-state-title">{{ title }}</h3>
+    
+    <!-- Message -->
+    <p class="animated-empty-state-message" *ngIf="message">{{ message }}</p>
+    
+    <!-- Action buttons -->
+    <div class="animated-empty-state-actions" *ngIf="primaryAction || secondaryAction">
+      <button 
+        *ngIf="primaryAction" 
+        class="btn-primary-action" 
+        (click)="onPrimaryClick()"
+        [attr.aria-label]="primaryAction.label">
+        <mat-icon *ngIf="primaryAction.icon" class="btn-icon">{{ primaryAction.icon }}</mat-icon>
+        <span>{{ primaryAction.label }}</span>
+      </button>
+      
+      <button 
+        *ngIf="secondaryAction" 
+        class="btn-secondary-action" 
+        (click)="onSecondaryClick()"
+        [attr.aria-label]="secondaryAction.label">
+        <mat-icon *ngIf="secondaryAction.icon" class="btn-icon">{{ secondaryAction.icon }}</mat-icon>
+        <span>{{ secondaryAction.label }}</span>
+      </button>
+    </div>
+    
+    <!-- Help link -->
+    <div class="animated-empty-state-help" *ngIf="helpLink">
+      <a 
+        href="javascript:void(0)" 
+        class="help-link" 
+        (click)="onHelpLinkClick()"
+        [attr.aria-label]="helpLink.label">
+        <mat-icon class="help-icon">help_outline</mat-icon>
+        <span>{{ helpLink.label }}</span>
+      </a>
+    </div>
+  </div>
+</div>

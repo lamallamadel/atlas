@@ -128,6 +128,14 @@ playwright/.cache/
 frontend/.cache/
 ms-playwright/
 
+# Accessibility & Performance Testing
+a11y-reports/
+.lighthouseci/
+lighthouse-reports/
+frontend/a11y-reports/
+frontend/.lighthouseci/
+frontend/lighthouse-reports/
+
 # Environment variables
 .env
 .env.local
@@ -452,6 +460,68 @@ backend/run-maven-install.js
 # Agent-created setup script (current session)
 setup-repo-packages.ps1
 
+
+# ML Service
+ml-service/venv/
+ml-service/env/
+ml-service/.venv/
+ml-service/__pycache__/
+ml-service/**/__pycache__/
+ml-service/*.pyc
+ml-service/.env
+ml-service/models/
+ml-service/*.log
+ml-service/.pytest_cache/
+ml-service/**/*.pkl
+ml-service/**/*.joblib
+
+# Analytics and BI
+metabase-data/
+report-exports/
+query-results/
+analytics-exports/
+*.csv
+*.xlsx
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/*.tfplan
+terraform/*.tfvars
+!terraform/terraform.tfvars.example
+terraform/modules/**/failover_lambda.zip
+terraform/crash.log
+terraform/override.tf
+terraform/override.tf.json
+terraform/*_override.tf
+terraform/*_override.tf.json
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+
+# AWS
+.aws/
+aws-exports.js
+amplify-build-config.json
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+
+# Deployment
+deployment-logs/
+rollback-backups/
+
 # Local tool configs
 .gordonrc
 .claude/
+

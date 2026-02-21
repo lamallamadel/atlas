@@ -1,10 +1,6 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.WorkflowDefinitionMapper;
-import com.example.backend.dto.WorkflowDefinitionRequest;
-import com.example.backend.dto.WorkflowDefinitionResponse;
-import com.example.backend.dto.WorkflowTransitionMapper;
-import com.example.backend.dto.WorkflowTransitionResponse;
+import com.example.backend.dto.*;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.WorkflowDefinition;
 import com.example.backend.entity.WorkflowTransition;
@@ -30,6 +26,7 @@ public class WorkflowService {
     private final WorkflowDefinitionMapper workflowDefinitionMapper;
     private final WorkflowTransitionMapper workflowTransitionMapper;
     private final WorkflowValidationService workflowValidationService;
+    private final WorkflowVersioningService workflowVersioningService;
     private final DossierRepository dossierRepository;
 
     public WorkflowService(
@@ -38,12 +35,14 @@ public class WorkflowService {
             WorkflowDefinitionMapper workflowDefinitionMapper,
             WorkflowTransitionMapper workflowTransitionMapper,
             WorkflowValidationService workflowValidationService,
+            WorkflowVersioningService workflowVersioningService,
             DossierRepository dossierRepository) {
         this.workflowDefinitionRepository = workflowDefinitionRepository;
         this.workflowTransitionRepository = workflowTransitionRepository;
         this.workflowDefinitionMapper = workflowDefinitionMapper;
         this.workflowTransitionMapper = workflowTransitionMapper;
         this.workflowValidationService = workflowValidationService;
+        this.workflowVersioningService = workflowVersioningService;
         this.dossierRepository = dossierRepository;
     }
 
@@ -56,6 +55,11 @@ public class WorkflowService {
 
         WorkflowDefinition definition = workflowDefinitionMapper.toEntity(request);
         definition.setOrgId(orgId);
+
+        Integer maxVersion = workflowDefinitionRepository
+                .findMaxVersionByCaseType(orgId, request.getCaseType())
+                .orElse(0);
+        definition.setVersion(maxVersion + 1);
 
         LocalDateTime now = LocalDateTime.now();
         definition.setCreatedAt(now);
@@ -72,13 +76,11 @@ public class WorkflowService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        WorkflowDefinition definition =
-                workflowDefinitionRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Workflow definition not found with id: " + id));
+        WorkflowDefinition definition = workflowDefinitionRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Workflow definition not found with id: " + id));
 
         if (!orgId.equals(definition.getOrgId())) {
             throw new EntityNotFoundException("Workflow definition not found with id: " + id);
@@ -90,6 +92,7 @@ public class WorkflowService {
     @Transactional(readOnly = true)
     public Page<WorkflowDefinitionResponse> listDefinitions(
             String caseType, Boolean isActive, Pageable pageable) {
+
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
@@ -99,35 +102,28 @@ public class WorkflowService {
 
         if (caseType != null && !caseType.isBlank()) {
             if (isActive != null && isActive) {
-                definitions =
-                        workflowDefinitionRepository.findAll(
-                                (root, query, cb) ->
-                                        cb.and(
-                                                cb.equal(root.get("orgId"), orgId),
-                                                cb.equal(root.get("caseType"), caseType),
-                                                cb.equal(root.get("isActive"), true)),
-                                pageable);
+                definitions = workflowDefinitionRepository.findAll(
+                        (root, query, cb) -> cb.and(
+                                cb.equal(root.get("orgId"), orgId),
+                                cb.equal(root.get("caseType"), caseType),
+                                cb.equal(root.get("isActive"), true)),
+                        pageable);
             } else {
-                definitions =
-                        workflowDefinitionRepository.findAll(
-                                (root, query, cb) ->
-                                        cb.and(
-                                                cb.equal(root.get("orgId"), orgId),
-                                                cb.equal(root.get("caseType"), caseType)),
-                                pageable);
+                definitions = workflowDefinitionRepository.findAll(
+                        (root, query, cb) -> cb.and(
+                                cb.equal(root.get("orgId"), orgId),
+                                cb.equal(root.get("caseType"), caseType)),
+                        pageable);
             }
         } else if (isActive != null && isActive) {
-            definitions =
-                    workflowDefinitionRepository.findAll(
-                            (root, query, cb) ->
-                                    cb.and(
-                                            cb.equal(root.get("orgId"), orgId),
-                                            cb.equal(root.get("isActive"), true)),
-                            pageable);
+            definitions = workflowDefinitionRepository.findAll(
+                    (root, query, cb) -> cb.and(
+                            cb.equal(root.get("orgId"), orgId),
+                            cb.equal(root.get("isActive"), true)),
+                    pageable);
         } else {
-            definitions =
-                    workflowDefinitionRepository.findAll(
-                            (root, query, cb) -> cb.equal(root.get("orgId"), orgId), pageable);
+            definitions = workflowDefinitionRepository.findAll(
+                    (root, query, cb) -> cb.equal(root.get("orgId"), orgId), pageable);
         }
 
         return definitions.map(workflowDefinitionMapper::toResponse);
@@ -135,13 +131,19 @@ public class WorkflowService {
 
     @Transactional(readOnly = true)
     public List<WorkflowDefinitionResponse> getTransitionsForCaseType(String caseType) {
+        return getVersionsByCaseType(caseType);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkflowDefinitionResponse> getVersionsByCaseType(String caseType) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        List<WorkflowDefinition> definitions =
-                workflowDefinitionRepository.findByCaseType(orgId, caseType);
+        List<WorkflowDefinition> definitions = workflowDefinitionRepository
+                .findAllVersionsByCaseType(orgId, caseType);
+
         return definitions.stream()
                 .map(workflowDefinitionMapper::toResponse)
                 .collect(Collectors.toList());
@@ -154,16 +156,18 @@ public class WorkflowService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        WorkflowDefinition definition =
-                workflowDefinitionRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Workflow definition not found with id: " + id));
+        WorkflowDefinition definition = workflowDefinitionRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Workflow definition not found with id: " + id));
 
         if (!orgId.equals(definition.getOrgId())) {
             throw new EntityNotFoundException("Workflow definition not found with id: " + id);
+        }
+
+        if (definition.getIsPublished()) {
+            throw new IllegalStateException("Cannot update published workflow. Create a new version instead.");
         }
 
         workflowDefinitionMapper.updateEntity(definition, request);
@@ -174,22 +178,102 @@ public class WorkflowService {
     }
 
     @Transactional
+    public WorkflowDefinitionResponse publishWorkflow(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        WorkflowDefinition definition = workflowDefinitionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Workflow definition not found with id: " + id));
+
+        if (!orgId.equals(definition.getOrgId())) {
+            throw new EntityNotFoundException("Workflow definition not found with id: " + id);
+        }
+
+        workflowValidationService.validateWorkflowStructure(definition);
+
+        definition.setIsPublished(true);
+        definition.setUpdatedAt(LocalDateTime.now());
+
+        WorkflowDefinition updated = workflowDefinitionRepository.save(definition);
+        return workflowDefinitionMapper.toResponse(updated);
+    }
+
+    @Transactional
+    public WorkflowDefinitionResponse activateWorkflow(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        WorkflowDefinition definition = workflowDefinitionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Workflow definition not found with id: " + id));
+
+        if (!orgId.equals(definition.getOrgId())) {
+            throw new EntityNotFoundException("Workflow definition not found with id: " + id);
+        }
+
+        if (!definition.getIsPublished()) {
+            throw new IllegalStateException("Cannot activate unpublished workflow. Publish it first.");
+        }
+
+        List<WorkflowDefinition> activeWorkflows = workflowDefinitionRepository
+                .findAllVersionsByCaseType(orgId, definition.getCaseType()).stream()
+                .filter(WorkflowDefinition::getIsActive)
+                .collect(Collectors.toList());
+
+        for (WorkflowDefinition active : activeWorkflows) {
+            active.setIsActive(false);
+            workflowDefinitionRepository.save(active);
+        }
+
+        definition.setIsActive(true);
+        definition.setUpdatedAt(LocalDateTime.now());
+
+        WorkflowDefinition updated = workflowDefinitionRepository.save(definition);
+        return workflowDefinitionMapper.toResponse(updated);
+    }
+
+    @Transactional
+    public WorkflowDefinitionResponse createNewVersion(Long parentId, String versionDescription) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        return workflowVersioningService.createNewVersion(parentId, versionDescription, orgId);
+    }
+
+    @Transactional
     public void deleteDefinition(Long id) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        WorkflowDefinition definition =
-                workflowDefinitionRepository
-                        .findById(id)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Workflow definition not found with id: " + id));
+        WorkflowDefinition definition = workflowDefinitionRepository
+                .findById(id)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Workflow definition not found with id: " + id));
 
         if (!orgId.equals(definition.getOrgId())) {
             throw new EntityNotFoundException("Workflow definition not found with id: " + id);
+        }
+
+        if (definition.getIsActive()) {
+            throw new IllegalStateException("Cannot delete active workflow. Deactivate it first.");
+        }
+
+        long activeDossiers = dossierRepository.count(
+                (root, query, cb) -> cb.and(
+                        cb.equal(root.get("orgId"), orgId),
+                        cb.equal(root.get("workflowDefinitionId"), id)));
+
+        if (activeDossiers > 0) {
+            throw new IllegalStateException(
+                    "Cannot delete workflow with active dossiers. Found " + activeDossiers + " dossiers.");
         }
 
         workflowDefinitionRepository.delete(definition);
@@ -203,8 +287,7 @@ public class WorkflowService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Page<WorkflowTransition> transitions =
-                workflowTransitionRepository.findByDossierId(dossierId, pageable);
+        Page<WorkflowTransition> transitions = workflowTransitionRepository.findByDossierId(dossierId, pageable);
 
         return transitions.map(workflowTransitionMapper::toResponse);
     }
@@ -217,13 +300,11 @@ public class WorkflowService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier =
-                dossierRepository
-                        .findById(dossierId)
-                        .orElseThrow(
-                                () ->
-                                        new EntityNotFoundException(
-                                                "Dossier not found with id: " + dossierId));
+        Dossier dossier = dossierRepository
+                .findById(dossierId)
+                .orElseThrow(
+                        () -> new EntityNotFoundException(
+                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);

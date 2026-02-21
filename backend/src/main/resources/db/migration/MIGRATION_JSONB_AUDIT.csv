@@ -1,0 +1,9 @@
+Migration,File,Line,Column Name,Type Used,Needs Refactoring,Priority,Table Name,Notes
+V2,V2__Add_jsonb_and_missing_columns.sql,1,N/A (comment),N/A,No,Low,N/A,Comment only - informational
+V34,V34__Add_user_preferences.sql,8,dashboard_layout,JSONB,Yes,High,user_preferences,Dashboard layout configuration JSON
+V34,V34__Add_user_preferences.sql,9,widget_settings,JSONB,Yes,High,user_preferences,Widget settings configuration JSON
+V34,V34__Add_user_preferences.sql,10,general_preferences,JSONB,Yes,High,user_preferences,General preferences JSON
+V35,V35__Add_filter_preset_entity.sql,7,filter_config,JSONB NOT NULL,Yes,High,filter_preset,Filter configuration JSON (NOT NULL)
+V36,V36__Add_comment_threads.sql,20,mentions_json,JSONB,Yes,Medium,comment,User mentions in comments JSON
+V37,V37__Add_smart_suggestions.sql,32,action_payload,JSONB,Yes,Medium,suggestion_template,Suggestion action payload JSON
+V37,V37__Add_smart_suggestions.sql,51,variables,JSONB,Yes,Medium,message_template,Message template variables JSON

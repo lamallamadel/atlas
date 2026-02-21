@@ -9,6 +9,7 @@ import { ObservabilityDashboardComponent } from './components/observability-dash
 import { SearchComponent } from './pages/search/search.component';
 import { TaskListComponent } from './components/task-list.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
+import { SettingsPageComponent } from './components/settings-page.component';
 import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
@@ -33,6 +34,15 @@ const routes: Routes = [
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
       { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
       { path: 'calendar', component: CalendarViewComponent, data: { animation: 'CalendarPage' } },
+
+      { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
+      { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
+      { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
+      { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
+      { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
+      { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } },
+      { path: 'settings', component: SettingsPageComponent, data: { animation: 'SettingsPage' } },
+
       {
         path: 'annonces',
         loadChildren: () => import('./pages/annonces/annonces.module').then(m => m.AnnoncesModule),
@@ -43,6 +53,7 @@ const routes: Routes = [
         loadChildren: () => import('./pages/dossiers/dossiers.module').then(m => m.DossiersModule),
         data: { animation: 'DossiersPage' }
       },
+
       { 
         path: 'workflow-admin', 
         loadChildren: () => import('./pages/workflow-admin/workflow-admin.module').then(m => m.WorkflowAdminModule),
@@ -53,7 +64,11 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes, {
+    scrollPositionRestoration: 'disabled',
+    anchorScrolling: 'enabled',
+    scrollOffset: [0, 64]
+  })],
   exports: [RouterModule]
 })
 export class AppRoutingModule { }

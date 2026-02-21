@@ -1,0 +1,312 @@
+.calendar-list-view {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.list-header {
+  padding: 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.stats {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  gap: 16px;
+}
+
+.loading-state p {
+  color: #666;
+  font-size: 14px;
+}
+
+.appointments-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 16px;
+  color: #999;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+}
+
+.empty-state p {
+  font-size: 16px;
+}
+
+.date-group {
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.date-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #fafafa;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s;
+}
+
+.date-header:hover {
+  background: #f5f5f5;
+}
+
+.date-info {
+  flex: 1;
+}
+
+.date-label {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  text-transform: capitalize;
+}
+
+.appointment-count {
+  font-size: 12px;
+  color: #666;
+  margin-left: 8px;
+}
+
+.expand-icon {
+  color: #666;
+  transition: transform 0.2s;
+}
+
+.date-group.expanded .expand-icon {
+  transform: rotate(180deg);
+}
+
+.appointments-container {
+  border-top: 1px solid #e0e0e0;
+}
+
+.appointment-item {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  position: relative;
+}
+
+.appointment-item:last-child {
+  border-bottom: none;
+}
+
+.appointment-item:hover {
+  background: #f9f9f9;
+}
+
+.appointment-item.mobile {
+  padding: 12px;
+}
+
+.appointment-status-indicator {
+  width: 4px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.appointment-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.appointment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.appointment-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-time {
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.appointment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.detail-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+}
+
+.detail-row mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: #999;
+}
+
+.detail-row span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.appointment-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-chip {
+  font-size: 11px;
+  height: 24px;
+  padding: 0 8px;
+  color: white;
+  font-weight: 500;
+}
+
+.appointment-actions {
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.appointment-item:hover .appointment-actions {
+  opacity: 1;
+}
+
+@media (max-width: 768px) {
+  .list-header {
+    padding: 12px;
+  }
+
+  .stats {
+    gap: 16px;
+  }
+
+  .stat-value {
+    font-size: 20px;
+  }
+
+  .stat-label {
+    font-size: 11px;
+  }
+
+  .appointments-list {
+    padding: 4px;
+  }
+
+  .date-header {
+    padding: 10px 12px;
+  }
+
+  .date-label {
+    font-size: 14px;
+  }
+
+  .appointment-count {
+    font-size: 11px;
+  }
+
+  .appointment-item {
+    gap: 8px;
+  }
+
+  .appointment-title {
+    font-size: 13px;
+  }
+
+  .appointment-time {
+    font-size: 12px;
+  }
+
+  .detail-row {
+    font-size: 12px;
+  }
+
+  .detail-row mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .appointment-header {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .appointment-title {
+    white-space: normal;
+    line-height: 1.3;
+  }
+}

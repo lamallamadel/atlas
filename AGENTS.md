@@ -81,47 +81,507 @@ See `SETUP.md` for detailed setup instructions including toolchains configuratio
 
 ## Database Performance Optimizations
 
-### Partial Indexes for Outbound Message Processing
+### Migration Strategy: Cross-Database Compatibility
 
-PostgreSQL partial indexes have been added to optimize message processing workloads (migration V101):
+The project uses a **dual-folder migration strategy** to support both H2 (for development/testing) and PostgreSQL (for production), with database-specific optimizations where needed.
 
-**1. Queued Messages Index:**
+#### Migration Folder Structure
+
+```
+backend/src/main/resources/db/
+├── migration/              # Base migrations (H2 & PostgreSQL compatible)
+│   ├── V1__Initial_schema.sql
+│   ├── V2__Add_jsonb_and_missing_columns.sql
+│   └── V99__...sql
+├── migration-postgres/     # PostgreSQL-specific optimizations
+│   ├── V100__Add_postgres_full_text_indexes.sql
+│   ├── V101__Add_outbound_partial_indexes.sql
+│   └── V107__...sql
+└── e2e/                   # Test data for E2E tests
+```
+
+**Key Principles:**
+- **V1-V99**: Cross-database migrations in `migration/` - must work on H2 and PostgreSQL
+- **V100+**: PostgreSQL-only optimizations in `migration-postgres/`
+- Flyway executes all migrations in version order across both folders
+
+#### Cross-Database Compatibility with `${json_type}` Placeholder
+
+To support both H2 (JSON type) and PostgreSQL (JSONB type), use the `${json_type}` placeholder in migrations:
+
+**Example Migration:**
 ```sql
+-- V34__Add_user_preferences.sql
+CREATE TABLE user_preferences (
+    id BIGSERIAL PRIMARY KEY,
+    user_id VARCHAR(255) NOT NULL,
+    dashboard_layout ${json_type},      -- Becomes JSON (H2) or JSONB (PostgreSQL)
+    widget_settings ${json_type},
+    general_preferences ${json_type},
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+**Configuration per Environment:**
+
+**H2 (unit tests, H2 E2E tests):**
+```yaml
+# application-test.yml or application-e2e-h2-mock.yml
+spring:
+  flyway:
+    locations: classpath:db/migration,classpath:db/e2e
+    placeholders:
+      json_type: JSON    # ← H2 uses JSON type
+```
+
+**PostgreSQL (PostgreSQL E2E tests, production):**
+```yaml
+# application-e2e-postgres-mock.yml or application-postgres.yml
+spring:
+  flyway:
+    locations: 
+      - classpath:db/migration           # Base migrations
+      - classpath:db/migration-postgres  # PostgreSQL-specific optimizations
+      - classpath:db/e2e
+    placeholders:
+      json_type: JSONB   # ← PostgreSQL uses JSONB type
+```
+
+**Flyway substitutes the placeholder at runtime:**
+- H2 sees: `dashboard_layout JSON`
+- PostgreSQL sees: `dashboard_layout JSONB`
+
+**Critical Rules for `migration/` folder:**
+- ✅ Use `${json_type}` for all JSON columns
+- ✅ Standard SQL only (CREATE TABLE, ALTER TABLE, CREATE INDEX without WHERE clause)
+- ✅ Standard constraints (PRIMARY KEY, FOREIGN KEY, UNIQUE, NOT NULL)
+- ❌ NO partial indexes (WHERE clause in CREATE INDEX)
+- ❌ NO GIN/GiST indexes (USING gin, USING gist)
+- ❌ NO PL/pgSQL DO blocks
+- ❌ NO ON CONFLICT (upsert)
+- ❌ NO explicit JSONB type (use placeholder)
+
+### PostgreSQL-Specific Optimizations (migration-postgres/)
+
+The `migration-postgres/` folder contains production-grade optimizations that leverage PostgreSQL-exclusive features. These migrations are **only executed** when running with PostgreSQL (E2E tests with PostgreSQL profile, production).
+
+#### Rationale for PostgreSQL-Specific Migrations
+
+**Why separate PostgreSQL optimizations?**
+
+1. **Performance at Scale**: H2 is an in-memory database for testing; PostgreSQL is for production with millions of rows
+2. **Advanced Features**: PostgreSQL offers partial indexes, GIN indexes, full-text search not available in H2
+3. **Index Efficiency**: Partial indexes reduce index size by 60-80% while improving query speed by 40-60%
+4. **Production Workloads**: Optimizations target real-world query patterns not relevant in test environments
+
+**What belongs in migration-postgres/?**
+
+| Feature | Example | Why PostgreSQL-Only |
+|---------|---------|---------------------|
+| **Partial Indexes** | `CREATE INDEX ... WHERE status = 'ACTIVE'` | H2 doesn't support WHERE clause in indexes |
+| **GIN Indexes** | `CREATE INDEX ... USING gin (metadata)` | H2 doesn't support GIN index type |
+| **Full-Text Search** | `to_tsvector('french', content)` | H2 uses different full-text syntax |
+| **PL/pgSQL Blocks** | `DO $$ BEGIN ... END $$;` | H2 doesn't support procedural SQL blocks |
+| **ON CONFLICT** | `INSERT ... ON CONFLICT DO NOTHING` | H2 uses MERGE syntax instead |
+| **JSONB Operators** | `metadata @> '{"key": "value"}'` | H2 JSON type doesn't support containment |
+
+#### Example Optimizations Currently Implemented
+
+**1. Partial Indexes for Message Processing (V101)**
+
+```sql
+-- Index only queued messages (typically 5-15% of total)
 CREATE INDEX idx_outbound_message_queued 
 ON outbound_message(status, attempt_count) 
 WHERE status = 'QUEUED';
-```
 
-**Benefits:**
-- Reduces index size by only indexing rows with status = 'QUEUED'
-- Optimizes queries that fetch messages ready for processing
-- Improves performance of message queue polling operations
-- Reduces I/O overhead during message batch retrieval
-
-**Use Case:** Query patterns like `SELECT * FROM outbound_message WHERE status = 'QUEUED' ORDER BY attempt_count, created_at LIMIT 100`
-
-**2. Pending Retry Attempts Index:**
-```sql
+-- Index only retry-eligible attempts
 CREATE INDEX idx_outbound_attempt_pending_retry 
 ON outbound_attempt(next_retry_at) 
 WHERE next_retry_at IS NOT NULL;
 ```
 
-**Benefits:**
-- Only indexes attempts that require retry scheduling
-- Optimizes queries that find attempts eligible for retry
-- Reduces index maintenance overhead (no indexing of completed/failed attempts)
-- Improves performance of retry scheduler jobs
+**Performance Impact:**
+- Index size reduction: ~60-80% (only indexes subset of rows)
+- Query execution time: ~40-60% faster for filtered queries
+- Write overhead: Minimal (~2-3% impact on inserts)
+- Memory footprint: Significantly reduced
 
-**Use Case:** Query patterns like `SELECT * FROM outbound_attempt WHERE next_retry_at IS NOT NULL AND next_retry_at <= NOW() ORDER BY next_retry_at LIMIT 50`
+**Use Case:** Message queue polling: `SELECT * FROM outbound_message WHERE status = 'QUEUED' ORDER BY attempt_count LIMIT 100`
+
+**2. Full-Text Search Indexes (V100)**
+
+```sql
+-- Full-text search on dossier notes
+CREATE INDEX idx_dossier_note_content_fts 
+ON dossier_note USING gin (to_tsvector('french', COALESCE(content, '')));
+
+-- Full-text search on property descriptions
+CREATE INDEX idx_annonce_description_fts 
+ON annonce USING gin (to_tsvector('french', COALESCE(description, '')));
+```
 
 **Performance Impact:**
-- Index size reduction: ~60-80% compared to full table indexes (typical workload with 20-30% queued messages)
-- Query execution time: ~40-60% improvement for message processing queries
-- Write performance: Negligible impact (partial indexes update only when condition matches)
-- Memory footprint: Reduced due to smaller index size
+- Query performance: 100-1000x faster than LIKE queries
+- Index size: ~20-40% of original text column size
+- Supports ranking, phrase search, stemming
 
-**Note:** These are PostgreSQL-specific optimizations and not available in H2. E2E tests with PostgreSQL profile will apply these migrations.
+**3. JSONB GIN Indexes (V105)**
+
+```sql
+-- Efficient JSONB querying for activity metadata
+CREATE INDEX idx_activity_metadata 
+ON activity USING gin (metadata);
+```
+
+**Performance Impact:**
+- JSONB queries: 50-100x faster than text-based JSON parsing
+- Supports containment (@>), key existence (?), array operations
+- Index size: ~30-50% of JSONB column size
+
+**4. Conditional DDL with PL/pgSQL (V102, V103, V104)**
+
+```sql
+-- Idempotent data seeding with ON CONFLICT
+INSERT INTO referential (org_id, entity_type, code, label_fr) 
+VALUES ('default', 'DOSSIER_STATUS', 'NEW', 'Nouveau')
+ON CONFLICT (org_id, entity_type, code) DO NOTHING;
+
+-- Conditional schema changes
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'user_preferences' AND column_name = 'theme') THEN
+        ALTER TABLE user_preferences ADD COLUMN theme VARCHAR(50);
+    END IF;
+END $$;
+```
+
+**Benefits:**
+- Idempotent migrations (can re-run safely)
+- Prevents duplicate key errors on redeployment
+- Conditional DDL for gradual schema evolution
+
+### Flyway Schema Validation Commands
+
+**Validate Current Schema State:**
+
+```bash
+# Validate that applied migrations match expected checksums
+cd backend
+mvn flyway:validate
+
+# Validate specific profile
+mvn flyway:validate -Dspring.profiles.active=postgres
+```
+
+**Check Migration Status:**
+
+```bash
+# Show which migrations have been applied
+mvn flyway:info
+
+# Show migration history with details
+mvn flyway:info -Dspring.profiles.active=postgres
+```
+
+**Generate Schema Baseline:**
+
+```bash
+# Baseline existing database at specific version
+mvn flyway:baseline -Dflyway.baselineVersion=1
+
+# Useful for adding Flyway to existing database
+mvn flyway:baseline -Dflyway.baselineVersion=99 -Dflyway.baselineDescription="Existing schema"
+```
+
+**Repair Flyway Metadata:**
+
+```bash
+# Repair checksums (after manual migration edits - use with caution)
+mvn flyway:repair
+
+# Only use in development, never in production
+```
+
+**Clean Database (Development Only):**
+
+```bash
+# WARNING: Drops all objects in schema
+# Only use in local development, NEVER in production
+mvn flyway:clean
+mvn flyway:migrate
+```
+
+**Verify Schema Against Entity Models:**
+
+```bash
+# Run Hibernate schema validation
+mvn test -Dspring.jpa.hibernate.ddl-auto=validate
+
+# E2E tests with schema validation
+mvn verify -Pbackend-e2e-postgres -Dspring.jpa.hibernate.ddl-auto=validate
+```
+
+### Troubleshooting Common Migration Errors
+
+#### Error: Placeholder Not Substituted
+
+**Symptom:**
+```
+SQL state [42601]; error code [0]; ERROR: syntax error at or near "${json_type}"
+```
+or
+```
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error ... "${json_type}"
+```
+
+**Root Cause:**
+Flyway placeholder substitution is not configured for the active profile.
+
+**Solution:**
+
+1. **Verify Flyway configuration:**
+```yaml
+# application.yml or application-{profile}.yml
+spring:
+  flyway:
+    placeholders:
+      json_type: JSON     # For H2
+      # OR
+      json_type: JSONB    # For PostgreSQL
+```
+
+2. **Check active profile:**
+```bash
+# Ensure correct profile is active
+mvn test -Dspring.profiles.active=test           # Should have json_type: JSON
+mvn verify -Pbackend-e2e-postgres                # Should have json_type: JSONB
+```
+
+3. **Verify placeholder usage in migration:**
+```sql
+-- ✅ Correct
+ALTER TABLE product ADD COLUMN metadata ${json_type};
+
+-- ❌ Wrong - hardcoded type
+ALTER TABLE product ADD COLUMN metadata JSONB;
+```
+
+4. **Check for typos:**
+- Placeholder name is case-sensitive: `${json_type}` not `${JSON_TYPE}`
+- Correct syntax: `${json_type}` not `#{json_type}` or `{json_type}`
+
+#### Error: Migrations Applied Out of Order
+
+**Symptom:**
+```
+org.flywaydb.core.api.FlywayException: Validate failed: 
+Detected applied migration not resolved locally: 101
+```
+or
+```
+Migration checksum mismatch for migration version 50
+```
+
+**Root Cause:**
+- New migration added with version number lower than already-applied migrations
+- Migration file modified after being applied to database
+- Team member applied different migration with same version
+
+**Solution:**
+
+1. **Check migration history:**
+```bash
+mvn flyway:info
+# Shows all applied migrations and their versions
+```
+
+2. **For new migration out-of-order:**
+```bash
+# Option A: Use higher version number
+# Rename V45__new_feature.sql to V108__new_feature.sql
+
+# Option B: Enable out-of-order migrations (development only)
+mvn flyway:migrate -Dflyway.outOfOrder=true
+```
+
+```yaml
+# application-dev.yml (NOT for production)
+spring:
+  flyway:
+    out-of-order: true  # Allow out-of-order migrations
+```
+
+3. **For modified migration checksum:**
+```bash
+# Option A: Repair Flyway metadata (development only)
+mvn flyway:repair
+
+# Option B: Create new migration with correction
+# V108__Fix_issue_from_V45.sql
+ALTER TABLE product ALTER COLUMN price TYPE DECIMAL(12,2);
+```
+
+4. **Prevention:**
+- Never modify a migration after it's applied
+- Use sequential version numbers: V107, V108, V109...
+- Coordinate version numbers across team (use range assignments)
+- Always pull latest migrations before creating new ones
+
+**Version Number Coordination:**
+```
+Team member A: V108-V119
+Team member B: V120-V129
+Team member C: V130-V139
+```
+
+#### Error: PostgreSQL-Specific Migration Running on H2
+
+**Symptom:**
+```
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Syntax error in SQL statement 
+"CREATE INDEX ... WHERE [*]..."
+```
+or
+```
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Function "TO_TSVECTOR" not found
+```
+
+**Root Cause:**
+Migration using PostgreSQL-specific syntax is in `migration/` folder instead of `migration-postgres/`, so H2 attempts to execute it.
+
+**Solution:**
+
+1. **Move migration to correct folder:**
+```bash
+# Move from migration/ to migration-postgres/
+mv backend/src/main/resources/db/migration/V101__feature.sql \
+   backend/src/main/resources/db/migration-postgres/V101__feature.sql
+```
+
+2. **Create H2-compatible base migration:**
+```sql
+-- migration/V50__Add_order_table.sql (H2 compatible)
+CREATE TABLE order (
+    id BIGSERIAL PRIMARY KEY,
+    status VARCHAR(50) NOT NULL,
+    created_at TIMESTAMP NOT NULL
+);
+
+CREATE INDEX idx_order_status ON order(status);  -- Standard index
+```
+
+```sql
+-- migration-postgres/V101__Optimize_order_queries.sql (PostgreSQL only)
+DROP INDEX IF EXISTS idx_order_status;
+CREATE INDEX idx_order_active 
+ON order(status, created_at) 
+WHERE status IN ('PENDING', 'PROCESSING');  -- Partial index
+```
+
+3. **Verify Flyway configuration:**
+```yaml
+# application-test.yml (H2)
+spring:
+  flyway:
+    locations: classpath:db/migration  # Should NOT include migration-postgres
+
+# application-postgres.yml (PostgreSQL)
+spring:
+  flyway:
+    locations:
+      - classpath:db/migration           # Base migrations
+      - classpath:db/migration-postgres  # PostgreSQL optimizations
+```
+
+#### Error: Duplicate Version Numbers
+
+**Symptom:**
+```
+org.flywaydb.core.api.FlywayException: Found more than one migration with version 101
+```
+
+**Root Cause:**
+Same version number used in both `migration/` and `migration-postgres/` folders.
+
+**Solution:**
+
+1. **Use version ranges:**
+- `migration/`: V1-V99 (base migrations)
+- `migration-postgres/`: V100+ (PostgreSQL-specific)
+
+2. **Rename conflicting migration:**
+```bash
+# If V101 exists in both folders, rename one:
+mv migration/V101__feature.sql migration/V52__feature.sql
+# OR
+mv migration-postgres/V101__optimize.sql migration-postgres/V108__optimize.sql
+```
+
+3. **Verify no duplicates:**
+```bash
+# Find all migration files
+find backend/src/main/resources/db -name "V*.sql" | sort
+
+# Check for duplicate version numbers
+find backend/src/main/resources/db -name "V*.sql" -exec basename {} \; | \
+  cut -d_ -f1 | sort | uniq -d
+# Empty output = no duplicates
+```
+
+#### Error: JSONB Column Incompatibility
+
+**Symptom:**
+```
+ERROR: column "metadata" is of type jsonb but expression is of type character varying
+```
+or
+```
+ERROR: column "rules_json" is of type json but expression is of type jsonb
+```
+
+**Root Cause:**
+Type mismatch between application code and database schema, or placeholder not used correctly.
+
+**Solution:**
+
+1. **Ensure placeholder usage in migration:**
+```sql
+-- ✅ Correct - uses placeholder
+ALTER TABLE product ADD COLUMN metadata ${json_type};
+
+-- ❌ Wrong - hardcoded type causes mismatch
+ALTER TABLE product ADD COLUMN metadata JSONB;
+```
+
+2. **Check entity annotation:**
+```java
+@JdbcTypeCode(SqlTypes.JSON)
+@Column(name = "metadata", columnDefinition = "jsonb")  // PostgreSQL
+// OR
+@Column(name = "metadata", columnDefinition = "json")   // H2
+private Map<String, Object> metadata;
+```
+
+3. **Use database-agnostic annotation:**
+```java
+@JdbcTypeCode(SqlTypes.JSON)  // Hibernate handles JSON/JSONB conversion
+@Column(name = "metadata")
+private Map<String, Object> metadata;
+```
+
+4. **Verify Flyway placeholder configuration:**
+```bash
+# Check active profile and placeholder value
+mvn flyway:info -X | grep json_type
+```
+
+### Documentation References
+
+- **Detailed migration guide:** `backend/src/main/resources/db/migration/README.md`
+- **PostgreSQL optimizations:** `backend/src/main/resources/db/migration-postgres/README.md`
+- **Validation report:** `backend/src/main/resources/db/migration-postgres/VALIDATION_REPORT.md`
 
 ## Code Style
 - Java: Follow Spring Boot conventions

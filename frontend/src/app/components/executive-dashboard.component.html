@@ -1,0 +1,121 @@
+<div class="executive-dashboard">
+  <div class="dashboard-header">
+    <h1>Executive Dashboard</h1>
+    <button mat-raised-button color="primary" (click)="refreshDashboard()" [disabled]="loading">
+      <mat-icon>refresh</mat-icon>
+      Refresh
+    </button>
+  </div>
+
+  <div class="kpi-grid" *ngIf="!loading">
+    <mat-card class="kpi-card" *ngFor="let kpi of kpis">
+      <div class="kpi-content">
+        <div class="kpi-icon" [style.background-color]="kpi.color">
+          <mat-icon>{{ kpi.icon }}</mat-icon>
+        </div>
+        <div class="kpi-details">
+          <div class="kpi-label">{{ kpi.label }}</div>
+          <div class="kpi-value">{{ kpi.value }}</div>
+          <div class="kpi-change" [class.positive]="kpi.trend === 'up'" [class.negative]="kpi.trend === 'down'">
+            <mat-icon *ngIf="kpi.trend === 'up'">arrow_upward</mat-icon>
+            <mat-icon *ngIf="kpi.trend === 'down'">arrow_downward</mat-icon>
+            <span>{{ kpi.change >= 0 ? '+' : '' }}{{ kpi.change }}%</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="charts-grid" *ngIf="!loading">
+    <mat-card class="chart-card forecast-card">
+      <mat-card-header>
+        <mat-card-title>Revenue Forecast</mat-card-title>
+        <mat-card-subtitle>Predictive analysis for the next 30 days</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas 
+          baseChart
+          [data]="pipelineForecastChartData"
+          [options]="pipelineForecastChartOptions"
+          [type]="'line'">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Team Performance Heatmap</mat-card-title>
+        <mat-card-subtitle>Conversion rate and response scores by agent</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas 
+          baseChart
+          [data]="teamPerformanceChartData"
+          [options]="teamPerformanceChartOptions"
+          [type]="'bar'">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="chart-card">
+      <mat-card-header>
+        <mat-card-title>Market Trends</mat-card-title>
+        <mat-card-subtitle>Property value trends and predictions</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas 
+          baseChart
+          [data]="marketTrendsChartData"
+          [options]="marketTrendsChartOptions"
+          [type]="'line'">
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="insights-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>lightbulb</mat-icon>
+          Key Insights
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="insight-item">
+          <mat-icon color="primary">trending_up</mat-icon>
+          <div class="insight-text">
+            <strong>Strong Pipeline Growth</strong>
+            <p>Pipeline value increased by 8.3% this quarter, indicating healthy deal flow.</p>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="insight-item">
+          <mat-icon color="warn">warning</mat-icon>
+          <div class="insight-text">
+            <strong>Win Rate Decline</strong>
+            <p>Win rate decreased by 2.1%. Consider reviewing qualification criteria and sales processes.</p>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="insight-item">
+          <mat-icon color="accent">people</mat-icon>
+          <div class="insight-text">
+            <strong>Team Performance</strong>
+            <p>Agent 5 shows exceptional conversion rate (95%). Consider sharing best practices.</p>
+          </div>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="insight-item">
+          <mat-icon color="primary">schedule</mat-icon>
+          <div class="insight-text">
+            <strong>Faster Deal Cycles</strong>
+            <p>Average deal time improved by 6.4%, indicating more efficient sales process.</p>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="loading-overlay" *ngIf="loading">
+    <mat-spinner></mat-spinner>
+  </div>
+</div>

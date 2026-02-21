@@ -1,4 +1,12 @@
 <app-offline-indicator></app-offline-indicator>
-<div [@routeFadeSlideAnimation]="prepareRoute(outlet)" class="page-transition-wrapper">
+<app-progress-bar [isNavigating]="isNavigating"></app-progress-bar>
+<app-notification-toast></app-notification-toast>
+<div 
+  *ngIf="showLoadingOverlay" 
+  class="loading-overlay"
+  [@fadeInOut]>
+  <div class="loading-backdrop"></div>
+</div>
+<div [@routeFadeInAnimation]="getRouteAnimation()" class="page-transition-wrapper">
   <router-outlet #outlet="outlet"></router-outlet>
 </div>

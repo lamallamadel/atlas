@@ -249,7 +249,7 @@
   </div>
 
   <main class="page-content">
-    <app-loading-skeleton *ngIf="loading && viewMode === 'list'" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-loading-skeleton>
+    <app-skeleton-loader *ngIf="loading && viewMode === 'list'" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-skeleton-loader>
 
     <div *ngIf="error && !loading" class="error-state" role="alert" aria-live="assertive">
       <p class="error-message">{{ error }}</p>
@@ -365,7 +365,7 @@
         </div>
       </div>
 
-      <app-loading-skeleton *ngIf="loading" variant="card" [rows]="5" aria-label="Chargement des dossiers"></app-loading-skeleton>
+      <app-skeleton-loader *ngIf="loading" variant="card" [rows]="5" aria-label="Chargement des dossiers"></app-skeleton-loader>
 
       <app-empty-state 
         *ngIf="!loading && !error && dossiers.length === 0"

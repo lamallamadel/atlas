@@ -1,0 +1,205 @@
+// ========================================
+// TYPOGRAPHY EXAMPLES
+// Demonstrates how to use the modular typography system
+// ========================================
+
+@use './typography' as typography;
+
+/* 
+ * Example 1: Page Header
+ * Using heading-1 mixin for hero titles
+ */
+.example-hero-title {
+  @include typography.heading-1;
+  margin-bottom: 24px;
+  // Output: 42.8px, line-height 1.2, letter-spacing -0.02em, weight 700
+}
+
+/* 
+ * Example 2: Section Titles
+ * Using heading-2 and heading-3 for section hierarchy
+ */
+.example-page-title {
+  @include typography.heading-2;
+  margin-bottom: 16px;
+  // Output: 34.2px, line-height 1.2, letter-spacing -0.02em, weight 700
+}
+
+.example-section-title {
+  @include typography.heading-3;
+  margin-bottom: 12px;
+  // Output: 27.4px, line-height 1.2, letter-spacing -0.02em, weight 600
+}
+
+/* 
+ * Example 3: Card Component
+ * Combining different heading levels
+ */
+.example-card {
+  .card-title {
+    @include typography.heading-4;
+    color: var(--color-neutral-900);
+    // Output: 21.9px, line-height 1.2, letter-spacing 0em, weight 600
+  }
+  
+  .card-subtitle {
+    @include typography.heading-6;
+    color: var(--color-neutral-600);
+    margin-top: 8px;
+    // Output: 14px, line-height 1.2, letter-spacing 0em, weight 500
+  }
+  
+  .card-body {
+    @include typography.body-base;
+    margin-top: 16px;
+    // Output: 14px, line-height 1.6, letter-spacing 0em, weight 400
+  }
+}
+
+/* 
+ * Example 4: Body Text Variations
+ * Using body mixins for different content sizes
+ */
+.example-intro-text {
+  @include typography.body-large;
+  color: var(--color-neutral-800);
+  // Output: 17.5px, line-height 1.6, letter-spacing 0em, weight 400
+}
+
+.example-standard-text {
+  @include typography.body-base;
+  // Output: 14px, line-height 1.6, letter-spacing 0em, weight 400
+}
+
+.example-small-text {
+  @include typography.body-small;
+  color: var(--color-neutral-600);
+  // Output: 11.2px, line-height 1.6, letter-spacing 0em, weight 400
+}
+
+/* 
+ * Example 5: Responsive Typography
+ * Scale up on larger screens
+ */
+.example-responsive-title {
+  @include typography.heading-4;
+  
+  @media (min-width: 768px) {
+    @include typography.heading-3;
+  }
+  
+  @media (min-width: 1440px) {
+    @include typography.heading-2;
+  }
+}
+
+/* 
+ * Example 6: Custom Typography with Variables
+ * Mix and match properties
+ */
+.example-custom-text {
+  font-size: var(--font-size-2);
+  line-height: var(--line-height-body);
+  letter-spacing: var(--letter-spacing-normal);
+  font-weight: var(--font-weight-medium);
+  font-family: 'Roboto', 'Open Sans', sans-serif;
+}
+
+/* 
+ * Example 7: List with Proper Typography
+ */
+.example-list {
+  .list-title {
+    @include typography.heading-5;
+    margin-bottom: 12px;
+  }
+  
+  .list-item {
+    @include typography.body-base;
+    margin-bottom: 8px;
+  }
+}
+
+/* 
+ * Example 8: Form Labels and Help Text
+ */
+.example-form {
+  .form-label {
+    @include typography.heading-6;
+    margin-bottom: 4px;
+  }
+  
+  .form-help-text {
+    @include typography.body-small;
+    color: var(--color-neutral-600);
+    margin-top: 4px;
+  }
+  
+  .form-error {
+    @include typography.body-small;
+    color: var(--color-error-600);
+    margin-top: 4px;
+  }
+}
+
+/* 
+ * Example 9: Navigation Menu
+ */
+.example-nav {
+  .nav-title {
+    @include typography.heading-5;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .nav-item {
+    @include typography.body-base;
+  }
+  
+  .nav-subitem {
+    @include typography.body-small;
+  }
+}
+
+/* 
+ * Example 10: Stats/KPI Cards
+ */
+.example-kpi-card {
+  .kpi-value {
+    @include typography.heading-1;
+    color: var(--color-primary-600);
+  }
+  
+  .kpi-label {
+    @include typography.body-base;
+    color: var(--color-neutral-700);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .kpi-change {
+    @include typography.body-small;
+    font-weight: var(--font-weight-semibold);
+  }
+}
+
+/* 
+ * Example 11: Truncation with Typography
+ */
+.example-truncated-title {
+  @include typography.heading-4;
+  @include typography.text-truncate;
+  max-width: 300px;
+}
+
+.example-multiline-truncate {
+  @include typography.body-base;
+  @include typography.text-truncate-multiline(3);
+}
+
+/* 
+ * Example 12: Utility Class Combinations (HTML)
+ * <div class="heading-2 tracking-tight">Large Title</div>
+ * <p class="body-large leading-relaxed">Intro paragraph</p>
+ * <span class="text-3 font-semibold">Custom styled text</span>
+ */

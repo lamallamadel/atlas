@@ -1,0 +1,237 @@
+name: Android Mobile CI/CD
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/mobile-android-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'frontend/**'
+
+env:
+  NODE_VERSION: '18'
+  JAVA_VERSION: '17'
+
+jobs:
+  build-android:
+    name: Build Android App
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: 'gradle'
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Angular app
+        working-directory: frontend
+        run: npm run build:prod
+
+      - name: Sync Capacitor
+        working-directory: frontend
+        run: |
+          npm run cap:sync:android
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Make gradlew executable
+        working-directory: frontend/android
+        run: chmod +x ./gradlew
+
+      - name: Build Android Debug APK
+        if: github.event_name == 'pull_request'
+        working-directory: frontend/android
+        run: |
+          ./gradlew assembleDebug
+
+      - name: Upload Debug APK
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-debug-apk
+          path: frontend/android/app/build/outputs/apk/debug/*.apk
+          retention-days: 7
+
+      - name: Decode keystore
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo $KEYSTORE_BASE64 | base64 -d > frontend/android/app/release.keystore
+
+      - name: Build Android Release APK
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        working-directory: frontend/android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew assembleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/release.keystore \
+            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+
+      - name: Build Android App Bundle (AAB)
+        if: github.ref == 'refs/heads/main'
+        working-directory: frontend/android
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          ./gradlew bundleRelease \
+            -Pandroid.injected.signing.store.file=$(pwd)/app/release.keystore \
+            -Pandroid.injected.signing.store.password=$KEYSTORE_PASSWORD \
+            -Pandroid.injected.signing.key.alias=$KEY_ALIAS \
+            -Pandroid.injected.signing.key.password=$KEY_PASSWORD
+
+      - name: Upload Release APK
+        if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-release-apk
+          path: frontend/android/app/build/outputs/apk/release/*.apk
+          retention-days: 30
+
+      - name: Upload App Bundle (AAB)
+        if: github.ref == 'refs/heads/main'
+        uses: actions/upload-artifact@v3
+        with:
+          name: android-app-bundle
+          path: frontend/android/app/build/outputs/bundle/release/*.aab
+          retention-days: 30
+
+  deploy-play-store:
+    name: Deploy to Google Play
+    runs-on: ubuntu-latest
+    needs: build-android
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download App Bundle
+        uses: actions/download-artifact@v3
+        with:
+          name: android-app-bundle
+          path: ./build
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install Fastlane
+        run: |
+          sudo gem install fastlane
+          fastlane --version
+
+      - name: Decode Google Play service account
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          echo $GOOGLE_PLAY_SERVICE_ACCOUNT_JSON | base64 -d > ${{ runner.temp }}/service_account.json
+
+      - name: Deploy to Google Play Internal Testing
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          fastlane supply \
+            --aab ./build/*.aab \
+            --track internal \
+            --json_key ${{ runner.temp }}/service_account.json \
+            --package_name com.atlas.immobilier \
+            --skip_upload_metadata \
+            --skip_upload_images \
+            --skip_upload_screenshots
+
+      - name: Deploy to Google Play Beta
+        if: github.ref == 'refs/heads/main'
+        run: |
+          fastlane supply \
+            --aab ./build/*.aab \
+            --track beta \
+            --json_key ${{ runner.temp }}/service_account.json \
+            --package_name com.atlas.immobilier \
+            --skip_upload_metadata \
+            --skip_upload_images \
+            --skip_upload_screenshots \
+            --rollout 0.1
+
+      - name: Notify Slack
+        if: success()
+        uses: slackapi/slack-github-action@v1
+        with:
+          payload: |
+            {
+              "text": "✅ Android app successfully deployed to Google Play",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "✅ *Android App Deployment*\n\nSuccessfully deployed to Google Play Beta\n\n*Commit:* ${{ github.sha }}\n*Branch:* ${{ github.ref }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: build-android
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download APK
+        uses: actions/download-artifact@v3
+        with:
+          name: android-release-apk
+          path: ./build
+
+      - name: Run MobSF Analysis
+        uses: MobSF/mobsfscan@main
+        with:
+          path: ./build
+          output: mobsf-report.json
+          
+      - name: Upload security report
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-scan-report
+          path: mobsf-report.json
+          retention-days: 30

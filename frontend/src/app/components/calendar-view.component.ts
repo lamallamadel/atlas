@@ -1,4 +1,6 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+
+
 import { FullCalendarComponent } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg, EventChangeArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -6,12 +8,15 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import iCalendarPlugin from '@fullcalendar/icalendar';
+
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus, AppointmentCreateRequest, AppointmentUpdateRequest } from '../services/appointment-api.service';
+import { CalendarSyncService } from '../services/calendar-sync.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
+import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 
 interface CalendarEvent extends EventInput {
   id: string;
@@ -36,12 +41,17 @@ interface CalendarEvent extends EventInput {
   styleUrls: ['./calendar-view.component.css']
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
-  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
+  @ViewChild('calendar') calendarComponent: any;
 
   private destroy$ = new Subject<void>();
+  isMobile = false;
+  currentView = 'timeGridWeek';
+  showListView = false;
+  calendarLoaded = false;
+  calendarLoading = false;
   
-  calendarOptions: CalendarOptions = {
-    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin, iCalendarPlugin],
+  calendarOptions: any = {
+    plugins: [],
     initialView: 'timeGridWeek',
     headerToolbar: {
       left: 'prev,next today',
@@ -50,8 +60,10 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     },
     locale: 'fr',
     firstDay: 1,
-    slotMinTime: '08:00:00',
-    slotMaxTime: '20:00:00',
+    slotMinTime: '07:00:00',
+    slotMaxTime: '21:00:00',
+    slotDuration: '00:30:00',
+    snapDuration: '00:15:00',
     allDaySlot: false,
     height: 'auto',
     editable: true,
@@ -59,6 +71,9 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     selectMirror: true,
     dayMaxEvents: true,
     weekends: true,
+    nowIndicator: true,
+    selectOverlap: false,
+    eventOverlap: false,
     businessHours: {
       daysOfWeek: [1, 2, 3, 4, 5],
       startTime: '09:00',
@@ -78,6 +93,15 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       hour: '2-digit',
       minute: '2-digit',
       meridiem: false
+    },
+    eventClassNames: (arg: any) => {
+      const classes = ['fc-event-custom'];
+      if (arg.event.extendedProps && arg.event.extendedProps['status'] === AppointmentStatus.CANCELLED) {
+        classes.push('fc-event-cancelled');
+      } else if (arg.event.extendedProps && arg.event.extendedProps['status'] === AppointmentStatus.COMPLETED) {
+        classes.push('fc-event-completed');
+      }
+      return classes;
     }
   };
 
@@ -96,12 +120,67 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
   constructor(
     private appointmentService: AppointmentApiService,
+    private calendarSyncService: CalendarSyncService,
     private dialog: MatDialog,
-    private toastService: ToastNotificationService
+    private toastService: ToastNotificationService,
+    private breakpointObserver: BreakpointObserver
   ) {}
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    this.breakpointObserver
+      .observe([Breakpoints.Handset])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(result => {
+        this.isMobile = result.matches;
+        if (this.isMobile && this.currentView !== 'listWeek') {
+          this.changeView('listWeek');
+        }
+      });
+
+    await this.loadCalendarPlugins();
     this.loadAppointments();
+  }
+
+  private async loadCalendarPlugins(): Promise<void> {
+    if (this.calendarLoaded) {
+      return;
+    }
+
+    if (this.calendarLoading) {
+      return;
+    }
+
+    this.calendarLoading = true;
+
+    try {
+      const [
+        { default: dayGridPlugin },
+        { default: timeGridPlugin },
+        { default: listPlugin },
+        { default: interactionPlugin },
+        { default: iCalendarPlugin }
+      ] = await Promise.all([
+        import('@fullcalendar/daygrid'),
+        import('@fullcalendar/timegrid'),
+        import('@fullcalendar/list'),
+        import('@fullcalendar/interaction'),
+        import('@fullcalendar/icalendar')
+      ]);
+
+      this.calendarOptions.plugins = [
+        dayGridPlugin,
+        timeGridPlugin,
+        listPlugin,
+        interactionPlugin,
+        iCalendarPlugin
+      ];
+
+      this.calendarLoaded = true;
+      this.calendarLoading = false;
+    } catch (error) {
+      console.error('Failed to load FullCalendar plugins:', error);
+      this.calendarLoading = false;
+    }
   }
 
   ngOnDestroy(): void {
@@ -197,7 +276,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleDateSelect(selectInfo: DateSelectArg): void {
+  handleDateSelect(selectInfo: any): void {
     const calendarApi = selectInfo.view.calendar;
 
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
@@ -226,7 +305,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleEventClick(clickInfo: EventClickArg): void {
+  handleEventClick(clickInfo: any): void {
     const appointmentId = parseInt(clickInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 
@@ -257,7 +336,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
-  handleEventDrop(dropInfo: EventDropArg): void {
+  handleEventDrop(dropInfo: any): void {
     const appointmentId = parseInt(dropInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 
@@ -274,10 +353,30 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.checkConflict(appointmentId, newStart, newEnd, appointment.assignedTo)) {
-      this.toastService.warning('Conflit détecté : un autre rendez-vous existe déjà sur ce créneau');
+    const conflicts = this.detectConflicts(appointmentId, newStart, newEnd, appointment.assignedTo);
+    
+    if (conflicts.length > 0) {
+      const conflictMessages = conflicts.map(c => 
+        `RDV #${c.id} (${this.formatTime(c.startTime)} - ${this.formatTime(c.endTime)})`
+      ).join(', ');
+      
+      this.toastService.warning(`Conflit détecté avec: ${conflictMessages}`);
       dropInfo.revert();
       return;
+    }
+
+    const oldStartTime = appointment.startTime;
+    const oldEndTime = appointment.endTime;
+    
+    const optimisticUpdate = {
+      ...appointment,
+      startTime: newStart.toISOString(),
+      endTime: newEnd.toISOString()
+    };
+    
+    const index = this.appointments.findIndex(apt => apt.id === appointmentId);
+    if (index !== -1) {
+      this.appointments[index] = optimisticUpdate;
     }
 
     const updateRequest: AppointmentUpdateRequest = {
@@ -293,21 +392,36 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updated) => {
-          const index = this.appointments.findIndex(apt => apt.id === appointmentId);
-          if (index !== -1) {
-            this.appointments[index] = updated;
+          const idx = this.appointments.findIndex(apt => apt.id === appointmentId);
+          if (idx !== -1) {
+            this.appointments[idx] = updated;
           }
+          this.updateCalendarEvents();
           this.toastService.success('Rendez-vous déplacé avec succès');
         },
         error: (error) => {
           console.error('Error updating appointment:', error);
+          
+          if (index !== -1) {
+            this.appointments[index] = {
+              ...appointment,
+              startTime: oldStartTime,
+              endTime: oldEndTime
+            };
+          }
+          
+          this.updateCalendarEvents();
           this.toastService.error('Erreur lors du déplacement du rendez-vous');
           dropInfo.revert();
         }
       });
   }
 
+
+  handleEventResize(resizeInfo: any): void {
+
   handleEventResize(resizeInfo: EventChangeArg): void {
+
     const appointmentId = parseInt(resizeInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 
@@ -324,10 +438,26 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.checkConflict(appointmentId, newStart, newEnd, appointment.assignedTo)) {
-      this.toastService.warning('Conflit détecté : un autre rendez-vous existe déjà sur ce créneau');
+    const conflicts = this.detectConflicts(appointmentId, newStart, newEnd, appointment.assignedTo);
+    
+    if (conflicts.length > 0) {
+      this.toastService.warning('Conflit détecté : redimensionnement impossible');
       resizeInfo.revert();
       return;
+    }
+
+    const oldStartTime = appointment.startTime;
+    const oldEndTime = appointment.endTime;
+    
+    const optimisticUpdate = {
+      ...appointment,
+      startTime: newStart.toISOString(),
+      endTime: newEnd.toISOString()
+    };
+    
+    const index = this.appointments.findIndex(apt => apt.id === appointmentId);
+    if (index !== -1) {
+      this.appointments[index] = optimisticUpdate;
     }
 
     const updateRequest: AppointmentUpdateRequest = {
@@ -343,14 +473,25 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updated) => {
-          const index = this.appointments.findIndex(apt => apt.id === appointmentId);
-          if (index !== -1) {
-            this.appointments[index] = updated;
+          const idx = this.appointments.findIndex(apt => apt.id === appointmentId);
+          if (idx !== -1) {
+            this.appointments[idx] = updated;
           }
+          this.updateCalendarEvents();
           this.toastService.success('Rendez-vous modifié avec succès');
         },
         error: (error) => {
           console.error('Error resizing appointment:', error);
+          
+          if (index !== -1) {
+            this.appointments[index] = {
+              ...appointment,
+              startTime: oldStartTime,
+              endTime: oldEndTime
+            };
+          }
+          
+          this.updateCalendarEvents();
           this.toastService.error('Erreur lors de la modification du rendez-vous');
           resizeInfo.revert();
         }
@@ -358,11 +499,15 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   }
 
   private checkConflict(appointmentId: number, start: Date, end: Date, assignedTo?: string): boolean {
+    return this.detectConflicts(appointmentId, start, end, assignedTo).length > 0;
+  }
+
+  private detectConflicts(appointmentId: number, start: Date, end: Date, assignedTo?: string): AppointmentResponse[] {
     if (!assignedTo) {
-      return false;
+      return [];
     }
 
-    return this.appointments.some(apt => {
+    return this.appointments.filter(apt => {
       if (apt.id === appointmentId) {
         return false;
       }
@@ -379,6 +524,13 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       const aptEnd = new Date(apt.endTime);
 
       return (start < aptEnd && end > aptStart);
+    });
+  }
+
+  private formatTime(dateString: string): string {
+    return new Date(dateString).toLocaleTimeString('fr-FR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
     });
   }
 
@@ -498,62 +650,12 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       );
     }
 
-    const icsContent = this.generateICalContent(filteredAppointments);
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `appointments_${new Date().toISOString().split('T')[0]}.ics`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+    this.calendarSyncService.downloadICalendar(
+      filteredAppointments,
+      `appointments_${new Date().toISOString().split('T')[0]}.ics`
+    );
     
     this.toastService.success('Calendrier exporté avec succès');
-  }
-
-  private generateICalContent(appointments: AppointmentResponse[]): string {
-    const lines: string[] = [];
-    
-    lines.push('BEGIN:VCALENDAR');
-    lines.push('VERSION:2.0');
-    lines.push('PRODID:-//Real Estate CRM//Appointments//FR');
-    lines.push('CALSCALE:GREGORIAN');
-    lines.push('METHOD:PUBLISH');
-
-    appointments.forEach(apt => {
-      const startDate = new Date(apt.startTime);
-      const endDate = new Date(apt.endTime);
-      
-      lines.push('BEGIN:VEVENT');
-      lines.push(`UID:appointment-${apt.id}@realestate-crm.com`);
-      lines.push(`DTSTAMP:${this.formatICalDate(new Date())}`);
-      lines.push(`DTSTART:${this.formatICalDate(startDate)}`);
-      lines.push(`DTEND:${this.formatICalDate(endDate)}`);
-      lines.push(`SUMMARY:RDV #${apt.id}${apt.assignedTo ? ' - ' + apt.assignedTo : ''}`);
-      
-      if (apt.location) {
-        lines.push(`LOCATION:${apt.location}`);
-      }
-      
-      if (apt.notes) {
-        lines.push(`DESCRIPTION:${apt.notes.replace(/\n/g, '\\n')}`);
-      }
-      
-      lines.push(`STATUS:${apt.status === AppointmentStatus.CANCELLED ? 'CANCELLED' : 'CONFIRMED'}`);
-      lines.push('END:VEVENT');
-    });
-
-    lines.push('END:VCALENDAR');
-    
-    return lines.join('\r\n');
-  }
-
-  private formatICalDate(date: Date): string {
-    const year = date.getUTCFullYear();
-    const month = String(date.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(date.getUTCDate()).padStart(2, '0');
-    const hours = String(date.getUTCHours()).padStart(2, '0');
-    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
-    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
-    return `${year}${month}${day}T${hours}${minutes}${seconds}Z`;
   }
 
   refreshCalendar(): void {
@@ -561,10 +663,15 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   }
 
   changeView(viewType: string): void {
+    this.currentView = viewType;
     const calendarApi = this.calendarComponent?.getApi();
     if (calendarApi) {
       calendarApi.changeView(viewType);
     }
+  }
+
+  toggleListView(): void {
+    this.showListView = !this.showListView;
   }
 
   goToToday(): void {

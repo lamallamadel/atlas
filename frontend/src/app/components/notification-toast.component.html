@@ -1,0 +1,57 @@
+<div class="toast-wrapper" role="region" aria-label="Notifications">
+  <div *ngFor="let position of positions" 
+       [ngClass]="getPositionClass(position)"
+       class="toast-container">
+    <div *ngFor="let toast of getToastsForPosition(position); trackBy: trackByToastId"
+         [@toastAnimation]
+         class="toast"
+         [ngClass]="'toast-' + toast.type"
+         [attr.role]="toast.type === 'error' ? 'alert' : 'status'"
+         [attr.aria-live]="toast.type === 'error' ? 'assertive' : 'polite'"
+         [attr.aria-atomic]="true"
+         appSwipeGesture
+         [enableSwipeLeft]="true"
+         [enableSwipeRight]="true"
+         (swipeLeft)="onSwipeLeft(toast)"
+         (swipeRight)="onSwipeRight(toast)">
+      
+      <div class="toast-content">
+        <div class="toast-icon" [attr.aria-hidden]="true">
+          <mat-icon>{{ getIcon(toast.type) }}</mat-icon>
+        </div>
+        
+        <div class="toast-body">
+          <div class="toast-message">{{ toast.message }}</div>
+          
+          <button *ngIf="toast.action"
+                  type="button"
+                  class="toast-action-button"
+                  (click)="onAction(toast)"
+                  [attr.aria-label]="toast.action.label">
+            {{ toast.action.label }}
+          </button>
+        </div>
+        
+        <button *ngIf="toast.dismissible"
+                type="button"
+                class="toast-close"
+                (click)="onDismiss(toast)"
+                aria-label="Fermer la notification"
+                [attr.aria-describedby]="'toast-message-' + toast.id">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <div *ngIf="toast.showProgress && toast.duration && toast.duration > 0"
+           class="toast-progress"
+           role="progressbar"
+           [attr.aria-valuenow]="getProgress(toast)"
+           aria-valuemin="0"
+           aria-valuemax="100"
+           [attr.aria-label]="'Temps restant avant fermeture automatique'">
+        <div class="toast-progress-bar" 
+             [style.width.%]="getProgress(toast)"></div>
+      </div>
+    </div>
+  </div>
+</div>

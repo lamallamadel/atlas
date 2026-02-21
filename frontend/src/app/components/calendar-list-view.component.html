@@ -1,0 +1,98 @@
+<div class="calendar-list-view">
+  <div class="list-header" *ngIf="!isLoading">
+    <div class="stats">
+      <div class="stat-item">
+        <span class="stat-value">{{ totalAppointments }}</span>
+        <span class="stat-label">Total</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-value">{{ upcomingAppointments }}</span>
+        <span class="stat-label">À venir</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement...</p>
+  </div>
+
+  <div class="appointments-list" *ngIf="!isLoading">
+    <div class="empty-state" *ngIf="groupedAppointments.length === 0">
+      <mat-icon>event_busy</mat-icon>
+      <p>Aucun rendez-vous trouvé</p>
+    </div>
+
+    <div 
+      class="date-group" 
+      *ngFor="let group of groupedAppointments; trackBy: trackByGroup"
+      [class.expanded]="isGroupExpanded(group.dateLabel)">
+      
+      <div class="date-header" (click)="toggleGroup(group.dateLabel)">
+        <div class="date-info">
+          <h3 class="date-label">{{ group.dateLabel }}</h3>
+          <span class="appointment-count">{{ group.appointments.length }} rendez-vous</span>
+        </div>
+        <mat-icon class="expand-icon">
+          {{ isGroupExpanded(group.dateLabel) ? 'expand_less' : 'expand_more' }}
+        </mat-icon>
+      </div>
+
+      <div class="appointments-container" *ngIf="isGroupExpanded(group.dateLabel)">
+        <div 
+          class="appointment-item" 
+          *ngFor="let appointment of group.appointments; trackBy: trackByAppointment"
+          (click)="onAppointmentClick(appointment)"
+          [class.mobile]="isMobile">
+          
+          <div class="appointment-status-indicator" 
+               [style.background-color]="getStatusColor(appointment.status)">
+          </div>
+
+          <div class="appointment-content">
+            <div class="appointment-header">
+              <h4 class="appointment-title">{{ getAppointmentTitle(appointment) }}</h4>
+              <span class="appointment-time">
+                {{ formatTime(appointment.startTime) }} - {{ formatTime(appointment.endTime) }}
+              </span>
+            </div>
+
+            <div class="appointment-details">
+              <div class="detail-row" *ngIf="appointment.location">
+                <mat-icon>location_on</mat-icon>
+                <span>{{ appointment.location }}</span>
+              </div>
+              
+              <div class="detail-row">
+                <mat-icon>schedule</mat-icon>
+                <span>{{ getDuration(appointment.startTime, appointment.endTime) }}</span>
+              </div>
+
+              <div class="detail-row">
+                <mat-icon>folder</mat-icon>
+                <span>Dossier #{{ appointment.dossierId }}</span>
+              </div>
+            </div>
+
+            <div class="appointment-footer">
+              <mat-chip 
+                [style.background-color]="getStatusColor(appointment.status)"
+                class="status-chip">
+                {{ getStatusLabel(appointment.status) }}
+              </mat-chip>
+            </div>
+          </div>
+
+          <div class="appointment-actions" *ngIf="!isMobile">
+            <button 
+              mat-icon-button 
+              (click)="onAppointmentClick(appointment); $event.stopPropagation()"
+              matTooltip="Voir les détails">
+              <mat-icon>visibility</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

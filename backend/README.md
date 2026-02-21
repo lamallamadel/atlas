@@ -132,6 +132,35 @@ Returns all metrics in Prometheus format for scraping:
 curl http://localhost:8080/actuator/prometheus
 ```
 
+## Performance Testing and Optimization
+
+The application includes a comprehensive performance testing and optimization suite. See [PERFORMANCE_README.md](PERFORMANCE_README.md) for complete documentation:
+
+- **Load Testing**: Gatling and K6 tests for realistic user workloads (100 concurrent users, 1000 dossiers/hour)
+- **Performance Monitoring**: Hibernate statistics logging with automatic N+1 query detection
+- **Database Optimization**: 30+ optimized indexes based on slow query analysis
+- **Redis Caching**: Configurable TTL caching for frequently accessed data (active annonces, user preferences, referential data)
+- **Connection Pool Tuning**: HikariCP optimization based on load test results
+
+### Quick Start
+
+```bash
+# Run standard load test
+./run-load-tests.sh standard
+
+# Enable performance monitoring
+SPRING_PROFILES_ACTIVE=performance mvn spring-boot:run
+
+# View performance metrics
+curl http://localhost:8080/api/v1/performance/metrics
+```
+
+**Documentation:**
+- [PERFORMANCE_README.md](PERFORMANCE_README.md) - Main guide and quick start
+- [PERFORMANCE_LOAD_TESTING.md](PERFORMANCE_LOAD_TESTING.md) - Comprehensive guide
+- [PERFORMANCE_QUICK_REFERENCE.md](PERFORMANCE_QUICK_REFERENCE.md) - Command reference
+- [PERFORMANCE_OPTIMIZATION_CHECKLIST.md](PERFORMANCE_OPTIMIZATION_CHECKLIST.md) - Pre-deployment checklist
+
 ## Observability
 
 The application includes comprehensive observability for outbound messaging. See [OUTBOUND_MESSAGING_OBSERVABILITY.md](OUTBOUND_MESSAGING_OBSERVABILITY.md) for detailed documentation on:

@@ -1,0 +1,128 @@
+<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate, 'skeleton-card': variant === 'card', 'skeleton-list': variant === 'list', 'skeleton-table': variant === 'table', 'skeleton-form': variant === 'form', 'skeleton-dashboard-kpi': variant === 'dashboard-kpi', 'skeleton-detail': variant === 'detail', 'skeleton-grid': variant === 'grid', 'skeleton-message': variant === 'message', 'skeleton-timeline': variant === 'timeline'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
+  <span class="sr-only">Chargement des données en cours...</span>
+  
+  <!-- Card variant -->
+  <div *ngIf="variant === 'card'" class="skeleton-card" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-card-item">
+      <div class="skeleton-card-header">
+        <div class="skeleton-rectangle skeleton-avatar"></div>
+        <div class="skeleton-card-header-content">
+          <div class="skeleton-rectangle skeleton-title"></div>
+          <div class="skeleton-rectangle skeleton-subtitle"></div>
+        </div>
+      </div>
+      <div class="skeleton-card-body">
+        <div class="skeleton-rectangle skeleton-line"></div>
+        <div class="skeleton-rectangle skeleton-line"></div>
+        <div class="skeleton-rectangle skeleton-line skeleton-line-short"></div>
+      </div>
+      <div class="skeleton-card-footer">
+        <div class="skeleton-rectangle skeleton-button-small"></div>
+        <div class="skeleton-rectangle skeleton-button-small"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- List variant -->
+  <div *ngIf="variant === 'list'" class="skeleton-list" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-list-item">
+      <div class="skeleton-rectangle skeleton-list-icon"></div>
+      <div class="skeleton-list-content">
+        <div class="skeleton-rectangle skeleton-list-title"></div>
+        <div class="skeleton-rectangle skeleton-list-subtitle"></div>
+      </div>
+      <div class="skeleton-rectangle skeleton-list-action"></div>
+    </div>
+  </div>
+
+  <!-- Table variant -->
+  <div *ngIf="variant === 'table'" class="skeleton-table" aria-hidden="true">
+    <div class="skeleton-table-header">
+      <div *ngFor="let i of columnsArray; trackBy: trackByIndex" class="skeleton-rectangle skeleton-table-header-cell"></div>
+    </div>
+    <div class="skeleton-table-body">
+      <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-table-row">
+        <div *ngFor="let j of columnsArray; trackBy: trackByIndex" class="skeleton-rectangle skeleton-table-cell"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Form variant -->
+  <div *ngIf="variant === 'form'" class="skeleton-form" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-form-group">
+      <div class="skeleton-rectangle skeleton-form-label"></div>
+      <div class="skeleton-rectangle skeleton-form-input"></div>
+    </div>
+    <div class="skeleton-form-actions">
+      <div class="skeleton-rectangle skeleton-button"></div>
+      <div class="skeleton-rectangle skeleton-button"></div>
+    </div>
+  </div>
+
+  <!-- Dashboard KPI variant -->
+  <div *ngIf="variant === 'dashboard-kpi'" class="skeleton-dashboard-kpi" aria-hidden="true">
+    <div class="skeleton-kpi-header">
+      <div class="skeleton-rectangle skeleton-kpi-title"></div>
+    </div>
+    <div class="skeleton-kpi-value">
+      <div class="skeleton-rectangle skeleton-kpi-number"></div>
+    </div>
+    <div class="skeleton-kpi-footer">
+      <div class="skeleton-rectangle skeleton-kpi-button"></div>
+    </div>
+  </div>
+
+  <!-- Detail variant -->
+  <div *ngIf="variant === 'detail'" class="skeleton-detail" aria-hidden="true">
+    <div class="skeleton-detail-header">
+      <div class="skeleton-rectangle skeleton-detail-back"></div>
+      <div class="skeleton-rectangle skeleton-detail-title"></div>
+      <div class="skeleton-rectangle skeleton-detail-badge"></div>
+    </div>
+    <div class="skeleton-detail-content">
+      <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-detail-row">
+        <div class="skeleton-rectangle skeleton-detail-label"></div>
+        <div class="skeleton-rectangle skeleton-detail-value"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid variant -->
+  <div *ngIf="variant === 'grid'" class="skeleton-grid" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-grid-item">
+      <div class="skeleton-rectangle skeleton-grid-image"></div>
+      <div class="skeleton-grid-content">
+        <div class="skeleton-rectangle skeleton-grid-title"></div>
+        <div class="skeleton-rectangle skeleton-grid-subtitle"></div>
+        <div class="skeleton-rectangle skeleton-grid-price"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message variant -->
+  <div *ngIf="variant === 'message'" class="skeleton-message" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" [ngClass]="{'skeleton-message-item': true, 'skeleton-message-right': i % 2 === 0}">
+      <div class="skeleton-rectangle skeleton-message-avatar" *ngIf="i % 2 !== 0"></div>
+      <div class="skeleton-message-bubble">
+        <div class="skeleton-rectangle skeleton-message-text"></div>
+        <div class="skeleton-rectangle skeleton-message-text skeleton-message-text-short"></div>
+        <div class="skeleton-rectangle skeleton-message-time"></div>
+      </div>
+      <div class="skeleton-rectangle skeleton-message-avatar" *ngIf="i % 2 === 0"></div>
+    </div>
+  </div>
+
+  <!-- Timeline variant -->
+  <div *ngIf="variant === 'timeline'" class="skeleton-timeline" aria-hidden="true">
+    <div *ngFor="let i of rowsArray; trackBy: trackByIndex" class="skeleton-timeline-item">
+      <div class="skeleton-timeline-marker">
+        <div class="skeleton-rectangle skeleton-timeline-dot"></div>
+      </div>
+      <div class="skeleton-timeline-content">
+        <div class="skeleton-rectangle skeleton-timeline-title"></div>
+        <div class="skeleton-rectangle skeleton-timeline-description"></div>
+        <div class="skeleton-rectangle skeleton-timeline-time"></div>
+      </div>
+    </div>
+  </div>
+</div>

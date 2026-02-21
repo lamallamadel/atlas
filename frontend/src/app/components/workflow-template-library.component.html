@@ -1,0 +1,66 @@
+<div class="template-library-container">
+  <mat-card class="header-card">
+    <mat-card-header>
+      <mat-card-title>Workflow Template Library</mat-card-title>
+      <mat-card-subtitle>Choose from pre-built workflow templates for different business scenarios</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="actions">
+        <button mat-raised-button color="primary" (click)="seedTemplates()">
+          <mat-icon>refresh</mat-icon> Seed System Templates
+        </button>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="filter-card">
+    <mat-card-content>
+      <mat-chip-listbox [(value)]="selectedCategory" (change)="filterByCategory($event.value)">
+        <mat-chip-option value="">All Templates</mat-chip-option>
+        <mat-chip-option *ngFor="let category of categories" [value]="category">
+          <mat-icon [style.color]="getCategoryColor(category)">{{ getCategoryIcon(category) }}</mat-icon>
+          {{ category }}
+        </mat-chip-option>
+      </mat-chip-listbox>
+    </mat-card-content>
+  </mat-card>
+
+  <div *ngIf="isLoading" class="loading-container">
+    <mat-spinner></mat-spinner>
+  </div>
+
+  <div *ngIf="!isLoading && filteredTemplates.length === 0" class="empty-state">
+    <mat-icon>inbox</mat-icon>
+    <p>No templates available. Click "Seed System Templates" to populate the library.</p>
+  </div>
+
+  <div class="templates-grid" *ngIf="!isLoading && filteredTemplates.length > 0">
+    <mat-card *ngFor="let template of filteredTemplates" class="template-card">
+      <mat-card-header>
+        <div mat-card-avatar [style.background-color]="getCategoryColor(template.category)">
+          <mat-icon>{{ getCategoryIcon(template.category) }}</mat-icon>
+        </div>
+        <mat-card-title>{{ template.name }}</mat-card-title>
+        <mat-card-subtitle>{{ template.category }}</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content>
+        <p>{{ template.description }}</p>
+        <div class="template-stats">
+          <span class="stat">
+            <mat-icon>radio_button_checked</mat-icon>
+            {{ template.stateCount }} states
+          </span>
+          <span class="stat">
+            <mat-icon>trending_flat</mat-icon>
+            {{ template.transitionCount }} transitions
+          </span>
+        </div>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-raised-button color="primary" (click)="instantiateTemplate(template.id, template.name)">
+          <mat-icon>content_copy</mat-icon> Use Template
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>

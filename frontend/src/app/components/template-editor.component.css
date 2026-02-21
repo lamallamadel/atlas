@@ -1,0 +1,168 @@
+.template-editor-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 30px;
+}
+
+.editor-form {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.form-section {
+  margin-bottom: 32px;
+}
+
+.form-section h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.half-width {
+  width: 100%;
+}
+
+.variables-list, .buttons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.variable-item, .button-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px;
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.variable-name {
+  flex: 1;
+}
+
+.variable-type {
+  flex: 0.8;
+}
+
+.variable-example {
+  flex: 1.2;
+}
+
+.button-type {
+  flex: 0.8;
+}
+
+.button-text {
+  flex: 1.5;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.preview-panel {
+  position: sticky;
+  top: 20px;
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  height: fit-content;
+}
+
+.preview-panel h3 {
+  margin: 0 0 16px 0;
+  color: #333;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.whatsapp-preview {
+  background: linear-gradient(135deg, #dcf8c6 0%, #e8f5e9 100%);
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 300px;
+}
+
+.preview-phone {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.preview-message {
+  padding: 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.preview-message pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+  color: #333;
+}
+
+.preview-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 12px;
+  background: #fff3cd;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #856404;
+}
+
+.preview-note mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+@media (max-width: 1200px) {
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-panel {
+    position: static;
+  }
+}

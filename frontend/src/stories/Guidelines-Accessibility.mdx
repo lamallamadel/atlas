@@ -1,0 +1,479 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Guidelines/Accessibility Checklist" />
+
+<div className="sb-container">
+  <div className="sb-section-title">
+    # Accessibility Checklist
+
+    Comprehensive WCAG 2.1 AA compliance checklist for Atlas Immobilier components and pages.
+  </div>
+
+  <div className="sb-section">
+    ## 🎯 Overview
+
+    This checklist ensures all components meet WCAG 2.1 Level AA standards for accessibility. Use this as a reference when building new features or reviewing existing code.
+  </div>
+
+  <div className="sb-section">
+    ## ✅ Color & Contrast
+
+    ### Required Contrast Ratios
+    - **Normal text**: 4.5:1 minimum (14px-17px)
+    - **Large text**: 3:1 minimum (≥18px or ≥14px bold)
+    - **UI components**: 3:1 minimum (buttons, form borders, icons)
+    - **Focus indicators**: 3:1 minimum against background
+
+    ### Color Usage
+    - [ ] Don't rely solely on color to convey information
+    - [ ] Use color + icon/text/pattern for status indicators
+    - [ ] Ensure sufficient contrast for all text
+    - [ ] Test with color blindness simulators
+    - [ ] Provide alternative text for color-coded content
+
+    ### Tools
+    - WebAIM Contrast Checker
+    - Chrome DevTools Contrast Ratio
+    - axe DevTools
+  </div>
+
+  <div className="sb-section">
+    ## ⌨️ Keyboard Navigation
+
+    ### Tab Order
+    - [ ] Logical tab order matches visual order
+    - [ ] All interactive elements are keyboard accessible
+    - [ ] No keyboard traps (can always tab away)
+    - [ ] Skip links for main content areas
+    - [ ] Modal/dialog trap focus when open
+
+    ### Focus Indicators
+    - [ ] Visible focus indicator on all interactive elements
+    - [ ] 2px solid outline with 2px offset
+    - [ ] Focus indicator has 3:1 contrast ratio
+    - [ ] Custom focus styles when default removed
+
+    ### Keyboard Shortcuts
+    - [ ] Document all keyboard shortcuts
+    - [ ] Don't override browser shortcuts
+    - [ ] Provide alternative methods for keyboard-only users
+    - [ ] Support standard shortcuts (Ctrl+S, Esc, etc.)
+
+    ### Key Mappings
+    ```
+    Tab             - Move focus forward
+    Shift + Tab     - Move focus backward
+    Enter/Space     - Activate button or link
+    Arrow Keys      - Navigate within components
+    Esc             - Close modal/dialog
+    ```
+  </div>
+
+  <div className="sb-section">
+    ## 🏷️ Semantic HTML & ARIA
+
+    ### HTML Elements
+    - [ ] Use semantic HTML5 elements
+    - [ ] `<button>` for buttons, not `<div>` or `<span>`
+    - [ ] `<nav>` for navigation
+    - [ ] `<main>` for main content
+    - [ ] `<header>`, `<footer>`, `<aside>` appropriately
+    - [ ] Proper heading hierarchy (h1 → h2 → h3)
+
+    ### ARIA Attributes
+    - [ ] `aria-label` for icon-only buttons
+    - [ ] `aria-labelledby` to associate labels
+    - [ ] `aria-describedby` for additional descriptions
+    - [ ] `aria-required` on required form fields
+    - [ ] `aria-invalid` for validation errors
+    - [ ] `aria-live` for dynamic content updates
+    - [ ] `role` attributes when semantic HTML isn't enough
+
+    ### Labels & Descriptions
+    - [ ] All form inputs have associated labels
+    - [ ] Labels are visible (not just placeholder)
+    - [ ] Error messages programmatically associated
+    - [ ] Descriptive link text (not "click here")
+    - [ ] Image alt text describes content/function
+  </div>
+
+  <div className="sb-section">
+    ## 📝 Forms
+
+    ### Form Fields
+    - [ ] All inputs have visible `<label>` elements
+    - [ ] Labels use `for` attribute matching input `id`
+    - [ ] Required fields marked with * and `aria-required`
+    - [ ] Placeholder text doesn't replace labels
+    - [ ] Input types appropriate (email, tel, number, etc.)
+    - [ ] Autocomplete attributes for personal data
+
+    ### Validation
+    - [ ] Clear, specific error messages
+    - [ ] Errors associated with inputs via `aria-describedby`
+    - [ ] Inline validation on blur (not just on submit)
+    - [ ] Error summary at top of form
+    - [ ] Don't rely on color alone for errors
+    - [ ] Success confirmation messages
+
+    ### Form Structure
+    - [ ] Group related fields with `<fieldset>`
+    - [ ] `<legend>` for fieldset groups
+    - [ ] Logical tab order through form
+    - [ ] Submit button clearly labeled
+    - [ ] Disabled state communicated to screen readers
+  </div>
+
+  <div className="sb-section">
+    ## 🖼️ Images & Media
+
+    ### Images
+    - [ ] Descriptive `alt` text for informative images
+    - [ ] Empty `alt=""` for decorative images
+    - [ ] Don't include "image of" in alt text
+    - [ ] SVG icons have `aria-label` or title
+    - [ ] Image-based buttons have text alternatives
+
+    ### Video & Audio
+    - [ ] Captions for video content
+    - [ ] Transcripts for audio content
+    - [ ] Audio descriptions for visual-only content
+    - [ ] Player controls are keyboard accessible
+    - [ ] Auto-play disabled or user controlled
+
+    ### Icons
+    - [ ] Icon-only buttons have `aria-label`
+    - [ ] Decorative icons have `aria-hidden="true"`
+    - [ ] Icon + text buttons don't duplicate labels
+  </div>
+
+  <div className="sb-section">
+    ## 🔘 Interactive Components
+
+    ### Buttons
+    - [ ] Minimum 44×44px touch target
+    - [ ] Clear, descriptive button text
+    - [ ] Disabled state communicated properly
+    - [ ] Loading state announced to screen readers
+    - [ ] Icon buttons have aria-label
+
+    ### Links
+    - [ ] Descriptive link text (not "click here")
+    - [ ] External links indicated (icon + text)
+    - [ ] Visited links visually distinct
+    - [ ] Links distinguishable from text (not just color)
+
+    ### Modals & Dialogs
+    - [ ] Focus trapped within modal when open
+    - [ ] Focus returns to trigger on close
+    - [ ] Esc key closes modal
+    - [ ] `role="dialog"` and `aria-modal="true"`
+    - [ ] `aria-labelledby` points to title
+    - [ ] Background content inert (aria-hidden)
+
+    ### Dropdowns & Selects
+    - [ ] Keyboard navigable with arrow keys
+    - [ ] Current selection announced
+    - [ ] Typing filters options (type-ahead)
+    - [ ] Esc closes dropdown
+    - [ ] `aria-expanded` state toggled
+  </div>
+
+  <div className="sb-section">
+    ## 📱 Touch & Mobile
+
+    ### Touch Targets
+    - [ ] Minimum 44×44px for touch targets
+    - [ ] Adequate spacing between targets (8px minimum)
+    - [ ] Tap area larger than visual element if needed
+    - [ ] No hover-only interactions
+
+    ### Mobile Considerations
+    - [ ] Pinch-to-zoom enabled
+    - [ ] Viewport meta tag configured properly
+    - [ ] Landscape and portrait orientations supported
+    - [ ] Touch gestures have keyboard alternatives
+  </div>
+
+  <div className="sb-section">
+    ## 🔊 Screen Reader Support
+
+    ### Content Structure
+    - [ ] Logical heading hierarchy
+    - [ ] Landmark regions defined (nav, main, etc.)
+    - [ ] Lists use `<ul>`, `<ol>`, `<li>` elements
+    - [ ] Tables use proper markup (th, scope, caption)
+
+    ### Dynamic Content
+    - [ ] `aria-live` regions for updates
+    - [ ] Loading states announced
+    - [ ] Error messages announced
+    - [ ] Success confirmations announced
+    - [ ] Route changes announced (SPA)
+
+    ### Hidden Content
+    - [ ] Visually hidden text for context
+    - [ ] `aria-hidden` for decorative elements
+    - [ ] Display:none removes from screen readers
+    - [ ] Skip links for repetitive content
+  </div>
+
+  <div className="sb-section">
+    ## ⚡ Performance & Motion
+
+    ### Animations
+    - [ ] Respect `prefers-reduced-motion`
+    - [ ] No auto-playing animations over 5s
+    - [ ] Provide controls for auto-updating content
+    - [ ] No flashing content (3+ times/second)
+    - [ ] Animations can be paused
+
+    ### Loading States
+    - [ ] Loading indicators announced
+    - [ ] Skeleton loaders have proper ARIA
+    - [ ] Timeout warnings for long operations
+    - [ ] Progress indicators are accessible
+  </div>
+
+  <div className="sb-section">
+    ## 🧪 Testing
+
+    ### Automated Testing
+    - [ ] Run axe DevTools on all pages
+    - [ ] Lighthouse accessibility audit passes
+    - [ ] Pa11y CI integration
+    - [ ] Fix all automated errors
+
+    ### Manual Testing
+    - [ ] Tab through entire page
+    - [ ] Test with screen reader (NVDA/JAWS/VoiceOver)
+    - [ ] Test at 200% zoom
+    - [ ] Test with keyboard only
+    - [ ] Test with high contrast mode
+    - [ ] Test with color blindness simulator
+
+    ### Browser Testing
+    - [ ] Chrome + ChromeVox
+    - [ ] Firefox + NVDA
+    - [ ] Safari + VoiceOver
+    - [ ] Edge + Narrator
+  </div>
+
+  <div className="sb-section">
+    ## 📋 Component-Specific Checklists
+
+    ### Buttons
+    ```html
+    ✓ Use <button> element
+    ✓ Include aria-label for icon-only
+    ✓ Disabled state has aria-disabled
+    ✓ Focus indicator visible
+    ✓ 44×44px minimum size
+    ```
+
+    ### Forms
+    ```html
+    ✓ Labels associated with inputs
+    ✓ Required fields marked
+    ✓ Error messages linked via aria-describedby
+    ✓ Validation on blur
+    ✓ Success states announced
+    ```
+
+    ### Modals
+    ```html
+    ✓ role="dialog"
+    ✓ aria-modal="true"
+    ✓ aria-labelledby points to title
+    ✓ Focus trapped
+    ✓ Esc key closes
+    ✓ Focus returns to trigger
+    ```
+
+    ### Tables
+    ```html
+    ✓ <th> for headers
+    ✓ scope="col" or scope="row"
+    ✓ <caption> describes table
+    ✓ Complex tables use aria-labelledby
+    ✓ Sortable columns announced
+    ```
+  </div>
+
+  <div className="sb-section">
+    ## 🛠️ Tools & Resources
+
+    ### Browser Extensions
+    - axe DevTools (Chrome, Firefox)
+    - WAVE (Chrome, Firefox)
+    - Lighthouse (Chrome DevTools)
+    - Color Contrast Analyzer
+
+    ### Screen Readers
+    - NVDA (Windows, free)
+    - JAWS (Windows, paid)
+    - VoiceOver (macOS/iOS, built-in)
+    - TalkBack (Android, built-in)
+
+    ### Testing Tools
+    - Pa11y (automated testing)
+    - axe-core (JavaScript library)
+    - cypress-axe (Cypress plugin)
+    - jest-axe (Jest matcher)
+
+    ### Documentation
+    - [WCAG 2.1 Quick Reference](https://www.w3.org/WAI/WCAG21/quickref/)
+    - [MDN Accessibility](https://developer.mozilla.org/en-US/docs/Web/Accessibility)
+    - [WebAIM Articles](https://webaim.org/articles/)
+    - [A11y Project](https://www.a11yproject.com/)
+  </div>
+
+  <div className="sb-section">
+    ## 🎯 Quick Reference
+
+    ### Common ARIA Attributes
+    ```html
+    <!-- Labeling -->
+    aria-label="Close"
+    aria-labelledby="modal-title"
+    aria-describedby="error-message"
+
+    <!-- States -->
+    aria-expanded="true"
+    aria-hidden="true"
+    aria-disabled="true"
+    aria-selected="true"
+    aria-checked="true"
+
+    <!-- Properties -->
+    aria-required="true"
+    aria-invalid="true"
+    aria-live="polite"
+    aria-atomic="true"
+
+    <!-- Relationships -->
+    aria-controls="panel-1"
+    aria-owns="submenu"
+    ```
+
+    ### Semantic HTML Priority
+    ```html
+    1. Use native HTML (button, input, nav)
+    2. Add ARIA only when needed
+    3. Never remove native semantics
+    4. Test with screen readers
+    ```
+  </div>
+</div>
+
+<style>
+  {`
+  .sb-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+
+  .sb-section {
+    margin-bottom: 48px;
+  }
+
+  .sb-section-title h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-primary-600, #2c5aa0);
+    margin-bottom: 16px;
+  }
+
+  .sb-section h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--color-neutral-900, #212121);
+    border-bottom: 2px solid var(--color-neutral-200, #eeeeee);
+    padding-bottom: 8px;
+  }
+
+  .sb-section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 24px 0 12px 0;
+    color: var(--color-neutral-800, #424242);
+  }
+
+  .sb-section p {
+    line-height: 1.6;
+    color: var(--color-neutral-700, #616161);
+    margin-bottom: 16px;
+  }
+
+  .sb-section ul {
+    list-style: none;
+    padding-left: 0;
+    line-height: 1.8;
+    margin-bottom: 16px;
+  }
+
+  .sb-section ul li {
+    padding-left: 24px;
+    position: relative;
+    color: var(--color-neutral-700, #616161);
+    margin-bottom: 8px;
+  }
+
+  .sb-section ul li::before {
+    content: "□";
+    position: absolute;
+    left: 0;
+    color: var(--color-primary-500, #2c5aa0);
+    font-weight: bold;
+  }
+
+  .sb-section pre {
+    background: var(--color-neutral-50, #fafafa);
+    padding: 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid var(--color-neutral-200, #eeeeee);
+    margin-bottom: 16px;
+  }
+
+  .sb-section code {
+    background: var(--color-neutral-100, #f5f5f5);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Monaco', 'Courier New', monospace;
+    font-size: 13px;
+    color: var(--color-primary-700, #1f4782);
+  }
+
+  .dark-theme .sb-section-title h1 {
+    color: var(--color-primary-300, #93a9cc);
+  }
+
+  .dark-theme .sb-section h2,
+  .dark-theme .sb-section h3 {
+    color: var(--color-neutral-100, #f5f5f5);
+    border-bottom-color: var(--color-neutral-700, #616161);
+  }
+
+  .dark-theme .sb-section p,
+  .dark-theme .sb-section ul li {
+    color: var(--color-neutral-300, #e0e0e0);
+  }
+
+  .dark-theme .sb-section pre {
+    background: var(--color-neutral-800, #424242);
+    color: var(--color-neutral-100, #f5f5f5);
+    border-color: var(--color-neutral-700, #616161);
+  }
+
+  .dark-theme .sb-section code {
+    background: var(--color-neutral-700, #616161);
+    color: var(--color-primary-200, #93a9cc);
+  }
+  `}
+</style>

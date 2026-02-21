@@ -1,0 +1,132 @@
+.template-library-container {
+  padding: 20px;
+}
+
+.header-card {
+  margin-bottom: 20px;
+}
+
+.actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.filter-card {
+  margin-bottom: 20px;
+}
+
+mat-chip-listbox {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+mat-chip-option {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #666;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.template-card {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.template-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.template-card mat-card-header {
+  margin-bottom: 16px;
+}
+
+.template-card [mat-card-avatar] {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.template-card [mat-card-avatar] mat-icon {
+  color: white;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.template-card mat-card-content p {
+  color: #666;
+  margin-bottom: 16px;
+  min-height: 60px;
+}
+
+.template-stats {
+  display: flex;
+  gap: 16px;
+  color: #666;
+  font-size: 14px;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.template-card mat-card-actions {
+  padding: 16px;
+  border-top: 1px solid #eee;
+}
+
+.template-card mat-card-actions button {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions button {
+    width: 100%;
+  }
+}

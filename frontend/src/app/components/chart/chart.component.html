@@ -1,0 +1,31 @@
+<div class="chart-wrapper" [class.dark-mode]="darkMode">
+  <div class="chart-header" *ngIf="title || subtitle || enableExport">
+    <div class="chart-title-section">
+      <h3 class="chart-title" *ngIf="title">{{ title }}</h3>
+      <p class="chart-subtitle" *ngIf="subtitle">{{ subtitle }}</p>
+    </div>
+    <div class="chart-actions" *ngIf="enableExport">
+      <button 
+        mat-icon-button 
+        [matMenuTriggerFor]="exportMenu"
+        matTooltip="Exporter le graphique"
+        aria-label="Exporter le graphique">
+        <mat-icon>download</mat-icon>
+      </button>
+      <mat-menu #exportMenu="matMenu">
+        <button mat-menu-item (click)="exportChart({ format: 'png' })">
+          <mat-icon>image</mat-icon>
+          <span>Exporter en PNG</span>
+        </button>
+        <button mat-menu-item (click)="exportChart({ format: 'svg' })">
+          <mat-icon>code</mat-icon>
+          <span>Exporter en SVG</span>
+        </button>
+      </mat-menu>
+    </div>
+  </div>
+
+  <div class="chart-container" [style.height.px]="height">
+    <canvas #chartCanvas></canvas>
+  </div>
+</div>

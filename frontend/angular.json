@@ -16,6 +16,19 @@
           "setParserOptionsProject": true
         }
       },
+      "i18n": {
+        "sourceLocale": "fr",
+        "locales": {
+          "en": {
+            "translation": "src/locale/messages.en.xlf",
+            "baseHref": "/en/"
+          },
+          "es": {
+            "translation": "src/locale/messages.es.xlf",
+            "baseHref": "/es/"
+          }
+        }
+      },
       "root": "",
       "sourceRoot": "src",
       "prefix": "app",
@@ -23,17 +36,21 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
+            "localize": false,
             "outputPath": "dist/frontend",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
-              "zone.js"
+              "zone.js",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
               "src/assets",
-              "src/service-worker.js"
+              "src/service-worker.js",
+              "src/manifest.json",
+              "src/browserconfig.xml"
             ],
             "styles": [
               "src/styles/variables.scss",
@@ -49,10 +66,12 @@
               "jspdf",
               "jspdf-autotable",
               "papaparse",
+              "xlsx",
               "canvg",
               "raf",
               "rgbcolor",
               "shepherd.js",
+              "lottie-web",
               "@fullcalendar/core",
               "@fullcalendar/daygrid",
               "@fullcalendar/timegrid",
@@ -63,6 +82,7 @@
           },
           "configurations": {
             "production": {
+              "localize": true,
               "budgets": [
                 {
                   "type": "initial",
@@ -76,6 +96,27 @@
                 }
               ],
               "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true
+                },
+                "fonts": {
+                  "inline": true
+                }
+              },
+              "sourceMap": {
+                "scripts": true,
+                "styles": false,
+                "hidden": true
+              },
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": true,
+              "buildOptimizer": true,
+              "serviceWorker": true,
+              "ngswConfigPath": "ngsw-config.json",
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -84,12 +125,22 @@
               ]
             },
             "development": {
+              "localize": false,
               "buildOptimizer": false,
               "optimization": false,
               "vendorChunk": true,
               "extractLicenses": false,
               "sourceMap": true,
               "namedChunks": true
+            },
+            "fr": {
+              "localize": ["fr"]
+            },
+            "en": {
+              "localize": ["en"]
+            },
+            "es": {
+              "localize": ["es"]
             }
           },
           "defaultConfiguration": "production"
@@ -102,6 +153,15 @@
             },
             "development": {
               "browserTarget": "frontend:build:development"
+            },
+            "fr": {
+              "browserTarget": "frontend:build:development,fr"
+            },
+            "en": {
+              "browserTarget": "frontend:build:development,en"
+            },
+            "es": {
+              "browserTarget": "frontend:build:development,es"
             }
           },
           "defaultConfiguration": "development"
@@ -109,7 +169,9 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "frontend:build"
+            "browserTarget": "frontend:build",
+            "format": "xlf2",
+            "outputPath": "src/locale"
           }
         },
         "test": {
@@ -117,7 +179,8 @@
           "options": {
             "polyfills": [
               "zone.js",
-              "zone.js/testing"
+              "zone.js/testing",
+              "@angular/localize/init"
             ],
             "tsConfig": "tsconfig.spec.json",
             "assets": [

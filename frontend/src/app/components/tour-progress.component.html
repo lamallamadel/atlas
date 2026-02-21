@@ -1,0 +1,105 @@
+<div class="tour-progress-container">
+  <div class="tour-progress-header">
+    <h2>Guides interactifs</h2>
+    <p class="tour-progress-subtitle">
+      Découvrez les fonctionnalités d'Atlas Immobilier avec nos guides pas à pas
+    </p>
+  </div>
+
+  <div class="progress-overview" *ngIf="!isLoading">
+    <div class="progress-stats">
+      <div class="stat-item">
+        <div class="stat-value">{{ completedCount }}/{{ totalCount }}</div>
+        <div class="stat-label">Guides complétés</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-value">{{ completionPercentage }}%</div>
+        <div class="stat-label">Progression</div>
+      </div>
+    </div>
+    
+    <div class="progress-bar-container">
+      <mat-progress-bar 
+        mode="determinate" 
+        [value]="completionPercentage"
+        color="primary">
+      </mat-progress-bar>
+    </div>
+
+    <div class="progress-actions" *ngIf="completedCount > 0">
+      <button 
+        mat-stroked-button 
+        color="warn" 
+        (click)="resetAllTours()"
+        aria-label="Réinitialiser tous les guides">
+        <mat-icon>refresh</mat-icon>
+        Tout réinitialiser
+      </button>
+    </div>
+  </div>
+
+  <div class="tour-list" *ngIf="!isLoading">
+    <mat-card *ngFor="let tour of tours" class="tour-card" [class.completed]="isTourCompleted(tour.id)">
+      <mat-card-header>
+        <div mat-card-avatar class="tour-icon">
+          <mat-icon [color]="getStatusColor(tour)">{{ getStatusIcon(tour) }}</mat-icon>
+        </div>
+        <mat-card-title>{{ tour.name }}</mat-card-title>
+        <mat-card-subtitle>
+          <span class="tour-duration">
+            <mat-icon class="duration-icon">schedule</mat-icon>
+            {{ tour.estimatedTime }} min
+          </span>
+          <span class="tour-steps">
+            <mat-icon class="steps-icon">layers</mat-icon>
+            {{ tour.steps.length }} étapes
+          </span>
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <p class="tour-description">{{ tour.description }}</p>
+        
+        <div class="tour-status" *ngIf="isTourCompleted(tour.id)">
+          <mat-chip class="completed-chip" color="primary">
+            <mat-icon>check</mat-icon>
+            Complété
+          </mat-chip>
+        </div>
+      </mat-card-content>
+      
+      <mat-card-actions>
+        <button 
+          mat-raised-button 
+          [color]="isTourCompleted(tour.id) ? 'accent' : 'primary'"
+          (click)="startTour(tour)"
+          [attr.aria-label]="isTourCompleted(tour.id) ? 'Refaire le guide ' + tour.name : 'Démarrer le guide ' + tour.name">
+          <mat-icon>{{ isTourCompleted(tour.id) ? 'replay' : 'play_arrow' }}</mat-icon>
+          {{ isTourCompleted(tour.id) ? 'Refaire' : 'Démarrer' }}
+        </button>
+        
+        <button 
+          mat-button
+          *ngIf="isTourCompleted(tour.id)"
+          (click)="resetTour(tour, $event)"
+          aria-label="Réinitialiser ce guide">
+          <mat-icon>delete_outline</mat-icon>
+          Réinitialiser
+        </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Chargement des guides...</p>
+  </div>
+
+  <div class="tour-info-banner">
+    <mat-icon>info</mat-icon>
+    <div class="banner-content">
+      <h3>Astuce</h3>
+      <p>Vous pouvez accéder aux guides depuis le menu d'aide <mat-icon class="inline-icon">help_outline</mat-icon> à tout moment.</p>
+    </div>
+  </div>
+</div>

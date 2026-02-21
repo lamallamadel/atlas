@@ -1,0 +1,128 @@
+// ========================================
+// MODULAR TYPOGRAPHY SCALE
+// Perfect Fourth Ratio (1.25)
+// Base: 14px
+// ========================================
+
+// Typography scale variables
+$font-base: 14px;
+$ratio-perfect-fourth: 1.25;
+
+// Calculate modular scale sizes
+$font-size-base: $font-base;                                    // 14px
+$font-size-1: $font-size-base * $ratio-perfect-fourth;          // 17.5px
+$font-size-2: $font-size-1 * $ratio-perfect-fourth;             // 21.875px
+$font-size-3: $font-size-2 * $ratio-perfect-fourth;             // 27.34375px
+$font-size-4: $font-size-3 * $ratio-perfect-fourth;             // 34.1796875px
+$font-size-5: $font-size-4 * $ratio-perfect-fourth;             // 42.724609375px
+
+// Line height values
+$line-height-heading: 1.2;
+$line-height-body: 1.6;
+
+// Letter spacing function based on size
+@function letter-spacing-for-size($size) {
+  @if $size >= $font-size-3 {
+    @return -0.02em;
+  } @else {
+    @return 0em;
+  }
+}
+
+// ========================================
+// HEADING MIXINS
+// ========================================
+
+@mixin heading-1 {
+  font-size: $font-size-5;      // 42.8px
+  line-height: $line-height-heading;
+  letter-spacing: letter-spacing-for-size($font-size-5);
+  font-weight: 700;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin heading-2 {
+  font-size: $font-size-4;      // 34.2px
+  line-height: $line-height-heading;
+  letter-spacing: letter-spacing-for-size($font-size-4);
+  font-weight: 700;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin heading-3 {
+  font-size: $font-size-3;      // 27.4px
+  line-height: $line-height-heading;
+  letter-spacing: letter-spacing-for-size($font-size-3);
+  font-weight: 600;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin heading-4 {
+  font-size: $font-size-2;      // 21.9px
+  line-height: $line-height-heading;
+  letter-spacing: letter-spacing-for-size($font-size-2);
+  font-weight: 600;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin heading-5 {
+  font-size: $font-size-1;      // 17.5px
+  line-height: $line-height-heading;
+  letter-spacing: letter-spacing-for-size($font-size-1);
+  font-weight: 500;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin heading-6 {
+  font-size: $font-size-base;   // 14px
+  line-height: $line-height-heading;
+  letter-spacing: letter-spacing-for-size($font-size-base);
+  font-weight: 500;
+  font-family: 'Roboto', 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+// ========================================
+// BODY TEXT MIXINS
+// ========================================
+
+@mixin body-large {
+  font-size: $font-size-1;      // 17.5px
+  line-height: $line-height-body;
+  letter-spacing: 0em;
+  font-weight: 400;
+  font-family: 'Open Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin body-base {
+  font-size: $font-size-base;   // 14px
+  line-height: $line-height-body;
+  letter-spacing: 0em;
+  font-weight: 400;
+  font-family: 'Open Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+@mixin body-small {
+  font-size: calc(#{$font-size-base} / #{$ratio-perfect-fourth}); // 11.2px
+  line-height: $line-height-body;
+  letter-spacing: 0em;
+  font-weight: 400;
+  font-family: 'Open Sans', 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+}
+
+// ========================================
+// UTILITY MIXINS
+// ========================================
+
+@mixin text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-truncate-multiline($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

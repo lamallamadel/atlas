@@ -1,180 +1,41 @@
 spring:
   application:
     name: backend
-  servlet:
-    multipart:
-      enabled: true
-      max-file-size: ${MULTIPART_MAX_FILE_SIZE:10MB}
-      max-request-size: ${MULTIPART_MAX_REQUEST_SIZE:10MB}
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: ${OAUTH2_ISSUER_URI:http://localhost:8081/realms/myrealm}
-  datasource:
-    hikari:
-      maximum-pool-size: ${HIKARI_MAX_POOL_SIZE:20}
-      minimum-idle: ${HIKARI_MIN_IDLE:5}
-      connection-timeout: ${HIKARI_CONNECTION_TIMEOUT:30000}
-      idle-timeout: ${HIKARI_IDLE_TIMEOUT:600000}
-      max-lifetime: ${HIKARI_MAX_LIFETIME:1800000}
-      leak-detection-threshold: ${HIKARI_LEAK_DETECTION_THRESHOLD:60000}
-      pool-name: ${HIKARI_POOL_NAME:BackendHikariPool}
-  mail:
-    host: ${MAIL_HOST:smtp.gmail.com}
-    port: ${MAIL_PORT:587}
-    username: ${MAIL_USERNAME:}
-    password: ${MAIL_PASSWORD:}
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
     properties:
-      mail:
-        smtp:
-          auth: ${MAIL_SMTP_AUTH:true}
-          starttls:
-            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
-      timeout: ${REDIS_TIMEOUT:2000}
-      lettuce:
-        pool:
-          max-active: ${REDIS_POOL_MAX_ACTIVE:8}
-          max-idle: ${REDIS_POOL_MAX_IDLE:8}
-          min-idle: ${REDIS_POOL_MIN_IDLE:0}
-          max-wait: ${REDIS_POOL_MAX_WAIT:-1}
-
-keycloak:
-  admin:
-    server-url: ${KEYCLOAK_ADMIN_SERVER_URL:http://localhost:8081}
-    realm: ${KEYCLOAK_ADMIN_REALM:myrealm}
-    client-id: ${KEYCLOAK_ADMIN_CLIENT_ID:admin-cli}
-    username: ${KEYCLOAK_ADMIN_USERNAME:admin}
-    password: ${KEYCLOAK_ADMIN_PASSWORD:admin}
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+  
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+    placeholders:
+      json_type: JSONB
+  
   mail:
     host: ${MAIL_HOST:localhost}
     port: ${MAIL_PORT:1025}
     username: ${MAIL_USERNAME:}
     password: ${MAIL_PASSWORD:}
-    from: ${MAIL_FROM:noreply@example.com}
     properties:
       mail:
         smtp:
-          auth: ${MAIL_SMTP_AUTH:false}
+          auth: false
           starttls:
-            enable: ${MAIL_SMTP_STARTTLS:false}
-  thymeleaf:
-    prefix: classpath:/templates/
-    suffix: .html
-    mode: HTML
-    encoding: UTF-8
-    cache: false
-  data:
-    elasticsearch:
-      repositories:
-        enabled: ${ELASTICSEARCH_ENABLED:false}
+            enable: false
 
-
-  output:
-    ansi:
-      enabled: ALWAYS
-
-cache:
-  redis:
-    enabled: ${CACHE_REDIS_ENABLED:true}
-  ttl:
-    annonce: ${CACHE_TTL_ANNONCE:900}
-    dossier: ${CACHE_TTL_DOSSIER:600}
-    funnel-analysis: ${CACHE_TTL_FUNNEL_ANALYSIS:3600}
-    agent-performance: ${CACHE_TTL_AGENT_PERFORMANCE:3600}
-    revenue-forecast: ${CACHE_TTL_REVENUE_FORECAST:7200}
-    pipeline-summary: ${CACHE_TTL_PIPELINE_SUMMARY:1800}
-
-database:
-  index-audit:
-    enabled: ${DATABASE_INDEX_AUDIT_ENABLED:true}
-
-# Optional: enable Spring Elasticsearch client only when desired
-elasticsearch:
-  enabled: ${ELASTICSEARCH_ENABLED:false}
-  uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
-  username: ${ELASTICSEARCH_USERNAME:}
-  password: ${ELASTICSEARCH_PASSWORD:}
-
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui
-
-notification:
-  processor:
-    interval: ${NOTIFICATION_PROCESSOR_INTERVAL:10000}
-
-rate-limit:
-  default-requests-per-minute: ${RATE_LIMIT_DEFAULT_RPM:100}
-  enabled: ${RATE_LIMIT_ENABLED:true}
-
-outbound:
-  worker:
-    enabled: ${OUTBOUND_WORKER_ENABLED:true}
-    poll-interval-ms: ${OUTBOUND_WORKER_POLL_INTERVAL_MS:5000}
-    batch-size: ${OUTBOUND_WORKER_BATCH_SIZE:10}
-  metrics:
-    update-interval-ms: ${OUTBOUND_METRICS_UPDATE_INTERVAL_MS:10000}
-  alert:
-    enabled: ${OUTBOUND_ALERT_ENABLED:true}
-    cron: ${OUTBOUND_ALERT_CRON:0 */15 * * * *}
-    stuck-message-threshold-attempts: ${OUTBOUND_ALERT_STUCK_THRESHOLD_ATTEMPTS:3}
-    stuck-message-age-hours: ${OUTBOUND_ALERT_STUCK_AGE_HOURS:2}
-    max-results: ${OUTBOUND_ALERT_MAX_RESULTS:100}
-    dlq-threshold: ${OUTBOUND_ALERT_DLQ_THRESHOLD:100}
-    high-queue-threshold: ${OUTBOUND_ALERT_HIGH_QUEUE_THRESHOLD:1000}
-    failure-rate-threshold: ${OUTBOUND_ALERT_FAILURE_RATE_THRESHOLD:0.30}
-    time-window-minutes: ${OUTBOUND_ALERT_TIME_WINDOW_MINUTES:60}
-    escalation-attempts: ${OUTBOUND_ALERT_ESCALATION_ATTEMPTS:5}
-    health-metrics-update-ms: ${OUTBOUND_ALERT_HEALTH_METRICS_UPDATE_MS:30000}
-    email:
-      enabled: ${OUTBOUND_ALERT_EMAIL_ENABLED:false}
-      recipients: ${OUTBOUND_ALERT_EMAIL_RECIPIENTS:}
-    slack:
-      enabled: ${OUTBOUND_ALERT_SLACK_ENABLED:false}
-      webhook-url: ${OUTBOUND_ALERT_SLACK_WEBHOOK_URL:}
-    high-queue-depth:
-      cron: ${OUTBOUND_ALERT_HIGH_QUEUE_CRON:0 */10 * * * *}
-    dead-letter:
-      cron: ${OUTBOUND_ALERT_DEAD_LETTER_CRON:0 0 * * * *}
-    failure-rate:
-      cron: ${OUTBOUND_ALERT_FAILURE_RATE_CRON:0 */5 * * * *}
-    escalation:
-      cron: ${OUTBOUND_ALERT_ESCALATION_CRON:0 */20 * * * *}
-
-whatsapp:
-  cloud:
-    api:
-      base-url: ${WHATSAPP_CLOUD_API_BASE_URL:https://graph.facebook.com/v18.0}
-
-storage:
-  strategy: ${STORAGE_STRATEGY:localFileStorage}
-  max-file-size: ${STORAGE_MAX_FILE_SIZE:10485760}
-  local:
-    base-path: ${STORAGE_LOCAL_BASE_PATH:./storage}
-  s3:
-    bucket-name: ${STORAGE_S3_BUCKET_NAME:}
-    region: ${STORAGE_S3_REGION:us-east-1}
-    access-key: ${STORAGE_S3_ACCESS_KEY:}
-    secret-key: ${STORAGE_S3_SECRET_KEY:}
-
-# App metadata (surfaced in /actuator/info when enabled)
-app:
-  env: ${APP_ENV:local}
-  version: ${APP_VERSION:@project.version@}
-
-atlas:
-  slow-request:
-    threshold-ms: ${ATLAS_SLOW_REQUEST_THRESHOLD_MS:1500}
-  metrics:
-    include-org-id: ${ATLAS_METRICS_INCLUDE_ORG_ID:false}
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=10m
 
 brain:
   scoring:
@@ -213,6 +74,9 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
+
+      show-details: always
+
       show-details: when-authorized
     proposal-service:
       base-url: "http://localhost:8002"
@@ -226,41 +90,23 @@ management:
       enabled: true
     prometheus:
       enabled: true
+
   metrics:
-    distribution:
-      percentiles-histogram:
-        http.server.requests: true
-        outbound.message.delivery.latency: true
-      percentiles:
-        outbound.message.delivery.latency: 0.5, 0.75, 0.9, 0.95, 0.99
-    tags:
-      application: ${spring.application.name}
-  info:
-    build:
-      enabled: true
-    env:
-      enabled: true
-    java:
-      enabled: true
-    os:
-      enabled: true
+    export:
+      prometheus:
+        enabled: true
 
-info:
-  app:
-    name: ${spring.application.name}
-    description: Spring Boot Backend Application
-    version: ${app.version}
+ml:
+  service:
+    url: ${ML_SERVICE_URL:http://localhost:5000}
+  training:
+    enabled: ${ML_TRAINING_ENABLED:false}
+    cron: ${ML_TRAINING_CRON:0 0 2 1 * ?}
 
-resilience4j:
-  circuitbreaker:
-    instances:
-      keycloak:
-        failure-rate-threshold: ${RESILIENCE4J_KEYCLOAK_FAILURE_RATE_THRESHOLD:50}
-        slow-call-rate-threshold: ${RESILIENCE4J_KEYCLOAK_SLOW_CALL_RATE_THRESHOLD:50}
-        slow-call-duration-threshold: ${RESILIENCE4J_KEYCLOAK_SLOW_CALL_DURATION_THRESHOLD:2s}
-        wait-duration-in-open-state: ${RESILIENCE4J_KEYCLOAK_WAIT_DURATION_OPEN:30s}
-        permitted-number-of-calls-in-half-open-state: ${RESILIENCE4J_KEYCLOAK_PERMITTED_CALLS_HALF_OPEN:3}
-        minimum-number-of-calls: ${RESILIENCE4J_KEYCLOAK_MIN_CALLS:5}
-        sliding-window-size: ${RESILIENCE4J_KEYCLOAK_SLIDING_WINDOW_SIZE:10}
-        sliding-window-type: COUNT_BASED
-        register-health-indicator: true
+logging:
+  level:
+    root: INFO
+    com.example.backend: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

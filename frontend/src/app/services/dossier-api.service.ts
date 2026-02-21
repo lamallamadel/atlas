@@ -64,6 +64,7 @@ export interface DossierResponse {
   leadPhone?: string;
   leadName?: string;
   leadSource?: string;
+  notes?: string;
   status: DossierStatus;
   score?: number;
   source?: DossierSource;

@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
   apiBaseUrl: '/api',
+  vapidPublicKey: 'BEl62iUYgUivxIkv69yViEuiBIa-Ib9-SkvMeAtA3LFgDzkrxZJjSgSnfckjBJuBkr3qBUYIHBQFLXYp5Nksh8U',
   oidc: {
     enabled: true,
     // Keycloak realm issuer

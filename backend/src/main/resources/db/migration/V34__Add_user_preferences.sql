@@ -1,13 +1,14 @@
 -- V34: Add user preferences table for dashboard customization
 -- Description: Creates user_preferences table to store dashboard layouts, widget settings, and general user preferences
+-- Using ${json_type} placeholder: JSONB for PostgreSQL, JSON for H2
 
 CREATE TABLE user_preferences (
     id BIGSERIAL PRIMARY KEY,
     user_id VARCHAR(255) NOT NULL,
     org_id VARCHAR(255) NOT NULL,
-    dashboard_layout JSONB,
-    widget_settings JSONB,
-    general_preferences JSONB,
+    dashboard_layout ${json_type},
+    widget_settings ${json_type},
+    general_preferences ${json_type},
     theme VARCHAR(50),
     language VARCHAR(10),
     role_template VARCHAR(50),
@@ -21,8 +22,8 @@ CREATE TABLE user_preferences (
 -- Index for faster lookups by user and org
 CREATE INDEX idx_user_preferences_user_org ON user_preferences(user_id, org_id);
 
--- Index for querying by role template
-CREATE INDEX idx_user_preferences_role_template ON user_preferences(role_template) WHERE role_template IS NOT NULL;
+-- Index for querying by role template (removed partial WHERE clause for H2 compatibility)
+CREATE INDEX idx_user_preferences_role_template ON user_preferences(role_template);
 
 -- Comments for documentation
 COMMENT ON TABLE user_preferences IS 'Stores user-specific preferences including dashboard layouts and widget configurations';

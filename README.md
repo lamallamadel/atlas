@@ -36,6 +36,7 @@ This project includes a comprehensive test validation suite with multiple databa
 - **Current delivery status**: [docs/PROJECT_STATUS.md](./docs/PROJECT_STATUS.md)
 - **MVP roadmap (S1→S13)**: [docs/MVP_ROADMAP.md](./docs/MVP_ROADMAP.md)
 - **UAT scenarios**: [docs/UAT_SCENARIOS.md](./docs/UAT_SCENARIOS.md)
+- **API Rate Limiting**: [backend/RATE_LIMITING.md](./backend/RATE_LIMITING.md) | [Quick Start](./backend/RATE_LIMITING_QUICKSTART.md)
 
 ## 🚀 Quick Start (< 10 minutes)
 

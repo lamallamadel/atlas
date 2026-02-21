@@ -1,0 +1,76 @@
+<div class="lottie-demo-container">
+  <div class="lottie-demo-header">
+    <h1>Lottie Animations - États Vides</h1>
+    <p>Animations JSON optimisées avec fallback SVG statique</p>
+  </div>
+
+  <div class="lottie-demo-controls">
+    <mat-card>
+      <mat-card-content>
+        <h3>Paramètres globaux</h3>
+        <div class="controls-grid">
+          <mat-checkbox [(ngModel)]="showControls">
+            Afficher les contrôles
+          </mat-checkbox>
+          <mat-checkbox [(ngModel)]="loop">
+            Boucle d'animation
+          </mat-checkbox>
+          <div class="size-controls">
+            <mat-form-field appearance="outline">
+              <mat-label>Largeur</mat-label>
+              <input matInput type="number" [(ngModel)]="animationWidth" min="100" max="400">
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Hauteur</mat-label>
+              <input matInput type="number" [(ngModel)]="animationHeight" min="100" max="400">
+            </mat-form-field>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="lottie-demo-grid">
+    <mat-card *ngFor="let animation of animations" class="animation-card">
+      <mat-card-header>
+        <mat-card-title>{{ animation.type }}</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <app-animated-empty-state
+          [title]="animation.title"
+          [message]="animation.message"
+          [animationType]="animation.type"
+          [animationWidth]="animationWidth"
+          [animationHeight]="animationHeight"
+          [loop]="loop"
+          [showControls]="showControls"
+          [primaryAction]="getActionConfig(animation, true)"
+          [secondaryAction]="getActionConfig(animation, false)">
+        </app-animated-empty-state>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="lottie-demo-info">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>info</mat-icon>
+          Caractéristiques
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li><strong>5 animations JSON</strong> : search-empty, success, error, upload, maintenance</li>
+          <li><strong>Taille optimisée</strong> : Chaque animation &lt; 50KB</li>
+          <li><strong>Chargement lazy</strong> : Lottie-web chargé uniquement si nécessaire</li>
+          <li><strong>Fallback SVG</strong> : Icônes statiques si Lottie échoue</li>
+          <li><strong>Contrôles</strong> : Play/Pause, vitesse réglable (0.5x - 2x)</li>
+          <li><strong>Animations fluides</strong> : 30-60 FPS selon l'animation</li>
+          <li><strong>Accessible</strong> : Support ARIA, prefers-reduced-motion</li>
+          <li><strong>Responsive</strong> : Adapté mobile/tablette/desktop</li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

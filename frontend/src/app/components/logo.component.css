@@ -1,0 +1,213 @@
+/* Logo Container */
+.logo-container {
+  display: inline-block;
+  line-height: 0;
+}
+
+.logo-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* Default sizes for different variants */
+.logo-horizontal .logo-image {
+  width: 240px;
+  height: auto;
+}
+
+.logo-vertical .logo-image {
+  width: 120px;
+  height: auto;
+}
+
+.logo-icon .logo-image {
+  width: 64px;
+  height: 64px;
+}
+
+/* Responsive sizing */
+@media (max-width: 768px) {
+  .logo-horizontal .logo-image {
+    width: 180px;
+  }
+  
+  .logo-vertical .logo-image {
+    width: 100px;
+  }
+  
+  .logo-icon .logo-image {
+    width: 48px;
+    height: 48px;
+  }
+}
+
+@media (max-width: 480px) {
+  .logo-horizontal .logo-image {
+    width: 160px;
+  }
+  
+  .logo-vertical .logo-image {
+    width: 80px;
+  }
+  
+  .logo-icon .logo-image {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+/* Animation: Path Drawing Effect */
+.logo-animated .logo-image {
+  animation: logoFadeIn 0.6s ease-out;
+}
+
+@keyframes logoFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Advanced SVG path animation (when SVG is inline) */
+.logo-container.logo-animated svg {
+  overflow: visible;
+}
+
+.logo-container.logo-animated svg path,
+.logo-container.logo-animated svg circle,
+.logo-container.logo-animated svg ellipse,
+.logo-container.logo-animated svg rect {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: drawPath 1.5s ease-out forwards;
+}
+
+.logo-container.logo-animated svg path:nth-child(1),
+.logo-container.logo-animated svg circle:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.logo-container.logo-animated svg path:nth-child(2),
+.logo-container.logo-animated svg ellipse:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.logo-container.logo-animated svg path:nth-child(3),
+.logo-container.logo-animated svg rect:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+.logo-container.logo-animated svg path:nth-child(4),
+.logo-container.logo-animated svg rect:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+.logo-container.logo-animated svg path:nth-child(5),
+.logo-container.logo-animated svg rect:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+@keyframes drawPath {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Fill animation for shapes */
+.logo-container.logo-animated svg rect[fill],
+.logo-container.logo-animated svg path[fill] {
+  fill-opacity: 0;
+  animation: fillShape 0.6s ease-out 0.8s forwards;
+}
+
+@keyframes fillShape {
+  to {
+    fill-opacity: 1;
+  }
+}
+
+/* Text animation */
+.logo-container.logo-animated svg text {
+  opacity: 0;
+  animation: fadeInText 0.6s ease-out 1s forwards;
+}
+
+@keyframes fadeInText {
+  to {
+    opacity: 1;
+  }
+}
+
+/* Hover effect */
+.logo-container:hover .logo-image {
+  transform: scale(1.02);
+  transition: transform 0.3s ease;
+}
+
+/* Print styles */
+@media print {
+  .logo-container {
+    break-inside: avoid;
+  }
+  
+  .logo-animated .logo-image {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Accessibility: Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .logo-animated .logo-image,
+  .logo-animated svg path,
+  .logo-animated svg circle,
+  .logo-animated svg ellipse,
+  .logo-animated svg rect,
+  .logo-animated svg text {
+    animation: none !important;
+    stroke-dasharray: none !important;
+    stroke-dashoffset: 0 !important;
+    opacity: 1 !important;
+    fill-opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  .logo-container:hover .logo-image {
+    transform: none;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .logo-container {
+    /* Logo SVGs already have dark variants, no additional styling needed */
+  }
+}
+
+/* Loading skeleton (optional) */
+.logo-container.loading {
+  background: linear-gradient(
+    90deg,
+    rgba(224, 224, 224, 0.2) 25%,
+    rgba(224, 224, 224, 0.4) 50%,
+    rgba(224, 224, 224, 0.2) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

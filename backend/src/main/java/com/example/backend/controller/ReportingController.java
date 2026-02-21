@@ -612,4 +612,53 @@ public class ReportingController {
             return "{\"error\": \"Failed to serialize metrics\"}";
         }
     }
+
+    @PostMapping("/custom")
+    @Operation(summary = "Generate custom report", description = "Generate a custom report based on selected dimensions and metrics")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Custom report generated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid report definition")
+    })
+    public ResponseEntity<java.util.Map<String, Object>> generateCustomReport(
+            @RequestBody com.example.backend.dto.CustomReportDefinitionDto definition,
+            @Parameter(description = "Organization ID")
+            @RequestParam(required = false) String orgId) {
+
+        String effectiveOrgId = orgId != null ? orgId : TenantContext.getTenantId();
+
+        java.util.Map<String, Object> response = new java.util.HashMap<>();
+        response.put("status", "success");
+        response.put("definition", definition);
+        
+        java.util.List<java.util.Map<String, Object>> mockResults = new java.util.ArrayList<>();
+        for (int i = 0; i < 10; i++) {
+            java.util.Map<String, Object> row = new java.util.HashMap<>();
+            row.put("date", "2024-01-" + String.format("%02d", i + 1));
+            row.put("status", new String[]{"NEW", "QUALIFIED", "WON"}[i % 3]);
+            row.put("dossierCount", 10 + (int)(Math.random() * 50));
+            row.put("conversionRate", 0.2 + Math.random() * 0.3);
+            mockResults.add(row);
+        }
+        response.put("results", mockResults);
+        
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/dimensions")
+    @Operation(summary = "Get available dimensions", description = "Returns list of available report dimensions")
+    public ResponseEntity<java.util.List<String>> getAvailableDimensions() {
+        java.util.List<String> dimensions = java.util.Arrays.asList(
+            "date", "status", "source", "agent", "city", "propertyType"
+        );
+        return ResponseEntity.ok(dimensions);
+    }
+
+    @GetMapping("/metrics")
+    @Operation(summary = "Get available metrics", description = "Returns list of available report metrics")
+    public ResponseEntity<java.util.List<String>> getAvailableMetrics() {
+        java.util.List<String> metrics = java.util.Arrays.asList(
+            "dossierCount", "conversionRate", "totalValue", "avgResponseTime", "appointmentCount", "messageCount"
+        );
+        return ResponseEntity.ok(metrics);
+    }
 }

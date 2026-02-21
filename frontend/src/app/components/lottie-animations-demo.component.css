@@ -1,0 +1,192 @@
+.lottie-demo-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.lottie-demo-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.lottie-demo-header h1 {
+  font-size: 32px;
+  font-weight: 700;
+  color: #1f2937;
+  margin: 0 0 8px 0;
+}
+
+.lottie-demo-header p {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+}
+
+.lottie-demo-controls {
+  margin-bottom: 32px;
+}
+
+.lottie-demo-controls mat-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+}
+
+.lottie-demo-controls h3 {
+  margin: 0 0 16px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: center;
+}
+
+.size-controls {
+  display: flex;
+  gap: 12px;
+}
+
+.size-controls mat-form-field {
+  flex: 1;
+}
+
+.lottie-demo-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.animation-card {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.animation-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.animation-card mat-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.lottie-demo-info mat-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.lottie-demo-info mat-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: white;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.lottie-demo-info mat-card-title mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.lottie-demo-info ul {
+  margin: 16px 0 0 0;
+  padding-left: 24px;
+  line-height: 1.8;
+}
+
+.lottie-demo-info li {
+  margin-bottom: 8px;
+}
+
+.lottie-demo-info strong {
+  font-weight: 600;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .lottie-demo-header h1 {
+    color: #f3f4f6;
+  }
+
+  .lottie-demo-header p {
+    color: #9ca3af;
+  }
+
+  .lottie-demo-controls mat-card {
+    background: #1f2937;
+    border-color: #374151;
+  }
+
+  .lottie-demo-controls h3 {
+    color: #f3f4f6;
+  }
+
+  .animation-card {
+    background: #1f2937;
+  }
+
+  .animation-card mat-card-title {
+    color: #a5b4fc;
+  }
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+  .lottie-demo-container {
+    padding: 16px;
+  }
+
+  .lottie-demo-header h1 {
+    font-size: 24px;
+  }
+
+  .lottie-demo-header p {
+    font-size: 14px;
+  }
+
+  .lottie-demo-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .controls-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .size-controls {
+    flex-direction: column;
+  }
+
+  .animation-card:hover {
+    transform: none;
+  }
+}
+
+/* Tablet responsive */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .lottie-demo-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .animation-card {
+    transition: none;
+  }
+
+  .animation-card:hover {
+    transform: none;
+  }
+}

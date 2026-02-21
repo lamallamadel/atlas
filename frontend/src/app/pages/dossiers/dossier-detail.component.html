@@ -15,6 +15,11 @@
         Retour aux dossiers
       </a>
 
+      <!-- Real-time Collaboration Features -->
+      <div *ngIf="collaborationEnabled" class="collaboration-section">
+        <app-collaboration-presence [dossierId]="dossier.id"></app-collaboration-presence>
+      </div>
+
       <div class="dossier-header">
         <div class="header-line-1">
           <div class="title-and-badge">
@@ -762,6 +767,44 @@
 
               <div *ngIf="auditEvents.length === 0" class="empty-message">
                 Aucun événement d'audit disponible.
+              </div>
+            </div>
+          </div>
+        </mat-tab>
+
+        <!-- Real-time Collaboration Tab -->
+        <mat-tab label="Collaboration" aria-label="Fonctionnalités de collaboration en temps réel" *ngIf="collaborationEnabled">
+          <div class="tab-content">
+            <div class="collaboration-grid">
+              <!-- Activity Stream -->
+              <div class="collaboration-panel">
+                <app-collaboration-activity-stream [dossierId]="dossier.id"></app-collaboration-activity-stream>
+              </div>
+
+              <!-- Shared Notes with Live Cursors -->
+              <div class="collaboration-panel">
+                <mat-card>
+                  <mat-card-header>
+                    <mat-card-title>
+                      📝 Shared Notes
+                    </mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    <textarea 
+                      [(ngModel)]="dossier.notes"
+                      (input)="onNotesInput($event)"
+                      placeholder="Add shared notes here..."
+                      class="shared-notes-textarea"
+                      rows="10">
+                    </textarea>
+                    <app-collaboration-cursor fieldName="notes"></app-collaboration-cursor>
+                  </mat-card-content>
+                </mat-card>
+              </div>
+
+              <!-- Filter Presets -->
+              <div class="collaboration-panel full-width">
+                <app-collaboration-filter-share></app-collaboration-filter-share>
               </div>
             </div>
           </div>

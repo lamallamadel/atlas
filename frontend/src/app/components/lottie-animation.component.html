@@ -1,0 +1,89 @@
+<div class="lottie-animation-wrapper" [style.width.px]="width" [style.height.px]="height">
+  <!-- Lottie container -->
+  <div 
+    #lottieContainer 
+    class="lottie-container"
+    [class.hidden]="useFallback"
+    [attr.aria-label]="'Animation: ' + animationType"
+    role="img">
+  </div>
+
+  <!-- Fallback SVG when Lottie fails to load -->
+  <div 
+    *ngIf="useFallback" 
+    class="lottie-fallback"
+    [attr.aria-label]="'Fallback icon: ' + animationType"
+    role="img">
+    <svg 
+      [attr.width]="width * 0.6" 
+      [attr.height]="height * 0.6" 
+      viewBox="0 0 24 24" 
+      [attr.fill]="getFallbackColor()">
+      <use [attr.xlink:href]="'#' + getFallbackIcon()"></use>
+    </svg>
+    
+    <!-- Fallback SVG definitions -->
+    <svg style="display: none;">
+      <defs>
+        <symbol id="search" viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="8" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </symbol>
+        <symbol id="check_circle" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="error" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+        </symbol>
+        <symbol id="cloud_upload" viewBox="0 0 24 24">
+          <path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6h.1a5 5 0 011 9.9M9 19l3-3m0 0l3 3m-3-3v8" 
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="build" viewBox="0 0 24 24">
+          <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z" 
+                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+        <symbol id="help_outline" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+        </symbol>
+      </defs>
+    </svg>
+  </div>
+
+  <!-- Optional controls -->
+  <div class="lottie-controls" *ngIf="showControls && !useFallback">
+    <button 
+      class="control-btn" 
+      (click)="toggle()" 
+      [attr.aria-label]="isPaused ? 'Play animation' : 'Pause animation'"
+      type="button">
+      <mat-icon>{{ isPaused ? 'play_arrow' : 'pause' }}</mat-icon>
+    </button>
+    <button 
+      class="control-btn" 
+      (click)="stop()" 
+      aria-label="Stop animation"
+      type="button">
+      <mat-icon>stop</mat-icon>
+    </button>
+    <div class="speed-control">
+      <label for="speed-slider" class="sr-only">Animation speed</label>
+      <input 
+        id="speed-slider"
+        type="range" 
+        min="0.5" 
+        max="2" 
+        step="0.1" 
+        [value]="speed"
+        (input)="setSpeed(+$any($event.target).value)"
+        class="speed-slider"
+        aria-label="Animation speed control">
+      <span class="speed-label">{{ speed }}x</span>
+    </div>
+  </div>
+</div>

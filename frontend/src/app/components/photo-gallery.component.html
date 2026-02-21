@@ -1,0 +1,184 @@
+<div class="photo-gallery-container">
+  <div 
+    *ngIf="!photos || photos.length === 0" 
+    class="empty-state">
+    <mat-icon class="empty-icon">photo_library</mat-icon>
+    <p class="empty-text">Aucune photo disponible</p>
+  </div>
+
+  <div 
+    *ngIf="photos && photos.length > 0"
+    class="masonry-grid"
+    cdkDropList
+    [cdkDropListDisabled]="!editable"
+    (cdkDropListDropped)="onDrop($event)">
+    
+    <div 
+      *ngFor="let column of getMasonryColumns(); let colIndex = index"
+      class="masonry-column">
+      
+      <div 
+        *ngFor="let photo of column; let i = index"
+        class="photo-item"
+        [class.editable]="editable"
+        cdkDrag
+        [cdkDragDisabled]="!editable"
+        (click)="openLightbox(photos.indexOf(photo))">
+        
+        <div class="photo-wrapper">
+          <div 
+            class="photo-placeholder"
+            [style.background-image]="'url(' + getBlurDataUrl(photo) + ')'">
+          </div>
+          
+          <img
+            #photoImage
+            class="photo-image"
+            [attr.data-src]="getThumbnailUrl(photo)"
+            [attr.srcset]="getSrcset(photo)"
+            [attr.sizes]="getSizes()"
+            [alt]="photo.alt || photo.title || 'Photo'"
+            loading="lazy" />
+          
+          <div class="photo-overlay">
+            <mat-icon class="zoom-icon">zoom_in</mat-icon>
+          </div>
+
+          <button 
+            *ngIf="editable"
+            mat-icon-button
+            class="delete-btn"
+            (click)="deletePhoto(photo, $event)"
+            [attr.aria-label]="'Supprimer ' + (photo.title || 'photo')">
+            <mat-icon>delete</mat-icon>
+          </button>
+
+          <div *ngIf="editable" class="drag-handle" cdkDragHandle>
+            <mat-icon>drag_indicator</mat-icon>
+          </div>
+        </div>
+
+        <div *ngIf="photo.title" class="photo-title">
+          {{ photo.title }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div 
+  *ngIf="lightboxOpen" 
+  class="lightbox-overlay"
+  (click)="closeLightbox()">
+  
+  <div class="lightbox-container" (click)="$event.stopPropagation()">
+    <button 
+      mat-icon-button 
+      class="lightbox-close"
+      (click)="closeLightbox()"
+      aria-label="Fermer la lightbox">
+      <mat-icon>close</mat-icon>
+    </button>
+
+    <div class="lightbox-controls">
+      <button 
+        mat-icon-button 
+        class="control-btn"
+        (click)="zoomOut()"
+        [disabled]="lightboxZoom <= 0.5"
+        matTooltip="Zoom arrière (-)">
+        <mat-icon>zoom_out</mat-icon>
+      </button>
+      
+      <span class="zoom-indicator">{{ (lightboxZoom * 100).toFixed(0) }}%</span>
+      
+      <button 
+        mat-icon-button 
+        class="control-btn"
+        (click)="zoomIn()"
+        [disabled]="lightboxZoom >= 3"
+        matTooltip="Zoom avant (+)">
+        <mat-icon>zoom_in</mat-icon>
+      </button>
+      
+      <button 
+        mat-icon-button 
+        class="control-btn"
+        (click)="resetZoom()"
+        [disabled]="lightboxZoom === 1"
+        matTooltip="Réinitialiser le zoom (0)">
+        <mat-icon>fit_screen</mat-icon>
+      </button>
+    </div>
+
+    <button 
+      *ngIf="currentPhotoIndex > 0"
+      mat-icon-button 
+      class="lightbox-nav lightbox-prev"
+      (click)="previousPhoto()"
+      aria-label="Photo précédente">
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+
+    <button 
+      *ngIf="currentPhotoIndex < photos.length - 1"
+      mat-icon-button 
+      class="lightbox-nav lightbox-next"
+      (click)="nextPhoto()"
+      aria-label="Photo suivante">
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+
+    <div class="lightbox-image-container">
+      <img
+        *ngIf="getCurrentPhoto() as currentPhoto"
+        [src]="currentPhoto.url"
+        [alt]="currentPhoto.alt || currentPhoto.title || 'Photo'"
+        class="lightbox-image"
+        [class.zoomed]="lightboxZoom > 1"
+        [class.dragging]="isDragging"
+        [style.transform]="'scale(' + lightboxZoom + ') translate(' + lightboxTranslateX + 'px, ' + lightboxTranslateY + 'px)'"
+        (mousedown)="onLightboxImageMouseDown($event)"
+        draggable="false" />
+    </div>
+
+    <div class="lightbox-info" *ngIf="getCurrentPhoto() as currentPhoto">
+      <div class="photo-counter">
+        {{ currentPhotoIndex + 1 }} / {{ photos.length }}
+      </div>
+      <div *ngIf="currentPhoto.title" class="photo-title-lightbox">
+        {{ currentPhoto.title }}
+      </div>
+    </div>
+
+    <div class="lightbox-thumbnails">
+      <div class="thumbnails-wrapper">
+        <div 
+          *ngFor="let photo of photos; let i = index"
+          class="thumbnail-item"
+          [class.active]="i === currentPhotoIndex"
+          (click)="goToThumbnail(i)">
+          <img 
+            [src]="getThumbnailUrl(photo)"
+            [alt]="photo.alt || photo.title || 'Miniature'"
+            class="thumbnail-image" />
+        </div>
+      </div>
+    </div>
+
+    <div class="lightbox-keyboard-hints">
+      <span class="hint">
+        <kbd>←</kbd> <kbd>→</kbd> Navigation
+      </span>
+      <span class="hint">
+        <kbd>+</kbd> <kbd>-</kbd> Zoom
+      </span>
+      <span class="hint">
+        <kbd>0</kbd> Réinitialiser
+      </span>
+      <span class="hint">
+        <kbd>Esc</kbd> Fermer
+      </span>
+    </div>
+  </div>
+</div>

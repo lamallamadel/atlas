@@ -1,0 +1,309 @@
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  
+  <!-- House Types -->
+  <symbol id="re-house" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9 22V12h6v10"/>
+  </symbol>
+
+  <symbol id="re-apartment" viewBox="0 0 24 24">
+    <rect x="4" y="2" width="16" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="8" y1="6" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="6" x2="12" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16" y1="6" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="10" x2="8" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="10" x2="12" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="8" y1="14" x2="8" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="12" y1="14" x2="12" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <line x1="16" y1="14" x2="16" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    <rect x="10" y="18" width="4" height="4" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-villa" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M2 12l10-8 10 8"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M4 10v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10"/>
+    <rect x="9" y="14" width="6" height="6" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="8" cy="17" r="1" fill="currentColor"/>
+    <circle cx="16" cy="17" r="1" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="re-office" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/>
+    <line x1="3" y1="15" x2="21" y2="15" stroke="currentColor" stroke-width="2"/>
+    <line x1="9" y1="3" x2="9" y2="21" stroke="currentColor" stroke-width="2"/>
+    <line x1="15" y1="3" x2="15" y2="21" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-warehouse" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 10l9-5 9 5v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V10z"/>
+    <rect x="9" y="14" width="6" height="7" fill="none" stroke="currentColor" stroke-width="2"/>
+    <line x1="12" y1="14" x2="12" y2="21" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-land" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 20h18M4 16l3-3 3 3 4-4 3 3 3-3"/>
+  </symbol>
+
+  <!-- Rooms -->
+  <symbol id="re-bedroom" viewBox="0 0 24 24">
+    <rect x="3" y="10" width="18" height="9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M7 14h10M3 19v-9M21 19v-9"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 10V7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v3"/>
+  </symbol>
+
+  <symbol id="re-bathroom" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9 6l1-3h4l1 3"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 6h18v5a7 7 0 0 1-7 7H10a7 7 0 0 1-7-7V6z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M7 18v3M17 18v3"/>
+  </symbol>
+
+  <symbol id="re-kitchen" viewBox="0 0 24 24">
+    <rect x="4" y="2" width="16" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="4" y1="7" x2="20" y2="7" stroke="currentColor" stroke-width="2"/>
+    <line x1="10" y1="2" x2="10" y2="7" stroke="currentColor" stroke-width="2"/>
+    <circle cx="7" cy="12" r="1" fill="currentColor"/>
+    <circle cx="7" cy="16" r="1" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="re-living-room" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 10v4a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-4"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M5 16v3M19 16v3"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 10V8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2"/>
+  </symbol>
+
+  <symbol id="re-garage" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M2 12l10-8 10 8v8a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-8z"/>
+    <rect x="7" y="14" width="10" height="8" fill="none" stroke="currentColor" stroke-width="2"/>
+    <line x1="7" y1="17" x2="17" y2="17" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-balcony" viewBox="0 0 24 24">
+    <line x1="4" y1="22" x2="20" y2="22" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M6 22V10h12v12"/>
+    <line x1="6" y1="14" x2="18" y2="14" stroke="currentColor" stroke-width="2"/>
+    <line x1="9" y1="14" x2="9" y2="22" stroke="currentColor" stroke-width="2"/>
+    <line x1="12" y1="14" x2="12" y2="22" stroke="currentColor" stroke-width="2"/>
+    <line x1="15" y1="14" x2="15" y2="22" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9 6l3-4 3 4"/>
+  </symbol>
+
+  <!-- Amenities & Equipment -->
+  <symbol id="re-pool" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M2 15c1.67-1.33 3.33-1.33 5 0s3.33 1.33 5 0 3.33-1.33 5 0 3.33 1.33 5 0"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M2 19c1.67-1.33 3.33-1.33 5 0s3.33 1.33 5 0 3.33-1.33 5 0 3.33 1.33 5 0"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M20 4v6M17 5l3-1 3 1"/>
+  </symbol>
+
+  <symbol id="re-garden" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M12 22v-6M8 8a4 4 0 0 1 8 0c0 4-4 8-4 8s-4-4-4-8z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M7 16c-2-1-3.5-3-3.5-5a4.5 4.5 0 0 1 7-3.7"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M17 16c2-1 3.5-3 3.5-5a4.5 4.5 0 0 0-7-3.7"/>
+  </symbol>
+
+  <symbol id="re-parking" viewBox="0 0 24 24">
+    <rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9 7h4a3 3 0 0 1 0 6H9z"/>
+    <line x1="9" y1="7" x2="9" y2="17" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-elevator" viewBox="0 0 24 24">
+    <rect x="5" y="2" width="14" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="12" y1="2" x2="12" y2="22" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M8.5 8l-1.5 2h3l-1.5-2z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M8.5 16l-1.5-2h3l-1.5 2z"/>
+  </symbol>
+
+  <symbol id="re-security" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9 12l2 2 4-4"/>
+  </symbol>
+
+  <symbol id="re-heating" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 4v16M10 4v16M6 8v8M18 8v8"/>
+  </symbol>
+
+  <symbol id="re-ac" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M12 2v10m0 10v-10m0 0L8 8m4 4l4-4m-4 4l-4 4m4-4l4 4"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 14h18M3 18h18"/>
+  </symbol>
+
+  <!-- Documents -->
+  <symbol id="re-contract" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2v6h6"/>
+    <line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="2"/>
+    <line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" stroke-width="2"/>
+    <line x1="10" y1="9" x2="12" y2="9" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-deed" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2v6h6"/>
+    <circle cx="10" cy="15" r="2" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 15h2"/>
+  </symbol>
+
+  <symbol id="re-inspection" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2v6h6"/>
+    <line x1="9" y1="13" x2="11" y2="15" stroke="currentColor" stroke-width="2"/>
+    <line x1="11" y1="15" x2="15" y2="11" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-blueprint" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="3" y1="9" x2="21" y2="9" stroke="currentColor" stroke-width="2"/>
+    <line x1="9" y1="21" x2="9" y2="9" stroke="currentColor" stroke-width="2"/>
+    <rect x="11" y="11" width="4" height="4" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-certificate" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h5"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14 2v6h6"/>
+    <circle cx="17" cy="17" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M15 22l2-2 2 2v-5"/>
+  </symbol>
+
+  <!-- Actions -->
+  <symbol id="re-visit" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <circle cx="12" cy="13" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-keys" viewBox="0 0 24 24">
+    <circle cx="7" cy="7" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9.5 9.5L21 21M15 15l-2 2M19 19l-2 2"/>
+  </symbol>
+
+  <symbol id="re-sold" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M9 12l2 2 4-4"/>
+  </symbol>
+
+  <symbol id="re-rent" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+    <circle cx="12" cy="14" r="2" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M12 16v2"/>
+  </symbol>
+
+  <symbol id="re-price" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M14.5 8.5a2.5 2.5 0 0 0-2.5-2.5v10a2.5 2.5 0 0 0 0-5h-1a2.5 2.5 0 0 1 0-5"/>
+    <line x1="12" y1="4" x2="12" y2="6" stroke="currentColor" stroke-width="2"/>
+    <line x1="12" y1="18" x2="12" y2="20" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-offer" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M20 12V5H4v14h9"/>
+    <line x1="4" y1="9" x2="20" y2="9" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M16 18l2 2 4-4"/>
+  </symbol>
+
+  <!-- Measurements & Info -->
+  <symbol id="re-area" viewBox="0 0 24 24">
+    <rect x="4" y="4" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="4" y1="10" x2="8" y2="10" stroke="currentColor" stroke-width="2"/>
+    <line x1="4" y1="14" x2="8" y2="14" stroke="currentColor" stroke-width="2"/>
+    <line x1="4" y1="18" x2="8" y2="18" stroke="currentColor" stroke-width="2"/>
+    <line x1="14" y1="4" x2="14" y2="8" stroke="currentColor" stroke-width="2"/>
+    <line x1="18" y1="4" x2="18" y2="8" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-floor-plan" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2"/>
+    <line x1="12" y1="3" x2="12" y2="12" stroke="currentColor" stroke-width="2"/>
+    <circle cx="18" cy="6" r="1" fill="currentColor"/>
+  </symbol>
+
+  <symbol id="re-location" viewBox="0 0 24 24">
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+    <circle cx="12" cy="10" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-compass" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+    <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+
+  <symbol id="re-energy" viewBox="0 0 24 24">
+    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </symbol>
+
+  <symbol id="re-calendar-visit" viewBox="0 0 24 24">
+    <rect x="3" y="4" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
+    <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
+    <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
+    <circle cx="12" cy="15" r="2" fill="none" stroke="currentColor" stroke-width="2"/>
+  </symbol>
+
+  <symbol id="re-photo" viewBox="0 0 24 24">
+    <rect x="3" y="3" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="8.5" cy="8.5" r="1.5" fill="currentColor"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M21 15l-5-5L5 21"/>
+  </symbol>
+
+  <symbol id="re-virtual-tour" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="2"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M2 12h20"/>
+    <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+      d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+  </symbol>
+
+</svg>

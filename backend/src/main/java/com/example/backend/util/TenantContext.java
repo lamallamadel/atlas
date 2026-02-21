@@ -2,6 +2,7 @@ package com.example.backend.util;
 
 public final class TenantContext {
     private static final ThreadLocal<String> ORG_ID = new ThreadLocal<>();
+    private static final ThreadLocal<String> USER_ID = new ThreadLocal<>();
 
     private TenantContext() {}
 
@@ -28,7 +29,16 @@ public final class TenantContext {
         return getOrgId();
     }
 
+    public static void setUserId(String userId) {
+        USER_ID.set(userId);
+    }
+
+    public static String getUserId() {
+        return USER_ID.get();
+    }
+
     public static void clear() {
         ORG_ID.remove();
+        USER_ID.remove();
     }
 }

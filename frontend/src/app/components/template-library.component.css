@@ -1,0 +1,140 @@
+.template-library-container {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 500;
+}
+
+.filters-section {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  flex: 2;
+  min-width: 250px;
+}
+
+.filter-field {
+  flex: 1;
+  min-width: 150px;
+}
+
+.table-container {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.templates-table {
+  width: 100%;
+}
+
+.templates-table th {
+  background: #f5f5f5;
+  font-weight: 600;
+  padding: 16px;
+}
+
+.templates-table td {
+  padding: 16px;
+}
+
+.template-name {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.template-description {
+  font-size: 12px;
+  color: #666;
+}
+
+.no-results {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.no-results mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.no-results p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 24px;
+}
+
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.loading-state p {
+  margin-top: 16px;
+  color: #666;
+}
+
+mat-chip {
+  font-size: 12px;
+  padding: 4px 12px;
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .filters-section {
+    flex-direction: column;
+  }
+
+  .search-field,
+  .filter-field {
+    width: 100%;
+  }
+
+  .templates-table {
+    font-size: 14px;
+  }
+
+  .templates-table th,
+  .templates-table td {
+    padding: 8px;
+  }
+}

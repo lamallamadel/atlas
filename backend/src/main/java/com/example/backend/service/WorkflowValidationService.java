@@ -534,4 +534,29 @@ public class WorkflowValidationService {
 
         return result;
     }
+
+    public void validateWorkflowStructure(WorkflowDefinition workflow) {
+        List<String> errors = new ArrayList<>();
+
+        if (workflow.getStatesJson() == null || workflow.getStatesJson().isEmpty()) {
+            errors.add("Workflow must have at least one state");
+        }
+
+        if (workflow.getTransitionsJson() == null || workflow.getTransitionsJson().isEmpty()) {
+            errors.add("Workflow must have at least one transition");
+        }
+
+        if (workflow.getInitialState() == null || workflow.getInitialState().isBlank()) {
+            errors.add("Workflow must have an initial state");
+        }
+
+        if (workflow.getFinalStates() == null || workflow.getFinalStates().isBlank()) {
+            errors.add("Workflow must have at least one final state");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new WorkflowValidationException("Workflow structure validation failed", 
+                    Map.of("errors", errors));
+        }
+    }
 }

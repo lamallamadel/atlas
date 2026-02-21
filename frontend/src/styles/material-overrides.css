@@ -1,22 +1,54 @@
 /* Material Design component animation overrides and enhancements */
 /* WCAG AA Accessibility Enhancements */
 
-/* Enhanced Material Card animations */
+/* Enhanced Material Card animations with visual depth */
 .mat-mdc-card {
-  transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1),
-              box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative;
+  background: linear-gradient(to bottom, var(--color-neutral-0, #ffffff), var(--color-neutral-50, #fafafa)) !important;
+  border: 1px solid var(--color-neutral-200, #eeeeee) !important;
+  border-radius: var(--radius-xl, 0.75rem) !important;
+  padding: var(--spacing-6, 1.5rem) !important;
+  box-shadow: var(--shadow-2, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1)) !important;
+  transition: box-shadow 200ms ease-in-out,
+              transform 200ms ease-in-out !important;
   min-height: 40px;
+  overflow: hidden;
+}
+
+.mat-mdc-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease-in-out;
 }
 
 .mat-mdc-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-4, 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)) !important;
 }
 
 .mat-mdc-card:focus-visible {
   outline: 2px solid var(--color-primary-500, #2c5aa0) !important;
   outline-offset: 2px !important;
   box-shadow: 0 0 0 4px rgba(44, 90, 160, 0.2) !important;
+}
+
+/* Active/Selected Material Card with inner glow */
+.mat-mdc-card[aria-selected="true"],
+.mat-mdc-card.active,
+.mat-mdc-card.selected {
+  border-color: var(--color-primary-500, #2c5aa0) !important;
+}
+
+.mat-mdc-card[aria-selected="true"]::before,
+.mat-mdc-card.active::before,
+.mat-mdc-card.selected::before {
+  opacity: 1;
+  box-shadow: inset 0 0 0 1px var(--color-primary-500, #2c5aa0),
+              inset 0 0 20px rgba(44, 90, 160, 0.1);
 }
 
 /* Material Button ripple enhancements - WCAG AA minimum size */
@@ -322,6 +354,14 @@
 
 /* Reduced motion support for Material components */
 @media (prefers-reduced-motion: reduce) {
+  .mat-mdc-card {
+    transition: none !important;
+  }
+  
+  .mat-mdc-card::before {
+    transition: none !important;
+  }
+  
   .mat-mdc-card:hover,
   .mat-mdc-raised-button:hover,
   .mat-mdc-fab:hover,
@@ -361,8 +401,13 @@
 }
 
 /* Dark Theme Support for Material Components */
+.dark-theme .mat-mdc-card {
+  background: linear-gradient(to bottom, var(--color-neutral-800, #424242), var(--color-neutral-900, #212121)) !important;
+  border-color: var(--color-neutral-700, #616161) !important;
+}
+
 .dark-theme .mat-mdc-card:hover {
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4) !important;
 }
 
 .dark-theme .mat-mdc-raised-button:not(:disabled):hover {

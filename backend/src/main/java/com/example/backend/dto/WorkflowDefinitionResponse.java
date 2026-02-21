@@ -2,6 +2,7 @@ package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Schema(description = "Workflow definition response representation")
@@ -13,25 +14,54 @@ public class WorkflowDefinitionResponse {
     @Schema(description = "Organization ID", example = "org-123")
     private String orgId;
 
-    @Schema(description = "Case type code", example = "CRM_LEAD_BUY")
+    @Schema(description = "Workflow name", example = "Sales Lead Workflow")
+    private String name;
+
+    @Schema(description = "Workflow description")
+    private String description;
+
+    @Schema(description = "Case type code", example = "SALE")
     private String caseType;
 
-    @Schema(description = "From status", example = "NEW")
-    private String fromStatus;
+    @Schema(description = "Workflow version", example = "1")
+    private Integer version;
 
-    @Schema(description = "To status", example = "QUALIFIED")
-    private String toStatus;
-
-    @Schema(description = "Whether this transition is active", example = "true")
+    @Schema(description = "Whether this workflow is active", example = "true")
     private Boolean isActive;
 
-    @Schema(description = "JSON object defining conditions for this transition", nullable = true)
-    private Map<String, Object> conditionsJson;
+    @Schema(description = "Whether this workflow is published", example = "false")
+    private Boolean isPublished;
+
+
+    @Schema(description = "Whether this is a template", example = "false")
+    private Boolean isTemplate;
+
+    @Schema(description = "Template category if this is a template")
+    private String templateCategory;
+
+    @Schema(description = "Parent version ID if this is a new version")
+    private Long parentVersionId;
+
+    @Schema(description = "States in the workflow")
+    private List<Map<String, Object>> statesJson;
+
+    @Schema(description = "Transitions in the workflow")
+    private List<Map<String, Object>> transitionsJson;
+
+    @Schema(description = "Workflow metadata")
+    private Map<String, Object> metadataJson;
+
+    @Schema(description = "Initial state code")
+    private String initialState;
+
+    @Schema(description = "Comma-separated list of final states")
+    private String finalStates;
 
     @Schema(
             description = "JSON object defining required fields for this transition",
             nullable = true)
     private Map<String, Object> requiredFieldsJson;
+
 
     @Schema(description = "Timestamp when created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
@@ -61,6 +91,22 @@ public class WorkflowDefinitionResponse {
         this.orgId = orgId;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
     public String getCaseType() {
         return caseType;
     }
@@ -69,20 +115,12 @@ public class WorkflowDefinitionResponse {
         this.caseType = caseType;
     }
 
-    public String getFromStatus() {
-        return fromStatus;
+    public Integer getVersion() {
+        return version;
     }
 
-    public void setFromStatus(String fromStatus) {
-        this.fromStatus = fromStatus;
-    }
-
-    public String getToStatus() {
-        return toStatus;
-    }
-
-    public void setToStatus(String toStatus) {
-        this.toStatus = toStatus;
+    public void setVersion(Integer version) {
+        this.version = version;
     }
 
     public Boolean getIsActive() {
@@ -93,20 +131,76 @@ public class WorkflowDefinitionResponse {
         this.isActive = isActive;
     }
 
-    public Map<String, Object> getConditionsJson() {
-        return conditionsJson;
+    public Boolean getIsPublished() {
+        return isPublished;
     }
 
-    public void setConditionsJson(Map<String, Object> conditionsJson) {
-        this.conditionsJson = conditionsJson;
+    public void setIsPublished(Boolean isPublished) {
+        this.isPublished = isPublished;
     }
 
-    public Map<String, Object> getRequiredFieldsJson() {
-        return requiredFieldsJson;
+    public Boolean getIsTemplate() {
+        return isTemplate;
     }
 
-    public void setRequiredFieldsJson(Map<String, Object> requiredFieldsJson) {
-        this.requiredFieldsJson = requiredFieldsJson;
+    public void setIsTemplate(Boolean isTemplate) {
+        this.isTemplate = isTemplate;
+    }
+
+    public String getTemplateCategory() {
+        return templateCategory;
+    }
+
+    public void setTemplateCategory(String templateCategory) {
+        this.templateCategory = templateCategory;
+    }
+
+    public Long getParentVersionId() {
+        return parentVersionId;
+    }
+
+    public void setParentVersionId(Long parentVersionId) {
+        this.parentVersionId = parentVersionId;
+    }
+
+    public List<Map<String, Object>> getStatesJson() {
+        return statesJson;
+    }
+
+    public void setStatesJson(List<Map<String, Object>> statesJson) {
+        this.statesJson = statesJson;
+    }
+
+    public List<Map<String, Object>> getTransitionsJson() {
+        return transitionsJson;
+    }
+
+    public void setTransitionsJson(List<Map<String, Object>> transitionsJson) {
+        this.transitionsJson = transitionsJson;
+    }
+
+    public Map<String, Object> getMetadataJson() {
+        return metadataJson;
+    }
+
+    public void setMetadataJson(Map<String, Object> metadataJson) {
+        this.metadataJson = metadataJson;
+    }
+
+    public String getInitialState() {
+        return initialState;
+    }
+
+    public void setInitialState(String initialState) {
+        this.initialState = initialState;
+    }
+
+    public String getFinalStates() {
+        return finalStates;
+    }
+
+    public void setFinalStates(String finalStates) {
+        this.finalStates = finalStates;
     }
 
     public LocalDateTime getCreatedAt() {

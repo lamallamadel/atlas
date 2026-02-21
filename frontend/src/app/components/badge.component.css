@@ -1,0 +1,914 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: 6px;
+  transition: var(--transition-badge-color);
+  vertical-align: middle;
+}
+
+.badge-content {
+  display: inline-flex;
+  align-items: center;
+}
+
+.badge-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+.badge-md {
+  padding: 6px 12px;
+  font-size: 12px;
+  letter-spacing: 0.01em;
+}
+
+.badge-lg {
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+}
+
+.badge-pill {
+  border-radius: 9999px;
+}
+
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.badge-sm .badge-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.badge-md .badge-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.badge-lg .badge-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.badge-with-dot {
+  padding-left: 8px;
+}
+
+.badge-sm.badge-with-dot {
+  padding-left: 6px;
+}
+
+.badge-lg.badge-with-dot {
+  padding-left: 10px;
+}
+
+.badge-dot {
+  display: inline-block;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-sm .badge-dot {
+  width: 6px;
+  height: 6px;
+}
+
+.badge-md .badge-dot {
+  width: 8px;
+  height: 8px;
+}
+
+.badge-lg .badge-dot {
+  width: 10px;
+  height: 10px;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.badge-pulse {
+  position: relative;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.badge-pulse::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: inherit;
+  border: 2px solid currentColor;
+  opacity: 0;
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.badge-solid.badge-primary {
+  background-color: var(--color-primary-600, #265192);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-primary:hover {
+  background-color: var(--color-primary-700, #1f4782);
+}
+
+.badge-outline.badge-primary {
+  background-color: transparent;
+  color: var(--color-primary-700, #1f4782);
+  border: 1px solid var(--color-primary-600, #265192);
+}
+
+.badge-outline.badge-primary:hover {
+  background-color: var(--color-primary-50, #e5eaf3);
+}
+
+.badge-soft.badge-primary {
+  background-color: rgba(38, 81, 146, 0.1);
+  color: var(--color-primary-700, #1f4782);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-primary:hover {
+  background-color: rgba(38, 81, 146, 0.15);
+}
+
+.badge-dot-primary {
+  background-color: var(--color-primary-600, #265192);
+}
+
+.badge-solid.badge-success {
+  background-color: var(--color-success-600, #27ae60);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-success:hover {
+  background-color: var(--color-success-700, #1e8449);
+}
+
+.badge-outline.badge-success {
+  background-color: transparent;
+  color: var(--color-success-700, #1e8449);
+  border: 1px solid var(--color-success-600, #27ae60);
+}
+
+.badge-outline.badge-success:hover {
+  background-color: var(--color-success-50, #d4edda);
+}
+
+.badge-soft.badge-success {
+  background-color: rgba(39, 174, 96, 0.1);
+  color: var(--color-success-700, #1e8449);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-success:hover {
+  background-color: rgba(39, 174, 96, 0.15);
+}
+
+.badge-dot-success {
+  background-color: var(--color-success-600, #27ae60);
+}
+
+.badge-solid.badge-success-sold {
+  background-color: var(--color-success-sold-600, #059669);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-success-sold:hover {
+  background-color: var(--color-success-sold-700, #047857);
+}
+
+.badge-outline.badge-success-sold {
+  background-color: transparent;
+  color: var(--color-success-sold-700, #047857);
+  border: 1px solid var(--color-success-sold-600, #059669);
+}
+
+.badge-outline.badge-success-sold:hover {
+  background-color: var(--color-success-sold-50, #ecfdf5);
+}
+
+.badge-soft.badge-success-sold {
+  background-color: var(--color-success-sold-alpha-10, rgba(4, 120, 87, 0.1));
+  color: var(--color-success-sold-700, #047857);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-success-sold:hover {
+  background-color: var(--color-success-sold-alpha-20, rgba(4, 120, 87, 0.2));
+}
+
+.badge-dot-success-sold {
+  background-color: var(--color-success-sold-600, #059669);
+}
+
+.badge-solid.badge-success-rented {
+  background-color: var(--color-success-rented-600, #0d9488);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-success-rented:hover {
+  background-color: var(--color-success-rented-700, #0f766e);
+}
+
+.badge-outline.badge-success-rented {
+  background-color: transparent;
+  color: var(--color-success-rented-700, #0f766e);
+  border: 1px solid var(--color-success-rented-600, #0d9488);
+}
+
+.badge-outline.badge-success-rented:hover {
+  background-color: var(--color-success-rented-50, #f0fdfa);
+}
+
+.badge-soft.badge-success-rented {
+  background-color: var(--color-success-rented-alpha-10, rgba(15, 118, 110, 0.1));
+  color: var(--color-success-rented-700, #0f766e);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-success-rented:hover {
+  background-color: var(--color-success-rented-alpha-20, rgba(15, 118, 110, 0.2));
+}
+
+.badge-dot-success-rented {
+  background-color: var(--color-success-rented-600, #0d9488);
+}
+
+.badge-solid.badge-success-signed {
+  background-color: var(--color-success-signed-600, #0891b2);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-success-signed:hover {
+  background-color: var(--color-success-signed-700, #0e7490);
+}
+
+.badge-outline.badge-success-signed {
+  background-color: transparent;
+  color: var(--color-success-signed-700, #0e7490);
+  border: 1px solid var(--color-success-signed-600, #0891b2);
+}
+
+.badge-outline.badge-success-signed:hover {
+  background-color: var(--color-success-signed-50, #ecfeff);
+}
+
+.badge-soft.badge-success-signed {
+  background-color: var(--color-success-signed-alpha-10, rgba(14, 116, 144, 0.1));
+  color: var(--color-success-signed-700, #0e7490);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-success-signed:hover {
+  background-color: var(--color-success-signed-alpha-20, rgba(14, 116, 144, 0.2));
+}
+
+.badge-dot-success-signed {
+  background-color: var(--color-success-signed-600, #0891b2);
+}
+
+.badge-solid.badge-warning {
+  background-color: var(--color-warning-600, #f39c12);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-warning:hover {
+  background-color: var(--color-warning-700, #e67e22);
+}
+
+.badge-outline.badge-warning {
+  background-color: transparent;
+  color: var(--color-warning-700, #e67e22);
+  border: 1px solid var(--color-warning-600, #f39c12);
+}
+
+.badge-outline.badge-warning:hover {
+  background-color: var(--color-warning-50, #fef5e7);
+}
+
+.badge-soft.badge-warning {
+  background-color: rgba(243, 156, 18, 0.1);
+  color: var(--color-warning-700, #e67e22);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-warning:hover {
+  background-color: rgba(243, 156, 18, 0.15);
+}
+
+.badge-dot-warning {
+  background-color: var(--color-warning-600, #f39c12);
+}
+
+.badge-solid.badge-warning-attention {
+  background-color: var(--color-warning-attention-600, #ca8a04);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-warning-attention:hover {
+  background-color: var(--color-warning-attention-700, #a16207);
+}
+
+.badge-outline.badge-warning-attention {
+  background-color: transparent;
+  color: var(--color-warning-attention-700, #a16207);
+  border: 1px solid var(--color-warning-attention-600, #ca8a04);
+}
+
+.badge-outline.badge-warning-attention:hover {
+  background-color: var(--color-warning-attention-50, #fefce8);
+}
+
+.badge-soft.badge-warning-attention {
+  background-color: var(--color-warning-attention-alpha-10, rgba(161, 98, 7, 0.1));
+  color: var(--color-warning-attention-700, #a16207);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-warning-attention:hover {
+  background-color: var(--color-warning-attention-alpha-20, rgba(161, 98, 7, 0.2));
+}
+
+.badge-dot-warning-attention {
+  background-color: var(--color-warning-attention-600, #ca8a04);
+}
+
+.badge-solid.badge-warning-urgent {
+  background-color: var(--color-warning-urgent-600, #ea580c);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-warning-urgent:hover {
+  background-color: var(--color-warning-urgent-700, #c2410c);
+}
+
+.badge-outline.badge-warning-urgent {
+  background-color: transparent;
+  color: var(--color-warning-urgent-700, #c2410c);
+  border: 1px solid var(--color-warning-urgent-600, #ea580c);
+}
+
+.badge-outline.badge-warning-urgent:hover {
+  background-color: var(--color-warning-urgent-50, #fff7ed);
+}
+
+.badge-soft.badge-warning-urgent {
+  background-color: var(--color-warning-urgent-alpha-10, rgba(194, 65, 12, 0.1));
+  color: var(--color-warning-urgent-700, #c2410c);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-warning-urgent:hover {
+  background-color: var(--color-warning-urgent-alpha-20, rgba(194, 65, 12, 0.2));
+}
+
+.badge-dot-warning-urgent {
+  background-color: var(--color-warning-urgent-600, #ea580c);
+}
+
+.badge-solid.badge-warning-critical {
+  background-color: var(--color-warning-critical-600, #dc2626);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-warning-critical:hover {
+  background-color: var(--color-warning-critical-700, #b91c1c);
+}
+
+.badge-outline.badge-warning-critical {
+  background-color: transparent;
+  color: var(--color-warning-critical-700, #b91c1c);
+  border: 1px solid var(--color-warning-critical-600, #dc2626);
+}
+
+.badge-outline.badge-warning-critical:hover {
+  background-color: var(--color-warning-critical-50, #fef2f2);
+}
+
+.badge-soft.badge-warning-critical {
+  background-color: var(--color-warning-critical-alpha-10, rgba(185, 28, 28, 0.1));
+  color: var(--color-warning-critical-700, #b91c1c);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-warning-critical:hover {
+  background-color: var(--color-warning-critical-alpha-20, rgba(185, 28, 28, 0.2));
+}
+
+.badge-dot-warning-critical {
+  background-color: var(--color-warning-critical-600, #dc2626);
+}
+
+.badge-solid.badge-danger {
+  background-color: var(--color-error-600, #e74c3c);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-danger:hover {
+  background-color: var(--color-error-700, #c0392b);
+}
+
+.badge-outline.badge-danger {
+  background-color: transparent;
+  color: var(--color-error-700, #c0392b);
+  border: 1px solid var(--color-error-600, #e74c3c);
+}
+
+.badge-outline.badge-danger:hover {
+  background-color: var(--color-error-50, #fadbd8);
+}
+
+.badge-soft.badge-danger {
+  background-color: rgba(231, 76, 60, 0.1);
+  color: var(--color-error-700, #c0392b);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-danger:hover {
+  background-color: rgba(231, 76, 60, 0.15);
+}
+
+.badge-dot-danger {
+  background-color: var(--color-error-600, #e74c3c);
+}
+
+.badge-solid.badge-danger-soft {
+  background-color: var(--color-danger-soft-600, #e11d48);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-danger-soft:hover {
+  background-color: var(--color-danger-soft-700, #be123c);
+}
+
+.badge-outline.badge-danger-soft {
+  background-color: transparent;
+  color: var(--color-danger-soft-700, #be123c);
+  border: 1px solid var(--color-danger-soft-600, #e11d48);
+}
+
+.badge-outline.badge-danger-soft:hover {
+  background-color: var(--color-danger-soft-50, #fef2f2);
+}
+
+.badge-soft.badge-danger-soft {
+  background-color: var(--color-danger-soft-alpha-10, rgba(190, 18, 60, 0.1));
+  color: var(--color-danger-soft-700, #be123c);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-danger-soft:hover {
+  background-color: var(--color-danger-soft-alpha-20, rgba(190, 18, 60, 0.2));
+}
+
+.badge-dot-danger-soft {
+  background-color: var(--color-danger-soft-600, #e11d48);
+}
+
+.badge-solid.badge-info {
+  background-color: var(--color-info-600, #2196f3);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-info:hover {
+  background-color: var(--color-info-700, #1976d2);
+}
+
+.badge-outline.badge-info {
+  background-color: transparent;
+  color: var(--color-info-700, #1976d2);
+  border: 1px solid var(--color-info-600, #2196f3);
+}
+
+.badge-outline.badge-info:hover {
+  background-color: var(--color-info-50, #e3f2fd);
+}
+
+.badge-soft.badge-info {
+  background-color: rgba(33, 150, 243, 0.1);
+  color: var(--color-info-700, #1976d2);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-info:hover {
+  background-color: rgba(33, 150, 243, 0.15);
+}
+
+.badge-dot-info {
+  background-color: var(--color-info-600, #2196f3);
+}
+
+.badge-solid.badge-neutral {
+  background-color: var(--color-neutral-600, #757575);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-neutral:hover {
+  background-color: var(--color-neutral-700, #616161);
+}
+
+.badge-outline.badge-neutral {
+  background-color: transparent;
+  color: var(--color-neutral-700, #616161);
+  border: 1px solid var(--color-neutral-600, #757575);
+}
+
+.badge-outline.badge-neutral:hover {
+  background-color: var(--color-neutral-100, #f5f5f5);
+}
+
+.badge-soft.badge-neutral {
+  background-color: rgba(117, 117, 117, 0.1);
+  color: var(--color-neutral-700, #616161);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-neutral:hover {
+  background-color: rgba(117, 117, 117, 0.15);
+}
+
+.badge-dot-neutral {
+  background-color: var(--color-neutral-600, #757575);
+}
+
+.badge-solid.badge-neutral-warmth {
+  background-color: var(--color-neutral-warmth-600, #57534e);
+  color: white;
+  border: 1px solid transparent;
+}
+
+.badge-solid.badge-neutral-warmth:hover {
+  background-color: var(--color-neutral-warmth-700, #44403c);
+}
+
+.badge-outline.badge-neutral-warmth {
+  background-color: transparent;
+  color: var(--color-neutral-warmth-700, #44403c);
+  border: 1px solid var(--color-neutral-warmth-600, #57534e);
+}
+
+.badge-outline.badge-neutral-warmth:hover {
+  background-color: var(--color-neutral-warmth-100, #f5f5f4);
+}
+
+.badge-soft.badge-neutral-warmth {
+  background-color: var(--color-neutral-warmth-alpha-10, rgba(87, 83, 78, 0.1));
+  color: var(--color-neutral-warmth-700, #44403c);
+  border: 1px solid transparent;
+}
+
+.badge-soft.badge-neutral-warmth:hover {
+  background-color: var(--color-neutral-warmth-alpha-20, rgba(87, 83, 78, 0.2));
+}
+
+.badge-dot-neutral-warmth {
+  background-color: var(--color-neutral-warmth-600, #57534e);
+}
+
+.dark-theme .badge-solid.badge-primary {
+  background-color: var(--color-primary-500, #2c5aa0);
+  color: white;
+}
+
+.dark-theme .badge-solid.badge-primary:hover {
+  background-color: var(--color-primary-600, #265192);
+}
+
+.dark-theme .badge-outline.badge-primary {
+  color: var(--color-primary-400, #476da8);
+  border-color: var(--color-primary-500, #2c5aa0);
+}
+
+.dark-theme .badge-outline.badge-primary:hover {
+  background-color: rgba(44, 90, 160, 0.1);
+}
+
+.dark-theme .badge-soft.badge-primary {
+  background-color: rgba(44, 90, 160, 0.15);
+  color: var(--color-primary-400, #476da8);
+}
+
+.dark-theme .badge-soft.badge-primary:hover {
+  background-color: rgba(44, 90, 160, 0.25);
+}
+
+.dark-theme .badge-solid.badge-success {
+  background-color: var(--color-success-500, #27ae60);
+}
+
+.dark-theme .badge-outline.badge-success {
+  color: var(--color-success-400, #52c27a);
+  border-color: var(--color-success-500, #27ae60);
+}
+
+.dark-theme .badge-outline.badge-success:hover {
+  background-color: rgba(39, 174, 96, 0.1);
+}
+
+.dark-theme .badge-soft.badge-success {
+  background-color: rgba(39, 174, 96, 0.15);
+  color: var(--color-success-400, #52c27a);
+}
+
+.dark-theme .badge-soft.badge-success:hover {
+  background-color: rgba(39, 174, 96, 0.25);
+}
+
+.dark-theme .badge-solid.badge-success-sold {
+  background-color: var(--color-success-sold-500, #10b981);
+}
+
+.dark-theme .badge-outline.badge-success-sold {
+  color: var(--color-success-sold-400, #34d399);
+  border-color: var(--color-success-sold-500, #10b981);
+}
+
+.dark-theme .badge-outline.badge-success-sold:hover {
+  background-color: rgba(16, 185, 129, 0.1);
+}
+
+.dark-theme .badge-soft.badge-success-sold {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: var(--color-success-sold-400, #34d399);
+}
+
+.dark-theme .badge-soft.badge-success-sold:hover {
+  background-color: rgba(16, 185, 129, 0.25);
+}
+
+.dark-theme .badge-solid.badge-success-rented {
+  background-color: var(--color-success-rented-500, #14b8a6);
+}
+
+.dark-theme .badge-outline.badge-success-rented {
+  color: var(--color-success-rented-400, #2dd4bf);
+  border-color: var(--color-success-rented-500, #14b8a6);
+}
+
+.dark-theme .badge-outline.badge-success-rented:hover {
+  background-color: rgba(20, 184, 166, 0.1);
+}
+
+.dark-theme .badge-soft.badge-success-rented {
+  background-color: rgba(20, 184, 166, 0.15);
+  color: var(--color-success-rented-400, #2dd4bf);
+}
+
+.dark-theme .badge-soft.badge-success-rented:hover {
+  background-color: rgba(20, 184, 166, 0.25);
+}
+
+.dark-theme .badge-solid.badge-success-signed {
+  background-color: var(--color-success-signed-500, #06b6d4);
+}
+
+.dark-theme .badge-outline.badge-success-signed {
+  color: var(--color-success-signed-400, #22d3ee);
+  border-color: var(--color-success-signed-500, #06b6d4);
+}
+
+.dark-theme .badge-outline.badge-success-signed:hover {
+  background-color: rgba(6, 182, 212, 0.1);
+}
+
+.dark-theme .badge-soft.badge-success-signed {
+  background-color: rgba(6, 182, 212, 0.15);
+  color: var(--color-success-signed-400, #22d3ee);
+}
+
+.dark-theme .badge-soft.badge-success-signed:hover {
+  background-color: rgba(6, 182, 212, 0.25);
+}
+
+.dark-theme .badge-solid.badge-warning-attention {
+  background-color: var(--color-warning-attention-500, #eab308);
+}
+
+.dark-theme .badge-outline.badge-warning-attention {
+  color: var(--color-warning-attention-400, #facc15);
+  border-color: var(--color-warning-attention-500, #eab308);
+}
+
+.dark-theme .badge-outline.badge-warning-attention:hover {
+  background-color: rgba(234, 179, 8, 0.1);
+}
+
+.dark-theme .badge-soft.badge-warning-attention {
+  background-color: rgba(234, 179, 8, 0.15);
+  color: var(--color-warning-attention-400, #facc15);
+}
+
+.dark-theme .badge-soft.badge-warning-attention:hover {
+  background-color: rgba(234, 179, 8, 0.25);
+}
+
+.dark-theme .badge-solid.badge-warning-urgent {
+  background-color: var(--color-warning-urgent-500, #f97316);
+}
+
+.dark-theme .badge-outline.badge-warning-urgent {
+  color: var(--color-warning-urgent-400, #fb923c);
+  border-color: var(--color-warning-urgent-500, #f97316);
+}
+
+.dark-theme .badge-outline.badge-warning-urgent:hover {
+  background-color: rgba(249, 115, 22, 0.1);
+}
+
+.dark-theme .badge-soft.badge-warning-urgent {
+  background-color: rgba(249, 115, 22, 0.15);
+  color: var(--color-warning-urgent-400, #fb923c);
+}
+
+.dark-theme .badge-soft.badge-warning-urgent:hover {
+  background-color: rgba(249, 115, 22, 0.25);
+}
+
+.dark-theme .badge-solid.badge-warning-critical {
+  background-color: var(--color-warning-critical-500, #ef4444);
+}
+
+.dark-theme .badge-outline.badge-warning-critical {
+  color: var(--color-warning-critical-400, #f87171);
+  border-color: var(--color-warning-critical-500, #ef4444);
+}
+
+.dark-theme .badge-outline.badge-warning-critical:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.dark-theme .badge-soft.badge-warning-critical {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: var(--color-warning-critical-400, #f87171);
+}
+
+.dark-theme .badge-soft.badge-warning-critical:hover {
+  background-color: rgba(239, 68, 68, 0.25);
+}
+
+.dark-theme .badge-solid.badge-danger {
+  background-color: var(--color-error-500, #e74c3c);
+}
+
+.dark-theme .badge-outline.badge-danger {
+  color: var(--color-error-400, #ed7f7f);
+  border-color: var(--color-error-500, #e74c3c);
+}
+
+.dark-theme .badge-outline.badge-danger:hover {
+  background-color: rgba(231, 76, 60, 0.1);
+}
+
+.dark-theme .badge-soft.badge-danger {
+  background-color: rgba(231, 76, 60, 0.15);
+  color: var(--color-error-400, #ed7f7f);
+}
+
+.dark-theme .badge-soft.badge-danger:hover {
+  background-color: rgba(231, 76, 60, 0.25);
+}
+
+.dark-theme .badge-solid.badge-danger-soft {
+  background-color: var(--color-danger-soft-500, #f43f5e);
+}
+
+.dark-theme .badge-outline.badge-danger-soft {
+  color: var(--color-danger-soft-400, #fb7185);
+  border-color: var(--color-danger-soft-500, #f43f5e);
+}
+
+.dark-theme .badge-outline.badge-danger-soft:hover {
+  background-color: rgba(244, 63, 94, 0.1);
+}
+
+.dark-theme .badge-soft.badge-danger-soft {
+  background-color: rgba(244, 63, 94, 0.15);
+  color: var(--color-danger-soft-400, #fb7185);
+}
+
+.dark-theme .badge-soft.badge-danger-soft:hover {
+  background-color: rgba(244, 63, 94, 0.25);
+}
+
+.dark-theme .badge-solid.badge-info {
+  background-color: var(--color-info-500, #2196f3);
+}
+
+.dark-theme .badge-outline.badge-info {
+  color: var(--color-info-400, #42a5f5);
+  border-color: var(--color-info-500, #2196f3);
+}
+
+.dark-theme .badge-outline.badge-info:hover {
+  background-color: rgba(33, 150, 243, 0.1);
+}
+
+.dark-theme .badge-soft.badge-info {
+  background-color: rgba(33, 150, 243, 0.15);
+  color: var(--color-info-400, #42a5f5);
+}
+
+.dark-theme .badge-soft.badge-info:hover {
+  background-color: rgba(33, 150, 243, 0.25);
+}
+
+.dark-theme .badge-solid.badge-neutral {
+  background-color: var(--color-neutral-500, #9e9e9e);
+}
+
+.dark-theme .badge-outline.badge-neutral {
+  color: var(--color-neutral-400, #bdbdbd);
+  border-color: var(--color-neutral-500, #9e9e9e);
+}
+
+.dark-theme .badge-outline.badge-neutral:hover {
+  background-color: rgba(158, 158, 158, 0.1);
+}
+
+.dark-theme .badge-soft.badge-neutral {
+  background-color: rgba(158, 158, 158, 0.15);
+  color: var(--color-neutral-400, #bdbdbd);
+}
+
+.dark-theme .badge-soft.badge-neutral:hover {
+  background-color: rgba(158, 158, 158, 0.25);
+}
+
+.dark-theme .badge-solid.badge-neutral-warmth {
+  background-color: var(--color-neutral-warmth-500, #78716c);
+}
+
+.dark-theme .badge-outline.badge-neutral-warmth {
+  color: var(--color-neutral-warmth-400, #a8a29e);
+  border-color: var(--color-neutral-warmth-500, #78716c);
+}
+
+.dark-theme .badge-outline.badge-neutral-warmth:hover {
+  background-color: rgba(120, 113, 108, 0.1);
+}
+
+.dark-theme .badge-soft.badge-neutral-warmth {
+  background-color: rgba(120, 113, 108, 0.15);
+  color: var(--color-neutral-warmth-400, #a8a29e);
+}
+
+.dark-theme .badge-soft.badge-neutral-warmth:hover {
+  background-color: rgba(120, 113, 108, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge {
+    transition: none;
+  }
+  
+  .badge-pulse {
+    animation: none;
+  }
+  
+  .badge-pulse::before {
+    animation: none;
+  }
+}

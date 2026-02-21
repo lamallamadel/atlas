@@ -56,3 +56,70 @@ Thumbs.db
 # Service Worker / Offline Mode
 .sw-cache/
 sw-debug.log
+
+# Accessibility & Performance Testing
+/a11y-reports/
+/.lighthouseci/
+/lighthouse-reports/
+
+# Bundle analysis
+stats.json
+dist/frontend/stats.json
+dist/frontend/stats-es2015.json
+dist/frontend/stats-es5.json
+
+# Source map explorer
+.sourcemap-explorer/
+
+# Storybook
+storybook-static/
+.storybook-out/
+
+# Capacitor / Mobile Native Platforms
+/android/
+/ios/
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+.DS_Store
+xcuserdata/
+*.xcworkspace
+Pods/
+Podfile.lock
+build/
+.gradle/
+local.properties
+*.iml
+.idea/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Capacitor generated files
+capacitor.config.json
+
+# iOS signing
+*.mobileprovision
+*.p12
+*.certSigningRequest
+ios/App/App.xcarchive
+ios/App/exportOptions.plist
+
+# Android signing
+android/app/release.keystore
+android/app/debug.keystore
+android/key.properties
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/.env
+fastlane/.env.*
+
+# App Store / Play Store credentials
+*.p8
+service_account.json
+api_key.json

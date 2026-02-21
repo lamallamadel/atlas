@@ -1,7 +1,14 @@
 import { Injectable } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
-import Shepherd from 'shepherd.js';
-import { filter } from 'rxjs/operators';
+import { HttpClient } from '@angular/common/http';
+import { filter, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
+import { TourDefinitionService } from './tour-definition.service';
+import { AuthService } from './auth.service';
+
+// Type definitions for Shepherd.js (lazy-loaded)
+type ShepherdTour = any;
+type ShepherdStep = any;
 
 export interface TourProgress {
   [tourId: string]: {
@@ -9,14 +16,19 @@ export interface TourProgress {
     completedAt?: string;
     currentStep?: number;
     skipped?: boolean;
+    abandonedAt?: string;
+    stepAbandonment?: { [stepIndex: number]: number };
   };
 }
 
 export interface TourAnalytics {
   tourId: string;
-  action: 'started' | 'completed' | 'skipped' | 'step_completed';
+  action: 'started' | 'completed' | 'skipped' | 'abandoned' | 'step_completed' | 'step_abandoned';
   step?: number;
+  stepName?: string;
   timestamp: string;
+  duration?: number;
+  userId?: string;
 }
 
 @Injectable({
@@ -25,12 +37,24 @@ export interface TourAnalytics {
 export class OnboardingTourService {
   private readonly STORAGE_KEY = 'onboarding_tour_progress';
   private readonly ANALYTICS_KEY = 'onboarding_tour_analytics';
-  private currentTour: Shepherd.Tour | null = null;
+  private readonly API_BASE = '/api/v1/user-preferences';
+  
+  private currentTour: ShepherdTour | null = null;
   private tourProgress: TourProgress = {};
+  private tourStartTime: number | null = null;
+  private syncInProgress = false;
+  private shepherdLoaded = false;
+  private shepherdModule: any = null;
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private http: HttpClient,
+    private tourDefinitionService: TourDefinitionService,
+    private authService: AuthService
+  ) {
     this.loadProgress();
     this.setupRouteListener();
+    this.syncWithBackend();
   }
 
   private loadProgress(): void {
@@ -48,13 +72,80 @@ export class OnboardingTourService {
   private saveProgress(): void {
     try {
       localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tourProgress));
+      this.syncWithBackend();
     } catch (error) {
       console.error('Failed to save tour progress:', error);
     }
   }
 
+  private syncWithBackend(): void {
+    if (this.syncInProgress) {
+      return;
+    }
+
+    const userId = this.getUserId();
+    if (!userId) {
+      return;
+    }
+
+    this.syncInProgress = true;
+    this.http.put(`${this.API_BASE}/${userId}/tour-progress`, this.tourProgress)
+      .pipe(
+        catchError(error => {
+          console.warn('Failed to sync tour progress with backend:', error);
+          return of(null);
+        })
+      )
+      .subscribe(() => {
+        this.syncInProgress = false;
+      });
+  }
+
+  private loadProgressFromBackend(): void {
+    const userId = this.getUserId();
+    if (!userId) {
+      return;
+    }
+
+    this.http.get<TourProgress>(`${this.API_BASE}/${userId}/tour-progress`)
+      .pipe(
+        catchError(error => {
+          console.warn('Failed to load tour progress from backend:', error);
+          return of({});
+        })
+      )
+      .subscribe(progress => {
+        if (progress && Object.keys(progress).length > 0) {
+          this.tourProgress = progress;
+          this.saveProgressLocally();
+        }
+      });
+  }
+
+  private saveProgressLocally(): void {
+    try {
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(this.tourProgress));
+    } catch (error) {
+      console.error('Failed to save tour progress locally:', error);
+    }
+  }
+
+  private getUserId(): string | null {
+    // Get user ID from auth service or use a default for demo
+    try {
+      // @ts-ignore - getCurrentUserId may not exist in all implementations
+      return this.authService.getCurrentUserId?.() || 'demo-user';
+    } catch {
+      return 'demo-user';
+    }
+  }
+
   private trackAnalytics(analytics: TourAnalytics): void {
     try {
+      // Add user ID to analytics
+      analytics.userId = this.getUserId() || undefined;
+      
+      // Store locally
       const stored = localStorage.getItem(this.ANALYTICS_KEY);
       const events: TourAnalytics[] = stored ? JSON.parse(stored) : [];
       events.push(analytics);
@@ -64,9 +155,74 @@ export class OnboardingTourService {
       }
       
       localStorage.setItem(this.ANALYTICS_KEY, JSON.stringify(events));
+      
+      // Log to console for debugging
+      console.log('[Tour Analytics]', analytics);
+      
+      // Send to analytics endpoint (could integrate with GA4, Mixpanel, etc.)
+      this.sendAnalyticsToBackend(analytics);
     } catch (error) {
       console.error('Failed to track analytics:', error);
     }
+  }
+
+  private sendAnalyticsToBackend(analytics: TourAnalytics): void {
+    // Optional: Send analytics to backend for aggregation
+    // This could be implemented as a separate endpoint
+    // For now, we just log it
+    if (window.gtag) {
+      // Google Analytics 4 integration
+      window.gtag('event', analytics.action, {
+        event_category: 'Tour',
+        event_label: analytics.tourId,
+        tour_step: analytics.stepName || analytics.step,
+        tour_duration: analytics.duration,
+        user_id: analytics.userId
+      });
+    }
+  }
+
+  getAbandonmentRate(tourId: string): number {
+    const progress = this.tourProgress[tourId];
+    if (!progress || !progress.stepAbandonment) {
+      return 0;
+    }
+
+    const tour = this.tourDefinitionService.getTour(tourId);
+    if (!tour) {
+      return 0;
+    }
+
+    const totalSteps = tour.steps.length;
+    const abandonments = Object.values(progress.stepAbandonment).reduce((sum, count) => sum + count, 0);
+    const starts = this.getAnalytics().filter(a => a.tourId === tourId && a.action === 'started').length;
+
+    return starts > 0 ? (abandonments / (starts * totalSteps)) * 100 : 0;
+  }
+
+  getStepAbandonmentRates(tourId: string): { [stepIndex: number]: number } {
+    const analytics = this.getAnalytics().filter(a => a.tourId === tourId);
+    const starts = analytics.filter(a => a.action === 'started').length;
+    
+    if (starts === 0) {
+      return {};
+    }
+
+    const abandonmentCounts: { [stepIndex: number]: number } = {};
+    const tour = this.tourDefinitionService.getTour(tourId);
+    
+    if (!tour) {
+      return {};
+    }
+
+    tour.steps.forEach((_, index) => {
+      const stepAbandoned = analytics.filter(
+        a => a.action === 'step_abandoned' && a.step === index
+      ).length;
+      abandonmentCounts[index] = (stepAbandoned / starts) * 100;
+    });
+
+    return abandonmentCounts;
   }
 
   private setupRouteListener(): void {
@@ -112,12 +268,30 @@ export class OnboardingTourService {
     }
   }
 
-  private createTour(tourId: string, options?: Shepherd.Tour.TourOptions): Shepherd.Tour {
+  private async loadShepherd(): Promise<any> {
+    if (this.shepherdLoaded && this.shepherdModule) {
+      return this.shepherdModule;
+    }
+
+    try {
+      const { default: Shepherd } = await import('shepherd.js');
+      this.shepherdModule = Shepherd;
+      this.shepherdLoaded = true;
+      return Shepherd;
+    } catch (error) {
+      console.error('Failed to load Shepherd.js:', error);
+      throw error;
+    }
+  }
+
+  private async createTour(tourId: string, options?: any): Promise<ShepherdTour> {
     if (this.currentTour) {
       this.currentTour.complete();
     }
 
-    const defaultOptions: Shepherd.Tour.TourOptions = {
+    const Shepherd = await this.loadShepherd();
+
+    const defaultOptions: any = {
       useModalOverlay: true,
       defaultStepOptions: {
         classes: 'shepherd-theme-custom',
@@ -132,6 +306,7 @@ export class OnboardingTourService {
     this.currentTour = new Shepherd.Tour(defaultOptions);
 
     this.currentTour.on('complete', () => {
+      const duration = this.tourStartTime ? Date.now() - this.tourStartTime : undefined;
       this.tourProgress[tourId] = {
         completed: true,
         completedAt: new Date().toISOString()
@@ -140,26 +315,56 @@ export class OnboardingTourService {
       this.trackAnalytics({
         tourId,
         action: 'completed',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        duration
       });
+      this.tourStartTime = null;
     });
 
     this.currentTour.on('cancel', () => {
+      const currentStep = this.currentTour?.getCurrentStep();
+      const stepIndex = currentStep ? this.currentTour?.steps.indexOf(currentStep) : -1;
+      
       if (!this.tourProgress[tourId]?.completed) {
-        this.tourProgress[tourId] = {
-          completed: false,
-          skipped: true
-        };
+        if (!this.tourProgress[tourId]) {
+          this.tourProgress[tourId] = {
+            completed: false,
+            skipped: false
+          };
+        }
+        
+        // Track abandonment at specific step
+        if (stepIndex !== undefined && stepIndex >= 0) {
+          if (!this.tourProgress[tourId].stepAbandonment) {
+            this.tourProgress[tourId].stepAbandonment = {};
+          }
+          const currentCount = this.tourProgress[tourId].stepAbandonment![stepIndex] || 0;
+          this.tourProgress[tourId].stepAbandonment![stepIndex] = currentCount + 1;
+          
+          this.trackAnalytics({
+            tourId,
+            action: 'step_abandoned',
+            step: stepIndex,
+            stepName: currentStep?.id,
+            timestamp: new Date().toISOString()
+          });
+        } else {
+          this.tourProgress[tourId].skipped = true;
+          this.trackAnalytics({
+            tourId,
+            action: 'skipped',
+            timestamp: new Date().toISOString()
+          });
+        }
+        
+        this.tourProgress[tourId].abandonedAt = new Date().toISOString();
         this.saveProgress();
-        this.trackAnalytics({
-          tourId,
-          action: 'skipped',
-          timestamp: new Date().toISOString()
-        });
       }
+      this.tourStartTime = null;
     });
 
     this.currentTour.on('start', () => {
+      this.tourStartTime = Date.now();
       this.trackAnalytics({
         tourId,
         action: 'started',
@@ -170,14 +375,14 @@ export class OnboardingTourService {
     return this.currentTour;
   }
 
-  startDossierCreationTour(): void {
+  async startDossierCreationTour(): Promise<void> {
     const tourId = 'dossier-creation';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'welcome',
@@ -372,14 +577,14 @@ export class OnboardingTourService {
     tour.start();
   }
 
-  startDossierDetailTour(): void {
+  async startDossierDetailTour(): Promise<void> {
     const tourId = 'dossier-detail';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'overview',
@@ -575,14 +780,14 @@ export class OnboardingTourService {
     tour.start();
   }
 
-  startMessageCreationTour(): void {
+  async startMessageCreationTour(): Promise<void> {
     const tourId = 'message-creation';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'intro',
@@ -705,14 +910,14 @@ export class OnboardingTourService {
     tour.start();
   }
 
-  startWorkflowStatusTour(): void {
+  async startWorkflowStatusTour(): Promise<void> {
     const tourId = 'workflow-status';
     
     if (this.isTourCompleted(tourId)) {
       return;
     }
 
-    const tour = this.createTour(tourId);
+    const tour = await this.createTour(tourId);
 
     tour.addStep({
       id: 'intro',

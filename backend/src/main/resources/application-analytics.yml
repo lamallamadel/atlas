@@ -1,0 +1,34 @@
+metabase:
+  url: ${METABASE_URL:http://localhost:3000}
+  secret-key: ${METABASE_SECRET_KEY:your-secret-key-here}
+  site-url: ${METABASE_SITE_URL:http://localhost:4200}
+
+spring:
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+  
+  quartz:
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: always
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: AnalyticsScheduler
+            instanceId: AUTO
+          jobStore:
+            class: org.quartz.impl.jdbcjobstore.JobStoreTx
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.PostgreSQLDelegate
+            useProperties: false
+            misfireThreshold: 60000
+            tablePrefix: QRTZ_
+            isClustered: true
+            clusterCheckinInterval: 20000
+          threadPool:
+            class: org.quartz.simpl.SimpleThreadPool
+            threadCount: 10
+            threadPriority: 5

@@ -11,31 +11,53 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface WorkflowDefinitionRepository
-        extends JpaRepository<WorkflowDefinition, Long>,
+                extends JpaRepository<WorkflowDefinition, Long>,
                 JpaSpecificationExecutor<WorkflowDefinition> {
 
-    @Query(
-            "SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType AND wd.fromStatus = :fromStatus AND wd.toStatus = :toStatus AND wd.isActive = true")
-    Optional<WorkflowDefinition> findActiveTransition(
-            @Param("orgId") String orgId,
-            @Param("caseType") String caseType,
-            @Param("fromStatus") String fromStatus,
-            @Param("toStatus") String toStatus);
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType AND wd.isActive = true AND wd.isPublished = true ORDER BY wd.version DESC")
+        Optional<WorkflowDefinition> findActiveWorkflowByCaseType(
+                        @Param("orgId") String orgId,
+                        @Param("caseType") String caseType);
 
-    @Query(
-            "SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType AND wd.fromStatus = :fromStatus AND wd.isActive = true")
-    List<WorkflowDefinition> findAllowedTransitionsFrom(
-            @Param("orgId") String orgId,
-            @Param("caseType") String caseType,
-            @Param("fromStatus") String fromStatus);
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType AND wd.isActive = true")
+        List<WorkflowDefinition> findByCaseType(
+                        @Param("orgId") String orgId, @Param("caseType") String caseType);
 
-    @Query(
-            "SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType AND wd.isActive = true")
-    List<WorkflowDefinition> findByCaseType(
-            @Param("orgId") String orgId, @Param("caseType") String caseType);
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType ORDER BY wd.version DESC")
+        List<WorkflowDefinition> findAllVersionsByCaseType(
+                        @Param("orgId") String orgId,
+                        @Param("caseType") String caseType);
 
-    @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.isActive = true")
-    List<WorkflowDefinition> findAllActive(@Param("orgId") String orgId);
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.isTemplate = true AND wd.templateCategory = :category")
+        List<WorkflowDefinition> findTemplatesByCategory(
+                        @Param("orgId") String orgId,
+                        @Param("category") String category);
 
-    List<WorkflowDefinition> findByCaseType(String caseType);
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.isTemplate = true")
+        List<WorkflowDefinition> findAllTemplates();
+
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.isActive = true AND wd.isPublished = true")
+        List<WorkflowDefinition> findAllActivePublished(@Param("orgId") String orgId);
+
+        @Query("SELECT wd FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.parentVersionId = :parentVersionId")
+        List<WorkflowDefinition> findChildVersions(
+                        @Param("orgId") String orgId,
+                        @Param("parentVersionId") Long parentVersionId);
+
+        @Query("SELECT MAX(wd.version) FROM WorkflowDefinition wd WHERE wd.orgId = :orgId AND wd.caseType = :caseType")
+        Optional<Integer> findMaxVersionByCaseType(
+                        @Param("orgId") String orgId,
+                        @Param("caseType") String caseType);
+
+        @Deprecated
+        default Optional<WorkflowDefinition> findActiveTransition(
+                        String orgId, String caseType, String fromStatus, String toStatus) {
+                return Optional.empty();
+        }
+
+        @Deprecated
+        default List<WorkflowDefinition> findAllowedTransitionsFrom(
+                        String orgId, String caseType, String fromStatus) {
+                return List.of();
+        }
 }

@@ -1,0 +1,121 @@
+import { Meta } from '@storybook/blocks';
+
+<Meta title="Design Tokens/Overview" />
+
+# Design Tokens
+
+Design tokens are the visual design atoms of the Atlas Immobilier design system. They are named entities that store visual design attributes, ensuring consistency across the entire application.
+
+## What are Design Tokens?
+
+Design tokens are platform-agnostic variables that represent the smallest pieces of a design system's visual style:
+
+- **Colors**: Primary, secondary, semantic (success, warning, error, info), and neutral palettes
+- **Typography**: Font families, sizes, weights, line heights, and letter spacing
+- **Spacing**: A consistent spacing scale based on a 4px grid system
+- **Shadows**: Elevation levels for depth and hierarchy
+- **Border Radius**: Rounded corners for different components
+- **Animations**: Duration and easing functions for transitions
+
+## Why Use Design Tokens?
+
+1. **Consistency**: Ensures visual consistency across the entire application
+2. **Maintainability**: Update values in one place, reflected everywhere
+3. **Scalability**: Easy to extend and modify as the design system grows
+4. **Theme Support**: Enables light/dark mode and white-label customization
+5. **Developer Experience**: Clear naming conventions make development faster
+
+## Token Categories
+
+### Colors
+- **Primary**: Brand colors for main actions and focus states
+- **Secondary/Accent**: Complementary colors for secondary actions
+- **Semantic**: Success (green), warning (orange), error (red), info (blue)
+- **Neutral**: Grayscale palette for text, backgrounds, and borders
+
+### Typography
+- **Font Families**: Roboto (UI), Open Sans (body text)
+- **Modular Scale**: Perfect Fourth ratio (1.25) for consistent sizing
+- **Font Weights**: Light (300), Regular (400), Medium (500), Semibold (600), Bold (700)
+- **Line Heights**: Heading (1.2), Body (1.6)
+
+### Spacing
+- Based on 4px grid system
+- Scale: 0, 4px, 8px, 12px, 16px, 20px, 24px, 32px, 40px, 48px, 64px, 80px, 96px, 128px
+
+### Shadows
+- 6 elevation levels (0-5)
+- Material Design inspired shadow system
+- Inner shadow for inset effects
+
+### Border Radius
+- Scale: 0, 2px, 4px, 6px, 8px, 12px, 16px, 24px, full (9999px)
+
+### Animations
+- Duration: instant (0ms), fast (100ms), normal (200ms), moderate (300ms), slow (400ms)
+- Easing: ease-in, ease-out, ease-in-out, sharp, bounce
+
+## Using Design Tokens
+
+### In CSS/SCSS
+```css
+/* Using CSS custom properties */
+.button-primary {
+  background-color: var(--color-primary-500);
+  color: var(--color-neutral-0);
+  padding: var(--spacing-3) var(--spacing-6);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  transition: var(--transition-base);
+}
+
+.heading {
+  font-size: var(--font-size-3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-heading);
+  letter-spacing: var(--letter-spacing-tight);
+  color: var(--color-neutral-900);
+}
+```
+
+### In TypeScript/Angular
+```typescript
+// Access via getComputedStyle
+const primaryColor = getComputedStyle(document.documentElement)
+  .getPropertyValue('--color-primary-500');
+
+// Or set programmatically
+document.documentElement.style.setProperty('--color-primary-500', '#2c5aa0');
+```
+
+## WCAG AA Compliance
+
+All color combinations in our design system meet WCAG AA standards:
+- **Normal text**: 4.5:1 minimum contrast ratio
+- **Large text (≥18px or ≥14px bold)**: 3:1 minimum contrast ratio
+- **UI components**: 3:1 minimum contrast ratio
+
+Colors marked with ✓ in the palettes meet these requirements when used on white backgrounds.
+
+## Dark Theme Support
+
+All design tokens support dark theme through CSS custom property overrides:
+
+```css
+.dark-theme {
+  --color-neutral-900: #ffffff;
+  --color-neutral-0: #1a1a1a;
+  /* Other token overrides */
+}
+```
+
+The dark theme maintains the same contrast ratios and accessibility standards as the light theme.
+
+## Explore Token Categories
+
+- **[Colors](/story/design-tokens-colors--color-palette)**: Complete color palette with accessibility information
+- **[Typography](/story/design-tokens-typography--type-scale)**: Font families, sizes, and styles
+- **[Spacing](/story/design-tokens-spacing--spacing-scale)**: Consistent spacing system
+- **[Shadows](/story/design-tokens-shadows--shadow-levels)**: Elevation and depth
+- **[Border Radius](/story/design-tokens-border-radius--radius-scale)**: Rounded corners
+- **[Animations](/story/design-tokens-animations--duration-scale)**: Timing and easing

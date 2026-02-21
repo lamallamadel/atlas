@@ -1,0 +1,354 @@
+name: Accessibility & Performance CI
+
+on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/accessibility-ci.yml'
+      - 'backend/**'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lighthouse-ci:
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: atlas_test
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install backend dependencies
+        run: mvn clean install -DskipTests
+        working-directory: backend
+
+      - name: Start backend server
+        run: |
+          mvn spring-boot:run -Dspring-boot.run.profiles=test &
+          echo $! > backend.pid
+          sleep 30
+        working-directory: backend
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build frontend
+        run: npm run build -- --configuration production
+        working-directory: frontend
+
+      - name: Start frontend server
+        run: |
+          npm run start &
+          echo $! > frontend.pid
+          sleep 20
+        working-directory: frontend
+
+      - name: Wait for services
+        run: |
+          npx wait-on http://localhost:8080/actuator/health -t 60000
+          npx wait-on http://localhost:4200 -t 60000
+
+      - name: Run Lighthouse CI
+        run: npm run lighthouse:ci
+        working-directory: frontend
+        continue-on-error: true
+        id: lighthouse
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results
+          path: frontend/.lighthouseci/
+          retention-days: 30
+
+      - name: Parse Lighthouse results
+        if: always()
+        run: |
+          if [ -f frontend/.lighthouseci/manifest.json ]; then
+            echo "## 🔦 Lighthouse CI Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            # Find the latest report
+            LATEST_REPORT=$(ls -t frontend/.lighthouseci/*.report.json | head -n1)
+            
+            if [ -f "$LATEST_REPORT" ]; then
+              # Extract scores
+              PERF_SCORE=$(jq -r '.categories.performance.score * 100' "$LATEST_REPORT" | cut -d'.' -f1)
+              A11Y_SCORE=$(jq -r '.categories.accessibility.score * 100' "$LATEST_REPORT" | cut -d'.' -f1)
+              FCP=$(jq -r '.audits["first-contentful-paint"].numericValue' "$LATEST_REPORT")
+              LCP=$(jq -r '.audits["largest-contentful-paint"].numericValue' "$LATEST_REPORT")
+              TTI=$(jq -r '.audits.interactive.numericValue' "$LATEST_REPORT")
+              
+              echo "| Metric | Score/Value | Target | Status |" >> $GITHUB_STEP_SUMMARY
+              echo "|--------|-------------|--------|--------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Performance | ${PERF_SCORE}% | ≥70% | $([ $PERF_SCORE -ge 70 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+              echo "| Accessibility | ${A11Y_SCORE}% | ≥95% | $([ $A11Y_SCORE -ge 95 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+              echo "| FCP | ${FCP}ms | <1800ms | $([ $(echo "$FCP < 1800" | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+              echo "| LCP | ${LCP}ms | <2500ms | $([ $(echo "$LCP < 2500" | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+              echo "| TTI | ${TTI}ms | <3800ms | $([ $(echo "$TTI < 3800" | bc -l) -eq 1 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Comment PR with Lighthouse results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            let comment = '## 🔦 Lighthouse CI Results\n\n';
+            
+            try {
+              const manifestPath = 'frontend/.lighthouseci/manifest.json';
+              if (fs.existsSync(manifestPath)) {
+                const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+                const reportPath = manifest[0]?.jsonPath;
+                
+                if (reportPath && fs.existsSync(reportPath)) {
+                  const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                  
+                  const perfScore = Math.round(report.categories.performance.score * 100);
+                  const a11yScore = Math.round(report.categories.accessibility.score * 100);
+                  const fcp = Math.round(report.audits['first-contentful-paint'].numericValue);
+                  const lcp = Math.round(report.audits['largest-contentful-paint'].numericValue);
+                  const tti = Math.round(report.audits.interactive.numericValue);
+                  
+                  comment += '| Metric | Score/Value | Target | Status |\n';
+                  comment += '|--------|-------------|--------|--------|\n';
+                  comment += `| Performance | ${perfScore}% | ≥70% | ${perfScore >= 70 ? '✅' : '❌'} |\n`;
+                  comment += `| Accessibility | ${a11yScore}% | ≥95% | ${a11yScore >= 95 ? '✅' : '❌'} |\n`;
+                  comment += `| FCP | ${fcp}ms | <1800ms | ${fcp < 1800 ? '✅' : '❌'} |\n`;
+                  comment += `| LCP | ${lcp}ms | <2500ms | ${lcp < 2500 ? '✅' : '❌'} |\n`;
+                  comment += `| TTI | ${tti}ms | <3800ms | ${tti < 3800 ? '✅' : '❌'} |\n\n`;
+                  
+                  // Add accessibility violations if any
+                  const a11yAudit = report.audits.accessibility;
+                  if (a11yAudit && a11yAudit.details && a11yAudit.details.items) {
+                    const violations = a11yAudit.details.items.length;
+                    if (violations > 0) {
+                      comment += `\n⚠️ **${violations} accessibility issues found**\n\n`;
+                    }
+                  }
+                }
+              }
+            } catch (error) {
+              comment += `\n⚠️ Could not parse Lighthouse results: ${error.message}\n`;
+            }
+            
+            comment += '\n📊 [View detailed report in artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Stop servers
+        if: always()
+        run: |
+          if [ -f frontend/frontend.pid ]; then
+            kill $(cat frontend/frontend.pid) || true
+          fi
+          if [ -f backend/backend.pid ]; then
+            kill $(cat backend/backend.pid) || true
+          fi
+
+      - name: Fail if Lighthouse CI failed
+        if: steps.lighthouse.outcome == 'failure'
+        run: exit 1
+
+  axe-e2e-tests:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: atlas_test
+          POSTGRES_USER: atlas
+          POSTGRES_PASSWORD: atlas_password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'maven'
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'frontend/package-lock.json'
+
+      - name: Install backend dependencies
+        run: mvn clean install -DskipTests
+        working-directory: backend
+
+      - name: Start backend server
+        run: |
+          mvn spring-boot:run -Dspring-boot.run.profiles=test &
+          sleep 30
+        working-directory: backend
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: frontend
+
+      - name: Start frontend server
+        run: |
+          npm run start &
+          sleep 20
+        working-directory: frontend
+
+      - name: Wait for services
+        run: |
+          npx wait-on http://localhost:8080/actuator/health -t 60000
+          npx wait-on http://localhost:4200 -t 60000
+
+      - name: Run accessibility E2E tests
+        run: npm run e2e:a11y
+        working-directory: frontend
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: a11y-test-results
+          path: |
+            frontend/test-results/
+            frontend/a11y-reports/
+          retention-days: 30
+
+      - name: Parse accessibility violations
+        if: always()
+        run: |
+          if [ -d frontend/a11y-reports ]; then
+            echo "## ♿ Accessibility Test Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            
+            REPORT_FILE=$(ls -t frontend/a11y-reports/*.json | head -n1)
+            if [ -f "$REPORT_FILE" ]; then
+              CRITICAL=$(jq '[.violations[] | select(.impact=="critical")] | length' "$REPORT_FILE")
+              SERIOUS=$(jq '[.violations[] | select(.impact=="serious")] | length' "$REPORT_FILE")
+              MODERATE=$(jq '[.violations[] | select(.impact=="moderate")] | length' "$REPORT_FILE")
+              MINOR=$(jq '[.violations[] | select(.impact=="minor")] | length' "$REPORT_FILE")
+              
+              echo "| Severity | Count | Status |" >> $GITHUB_STEP_SUMMARY
+              echo "|----------|-------|--------|" >> $GITHUB_STEP_SUMMARY
+              echo "| Critical | $CRITICAL | $([ $CRITICAL -eq 0 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+              echo "| Serious | $SERIOUS | $([ $SERIOUS -eq 0 ] && echo '✅' || echo '❌') |" >> $GITHUB_STEP_SUMMARY
+              echo "| Moderate | $MODERATE | $([ $MODERATE -le 5 ] && echo '✅' || echo '⚠️') |" >> $GITHUB_STEP_SUMMARY
+              echo "| Minor | $MINOR | ℹ️ |" >> $GITHUB_STEP_SUMMARY
+            fi
+          fi
+
+      - name: Comment PR with accessibility violations
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            
+            let comment = '## ♿ Accessibility E2E Test Results\n\n';
+            
+            try {
+              const reportsDir = 'frontend/a11y-reports';
+              if (fs.existsSync(reportsDir)) {
+                const files = fs.readdirSync(reportsDir).filter(f => f.endsWith('.json'));
+                
+                if (files.length > 0) {
+                  const reportPath = path.join(reportsDir, files[files.length - 1]);
+                  const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+                  
+                  const critical = report.violations.filter(v => v.impact === 'critical').length;
+                  const serious = report.violations.filter(v => v.impact === 'serious').length;
+                  const moderate = report.violations.filter(v => v.impact === 'moderate').length;
+                  const minor = report.violations.filter(v => v.impact === 'minor').length;
+                  
+                  comment += '| Severity | Count | Status |\n';
+                  comment += '|----------|-------|--------|\n';
+                  comment += `| Critical | ${critical} | ${critical === 0 ? '✅' : '❌'} |\n`;
+                  comment += `| Serious | ${serious} | ${serious === 0 ? '✅' : '❌'} |\n`;
+                  comment += `| Moderate | ${moderate} | ${moderate <= 5 ? '✅' : '⚠️'} |\n`;
+                  comment += `| Minor | ${minor} | ℹ️ |\n\n`;
+                  
+                  if (report.violations.length > 0) {
+                    comment += '### Top Violations\n\n';
+                    report.violations.slice(0, 5).forEach(v => {
+                      comment += `- **${v.id}** (${v.impact}): ${v.description}\n`;
+                      comment += `  - Affected: ${v.nodes.length} element(s)\n`;
+                    });
+                  }
+                }
+              }
+            } catch (error) {
+              comment += `\n⚠️ Could not parse accessibility results: ${error.message}\n`;
+            }
+            
+            comment += '\n📊 [View detailed report in artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

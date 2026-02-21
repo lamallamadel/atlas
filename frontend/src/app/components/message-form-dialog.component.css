@@ -1,49 +1,105 @@
 @import '../../styles/variables.scss';
 
-mat-dialog-content {
-  padding: 24px !important;
-  min-height: 200px;
-  overflow-y: auto;
+.elegant-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0;
+  }
 }
 
-mat-dialog-actions {
+.dialog-title-elegant {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px 24px 16px !important;
+  margin: 0 !important;
+  border-bottom: 2px solid var(--color-neutral-200);
+  background: linear-gradient(135deg, var(--color-primary-50) 0%, var(--color-neutral-0) 100%);
+
+  mat-icon {
+    color: var(--color-primary-500);
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  span {
+    font-size: var(--font-size-2);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-neutral-900);
+  }
+}
+
+.elegant-dialog-content {
+  padding: 24px !important;
+  min-height: 200px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: var(--color-neutral-50);
+}
+
+.elegant-dialog-actions {
   padding: 16px 24px !important;
   margin: 0 !important;
   min-height: 52px;
+  border-top: 1px solid var(--color-neutral-200);
+  background: var(--color-neutral-0);
+  gap: 12px;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 120px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
 }
 
 .message-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
-}
-
-.full-width {
-  width: 100%;
+  gap: 24px;
 }
 
 button[mat-raised-button] {
-  min-width: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
+  mat-spinner {
+    display: inline-block;
+  }
 
-button[mat-raised-button] mat-spinner {
-  display: inline-block;
-}
-
-button[mat-raised-button] mat-spinner ::ng-deep circle {
-  stroke: white;
+  mat-spinner ::ng-deep circle {
+    stroke: white;
+  }
 }
 
 @media (max-width: 599px) {
-  mat-dialog-content {
+  .dialog-title-elegant {
+    padding: 20px 16px 12px !important;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    span {
+      font-size: var(--font-size-1);
+    }
+  }
+
+  .elegant-dialog-content {
     padding: 16px !important;
   }
 
-  mat-dialog-actions {
+  .elegant-dialog-actions {
     padding: 12px 16px !important;
+
+    button {
+      flex: 1;
+      min-width: 0;
+    }
   }
 }

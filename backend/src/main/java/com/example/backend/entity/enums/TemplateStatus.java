@@ -3,8 +3,10 @@ package com.example.backend.entity.enums;
 public enum TemplateStatus {
     ACTIVE("active"),
     INACTIVE("inactive"),
-    PENDING_APPROVAL("pending_approval"),
+    PENDING("pending"),
+    APPROVED("approved"),
     REJECTED("rejected"),
+    PAUSED("paused"),
     DRAFT("draft");
 
     private final String value;

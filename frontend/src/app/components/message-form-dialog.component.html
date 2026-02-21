@@ -1,59 +1,141 @@
-<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true">
-  <h2 mat-dialog-title id="dialog-title">Nouveau message</h2>
+<div @slideIn role="dialog" aria-labelledby="dialog-title" aria-modal="true" class="elegant-dialog">
+  <h2 mat-dialog-title id="dialog-title" class="dialog-title-elegant">
+    <mat-icon>message</mat-icon>
+    <span>Nouveau message</span>
+  </h2>
 
-  <mat-dialog-content>
-    <form [formGroup]="messageForm" class="message-form">
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Canal</mat-label>
-        <mat-select formControlName="channel" aria-required="true" [attr.aria-invalid]="messageForm.get('channel')?.hasError('required') && messageForm.get('channel')?.touched">
-          <mat-option *ngFor="let option of channelOptions" [value]="option.value">
-            {{ option.label }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="messageForm.get('channel')?.hasError('required')" role="alert">
-          {{ getErrorMessage('channel') }}
-        </mat-error>
-      </mat-form-field>
+  <mat-dialog-content class="elegant-dialog-content">
+    <form [formGroup]="messageForm" class="elegant-form message-form">
+      <div class="form-section-card">
+        <div class="section-header">
+          <mat-icon>settings</mat-icon>
+          <div>
+            <h3 class="section-title">Configuration du message</h3>
+            <p class="section-subtitle">Type et direction du message</p>
+          </div>
+        </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Direction</mat-label>
-        <mat-select formControlName="direction" aria-required="true" [attr.aria-invalid]="messageForm.get('direction')?.hasError('required') && messageForm.get('direction')?.touched">
-          <mat-option *ngFor="let option of directionOptions" [value]="option.value">
-            {{ option.label }}
-          </mat-option>
-        </mat-select>
-        <mat-error *ngIf="messageForm.get('direction')?.hasError('required')" role="alert">
-          {{ getErrorMessage('direction') }}
-        </mat-error>
-      </mat-form-field>
+        <div class="section-body">
+          <div class="elegant-form-field"
+               [ngClass]="{
+                 'has-value': messageForm.get('channel')?.value,
+                 'field-error': messageForm.get('channel')?.invalid && messageForm.get('channel')?.touched
+               }">
+            <select 
+              id="channel" 
+              formControlName="channel"
+              aria-required="true"
+              [attr.aria-invalid]="messageForm.get('channel')?.hasError('required') && messageForm.get('channel')?.touched">
+              <option value="">Sélectionner un canal</option>
+              <option *ngFor="let option of channelOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <label for="channel">Canal <span class="required-indicator">*</span></label>
+            <div class="validation-icon" *ngIf="messageForm.get('channel')?.touched">
+              <mat-icon *ngIf="messageForm.get('channel')?.valid">check_circle</mat-icon>
+              <mat-icon *ngIf="messageForm.get('channel')?.invalid">error</mat-icon>
+            </div>
+            <div class="field-helper" *ngIf="!messageForm.get('channel')?.touched || messageForm.get('channel')?.valid">
+              <mat-icon>info</mat-icon>
+              <span>Choisissez le canal de communication</span>
+            </div>
+            <div class="error-message" *ngIf="messageForm.get('channel')?.invalid && messageForm.get('channel')?.touched" role="alert">
+              <mat-icon>error</mat-icon>
+              <span>{{ getErrorMessage('channel') }}</span>
+            </div>
+          </div>
 
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Contenu</mat-label>
-        <textarea 
-          matInput 
-          formControlName="content" 
-          placeholder="Contenu du message"
-          rows="5"
-          aria-required="true"
-          [attr.aria-invalid]="messageForm.get('content')?.hasError('required') && messageForm.get('content')?.touched"
-        ></textarea>
-        <mat-error *ngIf="messageForm.get('content')?.hasError('required')" role="alert">
-          {{ getErrorMessage('content') }}
-        </mat-error>
-      </mat-form-field>
+          <div class="elegant-form-field"
+               [ngClass]="{
+                 'has-value': messageForm.get('direction')?.value,
+                 'field-error': messageForm.get('direction')?.invalid && messageForm.get('direction')?.touched
+               }">
+            <select 
+              id="direction" 
+              formControlName="direction"
+              aria-required="true"
+              [attr.aria-invalid]="messageForm.get('direction')?.hasError('required') && messageForm.get('direction')?.touched">
+              <option value="">Sélectionner une direction</option>
+              <option *ngFor="let option of directionOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <label for="direction">Direction <span class="required-indicator">*</span></label>
+            <div class="validation-icon" *ngIf="messageForm.get('direction')?.touched">
+              <mat-icon *ngIf="messageForm.get('direction')?.valid">check_circle</mat-icon>
+              <mat-icon *ngIf="messageForm.get('direction')?.invalid">error</mat-icon>
+            </div>
+            <div class="field-helper" *ngIf="!messageForm.get('direction')?.touched || messageForm.get('direction')?.valid">
+              <mat-icon>info</mat-icon>
+              <span>Sens du message (entrant ou sortant)</span>
+            </div>
+            <div class="error-message" *ngIf="messageForm.get('direction')?.invalid && messageForm.get('direction')?.touched" role="alert">
+              <mat-icon>error</mat-icon>
+              <span>{{ getErrorMessage('direction') }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
 
-      <div class="full-width">
-        <app-datetime-picker
-          formControlName="timestamp"
-          [required]="true"
-          label="Date et heure"
-        ></app-datetime-picker>
+      <div class="form-section-card">
+        <div class="section-header">
+          <mat-icon>edit</mat-icon>
+          <div>
+            <h3 class="section-title">Contenu</h3>
+            <p class="section-subtitle">Rédigez votre message</p>
+          </div>
+        </div>
+
+        <div class="section-body">
+          <div class="elegant-form-field"
+               [ngClass]="{
+                 'has-value': messageForm.get('content')?.value,
+                 'field-error': messageForm.get('content')?.invalid && messageForm.get('content')?.touched
+               }">
+            <textarea 
+              id="content" 
+              formControlName="content"
+              placeholder=" "
+              rows="5"
+              aria-required="true"
+              [attr.aria-invalid]="messageForm.get('content')?.hasError('required') && messageForm.get('content')?.touched"></textarea>
+            <label for="content">Contenu <span class="required-indicator">*</span></label>
+            <div class="validation-icon" *ngIf="messageForm.get('content')?.touched">
+              <mat-icon *ngIf="messageForm.get('content')?.valid">check_circle</mat-icon>
+              <mat-icon *ngIf="messageForm.get('content')?.invalid">error</mat-icon>
+            </div>
+            <div class="field-helper" *ngIf="!messageForm.get('content')?.touched || messageForm.get('content')?.valid">
+              <mat-icon>info</mat-icon>
+              <span>Saisissez le contenu de votre message</span>
+            </div>
+            <div class="error-message" *ngIf="messageForm.get('content')?.invalid && messageForm.get('content')?.touched" role="alert">
+              <mat-icon>error</mat-icon>
+              <span>{{ getErrorMessage('content') }}</span>
+            </div>
+          </div>
+
+          <div class="elegant-form-field has-value">
+            <app-datetime-picker
+              formControlName="timestamp"
+              [required]="true"
+              label="Date et heure"
+            ></app-datetime-picker>
+            <div class="field-helper">
+              <mat-icon>info</mat-icon>
+              <span>Date et heure d'envoi du message</span>
+            </div>
+          </div>
+        </div>
       </div>
     </form>
   </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la création du message">Annuler</button>
+  <mat-dialog-actions align="end" class="elegant-dialog-actions">
+    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la création du message">
+      <mat-icon>close</mat-icon>
+      Annuler
+    </button>
     <button mat-raised-button 
             color="primary" 
             (click)="onSubmit()" 
@@ -61,6 +143,7 @@
             [attr.aria-busy]="isSubmitting"
             [attr.aria-label]="isSubmitting ? 'Création en cours' : 'Créer le message'">
       <mat-spinner *ngIf="isSubmitting" diameter="20" aria-hidden="true"></mat-spinner>
+      <mat-icon *ngIf="!isSubmitting">send</mat-icon>
       <span *ngIf="!isSubmitting">Créer</span>
       <span *ngIf="isSubmitting" class="sr-only" role="status" aria-live="polite">Création en cours</span>
     </button>

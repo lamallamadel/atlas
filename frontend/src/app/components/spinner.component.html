@@ -1,0 +1,59 @@
+<div class="spinner-container" [class]="variantClass + ' ' + sizeClass + ' ' + colorClass">
+  <!-- Circular Spinner -->
+  <div *ngIf="variant === 'circular'" class="spinner-circular">
+    <svg class="spinner-svg" viewBox="0 0 50 50">
+      <circle
+        class="spinner-track"
+        cx="25"
+        cy="25"
+        r="20"
+        fill="none"
+        stroke-width="4">
+      </circle>
+      <circle
+        class="spinner-path"
+        cx="25"
+        cy="25"
+        r="20"
+        fill="none"
+        stroke-width="4"
+        stroke-linecap="round">
+      </circle>
+    </svg>
+  </div>
+
+  <!-- Linear Spinner -->
+  <div *ngIf="variant === 'linear'" class="spinner-linear">
+    <div class="spinner-linear-track">
+      <div class="spinner-linear-bar spinner-linear-bar-1"></div>
+      <div class="spinner-linear-bar spinner-linear-bar-2"></div>
+    </div>
+  </div>
+
+  <!-- Dots Spinner -->
+  <div *ngIf="variant === 'dots'" class="spinner-dots">
+    <div class="spinner-dot"></div>
+    <div class="spinner-dot"></div>
+    <div class="spinner-dot"></div>
+  </div>
+
+  <!-- Message -->
+  <div *ngIf="message && !showTimeoutMessage" class="spinner-message">
+    {{ message }}
+  </div>
+
+  <!-- Timeout Message -->
+  <div *ngIf="showTimeoutMessage" class="spinner-timeout-message">
+    {{ timeoutMessage }}
+  </div>
+
+  <!-- Cancel Button -->
+  <button
+    *ngIf="showCancelButton"
+    class="spinner-cancel-btn"
+    (click)="onCancel()"
+    type="button"
+    aria-label="Annuler l'opération">
+    {{ cancelButtonLabel }}
+  </button>
+</div>

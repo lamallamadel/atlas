@@ -1,0 +1,38 @@
+# Multi-Region Deployment Configuration
+# Copy this file to terraform.tfvars and fill in your values
+
+# Environment configuration
+environment = "production"
+
+# Domain configuration
+domain_name = "atlas-crm.com"
+
+# Cloudflare configuration
+cloudflare_api_token = "your-cloudflare-api-token-here"
+cloudflare_zone_id   = "your-zone-id-here"
+
+# Alert configuration
+alert_email = "ops@atlas-crm.com"
+
+# Database configuration
+db_master_username = "atlas_admin"
+db_master_password = "your-secure-password-here"  # Use AWS Secrets Manager in production
+
+# Regional configuration (optional overrides)
+# regions = {
+#   eu_west_1 = {
+#     enabled = true
+#     instance_type = "db.r6g.xlarge"
+#     desired_count = 3
+#   }
+#   us_east_1 = {
+#     enabled = true
+#     instance_type = "db.r6g.xlarge"
+#     desired_count = 2
+#   }
+#   ap_southeast_1 = {
+#     enabled = true
+#     instance_type = "db.r6g.xlarge"
+#     desired_count = 2
+#   }
+# }

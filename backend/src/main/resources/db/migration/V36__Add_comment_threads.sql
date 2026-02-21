@@ -1,3 +1,4 @@
+-- Using ${json_type} placeholder: JSONB for PostgreSQL, JSON for H2
 CREATE TABLE comment_thread (
     id BIGSERIAL PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL,
@@ -17,7 +18,7 @@ CREATE TABLE comment (
     id BIGSERIAL PRIMARY KEY,
     thread_id BIGINT NOT NULL,
     content TEXT NOT NULL,
-    mentions_json JSONB,
+    mentions_json ${json_type},
     org_id VARCHAR(255) NOT NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NOT NULL,
@@ -32,5 +33,3 @@ CREATE INDEX idx_comment_thread_resolved ON comment_thread(resolved);
 CREATE INDEX idx_comment_thread_id ON comment(thread_id);
 CREATE INDEX idx_comment_org_id ON comment(org_id);
 CREATE INDEX idx_comment_created_at ON comment(created_at);
-
-CREATE INDEX idx_comment_content_fulltext ON comment USING gin(to_tsvector('french', content));
