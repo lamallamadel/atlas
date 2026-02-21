@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.TaskPriority;
 import com.example.backend.entity.enums.TaskStatus;
 import jakarta.validation.constraints.Size;
-
 import java.time.LocalDateTime;
 
 public class TaskUpdateRequest {

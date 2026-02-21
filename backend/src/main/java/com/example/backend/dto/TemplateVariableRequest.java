@@ -14,7 +14,10 @@ public class TemplateVariableRequest {
     @Size(max = 255, message = "Variable name must not exceed 255 characters")
     private String variableName;
 
-    @Schema(description = "Component type where variable is used", example = "BODY", required = true)
+    @Schema(
+            description = "Component type where variable is used",
+            example = "BODY",
+            required = true)
     @NotNull(message = "Component type is required")
     private ComponentType componentType;
 

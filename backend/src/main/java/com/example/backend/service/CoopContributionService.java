@@ -14,17 +14,16 @@ import com.example.backend.repository.CoopMemberRepository;
 import com.example.backend.repository.CoopProjectRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CoopContributionService {
@@ -35,11 +34,12 @@ public class CoopContributionService {
     private final CoopContributionMapper coopContributionMapper;
     private final NotificationService notificationService;
 
-    public CoopContributionService(CoopContributionRepository coopContributionRepository,
-                                  CoopMemberRepository coopMemberRepository,
-                                  CoopProjectRepository coopProjectRepository,
-                                  CoopContributionMapper coopContributionMapper,
-                                  NotificationService notificationService) {
+    public CoopContributionService(
+            CoopContributionRepository coopContributionRepository,
+            CoopMemberRepository coopMemberRepository,
+            CoopProjectRepository coopProjectRepository,
+            CoopContributionMapper coopContributionMapper,
+            NotificationService notificationService) {
         this.coopContributionRepository = coopContributionRepository;
         this.coopMemberRepository = coopMemberRepository;
         this.coopProjectRepository = coopProjectRepository;
@@ -54,16 +54,28 @@ public class CoopContributionService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopMember member = coopMemberRepository.findByIdAndOrgId(request.getMemberId(), orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop member not found with id: " + request.getMemberId()));
+        CoopMember member =
+                coopMemberRepository
+                        .findByIdAndOrgId(request.getMemberId(), orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop member not found with id: "
+                                                        + request.getMemberId()));
 
         CoopContribution contribution = coopContributionMapper.toEntity(request);
         contribution.setOrgId(orgId);
         contribution.setMember(member);
 
         if (request.getProjectId() != null) {
-            CoopProject project = coopProjectRepository.findByIdAndOrgId(request.getProjectId(), orgId)
-                    .orElseThrow(() -> new EntityNotFoundException("Coop project not found with id: " + request.getProjectId()));
+            CoopProject project =
+                    coopProjectRepository
+                            .findByIdAndOrgId(request.getProjectId(), orgId)
+                            .orElseThrow(
+                                    () ->
+                                            new EntityNotFoundException(
+                                                    "Coop project not found with id: "
+                                                            + request.getProjectId()));
             contribution.setProject(project);
         }
 
@@ -85,14 +97,24 @@ public class CoopContributionService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopContribution contribution = coopContributionRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop contribution not found with id: " + id));
+        CoopContribution contribution =
+                coopContributionRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop contribution not found with id: " + id));
 
         return coopContributionMapper.toResponse(contribution);
     }
 
     @Transactional(readOnly = true)
-    public Page<CoopContributionResponse> list(Long memberId, Long projectId, ContributionStatus status, ContributionType type, Pageable pageable) {
+    public Page<CoopContributionResponse> list(
+            Long memberId,
+            Long projectId,
+            ContributionStatus status,
+            ContributionType type,
+            Pageable pageable) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
@@ -100,11 +122,14 @@ public class CoopContributionService {
 
         Page<CoopContribution> contributions;
         if (memberId != null) {
-            contributions = coopContributionRepository.findByMemberIdAndOrgId(memberId, orgId, pageable);
+            contributions =
+                    coopContributionRepository.findByMemberIdAndOrgId(memberId, orgId, pageable);
         } else if (projectId != null) {
-            contributions = coopContributionRepository.findByProjectIdAndOrgId(projectId, orgId, pageable);
+            contributions =
+                    coopContributionRepository.findByProjectIdAndOrgId(projectId, orgId, pageable);
         } else if (status != null) {
-            contributions = coopContributionRepository.findByStatusAndOrgId(status, orgId, pageable);
+            contributions =
+                    coopContributionRepository.findByStatusAndOrgId(status, orgId, pageable);
         } else if (type != null) {
             contributions = coopContributionRepository.findByTypeAndOrgId(type, orgId, pageable);
         } else {
@@ -121,19 +146,38 @@ public class CoopContributionService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopContribution contribution = coopContributionRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop contribution not found with id: " + id));
+        CoopContribution contribution =
+                coopContributionRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop contribution not found with id: " + id));
 
-        if (request.getMemberId() != null && !request.getMemberId().equals(contribution.getMember().getId())) {
-            CoopMember newMember = coopMemberRepository.findByIdAndOrgId(request.getMemberId(), orgId)
-                    .orElseThrow(() -> new EntityNotFoundException("Coop member not found with id: " + request.getMemberId()));
+        if (request.getMemberId() != null
+                && !request.getMemberId().equals(contribution.getMember().getId())) {
+            CoopMember newMember =
+                    coopMemberRepository
+                            .findByIdAndOrgId(request.getMemberId(), orgId)
+                            .orElseThrow(
+                                    () ->
+                                            new EntityNotFoundException(
+                                                    "Coop member not found with id: "
+                                                            + request.getMemberId()));
             contribution.setMember(newMember);
         }
 
         if (request.getProjectId() != null) {
-            if (contribution.getProject() == null || !request.getProjectId().equals(contribution.getProject().getId())) {
-                CoopProject newProject = coopProjectRepository.findByIdAndOrgId(request.getProjectId(), orgId)
-                        .orElseThrow(() -> new EntityNotFoundException("Coop project not found with id: " + request.getProjectId()));
+            if (contribution.getProject() == null
+                    || !request.getProjectId().equals(contribution.getProject().getId())) {
+                CoopProject newProject =
+                        coopProjectRepository
+                                .findByIdAndOrgId(request.getProjectId(), orgId)
+                                .orElseThrow(
+                                        () ->
+                                                new EntityNotFoundException(
+                                                        "Coop project not found with id: "
+                                                                + request.getProjectId()));
                 contribution.setProject(newProject);
             }
         }
@@ -152,8 +196,13 @@ public class CoopContributionService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopContribution contribution = coopContributionRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop contribution not found with id: " + id));
+        CoopContribution contribution =
+                coopContributionRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop contribution not found with id: " + id));
 
         coopContributionRepository.delete(contribution);
     }
@@ -162,8 +211,9 @@ public class CoopContributionService {
     @Transactional
     public void sendOverdueReminders() {
         LocalDate today = LocalDate.now();
-        List<CoopContribution> overdueContributions = coopContributionRepository
-                .findByStatusAndDueDateBeforeAndOrgId(ContributionStatus.PENDING, today, TenantContext.getOrgId());
+        List<CoopContribution> overdueContributions =
+                coopContributionRepository.findByStatusAndDueDateBeforeAndOrgId(
+                        ContributionStatus.PENDING, today, TenantContext.getOrgId());
 
         for (CoopContribution contribution : overdueContributions) {
             sendOverdueNotification(contribution);
@@ -185,8 +235,7 @@ public class CoopContributionService {
                     member.getEmail(),
                     "Contribution Required",
                     "coop-contribution-required",
-                    variables
-            );
+                    variables);
         } catch (Exception e) {
         }
     }
@@ -207,8 +256,7 @@ public class CoopContributionService {
                     member.getEmail(),
                     "Overdue Contribution Reminder",
                     "coop-contribution-overdue",
-                    variables
-            );
+                    variables);
         } catch (Exception e) {
         }
     }

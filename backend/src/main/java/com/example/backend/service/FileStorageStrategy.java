@@ -4,7 +4,13 @@ import java.io.InputStream;
 
 public interface FileStorageStrategy {
 
-    String store(String orgId, Long dossierId, String fileName, InputStream inputStream, long size, String contentType);
+    String store(
+            String orgId,
+            Long dossierId,
+            String fileName,
+            InputStream inputStream,
+            long size,
+            String contentType);
 
     InputStream retrieve(String storagePath);
 

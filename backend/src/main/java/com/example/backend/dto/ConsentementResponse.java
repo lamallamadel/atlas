@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -19,8 +18,7 @@ public class ConsentementResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public ConsentementResponse() {
-    }
+    public ConsentementResponse() {}
 
     public Long getId() {
         return id;

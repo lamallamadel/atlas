@@ -6,22 +6,28 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
 import java.util.List;
 import java.util.Map;
 
 @Schema(description = "Request body for creating or updating a WhatsApp template")
 public class WhatsAppTemplateRequest {
 
-    @Schema(description = "Template name (lowercase, numbers, underscores only)", example = "order_confirmation", required = true)
+    @Schema(
+            description = "Template name (lowercase, numbers, underscores only)",
+            example = "order_confirmation",
+            required = true)
     @NotBlank(message = "Template name is required")
     @Size(max = 512, message = "Template name must not exceed 512 characters")
-    @Pattern(regexp = "^[a-z0-9_]+$", message = "Template name can only contain lowercase letters, numbers, and underscores")
+    @Pattern(
+            regexp = "^[a-z0-9_]+$",
+            message = "Template name can only contain lowercase letters, numbers, and underscores")
     private String name;
 
     @Schema(description = "Language code (ISO 639-1 format)", example = "en", required = true)
     @NotBlank(message = "Language is required")
-    @Pattern(regexp = "^[a-z]{2}(_[A-Z]{2})?$", message = "Invalid language code format. Expected format: 'en' or 'en_US'")
+    @Pattern(
+            regexp = "^[a-z]{2}(_[A-Z]{2})?$",
+            message = "Invalid language code format. Expected format: 'en' or 'en_US'")
     private String language;
 
     @Schema(description = "Template category", example = "TRANSACTIONAL", required = true)

@@ -56,7 +56,7 @@ describe('SmartSuggestionsApiService', () => {
     };
 
     service.trackBehavior(request).subscribe(response => {
-      expect(response).toBeUndefined();
+      expect(response).toBeNull();
     });
 
     const req = httpMock.expectOne(`${apiUrl}/track-behavior`);
@@ -74,7 +74,7 @@ describe('SmartSuggestionsApiService', () => {
     };
 
     service.submitFeedback(feedback).subscribe(response => {
-      expect(response).toBeUndefined();
+      expect(response).toBeNull();
     });
 
     const req = httpMock.expectOne(`${apiUrl}/feedback`);
@@ -136,7 +136,7 @@ describe('SmartSuggestionsApiService', () => {
     const templateId = 1;
 
     service.recordTemplateUsage(templateId).subscribe(response => {
-      expect(response).toBeUndefined();
+      expect(response).toBeNull();
     });
 
     const req = httpMock.expectOne(`${apiUrl}/message-templates/${templateId}/use`);

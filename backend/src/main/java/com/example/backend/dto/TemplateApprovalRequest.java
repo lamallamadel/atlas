@@ -6,7 +6,10 @@ import jakarta.validation.constraints.NotBlank;
 @Schema(description = "Request body for approving a template")
 public class TemplateApprovalRequest {
 
-    @Schema(description = "WhatsApp Business API template ID", example = "123456789", required = true)
+    @Schema(
+            description = "WhatsApp Business API template ID",
+            example = "123456789",
+            required = true)
     @NotBlank(message = "WhatsApp template ID is required")
     private String whatsAppTemplateId;
 

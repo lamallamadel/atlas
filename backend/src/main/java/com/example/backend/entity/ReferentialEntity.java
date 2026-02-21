@@ -5,7 +5,8 @@ import org.hibernate.annotations.Filter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "referential",
+@Table(
+        name = "referential",
         uniqueConstraints = @UniqueConstraint(columnNames = {"org_id", "category", "code"}))
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)

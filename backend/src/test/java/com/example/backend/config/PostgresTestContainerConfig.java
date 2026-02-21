@@ -14,11 +14,12 @@ public class PostgresTestContainerConfig {
 
     @Bean(initMethod = "start", destroyMethod = "stop")
     public PostgreSQLContainer<?> postgresContainer() {
-        PostgreSQLContainer<?> container = new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE))
-                .withDatabaseName("testdb")
-                .withUsername("testuser")
-                .withPassword("testpass")
-                .withReuse(false);
+        PostgreSQLContainer<?> container =
+                new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE))
+                        .withDatabaseName("testdb")
+                        .withUsername("testuser")
+                        .withPassword("testpass")
+                        .withReuse(false);
 
         System.setProperty("spring.datasource.url", container.getJdbcUrl());
         System.setProperty("spring.datasource.username", container.getUsername());

@@ -9,13 +9,12 @@ import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
 import com.example.backend.repository.RateLimitTierRepository;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ObservabilityService {
@@ -36,7 +35,8 @@ public class ObservabilityService {
         this.rateLimitTierRepository = rateLimitTierRepository;
     }
 
-    public ObservabilityMetricsResponse getObservabilityMetrics(LocalDateTime from, LocalDateTime to, String orgId) {
+    public ObservabilityMetricsResponse getObservabilityMetrics(
+            LocalDateTime from, LocalDateTime to, String orgId) {
         if (from == null) {
             from = LocalDateTime.now().minusHours(24);
         }
@@ -57,9 +57,11 @@ public class ObservabilityService {
     }
 
     private ObservabilityMetricsResponse.QueueMetrics buildQueueMetrics() {
-        ObservabilityMetricsResponse.QueueMetrics metrics = new ObservabilityMetricsResponse.QueueMetrics();
+        ObservabilityMetricsResponse.QueueMetrics metrics =
+                new ObservabilityMetricsResponse.QueueMetrics();
 
-        List<Object[]> queuedByChannel = messageRepository.countByStatusGroupByChannel(OutboundMessageStatus.QUEUED);
+        List<Object[]> queuedByChannel =
+                messageRepository.countByStatusGroupByChannel(OutboundMessageStatus.QUEUED);
         Map<String, Long> queueDepthMap = new HashMap<>();
         long totalQueued = 0;
 
@@ -81,13 +83,15 @@ public class ObservabilityService {
     }
 
     private ObservabilityMetricsResponse.LatencyMetrics buildLatencyMetrics(LocalDateTime from) {
-        ObservabilityMetricsResponse.LatencyMetrics metrics = new ObservabilityMetricsResponse.LatencyMetrics();
+        ObservabilityMetricsResponse.LatencyMetrics metrics =
+                new ObservabilityMetricsResponse.LatencyMetrics();
         Map<String, ObservabilityMetricsResponse.LatencyPercentiles> latencyMap = new HashMap<>();
 
         for (MessageChannel channel : MessageChannel.values()) {
             List<Double> latencies = attemptRepository.findDeliveryLatencies(channel, from);
 
-            ObservabilityMetricsResponse.LatencyPercentiles percentiles = new ObservabilityMetricsResponse.LatencyPercentiles();
+            ObservabilityMetricsResponse.LatencyPercentiles percentiles =
+                    new ObservabilityMetricsResponse.LatencyPercentiles();
 
             if (!latencies.isEmpty()) {
                 Collections.sort(latencies);
@@ -122,11 +126,14 @@ public class ObservabilityService {
         return sortedValues.get(index);
     }
 
-    private ObservabilityMetricsResponse.FailureMetrics buildFailureMetrics(LocalDateTime from, LocalDateTime to) {
-        ObservabilityMetricsResponse.FailureMetrics metrics = new ObservabilityMetricsResponse.FailureMetrics();
+    private ObservabilityMetricsResponse.FailureMetrics buildFailureMetrics(
+            LocalDateTime from, LocalDateTime to) {
+        ObservabilityMetricsResponse.FailureMetrics metrics =
+                new ObservabilityMetricsResponse.FailureMetrics();
 
-        List<Object[]> failuresByChannel = messageRepository.countByStatusAndCreatedAtAfterGroupByChannel(
-                OutboundMessageStatus.FAILED, from);
+        List<Object[]> failuresByChannel =
+                messageRepository.countByStatusAndCreatedAtAfterGroupByChannel(
+                        OutboundMessageStatus.FAILED, from);
         Map<String, Long> failuresMap = new HashMap<>();
         long totalFailures = 0;
 
@@ -164,9 +171,11 @@ public class ObservabilityService {
         }
         metrics.setFailureTrend(trendData);
 
-        long totalMessages = messageRepository.countByStatusAndCreatedAtAfter(OutboundMessageStatus.SENT, from)
-                + messageRepository.countByStatusAndCreatedAtAfter(OutboundMessageStatus.DELIVERED, from)
-                + totalFailures;
+        long totalMessages =
+                messageRepository.countByStatusAndCreatedAtAfter(OutboundMessageStatus.SENT, from)
+                        + messageRepository.countByStatusAndCreatedAtAfter(
+                                OutboundMessageStatus.DELIVERED, from)
+                        + totalFailures;
 
         double failureRate = totalMessages > 0 ? (totalFailures * 100.0 / totalMessages) : 0.0;
         metrics.setOverallFailureRate(failureRate);
@@ -175,10 +184,11 @@ public class ObservabilityService {
     }
 
     private ObservabilityMetricsResponse.DlqMetrics buildDlqMetrics() {
-        ObservabilityMetricsResponse.DlqMetrics metrics = new ObservabilityMetricsResponse.DlqMetrics();
+        ObservabilityMetricsResponse.DlqMetrics metrics =
+                new ObservabilityMetricsResponse.DlqMetrics();
 
-        List<OutboundMessageEntity> dlqMessages = messageRepository.findDlqMessages(
-                PageRequest.of(0, RECENT_DLQ_LIMIT));
+        List<OutboundMessageEntity> dlqMessages =
+                messageRepository.findDlqMessages(PageRequest.of(0, RECENT_DLQ_LIMIT));
 
         metrics.setDlqSize((long) dlqMessages.size());
 
@@ -196,9 +206,8 @@ public class ObservabilityService {
 
         metrics.setDlqSizeByChannel(dlqChannelMap);
 
-        List<ObservabilityMetricsResponse.DlqMessage> recentMessages = dlqMessages.stream()
-                .map(this::convertToDlqMessage)
-                .collect(Collectors.toList());
+        List<ObservabilityMetricsResponse.DlqMessage> recentMessages =
+                dlqMessages.stream().map(this::convertToDlqMessage).collect(Collectors.toList());
         metrics.setRecentDlqMessages(recentMessages);
 
         metrics.setAlertThreshold(DLQ_ALERT_THRESHOLD);
@@ -207,8 +216,10 @@ public class ObservabilityService {
         return metrics;
     }
 
-    private ObservabilityMetricsResponse.DlqMessage convertToDlqMessage(OutboundMessageEntity entity) {
-        ObservabilityMetricsResponse.DlqMessage dlqMessage = new ObservabilityMetricsResponse.DlqMessage();
+    private ObservabilityMetricsResponse.DlqMessage convertToDlqMessage(
+            OutboundMessageEntity entity) {
+        ObservabilityMetricsResponse.DlqMessage dlqMessage =
+                new ObservabilityMetricsResponse.DlqMessage();
         dlqMessage.setMessageId(entity.getId());
         dlqMessage.setChannel(entity.getChannel().name());
         dlqMessage.setErrorCode(entity.getErrorCode());
@@ -218,8 +229,10 @@ public class ObservabilityService {
         return dlqMessage;
     }
 
-    private ObservabilityMetricsResponse.QuotaMetrics buildQuotaMetrics(LocalDateTime from, String orgId) {
-        ObservabilityMetricsResponse.QuotaMetrics metrics = new ObservabilityMetricsResponse.QuotaMetrics();
+    private ObservabilityMetricsResponse.QuotaMetrics buildQuotaMetrics(
+            LocalDateTime from, String orgId) {
+        ObservabilityMetricsResponse.QuotaMetrics metrics =
+                new ObservabilityMetricsResponse.QuotaMetrics();
         Map<String, ObservabilityMetricsResponse.QuotaUsage> quotaMap = new HashMap<>();
 
         RateLimitTier tier = null;
@@ -230,7 +243,8 @@ public class ObservabilityService {
         for (MessageChannel channel : MessageChannel.values()) {
             long used = messageRepository.countByChannelAndCreatedAtAfter(channel, from);
 
-            ObservabilityMetricsResponse.QuotaUsage usage = new ObservabilityMetricsResponse.QuotaUsage();
+            ObservabilityMetricsResponse.QuotaUsage usage =
+                    new ObservabilityMetricsResponse.QuotaUsage();
             usage.setUsed(used);
 
             if (tier != null) {

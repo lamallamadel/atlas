@@ -26,6 +26,10 @@ export interface AnnonceResponse {
   photos?: string[];
   rulesJson?: any;
   meta?: any;
+  aiScore?: number;
+  aiScoreDetails?: string;
+  fraudScore?: number;
+  fraudStatut?: string;
   createdAt: string;
   updatedAt: string;
   createdBy: string;

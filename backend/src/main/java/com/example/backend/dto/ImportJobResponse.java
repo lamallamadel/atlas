@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.ImportJobStatus;
-
 import java.time.LocalDateTime;
 
 public class ImportJobResponse {
@@ -17,8 +16,7 @@ public class ImportJobResponse {
     private LocalDateTime createdAt;
     private String createdBy;
 
-    public ImportJobResponse() {
-    }
+    public ImportJobResponse() {}
 
     public Long getId() {
         return id;

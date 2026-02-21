@@ -8,6 +8,9 @@ import com.example.backend.repository.WhatsAppRateLimitRepository;
 import io.micrometer.core.instrument.DistributionSummary;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,10 +43,12 @@ public class OutboundMessageMetricsService {
     private final AtomicLong whatsappQuotaRemaining = new AtomicLong(1000);
 
     public OutboundMessageMetricsService(
+
             OutboundMessageRepository outboundMessageRepository,
             OutboundAttemptRepository outboundAttemptRepository,
             WhatsAppRateLimitRepository whatsAppRateLimitRepository,
             MeterRegistry registry) {
+
         this.outboundMessageRepository = outboundMessageRepository;
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.whatsAppRateLimitRepository = whatsAppRateLimitRepository;
@@ -56,7 +61,7 @@ public class OutboundMessageMetricsService {
             String statusKey = status.name().toLowerCase();
             AtomicLong gauge = new AtomicLong(0);
             queueDepthByStatus.put(statusKey, gauge);
-            
+
             Gauge.builder("outbound_message_queue_depth", gauge, AtomicLong::get)
                     .tag("status", statusKey)
                     .description("Number of outbound messages by status")
@@ -65,7 +70,7 @@ public class OutboundMessageMetricsService {
 
         for (MessageChannel channel : MessageChannel.values()) {
             String channelKey = channel.name().toLowerCase();
-            
+
             AtomicLong queueGauge = new AtomicLong(0);
             queueDepthByChannel.put(channelKey, queueGauge);
             Gauge.builder("outbound_message_queue_depth_by_channel", queueGauge, AtomicLong::get)
@@ -90,7 +95,10 @@ public class OutboundMessageMetricsService {
             latencySummaries.put(channelKey, summary);
         }
 
-        Gauge.builder("outbound_message_dead_letter_queue_size", deadLetterQueueSize, AtomicLong::get)
+        Gauge.builder(
+                "outbound_message_dead_letter_queue_size",
+                deadLetterQueueSize,
+                AtomicLong::get)
                 .description("Number of permanently failed messages in dead letter queue")
                 .register(registry);
 
@@ -116,12 +124,52 @@ public class OutboundMessageMetricsService {
     @Scheduled(fixedDelayString = "${outbound.metrics.update-interval-ms:10000}")
     public void updateMetrics() {
         try {
+
             updateQueueDepthMetrics();
             updateLatencyMetrics();
             updateWhatsAppQuotaMetrics();
 
-            logger.debug("Updated outbound message metrics: totalQueued={}, deadLetter={}, whatsappQuotaUsed={}/{}", 
-                    totalQueuedMessages.get(), deadLetterQueueSize.get(), whatsappQuotaUsed.get(), whatsappQuotaLimit.get());
+            logger.debug("Updated outbound message metrics: totalQueued={}, deadLetter={}, whatsappQuotaUsed={}/{}",
+                    totalQueuedMessages.get(), deadLetterQueueSize.get(), whatsappQuotaUsed.get(),
+                    whatsappQuotaLimit.get());
+
+            for (OutboundMessageStatus status : OutboundMessageStatus.values()) {
+                String statusKey = status.name().toLowerCase();
+                long count = outboundMessageRepository.countByStatus(status);
+                AtomicLong gauge = queueDepthByStatus.get(statusKey);
+                if (gauge != null) {
+                    gauge.set(count);
+                }
+
+                if (status == OutboundMessageStatus.QUEUED) {
+                    totalQueuedMessages.set(count);
+                } else if (status == OutboundMessageStatus.FAILED) {
+                    deadLetterQueueSize.set(count);
+                }
+            }
+
+            for (MessageChannel channel : MessageChannel.values()) {
+                String channelKey = channel.name().toLowerCase();
+
+                long queuedCount = outboundMessageRepository.countByStatusAndChannel(
+                        OutboundMessageStatus.QUEUED, channel);
+                AtomicLong queueGauge = queueDepthByChannel.get(channelKey);
+                if (queueGauge != null) {
+                    queueGauge.set(queuedCount);
+                }
+
+                long retryCount = outboundMessageRepository.countByChannelAndAttemptCountGreaterThan(
+                        channel, 0);
+                AtomicLong retryGauge = retryCountsByChannel.get(channelKey);
+                if (retryGauge != null) {
+                    retryGauge.set(retryCount);
+                }
+            }
+
+            logger.debug(
+                    "Updated outbound message metrics: totalQueued={}, deadLetter={}",
+                    totalQueuedMessages.get(),
+                    deadLetterQueueSize.get());
 
         } catch (Exception e) {
             logger.error("Error updating outbound message metrics", e);
@@ -136,7 +184,7 @@ public class OutboundMessageMetricsService {
             if (gauge != null) {
                 gauge.set(count);
             }
-            
+
             if (status == OutboundMessageStatus.QUEUED) {
                 totalQueuedMessages.set(count);
             } else if (status == OutboundMessageStatus.FAILED) {
@@ -146,7 +194,7 @@ public class OutboundMessageMetricsService {
 
         for (MessageChannel channel : MessageChannel.values()) {
             String channelKey = channel.name().toLowerCase();
-            
+
             long queuedCount = outboundMessageRepository.countByStatusAndChannel(
                     OutboundMessageStatus.QUEUED, channel);
             AtomicLong queueGauge = queueDepthByChannel.get(channelKey);
@@ -165,14 +213,14 @@ public class OutboundMessageMetricsService {
 
     private void updateLatencyMetrics() {
         LocalDateTime oneHourAgo = LocalDateTime.now().minusHours(1);
-        
+
         for (MessageChannel channel : MessageChannel.values()) {
             String channelKey = channel.name().toLowerCase();
-            
+
             try {
                 List<Double> latencies = outboundAttemptRepository.findDeliveryLatencies(channel, oneHourAgo);
                 DistributionSummary summary = latencySummaries.get(channelKey);
-                
+
                 if (summary != null && !latencies.isEmpty()) {
                     for (Double latency : latencies) {
                         summary.record(latency);
@@ -191,7 +239,7 @@ public class OutboundMessageMetricsService {
                 long used = rateLimit.getMessagesSentCount();
                 long limit = rateLimit.getQuotaLimit();
                 long remaining = Math.max(0, limit - used);
-                
+
                 whatsappQuotaUsed.set(used);
                 whatsappQuotaLimit.set(limit);
                 whatsappQuotaRemaining.set(remaining);

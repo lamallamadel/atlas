@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 

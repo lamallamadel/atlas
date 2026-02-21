@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.MessageDirection;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 
 @Schema(description = "Message response representation")
@@ -33,8 +32,7 @@ public class MessageResponse {
     @Schema(description = "Timestamp when the message was created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
 
-    public MessageResponse() {
-    }
+    public MessageResponse() {}
 
     public Long getId() {
         return id;

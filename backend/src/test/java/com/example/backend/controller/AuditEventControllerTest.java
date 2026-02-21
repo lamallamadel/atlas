@@ -1,5 +1,10 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.entity.AuditEventEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.AuditAction;
@@ -8,6 +13,8 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.DossierRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,14 +26,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -40,22 +39,18 @@ class AuditEventControllerTest {
     private static final String ORG_ID = "org123";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     @BeforeEach
@@ -91,9 +86,11 @@ class AuditEventControllerTest {
         event2.setDiff(diff);
         auditEventRepository.save(event2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "DOSSIER")
-                        .param("entityId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -128,8 +125,10 @@ class AuditEventControllerTest {
         event2.setUserId("user-456");
         auditEventRepository.save(event2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.content", hasSize(2)))
@@ -156,10 +155,12 @@ class AuditEventControllerTest {
             auditEventRepository.save(event);
         }
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("page", "0")
-                        .param("size", "2")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "0")
+                                        .param("size", "2")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.totalElements").value(5))
@@ -167,10 +168,12 @@ class AuditEventControllerTest {
                 .andExpect(jsonPath("$.number").value(0))
                 .andExpect(jsonPath("$.size").value(2));
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("page", "1")
-                        .param("size", "2")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "1")
+                                        .param("size", "2")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.number").value(1));
@@ -202,9 +205,11 @@ class AuditEventControllerTest {
         event2.setUserId("user-2");
         event2 = auditEventRepository.save(event2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("sort", "createdAt,desc")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("sort", "createdAt,desc")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id").value(event2.getId()))
@@ -237,9 +242,11 @@ class AuditEventControllerTest {
         event2.setUserId("user-2");
         event2 = auditEventRepository.save(event2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("sort", "createdAt,asc")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("sort", "createdAt,asc")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].id").value(event1.getId()))
@@ -267,8 +274,10 @@ class AuditEventControllerTest {
         event.setDiff(diff);
         auditEventRepository.save(event);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].diff").exists())
@@ -308,8 +317,10 @@ class AuditEventControllerTest {
         event2.setUserId("user-456");
         auditEventRepository.save(event2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier1.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier1.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].entityId").value(dossier1.getId()));
@@ -323,15 +334,13 @@ class AuditEventControllerTest {
 
     @Test
     void list_WithEntityTypeButNoEntityId_Returns400() throws Exception {
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "DOSSIER")))
+        mockMvc.perform(withHeaders(get("/api/v1/audit-events").param("entityType", "DOSSIER")))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void list_WithEntityIdButNoEntityType_Returns400() throws Exception {
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("entityId", "123")))
+        mockMvc.perform(withHeaders(get("/api/v1/audit-events").param("entityId", "123")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -343,8 +352,10 @@ class AuditEventControllerTest {
         dossier.setStatus(DossierStatus.NEW);
         dossier = dossierRepository.save(dossier);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -352,9 +363,10 @@ class AuditEventControllerTest {
 
     @Test
     void list_MissingTenantHeader_Returns400() throws Exception {
-        mockMvc.perform(get("/api/v1/audit-events")
-                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                        .param("dossierId", "123"))
+        mockMvc.perform(
+                        get("/api/v1/audit-events")
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .param("dossierId", "123"))
                 .andExpect(status().isBadRequest());
     }
 
@@ -362,10 +374,12 @@ class AuditEventControllerTest {
     void list_WithoutAuthentication_Returns401() throws Exception {
         // The class is annotated with @WithMockUser; force an anonymous request for this test.
         SecurityContextHolder.clearContext();
-        mockMvc.perform(get("/api/v1/audit-events").with(anonymous())
-                        .header(ORG_ID_HEADER, ORG_ID)
-                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                        .param("dossierId", "123"))
+        mockMvc.perform(
+                        get("/api/v1/audit-events")
+                                .with(anonymous())
+                                .header(ORG_ID_HEADER, ORG_ID)
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .param("dossierId", "123"))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -386,8 +400,10 @@ class AuditEventControllerTest {
         event.setUserId("user-123");
         auditEventRepository.save(event);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -416,9 +432,11 @@ class AuditEventControllerTest {
         consentementEvent.setUserId("user-123");
         auditEventRepository.save(consentementEvent);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "DOSSIER")
-                        .param("entityId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].entityType").value("DOSSIER"))
@@ -448,9 +466,11 @@ class AuditEventControllerTest {
         event2.setDiff(diff);
         auditEventRepository.save(event2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "CONSENTEMENT")
-                        .param("entityId", consentementId.toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "CONSENTEMENT")
+                                        .param("entityId", consentementId.toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].entityType").value("CONSENTEMENT"))

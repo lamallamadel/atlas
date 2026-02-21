@@ -5,8 +5,7 @@ public class TrendData {
     private Long previousValue;
     private Double percentageChange;
 
-    public TrendData() {
-    }
+    public TrendData() {}
 
     public TrendData(Long currentValue, Long previousValue, Double percentageChange) {
         this.currentValue = currentValue;

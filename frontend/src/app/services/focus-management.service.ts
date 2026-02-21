@@ -8,7 +8,7 @@ export class FocusManagementService {
   private focusStack: HTMLElement[] = [];
   private lastFocusedElement: HTMLElement | null = null;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: unknown) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
 
   saveFocus(): void {
     if (isPlatformBrowser(this.platformId) && document.activeElement instanceof HTMLElement) {

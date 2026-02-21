@@ -10,6 +10,7 @@
 
 @include mat.core();
 
+
 // Modular Typography Scale - Perfect Fourth Ratio (1.25)
 // Base: 14px → 17.5px → 21.9px → 27.4px → 34.2px → 42.8px
 $custom-typography: mat.define-typography-config(
@@ -28,6 +29,22 @@ $custom-typography: mat.define-typography-config(
   $button: mat.define-typography-level(14px, 22.4px, 500, 'Roboto', 0em),
 );
 
+$custom-typography: mat.define-typography-config($font-family: '"Urbanist", "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    $headline-1: mat.define-typography-level(112px, 112px, 300, 'Urbanist', -0.0134em),
+    $headline-2: mat.define-typography-level(56px, 56px, 400, 'Urbanist', -0.0089em),
+    $headline-3: mat.define-typography-level(45px, 48px, 400, 'Urbanist', 0em),
+    $headline-4: mat.define-typography-level(34px, 40px, 400, 'Urbanist', 0.0074em),
+    $headline-5: mat.define-typography-level(24px, 32px, 600, 'Urbanist', 0em),
+    $headline-6: mat.define-typography-level(20px, 32px, 600, 'Urbanist', 0.0075em),
+    $subtitle-1: mat.define-typography-level(16px, 28px, 500, 'Urbanist', 0.0094em),
+    $subtitle-2: mat.define-typography-level(14px, 24px, 600, 'Urbanist', 0.0071em),
+    $body-1: mat.define-typography-level(16px, 24px, 400, 'Urbanist', 0.0179em),
+    $body-2: mat.define-typography-level(14px, 20px, 400, 'Urbanist', 0.0179em),
+    $caption: mat.define-typography-level(12px, 20px, 400, 'Urbanist', 0.0333em),
+    $button: mat.define-typography-level(14px, 14px, 600, 'Urbanist', 0.0893em),
+  );
+
+
 @include mat.typography-hierarchy($custom-typography);
 
 $real-estate-primary: (
@@ -45,8 +62,7 @@ $real-estate-primary: (
   A200: #709fff,
   A400: #3d7dff,
   A700: #2469ff,
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
+  contrast: (50: rgba(0, 0, 0, 0.87),
     100: rgba(0, 0, 0, 0.87),
     200: rgba(0, 0, 0, 0.87),
     300: rgba(0, 0, 0, 0.87),
@@ -78,8 +94,7 @@ $real-estate-accent: (
   A200: #ffd8ca,
   A400: #ffb097,
   A700: #ff9d7e,
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
+  contrast: (50: rgba(0, 0, 0, 0.87),
     100: rgba(0, 0, 0, 0.87),
     200: rgba(0, 0, 0, 0.87),
     300: rgba(0, 0, 0, 0.87),
@@ -111,8 +126,7 @@ $real-estate-warn: (
   A200: #ffd5d3,
   A400: #ffa3a0,
   A700: #ff8a86,
-  contrast: (
-    50: rgba(0, 0, 0, 0.87),
+  contrast: (50: rgba(0, 0, 0, 0.87),
     100: rgba(0, 0, 0, 0.87),
     200: rgba(0, 0, 0, 0.87),
     300: rgba(0, 0, 0, 0.87),
@@ -133,42 +147,36 @@ $primary-palette: mat.define-palette($real-estate-primary, 500, 300, 700);
 $accent-palette: mat.define-palette($real-estate-accent, 500, 300, 700);
 $warn-palette: mat.define-palette($real-estate-warn, 500, 300, 700);
 
-$real-estate-theme: mat.define-light-theme((
-  color: (
-    primary: $primary-palette,
-    accent: $accent-palette,
-    warn: $warn-palette,
-  ),
-  typography: $custom-typography,
-  density: 0,
-));
+$real-estate-theme: mat.define-light-theme((color: (primary: $primary-palette,
+        accent: $accent-palette,
+        warn: $warn-palette,
+      ),
+      typography: $custom-typography,
+      density: 0,
+    ));
 
 @include mat.all-component-themes($real-estate-theme);
 
 .compact-density {
-  $compact-theme: mat.define-light-theme((
-    color: (
-      primary: $primary-palette,
-      accent: $accent-palette,
-      warn: $warn-palette,
-    ),
-    typography: $custom-typography,
-    density: -1,
-  ));
-  
+  $compact-theme: mat.define-light-theme((color: (primary: $primary-palette,
+          accent: $accent-palette,
+          warn: $warn-palette,
+        ),
+        typography: $custom-typography,
+        density: -1,
+      ));
+
   @include mat.all-component-densities($compact-theme);
 }
 
 .compact-density-max {
-  $compact-max-theme: mat.define-light-theme((
-    color: (
-      primary: $primary-palette,
-      accent: $accent-palette,
-      warn: $warn-palette,
-    ),
-    typography: $custom-typography,
-    density: -2,
-  ));
-  
+  $compact-max-theme: mat.define-light-theme((color: (primary: $primary-palette,
+          accent: $accent-palette,
+          warn: $warn-palette,
+        ),
+        typography: $custom-typography,
+        density: -2,
+      ));
+
   @include mat.all-component-densities($compact-max-theme);
 }

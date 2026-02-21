@@ -1,16 +1,18 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.util.Map;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 @Entity
-@Table(name = "user_preferences", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_user_preferences_user_org", columnNames = {"user_id", "org_id"})
-})
+@Table(
+        name = "user_preferences",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_user_preferences_user_org",
+                    columnNames = {"user_id", "org_id"})
+        })
 public class UserPreferencesEntity extends BaseEntity {
 
     @Id

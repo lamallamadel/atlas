@@ -53,8 +53,10 @@ public class CoopContributionMapper {
     public CoopContributionResponse toResponse(CoopContribution contribution) {
         CoopContributionResponse response = new CoopContributionResponse();
         response.setId(contribution.getId());
-        response.setMemberId(contribution.getMember() != null ? contribution.getMember().getId() : null);
-        response.setProjectId(contribution.getProject() != null ? contribution.getProject().getId() : null);
+        response.setMemberId(
+                contribution.getMember() != null ? contribution.getMember().getId() : null);
+        response.setProjectId(
+                contribution.getProject() != null ? contribution.getProject().getId() : null);
         response.setType(contribution.getType());
         response.setAmount(contribution.getAmount());
         response.setCurrency(contribution.getCurrency());

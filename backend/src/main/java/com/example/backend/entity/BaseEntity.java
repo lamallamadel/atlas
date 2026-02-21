@@ -1,12 +1,10 @@
 package com.example.backend.entity;
 
-import java.time.LocalDateTime;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
-
+import java.time.LocalDateTime;
 import org.hibernate.annotations.FilterDef;
 import org.hibernate.annotations.ParamDef;
 import org.springframework.data.annotation.CreatedBy;
@@ -85,5 +83,4 @@ public abstract class BaseEntity {
     void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
 }

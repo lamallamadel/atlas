@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.NotificationType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 public class NotificationCreateRequest {

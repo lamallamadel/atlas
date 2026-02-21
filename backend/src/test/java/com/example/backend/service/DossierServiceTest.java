@@ -1,5 +1,8 @@
 package com.example.backend.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierResponse;
 import com.example.backend.dto.DossierStatusPatchRequest;
@@ -15,6 +18,8 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,12 +31,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -39,17 +38,13 @@ class DossierServiceTest {
 
     private static final String DEFAULT_ORG = "org123";
 
-    @Autowired
-    private DossierService dossierService;
+    @Autowired private DossierService dossierService;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private PartiePrenanteRepository partiePrenanteRepository;
+    @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
     @BeforeEach
     void setUp() {
@@ -162,20 +157,22 @@ class DossierServiceTest {
 
     @Test
     void create_WithArchivedAnnonce_ThrowsIllegalArgumentException() {
-        Annonce archivedAnnonce = createAnnonce(DEFAULT_ORG, "Archived Annonce", AnnonceStatus.ARCHIVED);
+        Annonce archivedAnnonce =
+                createAnnonce(DEFAULT_ORG, "Archived Annonce", AnnonceStatus.ARCHIVED);
         archivedAnnonce = annonceRepository.save(archivedAnnonce);
 
         DossierCreateRequest request = createBasicRequest();
         request.setAnnonceId(archivedAnnonce.getId());
 
         assertThatThrownBy(() -> dossierService.create(request))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Cannot create dossier with ARCHIVED annonce");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cannot create dossier with ARCHIVED annonce");
     }
 
     @Test
     void create_WithPublishedAnnonce_CreatesSuccessfully() {
-        Annonce publishedAnnonce = createAnnonce(DEFAULT_ORG, "Published Annonce", AnnonceStatus.PUBLISHED);
+        Annonce publishedAnnonce =
+                createAnnonce(DEFAULT_ORG, "Published Annonce", AnnonceStatus.PUBLISHED);
         publishedAnnonce = annonceRepository.save(publishedAnnonce);
 
         DossierCreateRequest request = createBasicRequest();
@@ -196,8 +193,8 @@ class DossierServiceTest {
         request.setAnnonceId(draftAnnonce.getId());
 
         assertThatThrownBy(() -> dossierService.create(request))
-            .isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Cannot create dossier with DRAFT annonce");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Cannot create dossier with DRAFT annonce");
     }
 
     @Test
@@ -220,8 +217,8 @@ class DossierServiceTest {
         request.setAnnonceId(99999L);
 
         assertThatThrownBy(() -> dossierService.create(request))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Annonce not found with id: 99999");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Annonce not found with id: 99999");
     }
 
     @Test
@@ -239,8 +236,9 @@ class DossierServiceTest {
         List<DossierResponse> duplicates = dossierService.checkForDuplicates(phone);
 
         assertThat(duplicates).hasSize(2);
-        assertThat(duplicates).extracting(DossierResponse::getStatus)
-            .containsExactlyInAnyOrder(DossierStatus.NEW, DossierStatus.QUALIFIED);
+        assertThat(duplicates)
+                .extracting(DossierResponse::getStatus)
+                .containsExactlyInAnyOrder(DossierStatus.NEW, DossierStatus.QUALIFIED);
     }
 
     @Test
@@ -267,7 +265,8 @@ class DossierServiceTest {
 
         Dossier qualifiedDossier = createDossier(DEFAULT_ORG, phone, DossierStatus.QUALIFIED);
         qualifiedDossier = dossierRepository.save(qualifiedDossier);
-        partiePrenanteRepository.save(createParty(qualifiedDossier, PartiePrenanteRole.BUYER, phone));
+        partiePrenanteRepository.save(
+                createParty(qualifiedDossier, PartiePrenanteRole.BUYER, phone));
 
         Dossier lostDossier = createDossier(DEFAULT_ORG, phone, DossierStatus.LOST);
         lostDossier = dossierRepository.save(lostDossier);
@@ -285,7 +284,8 @@ class DossierServiceTest {
 
         Dossier appointmentDossier = createDossier(DEFAULT_ORG, phone, DossierStatus.APPOINTMENT);
         appointmentDossier = dossierRepository.save(appointmentDossier);
-        partiePrenanteRepository.save(createParty(appointmentDossier, PartiePrenanteRole.BUYER, phone));
+        partiePrenanteRepository.save(
+                createParty(appointmentDossier, PartiePrenanteRole.BUYER, phone));
 
         List<DossierResponse> duplicates = dossierService.checkForDuplicates(phone);
 
@@ -317,7 +317,8 @@ class DossierServiceTest {
 
         Dossier dossier = createDossier(DEFAULT_ORG, "+33698765432", DossierStatus.NEW);
         dossier = dossierRepository.save(dossier);
-        partiePrenanteRepository.save(createParty(dossier, PartiePrenanteRole.BUYER, "+33698765432"));
+        partiePrenanteRepository.save(
+                createParty(dossier, PartiePrenanteRole.BUYER, "+33698765432"));
 
         List<DossierResponse> duplicates = dossierService.checkForDuplicates(phone);
 
@@ -367,8 +368,8 @@ class DossierServiceTest {
     @Test
     void getById_NotFound_ThrowsEntityNotFoundException() {
         assertThatThrownBy(() -> dossierService.getById(999L))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Dossier not found with id: 999");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Dossier not found with id: 999");
     }
 
     @Test
@@ -391,8 +392,8 @@ class DossierServiceTest {
         patchRequest.setStatus(DossierStatus.QUALIFIED);
 
         assertThatThrownBy(() -> dossierService.patchStatus(999L, patchRequest))
-            .isInstanceOf(EntityNotFoundException.class)
-            .hasMessageContaining("Dossier not found with id: 999");
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessageContaining("Dossier not found with id: 999");
     }
 
     @Test
@@ -450,8 +451,8 @@ class DossierServiceTest {
 
             TenantContext.setOrgId("ORG1");
             assertThatThrownBy(() -> dossierService.getById(org2Response.getId()))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Dossier not found with id: " + org2Response.getId());
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dossier not found with id: " + org2Response.getId());
 
             DossierResponse org1Retrieved = dossierService.getById(org1Response.getId());
             assertThat(org1Retrieved.getId()).isEqualTo(org1Response.getId());
@@ -471,8 +472,8 @@ class DossierServiceTest {
 
             TenantContext.setOrgId("ORG2");
             assertThatThrownBy(() -> dossierService.getById(org1Response.getId()))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Dossier not found with id: " + org1Response.getId());
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dossier not found with id: " + org1Response.getId());
         } finally {
             TenantContext.clear();
         }
@@ -489,8 +490,8 @@ class DossierServiceTest {
             patchRequest.setStatus(DossierStatus.WON);
 
             assertThatThrownBy(() -> dossierService.patchStatus(org1Response.getId(), patchRequest))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Dossier not found with id: " + org1Response.getId());
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Dossier not found with id: " + org1Response.getId());
         } finally {
             TenantContext.clear();
         }
@@ -509,8 +510,8 @@ class DossierServiceTest {
 
             Long finalAnnonceId = org2Annonce.getId();
             assertThatThrownBy(() -> dossierService.create(request))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessageContaining("Annonce not found with id: " + finalAnnonceId);
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessageContaining("Annonce not found with id: " + finalAnnonceId);
         } finally {
             TenantContext.clear();
         }
@@ -535,7 +536,8 @@ class DossierServiceTest {
         return dossier;
     }
 
-    private PartiePrenanteEntity createParty(Dossier dossier, PartiePrenanteRole role, String phone) {
+    private PartiePrenanteEntity createParty(
+            Dossier dossier, PartiePrenanteRole role, String phone) {
         PartiePrenanteEntity party = new PartiePrenanteEntity();
         party.setDossier(dossier);
         party.setOrgId(dossier.getOrgId());

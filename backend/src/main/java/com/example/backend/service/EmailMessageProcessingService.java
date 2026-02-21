@@ -10,17 +10,16 @@ import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class EmailMessageProcessingService {
@@ -85,7 +84,10 @@ public class EmailMessageProcessingService {
 
         LocalDateTime timestamp;
         if (parsedEmail.getTimestamp() != null) {
-            timestamp = LocalDateTime.ofInstant(Instant.ofEpochSecond(parsedEmail.getTimestamp()), ZoneId.systemDefault());
+            timestamp =
+                    LocalDateTime.ofInstant(
+                            Instant.ofEpochSecond(parsedEmail.getTimestamp()),
+                            ZoneId.systemDefault());
         } else {
             timestamp = LocalDateTime.now();
         }
@@ -104,8 +106,12 @@ public class EmailMessageProcessingService {
 
         messageRepository.save(messageEntity);
 
-        log.info("Processed email message {} from {} for dossier {} in org {}", 
-            messageId, fromEmail, dossier.getId(), orgId);
+        log.info(
+                "Processed email message {} from {} for dossier {} in org {}",
+                messageId,
+                fromEmail,
+                dossier.getId(),
+                orgId);
 
         logEmailActivity(dossier, parsedEmail);
     }
@@ -113,18 +119,21 @@ public class EmailMessageProcessingService {
     private Dossier findOrCreateDossier(String email, String name, String orgId) {
         List<DossierStatus> excludedStatuses = List.of(DossierStatus.WON, DossierStatus.LOST);
 
-        Dossier dossier = dossierRepository.findByLeadEmailAndOrgIdAndStatusNotIn(email, orgId, excludedStatuses)
-            .stream()
-            .findFirst()
-            .orElse(null);
+        Dossier dossier =
+                dossierRepository
+                        .findByLeadEmailAndOrgIdAndStatusNotIn(email, orgId, excludedStatuses)
+                        .stream()
+                        .findFirst()
+                        .orElse(null);
 
         if (dossier == null) {
-            List<PartiePrenanteEntity> parties = partiePrenanteRepository.findByEmailAndOrgId(email, orgId);
+            List<PartiePrenanteEntity> parties =
+                    partiePrenanteRepository.findByEmailAndOrgId(email, orgId);
 
             if (!parties.isEmpty()) {
                 PartiePrenanteEntity party = parties.get(0);
                 dossier = party.getDossier();
-                
+
                 if (!excludedStatuses.contains(dossier.getStatus())) {
                     if (dossier.getLeadEmail() == null || dossier.getLeadEmail().isEmpty()) {
                         dossier.setLeadEmail(email);
@@ -149,9 +158,11 @@ public class EmailMessageProcessingService {
             dossier.setUpdatedAt(now);
 
             dossier = dossierRepository.save(dossier);
-            log.info("Created new dossier {} for email {} in org {}", dossier.getId(), email, orgId);
+            log.info(
+                    "Created new dossier {} for email {} in org {}", dossier.getId(), email, orgId);
         } else {
-            if (name != null && (dossier.getLeadName() == null || dossier.getLeadName().isEmpty())) {
+            if (name != null
+                    && (dossier.getLeadName() == null || dossier.getLeadName().isEmpty())) {
                 dossier.setLeadName(name);
                 dossier.setUpdatedAt(LocalDateTime.now());
                 dossierRepository.save(dossier);
@@ -175,16 +186,18 @@ public class EmailMessageProcessingService {
                 metadata.put("toEmail", email.getToEmail());
                 metadata.put("subject", email.getSubject());
                 metadata.put("channel", "EMAIL");
-                metadata.put("hasAttachments", email.getAttachments() != null && !email.getAttachments().isEmpty());
+                metadata.put(
+                        "hasAttachments",
+                        email.getAttachments() != null && !email.getAttachments().isEmpty());
 
                 activityService.logActivity(
-                    dossier.getId(),
-                    "EMAIL_RECEIVED",
-                    String.format("Email received from %s: %s", 
-                        email.getFromEmail(), 
-                        email.getSubject() != null ? email.getSubject() : "(no subject)"),
-                    metadata
-                );
+                        dossier.getId(),
+                        "EMAIL_RECEIVED",
+                        String.format(
+                                "Email received from %s: %s",
+                                email.getFromEmail(),
+                                email.getSubject() != null ? email.getSubject() : "(no subject)"),
+                        metadata);
             } catch (Exception e) {
                 log.warn("Failed to log activity for email", e);
             }

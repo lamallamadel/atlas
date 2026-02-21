@@ -1,5 +1,9 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.dto.MessageCreateRequest;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.MessageEntity;
@@ -9,6 +13,7 @@ import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +24,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,28 +37,24 @@ class MessageControllerTest {
     private static final String ORG_ID_2 = "org456";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private MessageRepository messageRepository;
+    @Autowired private MessageRepository messageRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder, String orgId) {
-        return (T) builder
-                .header(ORG_ID_HEADER, orgId)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder, String orgId) {
+        return (T)
+                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     @BeforeEach
@@ -80,9 +75,11 @@ class MessageControllerTest {
         request.setContent("Test message content");
         request.setTimestamp(LocalDateTime.now());
 
-        mockMvc.perform(withHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/messages")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -100,9 +97,11 @@ class MessageControllerTest {
     void create_MissingRequiredFields_Returns400() throws Exception {
         MessageCreateRequest request = new MessageCreateRequest();
 
-        mockMvc.perform(withHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/messages")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -111,14 +110,16 @@ class MessageControllerTest {
     void create_InvalidEnumValue_Returns400() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
 
-        String invalidRequest = String.format(
-                "{\"dossierId\":%d,\"channel\":\"INVALID_CHANNEL\",\"direction\":\"INBOUND\",\"content\":\"Test\",\"timestamp\":\"2024-01-01T12:00:00\"}",
-                dossier.getId()
-        );
+        String invalidRequest =
+                String.format(
+                        "{\"dossierId\":%d,\"channel\":\"INVALID_CHANNEL\",\"direction\":\"INBOUND\",\"content\":\"Test\",\"timestamp\":\"2024-01-01T12:00:00\"}",
+                        dossier.getId());
 
-        mockMvc.perform(withHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidRequest)))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/messages")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(invalidRequest)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -132,9 +133,11 @@ class MessageControllerTest {
         request.setContent("Test message content");
         request.setTimestamp(LocalDateTime.now());
 
-        mockMvc.perform(withHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/messages")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -150,9 +153,11 @@ class MessageControllerTest {
         request.setContent("Admin message");
         request.setTimestamp(LocalDateTime.now());
 
-        mockMvc.perform(withHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/messages")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated());
     }
 
@@ -168,9 +173,11 @@ class MessageControllerTest {
         request.setContent("Test");
         request.setTimestamp(LocalDateTime.now());
 
-        mockMvc.perform(withHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/messages")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isForbidden());
     }
 
@@ -178,7 +185,8 @@ class MessageControllerTest {
     @WithMockUser(roles = {"PRO"})
     void getById_ExistingMessage_Returns200() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        MessageEntity message = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND);
+        MessageEntity message =
+                createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND);
 
         mockMvc.perform(withHeaders(get("/api/v1/messages/" + message.getId())))
                 .andExpect(status().isOk())
@@ -201,7 +209,8 @@ class MessageControllerTest {
     @WithMockUser(roles = {"PRO"})
     void getById_DifferentTenant_Returns404() throws Exception {
         Dossier dossier = createDossier(ORG_ID_2);
-        MessageEntity message = createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND);
+        MessageEntity message =
+                createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND);
 
         mockMvc.perform(withHeaders(get("/api/v1/messages/" + message.getId())))
                 .andExpect(status().isNotFound());
@@ -215,10 +224,12 @@ class MessageControllerTest {
             createMessage(dossier, MessageChannel.EMAIL, MessageDirection.INBOUND);
         }
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("page", "0")
-                        .param("size", "10")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "0")
+                                        .param("size", "10")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(10)))
                 .andExpect(jsonPath("$.totalElements").value(25))
@@ -226,18 +237,22 @@ class MessageControllerTest {
                 .andExpect(jsonPath("$.size").value(10))
                 .andExpect(jsonPath("$.number").value(0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("page", "1")
-                        .param("size", "10")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "1")
+                                        .param("size", "10")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(10)))
                 .andExpect(jsonPath("$.number").value(1));
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("page", "2")
-                        .param("size", "10")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "2")
+                                        .param("size", "10")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(5)))
                 .andExpect(jsonPath("$.number").value(2));
@@ -252,9 +267,11 @@ class MessageControllerTest {
         createMessage(dossier, MessageChannel.SMS, MessageDirection.INBOUND);
         createMessage(dossier, MessageChannel.WHATSAPP, MessageDirection.INBOUND);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("channel", "EMAIL")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("channel", "EMAIL")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].channel", everyItem(is("EMAIL"))));
@@ -268,9 +285,11 @@ class MessageControllerTest {
         createMessage(dossier, MessageChannel.SMS, MessageDirection.INBOUND);
         createMessage(dossier, MessageChannel.EMAIL, MessageDirection.OUTBOUND);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("direction", "INBOUND")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("direction", "INBOUND")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].direction", everyItem(is("INBOUND"))));
@@ -285,10 +304,12 @@ class MessageControllerTest {
         createMessage(dossier, MessageChannel.SMS, MessageDirection.INBOUND);
         createMessage(dossier, MessageChannel.SMS, MessageDirection.OUTBOUND);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("channel", "EMAIL")
-                        .param("direction", "INBOUND")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("channel", "EMAIL")
+                                        .param("direction", "INBOUND")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].channel").value("EMAIL"))
@@ -299,13 +320,18 @@ class MessageControllerTest {
     @WithMockUser(roles = {"PRO"})
     void list_SortByTimestampDesc_ReturnsSortedResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        MessageEntity msg1 = createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 1, 10, 0));
-        MessageEntity msg2 = createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 2, 10, 0));
-        MessageEntity msg3 = createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 3, 10, 0));
+        MessageEntity msg1 =
+                createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 1, 10, 0));
+        MessageEntity msg2 =
+                createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 2, 10, 0));
+        MessageEntity msg3 =
+                createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 3, 10, 0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("sort", "timestamp,desc")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("sort", "timestamp,desc")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[0].id").value(msg3.getId()))
@@ -317,13 +343,18 @@ class MessageControllerTest {
     @WithMockUser(roles = {"PRO"})
     void list_SortByTimestampAsc_ReturnsSortedResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        MessageEntity msg1 = createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 3, 10, 0));
-        MessageEntity msg2 = createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 1, 10, 0));
-        MessageEntity msg3 = createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 2, 10, 0));
+        MessageEntity msg1 =
+                createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 3, 10, 0));
+        MessageEntity msg2 =
+                createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 1, 10, 0));
+        MessageEntity msg3 =
+                createMessageWithTimestamp(dossier, LocalDateTime.of(2024, 1, 2, 10, 0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("sort", "timestamp,asc")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("sort", "timestamp,asc")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[0].id").value(msg2.getId()))
@@ -336,19 +367,22 @@ class MessageControllerTest {
     void list_MultiTenantIsolation_OnlyReturnsSameTenant() throws Exception {
         Dossier dossier1 = createDossier(ORG_ID);
         Dossier dossier2 = createDossier(ORG_ID_2);
-        
+
         createMessage(dossier1, MessageChannel.EMAIL, MessageDirection.INBOUND);
         createMessage(dossier1, MessageChannel.SMS, MessageDirection.INBOUND);
         createMessage(dossier2, MessageChannel.EMAIL, MessageDirection.INBOUND);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier1.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier1.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].orgId", everyItem(is(ORG_ID))));
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages"), ORG_ID_2)
-                        .param("dossierId", dossier2.getId().toString()))
+        mockMvc.perform(
+                        withHeaders(get("/api/v1/messages"), ORG_ID_2)
+                                .param("dossierId", dossier2.getId().toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[*].orgId", everyItem(is(ORG_ID_2))));
@@ -359,9 +393,11 @@ class MessageControllerTest {
     void list_InvalidChannelEnum_Returns400() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("channel", "INVALID_CHANNEL")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("channel", "INVALID_CHANNEL")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -370,9 +406,11 @@ class MessageControllerTest {
     void list_InvalidDirectionEnum_Returns400() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("direction", "INVALID_DIRECTION")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("direction", "INVALID_DIRECTION")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -381,8 +419,10 @@ class MessageControllerTest {
     void list_EmptyResults_ReturnsEmptyPage() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
 
-        mockMvc.perform(withHeaders(get("/api/v1/messages")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/messages")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(0)))
                 .andExpect(jsonPath("$.totalElements").value(0));
@@ -397,7 +437,8 @@ class MessageControllerTest {
         return dossierRepository.save(dossier);
     }
 
-    private MessageEntity createMessage(Dossier dossier, MessageChannel channel, MessageDirection direction) {
+    private MessageEntity createMessage(
+            Dossier dossier, MessageChannel channel, MessageDirection direction) {
         MessageEntity message = new MessageEntity();
         message.setOrgId(dossier.getOrgId());
         message.setDossier(dossier);

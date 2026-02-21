@@ -12,15 +12,14 @@ import com.example.backend.repository.MessageRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.hibernate.Session;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class MessageService {
@@ -30,7 +29,11 @@ public class MessageService {
     private final MessageMapper messageMapper;
     private final EntityManager entityManager;
 
-    public MessageService(MessageRepository messageRepository, DossierRepository dossierRepository, MessageMapper messageMapper, EntityManager entityManager) {
+    public MessageService(
+            MessageRepository messageRepository,
+            DossierRepository dossierRepository,
+            MessageMapper messageMapper,
+            EntityManager entityManager) {
         this.messageRepository = messageRepository;
         this.dossierRepository = dossierRepository;
         this.messageMapper = messageMapper;
@@ -44,19 +47,26 @@ public class MessageService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(request.getDossierId())
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
+        Dossier dossier =
+                dossierRepository
+                        .findById(request.getDossierId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: "
+                                                        + request.getDossierId()));
 
         if (!orgId.equals(dossier.getOrgId())) {
-            throw new EntityNotFoundException("Dossier not found with id: " + request.getDossierId());
+            throw new EntityNotFoundException(
+                    "Dossier not found with id: " + request.getDossierId());
         }
 
         MessageEntity message = messageMapper.toEntity(request, dossier, orgId);
-        
+
         LocalDateTime now = LocalDateTime.now();
         message.setCreatedAt(now);
         message.setUpdatedAt(now);
-        
+
         MessageEntity saved = messageRepository.save(message);
         return messageMapper.toResponse(saved);
     }
@@ -68,8 +78,13 @@ public class MessageService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        MessageEntity message = messageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Message not found with id: " + id));
+        MessageEntity message =
+                messageRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Message not found with id: " + id));
 
         if (!orgId.equals(message.getOrgId())) {
             throw new EntityNotFoundException("Message not found with id: " + id);
@@ -79,35 +94,52 @@ public class MessageService {
     }
 
     @Transactional(readOnly = true)
-    public Page<MessageResponse> listByDossier(Long dossierId, MessageChannel channel, MessageDirection direction, java.time.LocalDateTime startDate, java.time.LocalDateTime endDate, Pageable pageable) {
+    public Page<MessageResponse> listByDossier(
+            Long dossierId,
+            MessageChannel channel,
+            MessageDirection direction,
+            java.time.LocalDateTime startDate,
+            java.time.LocalDateTime endDate,
+            Pageable pageable) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
         }
 
         // Explicitly enable Hibernate filter for multi-tenant filtering
-        entityManager.unwrap(Session.class)
+        entityManager
+                .unwrap(Session.class)
                 .enableFilter("orgIdFilter")
                 .setParameter("orgId", orgId);
 
-        Page<MessageEntity> messages = messageRepository.findByDossierIdWithFilters(dossierId, channel, direction, startDate, endDate, pageable);
-        
+        Page<MessageEntity> messages =
+                messageRepository.findByDossierIdWithFilters(
+                        dossierId, channel, direction, startDate, endDate, pageable);
+
         // Force eager loading of dossier associations and map to DTOs within transaction boundary
-        List<MessageResponse> responseList = messages.getContent().stream()
-                .map(message -> {
-                    // Touch the dossier association to ensure it's loaded within transaction
-                    message.getDossier().getId();
-                    return messageMapper.toResponse(message);
-                })
-                .toList();
-        
+        List<MessageResponse> responseList =
+                messages.getContent().stream()
+                        .map(
+                                message -> {
+                                    // Touch the dossier association to ensure it's loaded within
+                                    // transaction
+                                    message.getDossier().getId();
+                                    return messageMapper.toResponse(message);
+                                })
+                        .toList();
+
         return new PageImpl<>(responseList, pageable, messages.getTotalElements());
     }
 
@@ -118,8 +150,13 @@ public class MessageService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        MessageEntity message = messageRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Message not found with id: " + id));
+        MessageEntity message =
+                messageRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Message not found with id: " + id));
 
         if (!orgId.equals(message.getOrgId())) {
             throw new EntityNotFoundException("Message not found with id: " + id);

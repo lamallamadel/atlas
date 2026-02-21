@@ -5,7 +5,8 @@ import org.hibernate.annotations.Filter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
-@Table(name = "referential_version",
+@Table(
+        name = "referential_version",
         indexes = {
             @Index(name = "idx_ref_version_ref_id", columnList = "referential_id"),
             @Index(name = "idx_ref_version_org_id", columnList = "org_id"),

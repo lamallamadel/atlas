@@ -5,19 +5,17 @@ $dark-primary: mat.define-palette(base-theme.$real-estate-primary, 400, 300, 700
 $dark-accent: mat.define-palette(base-theme.$real-estate-accent, 400, 300, 700);
 $dark-warn: mat.define-palette(base-theme.$real-estate-warn, 400, 300, 700);
 
-$real-estate-dark-theme: mat.define-dark-theme((
-  color: (
-    primary: $dark-primary,
-    accent: $dark-accent,
-    warn: $dark-warn,
-  ),
-  typography: base-theme.$custom-typography,
-  density: 0,
-));
+$real-estate-dark-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+        accent: $dark-accent,
+        warn: $dark-warn,
+      ),
+      typography: base-theme.$custom-typography,
+      density: 0,
+    ));
 
 body.dark-theme {
   @include mat.all-component-colors($real-estate-dark-theme);
-  
+
   --color-primary-50: #1e2a3f;
   --color-primary-100: #2c4060;
   --color-primary-200: #3d5580;
@@ -40,17 +38,18 @@ body.dark-theme {
   --color-secondary-800: #f9deb1;
   --color-secondary-900: #fdf1d0;
 
-  --color-neutral-0: #121212;
-  --color-neutral-50: #1a1a1a;
-  --color-neutral-100: #1e1e1e;
-  --color-neutral-200: #2a2a2a;
-  --color-neutral-300: #383838;
-  --color-neutral-400: #4a4a4a;
-  --color-neutral-500: #6b6b6b;
-  --color-neutral-600: #9e9e9e;
-  --color-neutral-700: #bdbdbd;
-  --color-neutral-800: #e0e0e0;
-  --color-neutral-900: #f5f5f5;
+  /* OLED-optimised neutrals — true black base for zero-energy OLED pixels */
+  --color-neutral-0: #000000;
+  --color-neutral-50: #0a0a0a;
+  --color-neutral-100: #111111;
+  --color-neutral-200: #1c1c1c;
+  --color-neutral-300: #2a2a2a;
+  --color-neutral-400: #3d3d3d;
+  --color-neutral-500: #5c5c5c;
+  --color-neutral-600: #8a8a8a;
+  --color-neutral-700: #b0b0b0;
+  --color-neutral-800: #d5d5d5;
+  --color-neutral-900: #f0f0f0;
   --color-neutral-1000: #ffffff;
 
   --color-success-50: #1b2e1f;
@@ -120,37 +119,48 @@ body.dark-theme {
   --shadow-3: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -4px rgba(0, 0, 0, 0.3);
   --shadow-4: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
   --shadow-5: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-  
+
   --shadow-inner: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 
   color: var(--color-neutral-900);
-  background-color: var(--color-neutral-100);
+  /* OLED black: #000000 — saves battery on AMOLED screens */
+  background-color: var(--color-neutral-0);
+}
+
+/* =====================================================
+   Auto dark mode via OS system preference.
+   Works alongside the explicit .dark-theme class:
+   OS in dark mode + no explicit class → dark automatically.
+   ===================================================== */
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme) {
+    @include mat.all-component-colors($real-estate-dark-theme);
+    color-scheme: dark;
+    color: var(--color-neutral-900);
+    background-color: var(--color-neutral-0);
+  }
 }
 
 .dark-theme .compact-density {
-  $dark-compact-theme: mat.define-dark-theme((
-    color: (
-      primary: $dark-primary,
-      accent: $dark-accent,
-      warn: $dark-warn,
-    ),
-    typography: base-theme.$custom-typography,
-    density: -1,
-  ));
-  
+  $dark-compact-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+          accent: $dark-accent,
+          warn: $dark-warn,
+        ),
+        typography: base-theme.$custom-typography,
+        density: -1,
+      ));
+
   @include mat.all-component-densities($dark-compact-theme);
 }
 
 .dark-theme .compact-density-max {
-  $dark-compact-max-theme: mat.define-dark-theme((
-    color: (
-      primary: $dark-primary,
-      accent: $dark-accent,
-      warn: $dark-warn,
-    ),
-    typography: base-theme.$custom-typography,
-    density: -2,
-  ));
-  
+  $dark-compact-max-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+          accent: $dark-accent,
+          warn: $dark-warn,
+        ),
+        typography: base-theme.$custom-typography,
+        density: -2,
+      ));
+
   @include mat.all-component-densities($dark-compact-max-theme);
 }

@@ -37,6 +37,36 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=10m
 
+brain:
+  scoring:
+    base-url: ${BRAIN_SCORING_URL:http://localhost:8000}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_SCORING_TIMEOUT:5}
+  dupli:
+    base-url: ${BRAIN_DUPLI_URL:http://localhost:8001}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_DUPLI_TIMEOUT:30}
+  fraud:
+    base-url: ${BRAIN_FRAUD_URL:http://localhost:8002}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_FRAUD_TIMEOUT:5}
+  match:
+    base-url: ${BRAIN_MATCH_URL:http://localhost:8003}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_MATCH_TIMEOUT:10}
+  proposal:
+    base-url: ${BRAIN_PROPOSAL_URL:http://localhost:8004}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_PROPOSAL_TIMEOUT:15}
+  nego:
+    base-url: ${BRAIN_NEGO_URL:http://localhost:8005}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_NEGO_TIMEOUT:5}
+  agent:
+    base-url: ${BRAIN_AGENT_URL:http://localhost:8006}
+    api-key: ${BRAIN_API_KEY:change-me-in-production}
+    timeout-seconds: ${BRAIN_AGENT_TIMEOUT:15}
+
 management:
   endpoints:
     web:
@@ -44,7 +74,23 @@ management:
         include: health,info,metrics,prometheus
   endpoint:
     health:
+
       show-details: always
+
+      show-details: when-authorized
+    proposal-service:
+      base-url: "http://localhost:8002"
+    nego-service:
+      base-url: "http://localhost:8003"
+    agent-service:
+      base-url: "http://localhost:8004"
+    document-service:
+      base-url: "http://localhost:8005"
+    info:
+      enabled: true
+    prometheus:
+      enabled: true
+
   metrics:
     export:
       prometheus:

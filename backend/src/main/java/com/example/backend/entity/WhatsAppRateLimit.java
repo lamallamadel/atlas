@@ -1,19 +1,18 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.Filter;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "whatsapp_rate_limit", 
-    indexes = {
-        @Index(name = "idx_rate_limit_org_reset", columnList = "org_id,reset_at")
-    },
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_rate_limit_org", columnNames = {"org_id"})
-    }
-)
+@Table(
+        name = "whatsapp_rate_limit",
+        indexes = {@Index(name = "idx_rate_limit_org_reset", columnList = "org_id,reset_at")},
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_rate_limit_org",
+                    columnNames = {"org_id"})
+        })
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class WhatsAppRateLimit extends BaseEntity {
 

@@ -1,7 +1,14 @@
+
 /**
  * Enhanced Service Worker with Workbox-inspired strategies
  * Implements offline-first caching for optimal performance
  */
+
+const CACHE_VERSION = 'v2';
+const CACHE_NAME = `offline-cache-${CACHE_VERSION}`;
+const API_CACHE_NAME = `api-cache-${CACHE_VERSION}`;
+const STATIC_CACHE_NAME = `static-cache-${CACHE_VERSION}`;
+
 
 const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `static-assets-${CACHE_VERSION}`;
@@ -93,7 +100,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+
   // Route to appropriate strategy based on request type
+
+  // Pass cross-origin requests (e.g. Keycloak discovery doc, JWKS) through without interference.
+  if (url.origin !== self.location.origin) {
+    return;
+  }
+
+  // Never cache the OIDC callback route — the auth code in the URL must reach Angular fresh.
+  if (url.pathname.startsWith('/auth/')) {
+    return;
+  }
+
+
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(networkFirstStrategy(request, API_CACHE));
   } else if (isImageRequest(url)) {
@@ -181,6 +201,7 @@ async function networkFirstStrategy(request, cacheName) {
 async function staleWhileRevalidateStrategy(request, cacheName) {
   const cachedResponse = await caches.match(request);
   
+
   // Fetch in background and update cache
   const fetchPromise = fetch(request)
     .then(async (networkResponse) => {
@@ -194,6 +215,22 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
     .catch((error) => {
       console.log('[ServiceWorker] Stale-While-Revalidate fetch failed:', error.message);
       return cachedResponse || createOfflineResponse(request);
+
+  const fetchPromise = fetch(request).then((networkResponse) => {
+    if (networkResponse && networkResponse.status === 200) {
+      // Clone synchronously before any async operation — cloning after the body
+      // is consumed (e.g. inside a deferred cache.then callback) throws
+      // "Response body is already used".
+      const cloned = networkResponse.clone();
+      caches.open(cacheName).then((c) => c.put(request, cloned));
+    }
+    return networkResponse;
+  }).catch((error) => {
+    console.log('[Service Worker] Fetch failed for stale-while-revalidate:', error);
+    return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), {
+      status: 503,
+      headers: new Headers({ 'Content-Type': 'application/json' })
+
     });
   
   // Return cached response immediately if available

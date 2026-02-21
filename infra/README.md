@@ -9,6 +9,7 @@ Pour le dépannage et la vérification (Kibana/Grafana/Prometheus), voir : `docs
 - **PostgreSQL** : base de données
 - **Keycloak** : IAM / OIDC (realm importé au démarrage)
 - **Backend** : Spring Boot
+- **Nginx** : reverse proxy (SSL via Cloudflare Origin certificates)
 - **Logs** : Elasticsearch + Kibana + Logstash + Filebeat
 - **Metrics** : Prometheus + Grafana
 - **Adminer** : UI DB
@@ -33,7 +34,7 @@ docker compose up -d
 docker compose ps
 ```
 
-## URLs et ports (par défaut)
+## URLs et ports (par défaut — local)
 
 - Backend API: http://localhost:8080
   - Swagger UI: http://localhost:8080/swagger-ui
@@ -45,6 +46,24 @@ docker compose ps
 - Kibana: http://localhost:5601
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000
+
+## URLs production (via Nginx + Cloudflare)
+
+| Subdomain | Service | Description |
+|---|---|---|
+| `afroware.app` | Frontend + API | Angular SPA (`/`) + Backend (`/api/`, `/actuator/`) |
+| `api.afroware.app` | Backend | Accès direct à l'API Spring Boot |
+| `identity.afroware.app` | Keycloak | IAM / OIDC |
+| `db.afroware.app` | Adminer | Administration base de données |
+| `grafana.afroware.app` | Grafana | Dashboards de monitoring |
+| `logs.afroware.app` | Kibana | Exploration des logs |
+
+### SSL / Cloudflare
+
+- SSL est terminé par Cloudflare (mode **Full Strict**)
+- Les certificats Origin Cloudflare sont montés sur le serveur : `/etc/ssl/cloudflare/fullchain.pem` et `/etc/ssl/cloudflare/privkey.pem`
+- Le certificat doit couvrir `*.afroware.app` + `afroware.app` (wildcard)
+- Nginx écoute sur les ports `80` (redirect HTTPS) et `443` (SSL)
 
 ## OIDC / Keycloak (important)
 

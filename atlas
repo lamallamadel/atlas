@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+# Atlas Dev CLI — lightweight counterpart to AtlasDevConsole.ps1 (Windows WPF)
+# Usage: ./atlas <command> [args]
+
+set -e
+
+INFRA_DIR="infra"
+FRONTEND_DIR="frontend"
+BACKEND_DIR="backend"
+
+compose() {
+  if docker compose version &>/dev/null; then
+    docker compose -f "$INFRA_DIR/docker-compose.yml" "$@"
+  else
+    docker-compose -f "$INFRA_DIR/docker-compose.yml" "$@"
+  fi
+}
+
+case "${1:-help}" in
+  up)
+    echo "Starting infrastructure..."
+    compose up -d
+    echo "Starting frontend..."
+    cd "$FRONTEND_DIR" && npm install --silent && npm start &
+    echo ""
+    echo "Frontend:  http://localhost:4200"
+    echo "Backend:   http://localhost:8080"
+    echo "Swagger:   http://localhost:8080/swagger-ui"
+    echo "Health:    http://localhost:8080/actuator/health"
+    echo "Keycloak:  http://localhost:8081"
+    echo "Adminer:   http://localhost:8082"
+    echo "Grafana:   http://localhost:3000"
+    ;;
+  down)
+    pkill -f "ng serve" 2>/dev/null || true
+    compose down
+    ;;
+  restart)
+    "$0" down
+    sleep 2
+    "$0" up
+    ;;
+  status)
+    compose ps
+    echo ""
+    curl -sf http://localhost:8080/actuator/health && echo " Backend OK" || echo "Backend DOWN"
+    curl -sf http://localhost:4200 >/dev/null && echo "Frontend OK" || echo "Frontend DOWN"
+    ;;
+  logs)
+    case "${2:-all}" in
+      backend)  compose logs -f backend ;;
+      db)       compose logs -f postgres ;;
+      frontend) echo "Frontend logs are in the npm start terminal" ;;
+      *)        compose logs -f ;;
+    esac
+    ;;
+  reset)
+    compose down
+    docker volume rm infra_postgres_data 2>/dev/null || true
+    compose up -d
+    echo "Database reset complete."
+    ;;
+  test)
+    echo "=== Backend unit tests ==="
+    cd "$BACKEND_DIR" && mvn test
+    echo ""
+    echo "=== Frontend unit tests ==="
+    cd "$FRONTEND_DIR" && npm test
+    ;;
+  build)
+    cd "$BACKEND_DIR" && mvn clean package
+    cd "$FRONTEND_DIR" && npm run build
+    ;;
+  help|--help|-h|*)
+    cat <<EOF
+Atlas Dev CLI
+
+Usage: ./atlas <command>
+
+Commands:
+  up        Start infrastructure (Docker) + frontend dev server
+  down      Stop everything
+  restart   Restart all services
+  status    Health check all services
+  logs      View logs (all | backend | frontend | db)
+  reset     Reset database (destroy + recreate)
+  test      Run backend + frontend unit tests
+  build     Build backend JAR + frontend dist
+  help      Show this message
+
+Windows users: use AtlasDevConsole.ps1 for the graphical dashboard.
+EOF
+    ;;
+esac

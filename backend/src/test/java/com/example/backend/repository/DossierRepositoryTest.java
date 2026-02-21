@@ -1,7 +1,10 @@
 package com.example.backend.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.DossierStatus;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,16 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DataJpaTest
 @ActiveProfiles("test")
 class DossierRepositoryTest {
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
     @BeforeEach
     void setUp() {
@@ -34,8 +32,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.NEW));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("leadPhone"), "+33612345678");
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("leadPhone"), "+33612345678");
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -48,8 +47,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.NEW));
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("leadPhone"), "+33699999999");
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("leadPhone"), "+33699999999");
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -63,8 +63,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", phone, DossierStatus.QUALIFIED));
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("leadPhone"), phone);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("leadPhone"), phone);
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -79,8 +80,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.QUALIFIED));
         dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.APPOINTMENT));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), DossierStatus.NEW);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), DossierStatus.NEW);
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -95,8 +97,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.QUALIFIED));
         dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.WON));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), DossierStatus.QUALIFIED);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), DossierStatus.QUALIFIED);
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -110,8 +113,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.LOST));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), DossierStatus.APPOINTMENT);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), DossierStatus.APPOINTMENT);
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -125,8 +129,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.LOST));
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.NEW));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), DossierStatus.WON);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), DossierStatus.WON);
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -139,8 +144,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345678", DossierStatus.LOST));
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.WON));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), DossierStatus.LOST);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), DossierStatus.LOST);
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -156,9 +162,14 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345679", DossierStatus.NEW));
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.QUALIFIED));
 
-        Specification<Dossier> spec = Specification.<Dossier>where(
-                (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("leadPhone"), phone))
-                .and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), DossierStatus.NEW));
+        Specification<Dossier> spec =
+                Specification.<Dossier>where(
+                                (root, query, criteriaBuilder) ->
+                                        criteriaBuilder.equal(root.get("leadPhone"), phone))
+                        .and(
+                                (root, query, criteriaBuilder) ->
+                                        criteriaBuilder.equal(
+                                                root.get("status"), DossierStatus.NEW));
 
         List<Dossier> result = dossierRepository.findAll(spec);
 
@@ -173,11 +184,13 @@ class DossierRepositoryTest {
             dossierRepository.save(createDossier("org1", "+3361234567" + i, DossierStatus.NEW));
         }
         for (int i = 0; i < 10; i++) {
-            dossierRepository.save(createDossier("org1", "+3361234568" + i, DossierStatus.QUALIFIED));
+            dossierRepository.save(
+                    createDossier("org1", "+3361234568" + i, DossierStatus.QUALIFIED));
         }
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), DossierStatus.NEW);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), DossierStatus.NEW);
         Pageable pageable = PageRequest.of(0, 10);
 
         Page<Dossier> result = dossierRepository.findAll(spec, pageable);
@@ -192,12 +205,17 @@ class DossierRepositoryTest {
     void testFilterByPhoneWithPagination() {
         String phone = "+33612345678";
         for (int i = 0; i < 12; i++) {
-            dossierRepository.save(createDossier("org1", phone, DossierStatus.values()[i % DossierStatus.values().length]));
+            dossierRepository.save(
+                    createDossier(
+                            "org1",
+                            phone,
+                            DossierStatus.values()[i % DossierStatus.values().length]));
         }
         dossierRepository.save(createDossier("org1", "+33699999999", DossierStatus.NEW));
 
-        Specification<Dossier> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("leadPhone"), phone);
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("leadPhone"), phone);
         Pageable pageable = PageRequest.of(0, 10);
 
         Page<Dossier> result = dossierRepository.findAll(spec, pageable);
@@ -314,7 +332,9 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org1", "+33612345680", DossierStatus.APPOINTMENT));
         dossierRepository.save(createDossier("org1", "+33612345681", DossierStatus.WON));
 
-        Long count = dossierRepository.countByStatusIn(java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED));
+        Long count =
+                dossierRepository.countByStatusIn(
+                        java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED));
 
         assertThat(count).isEqualTo(2);
     }
@@ -327,10 +347,14 @@ class DossierRepositoryTest {
         dossierRepository.save(createDossier("org2", "+33612345681", DossierStatus.QUALIFIED));
         dossierRepository.save(createDossier("org1", "+33612345682", DossierStatus.APPOINTMENT));
 
-        Long org1Count = dossierRepository.countByStatusInAndOrgId(
-            java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED), "org1");
-        Long org2Count = dossierRepository.countByStatusInAndOrgId(
-            java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED), "org2");
+        Long org1Count =
+                dossierRepository.countByStatusInAndOrgId(
+                        java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED),
+                        "org1");
+        Long org2Count =
+                dossierRepository.countByStatusInAndOrgId(
+                        java.util.Arrays.asList(DossierStatus.NEW, DossierStatus.QUALIFIED),
+                        "org2");
 
         assertThat(org1Count).isEqualTo(2);
         assertThat(org2Count).isEqualTo(2);

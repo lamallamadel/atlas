@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -25,6 +24,10 @@ public class AnnonceResponse {
     private List<String> photos;
     private Map<String, Object> rulesJson;
     private Map<String, Object> meta;
+    private Integer aiScore;
+    private String aiScoreDetails;
+    private Integer fraudScore;
+    private String fraudStatut;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private String createdBy;
@@ -151,6 +154,38 @@ public class AnnonceResponse {
 
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
+    }
+
+    public Integer getAiScore() {
+        return aiScore;
+    }
+
+    public void setAiScore(Integer aiScore) {
+        this.aiScore = aiScore;
+    }
+
+    public String getAiScoreDetails() {
+        return aiScoreDetails;
+    }
+
+    public void setAiScoreDetails(String aiScoreDetails) {
+        this.aiScoreDetails = aiScoreDetails;
+    }
+
+    public Integer getFraudScore() {
+        return fraudScore;
+    }
+
+    public void setFraudScore(Integer fraudScore) {
+        this.fraudScore = fraudScore;
+    }
+
+    public String getFraudStatut() {
+        return fraudStatut;
+    }
+
+    public void setFraudStatut(String fraudStatut) {
+        this.fraudStatut = fraudStatut;
     }
 
     public LocalDateTime getCreatedAt() {

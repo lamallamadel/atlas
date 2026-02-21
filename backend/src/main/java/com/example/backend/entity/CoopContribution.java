@@ -3,14 +3,13 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.ContributionStatus;
 import com.example.backend.entity.enums.ContributionType;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.Map;
 
 @Entity
 @Table(name = "coop_contribution")

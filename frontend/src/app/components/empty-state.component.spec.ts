@@ -1,5 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { EmptyStateComponent } from './empty-state.component';
 import { EmptyStateIllustrationsService, EmptyStateContext } from '../services/empty-state-illustrations.service';
 
@@ -10,7 +12,7 @@ describe('EmptyStateComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       declarations: [ EmptyStateComponent ],
-      imports: [ MatIconModule ],
+      imports: [ CommonModule, MatIconModule, MatButtonModule ],
       providers: [ EmptyStateIllustrationsService ]
     })
     .compileComponents();
@@ -170,7 +172,7 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should render primary action button with icon', () => {
-      component.displayPrimaryAction = {
+      component.primaryAction = {
         label: 'Create',
         icon: 'add',
         handler: () => { /* no-op */ }
@@ -184,7 +186,7 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should render help link when provided', () => {
-      component.displayHelpLink = {
+      component.helpLink = {
         label: 'Need help?',
         url: '/help'
       };
@@ -218,7 +220,7 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should have aria-label on action buttons', () => {
-      component.displayPrimaryAction = {
+      component.primaryAction = {
         label: 'Create new',
         handler: () => {}
       };

@@ -1,6 +1,11 @@
 package com.example.backend.service;
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
@@ -8,24 +13,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
-
 @Service
 public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
     private static final int MAX_CACHE_SIZE = 1000;
-    
-    private final Map<String, String> displayNameCache = new LinkedHashMap<>(16, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
-            return size() > MAX_CACHE_SIZE;
-        }
-    };
+
+    private final Map<String, String> displayNameCache =
+            new LinkedHashMap<>(16, 0.75f, true) {
+                @Override
+                protected boolean removeEldestEntry(Map.Entry<String, String> eldest) {
+                    return size() > MAX_CACHE_SIZE;
+                }
+            };
 
     private final Keycloak keycloakAdminClient;
     private final CircuitBreaker circuitBreaker;
@@ -55,11 +55,11 @@ public class UserService {
 
         return userIds.stream()
                 .distinct()
-                .collect(Collectors.toMap(
-                        userId -> userId,
-                        this::getUserDisplayName,
-                        (existing, replacement) -> existing
-                ));
+                .collect(
+                        Collectors.toMap(
+                                userId -> userId,
+                                this::getUserDisplayName,
+                                (existing, replacement) -> existing));
     }
 
     private String fetchUserDisplayName(String userId) {
@@ -67,20 +67,25 @@ public class UserService {
             return "Système";
         }
 
-        Supplier<String> fetchFromKeycloak = () -> {
-            try {
-                UserRepresentation user = keycloakAdminClient
-                        .realm(keycloakRealm)
-                        .users()
-                        .get(userId)
-                        .toRepresentation();
+        Supplier<String> fetchFromKeycloak =
+                () -> {
+                    try {
+                        UserRepresentation user =
+                                keycloakAdminClient
+                                        .realm(keycloakRealm)
+                                        .users()
+                                        .get(userId)
+                                        .toRepresentation();
 
-                return buildDisplayName(user);
-            } catch (Exception e) {
-                log.warn("Failed to fetch user from Keycloak: userId={}, error={}", userId, e.getMessage());
-                throw e;
-            }
-        };
+                        return buildDisplayName(user);
+                    } catch (Exception e) {
+                        log.warn(
+                                "Failed to fetch user from Keycloak: userId={}, error={}",
+                                userId,
+                                e.getMessage());
+                        throw e;
+                    }
+                };
 
         try {
             return circuitBreaker.executeSupplier(fetchFromKeycloak);

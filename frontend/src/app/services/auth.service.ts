@@ -32,11 +32,13 @@ export class AuthService {
     responseType: 'code',
     scope: environment.oidc.scope,
     requireHttps: environment.oidc.requireHttps,
-    showDebugInformation: !environment.production,
+    showDebugInformation: true,
     strictDiscoveryDocumentValidation: false,
     useSilentRefresh: false,
     sessionChecksEnabled: false,
-    clearHashAfterLogin: true
+    clearHashAfterLogin: true,
+    skipIssuerCheck: false,
+    oidc: true
   };
 
   constructor(
@@ -60,12 +62,22 @@ export class AuthService {
     try {
       await this.oauthService.loadDiscoveryDocumentAndTryLogin();
 
-      // If OIDC login succeeded, mark the mode.
       if (this.oauthService.hasValidAccessToken()) {
         localStorage.setItem(this.AUTH_MODE_KEY, 'oidc');
+
+        // If we just handled the OIDC callback, navigate away from /auth/callback.
+        if (typeof window !== 'undefined' && window.location.pathname.includes('/auth/callback')) {
+          const returnUrl = sessionStorage.getItem('returnUrl') || '/dashboard';
+          sessionStorage.removeItem('returnUrl');
+          this.router.navigate([returnUrl], { replaceUrl: true });
+        }
+      } else if (typeof window !== 'undefined' && window.location.pathname.includes('/auth/callback')) {
+        // tryLogin ran on /auth/callback but no token — something went wrong.
+        console.error('[AuthService] OIDC callback reached but no valid access token after tryLogin.');
+        this.router.navigate(['/login'], { replaceUrl: true });
       }
-    } catch {
-      // Ignore - OIDC may not be available in all environments.
+    } catch (err) {
+      console.error('[AuthService] OIDC init error:', err);
     }
   }
 

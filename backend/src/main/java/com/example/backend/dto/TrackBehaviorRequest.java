@@ -3,8 +3,7 @@ package com.example.backend.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public class TrackBehaviorRequest {
-    @NotBlank
-    private String actionType;
+    @NotBlank private String actionType;
     private String contextType;
     private Long contextId;
 

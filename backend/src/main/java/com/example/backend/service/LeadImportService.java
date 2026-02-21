@@ -13,16 +13,15 @@ import com.example.backend.repository.ImportJobRepository;
 import com.example.backend.util.TenantContext;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class LeadImportService {
@@ -30,7 +29,8 @@ public class LeadImportService {
     private final DossierRepository dossierRepository;
     private final ImportJobRepository importJobRepository;
 
-    public LeadImportService(DossierRepository dossierRepository, ImportJobRepository importJobRepository) {
+    public LeadImportService(
+            DossierRepository dossierRepository, ImportJobRepository importJobRepository) {
         this.dossierRepository = dossierRepository;
         this.importJobRepository = importJobRepository;
     }
@@ -52,14 +52,16 @@ public class LeadImportService {
         response.setImportJobId(importJob.getId());
 
         try {
-            BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
+            BufferedReader reader =
+                    new BufferedReader(
+                            new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8));
 
-            CsvToBean<LeadImportRow> csvToBean = new CsvToBeanBuilder<LeadImportRow>(reader)
-                    .withType(LeadImportRow.class)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .withIgnoreEmptyLine(true)
-                    .build();
+            CsvToBean<LeadImportRow> csvToBean =
+                    new CsvToBeanBuilder<LeadImportRow>(reader)
+                            .withType(LeadImportRow.class)
+                            .withIgnoreLeadingWhiteSpace(true)
+                            .withIgnoreEmptyLine(true)
+                            .build();
 
             List<LeadImportRow> rows = csvToBean.parse();
             int totalRows = rows.size();
@@ -75,22 +77,25 @@ public class LeadImportService {
                 try {
                     if (!validateRow(row, rowNumber, response)) {
                         errorCount++;
-                        errorReport.append(String.format("Row %d: Validation failed - ", rowNumber));
+                        errorReport.append(
+                                String.format("Row %d: Validation failed - ", rowNumber));
                         errorReport.append(getValidationErrors(row)).append("\n");
                         continue;
                     }
 
-                    List<Dossier> existingDossiers = dossierRepository
-                            .findByLeadPhoneAndOrgIdAndStatusNotIn(
+                    List<Dossier> existingDossiers =
+                            dossierRepository.findByLeadPhoneAndOrgIdAndStatusNotIn(
                                     row.getPhone(),
                                     orgId,
-                                    Arrays.asList(DossierStatus.LOST, DossierStatus.WON)
-                            );
+                                    Arrays.asList(DossierStatus.LOST, DossierStatus.WON));
 
                     if (!existingDossiers.isEmpty()) {
                         if (mergeStrategy == MergeStrategy.SKIP) {
                             skippedCount++;
-                            errorReport.append(String.format("Row %d: Duplicate phone number - skipped\n", rowNumber));
+                            errorReport.append(
+                                    String.format(
+                                            "Row %d: Duplicate phone number - skipped\n",
+                                            rowNumber));
                             continue;
                         } else if (mergeStrategy == MergeStrategy.OVERWRITE) {
                             Dossier existingDossier = existingDossiers.get(0);
@@ -155,7 +160,8 @@ public class LeadImportService {
             try {
                 DossierSource.fromValue(row.getSource().toLowerCase());
             } catch (IllegalArgumentException e) {
-                response.addValidationError(rowNumber, "source", "Invalid source value: " + row.getSource());
+                response.addValidationError(
+                        rowNumber, "source", "Invalid source value: " + row.getSource());
                 valid = false;
             }
         }
@@ -164,7 +170,8 @@ public class LeadImportService {
             try {
                 int score = Integer.parseInt(row.getScore());
                 if (score < 0 || score > 100) {
-                    response.addValidationError(rowNumber, "score", "Score must be between 0 and 100");
+                    response.addValidationError(
+                            rowNumber, "score", "Score must be between 0 and 100");
                     valid = false;
                 }
             } catch (NumberFormatException e) {

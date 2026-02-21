@@ -3,9 +3,7 @@
     <h3 class="section-title">Documents</h3>
   </div>
 
-  <app-document-upload 
-    [dossierId]="dossierId"
-    (uploadComplete)="onUploadComplete($event)">
+  <app-document-upload [dossierId]="dossierId" (uploadComplete)="onUploadComplete($event)">
   </app-document-upload>
 
   <div class="documents-section">
@@ -29,27 +27,16 @@
             <mat-icon class="document-icon">{{ getFileIcon(document) }}</mat-icon>
           </div>
           <div class="document-actions">
-            <button 
-              mat-icon-button 
-              [matTooltip]="isPreviewable(document) ? 'Aperçu' : 'Aperçu non disponible'"
-              [disabled]="!isPreviewable(document)"
-              (click)="previewDocument(document)"
-              aria-label="Aperçu du document">
+            <button mat-icon-button [matTooltip]="isPreviewable(document) ? 'Aperçu' : 'Aperçu non disponible'"
+              [disabled]="!isPreviewable(document)" (click)="previewDocument(document)" aria-label="Aperçu du document">
               <mat-icon>visibility</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              matTooltip="Télécharger"
-              (click)="downloadDocument(document)"
+            <button mat-icon-button matTooltip="Télécharger" (click)="downloadDocument(document)"
               aria-label="Télécharger le document">
               <mat-icon>download</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              matTooltip="Supprimer"
-              (click)="deleteDocument(document)"
-              aria-label="Supprimer le document"
-              class="delete-btn">
+            <button mat-icon-button matTooltip="Supprimer" (click)="deleteDocument(document)"
+              aria-label="Supprimer le document" class="delete-btn">
               <mat-icon>delete</mat-icon>
             </button>
           </div>
@@ -57,7 +44,7 @@
 
         <div class="document-card-body">
           <h4 class="document-name" [title]="document.fileName">{{ document.fileName }}</h4>
-          
+
           <div class="document-meta">
             <div class="meta-item">
               <mat-icon class="meta-icon">storage</mat-icon>
@@ -73,9 +60,14 @@
             </div>
           </div>
 
-          <div class="document-category" *ngIf="document.category">
-            <span [class]="getCategoryBadgeClass(document.category)">
+          <div class="document-category" *ngIf="document.category || getAiStatusText(document.contentType)">
+            <span *ngIf="document.category" [class]="getCategoryBadgeClass(document.category)">
               {{ getCategoryLabel(document.category) }}
+            </span>
+            <span *ngIf="getAiStatusText(document.contentType)" [class]="getAiStatusClass(document.contentType)"
+              [matTooltip]="'Analyse sémantique du texte extrait (OCR) de votre document via notre microservice d\'Intelligence Artificielle (document-service)'"
+              matTooltipPosition="above" style="cursor:help;">
+              IA Atlas: {{ getAiStatusText(document.contentType) }}
             </span>
           </div>
         </div>

@@ -1,16 +1,15 @@
 package com.example.backend.service;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component("localFileStorage")
 public class LocalFileStorageStrategy implements FileStorageStrategy {
@@ -21,7 +20,13 @@ public class LocalFileStorageStrategy implements FileStorageStrategy {
     private String basePath;
 
     @Override
-    public String store(String orgId, Long dossierId, String fileName, InputStream inputStream, long size, String contentType) {
+    public String store(
+            String orgId,
+            Long dossierId,
+            String fileName,
+            InputStream inputStream,
+            long size,
+            String contentType) {
         try {
             String sanitizedFileName = sanitizeFileName(fileName);
             String uniqueFileName = UUID.randomUUID().toString() + "_" + sanitizedFileName;

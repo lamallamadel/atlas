@@ -46,7 +46,8 @@ public class ReferentialMapper {
         return entity;
     }
 
-    public static void updateEntityFromRequest(ReferentialEntity entity, ReferentialRequest request) {
+    public static void updateEntityFromRequest(
+            ReferentialEntity entity, ReferentialRequest request) {
         if (entity == null || request == null) {
             return;
         }

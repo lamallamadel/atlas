@@ -4,11 +4,10 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import jakarta.persistence.*;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-
-import java.util.Map;
 
 @Entity
 @Table(name = "consentement")
@@ -87,5 +86,4 @@ public class ConsentementEntity extends BaseEntity {
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
     }
-
 }

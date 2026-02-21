@@ -44,17 +44,10 @@ import { TextFieldModule } from '@angular/cdk/text-field';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AnnoncesComponent } from './pages/annonces/annonces.component';
-import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
-import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
-import { DossiersComponent } from './pages/dossiers/dossiers.component';
-import { DossierCreateComponent } from './pages/dossiers/dossier-create.component';
-import { DossierCreateDialogComponent } from './pages/dossiers/dossier-create-dialog.component';
-import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
+
 import { GenericTableComponent } from './components/generic-table.component';
 import { EmptyStateComponent } from './components/empty-state.component';
 import { BadgeStatusComponent } from './components/badge-status.component';
@@ -62,6 +55,8 @@ import { BadgeComponent } from './components/badge.component';
 import { BadgeShowcaseComponent } from './components/badge-showcase.component';
 import { LoadingSkeletonComponent } from './components/loading-skeleton.component';
 import { SkeletonLoaderComponent } from './components/skeleton-loader.component';
+
+
 import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
 import { MessageFormDialogComponent } from './components/message-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './components/confirm-delete-dialog.component';
@@ -71,7 +66,6 @@ import { ReportsDashboardComponent } from './components/reports-dashboard.compon
 import DatetimePickerComponent from './components/datetime-picker.component';
 import { GlobalSearchBarComponent } from './components/global-search-bar.component';
 import { SearchComponent } from './pages/search/search.component';
-import { ActivityTimelineComponent } from './components/activity-timeline.component';
 import { NoteFormDialogComponent } from './components/note-form-dialog.component';
 import { MobileFilterSheetComponent } from './components/mobile-filter-sheet.component';
 import { EnhancedSnackbarComponent } from './components/enhanced-snackbar.component';
@@ -84,6 +78,7 @@ import { KeyboardShortcutHintDirective } from './directives/keyboard-shortcut-hi
 import { FocusTrapDirective } from './directives/focus-trap.directive';
 import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
+
 import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
 import { AnimatedButtonDirective } from './directives/animated-button.directive';
 import { AnimatedFocusDirective } from './directives/animated-focus.directive';
@@ -97,6 +92,8 @@ import { CollaborationCursorComponent } from './components/collaboration-cursor.
 import { CollaborationActivityStreamComponent } from './components/collaboration-activity-stream.component';
 import { CollaborationFilterShareComponent } from './components/collaboration-filter-share.component';
 import { HighlightPipe } from './pipes/highlight.pipe';
+
+
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
@@ -104,15 +101,6 @@ import localeFr from '@angular/common/locales/fr';
 import localeEn from '@angular/common/locales/en';
 import localeEs from '@angular/common/locales/es';
 import { NgChartsModule } from 'ng2-charts';
-import { WhatsappThreadComponent } from './components/whatsapp-thread.component';
-import { WhatsappMessageInputComponent } from './components/whatsapp-message-input.component';
-import { TemplateSelectionSheetComponent } from './components/template-selection-sheet.component';
-import { WhatsappMessagingContainerComponent } from './components/whatsapp-messaging-container.component';
-import { MessagingTabComponent } from './pages/dossiers/messaging-tab.component';
-import { OutboundMessageListComponent } from './pages/dossiers/outbound-message-list.component';
-import { OutboundMessageFormComponent } from './pages/dossiers/outbound-message-form.component';
-import { DocumentListComponent } from './components/document-list.component';
-import { DocumentUploadComponent } from './components/document-upload.component';
 import { DocumentPreviewDialogComponent } from './components/document-preview-dialog.component';
 import { LeadImportDialogComponent } from './components/lead-import-dialog.component';
 import { LeadExportDialogComponent } from './components/lead-export-dialog.component';
@@ -129,7 +117,6 @@ import { FormProgressIndicatorComponent } from './components/form-progress-indic
 import { InlineValidationSuggestionComponent } from './components/inline-validation-suggestion.component';
 import { ContextualHintDirective } from './directives/contextual-hint.directive';
 import { EnhancedFormExampleComponent } from './components/enhanced-form-example.component';
-import { KanbanBoardComponent } from './components/kanban-board.component';
 import { CalendarViewComponent } from './components/calendar-view.component';
 import { CalendarListViewComponent } from './components/calendar-list-view.component';
 import { NotificationCenterComponent } from './components/notification-center.component';
@@ -137,12 +124,13 @@ import { ExportProgressDialogComponent } from './components/export-progress-dial
 import { NotificationDemoComponent } from './components/notification-demo.component';
 import { AdvancedFiltersComponent } from './components/advanced-filters.component';
 import { AdvancedFiltersDialogComponent } from './components/advanced-filters-dialog.component';
-import { QuickActionsComponent } from './components/quick-actions.component';
 import { VoipConfigDialogComponent } from './components/voip-config-dialog.component';
 import { OfflineIndicatorComponent } from './components/offline-indicator.component';
 import { OfflineInterceptor } from './interceptors/offline.interceptor';
+import { HttpCacheInterceptor } from './interceptors/http-cache.interceptor';
 import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
 import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
+
 import { MobileDossierCardComponent } from './components/mobile-dossier-card.component';
 import { LogoComponent } from './components/logo.component';
 import { LogoInlineComponent } from './components/logo-inline.component';
@@ -169,6 +157,13 @@ import { SettingsPageComponent } from './components/settings-page.component';
 import { UiPreferencesFormComponent } from './components/ui-preferences-form.component';
 import { NotificationPreferencesFormComponent } from './components/notification-preferences-form.component';
 
+import { WaterfallChartComponent } from './components/waterfall-chart.component';
+import { AiAgentPanelComponent } from './components/ai-agent-panel.component';
+import { DossierSharedModule } from './pages/dossiers/dossier-shared.module';
+import { SharedPipesModule } from './shared/shared-pipes.module';
+import { SharedComponentsModule } from './shared/shared-components.module';
+
+
 registerLocaleData(localeFr, 'fr');
 registerLocaleData(localeEn, 'en');
 registerLocaleData(localeEs, 'es');
@@ -181,17 +176,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
   declarations: [
     AppComponent,
     AppLayoutComponent,
-    DashboardComponent,
-    AnnoncesComponent,
-    AnnonceCreateComponent,
-    AnnonceDetailComponent,
-    DossiersComponent,
-    DossierCreateComponent,
-    DossierCreateDialogComponent,
-    DossierDetailComponent,
     LoginComponent,
     AccessDeniedComponent,
     SessionExpiredComponent,
+
     GenericTableComponent,
     EmptyStateComponent,
     BadgeStatusComponent,
@@ -199,6 +187,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     BadgeShowcaseComponent,
     LoadingSkeletonComponent,
     SkeletonLoaderComponent,
+
+
     PartiePrenanteFormDialogComponent,
     MessageFormDialogComponent,
     ConfirmDeleteDialogComponent,
@@ -208,7 +198,6 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     DatetimePickerComponent,
     GlobalSearchBarComponent,
     SearchComponent,
-    ActivityTimelineComponent,
     NoteFormDialogComponent,
     MobileFilterSheetComponent,
     EnhancedSnackbarComponent,
@@ -219,6 +208,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     FocusTrapDirective,
     LazyLoadImageDirective,
     InfiniteScrollDirective,
+
     SwipeGestureDirective,
     AnimatedButtonDirective,
     AnimatedFocusDirective,
@@ -241,6 +231,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     OutboundMessageFormComponent,
     DocumentListComponent,
     DocumentUploadComponent,
+
+
     DocumentPreviewDialogComponent,
     LeadImportDialogComponent,
     LeadExportDialogComponent,
@@ -256,7 +248,6 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     InlineValidationSuggestionComponent,
     ContextualHintDirective,
     EnhancedFormExampleComponent,
-    KanbanBoardComponent,
     CalendarViewComponent,
     CalendarListViewComponent,
     NotificationCenterComponent,
@@ -264,11 +255,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     NotificationDemoComponent,
     AdvancedFiltersComponent,
     AdvancedFiltersDialogComponent,
-    QuickActionsComponent,
     VoipConfigDialogComponent,
     OfflineIndicatorComponent,
     VirtualScrollListComponent,
     MobileActionSheetComponent,
+
     MobileDossierCardComponent,
     LogoComponent,
     LogoInlineComponent,
@@ -294,6 +285,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     SettingsPageComponent,
     UiPreferencesFormComponent,
     NotificationPreferencesFormComponent
+
+    WaterfallChartComponent,
+    AiAgentPanelComponent
+
   ],
   imports: [
     BrowserModule,
@@ -341,7 +336,10 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     ScrollingModule,
     TextFieldModule,
     NgChartsModule,
-    FullCalendarModule
+    FullCalendarModule,
+    DossierSharedModule,
+    SharedPipesModule,
+    SharedComponentsModule
   ],
   providers: [
     { provide: LOCALE_ID, useValue: 'fr-FR' },
@@ -366,6 +364,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     {
       provide: HTTP_INTERCEPTORS,
       useClass: OfflineInterceptor,
+      multi: true
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: HttpCacheInterceptor,
       multi: true
     }
   ],

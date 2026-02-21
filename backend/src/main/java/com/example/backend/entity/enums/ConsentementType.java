@@ -7,7 +7,6 @@ public enum ConsentementType {
     GESTIONNEL("gestionnel"),
     RECHERCHE("recherche");
 
-
     private final String value;
 
     ConsentementType(String value) {

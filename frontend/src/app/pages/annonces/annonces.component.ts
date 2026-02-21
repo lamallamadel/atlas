@@ -58,35 +58,35 @@ export class AnnoncesComponent implements OnInit {
 
   columns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
-    { 
-      key: 'title', 
-      header: 'Titre', 
+    {
+      key: 'title',
+      header: 'Titre',
       sortable: true,
       type: 'custom',
       format: (value: unknown, row: unknown) => {
         const annonce = row as AnnonceResponse;
         const title = `<strong>${value}</strong>`;
-        const description = annonce.description 
+        const description = annonce.description
           ? `<div class="description-preview">${annonce.description.length > 50 ? annonce.description.substring(0, 50) + '...' : annonce.description}</div>`
           : '';
         return title + description;
       }
     },
-    { 
-      key: 'category', 
-      header: 'Catégorie', 
+    {
+      key: 'category',
+      header: 'Catégorie',
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
-    { 
-      key: 'city', 
-      header: 'Ville', 
+    {
+      key: 'city',
+      header: 'Ville',
       sortable: true,
       format: (value: unknown) => (value as string) || '-'
     },
-    { 
-      key: 'price', 
-      header: 'Prix', 
+    {
+      key: 'price',
+      header: 'Prix',
       sortable: true,
       type: 'custom',
       format: (value: unknown, row: unknown) => {
@@ -95,9 +95,9 @@ export class AnnoncesComponent implements OnInit {
         return this.priceFormatPipe.transform(annonce.price, annonce.currency || 'EUR');
       }
     },
-    { 
-      key: 'status', 
-      header: 'Statut', 
+    {
+      key: 'status',
+      header: 'Statut',
       sortable: true,
       type: 'custom',
       format: (value: unknown) => {
@@ -107,16 +107,34 @@ export class AnnoncesComponent implements OnInit {
         return `<span class="${badgeClass}">${label}</span>`;
       }
     },
-    { 
-      key: 'createdAt', 
-      header: 'Créé le', 
+    {
+      key: 'fraudStatut',
+      header: 'Antifraude',
+      sortable: true,
+      type: 'custom',
+      format: (value: unknown) => {
+        const status = value as string;
+        if (!status) return '<span class="text-gray-400">-</span>';
+        let badgeClass = 'badge-status';
+        if (status === 'SAIN') badgeClass += ' badge-active';
+        else if (status === 'SUSPECT') badgeClass += ' badge-paused';
+        else if (status === 'FRAUDULEUX') badgeClass += ' badge-archived';
+
+        const tooltipText = "Évaluation combinée basée sur la détection d\\'anomalies de prix par le modèle ML de fraud-service et l\\'analyse sémantique TF-IDF des textes similaires par dupli-service.";
+
+        return `<span class="${badgeClass}" title="${tooltipText}" style="cursor:help;">${status}</span>`;
+      }
+    },
+    {
+      key: 'createdAt',
+      header: 'Créé le',
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.dateFormatPipe.transform(value as string)
     },
-    { 
-      key: 'updatedAt', 
-      header: 'Modifié le', 
+    {
+      key: 'updatedAt',
+      header: 'Modifié le',
       sortable: true,
       type: 'custom',
       format: (value: unknown) => this.dateFormatPipe.transform(value as string)
@@ -147,13 +165,13 @@ export class AnnoncesComponent implements OnInit {
   get emptyStateSecondaryAction(): ActionButtonConfig {
     return this.appliedFilters.length > 0
       ? {
-          label: 'Réinitialiser les filtres',
-          handler: () => this.resetFilters()
-        }
+        label: 'Réinitialiser les filtres',
+        handler: () => this.resetFilters()
+      }
       : {
-          label: 'Parcourir les modèles',
-          handler: () => console.log('Browse templates')
-        };
+        label: 'Parcourir les modèles',
+        handler: () => console.log('Browse templates')
+      };
   }
 
   constructor(
@@ -165,17 +183,17 @@ export class AnnoncesComponent implements OnInit {
     private breakpointObserver: BreakpointObserver,
     private exportService: ExportService,
     private dialog: MatDialog
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCities();
     this.loadSavedPresets();
-    
+
     this.breakpointObserver.observe([Breakpoints.Handset])
       .subscribe(result => {
         this.isMobile = result.matches;
       });
-    
+
     this.route.queryParams.subscribe(params => {
       if (params['status']) {
         this.selectedStatus = params['status'] as AnnonceStatus;
@@ -197,7 +215,7 @@ export class AnnoncesComponent implements OnInit {
   }
 
   loadSavedPresets(): void {
-    this.savedPresets = this.filterPresetService.getPresets(this.FILTER_CONTEXT);
+    this.savedPresets = this.filterPresetService.getPresetsLocally(this.FILTER_CONTEXT);
   }
 
   loadAnnonces(): void {
@@ -390,12 +408,12 @@ export class AnnoncesComponent implements OnInit {
       selectedType: this.selectedType
     };
 
-    this.filterPresetService.savePreset(this.FILTER_CONTEXT, name, filters);
+    this.filterPresetService.savePresetLocally(this.FILTER_CONTEXT, name, filters);
     this.loadSavedPresets();
   }
 
   loadPreset(preset: FilterPreset): void {
-    const filters = preset.filters;
+    const filters = preset.filterConfig;
     this.searchQuery = (filters['searchQuery'] as string) || '';
     this.selectedStatus = (filters['selectedStatus'] as AnnonceStatus) || '';
     this.selectedCity = (filters['selectedCity'] as string) || '';
@@ -407,7 +425,7 @@ export class AnnoncesComponent implements OnInit {
   deletePreset(preset: FilterPreset, event: Event): void {
     event.stopPropagation();
     if (confirm(`Supprimer le preset "${preset.name}" ?`)) {
-      this.filterPresetService.deletePreset(this.FILTER_CONTEXT, preset.id);
+      this.filterPresetService.deletePresetLocally(this.FILTER_CONTEXT, preset.name);
       this.loadSavedPresets();
     }
   }
@@ -530,7 +548,7 @@ export class AnnoncesComponent implements OnInit {
   }
 
   trackByPreset(index: number, preset: FilterPreset): string {
-    return preset.id;
+    return preset.name;
   }
 
   trackByFilter(index: number, filter: AppliedFilter): string {
@@ -560,7 +578,7 @@ export class AnnoncesComponent implements OnInit {
         title: annonce.title || '',
         category: annonce.category || '-',
         city: annonce.city || '-',
-        price: annonce.price !== undefined 
+        price: annonce.price !== undefined
           ? this.priceFormatPipe.transform(annonce.price, annonce.currency || 'EUR')
           : '-',
         status: this.getStatusLabel(annonce.status),
@@ -585,8 +603,8 @@ export class AnnoncesComponent implements OnInit {
     const exportPromise = event.format === 'pdf'
       ? this.exportService.exportToPDF(dataToExport, exportColumns, exportConfig)
       : event.format === 'excel'
-      ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
-      : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
+        ? this.exportService.exportToExcel(dataToExport, exportColumns, exportConfig)
+        : this.exportService.printTable(dataToExport, exportColumns, exportConfig);
 
     exportPromise.catch(error => {
       console.error('Export error:', error);

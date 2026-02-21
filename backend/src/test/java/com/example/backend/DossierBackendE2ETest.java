@@ -1,5 +1,11 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.DossierCreateRequest;
@@ -19,6 +25,8 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.DossierStatusHistoryRepository;
 import com.example.backend.repository.PartiePrenanteRepository;
 import com.example.backend.utils.BackendE2ETestDataBuilder;
+import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,31 +34,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 /**
  * End-to-end tests for Dossier API with workflow validation.
- * 
- * WORKFLOW VALIDATION STRATEGY:
- * All tests use .withCaseType(null) to bypass custom workflow validation.
- * This tests the BASIC transition rules only (DossierStatusTransitionService).
- * 
- * VALIDATION BEHAVIOR:
- * - caseType=null: Only basic transition rules apply (flexible transitions)
+ *
+ * <p>WORKFLOW VALIDATION STRATEGY: All tests use .withCaseType(null) to bypass custom workflow
+ * validation. This tests the BASIC transition rules only (DossierStatusTransitionService).
+ *
+ * <p>VALIDATION BEHAVIOR: - caseType=null: Only basic transition rules apply (flexible transitions)
  * - caseType set: Both basic AND custom workflow rules apply (stricter)
- * 
- * These tests verify that when caseType=null:
- * 1. Terminal states (WON, LOST) still cannot transition
- * 2. Invalid transitions are still blocked (e.g., NEW->WON)
- * 3. Valid shortcuts are allowed (e.g., NEW->QUALIFIED, NEW->APPOINTMENT)
- * 4. Multi-step transitions work (NEW->QUALIFYING->QUALIFIED->APPOINTMENT->WON)
+ *
+ * <p>These tests verify that when caseType=null: 1. Terminal states (WON, LOST) still cannot
+ * transition 2. Invalid transitions are still blocked (e.g., NEW->WON) 3. Valid shortcuts are
+ * allowed (e.g., NEW->QUALIFIED, NEW->APPOINTMENT) 4. Multi-step transitions work
+ * (NEW->QUALIFYING->QUALIFIED->APPOINTMENT->WON)
  */
 @BackendE2ETest
 @WithMockUser(roles = {"PRO", "ADMIN"})
@@ -59,20 +55,15 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     private static final String ORG_ID = "test-org-e2e";
     private static final String BASE_URL = "/api/v1/dossiers";
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private DossierStatusHistoryRepository statusHistoryRepository;
+    @Autowired private DossierStatusHistoryRepository statusHistoryRepository;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private PartiePrenanteRepository partiePrenanteRepository;
+    @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
-    @Autowired
-    private BackendE2ETestDataBuilder testDataBuilder;
+    @Autowired private BackendE2ETestDataBuilder testDataBuilder;
 
     @BeforeEach
     void setUp() {
@@ -107,11 +98,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         partyRequest.setEmail("john.doe@example.com");
         request.setInitialParty(partyRequest);
 
-        mockMvc.perform(post(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        post(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.orgId").value(ORG_ID))
@@ -135,7 +126,8 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         assertThat(dossiers.get(0).getOrgId()).isEqualTo(ORG_ID);
         assertThat(dossiers.get(0).getStatus()).isEqualTo(DossierStatus.NEW);
 
-        List<PartiePrenanteEntity> parties = partiePrenanteRepository.findByDossierId(dossiers.get(0).getId());
+        List<PartiePrenanteEntity> parties =
+                partiePrenanteRepository.findByDossierId(dossiers.get(0).getId());
         assertThat(parties).hasSize(1);
         assertThat(parties.get(0).getRole()).isEqualTo(PartiePrenanteRole.BUYER);
 
@@ -149,12 +141,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testCreateDossierWithInitialParty_DetectsDuplicate() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier existingDossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("Jane Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
-            .persist();
+        Dossier existingDossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("Jane Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(null)
+                        .persist();
 
         DossierCreateRequest request = new DossierCreateRequest();
         request.setLeadPhone("+33699999999");
@@ -167,17 +161,19 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         partyRequest.setRole(PartiePrenanteRole.BUYER);
         request.setInitialParty(partyRequest);
 
-        String responseJson = mockMvc.perform(post(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.existingOpenDossierId").value(existingDossier.getId()))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+        String responseJson =
+                mockMvc.perform(
+                                post(BASE_URL)
+                                        .header(TENANT_HEADER, ORG_ID)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(
+                                jsonPath("$.existingOpenDossierId").value(existingDossier.getId()))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
         DossierResponse response = objectMapper.readValue(responseJson, DossierResponse.class);
         assertThat(response.getExistingOpenDossierId()).isEqualTo(existingDossier.getId());
@@ -202,14 +198,15 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33612345678");
         request.setLeadName("John Doe");
 
-        mockMvc.perform(post(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        post(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
+                .andExpect(
+                        jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
 
         List<Dossier> dossiers = dossierRepository.findAll();
         assertThat(dossiers).isEmpty();
@@ -221,12 +218,15 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         // When caseType is null, workflow validation is bypassed, allowing transitions
         // to follow only basic transition rules from DossierStatusTransitionService
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)  // Bypass workflow validation, use basic transitions only
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(
+                                null) // Bypass workflow validation, use basic transitions only
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -235,11 +235,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Starting qualification process");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dossier.getId()))
                 .andExpect(jsonPath("$.status").value("QUALIFYING"));
@@ -257,11 +257,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         statusHistoryRepository.deleteAll();
         request.setStatus(DossierStatus.QUALIFIED);
         request.setReason("Client is qualified");
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("QUALIFIED"));
 
@@ -276,11 +276,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         statusHistoryRepository.deleteAll();
         request.setStatus(DossierStatus.APPOINTMENT);
         request.setReason("Appointment scheduled");
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("APPOINTMENT"));
 
@@ -295,11 +295,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         statusHistoryRepository.deleteAll();
         request.setStatus(DossierStatus.WON);
         request.setReason("Deal closed successfully");
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("WON"));
 
@@ -317,26 +317,31 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         // Test validates that terminal state (WON) prevents transitions
         // Even with caseType=null (workflow bypass), basic transition rules still apply
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.WON)
-            .withCaseType(null)  // Workflow bypass, but terminal state rules still enforced
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.WON)
+                        .withCaseType(
+                                null) // Workflow bypass, but terminal state rules still enforced
+                        .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
         request.setStatus(DossierStatus.QUALIFYING);
         request.setUserId("user-123");
         request.setReason("Trying to change won status");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("Invalid status transition from WON to QUALIFYING"));
+                .andExpect(
+                        jsonPath("$.detail")
+                                .value("Invalid status transition from WON to QUALIFYING"));
 
         Dossier unchanged = dossierRepository.findById(dossier.getId()).orElseThrow();
         assertThat(unchanged.getStatus()).isEqualTo(DossierStatus.WON);
@@ -347,26 +352,30 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         // Test validates that terminal state (LOST) prevents transitions
         // caseType=null bypasses workflow validation but not basic terminal state rules
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.LOST)
-            .withCaseType(null)  // Workflow bypass, but terminal state rules still enforced
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.LOST)
+                        .withCaseType(
+                                null) // Workflow bypass, but terminal state rules still enforced
+                        .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
         request.setStatus(DossierStatus.NEW);
         request.setUserId("user-123");
         request.setReason("Trying to reopen lost dossier");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("Invalid status transition from LOST to NEW"));
+                .andExpect(
+                        jsonPath("$.detail").value("Invalid status transition from LOST to NEW"));
 
         Dossier unchanged = dossierRepository.findById(dossier.getId()).orElseThrow();
         assertThat(unchanged.getStatus()).isEqualTo(DossierStatus.LOST);
@@ -378,23 +387,26 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         // NEW cannot directly transition to WON - requires intermediate steps
         // (e.g., NEW -> QUALIFYING -> QUALIFIED -> APPOINTMENT -> WON)
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)  // Workflow bypass, but basic transition rules still apply
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(
+                                null) // Workflow bypass, but basic transition rules still apply
+                        .persist();
 
         DossierStatusPatchRequest request = new DossierStatusPatchRequest();
         request.setStatus(DossierStatus.WON);
         request.setUserId("user-123");
         request.setReason("Skipping intermediate steps");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("Invalid status transition from NEW to WON"));
@@ -406,26 +418,28 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testGetDossiersWithPhoneFilter() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withLeadPhone("+33612345678")
+                .withLeadName("John Doe")
+                .withStatus(DossierStatus.NEW)
+                .withCaseType(null)
+                .persist();
 
-        testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33699999999")
-            .withLeadName("Jane Smith")
-            .withStatus(DossierStatus.QUALIFYING)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withLeadPhone("+33699999999")
+                .withLeadName("Jane Smith")
+                .withStatus(DossierStatus.QUALIFYING)
+                .withCaseType(null)
+                .persist();
 
-        mockMvc.perform(get(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("leadPhone", "+33612345678")
-                        .param("page", "0")
-                        .param("size", "20"))
+        mockMvc.perform(
+                        get(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("leadPhone", "+33612345678")
+                                .param("page", "0")
+                                .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].leadPhone").value("+33612345678"))
@@ -435,33 +449,36 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testGetDossiersWithStatusFilter() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withLeadPhone("+33612345678")
+                .withLeadName("John Doe")
+                .withStatus(DossierStatus.NEW)
+                .withCaseType(null)
+                .persist();
 
-        testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33699999999")
-            .withLeadName("Jane Smith")
-            .withStatus(DossierStatus.QUALIFYING)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withLeadPhone("+33699999999")
+                .withLeadName("Jane Smith")
+                .withStatus(DossierStatus.QUALIFYING)
+                .withCaseType(null)
+                .persist();
 
-        testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33611111111")
-            .withLeadName("Bob Johnson")
-            .withStatus(DossierStatus.QUALIFYING)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withLeadPhone("+33611111111")
+                .withLeadName("Bob Johnson")
+                .withStatus(DossierStatus.QUALIFYING)
+                .withCaseType(null)
+                .persist();
 
-        mockMvc.perform(get(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("status", "QUALIFYING")
-                        .param("page", "0")
-                        .param("size", "20"))
+        mockMvc.perform(
+                        get(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("status", "QUALIFYING")
+                                .param("page", "0")
+                                .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].status").value("QUALIFYING"))
@@ -489,36 +506,39 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         annonce2 = annonceRepository.save(annonce2);
 
         testDataBuilder.withOrgId(ORG_ID);
-        testDataBuilder.dossierBuilder()
-            .withAnnonceId(annonce1.getId())
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withAnnonceId(annonce1.getId())
+                .withLeadPhone("+33612345678")
+                .withLeadName("John Doe")
+                .withStatus(DossierStatus.NEW)
+                .withCaseType(null)
+                .persist();
 
-        testDataBuilder.dossierBuilder()
-            .withAnnonceId(annonce2.getId())
-            .withLeadPhone("+33699999999")
-            .withLeadName("Jane Smith")
-            .withStatus(DossierStatus.QUALIFYING)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withAnnonceId(annonce2.getId())
+                .withLeadPhone("+33699999999")
+                .withLeadName("Jane Smith")
+                .withStatus(DossierStatus.QUALIFYING)
+                .withCaseType(null)
+                .persist();
 
-        testDataBuilder.dossierBuilder()
-            .withAnnonceId(annonce1.getId())
-            .withLeadPhone("+33611111111")
-            .withLeadName("Bob Johnson")
-            .withStatus(DossierStatus.QUALIFIED)
-            .withCaseType(null)
-            .persist();
+        testDataBuilder
+                .dossierBuilder()
+                .withAnnonceId(annonce1.getId())
+                .withLeadPhone("+33611111111")
+                .withLeadName("Bob Johnson")
+                .withStatus(DossierStatus.QUALIFIED)
+                .withCaseType(null)
+                .persist();
 
-        mockMvc.perform(get(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("annonceId", annonce1.getId().toString())
-                        .param("page", "0")
-                        .param("size", "20"))
+        mockMvc.perform(
+                        get(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("annonceId", annonce1.getId().toString())
+                                .param("page", "0")
+                                .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].annonceId").value(annonce1.getId()))
@@ -529,19 +549,20 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     void testGetDossiersWithPagination() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
         for (int i = 0; i < 25; i++) {
-            testDataBuilder.dossierBuilder()
-                .withLeadPhone("+3361234567" + i)
-                .withLeadName("User " + i)
-                .withStatus(DossierStatus.NEW)
-                .withCaseType(null)
-                .persist();
+            testDataBuilder
+                    .dossierBuilder()
+                    .withLeadPhone("+3361234567" + i)
+                    .withLeadName("User " + i)
+                    .withStatus(DossierStatus.NEW)
+                    .withCaseType(null)
+                    .persist();
         }
 
-        mockMvc.perform(get(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("page", "0")
-                        .param("size", "10"))
+        mockMvc.perform(
+                        get(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("page", "0")
+                                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(10)))
                 .andExpect(jsonPath("$.totalElements").value(25))
@@ -549,20 +570,20 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.number").value(0))
                 .andExpect(jsonPath("$.size").value(10));
 
-        mockMvc.perform(get(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("page", "1")
-                        .param("size", "10"))
+        mockMvc.perform(
+                        get(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("page", "1")
+                                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(10)))
                 .andExpect(jsonPath("$.number").value(1));
 
-        mockMvc.perform(get(BASE_URL)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("page", "2")
-                        .param("size", "10"))
+        mockMvc.perform(
+                        get(BASE_URL)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("page", "2")
+                                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(5)))
                 .andExpect(jsonPath("$.number").value(2));
@@ -571,12 +592,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testStatusHistoryVerification() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(null)
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -585,29 +608,29 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("First transition");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
         request.setStatus(DossierStatus.QUALIFIED);
         request.setUserId("user-456");
         request.setReason("Second transition");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get(BASE_URL + "/{id}/status-history", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .param("page", "0")
-                        .param("size", "20"))
+        mockMvc.perform(
+                        get(BASE_URL + "/{id}/status-history", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .param("page", "0")
+                                .param("size", "20"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].fromStatus").value("QUALIFYING"))
@@ -628,22 +651,25 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         createRequest.setLeadName("John Doe");
         createRequest.setLeadSource("Website");
 
-        String createResponseJson = mockMvc.perform(post(BASE_URL)
+        String createResponseJson =
+                mockMvc.perform(
+                                post(BASE_URL)
+                                        .header(TENANT_HEADER, ORG_ID)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(createRequest)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.createdAt", notNullValue()))
+                        .andExpect(jsonPath("$.updatedAt", notNullValue()))
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
 
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.createdAt", notNullValue()))
-                .andExpect(jsonPath("$.updatedAt", notNullValue()))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        DossierResponse createResponse = objectMapper.readValue(createResponseJson, DossierResponse.class);
+        DossierResponse createResponse =
+                objectMapper.readValue(createResponseJson, DossierResponse.class);
         Long dossierId = createResponse.getId();
 
-        List<DossierStatusHistory> historyAfterCreate = statusHistoryRepository.findByDossierId(dossierId, null).getContent();
+        List<DossierStatusHistory> historyAfterCreate =
+                statusHistoryRepository.findByDossierId(dossierId, null).getContent();
         assertThat(historyAfterCreate).hasSize(1);
         assertThat(historyAfterCreate.get(0).getFromStatus()).isNull();
         assertThat(historyAfterCreate.get(0).getToStatus()).isEqualTo(DossierStatus.NEW);
@@ -657,22 +683,24 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         patchRequest.setUserId("user-123");
         patchRequest.setReason("Client called back");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossierId)
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(patchRequest)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossierId)
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(patchRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("QUALIFYING"))
                 .andExpect(jsonPath("$.updatedAt", notNullValue()));
 
-        List<DossierStatusHistory> historyAfterPatch = statusHistoryRepository.findByDossierId(dossierId, null).getContent();
+        List<DossierStatusHistory> historyAfterPatch =
+                statusHistoryRepository.findByDossierId(dossierId, null).getContent();
         assertThat(historyAfterPatch).hasSize(2);
 
-        DossierStatusHistory latestHistory = historyAfterPatch.stream()
-                .filter(h -> h.getToStatus() == DossierStatus.QUALIFYING)
-                .findFirst()
-                .orElseThrow();
+        DossierStatusHistory latestHistory =
+                historyAfterPatch.stream()
+                        .filter(h -> h.getToStatus() == DossierStatus.QUALIFYING)
+                        .findFirst()
+                        .orElseThrow();
 
         assertThat(latestHistory.getFromStatus()).isEqualTo(DossierStatus.NEW);
         assertThat(latestHistory.getToStatus()).isEqualTo(DossierStatus.QUALIFYING);
@@ -682,9 +710,9 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         assertThat(latestHistory.getDossierId()).isEqualTo(dossierId);
         assertThat(latestHistory.getTransitionedAt()).isNotNull();
 
-        mockMvc.perform(get(BASE_URL + "/{id}/status-history", dossierId)
-
-                        .header(TENANT_HEADER, ORG_ID))
+        mockMvc.perform(
+                        get(BASE_URL + "/{id}/status-history", dossierId)
+                                .header(TENANT_HEADER, ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].dossierId").value(dossierId))
@@ -697,12 +725,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testAlternativePathToLost() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(null)
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -711,11 +741,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Client not interested");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("LOST"));
 
@@ -731,12 +761,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testQualifyingToLostTransition() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.QUALIFYING)
-            .withCaseType(null)
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.QUALIFYING)
+                        .withCaseType(null)
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -745,11 +777,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Did not meet criteria");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("LOST"));
 
@@ -760,12 +792,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testQualifiedToLostTransition() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.QUALIFIED)
-            .withCaseType(null)
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.QUALIFIED)
+                        .withCaseType(null)
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -774,11 +808,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Found another property");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("LOST"));
 
@@ -789,12 +823,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void testAppointmentToLostTransition() throws Exception {
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.APPOINTMENT)
-            .withCaseType(null)
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.APPOINTMENT)
+                        .withCaseType(null)
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -803,11 +839,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Client no-showed");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("LOST"));
 
@@ -820,12 +856,14 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         // Test validates shortcut transition: NEW -> QUALIFIED (skipping QUALIFYING)
         // This is allowed by basic transition rules when caseType=null
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)  // Allows flexible transitions per basic rules
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(null) // Allows flexible transitions per basic rules
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -834,11 +872,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Pre-qualified client");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("QUALIFIED"));
 
@@ -848,15 +886,18 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void testNewDirectToAppointmentTransition() throws Exception {
-        // Test validates shortcut transition: NEW -> APPOINTMENT (skipping QUALIFYING and QUALIFIED)
+        // Test validates shortcut transition: NEW -> APPOINTMENT (skipping QUALIFYING and
+        // QUALIFIED)
         // This is allowed by basic transition rules when caseType=null
         testDataBuilder.withOrgId(ORG_ID);
-        Dossier dossier = testDataBuilder.dossierBuilder()
-            .withLeadPhone("+33612345678")
-            .withLeadName("John Doe")
-            .withStatus(DossierStatus.NEW)
-            .withCaseType(null)  // Allows flexible transitions per basic rules
-            .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadPhone("+33612345678")
+                        .withLeadName("John Doe")
+                        .withStatus(DossierStatus.NEW)
+                        .withCaseType(null) // Allows flexible transitions per basic rules
+                        .persist();
 
         statusHistoryRepository.deleteAll();
 
@@ -865,11 +906,11 @@ public class DossierBackendE2ETest extends BaseBackendE2ETest {
         request.setUserId("user-123");
         request.setReason("Direct appointment scheduling");
 
-        mockMvc.perform(patch(BASE_URL + "/{id}/status", dossier.getId())
-
-                        .header(TENANT_HEADER, ORG_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        patch(BASE_URL + "/{id}/status", dossier.getId())
+                                .header(TENANT_HEADER, ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("APPOINTMENT"));
 

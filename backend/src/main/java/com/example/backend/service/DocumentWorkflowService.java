@@ -204,21 +204,16 @@ public class DocumentWorkflowService {
 
     private void sendApprovalNotification(WorkflowApprovalEntity approval, WorkflowStepEntity step) {
         try {
-            NotificationCreateRequest notificationRequest = new NotificationCreateRequest();
-            notificationRequest.setType(NotificationType.APPROVAL_REQUEST);
-            notificationRequest.setRecipient(approval.getApproverId());
-            notificationRequest.setTemplateId("approval_request");
-            notificationRequest.setSubject("Approval Required: " + step.getStepName());
-            notificationRequest.setMessage("You have been requested to review and approve: " + step.getStepName());
-            notificationRequest.setActionUrl("/workflows/approvals/" + approval.getId());
+            String message = "You have been requested to review and approve: " + step.getStepName();
+            String actionUrl = "/workflows/approvals/" + approval.getId();
 
-            Map<String, Object> variables = new HashMap<>();
-            variables.put("stepName", step.getStepName());
-            variables.put("approvalId", approval.getId());
-            variables.put("workflowId", step.getWorkflowId());
-            notificationRequest.setVariables(variables);
-
-            notificationService.createNotification(notificationRequest, approval.getOrgId());
+            notificationService.createInAppNotification(
+                    approval.getOrgId(),
+                    null,
+                    approval.getApproverId(),
+                    "Approval Required: " + step.getStepName(),
+                    message,
+                    actionUrl);
         } catch (Exception e) {
             logger.error("Failed to send approval notification", e);
         }
@@ -240,7 +235,8 @@ public class DocumentWorkflowService {
         DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId)
                 .orElseThrow();
 
-        List<WorkflowStepEntity> allSteps = stepRepository.findByWorkflowIdAndOrgIdOrderByStepOrder(workflow.getId(), orgId);
+        List<WorkflowStepEntity> allSteps = stepRepository.findByWorkflowIdAndOrgIdOrderByStepOrder(workflow.getId(),
+                orgId);
         Optional<WorkflowStepEntity> nextStep = allSteps.stream()
                 .filter(s -> s.getStepOrder() > step.getStepOrder())
                 .filter(s -> s.getStatus() == WorkflowStepStatus.PENDING)
@@ -310,21 +306,21 @@ public class DocumentWorkflowService {
             step.setStepType(WorkflowStepType.valueOf((String) stepDef.get("stepType")));
             step.setStepOrder(order++);
             step.setStatus(WorkflowStepStatus.PENDING);
-            
+
             if (stepDef.containsKey("assignedApprovers")) {
                 step.setAssignedApprovers((List<String>) stepDef.get("assignedApprovers"));
             }
-            
+
             if (stepDef.containsKey("approvalsRequired")) {
                 step.setApprovalsRequired(((Number) stepDef.get("approvalsRequired")).intValue());
             }
-            
+
             step.setRequiresAllApprovers((Boolean) stepDef.getOrDefault("requiresAllApprovers", true));
             step.setIsParallel((Boolean) stepDef.getOrDefault("isParallel", false));
             step.setStepConfig((Map<String, Object>) stepDef.get("stepConfig"));
             step.setConditionRules((Map<String, Object>) stepDef.get("conditionRules"));
             step.setCreatedBy("system");
-            
+
             stepRepository.save(step);
         }
 
@@ -333,7 +329,7 @@ public class DocumentWorkflowService {
     }
 
     private void logAudit(Long documentId, Long workflowId, Long versionId, DocumentActionType actionType,
-                          String userId, String description, String orgId) {
+            String userId, String description, String orgId) {
         DocumentAuditEntity audit = new DocumentAuditEntity();
         audit.setOrgId(orgId);
         audit.setDocumentId(documentId);

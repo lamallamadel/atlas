@@ -67,26 +67,19 @@ export JAVA_HOME=/path/to/jdk-17
 
 #### 2. Start the Full Stack
 
-**Option A: Using the dev script (Recommended)**
-
-**Windows (PowerShell):**
+**Windows (Recommended — graphical dashboard):**
 ```powershell
-.\dev.ps1 up
+.\AtlasDevConsole.ps1
 ```
+This opens a WPF dashboard that auto-discovers all docker-compose services, npm scripts, Maven profiles, Spring profiles, and observability links.
 
 **Linux/Mac:**
 ```bash
-./dev up
-```
-
-**Option B: Using Make**
-```bash
-make up
+./atlas up
 ```
 
 This will:
-- Start PostgreSQL database
-- Build and start the backend with local profile (H2 database, port 8080)
+- Start infrastructure via Docker (PostgreSQL, Redis, Keycloak, backend, etc.)
 - Install dependencies and start the frontend (port 4200)
 
 #### 3. Access the Application
@@ -99,61 +92,34 @@ This will:
 
 ## 📋 Available Commands
 
-### Using dev script
-
-**Windows (PowerShell):**
-```powershell
-.\dev.ps1 up          # Start the full stack
-.\dev.ps1 down        # Stop all services
-.\dev.ps1 logs        # View logs (all services)
-.\dev.ps1 logs backend    # View backend logs
-.\dev.ps1 logs frontend   # View frontend logs
-.\dev.ps1 logs db         # View database logs
-.\dev.ps1 reset       # Reset database (delete all data)
-.\dev.ps1 restart     # Restart all services
-.\dev.ps1 status      # Check status of all services
-```
-
-**Linux/Mac:**
-```bash
-./dev up          # Start the full stack
-./dev down        # Stop all services
-./dev logs        # View logs (all services)
-./dev logs backend    # View backend logs
-./dev logs frontend   # View frontend logs
-./dev logs db         # View database logs
-./dev reset       # Reset database (delete all data)
-./dev restart     # Restart all services
-./dev status      # Check status of all services
-```
-
-### Using Makefile
+### Atlas CLI (Linux/Mac)
 
 ```bash
-make up           # Start the full stack
-make down         # Stop all services
-make logs         # View logs (all services)
-make logs-backend # View backend logs
-make logs-frontend # View frontend logs
-make logs-db      # View database logs
-make reset        # Reset database
-make restart      # Restart all services
-make status       # Check status
-make clean        # Stop services and clean build artifacts
-make help         # Show all available commands
+./atlas up        # Start the full stack
+./atlas down      # Stop all services
+./atlas restart   # Restart all services
+./atlas status    # Health check all services
+./atlas logs      # View logs (all | backend | frontend | db)
+./atlas reset     # Reset database (destroy + recreate)
+./atlas test      # Run backend + frontend unit tests
+./atlas build     # Build backend JAR + frontend dist
 ```
+
+### Atlas Dev Console (Windows)
+
+Run `.\AtlasDevConsole.ps1` to open the graphical dashboard. All commands, profiles, and services are auto-discovered from the repository.
 
 ### Manual Commands
 
 #### Backend
 ```bash
 cd backend
-./mvnw clean install         # Build
-./mvnw test                  # Run tests (uses test profile with H2)
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local  # Start server (port 8080)
-./mvnw clean package         # Build JAR for production
-./mvnw verify -Pbackend-e2e-h2         # Run E2E tests with H2
-./mvnw verify -Pbackend-e2e-postgres   # Run E2E tests with PostgreSQL
+mvn clean install         # Build
+mvn test                  # Run tests (uses test profile with H2)
+mvn spring-boot:run -Dspring-boot.run.profiles=local  # Start server (port 8080)
+mvn clean package         # Build JAR for production
+mvn verify -Pbackend-e2e-h2         # Run E2E tests with H2
+mvn verify -Pbackend-e2e-postgres   # Run E2E tests with PostgreSQL
 ```
 
 #### Frontend
@@ -225,7 +191,7 @@ docker-compose logs -f    # View logs
 
 - **[CONTRIBUTING.md](./docs/CONTRIBUTING.md)** - Contributing guidelines
 - **[AGENTS.md](./AGENTS.md)** - Agent development guide
-- **[SETUP.md](./SETUP.md)** - Detailed setup instructions
+- **[CLAUDE.md](./CLAUDE.md)** - Claude Code guidance
 - **[Backend README](./backend/README.md)** - Backend documentation
 - **[Frontend README](./frontend/README.md)** - Frontend documentation
 
@@ -256,17 +222,17 @@ Available profiles:
 **Local Development (H2):**
 ```bash
 cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=local
+mvn spring-boot:run -Dspring-boot.run.profiles=local
 # OR
-SPRING_PROFILES_ACTIVE=local ./mvnw spring-boot:run
+SPRING_PROFILES_ACTIVE=local mvn spring-boot:run
 ```
 
 **Development with Seed Data (H2):**
 ```bash
 cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 # OR
-SPRING_PROFILES_ACTIVE=dev ./mvnw spring-boot:run
+SPRING_PROFILES_ACTIVE=dev mvn spring-boot:run
 ```
 
 **Staging (PostgreSQL):**
@@ -277,7 +243,7 @@ export DB_PASSWORD=staging_password
 export SPRING_PROFILES_ACTIVE=staging
 
 cd backend
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 **Production (PostgreSQL):**
@@ -351,7 +317,7 @@ The `dev` profile includes an automatic seed data loader that populates the data
 **Example Usage:**
 ```bash
 cd backend
-./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
 ```
 
 The loader will output logs like:
@@ -682,7 +648,7 @@ $env:JAVA_HOME = 'C:\Path\To\jdk-17'  # Windows PowerShell
 ```bash
 # Make sure to specify a profile
 export SPRING_PROFILES_ACTIVE=local  # or staging, prod
-./mvnw spring-boot:run
+mvn spring-boot:run
 ```
 
 **Docker issues:**

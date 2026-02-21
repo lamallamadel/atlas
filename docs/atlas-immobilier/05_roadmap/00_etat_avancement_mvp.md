@@ -36,18 +36,28 @@ Ce document décrit **uniquement** l’état réel du projet (ce qui est présen
 - Search & reporting (endpoints + dashboard)
 
 ### S5+ — Consentements
-- CRUD consentements (stockage/consultation)
+- CRUD consentements (stockage/consultation) ✅
+- Enforcement strict sur outbound (WhatsApp/SMS/Email) + preuve de consentement ✅
 
-### S6+ — WhatsApp inbound
-- Webhook inbound : validation HMAC + idempotence + association dossier
+### S6+ — WhatsApp Inbound & Outbound (Agentic Chatbot)
+- Webhook inbound : validation HMAC + idempotence + association dossier ✅
+- WhatsApp outbound : provider Twilio + templates + outbox/retry + monitoring ✅
+- Agent IA NLP intégré : qualification de leads auto et prise de RDV autonome ✅
+
+### S7+ — IA Agentique & Automatisation (Phase 2)
+- Coach Virtuel : Nudging comportemental sur les leads ✅
+- Scanning IA : Validation DPE & Amiante ✅
+- Contrats IA : Génération de compromis de vente pré-rempli ✅
+- Yield Management : Ajustement automatique des prix ✅
+- Anti-fraude & Doublons : Scoring IA sur les annonces ✅
+- Interface "Glass Box" (tooltips d'explicabilité de l'IA) ✅
+
+### S8+ — Qualité & NFR
+- NFR : rate limiting, alerting, dashboards de performance ✅
+- E2E Playwright : Suite complète de tests E2E stabilisés intégrée au pipeline CI ✅
 
 ## Écarts vers “market-ready” (TO-BE)
-
-- Consentement : enforcement strict sur outbound (WhatsApp/SMS/Email) + preuve de consentement
-- WhatsApp outbound : provider + templates + outbox/retry + monitoring (Choix B)
-- E2E Playwright : stabiliser le login et réduire le flakiness
-- Timeline : garantir les événements automatiques pour statut/rdv/message
-- NFR : rate limiting, alerting, dashboards, politiques de rétention (selon besoin)
+- Le cœur du système et le CRM avancé sont livrés. Les prochains écarts concernent les extensions métiers B2B et Coop Habitat.
 
 ## Références
 - Contrat API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`

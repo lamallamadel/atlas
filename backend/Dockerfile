@@ -27,15 +27,13 @@ RUN mkdir -p /root/.m2 && \
 </toolchains>
 EOF
 
-# Download deps with cache mounted ONLY on repository
-RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -ntp -s /app/settings.xml dependency:go-offline
+# Download dependencies (without cache mount for compatibility)
+RUN mvn -ntp -s /app/settings.xml dependency:go-offline
 
 # Copy sources and build
 COPY src /app/src
 
-RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
+RUN mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
 
 
 # -------------------------

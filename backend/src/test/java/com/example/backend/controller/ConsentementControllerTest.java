@@ -1,11 +1,14 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.dto.ConsentementCreateRequest;
-import com.example.backend.entity.AuditEventEntity;
 import com.example.backend.entity.ConsentementEntity;
 import com.example.backend.entity.Dossier;
-import com.example.backend.entity.enums.AuditAction;
-import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
@@ -14,6 +17,9 @@ import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,16 +31,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -48,25 +44,20 @@ class ConsentementControllerTest {
     private static final String ORG_ID = "org123";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private ConsentementRepository consentementRepository;
+    @Autowired private ConsentementRepository consentementRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     @BeforeEach
@@ -96,9 +87,11 @@ class ConsentementControllerTest {
         request.setStatus(ConsentementStatus.GRANTED);
         request.setMeta(customMeta);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -142,9 +135,11 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.PENDING);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.meta.previousStatus").value(nullValue()))
                 .andExpect(jsonPath("$.meta.changedBy").exists())
@@ -158,9 +153,11 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -172,9 +169,11 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -191,9 +190,11 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -210,9 +211,11 @@ class ConsentementControllerTest {
         request.setChannel(ConsentementChannel.EMAIL);
         request.setConsentType(ConsentementType.MARKETING);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -224,10 +227,11 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        post("/api/v1/consentements")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -241,11 +245,13 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(post("/api/v1/consentements").with(anonymous())
-                        .header(ORG_ID_HEADER, ORG_ID)
-                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        post("/api/v1/consentements")
+                                .with(anonymous())
+                                .header(ORG_ID_HEADER, ORG_ID)
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -264,9 +270,11 @@ class ConsentementControllerTest {
         request.setConsentType(ConsentementType.MARKETING);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated());
     }
 
@@ -326,8 +334,10 @@ class ConsentementControllerTest {
         consent2.setStatus(ConsentementStatus.PENDING);
         consentementRepository.save(consent2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/consentements")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/consentements")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -367,9 +377,11 @@ class ConsentementControllerTest {
         consent3.setStatus(ConsentementStatus.DENIED);
         consentementRepository.save(consent3);
 
-        mockMvc.perform(withHeaders(get("/api/v1/consentements")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("channel", "EMAIL")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/consentements")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("channel", "EMAIL")))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$", hasSize(2)))
@@ -403,8 +415,10 @@ class ConsentementControllerTest {
         consent2.setStatus(ConsentementStatus.PENDING);
         consent2 = consentementRepository.save(consent2);
 
-        mockMvc.perform(withHeaders(get("/api/v1/consentements")
-                        .param("dossierId", dossier.getId().toString())))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/consentements")
+                                        .param("dossierId", dossier.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id").value(consent2.getId()))
@@ -413,8 +427,7 @@ class ConsentementControllerTest {
 
     @Test
     void list_NonExistentDossier_Returns404() throws Exception {
-        mockMvc.perform(withHeaders(get("/api/v1/consentements")
-                        .param("dossierId", "999")))
+        mockMvc.perform(withHeaders(get("/api/v1/consentements").param("dossierId", "999")))
                 .andExpect(status().isNotFound());
     }
 
@@ -431,9 +444,11 @@ class ConsentementControllerTest {
         request.setChannel(ConsentementChannel.EMAIL);
         request.setStatus(ConsentementStatus.GRANTED);
 
-        mockMvc.perform(withHeaders(post("/api/v1/consentements")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/consentements")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 }

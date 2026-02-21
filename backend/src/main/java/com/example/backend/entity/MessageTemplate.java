@@ -1,9 +1,9 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.util.List;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import java.util.List;
 
 @Entity
 @Table(name = "message_template")

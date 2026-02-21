@@ -1,8 +1,10 @@
 import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { 
-  ReportingApiService, 
-  KpiReportResponse, 
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import {
+  ReportingApiService,
+  KpiReportResponse,
   PipelineSummaryResponse,
   AnalyticsData,
   AgentPerformance,
@@ -329,6 +331,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.error = null;
 
+
     this.reportingService.getKpiReport(this.dateFrom, this.dateTo).subscribe({
       next: (data) => {
         this.kpiReport = data;
@@ -358,6 +361,32 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
         this.updateAgentPerformanceChart(data.agentPerformance);
         this.updateRevenueForecastChart(data.revenueForecast);
         this.updateLeadSourceChart(data.leadSources);
+
+    forkJoin({
+      kpi: this.reportingService.getKpiReport(this.dateFrom, this.dateTo).pipe(
+        catchError(err => { console.error('KPI report error:', err); return of(null); })
+      ),
+      pipeline: this.reportingService.getPipelineSummary().pipe(
+        catchError(err => { console.error('Pipeline summary error:', err); return of(null); })
+      ),
+      analytics: this.reportingService.getAnalyticsData(this.dateFrom, this.dateTo).pipe(
+        catchError(err => { console.error('Analytics data error:', err); return of(null); })
+      )
+    }).subscribe({
+      next: ({ kpi, pipeline, analytics }) => {
+        this.kpiReport = kpi;
+        this.pipelineSummary = pipeline;
+        if (analytics) {
+          this.analyticsData = analytics;
+          this.updateConversionFunnelChart(analytics.conversionFunnel);
+          this.updateAgentPerformanceChart(analytics.agentPerformance);
+          this.updateRevenueForecastChart(analytics.revenueForecast);
+          this.updateLeadSourceChart(analytics.leadSources);
+        }
+        if (!kpi && !pipeline && !analytics) {
+          this.error = 'Impossible de charger les rapports.';
+        }
+
         this.loading = false;
 
         // Render charts if Chart.js already loaded
@@ -366,8 +395,8 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
         }
       },
       error: (err) => {
-        this.error = 'Failed to load analytics data';
-        console.error(err);
+        console.error('Reports load error:', err);
+        this.error = 'Erreur lors du chargement des rapports.';
         this.loading = false;
       }
     });

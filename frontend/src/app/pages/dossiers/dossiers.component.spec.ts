@@ -25,6 +25,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
@@ -48,12 +49,13 @@ describe('DossiersComponent', () => {
   beforeEach(async () => {
     const dossierApiServiceSpy = jasmine.createSpyObj('DossierApiService', ['list', 'getById', 'create', 'patchStatus']);
     const annonceApiServiceSpy = jasmine.createSpyObj('AnnonceApiService', ['list', 'getById']);
-    const filterPresetServiceSpy = jasmine.createSpyObj('FilterPresetService', ['getPresets', 'savePreset', 'deletePreset']);
+    const filterPresetServiceSpy = jasmine.createSpyObj('FilterPresetService', ['getPresets', 'savePreset', 'deletePreset', 'getPresetsLocally', 'savePresetLocally', 'deletePresetLocally']);
     const bottomSheetSpy = jasmine.createSpyObj('MatBottomSheet', ['open']);
     const breakpointObserverSpy = jasmine.createSpyObj('BreakpointObserver', ['observe']);
 
     breakpointObserverSpy.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
     filterPresetServiceSpy.getPresets.and.returnValue([]);
+    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
     annonceApiServiceSpy.list.and.returnValue(of({
       content: [],
       pageable: {
@@ -96,6 +98,7 @@ describe('DossiersComponent', () => {
         MatExpansionModule,
         MatSelectModule,
         MatMenuModule,
+        MatSnackBarModule,
         NoopAnimationsModule
       ],
       providers: [

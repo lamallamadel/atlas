@@ -1,2 +1,0 @@
-@set JAVA_HOME=C:\Environement\Java\jdk-17.0.5.8-hotspot
-@mvn -f backend\pom.xml clean package -DskipTests

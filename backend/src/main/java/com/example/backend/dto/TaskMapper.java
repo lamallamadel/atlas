@@ -2,9 +2,8 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.TaskEntity;
 import com.example.backend.entity.enums.TaskStatus;
-import org.springframework.stereotype.Component;
-
 import java.time.LocalDateTime;
+import org.springframework.stereotype.Component;
 
 @Component
 public class TaskMapper {
@@ -66,15 +65,15 @@ public class TaskMapper {
         response.setUpdatedAt(entity.getUpdatedAt());
         response.setCreatedBy(entity.getCreatedBy());
         response.setUpdatedBy(entity.getUpdatedBy());
-        
-        if (entity.getDueDate() != null && 
-            entity.getStatus() != TaskStatus.COMPLETED && 
-            entity.getStatus() != TaskStatus.CANCELLED) {
+
+        if (entity.getDueDate() != null
+                && entity.getStatus() != TaskStatus.COMPLETED
+                && entity.getStatus() != TaskStatus.CANCELLED) {
             response.setIsOverdue(entity.getDueDate().isBefore(LocalDateTime.now()));
         } else {
             response.setIsOverdue(false);
         }
-        
+
         return response;
     }
 }

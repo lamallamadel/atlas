@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialogModule } from '@angular/material/dialog';
 import { of } from 'rxjs';
 
 import { AnnoncesComponent } from './annonces.component';
@@ -27,7 +28,11 @@ class GenericTableStubComponent {
   @Input() actions: any;
   @Input() showPagination = false;
   @Input() enableSort = false;
+  @Input() enableRowSelection = false;
+  @Input() enableExport = false;
+  @Input() showTableHeader = false;
   @Output() rowAction = new EventEmitter<any>();
+  @Output() exportRequest = new EventEmitter<any>();
 }
 
 @Component({ selector: 'app-empty-state', template: '' })
@@ -36,6 +41,8 @@ class EmptyStateStubComponent {
   @Input() subtext = '';
   @Input() primaryAction: any;
   @Input() secondaryAction: any;
+  @Input() context: any;
+  @Input() isNewUser = false;
 }
 
 @Component({ selector: 'app-loading-skeleton', template: '' })
@@ -86,7 +93,10 @@ describe('AnnoncesComponent', () => {
     const filterPresetServiceSpy = jasmine.createSpyObj('FilterPresetService', [
       'getPresets',
       'savePreset',
-      'deletePreset'
+      'deletePreset',
+      'getPresetsLocally',
+      'savePresetLocally',
+      'deletePresetLocally'
     ]);
 
     const bottomSheetSpy = jasmine.createSpyObj('MatBottomSheet', ['open']);
@@ -98,6 +108,7 @@ describe('AnnoncesComponent', () => {
     annonceApiServiceSpy.getDistinctCities.and.returnValue(of([]));
     annonceApiServiceSpy.list.and.returnValue(of(emptyPage));
     filterPresetServiceSpy.getPresets.and.returnValue([]);
+    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
 
     await TestBed.configureTestingModule({
       declarations: [
@@ -118,7 +129,8 @@ describe('AnnoncesComponent', () => {
         MatButtonModule,
         MatChipsModule,
         MatMenuModule,
-        MatCardModule
+        MatCardModule,
+        MatDialogModule
       ],
       providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },

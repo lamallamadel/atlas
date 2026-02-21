@@ -1,9 +1,16 @@
 package com.example.backend.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.example.backend.dto.UserPreferencesDTO;
 import com.example.backend.entity.UserPreferencesEntity;
 import com.example.backend.repository.UserPreferencesRepository;
 import com.example.backend.util.TenantContext;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,23 +19,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class UserPreferencesServiceTest {
 
-    @Mock
-    private UserPreferencesRepository userPreferencesRepository;
+    @Mock private UserPreferencesRepository userPreferencesRepository;
 
-    @InjectMocks
-    private UserPreferencesService userPreferencesService;
+    @InjectMocks private UserPreferencesService userPreferencesService;
 
     private static final String TEST_USER_ID = "user-123";
     private static final String TEST_ORG_ID = "org-456";
@@ -88,14 +84,15 @@ class UserPreferencesServiceTest {
     void updateDashboardLayout_UpdatesLayout() {
         UserPreferencesEntity entity = createTestEntity();
         Map<String, Object> newLayout = new HashMap<>();
-        newLayout.put("widgets", new Object[]{});
+        newLayout.put("widgets", new Object[] {});
 
         when(userPreferencesRepository.findByUserIdAndOrgId(TEST_USER_ID, TEST_ORG_ID))
                 .thenReturn(Optional.of(entity));
         when(userPreferencesRepository.save(any(UserPreferencesEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserPreferencesDTO result = userPreferencesService.updateDashboardLayout(TEST_USER_ID, newLayout);
+        UserPreferencesDTO result =
+                userPreferencesService.updateDashboardLayout(TEST_USER_ID, newLayout);
 
         assertNotNull(result);
         verify(userPreferencesRepository).save(any(UserPreferencesEntity.class));
@@ -123,7 +120,8 @@ class UserPreferencesServiceTest {
         when(userPreferencesRepository.save(any(UserPreferencesEntity.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserPreferencesDTO result = userPreferencesService.applyRoleTemplate(TEST_USER_ID, "manager");
+        UserPreferencesDTO result =
+                userPreferencesService.applyRoleTemplate(TEST_USER_ID, "manager");
 
         assertNotNull(result);
         assertEquals("manager", result.getRoleTemplate());

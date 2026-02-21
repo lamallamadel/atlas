@@ -48,6 +48,14 @@ export interface PartiePrenanteResponse {
   updatedAt: string;
 }
 
+export interface LeadActivityResponse {
+  id: number;
+  activityType: string;
+  description: string;
+  scoreImpact: number;
+  createdAt: string;
+}
+
 export interface DossierResponse {
   id: number;
   orgId: string;
@@ -61,6 +69,7 @@ export interface DossierResponse {
   score?: number;
   source?: DossierSource;
   parties?: PartiePrenanteResponse[];
+  recentActivities?: LeadActivityResponse[];
   existingOpenDossierId?: number;
   createdAt: string;
   updatedAt: string;
@@ -141,6 +150,11 @@ export interface BulkOperationError {
   message: string;
 }
 
+export interface ContractGenerateResponse {
+  contractText: string;
+  confidence: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -212,6 +226,10 @@ export class DossierApiService {
       );
   }
 
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
   bulkAssign(request: DossierBulkAssignRequest): Observable<BulkOperationResponse> {
     return this.http.post<BulkOperationResponse>(`${this.apiUrl}/bulk-assign`, request);
   }
@@ -222,5 +240,9 @@ export class DossierApiService {
     return this.list({ status: DossierStatus.NEW, size: 1 }).pipe(
       map(page => page.totalElements)
     );
+  }
+
+  generateContract(id: number): Observable<ContractGenerateResponse> {
+    return this.http.post<ContractGenerateResponse>(`${this.apiUrl}/${id}/contract/generate`, {});
   }
 }

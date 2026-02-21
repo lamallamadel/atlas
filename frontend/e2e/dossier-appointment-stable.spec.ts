@@ -6,21 +6,17 @@ import {
 } from './api-validation';
 
 test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
-  test.beforeEach(async ({ page, helpers }) => {
+  test.beforeEach(async ({ authenticatedPage: page, helpers }) => {
     await helpers.retryAssertion(async () => {
       await page.goto('/');
       await page.waitForSelector('app-root', { timeout: 10000 });
     });
   });
 
-  test.afterEach(async ({ dataCleanup }) => {
-    await dataCleanup.fullCleanup();
-  });
-
   test('Create appointment with stable waits and validation', async ({
-    page,
+    authenticatedPage: page,
     helpers,
-    dataCleanup,
+    cleanup,
   }) => {
     await helpers.navigateToDossiers();
 
@@ -34,7 +30,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
     const dossierId = helpers.extractDossierId(page.url());
     expect(dossierId).toBeTruthy();
     if (dossierId) {
-      dataCleanup.trackDossier(dossierId);
+      cleanup.trackDossier(dossierId);
     }
 
     await helpers.switchToTab('Rendez-vous');
@@ -79,7 +75,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
     expect(appointmentBody.id).toBeTruthy();
     expect(appointmentBody.location).toBe(location);
     expect(appointmentBody.status).toBe('SCHEDULED');
-    dataCleanup.trackAppointment(appointmentBody.id);
+    cleanup.trackAppointment(appointmentBody.id);
 
     await helpers.closeSnackbar();
 
@@ -97,7 +93,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
     await expect(appointmentRow).toContainText(/Planifié|SCHEDULED/i);
   });
 
-  test('Validate appointment time constraints', async ({ page, helpers, dataCleanup }) => {
+  test('Validate appointment time constraints', async ({ authenticatedPage: page, helpers, cleanup }) => {
     await helpers.navigateToDossiers();
 
     await helpers.ensureDossierExists('Time Validation Test', '+33612347000');
@@ -105,7 +101,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
 
     const dossierId = helpers.extractDossierId(page.url());
     if (dossierId) {
-      dataCleanup.trackDossier(dossierId);
+      cleanup.trackDossier(dossierId);
     }
 
     await helpers.switchToTab('Rendez-vous');
@@ -174,7 +170,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
     expect(errorBody.detail).toContain('fin');
   });
 
-  test('Appointment list updates after creation', async ({ page, helpers, dataCleanup }) => {
+  test('Appointment list updates after creation', async ({ authenticatedPage: page, helpers, cleanup }) => {
     await helpers.navigateToDossiers();
 
     await helpers.ensureDossierExists('List Update Test', '+33612348000');
@@ -182,7 +178,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
 
     const dossierId = helpers.extractDossierId(page.url());
     if (dossierId) {
-      dataCleanup.trackDossier(dossierId);
+      cleanup.trackDossier(dossierId);
     }
 
     await helpers.switchToTab('Rendez-vous');
@@ -225,7 +221,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
     await submitButton.first().click();
 
     const { body: createdAppointment } = await createPromise;
-    dataCleanup.trackAppointment(createdAppointment.id);
+    cleanup.trackAppointment(createdAppointment.id);
 
     await helpers.closeSnackbar();
 
@@ -236,7 +232,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
     }, { maxAttempts: 5, delayMs: 1000 });
   });
 
-  test('Filter appointments by status', async ({ page, helpers, dataCleanup }) => {
+  test('Filter appointments by status', async ({ authenticatedPage: page, helpers, cleanup }) => {
     await helpers.navigateToDossiers();
 
     await helpers.ensureDossierExists('Filter Test', '+33612349000');
@@ -244,7 +240,7 @@ test.describe('Dossier Appointment E2E Tests (Stabilized)', () => {
 
     const dossierId = helpers.extractDossierId(page.url());
     if (dossierId) {
-      dataCleanup.trackDossier(dossierId);
+      cleanup.trackDossier(dossierId);
     }
 
     await helpers.switchToTab('Rendez-vous');

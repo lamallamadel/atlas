@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.TaskPriority;
 import com.example.backend.entity.enums.TaskStatus;
-
 import java.time.LocalDateTime;
 
 public class TaskResponse {

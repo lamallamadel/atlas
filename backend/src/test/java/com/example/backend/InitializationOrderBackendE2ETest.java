@@ -1,45 +1,43 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.ResultSet;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.testcontainers.containers.PostgreSQLContainer;
-
-import javax.sql.DataSource;
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @BackendE2ETest
 @WithMockUser(roles = {"ADMIN"})
 public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
 
-    private static final Logger log = LoggerFactory.getLogger(InitializationOrderBackendE2ETest.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(InitializationOrderBackendE2ETest.class);
 
     @Autowired(required = false)
     private PostgreSQLContainer<?> postgresContainer;
 
-    @Autowired
-    private DataSource dataSource;
+    @Autowired private DataSource dataSource;
 
     @Test
     void verifyTestcontainerIsRunning() {
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         log.info("Verification Test 1: Testcontainer Status");
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        
+
         if (postgresContainer != null) {
             assertThat(postgresContainer.isRunning())
-                .as("PostgreSQL container should be running")
-                .isTrue();
-            
+                    .as("PostgreSQL container should be running")
+                    .isTrue();
+
             log.info("✓ PostgreSQL container is running");
             log.info("  Container ID: {}", postgresContainer.getContainerId());
             log.info("  JDBC URL: {}", postgresContainer.getJdbcUrl());
@@ -54,17 +52,18 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         log.info("Verification Test 2: DataSource Connection");
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        
+
         assertThat(dataSource).isNotNull();
-        
+
         try (Connection connection = dataSource.getConnection()) {
-            assertThat(connection.isValid(5))
-                .as("DataSource connection should be valid")
-                .isTrue();
-            
+            assertThat(connection.isValid(5)).as("DataSource connection should be valid").isTrue();
+
             DatabaseMetaData metaData = connection.getMetaData();
             log.info("✓ DataSource connection is valid");
-            log.info("  Database: {} {}", metaData.getDatabaseProductName(), metaData.getDatabaseProductVersion());
+            log.info(
+                    "  Database: {} {}",
+                    metaData.getDatabaseProductName(),
+                    metaData.getDatabaseProductVersion());
             log.info("  JDBC URL: {}", metaData.getURL());
         }
     }
@@ -74,32 +73,31 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         log.info("Verification Test 3: Flyway Migrations");
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        
+
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
-            
+
             // Check flyway_schema_history table exists
             boolean flywayTableExists = false;
             try (ResultSet tables = metaData.getTables(null, null, "flyway_schema_history", null)) {
                 flywayTableExists = tables.next();
             }
-            
-            assertThat(flywayTableExists)
-                .as("Flyway schema history table should exist")
-                .isTrue();
-            
+
+            assertThat(flywayTableExists).as("Flyway schema history table should exist").isTrue();
+
             log.info("✓ Flyway schema history table exists");
-            
+
             // Count successful migrations
             try (var stmt = connection.createStatement();
-                 var rs = stmt.executeQuery(
-                     "SELECT version, description, type, installed_on, success " +
-                     "FROM flyway_schema_history " +
-                     "ORDER BY installed_rank")) {
-                
+                    var rs =
+                            stmt.executeQuery(
+                                    "SELECT version, description, type, installed_on, success "
+                                            + "FROM flyway_schema_history "
+                                            + "ORDER BY installed_rank")) {
+
                 int migrationCount = 0;
                 int successCount = 0;
-                
+
                 log.info("Applied migrations:");
                 while (rs.next()) {
                     migrationCount++;
@@ -107,7 +105,7 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
                     String description = rs.getString("description");
                     String type = rs.getString("type");
                     boolean success = rs.getBoolean("success");
-                    
+
                     if (success) {
                         successCount++;
                         log.info("  ✓ V{} - {} ({})", version, description, type);
@@ -115,15 +113,15 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
                         log.warn("  ✗ V{} - {} ({}) - FAILED", version, description, type);
                     }
                 }
-                
+
                 assertThat(migrationCount)
-                    .as("At least one migration should have been executed")
-                    .isGreaterThan(0);
-                
+                        .as("At least one migration should have been executed")
+                        .isGreaterThan(0);
+
                 assertThat(successCount)
-                    .as("All migrations should be successful")
-                    .isEqualTo(migrationCount);
-                
+                        .as("All migrations should be successful")
+                        .isEqualTo(migrationCount);
+
                 log.info("✓ Total migrations: {}, Successful: {}", migrationCount, successCount);
             }
         }
@@ -134,7 +132,7 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         log.info("Verification Test 4: Required Database Tables");
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        
+
         String[] requiredTables = {
             "annonce",
             "dossier",
@@ -145,21 +143,19 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
             "audit_event",
             "dossier_status_history"
         };
-        
+
         try (Connection connection = dataSource.getConnection()) {
             DatabaseMetaData metaData = connection.getMetaData();
-            
+
             log.info("Checking for required tables:");
             for (String tableName : requiredTables) {
                 try (ResultSet tables = metaData.getTables(null, null, tableName, null)) {
                     boolean exists = tables.next();
-                    assertThat(exists)
-                        .as("Table '%s' should exist", tableName)
-                        .isTrue();
+                    assertThat(exists).as("Table '%s' should exist", tableName).isTrue();
                     log.info("  ✓ {}", tableName);
                 }
             }
-            
+
             log.info("✓ All required tables exist");
         }
     }
@@ -169,19 +165,13 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
         log.info("Verification Test 5: Spring Application Context");
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        
-        assertThat(mockMvc)
-            .as("MockMvc should be autowired")
-            .isNotNull();
-        
-        assertThat(objectMapper)
-            .as("ObjectMapper should be autowired")
-            .isNotNull();
-        
-        assertThat(restTemplate)
-            .as("TestRestTemplate should be autowired")
-            .isNotNull();
-        
+
+        assertThat(mockMvc).as("MockMvc should be autowired").isNotNull();
+
+        assertThat(objectMapper).as("ObjectMapper should be autowired").isNotNull();
+
+        assertThat(restTemplate).as("TestRestTemplate should be autowired").isNotNull();
+
         log.info("✓ MockMvc is configured");
         log.info("✓ ObjectMapper is configured");
         log.info("✓ TestRestTemplate is configured");
@@ -202,7 +192,7 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         log.info("╠════════════════════════════════════════════════════════════════════════════╣");
         log.info("║ Result: INITIALIZATION ORDER CORRECT ✓                                     ║");
         log.info("╚════════════════════════════════════════════════════════════════════════════╝");
-        
+
         assertThat(true).isTrue();
     }
 }

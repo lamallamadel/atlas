@@ -4,12 +4,10 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public class SuggestionFeedbackRequest {
-    @NotBlank
-    private String suggestionType;
+    @NotBlank private String suggestionType;
     private String contextType;
     private Long contextId;
-    @NotNull
-    private Boolean wasAccepted;
+    @NotNull private Boolean wasAccepted;
     private String feedbackText;
 
     public String getSuggestionType() {

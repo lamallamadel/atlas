@@ -2,7 +2,10 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.TemplateVariable;
 import com.example.backend.entity.WhatsAppTemplate;
+
 import com.example.backend.entity.WhatsAppTemplateVersion;
+
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,9 +37,10 @@ public class WhatsAppTemplateMapper {
         response.setUpdatedBy(entity.getUpdatedBy());
 
         if (entity.getVariables() != null && !entity.getVariables().isEmpty()) {
-            response.setVariables(entity.getVariables().stream()
-                    .map(WhatsAppTemplateMapper::toVariableResponse)
-                    .collect(Collectors.toList()));
+            response.setVariables(
+                    entity.getVariables().stream()
+                            .map(WhatsAppTemplateMapper::toVariableResponse)
+                            .collect(Collectors.toList()));
         }
 
         return response;
@@ -55,9 +59,10 @@ public class WhatsAppTemplateMapper {
         entity.setDescription(request.getDescription());
 
         if (request.getVariables() != null && !request.getVariables().isEmpty()) {
-            List<TemplateVariable> variables = request.getVariables().stream()
-                    .map(WhatsAppTemplateMapper::toVariableEntity)
-                    .collect(Collectors.toList());
+            List<TemplateVariable> variables =
+                    request.getVariables().stream()
+                            .map(WhatsAppTemplateMapper::toVariableEntity)
+                            .collect(Collectors.toList());
             entity.setVariables(variables);
         }
 

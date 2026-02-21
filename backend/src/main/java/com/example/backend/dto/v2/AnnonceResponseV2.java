@@ -3,7 +3,6 @@ package com.example.backend.dto.v2;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
@@ -57,13 +56,13 @@ public class AnnonceResponseV2 {
     public static class LocationInfoV2 {
         @Schema(description = "Street address", example = "123 Main Street")
         private String address;
-        
+
         @Schema(description = "City", example = "Paris")
         private String city;
-        
+
         @Schema(description = "Postal code", example = "75001")
         private String postalCode;
-        
+
         @Schema(description = "Country code", example = "FR")
         private String countryCode;
 
@@ -103,13 +102,13 @@ public class AnnonceResponseV2 {
     public static class PropertyDetailsV2 {
         @Schema(description = "Surface area in square meters", example = "85.5")
         private Double surface;
-        
+
         @Schema(description = "Number of rooms", example = "4")
         private Integer rooms;
-        
+
         @Schema(description = "Number of bedrooms", example = "3")
         private Integer bedrooms;
-        
+
         @Schema(description = "Number of bathrooms", example = "2")
         private Integer bathrooms;
 
@@ -149,10 +148,10 @@ public class AnnonceResponseV2 {
     public static class PricingInfoV2 {
         @Schema(description = "Property price", example = "450000.00")
         private BigDecimal amount;
-        
+
         @Schema(description = "Currency code", example = "EUR")
         private String currency;
-        
+
         @Schema(description = "Price per square meter", example = "5263.16")
         private BigDecimal pricePerSqm;
 
@@ -184,13 +183,15 @@ public class AnnonceResponseV2 {
     public static class AuditInfoV2 {
         @Schema(description = "Timestamp when created (ISO-8601)", example = "2024-01-01T12:00:00Z")
         private Instant createdAt;
-        
-        @Schema(description = "Timestamp when last updated (ISO-8601)", example = "2024-01-01T12:00:00Z")
+
+        @Schema(
+                description = "Timestamp when last updated (ISO-8601)",
+                example = "2024-01-01T12:00:00Z")
         private Instant updatedAt;
-        
+
         @Schema(description = "User who created the resource")
         private String createdBy;
-        
+
         @Schema(description = "User who last updated the resource")
         private String updatedBy;
 

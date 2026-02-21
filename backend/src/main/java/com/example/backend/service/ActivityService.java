@@ -12,15 +12,14 @@ import com.example.backend.repository.ActivityRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ActivityService {
@@ -30,10 +29,11 @@ public class ActivityService {
     private final ActivityMapper activityMapper;
     private final UserService userService;
 
-    public ActivityService(ActivityRepository activityRepository, 
-                          DossierRepository dossierRepository,
-                          ActivityMapper activityMapper,
-                          UserService userService) {
+    public ActivityService(
+            ActivityRepository activityRepository,
+            DossierRepository dossierRepository,
+            ActivityMapper activityMapper,
+            UserService userService) {
         this.activityRepository = activityRepository;
         this.dossierRepository = dossierRepository;
         this.activityMapper = activityMapper;
@@ -47,11 +47,18 @@ public class ActivityService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(request.getDossierId())
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + request.getDossierId()));
+        Dossier dossier =
+                dossierRepository
+                        .findById(request.getDossierId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: "
+                                                        + request.getDossierId()));
 
         if (!orgId.equals(dossier.getOrgId())) {
-            throw new EntityNotFoundException("Dossier not found with id: " + request.getDossierId());
+            throw new EntityNotFoundException(
+                    "Dossier not found with id: " + request.getDossierId());
         }
 
         ActivityEntity activity = new ActivityEntity();
@@ -79,8 +86,13 @@ public class ActivityService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        ActivityEntity activity = activityRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + id));
+        ActivityEntity activity =
+                activityRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Activity not found with id: " + id));
 
         if (!orgId.equals(activity.getOrgId())) {
             throw new EntityNotFoundException("Activity not found with id: " + id);
@@ -92,36 +104,47 @@ public class ActivityService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ActivityResponse> list(Long dossierId, ActivityVisibility visibility, 
-                                      LocalDateTime startDate, LocalDateTime endDate, 
-                                      Pageable pageable) {
+    public Page<ActivityResponse> list(
+            Long dossierId,
+            ActivityVisibility visibility,
+            LocalDateTime startDate,
+            LocalDateTime endDate,
+            Pageable pageable) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
         if (dossierId != null) {
-            Dossier dossier = dossierRepository.findById(dossierId)
-                    .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+            Dossier dossier =
+                    dossierRepository
+                            .findById(dossierId)
+                            .orElseThrow(
+                                    () ->
+                                            new EntityNotFoundException(
+                                                    "Dossier not found with id: " + dossierId));
 
             if (!orgId.equals(dossier.getOrgId())) {
                 throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
             }
 
             Page<ActivityEntity> activities;
-            
+
             if (visibility != null && startDate != null && endDate != null) {
-                activities = activityRepository.findByDossierIdAndVisibilityAndCreatedAtBetween(
-                    dossierId, visibility, startDate, endDate, pageable);
+                activities =
+                        activityRepository.findByDossierIdAndVisibilityAndCreatedAtBetween(
+                                dossierId, visibility, startDate, endDate, pageable);
             } else if (visibility != null) {
-                activities = activityRepository.findByDossierIdAndVisibility(
-                    dossierId, visibility, pageable);
+                activities =
+                        activityRepository.findByDossierIdAndVisibility(
+                                dossierId, visibility, pageable);
             } else if (startDate != null && endDate != null) {
-                activities = activityRepository.findByDossierIdAndCreatedAtBetween(
-                    dossierId, startDate, endDate, pageable);
+                activities =
+                        activityRepository.findByDossierIdAndCreatedAtBetween(
+                                dossierId, startDate, endDate, pageable);
             } else {
-                activities = activityRepository.findByDossierIdOrderByCreatedAtDesc(
-                    dossierId, pageable);
+                activities =
+                        activityRepository.findByDossierIdOrderByCreatedAtDesc(dossierId, pageable);
             }
 
             return enrichWithUserNames(activities);
@@ -132,24 +155,29 @@ public class ActivityService {
 
     private Page<ActivityResponse> enrichWithUserNames(Page<ActivityEntity> activities) {
         List<ActivityEntity> content = activities.getContent();
-        
+
         if (content.isEmpty()) {
             return activities.map(activityMapper::toResponse);
         }
 
-        List<String> userIds = content.stream()
-                .map(ActivityEntity::getCreatedBy)
-                .distinct()
-                .collect(Collectors.toList());
+        List<String> userIds =
+                content.stream()
+                        .map(ActivityEntity::getCreatedBy)
+                        .distinct()
+                        .collect(Collectors.toList());
 
         Map<String, String> displayNames = userService.getUserDisplayNames(userIds);
 
-        return activities.map(activity -> {
-            ActivityResponse response = activityMapper.toResponse(activity);
-            String displayName = displayNames.get(activity.getCreatedBy());
-            response.setCreatedByName(displayName != null ? displayName : userService.getUserDisplayName(activity.getCreatedBy()));
-            return response;
-        });
+        return activities.map(
+                activity -> {
+                    ActivityResponse response = activityMapper.toResponse(activity);
+                    String displayName = displayNames.get(activity.getCreatedBy());
+                    response.setCreatedByName(
+                            displayName != null
+                                    ? displayName
+                                    : userService.getUserDisplayName(activity.getCreatedBy()));
+                    return response;
+                });
     }
 
     @Transactional
@@ -159,8 +187,13 @@ public class ActivityService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        ActivityEntity activity = activityRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + id));
+        ActivityEntity activity =
+                activityRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Activity not found with id: " + id));
 
         if (!orgId.equals(activity.getOrgId())) {
             throw new EntityNotFoundException("Activity not found with id: " + id);
@@ -192,8 +225,13 @@ public class ActivityService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        ActivityEntity activity = activityRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Activity not found with id: " + id));
+        ActivityEntity activity =
+                activityRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Activity not found with id: " + id));
 
         if (!orgId.equals(activity.getOrgId())) {
             throw new EntityNotFoundException("Activity not found with id: " + id);
@@ -203,14 +241,20 @@ public class ActivityService {
     }
 
     @Transactional
-    public void logActivity(Long dossierId, String activityType, String description, Map<String, Object> metadata) {
+    public void logActivity(
+            Long dossierId, String activityType, String description, Map<String, Object> metadata) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -232,7 +276,11 @@ public class ActivityService {
     }
 
     @Transactional
-    public void logActivity(Long dossierId, ActivityType activityType, String description, Map<String, Object> metadata) {
+    public void logActivity(
+            Long dossierId,
+            ActivityType activityType,
+            String description,
+            Map<String, Object> metadata) {
         logActivity(dossierId, activityType.name(), description, metadata);
     }
 }

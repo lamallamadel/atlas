@@ -3,11 +3,10 @@ package com.example.backend.observability;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import org.springframework.stereotype.Service;
-
 import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.springframework.stereotype.Service;
 
 @Service
 public class MetricsService {
@@ -27,7 +26,8 @@ public class MetricsService {
     }
 
     public void incrementDossierStatusTransition(String from, String to) {
-        counter("dossier_status_transitions_total", "from", normalize(from), "to", normalize(to)).increment();
+        counter("dossier_status_transitions_total", "from", normalize(from), "to", normalize(to))
+                .increment();
     }
 
     public void incrementAnnonceView(String status) {
@@ -48,7 +48,8 @@ public class MetricsService {
     }
 
     public void incrementNotificationSent(String type, String status) {
-        counter("notification_sent_total", "type", normalize(type), "status", normalize(status)).increment();
+        counter("notification_sent_total", "type", normalize(type), "status", normalize(status))
+                .increment();
     }
 
     public void incrementOutboundMessageQueued(String channel) {
@@ -60,7 +61,13 @@ public class MetricsService {
     }
 
     public void incrementOutboundMessageSendFailure(String channel, String errorCode) {
-        counter("outbound_message_send_failure_total", "channel", normalize(channel), "error_code", normalize(errorCode)).increment();
+        counter(
+                        "outbound_message_send_failure_total",
+                        "channel",
+                        normalize(channel),
+                        "error_code",
+                        normalize(errorCode))
+                .increment();
     }
 
     public void incrementOutboundMessageRetry(String channel) {
@@ -77,12 +84,14 @@ public class MetricsService {
 
     public Counter counter(String name, String... tags) {
         String key = name + "|" + String.join("|", tags);
-        return counterCache.computeIfAbsent(key, k -> Counter.builder(name).tags(tags).register(registry));
+        return counterCache.computeIfAbsent(
+                key, k -> Counter.builder(name).tags(tags).register(registry));
     }
 
     public Timer timer(String name, String... tags) {
         String key = name + "|" + String.join("|", tags);
-        return timerCache.computeIfAbsent(key, k -> Timer.builder(name).tags(tags).register(registry));
+        return timerCache.computeIfAbsent(
+                key, k -> Timer.builder(name).tags(tags).register(registry));
     }
 
     public MeterRegistry getRegistry() {

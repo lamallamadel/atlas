@@ -1,5 +1,9 @@
 package com.example.backend.controller;
 
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.dto.AppointmentCreateRequest;
 import com.example.backend.dto.AppointmentUpdateRequest;
 import com.example.backend.entity.AppointmentEntity;
@@ -9,6 +13,7 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.DossierRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +24,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -38,28 +37,24 @@ class AppointmentControllerTest {
     private static final String ORG_ID_2 = "org456";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    @Autowired private AppointmentRepository appointmentRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-                .header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder) {
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder> T withHeaders(T builder, String orgId) {
-        return (T) builder
-                .header(ORG_ID_HEADER, orgId)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
+            T withHeaders(T builder, String orgId) {
+        return (T)
+                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     @BeforeEach
@@ -82,9 +77,11 @@ class AppointmentControllerTest {
         request.setNotes("Initial consultation");
         request.setStatus(AppointmentStatus.SCHEDULED);
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").exists())
@@ -102,9 +99,11 @@ class AppointmentControllerTest {
     void create_MissingRequiredFields_Returns400() throws Exception {
         AppointmentCreateRequest request = new AppointmentCreateRequest();
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 
@@ -118,11 +117,14 @@ class AppointmentControllerTest {
         request.setStartTime(LocalDateTime.of(2024, 6, 1, 11, 0));
         request.setEndTime(LocalDateTime.of(2024, 6, 1, 10, 0));
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail", containsString("Start time must be before end time")));
+                .andExpect(
+                        jsonPath("$.detail", containsString("Start time must be before end time")));
     }
 
     @Test
@@ -135,11 +137,14 @@ class AppointmentControllerTest {
         request.setStartTime(LocalDateTime.of(2024, 6, 1, 10, 0));
         request.setEndTime(LocalDateTime.of(2024, 6, 1, 10, 0));
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail", containsString("Start time must be before end time")));
+                .andExpect(
+                        jsonPath("$.detail", containsString("Start time must be before end time")));
     }
 
     @Test
@@ -147,14 +152,16 @@ class AppointmentControllerTest {
     void create_InvalidStatusEnum_Returns400() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
 
-        String invalidRequest = String.format(
-                "{\"dossierId\":%d,\"startTime\":\"2024-06-01T10:00:00\",\"endTime\":\"2024-06-01T11:00:00\",\"status\":\"INVALID_STATUS\"}",
-                dossier.getId()
-        );
+        String invalidRequest =
+                String.format(
+                        "{\"dossierId\":%d,\"startTime\":\"2024-06-01T10:00:00\",\"endTime\":\"2024-06-01T11:00:00\",\"status\":\"INVALID_STATUS\"}",
+                        dossier.getId());
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidRequest)))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(invalidRequest)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -168,9 +175,11 @@ class AppointmentControllerTest {
         request.setStartTime(LocalDateTime.of(2024, 6, 1, 10, 0));
         request.setEndTime(LocalDateTime.of(2024, 6, 1, 11, 0));
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated());
     }
 
@@ -184,9 +193,11 @@ class AppointmentControllerTest {
         request.setStartTime(LocalDateTime.of(2024, 6, 1, 10, 0));
         request.setEndTime(LocalDateTime.of(2024, 6, 1, 11, 0));
 
-        mockMvc.perform(withHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isForbidden());
     }
 
@@ -194,9 +205,11 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void getById_ExistingAppointment_Returns200() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        AppointmentEntity appointment = createAppointment(dossier, 
-                LocalDateTime.of(2024, 6, 1, 10, 0),
-                LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity appointment =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
 
         mockMvc.perform(withHeaders(get("/api/v1/appointments/" + appointment.getId())))
                 .andExpect(status().isOk())
@@ -217,9 +230,11 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void getById_DifferentTenant_Returns404() throws Exception {
         Dossier dossier = createDossier(ORG_ID_2);
-        AppointmentEntity appointment = createAppointment(dossier,
-                LocalDateTime.of(2024, 6, 1, 10, 0),
-                LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity appointment =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
 
         mockMvc.perform(withHeaders(get("/api/v1/appointments/" + appointment.getId())))
                 .andExpect(status().isNotFound());
@@ -229,9 +244,11 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void update_ValidRequest_Returns200() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        AppointmentEntity appointment = createAppointment(dossier,
-                LocalDateTime.of(2024, 6, 1, 10, 0),
-                LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity appointment =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
 
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStartTime(LocalDateTime.of(2024, 6, 2, 14, 0));
@@ -239,9 +256,11 @@ class AppointmentControllerTest {
         request.setStatus(AppointmentStatus.COMPLETED);
         request.setNotes("Updated notes");
 
-        mockMvc.perform(withHeaders(put("/api/v1/appointments/" + appointment.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/appointments/" + appointment.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(appointment.getId()))
                 .andExpect(jsonPath("$.status").value("COMPLETED"))
@@ -252,19 +271,24 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void update_StartTimeAfterEndTime_Returns400() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        AppointmentEntity appointment = createAppointment(dossier,
-                LocalDateTime.of(2024, 6, 1, 10, 0),
-                LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity appointment =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
 
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStartTime(LocalDateTime.of(2024, 6, 2, 15, 0));
         request.setEndTime(LocalDateTime.of(2024, 6, 2, 14, 0));
 
-        mockMvc.perform(withHeaders(put("/api/v1/appointments/" + appointment.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/appointments/" + appointment.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.detail", containsString("Start time must be before end time")));
+                .andExpect(
+                        jsonPath("$.detail", containsString("Start time must be before end time")));
     }
 
     @Test
@@ -273,9 +297,11 @@ class AppointmentControllerTest {
         AppointmentUpdateRequest request = new AppointmentUpdateRequest();
         request.setStatus(AppointmentStatus.COMPLETED);
 
-        mockMvc.perform(withHeaders(put("/api/v1/appointments/99999")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/appointments/99999")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
     }
 
@@ -283,15 +309,19 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void update_InvalidStatusEnum_Returns400() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        AppointmentEntity appointment = createAppointment(dossier,
-                LocalDateTime.of(2024, 6, 1, 10, 0),
-                LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity appointment =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
 
         String invalidRequest = "{\"status\":\"INVALID_STATUS\"}";
 
-        mockMvc.perform(withHeaders(put("/api/v1/appointments/" + appointment.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(invalidRequest)))
+        mockMvc.perform(
+                        withHeaders(
+                                put("/api/v1/appointments/" + appointment.getId())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(invalidRequest)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -299,9 +329,11 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     void delete_ExistingAppointment_Returns204() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        AppointmentEntity appointment = createAppointment(dossier,
-                LocalDateTime.of(2024, 6, 1, 10, 0),
-                LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity appointment =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
 
         mockMvc.perform(withHeaders(delete("/api/v1/appointments/" + appointment.getId())))
                 .andExpect(status().isNoContent());
@@ -319,15 +351,18 @@ class AppointmentControllerTest {
     void list_WithPagination_ReturnsPagedResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
         for (int i = 0; i < 25; i++) {
-            createAppointment(dossier,
+            createAppointment(
+                    dossier,
                     LocalDateTime.of(2024, 6, 1, 10, i),
                     LocalDateTime.of(2024, 6, 1, 11, i));
         }
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("dossierId", dossier.getId().toString())
-                        .param("page", "0")
-                        .param("size", "10")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/appointments")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "0")
+                                        .param("size", "10")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(10)))
                 .andExpect(jsonPath("$.totalElements").value(25))
@@ -341,30 +376,45 @@ class AppointmentControllerTest {
     void list_FilterByDossierId_ReturnsFilteredResults() throws Exception {
         Dossier dossier1 = createDossier(ORG_ID);
         Dossier dossier2 = createDossier(ORG_ID);
-        
-        createAppointment(dossier1, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
-        createAppointment(dossier1, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
-        createAppointment(dossier2, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("dossierId", dossier1.getId().toString())))
+        createAppointment(
+                dossier1, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
+        createAppointment(
+                dossier1, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
+        createAppointment(
+                dossier2, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
+
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/appointments")
+                                        .param("dossierId", dossier1.getId().toString())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[*].dossierId", everyItem(is(dossier1.getId().intValue()))));
+                .andExpect(
+                        jsonPath(
+                                "$.content[*].dossierId",
+                                everyItem(is(dossier1.getId().intValue()))));
     }
 
     @Test
     @WithMockUser(roles = {"PRO"})
     void list_FilterByDateRange_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        
-        createAppointment(dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
-        createAppointment(dossier, LocalDateTime.of(2024, 6, 5, 10, 0), LocalDateTime.of(2024, 6, 5, 11, 0));
-        createAppointment(dossier, LocalDateTime.of(2024, 6, 10, 10, 0), LocalDateTime.of(2024, 6, 10, 11, 0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("from", "2024-06-03T00:00:00")
-                        .param("to", "2024-06-07T23:59:59")))
+        createAppointment(
+                dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
+        createAppointment(
+                dossier, LocalDateTime.of(2024, 6, 5, 10, 0), LocalDateTime.of(2024, 6, 5, 11, 0));
+        createAppointment(
+                dossier,
+                LocalDateTime.of(2024, 6, 10, 10, 0),
+                LocalDateTime.of(2024, 6, 10, 11, 0));
+
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/appointments")
+                                        .param("from", "2024-06-03T00:00:00")
+                                        .param("to", "2024-06-07T23:59:59")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)));
     }
@@ -373,45 +423,71 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void list_FilterByAssignedTo_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        
-        AppointmentEntity app1 = createAppointment(dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
+
+        AppointmentEntity app1 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
         app1.setAssignedTo("agent1@example.com");
         appointmentRepository.save(app1);
 
-        AppointmentEntity app2 = createAppointment(dossier, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
+        AppointmentEntity app2 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 2, 10, 0),
+                        LocalDateTime.of(2024, 6, 2, 11, 0));
         app2.setAssignedTo("agent2@example.com");
         appointmentRepository.save(app2);
 
-        AppointmentEntity app3 = createAppointment(dossier, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
+        AppointmentEntity app3 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 3, 10, 0),
+                        LocalDateTime.of(2024, 6, 3, 11, 0));
         app3.setAssignedTo("agent1@example.com");
         appointmentRepository.save(app3);
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("assignedTo", "agent1@example.com")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/appointments")
+                                        .param("assignedTo", "agent1@example.com")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
-                .andExpect(jsonPath("$.content[*].assignedTo", everyItem(is("agent1@example.com"))));
+                .andExpect(
+                        jsonPath("$.content[*].assignedTo", everyItem(is("agent1@example.com"))));
     }
 
     @Test
     @WithMockUser(roles = {"PRO"})
     void list_FilterByStatus_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        
-        AppointmentEntity app1 = createAppointment(dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
+
+        AppointmentEntity app1 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
         app1.setStatus(AppointmentStatus.SCHEDULED);
         appointmentRepository.save(app1);
 
-        AppointmentEntity app2 = createAppointment(dossier, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
+        AppointmentEntity app2 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 2, 10, 0),
+                        LocalDateTime.of(2024, 6, 2, 11, 0));
         app2.setStatus(AppointmentStatus.COMPLETED);
         appointmentRepository.save(app2);
 
-        AppointmentEntity app3 = createAppointment(dossier, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
+        AppointmentEntity app3 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 3, 10, 0),
+                        LocalDateTime.of(2024, 6, 3, 11, 0));
         app3.setStatus(AppointmentStatus.SCHEDULED);
         appointmentRepository.save(app3);
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("status", "SCHEDULED")))
+        mockMvc.perform(withHeaders(get("/api/v1/appointments").param("status", "SCHEDULED")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[*].status", everyItem(is("SCHEDULED"))));
@@ -421,25 +497,39 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void list_FilterByMultipleCriteria_ReturnsFilteredResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        
-        AppointmentEntity app1 = createAppointment(dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
+
+        AppointmentEntity app1 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
         app1.setAssignedTo("agent1@example.com");
         app1.setStatus(AppointmentStatus.SCHEDULED);
         appointmentRepository.save(app1);
 
-        AppointmentEntity app2 = createAppointment(dossier, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
+        AppointmentEntity app2 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 2, 10, 0),
+                        LocalDateTime.of(2024, 6, 2, 11, 0));
         app2.setAssignedTo("agent1@example.com");
         app2.setStatus(AppointmentStatus.COMPLETED);
         appointmentRepository.save(app2);
 
-        AppointmentEntity app3 = createAppointment(dossier, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
+        AppointmentEntity app3 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 3, 10, 0),
+                        LocalDateTime.of(2024, 6, 3, 11, 0));
         app3.setAssignedTo("agent2@example.com");
         app3.setStatus(AppointmentStatus.SCHEDULED);
         appointmentRepository.save(app3);
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("assignedTo", "agent1@example.com")
-                        .param("status", "SCHEDULED")))
+        mockMvc.perform(
+                        withHeaders(
+                                get("/api/v1/appointments")
+                                        .param("assignedTo", "agent1@example.com")
+                                        .param("status", "SCHEDULED")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].assignedTo").value("agent1@example.com"))
@@ -450,13 +540,24 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void list_SortByStartTimeAsc_ReturnsSortedResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        
-        AppointmentEntity app1 = createAppointment(dossier, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
-        AppointmentEntity app2 = createAppointment(dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
-        AppointmentEntity app3 = createAppointment(dossier, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("sort", "startTime,asc")))
+        AppointmentEntity app1 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 3, 10, 0),
+                        LocalDateTime.of(2024, 6, 3, 11, 0));
+        AppointmentEntity app2 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity app3 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 2, 10, 0),
+                        LocalDateTime.of(2024, 6, 2, 11, 0));
+
+        mockMvc.perform(withHeaders(get("/api/v1/appointments").param("sort", "startTime,asc")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[0].id").value(app2.getId()))
@@ -468,13 +569,24 @@ class AppointmentControllerTest {
     @WithMockUser(roles = {"PRO"})
     void list_SortByStartTimeDesc_ReturnsSortedResults() throws Exception {
         Dossier dossier = createDossier(ORG_ID);
-        
-        AppointmentEntity app1 = createAppointment(dossier, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
-        AppointmentEntity app2 = createAppointment(dossier, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
-        AppointmentEntity app3 = createAppointment(dossier, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
 
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("sort", "startTime,desc")))
+        AppointmentEntity app1 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 1, 10, 0),
+                        LocalDateTime.of(2024, 6, 1, 11, 0));
+        AppointmentEntity app2 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 2, 10, 0),
+                        LocalDateTime.of(2024, 6, 2, 11, 0));
+        AppointmentEntity app3 =
+                createAppointment(
+                        dossier,
+                        LocalDateTime.of(2024, 6, 3, 10, 0),
+                        LocalDateTime.of(2024, 6, 3, 11, 0));
+
+        mockMvc.perform(withHeaders(get("/api/v1/appointments").param("sort", "startTime,desc")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(3)))
                 .andExpect(jsonPath("$.content[0].id").value(app3.getId()))
@@ -487,10 +599,13 @@ class AppointmentControllerTest {
     void list_MultiTenantIsolation_OnlyReturnsSameTenant() throws Exception {
         Dossier dossier1 = createDossier(ORG_ID);
         Dossier dossier2 = createDossier(ORG_ID_2);
-        
-        createAppointment(dossier1, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
-        createAppointment(dossier1, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
-        createAppointment(dossier2, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
+
+        createAppointment(
+                dossier1, LocalDateTime.of(2024, 6, 1, 10, 0), LocalDateTime.of(2024, 6, 1, 11, 0));
+        createAppointment(
+                dossier1, LocalDateTime.of(2024, 6, 2, 10, 0), LocalDateTime.of(2024, 6, 2, 11, 0));
+        createAppointment(
+                dossier2, LocalDateTime.of(2024, 6, 3, 10, 0), LocalDateTime.of(2024, 6, 3, 11, 0));
 
         mockMvc.perform(withHeaders(get("/api/v1/appointments")))
                 .andExpect(status().isOk())
@@ -506,8 +621,7 @@ class AppointmentControllerTest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void list_InvalidStatusEnum_Returns400() throws Exception {
-        mockMvc.perform(withHeaders(get("/api/v1/appointments")
-                        .param("status", "INVALID_STATUS")))
+        mockMvc.perform(withHeaders(get("/api/v1/appointments").param("status", "INVALID_STATUS")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -529,7 +643,8 @@ class AppointmentControllerTest {
         return dossierRepository.save(dossier);
     }
 
-    private AppointmentEntity createAppointment(Dossier dossier, LocalDateTime startTime, LocalDateTime endTime) {
+    private AppointmentEntity createAppointment(
+            Dossier dossier, LocalDateTime startTime, LocalDateTime endTime) {
         AppointmentEntity appointment = new AppointmentEntity();
         appointment.setOrgId(dossier.getOrgId());
         appointment.setDossier(dossier);

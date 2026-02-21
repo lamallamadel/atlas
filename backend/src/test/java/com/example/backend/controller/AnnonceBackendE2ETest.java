@@ -1,5 +1,10 @@
 package com.example.backend.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.AnnonceCreateRequest;
@@ -14,6 +19,10 @@ import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.AuditEventRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,42 +31,25 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 /**
  * Comprehensive Backend E2E Tests for Annonce API
- * 
- * Covers:
- * - POST /api/v1/annonces with full JSONB validation (photos array, rulesJson object)
- * - GET /{id} with X-Org-Id tenant filtering
- * - GET with filters (status, city, type, search query, pagination/sorting)
- * - PUT with partial updates
- * - Audit events with diff calculation
- * - Cross-tenant 404 (ORG1 accessing ORG2)
- * - RBAC 403 (PRO deleting returns forbidden)
- * - H2 vs Postgres JSONB compatibility
+ *
+ * <p>Covers: - POST /api/v1/annonces with full JSONB validation (photos array, rulesJson object) -
+ * GET /{id} with X-Org-Id tenant filtering - GET with filters (status, city, type, search query,
+ * pagination/sorting) - PUT with partial updates - Audit events with diff calculation -
+ * Cross-tenant 404 (ORG1 accessing ORG2) - RBAC 403 (PRO deleting returns forbidden) - H2 vs
+ * Postgres JSONB compatibility
  */
 @BackendE2ETest
-@WithMockUser( roles = {"PRO"})
+@WithMockUser(roles = {"PRO"})
 class AnnonceBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String ORG1 = "ORG1";
     private static final String ORG2 = "ORG2";
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
     @BeforeEach
     void setUp() {
@@ -87,27 +79,28 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setCity("Paris");
         request.setPrice(BigDecimal.valueOf(850000.00));
         request.setCurrency("EUR");
-        
+
         // JSONB photos array
-        List<String> photos = List.of(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
-        );
+        List<String> photos =
+                List.of(
+                        "https://example.com/photo1.jpg",
+                        "https://example.com/photo2.jpg",
+                        "https://example.com/photo3.jpg");
         request.setPhotos(photos);
-        
+
         // JSONB rulesJson object with nested structure
         Map<String, Object> rulesJson = new HashMap<>();
         rulesJson.put("minAge", 21);
         rulesJson.put("petsAllowed", true);
         rulesJson.put("smokingAllowed", false);
         rulesJson.put("depositRequired", true);
-        rulesJson.put("visitSchedule", Map.of(
-            "weekdays", List.of("Monday", "Wednesday", "Friday"),
-            "timeSlots", List.of("10:00-12:00", "14:00-16:00")
-        ));
+        rulesJson.put(
+                "visitSchedule",
+                Map.of(
+                        "weekdays", List.of("Monday", "Wednesday", "Friday"),
+                        "timeSlots", List.of("10:00-12:00", "14:00-16:00")));
         request.setRulesJson(rulesJson);
-        
+
         // JSONB meta object
         Map<String, Object> meta = new HashMap<>();
         meta.put("priority", "high");
@@ -116,54 +109,58 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setMeta(meta);
 
         // When
-        MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .header(CORRELATION_ID_HEADER, "test-create-001")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.orgId").value(ORG1))
-            .andExpect(jsonPath("$.title").value("Luxury Apartment in Paris"))
-            .andExpect(jsonPath("$.description").value("Beautiful 3-bedroom apartment in the heart of Paris"))
-            .andExpect(jsonPath("$.category").value("Real Estate"))
-            .andExpect(jsonPath("$.type").value("SALE"))
-            .andExpect(jsonPath("$.address").value("123 Rue de la Paix"))
-            .andExpect(jsonPath("$.surface").value(120.5))
-            .andExpect(jsonPath("$.city").value("Paris"))
-            .andExpect(jsonPath("$.price").value(850000.00))
-            .andExpect(jsonPath("$.currency").value("EUR"))
-            .andExpect(jsonPath("$.status").value("DRAFT"))
-            .andExpect(jsonPath("$.photos", hasSize(3)))
-            .andExpect(jsonPath("$.photos[0]").value("https://example.com/photo1.jpg"))
-            .andExpect(jsonPath("$.photos[1]").value("https://example.com/photo2.jpg"))
-            .andExpect(jsonPath("$.photos[2]").value("https://example.com/photo3.jpg"))
-            .andExpect(jsonPath("$.rulesJson.minAge").value(21))
-            .andExpect(jsonPath("$.rulesJson.petsAllowed").value(true))
-            .andExpect(jsonPath("$.rulesJson.smokingAllowed").value(false))
-            .andExpect(jsonPath("$.rulesJson.depositRequired").value(true))
-            .andExpect(jsonPath("$.rulesJson.visitSchedule.weekdays", hasSize(3)))
-            .andExpect(jsonPath("$.meta.priority").value("high"))
-            .andExpect(jsonPath("$.meta.source").value("website"))
-            .andExpect(jsonPath("$.meta.tags", hasSize(3)))
-            .andExpect(jsonPath("$.createdAt").exists())
-            .andExpect(jsonPath("$.updatedAt").exists())
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                post("/api/v1/annonces")
+                                        .header(TENANT_HEADER, ORG1)
+                                        .header(CORRELATION_ID_HEADER, "test-create-001")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.orgId").value(ORG1))
+                        .andExpect(jsonPath("$.title").value("Luxury Apartment in Paris"))
+                        .andExpect(
+                                jsonPath("$.description")
+                                        .value(
+                                                "Beautiful 3-bedroom apartment in the heart of Paris"))
+                        .andExpect(jsonPath("$.category").value("Real Estate"))
+                        .andExpect(jsonPath("$.type").value("SALE"))
+                        .andExpect(jsonPath("$.address").value("123 Rue de la Paix"))
+                        .andExpect(jsonPath("$.surface").value(120.5))
+                        .andExpect(jsonPath("$.city").value("Paris"))
+                        .andExpect(jsonPath("$.price").value(850000.00))
+                        .andExpect(jsonPath("$.currency").value("EUR"))
+                        .andExpect(jsonPath("$.status").value("DRAFT"))
+                        .andExpect(jsonPath("$.photos", hasSize(3)))
+                        .andExpect(jsonPath("$.photos[0]").value("https://example.com/photo1.jpg"))
+                        .andExpect(jsonPath("$.photos[1]").value("https://example.com/photo2.jpg"))
+                        .andExpect(jsonPath("$.photos[2]").value("https://example.com/photo3.jpg"))
+                        .andExpect(jsonPath("$.rulesJson.minAge").value(21))
+                        .andExpect(jsonPath("$.rulesJson.petsAllowed").value(true))
+                        .andExpect(jsonPath("$.rulesJson.smokingAllowed").value(false))
+                        .andExpect(jsonPath("$.rulesJson.depositRequired").value(true))
+                        .andExpect(jsonPath("$.rulesJson.visitSchedule.weekdays", hasSize(3)))
+                        .andExpect(jsonPath("$.meta.priority").value("high"))
+                        .andExpect(jsonPath("$.meta.source").value("website"))
+                        .andExpect(jsonPath("$.meta.tags", hasSize(3)))
+                        .andExpect(jsonPath("$.createdAt").exists())
+                        .andExpect(jsonPath("$.updatedAt").exists())
+                        .andReturn();
 
         // Then - Verify persistence in database
         String responseJson = result.getResponse().getContentAsString();
         AnnonceResponse response = objectMapper.readValue(responseJson, AnnonceResponse.class);
-        
+
         Annonce persisted = annonceRepository.findById(response.getId()).orElseThrow();
         assertThat(persisted.getOrgId()).isEqualTo(ORG1);
         assertThat(persisted.getTitle()).isEqualTo("Luxury Apartment in Paris");
         assertThat(persisted.getPhotos()).hasSize(3);
-        assertThat(persisted.getPhotos()).containsExactly(
-            "https://example.com/photo1.jpg",
-            "https://example.com/photo2.jpg",
-            "https://example.com/photo3.jpg"
-        );
+        assertThat(persisted.getPhotos())
+                .containsExactly(
+                        "https://example.com/photo1.jpg",
+                        "https://example.com/photo2.jpg",
+                        "https://example.com/photo3.jpg");
         assertThat(persisted.getRulesJson()).isNotNull();
         assertThat(persisted.getRulesJson().get("minAge")).isEqualTo(21);
         assertThat(persisted.getRulesJson().get("petsAllowed")).isEqualTo(true);
@@ -178,18 +175,18 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setTitle("Minimal Annonce");
 
         // When
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.id").exists())
-            .andExpect(jsonPath("$.orgId").value(ORG1))
-            .andExpect(jsonPath("$.title").value("Minimal Annonce"))
-            .andExpect(jsonPath("$.status").value("DRAFT"))
-            .andExpect(jsonPath("$.photos").isEmpty())
-            .andExpect(jsonPath("$.rulesJson").doesNotExist());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.orgId").value(ORG1))
+                .andExpect(jsonPath("$.title").value("Minimal Annonce"))
+                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andExpect(jsonPath("$.photos").isEmpty())
+                .andExpect(jsonPath("$.rulesJson").doesNotExist());
     }
 
     @Test
@@ -200,13 +197,13 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setPhotos(List.of());
 
         // When
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.photos").isEmpty());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.photos").isEmpty());
     }
 
     @Test
@@ -214,27 +211,30 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Given - Test deep nesting in JSONB
         AnnonceCreateRequest request = new AnnonceCreateRequest();
         request.setTitle("Complex Rules Test");
-        
+
         Map<String, Object> rulesJson = new HashMap<>();
-        rulesJson.put("level1", Map.of(
-            "level2", Map.of(
-                "level3", Map.of(
-                    "deepValue", "nested",
-                    "deepArray", List.of(1, 2, 3, 4, 5)
-                )
-            )
-        ));
+        rulesJson.put(
+                "level1",
+                Map.of(
+                        "level2",
+                        Map.of(
+                                "level3",
+                                Map.of(
+                                        "deepValue",
+                                        "nested",
+                                        "deepArray",
+                                        List.of(1, 2, 3, 4, 5)))));
         request.setRulesJson(rulesJson);
 
         // When
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.rulesJson.level1.level2.level3.deepValue").value("nested"))
-            .andExpect(jsonPath("$.rulesJson.level1.level2.level3.deepArray", hasSize(5)));
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.rulesJson.level1.level2.level3.deepValue").value("nested"))
+                .andExpect(jsonPath("$.rulesJson.level1.level2.level3.deepArray", hasSize(5)));
     }
 
     @Test
@@ -244,12 +244,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setTitle(null);
 
         // When & Then
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -261,12 +261,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Missing price and city
 
         // When & Then - Should return 400 Bad Request
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -279,12 +279,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Missing price
 
         // When & Then - Should return 400 Bad Request
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -297,12 +297,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Missing city
 
         // When & Then - Should return 400 Bad Request
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -315,16 +315,16 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setStatus(AnnonceStatus.ACTIVE);
 
         // When & Then - Should succeed
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andExpect(jsonPath("$.status").value("ACTIVE"))
-            .andExpect(jsonPath("$.title").value("Test Title"))
-            .andExpect(jsonPath("$.city").value("Paris"))
-            .andExpect(jsonPath("$.price").value(100.00));
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("ACTIVE"))
+                .andExpect(jsonPath("$.title").value("Test Title"))
+                .andExpect(jsonPath("$.city").value("Paris"))
+                .andExpect(jsonPath("$.price").value(100.00));
     }
 
     // ========== GET /{id} with Tenant Filtering Tests ==========
@@ -336,13 +336,11 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonce = annonceRepository.save(annonce);
 
         // When & Then
-        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(annonce.getId()))
-            .andExpect(jsonPath("$.orgId").value(ORG1))
-            .andExpect(jsonPath("$.title").value("Test Annonce"));
+        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(annonce.getId()))
+                .andExpect(jsonPath("$.orgId").value(ORG1))
+                .andExpect(jsonPath("$.title").value("Test Annonce"));
     }
 
     @Test
@@ -352,19 +350,15 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonce = annonceRepository.save(annonce);
 
         // When - Try to access from ORG1
-        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isNotFound());
     }
 
     @Test
     void getAnnonceById_NonExistent_Returns404() throws Exception {
         // When & Then
-        mockMvc.perform(get("/api/v1/annonces/999999")
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/v1/annonces/999999").header(TENANT_HEADER, ORG1))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -372,30 +366,28 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Complete Data Test", "Paris");
         annonce.setPhotos(List.of("photo1.jpg", "photo2.jpg"));
-        
+
         Map<String, Object> rules = new HashMap<>();
         rules.put("minAge", 18);
         rules.put("petsAllowed", false);
         annonce.setRulesJson(rules);
-        
+
         Map<String, Object> meta = new HashMap<>();
         meta.put("featured", true);
         meta.put("priority", 10);
         annonce.setMeta(meta);
-        
+
         annonce = annonceRepository.save(annonce);
 
         // When & Then
-        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.photos", hasSize(2)))
-            .andExpect(jsonPath("$.photos[0]").value("photo1.jpg"))
-            .andExpect(jsonPath("$.rulesJson.minAge").value(18))
-            .andExpect(jsonPath("$.rulesJson.petsAllowed").value(false))
-            .andExpect(jsonPath("$.meta.featured").value(true))
-            .andExpect(jsonPath("$.meta.priority").value(10));
+        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos", hasSize(2)))
+                .andExpect(jsonPath("$.photos[0]").value("photo1.jpg"))
+                .andExpect(jsonPath("$.rulesJson.minAge").value(18))
+                .andExpect(jsonPath("$.rulesJson.petsAllowed").value(false))
+                .andExpect(jsonPath("$.meta.featured").value(true))
+                .andExpect(jsonPath("$.meta.priority").value(10));
     }
 
     // ========== GET with Filters, Pagination, and Sorting Tests ==========
@@ -425,12 +417,10 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(org2Annonce2);
 
         // When & Then - ORG1 should have exactly 2 annonces
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(2)))
-            .andExpect(jsonPath("$.totalElements").value(2));
+        mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test
@@ -439,30 +429,30 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce draft = createTestAnnonce(ORG1, "Draft Annonce", "Paris");
         draft.setStatus(AnnonceStatus.DRAFT);
         annonceRepository.save(draft);
-        
+
         Annonce published = createTestAnnonce(ORG1, "Published Annonce", "Paris");
         published.setStatus(AnnonceStatus.PUBLISHED);
         annonceRepository.save(published);
-        
+
         Annonce archived = createTestAnnonce(ORG1, "Archived Annonce", "Paris");
         archived.setStatus(AnnonceStatus.ARCHIVED);
         annonceRepository.save(archived);
-        
+
         // Add ORG2 data to verify tenant isolation
         Annonce org2Published = createTestAnnonce(ORG2, "ORG2 Published", "Paris");
         org2Published.setStatus(AnnonceStatus.PUBLISHED);
         annonceRepository.save(org2Published);
 
         // When & Then - Filter by PUBLISHED for ORG1 only
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("status", "PUBLISHED"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.totalElements").value(1))
-            .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
-            .andExpect(jsonPath("$.content[0].title").value("Published Annonce"));
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("status", "PUBLISHED"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].status").value("PUBLISHED"))
+                .andExpect(jsonPath("$.content[0].title").value("Published Annonce"));
     }
 
     @Test
@@ -472,18 +462,15 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(createTestAnnonce(ORG1, "Paris Annonce 2", "Paris"));
         annonceRepository.save(createTestAnnonce(ORG1, "Lyon Annonce", "Lyon"));
         annonceRepository.save(createTestAnnonce(ORG1, "Marseille Annonce", "Marseille"));
-        
+
         // Add ORG2 data in Paris to verify tenant isolation
         annonceRepository.save(createTestAnnonce(ORG2, "ORG2 Paris Annonce", "Paris"));
 
         // When & Then - Filter by Paris for ORG1 only
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("city", "Paris"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(2)))
-            .andExpect(jsonPath("$.totalElements").value(2));
+        mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1).param("city", "Paris"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.totalElements").value(2));
     }
 
     @Test
@@ -492,23 +479,20 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce sale = createTestAnnonce(ORG1, "For Sale", "Paris");
         sale.setType(AnnonceType.SALE);
         annonceRepository.save(sale);
-        
+
         Annonce rent = createTestAnnonce(ORG1, "For Rent", "Paris");
         rent.setType(AnnonceType.RENT);
         annonceRepository.save(rent);
-        
+
         Annonce lease = createTestAnnonce(ORG1, "For Lease", "Paris");
         lease.setType(AnnonceType.LEASE);
         annonceRepository.save(lease);
 
         // When & Then - Filter by RENT
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("type", "RENT"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.content[0].type").value("RENT"));
+        mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1).param("type", "RENT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].type").value("RENT"));
     }
 
     @Test
@@ -519,13 +503,10 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(createTestAnnonce(ORG1, "Cozy House", "Marseille"));
 
         // When & Then - Search for "apartment"
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("q", "apartment"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.content[0].title").value("Beautiful Apartment"));
+        mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1).param("q", "apartment"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].title").value("Beautiful Apartment"));
     }
 
     @Test
@@ -534,19 +515,16 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce annonce1 = createTestAnnonce(ORG1, "Property 1", "Paris");
         annonce1.setDescription("Modern apartment with balcony");
         annonceRepository.save(annonce1);
-        
+
         Annonce annonce2 = createTestAnnonce(ORG1, "Property 2", "Lyon");
         annonce2.setDescription("Traditional house with garden");
         annonceRepository.save(annonce2);
 
         // When & Then - Search for "balcony"
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("q", "balcony"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.content[0].title").value("Property 1"));
+        mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1).param("q", "balcony"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.content[0].title").value("Property 1"));
     }
 
     @Test
@@ -556,17 +534,17 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         match.setStatus(AnnonceStatus.PUBLISHED);
         match.setType(AnnonceType.RENT);
         annonceRepository.save(match);
-        
+
         Annonce noMatchStatus = createTestAnnonce(ORG1, "Paris Rental Draft", "Paris");
         noMatchStatus.setStatus(AnnonceStatus.DRAFT);
         noMatchStatus.setType(AnnonceType.RENT);
         annonceRepository.save(noMatchStatus);
-        
+
         Annonce noMatchCity = createTestAnnonce(ORG1, "Lyon Rental", "Lyon");
         noMatchCity.setStatus(AnnonceStatus.PUBLISHED);
         noMatchCity.setType(AnnonceType.RENT);
         annonceRepository.save(noMatchCity);
-        
+
         // Add ORG2 data that would match filters - should not appear in results
         Annonce org2Match = createTestAnnonce(ORG2, "ORG2 Paris Rental", "Paris");
         org2Match.setStatus(AnnonceStatus.PUBLISHED);
@@ -574,17 +552,17 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(org2Match);
 
         // When & Then - Filter by status=PUBLISHED, city=Paris, type=RENT for ORG1
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("status", "PUBLISHED")
-                .param("city", "Paris")
-                .param("type", "RENT"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.totalElements").value(1))
-            .andExpect(jsonPath("$.content[0].title").value("Paris Rental"))
-            .andExpect(jsonPath("$.content[0].orgId").value(ORG1));
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("status", "PUBLISHED")
+                                .param("city", "Paris")
+                                .param("type", "RENT"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("Paris Rental"))
+                .andExpect(jsonPath("$.content[0].orgId").value(ORG1));
     }
 
     @Test
@@ -595,17 +573,17 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         }
 
         // When & Then - Request page 1 (second page) with size 10
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("page", "1")
-                .param("size", "10"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(10)))
-            .andExpect(jsonPath("$.number").value(1))
-            .andExpect(jsonPath("$.size").value(10))
-            .andExpect(jsonPath("$.totalElements").value(25))
-            .andExpect(jsonPath("$.totalPages").value(3));
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("page", "1")
+                                .param("size", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(10)))
+                .andExpect(jsonPath("$.number").value(1))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.totalElements").value(25))
+                .andExpect(jsonPath("$.totalPages").value(3));
     }
 
     @Test
@@ -616,15 +594,15 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(createTestAnnonce(ORG1, "Beta Property", "Paris"));
 
         // When & Then - Sort by title ascending
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("sort", "title,asc"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(3)))
-            .andExpect(jsonPath("$.content[0].title").value("Alpha Property"))
-            .andExpect(jsonPath("$.content[1].title").value("Beta Property"))
-            .andExpect(jsonPath("$.content[2].title").value("Zebra Property"));
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("sort", "title,asc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].title").value("Alpha Property"))
+                .andExpect(jsonPath("$.content[1].title").value("Beta Property"))
+                .andExpect(jsonPath("$.content[2].title").value("Zebra Property"));
     }
 
     @Test
@@ -633,23 +611,23 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce oldest = createTestAnnonce(ORG1, "Oldest", "Paris");
         annonceRepository.save(oldest);
         Thread.sleep(10); // Ensure different timestamps
-        
+
         Annonce middle = createTestAnnonce(ORG1, "Middle", "Paris");
         annonceRepository.save(middle);
         Thread.sleep(10);
-        
+
         Annonce newest = createTestAnnonce(ORG1, "Newest", "Paris");
         annonceRepository.save(newest);
 
         // When & Then - Sort by createdAt descending (newest first)
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("sort", "createdAt,desc"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(3)))
-            .andExpect(jsonPath("$.content[0].title").value("Newest"))
-            .andExpect(jsonPath("$.content[2].title").value("Oldest"));
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("sort", "createdAt,desc"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.content[0].title").value("Newest"))
+                .andExpect(jsonPath("$.content[2].title").value("Oldest"));
     }
 
     // ========== PUT with Partial Updates Tests ==========
@@ -668,18 +646,19 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setTitle("Updated Title");
         updateRequest.setPrice(BigDecimal.valueOf(200.00));
 
-        MvcResult result = mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(annonce.getId()))
-            .andExpect(jsonPath("$.title").value("Updated Title"))
-            .andExpect(jsonPath("$.price").value(200.00))
-            .andExpect(jsonPath("$.description").value("Original Description"))
-            .andExpect(jsonPath("$.city").value("Paris"))
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                put("/api/v1/annonces/" + annonce.getId())
+                                        .header(TENANT_HEADER, ORG1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(updateRequest)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(annonce.getId()))
+                        .andExpect(jsonPath("$.title").value("Updated Title"))
+                        .andExpect(jsonPath("$.price").value(200.00))
+                        .andExpect(jsonPath("$.description").value("Original Description"))
+                        .andExpect(jsonPath("$.city").value("Paris"))
+                        .andReturn();
 
         // Then - Verify in database
         Annonce updated = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -700,16 +679,16 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setPhotos(List.of("new1.jpg", "new2.jpg", "new3.jpg"));
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.photos", hasSize(3)))
-            .andExpect(jsonPath("$.photos[0]").value("new1.jpg"))
-            .andExpect(jsonPath("$.photos[1]").value("new2.jpg"))
-            .andExpect(jsonPath("$.photos[2]").value("new3.jpg"));
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos", hasSize(3)))
+                .andExpect(jsonPath("$.photos[0]").value("new1.jpg"))
+                .andExpect(jsonPath("$.photos[1]").value("new2.jpg"))
+                .andExpect(jsonPath("$.photos[2]").value("new3.jpg"));
 
         // Then - Verify in database
         Annonce updated = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -733,14 +712,14 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         newRules.put("smokingAllowed", false);
         updateRequest.setRulesJson(newRules);
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.rulesJson.minAge").value(21))
-            .andExpect(jsonPath("$.rulesJson.smokingAllowed").value(false));
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rulesJson.minAge").value(21))
+                .andExpect(jsonPath("$.rulesJson.smokingAllowed").value(false));
 
         // Then - Verify in database
         Annonce updated = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -759,13 +738,13 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setStatus(AnnonceStatus.PUBLISHED);
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.status").value("PUBLISHED"));
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("PUBLISHED"));
 
         // Then - Verify in database
         Annonce updated = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -782,12 +761,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setTitle("Hacked Title");
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isNotFound());
 
         // Then - Verify original data unchanged
         Annonce unchanged = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -802,12 +781,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setTitle("Non-existent Update");
 
         // When & Then
-        mockMvc.perform(put("/api/v1/annonces/999999")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(
+                        put("/api/v1/annonces/999999")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isNotFound());
     }
 
     // ========== Audit Events with Diff Calculation Tests ==========
@@ -821,13 +800,14 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setPrice(BigDecimal.valueOf(500.00));
 
         // When
-        MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                post("/api/v1/annonces")
+                                        .header(TENANT_HEADER, ORG1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
         AnnonceResponse response = objectMapper.readValue(responseJson, AnnonceResponse.class);
@@ -863,7 +843,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonce.setDescription("Original Description");
         annonce.setPrice(BigDecimal.valueOf(100.00));
         annonce = annonceRepository.save(annonce);
-        
+
         auditEventRepository.deleteAll(); // Clear create audit event
 
         // When
@@ -871,12 +851,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setTitle("Updated Title");
         updateRequest.setPrice(BigDecimal.valueOf(200.00));
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
         // Then - Verify audit event
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -912,20 +892,18 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser( roles = {"ADMIN"})
+    @WithMockUser(roles = {"ADMIN"})
     void deleteAnnonce_GeneratesAuditEventWithBeforeDiff() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "To Be Deleted", "Paris");
         annonce.setCity("Marseille");
         annonce = annonceRepository.save(annonce);
-        
+
         auditEventRepository.deleteAll(); // Clear create audit event
 
         // When
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isNoContent());
 
         // Then - Verify audit event
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -956,30 +934,30 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "JSONB Update Test", "Paris");
         annonce.setPhotos(List.of("old1.jpg", "old2.jpg"));
-        
+
         Map<String, Object> oldRules = new HashMap<>();
         oldRules.put("minAge", 18);
         oldRules.put("petsAllowed", true);
         annonce.setRulesJson(oldRules);
-        
+
         annonce = annonceRepository.save(annonce);
         auditEventRepository.deleteAll();
 
         // When - Update JSONB fields
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setPhotos(List.of("new1.jpg"));
-        
+
         Map<String, Object> newRules = new HashMap<>();
         newRules.put("minAge", 21);
         newRules.put("smokingAllowed", false);
         updateRequest.setRulesJson(newRules);
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
 
         // Then - Verify JSONB changes in audit
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -988,7 +966,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Map<String, Object> diff = auditEvents.get(0).getDiff();
         @SuppressWarnings("unchecked")
         Map<String, Object> changes = (Map<String, Object>) diff.get("changes");
-        
+
         assertThat(changes).containsKey("photos");
         assertThat(changes).containsKey("rulesJson");
     }
@@ -1002,27 +980,23 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonce = annonceRepository.save(annonce);
 
         // When & Then - PRO role should not be able to delete
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isForbidden());
+        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isForbidden());
 
         // Verify annonce still exists
         assertThat(annonceRepository.findById(annonce.getId())).isPresent();
     }
 
     @Test
-    @WithMockUser( roles = {"ADMIN"})
+    @WithMockUser(roles = {"ADMIN"})
     void deleteAnnonce_AsAdmin_Returns204NoContent() throws Exception {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "Admin Delete Test", "Paris");
         annonce = annonceRepository.save(annonce);
 
         // When & Then - ADMIN role should be able to delete
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isNoContent());
+        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isNoContent());
 
         // Verify annonce is deleted
         assertThat(annonceRepository.findById(annonce.getId())).isEmpty();
@@ -1035,12 +1009,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setTitle("Pro Create Test");
 
         // When & Then - PRO role should be able to create
-        mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated());
+        mockMvc.perform(
+                        post("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
     }
 
     @Test
@@ -1053,12 +1027,12 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setTitle("Pro Updated");
 
         // When & Then - PRO role should be able to update
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
     }
 
     // ========== H2 vs Postgres JSONB Compatibility Tests ==========
@@ -1071,26 +1045,25 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setPhotos(List.of("photo1.jpg", "photo2.jpg", "photo3.jpg"));
 
         // When
-        MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                post("/api/v1/annonces")
+                                        .header(TENANT_HEADER, ORG1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
         AnnonceResponse response = objectMapper.readValue(responseJson, AnnonceResponse.class);
 
         // Then - Verify retrieval works
-        mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.photos", hasSize(3)))
-            .andExpect(jsonPath("$.photos[0]").value("photo1.jpg"))
-            .andExpect(jsonPath("$.photos[1]").value("photo2.jpg"))
-            .andExpect(jsonPath("$.photos[2]").value("photo3.jpg"));
+        mockMvc.perform(get("/api/v1/annonces/" + response.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos", hasSize(3)))
+                .andExpect(jsonPath("$.photos[0]").value("photo1.jpg"))
+                .andExpect(jsonPath("$.photos[1]").value("photo2.jpg"))
+                .andExpect(jsonPath("$.photos[2]").value("photo3.jpg"));
     }
 
     @Test
@@ -1098,34 +1071,34 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Given
         AnnonceCreateRequest request = new AnnonceCreateRequest();
         request.setTitle("JSONB Nested Object Test");
-        
+
         Map<String, Object> rules = new HashMap<>();
-        rules.put("restrictions", Map.of(
-            "age", Map.of("min", 18, "max", 65),
-            "requirements", List.of("ID", "Proof of Income", "References")
-        ));
+        rules.put(
+                "restrictions",
+                Map.of(
+                        "age", Map.of("min", 18, "max", 65),
+                        "requirements", List.of("ID", "Proof of Income", "References")));
         request.setRulesJson(rules);
 
         // When
-        MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                post("/api/v1/annonces")
+                                        .header(TENANT_HEADER, ORG1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
         AnnonceResponse response = objectMapper.readValue(responseJson, AnnonceResponse.class);
 
         // Then - Verify retrieval and nested structure
-        mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.rulesJson.restrictions.age.min").value(18))
-            .andExpect(jsonPath("$.rulesJson.restrictions.age.max").value(65))
-            .andExpect(jsonPath("$.rulesJson.restrictions.requirements", hasSize(3)));
+        mockMvc.perform(get("/api/v1/annonces/" + response.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.rulesJson.restrictions.age.min").value(18))
+                .andExpect(jsonPath("$.rulesJson.restrictions.age.max").value(65))
+                .andExpect(jsonPath("$.rulesJson.restrictions.requirements", hasSize(3)));
     }
 
     @Test
@@ -1133,7 +1106,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Given - Test various JSON types: string, number, boolean, array, object
         AnnonceCreateRequest request = new AnnonceCreateRequest();
         request.setTitle("JSONB Mixed Types Test");
-        
+
         Map<String, Object> meta = new HashMap<>();
         meta.put("stringField", "value");
         meta.put("intField", 42);
@@ -1145,28 +1118,27 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setMeta(meta);
 
         // When
-        MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                post("/api/v1/annonces")
+                                        .header(TENANT_HEADER, ORG1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
         AnnonceResponse response = objectMapper.readValue(responseJson, AnnonceResponse.class);
 
         // Then - Verify all types are preserved
-        mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.meta.stringField").value("value"))
-            .andExpect(jsonPath("$.meta.intField").value(42))
-            .andExpect(jsonPath("$.meta.doubleField").value(3.14))
-            .andExpect(jsonPath("$.meta.booleanField").value(true))
-            .andExpect(jsonPath("$.meta.arrayField", hasSize(3)))
-            .andExpect(jsonPath("$.meta.objectField.nested").value("value"));
+        mockMvc.perform(get("/api/v1/annonces/" + response.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.meta.stringField").value("value"))
+                .andExpect(jsonPath("$.meta.intField").value(42))
+                .andExpect(jsonPath("$.meta.doubleField").value(3.14))
+                .andExpect(jsonPath("$.meta.booleanField").value(true))
+                .andExpect(jsonPath("$.meta.arrayField", hasSize(3)))
+                .andExpect(jsonPath("$.meta.objectField.nested").value("value"));
     }
 
     @Test
@@ -1179,23 +1151,22 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         request.setMeta(Map.of());
 
         // When
-        MvcResult result = mockMvc.perform(post("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)))
-            .andExpect(status().isCreated())
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                post("/api/v1/annonces")
+                                        .header(TENANT_HEADER, ORG1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
 
         String responseJson = result.getResponse().getContentAsString();
         AnnonceResponse response = objectMapper.readValue(responseJson, AnnonceResponse.class);
 
         // Then - Verify empty collections are handled
-        mockMvc.perform(get("/api/v1/annonces/" + response.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.photos").isEmpty());
+        mockMvc.perform(get("/api/v1/annonces/" + response.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos").isEmpty());
     }
 
     @Test
@@ -1203,7 +1174,7 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // Given
         Annonce annonce = createTestAnnonce(ORG1, "JSONB Update Compatibility", "Paris");
         annonce.setPhotos(List.of("old.jpg"));
-        
+
         Map<String, Object> oldRules = new HashMap<>();
         oldRules.put("oldKey", "oldValue");
         annonce.setRulesJson(oldRules);
@@ -1212,21 +1183,21 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         // When - Update JSONB fields
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
         updateRequest.setPhotos(List.of("new1.jpg", "new2.jpg"));
-        
+
         Map<String, Object> newRules = new HashMap<>();
         newRules.put("newKey", "newValue");
         newRules.put("complexKey", Map.of("nested", List.of(1, 2, 3)));
         updateRequest.setRulesJson(newRules);
 
-        mockMvc.perform(put("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(updateRequest)))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.photos", hasSize(2)))
-            .andExpect(jsonPath("$.rulesJson.newKey").value("newValue"))
-            .andExpect(jsonPath("$.rulesJson.complexKey.nested", hasSize(3)));
+        mockMvc.perform(
+                        put("/api/v1/annonces/" + annonce.getId())
+                                .header(TENANT_HEADER, ORG1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.photos", hasSize(2)))
+                .andExpect(jsonPath("$.rulesJson.newKey").value("newValue"))
+                .andExpect(jsonPath("$.rulesJson.complexKey.nested", hasSize(3)));
 
         // Then - Verify persistence
         Annonce updated = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -1261,39 +1232,41 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         annonceRepository.save(org2Annonce2);
 
         // When - List from ORG1
-        MvcResult result = mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(2)))
-            .andExpect(jsonPath("$.totalElements").value(2))
-            .andReturn();
+        MvcResult result =
+                mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content", hasSize(2)))
+                        .andExpect(jsonPath("$.totalElements").value(2))
+                        .andReturn();
 
         // Then - Verify only ORG1 data is returned
         String responseJson = result.getResponse().getContentAsString();
-        Map<String, Object> responseMap = objectMapper.readValue(responseJson, new TypeReference<>() {});
+        Map<String, Object> responseMap =
+                objectMapper.readValue(responseJson, new TypeReference<>() {});
         @SuppressWarnings("unchecked")
         List<Map<String, Object>> content = (List<Map<String, Object>>) responseMap.get("content");
-        
+
         for (Map<String, Object> item : content) {
             assertThat(item.get("orgId")).isEqualTo(ORG1);
             assertThat(item.get("title").toString()).startsWith("ORG1");
         }
-        
+
         // When - List from ORG2
-        MvcResult result2 = mockMvc.perform(get("/api/v1/annonces")
-                .header(TENANT_HEADER, ORG2))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(2)))
-            .andExpect(jsonPath("$.totalElements").value(2))
-            .andReturn();
+        MvcResult result2 =
+                mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG2))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content", hasSize(2)))
+                        .andExpect(jsonPath("$.totalElements").value(2))
+                        .andReturn();
 
         // Then - Verify only ORG2 data is returned
         String responseJson2 = result2.getResponse().getContentAsString();
-        Map<String, Object> responseMap2 = objectMapper.readValue(responseJson2, new TypeReference<>() {});
+        Map<String, Object> responseMap2 =
+                objectMapper.readValue(responseJson2, new TypeReference<>() {});
         @SuppressWarnings("unchecked")
-        List<Map<String, Object>> content2 = (List<Map<String, Object>>) responseMap2.get("content");
-        
+        List<Map<String, Object>> content2 =
+                (List<Map<String, Object>>) responseMap2.get("content");
+
         for (Map<String, Object> item : content2) {
             assertThat(item.get("orgId")).isEqualTo(ORG2);
             assertThat(item.get("title").toString()).startsWith("ORG2");
@@ -1306,12 +1279,11 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce annonce = createTestAnnonce(ORG2, "ORG2 Delete Test", "Paris");
         annonce = annonceRepository.save(annonce);
 
-        // When - Try to delete from ORG1 (even with forbidden response, it should be 404 for security)
+        // When - Try to delete from ORG1 (even with forbidden response, it should be 404 for
+        // security)
         // Note: PRO can't delete anyway, but testing cross-tenant isolation
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                
-                .header(TENANT_HEADER, ORG1))
-            .andExpect(status().isForbidden()); // PRO role gets 403 first
+        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId()).header(TENANT_HEADER, ORG1))
+                .andExpect(status().isForbidden()); // PRO role gets 403 first
 
         // Verify annonce still exists and unchanged
         Annonce unchanged = annonceRepository.findById(annonce.getId()).orElseThrow();
@@ -1325,61 +1297,59 @@ class AnnonceBackendE2ETest extends BaseBackendE2ETest {
         Annonce org1Paris1 = createTestAnnonce(ORG1, "ORG1 Paris Active 1", "Paris");
         org1Paris1.setStatus(AnnonceStatus.ACTIVE);
         annonceRepository.save(org1Paris1);
-        
+
         Annonce org1Paris2 = createTestAnnonce(ORG1, "ORG1 Paris Active 2", "Paris");
         org1Paris2.setStatus(AnnonceStatus.ACTIVE);
         annonceRepository.save(org1Paris2);
-        
+
         Annonce org1Lyon = createTestAnnonce(ORG1, "ORG1 Lyon Active", "Lyon");
         org1Lyon.setStatus(AnnonceStatus.ACTIVE);
         annonceRepository.save(org1Lyon);
-        
+
         Annonce org1ParisPaused = createTestAnnonce(ORG1, "ORG1 Paris Paused", "Paris");
         org1ParisPaused.setStatus(AnnonceStatus.PAUSED);
         annonceRepository.save(org1ParisPaused);
-        
+
         // ORG2: 1 ACTIVE in Paris (should not appear in ORG1 results)
         Annonce org2Paris = createTestAnnonce(ORG2, "ORG2 Paris Active", "Paris");
         org2Paris.setStatus(AnnonceStatus.ACTIVE);
         annonceRepository.save(org2Paris);
 
         // When & Then - Filter ORG1 by ACTIVE status only
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("status", "ACTIVE"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(3)))
-            .andExpect(jsonPath("$.totalElements").value(3));
-        
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("status", "ACTIVE"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.totalElements").value(3));
+
         // When & Then - Filter ORG1 by city=Paris only
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("city", "Paris"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(3)))
-            .andExpect(jsonPath("$.totalElements").value(3));
-        
+        mockMvc.perform(get("/api/v1/annonces").header(TENANT_HEADER, ORG1).param("city", "Paris"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(3)))
+                .andExpect(jsonPath("$.totalElements").value(3));
+
         // When & Then - Filter ORG1 by ACTIVE status AND city=Paris
-        mockMvc.perform(get("/api/v1/annonces")
-                
-                .header(TENANT_HEADER, ORG1)
-                .param("status", "ACTIVE")
-                .param("city", "Paris"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(2)))
-            .andExpect(jsonPath("$.totalElements").value(2));
-        
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG1)
+                                .param("status", "ACTIVE")
+                                .param("city", "Paris"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(2)))
+                .andExpect(jsonPath("$.totalElements").value(2));
+
         // When & Then - Filter ORG2 by ACTIVE status AND city=Paris
-        mockMvc.perform(get("/api/v1/annonces")
-                .header(TENANT_HEADER, ORG2)
-                .param("status", "ACTIVE")
-                .param("city", "Paris"))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.content", hasSize(1)))
-            .andExpect(jsonPath("$.totalElements").value(1))
-            .andExpect(jsonPath("$.content[0].title").value("ORG2 Paris Active"));
+        mockMvc.perform(
+                        get("/api/v1/annonces")
+                                .header(TENANT_HEADER, ORG2)
+                                .param("status", "ACTIVE")
+                                .param("city", "Paris"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content", hasSize(1)))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.content[0].title").value("ORG2 Paris Active"));
     }
 
     // ========== Helper Methods ==========

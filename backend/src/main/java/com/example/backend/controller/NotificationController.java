@@ -7,8 +7,8 @@ import com.example.backend.dto.NotificationResponse;
 import com.example.backend.entity.NotificationEntity;
 import com.example.backend.entity.enums.NotificationStatus;
 import com.example.backend.entity.enums.NotificationType;
-import com.example.backend.util.TenantContext;
 import com.example.backend.service.NotificationService;
+import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,56 +30,66 @@ public class NotificationController {
     private final NotificationService notificationService;
     private final NotificationMapper notificationMapper;
 
-    public NotificationController(NotificationService notificationService, NotificationMapper notificationMapper) {
+    public NotificationController(
+            NotificationService notificationService, NotificationMapper notificationMapper) {
         this.notificationService = notificationService;
         this.notificationMapper = notificationMapper;
     }
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Create a new notification", description = "Creates a new notification with PENDING status")
-    public ResponseEntity<NotificationResponse> create(@Valid @RequestBody NotificationCreateRequest request) {
+    @Operation(
+            summary = "Create a new notification",
+            description = "Creates a new notification with PENDING status")
+    public ResponseEntity<NotificationResponse> create(
+            @Valid @RequestBody NotificationCreateRequest request) {
         String orgId = TenantContext.getOrgId();
-        
-        NotificationEntity notification = notificationService.createNotification(
-            orgId,
-            request.getDossierId(),
-            request.getType(),
-            request.getRecipient(),
-            request.getSubject(),
-            request.getTemplateId(),
-            request.getVariables()
-        );
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(notificationMapper.toResponse(notification));
+
+        NotificationEntity notification =
+                notificationService.createNotification(
+                        orgId,
+                        request.getDossierId(),
+                        request.getType(),
+                        request.getRecipient(),
+                        request.getSubject(),
+                        request.getTemplateId(),
+                        request.getVariables());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(notificationMapper.toResponse(notification));
     }
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "List notifications", description = "Retrieves a paginated list of notifications with optional filtering")
+    @Operation(
+            summary = "List notifications",
+            description = "Retrieves a paginated list of notifications with optional filtering")
     public ResponseEntity<Page<NotificationResponse>> list(
-            @Parameter(description = "Filter by dossier ID")
-            @RequestParam(required = false) Long dossierId,
-            @Parameter(description = "Filter by notification type")
-            @RequestParam(required = false) NotificationType type,
+            @Parameter(description = "Filter by dossier ID") @RequestParam(required = false)
+                    Long dossierId,
+            @Parameter(description = "Filter by notification type") @RequestParam(required = false)
+                    NotificationType type,
             @Parameter(description = "Filter by notification status")
-            @RequestParam(required = false) NotificationStatus status,
-            @Parameter(description = "Page number (0-indexed)")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size")
-            @RequestParam(defaultValue = "20") int size,
-            @Parameter(description = "Sort criteria")
-            @RequestParam(defaultValue = "createdAt,desc") String sort) {
+                    @RequestParam(required = false)
+                    NotificationStatus status,
+            @Parameter(description = "Page number (0-indexed)") @RequestParam(defaultValue = "0")
+                    int page,
+            @Parameter(description = "Page size") @RequestParam(defaultValue = "20") int size,
+            @Parameter(description = "Sort criteria") @RequestParam(defaultValue = "createdAt,desc")
+                    String sort) {
 
         Pageable pageable = createPageable(page, size, sort);
-        Page<NotificationEntity> notifications = notificationService.listNotifications(dossierId, type, status, pageable);
-        
+        Page<NotificationEntity> notifications =
+                notificationService.listNotifications(dossierId, type, status, pageable);
+
         return ResponseEntity.ok(notifications.map(notificationMapper::toResponse));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Get notification by ID", description = "Retrieves a single notification by its ID")
+    @Operation(
+            summary = "Get notification by ID",
+            description = "Retrieves a single notification by its ID")
     public ResponseEntity<NotificationResponse> getById(@PathVariable Long id) {
         NotificationEntity notification = notificationService.getNotificationById(id);
         if (notification == null) {
@@ -101,7 +111,9 @@ public class NotificationController {
 
     @PatchMapping("/{id}/unread")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Mark notification as unread", description = "Marks a notification as unread")
+    @Operation(
+            summary = "Mark notification as unread",
+            description = "Marks a notification as unread")
     public ResponseEntity<NotificationResponse> markAsUnread(@PathVariable Long id) {
         NotificationEntity notification = notificationService.markAsUnread(id);
         if (notification == null) {
@@ -112,7 +124,9 @@ public class NotificationController {
 
     @GetMapping("/unread-count")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Get unread notification count", description = "Returns the count of unread IN_APP notifications")
+    @Operation(
+            summary = "Get unread notification count",
+            description = "Returns the count of unread IN_APP notifications")
     public ResponseEntity<Long> getUnreadCount() {
         long count = notificationService.getUnreadCount();
         return ResponseEntity.ok(count);
@@ -120,28 +134,33 @@ public class NotificationController {
 
     @PostMapping("/in-app")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "Create in-app notification", description = "Creates a new in-app notification for a user")
-    public ResponseEntity<NotificationResponse> createInAppNotification(@Valid @RequestBody InAppNotificationRequest request) {
+    @Operation(
+            summary = "Create in-app notification",
+            description = "Creates a new in-app notification for a user")
+    public ResponseEntity<NotificationResponse> createInAppNotification(
+            @Valid @RequestBody InAppNotificationRequest request) {
         String orgId = TenantContext.getOrgId();
-        
-        NotificationEntity notification = notificationService.createInAppNotification(
-            orgId,
-            request.getDossierId(),
-            request.getRecipient(),
-            request.getSubject(),
-            request.getMessage(),
-            request.getActionUrl()
-        );
-        
-        return ResponseEntity.status(HttpStatus.CREATED).body(notificationMapper.toResponse(notification));
+
+        NotificationEntity notification =
+                notificationService.createInAppNotification(
+                        orgId,
+                        request.getDossierId(),
+                        request.getRecipient(),
+                        request.getSubject(),
+                        request.getMessage(),
+                        request.getActionUrl());
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(notificationMapper.toResponse(notification));
     }
 
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+        Sort.Direction direction =
+                sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
         return PageRequest.of(page, size, Sort.by(direction, property));
     }
 }

@@ -1,11 +1,16 @@
 package com.example.backend.service;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.WhatsAppProviderConfig;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,35 +22,22 @@ import org.springframework.http.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class WhatsAppCloudApiProviderTest {
 
-    @Mock
-    private WhatsAppProviderConfigRepository providerConfigRepository;
+    @Mock private WhatsAppProviderConfigRepository providerConfigRepository;
 
-    @Mock
-    private WhatsAppSessionWindowService sessionWindowService;
+    @Mock private WhatsAppSessionWindowService sessionWindowService;
 
-    @Mock
-    private WhatsAppRateLimitService rateLimitService;
+    @Mock private WhatsAppRateLimitService rateLimitService;
 
-    @Mock
-    private WhatsAppErrorMapper errorMapper;
+    @Mock private WhatsAppErrorMapper errorMapper;
 
-    @Mock
-    private RestTemplate restTemplate;
+    @Mock private RestTemplate restTemplate;
 
-    @Mock
-    private ObjectMapper objectMapper;
+    @Mock private ObjectMapper objectMapper;
 
-    @InjectMocks
-    private WhatsAppCloudApiProvider provider;
+    @InjectMocks private WhatsAppCloudApiProvider provider;
 
     private WhatsAppProviderConfig config;
     private OutboundMessageEntity message;
@@ -71,14 +63,15 @@ class WhatsAppCloudApiProviderTest {
     void send_WithinSessionWindow_SendsFreeformMessage() {
         when(providerConfigRepository.findByOrgId("test-org")).thenReturn(Optional.of(config));
         when(rateLimitService.checkAndConsumeQuota("test-org")).thenReturn(true);
-        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890")).thenReturn(true);
+        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890"))
+                .thenReturn(true);
 
-        Map<String, Object> responseBody = Map.of(
-            "messages", List.of(Map.of("id", "whatsapp-msg-123"))
-        );
+        Map<String, Object> responseBody =
+                Map.of("messages", List.of(Map.of("id", "whatsapp-msg-123")));
         ResponseEntity<Map> response = ResponseEntity.ok(responseBody);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
-            .thenReturn(response);
+        when(restTemplate.exchange(
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(response);
 
         ProviderSendResult result = provider.send(message);
 
@@ -91,7 +84,8 @@ class WhatsAppCloudApiProviderTest {
     void send_OutsideSessionWindow_RequiresTemplate() {
         when(providerConfigRepository.findByOrgId("test-org")).thenReturn(Optional.of(config));
         when(rateLimitService.checkAndConsumeQuota("test-org")).thenReturn(true);
-        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890")).thenReturn(false);
+        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890"))
+                .thenReturn(false);
 
         ProviderSendResult result = provider.send(message);
 
@@ -107,14 +101,15 @@ class WhatsAppCloudApiProviderTest {
 
         when(providerConfigRepository.findByOrgId("test-org")).thenReturn(Optional.of(config));
         when(rateLimitService.checkAndConsumeQuota("test-org")).thenReturn(true);
-        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890")).thenReturn(false);
+        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890"))
+                .thenReturn(false);
 
-        Map<String, Object> responseBody = Map.of(
-            "messages", List.of(Map.of("id", "whatsapp-msg-456"))
-        );
+        Map<String, Object> responseBody =
+                Map.of("messages", List.of(Map.of("id", "whatsapp-msg-456")));
         ResponseEntity<Map> response = ResponseEntity.ok(responseBody);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
-            .thenReturn(response);
+        when(restTemplate.exchange(
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(response);
 
         ProviderSendResult result = provider.send(message);
 
@@ -150,27 +145,35 @@ class WhatsAppCloudApiProviderTest {
     void send_RateLimitError_HandlesAppropriately() throws Exception {
         when(providerConfigRepository.findByOrgId("test-org")).thenReturn(Optional.of(config));
         when(rateLimitService.checkAndConsumeQuota("test-org")).thenReturn(true);
-        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890")).thenReturn(true);
+        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890"))
+                .thenReturn(true);
 
-        String errorResponse = "{\"error\":{\"code\":130,\"message\":\"Rate limit hit\",\"error_data\":{\"retry_after\":300}}}";
-        HttpClientErrorException exception = HttpClientErrorException.create(
-            HttpStatus.TOO_MANY_REQUESTS,
-            "Too Many Requests",
-            HttpHeaders.EMPTY,
-            errorResponse.getBytes(),
-            null
-        );
+        String errorResponse =
+                "{\"error\":{\"code\":130,\"message\":\"Rate limit hit\",\"error_data\":{\"retry_after\":300}}}";
+        HttpClientErrorException exception =
+                HttpClientErrorException.create(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        "Too Many Requests",
+                        HttpHeaders.EMPTY,
+                        errorResponse.getBytes(),
+                        null);
 
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
-            .thenThrow(exception);
+        when(restTemplate.exchange(
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(exception);
         when(objectMapper.readValue(anyString(), eq(Map.class)))
-            .thenReturn(Map.of("error", Map.of(
-                "code", 130,
-                "message", "Rate limit hit",
-                "error_data", Map.of("retry_after", 300)
-            )));
+                .thenReturn(
+                        Map.of(
+                                "error",
+                                Map.of(
+                                        "code",
+                                        130,
+                                        "message",
+                                        "Rate limit hit",
+                                        "error_data",
+                                        Map.of("retry_after", 300))));
         when(errorMapper.getErrorInfo("130"))
-            .thenReturn(new WhatsAppErrorMapper.ErrorInfo("Rate limit hit", true, true));
+                .thenReturn(new WhatsAppErrorMapper.ErrorInfo("Rate limit hit", true, true));
 
         ProviderSendResult result = provider.send(message);
 
@@ -183,26 +186,35 @@ class WhatsAppCloudApiProviderTest {
     void send_SessionExpiredError_ReturnsAppropriateMessage() throws Exception {
         when(providerConfigRepository.findByOrgId("test-org")).thenReturn(Optional.of(config));
         when(rateLimitService.checkAndConsumeQuota("test-org")).thenReturn(true);
-        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890")).thenReturn(true);
+        when(sessionWindowService.isWithinSessionWindow("test-org", "+1234567890"))
+                .thenReturn(true);
 
-        String errorResponse = "{\"error\":{\"code\":132016,\"message\":\"Message out of session window\"}}";
-        HttpClientErrorException exception = HttpClientErrorException.create(
-            HttpStatus.BAD_REQUEST,
-            "Bad Request",
-            HttpHeaders.EMPTY,
-            errorResponse.getBytes(),
-            null
-        );
+        String errorResponse =
+                "{\"error\":{\"code\":132016,\"message\":\"Message out of session window\"}}";
+        HttpClientErrorException exception =
+                HttpClientErrorException.create(
+                        HttpStatus.BAD_REQUEST,
+                        "Bad Request",
+                        HttpHeaders.EMPTY,
+                        errorResponse.getBytes(),
+                        null);
 
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
-            .thenThrow(exception);
+        when(restTemplate.exchange(
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(exception);
         when(objectMapper.readValue(anyString(), eq(Map.class)))
-            .thenReturn(Map.of("error", Map.of(
-                "code", 132016,
-                "message", "Message out of session window"
-            )));
+                .thenReturn(
+                        Map.of(
+                                "error",
+                                Map.of(
+                                        "code",
+                                        132016,
+                                        "message",
+                                        "Message out of session window")));
         when(errorMapper.getErrorInfo("132016"))
-            .thenReturn(new WhatsAppErrorMapper.ErrorInfo("Out of session window - template required", false, false));
+                .thenReturn(
+                        new WhatsAppErrorMapper.ErrorInfo(
+                                "Out of session window - template required", false, false));
 
         ProviderSendResult result = provider.send(message);
 
@@ -219,14 +231,13 @@ class WhatsAppCloudApiProviderTest {
 
         message.setTo("1234567890");
 
-        Map<String, Object> responseBody = Map.of(
-            "messages", List.of(Map.of("id", "msg-123"))
-        );
+        Map<String, Object> responseBody = Map.of("messages", List.of(Map.of("id", "msg-123")));
         ResponseEntity<Map> response = ResponseEntity.ok(responseBody);
 
         ArgumentCaptor<HttpEntity> entityCaptor = ArgumentCaptor.forClass(HttpEntity.class);
-        when(restTemplate.exchange(anyString(), eq(HttpMethod.POST), entityCaptor.capture(), eq(Map.class)))
-            .thenReturn(response);
+        when(restTemplate.exchange(
+                        anyString(), eq(HttpMethod.POST), entityCaptor.capture(), eq(Map.class)))
+                .thenReturn(response);
 
         provider.send(message);
 

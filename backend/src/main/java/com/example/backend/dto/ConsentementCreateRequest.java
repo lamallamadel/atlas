@@ -4,7 +4,6 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 public class ConsentementCreateRequest {
@@ -23,8 +22,7 @@ public class ConsentementCreateRequest {
 
     private Map<String, Object> meta;
 
-    public ConsentementCreateRequest() {
-    }
+    public ConsentementCreateRequest() {}
 
     public Long getDossierId() {
         return dossierId;

@@ -2,12 +2,11 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.AppointmentStatus;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.Filter;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "appointment")

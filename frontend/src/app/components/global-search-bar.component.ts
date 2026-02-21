@@ -195,7 +195,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
       case 'Escape':
         event.preventDefault();
         this.clearSearch();
-        this.searchInput.nativeElement.blur();
+        this.searchInput?.nativeElement?.blur();
         break;
     }
   }

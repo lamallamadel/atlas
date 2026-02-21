@@ -4,6 +4,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
+import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
 import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DossierCreateDialogComponent } from '../dossiers/dossier-create-dialog.component';
@@ -36,17 +37,17 @@ interface KpiCard {
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
-  
+
   selectedPeriod$ = new BehaviorSubject<string>('TODAY');
   selectedDossierFilter$ = new BehaviorSubject<string>('A_TRAITER');
-  
+
   isHandset = false;
   isTablet = false;
   isDesktop = false;
 
   kpiCards: { [key: string]: KpiCard } = {
     annoncesActives: {
-      title: 'Annonces actives',
+      title: 'Biens en Portefeuille',
       value: 0,
       displayValue: 0,
       loading: true,
@@ -60,18 +61,33 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       description: 'Propriétés disponibles'
     },
     dossiersATraiter: {
-      title: 'Dossiers à traiter',
+      title: 'Leads Actifs',
       value: 0,
       displayValue: 0,
       loading: true,
       error: '',
-      icon: 'folder_open',
+      icon: 'person_add',
       color: '#ff9800',
       chartData: [8, 12, 10, 15, 13, 18, 20],
+
       trend: '',
       trendValue: 0,
       badgeColor: '#4caf50',
       description: 'Leads en attente'
+
+      trend: ''
+    },
+    conversionWhatsApp: {
+      title: 'Conversion WhatsApp %',
+      value: 0,
+      displayValue: 0,
+      loading: true,
+      error: '',
+      icon: 'connect_without_contact',
+      color: '#25D366',
+      chartData: [4, 6, 8, 10, 15, 18, 24],
+      trend: ''
+
     }
   };
 
@@ -79,18 +95,24 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   loadingRecent = false;
   errorRecent = '';
 
+  yieldAnnonces: AnnonceResponse[] = [];
+  loadingYield = false;
+
   @ViewChild('annoncesChart') annoncesChartRef!: ElementRef<HTMLCanvasElement>;
   @ViewChild('dossiersChart') dossiersChartRef!: ElementRef<HTMLCanvasElement>;
-  
+  @ViewChild('conversionWhatsAppChart') conversionWhatsAppChartRef!: ElementRef<HTMLCanvasElement>;
+
   private annoncesChart?: Chart;
   private dossiersChart?: Chart;
+  private conversionWhatsAppChart?: Chart;
 
   constructor(
     private dashboardKpiService: DashboardKpiService,
     private router: Router,
     private ariaAnnouncer: AriaLiveAnnouncerService,
     private breakpointObserver: BreakpointObserver,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private annonceApiService: AnnonceApiService
   ) { }
 
   ngOnInit(): void {
@@ -159,18 +181,22 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
-    
+
     if (this.annoncesChart) {
       this.annoncesChart.destroy();
     }
     if (this.dossiersChart) {
       this.dossiersChart.destroy();
     }
+    if (this.conversionWhatsAppChart) {
+      this.conversionWhatsAppChart.destroy();
+    }
   }
 
   loadKpis(): void {
     this.loadTrends();
     this.loadRecentDossiers();
+    this.loadYieldAnnonces();
   }
 
   loadTrends(): void {
@@ -178,6 +204,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.kpiCards['annoncesActives'].error = '';
     this.kpiCards['dossiersATraiter'].loading = true;
     this.kpiCards['dossiersATraiter'].error = '';
+
+    this.kpiCards['conversionWhatsApp'].loading = true;
+    this.kpiCards['conversionWhatsApp'].error = '';
 
     const period = this.selectedPeriod$.value;
     this.dashboardKpiService.getTrends(period).subscribe({
@@ -190,7 +219,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           this.kpiCards['annoncesActives'].loading = false;
           this.animateCounter('annoncesActives', annoncesData.currentValue);
           this.updateChart('annoncesActives', annoncesData.currentValue);
-          this.ariaAnnouncer.announcePolite(`${annoncesData.currentValue} annonces actives chargées`);
+          this.ariaAnnouncer.announcePolite(`${annoncesData.currentValue} biens chargés`);
         }
 
         if (trends['dossiersATraiter']) {
@@ -201,14 +230,24 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
           this.kpiCards['dossiersATraiter'].loading = false;
           this.animateCounter('dossiersATraiter', dossiersData.currentValue);
           this.updateChart('dossiersATraiter', dossiersData.currentValue);
-          this.ariaAnnouncer.announcePolite(`${dossiersData.currentValue} dossiers à traiter chargés`);
+          this.ariaAnnouncer.announcePolite(`${dossiersData.currentValue} leads chargés`);
         }
+
+        // Mock WhatsApp Conversion Rate
+        const mockConversion = period === 'TODAY' ? 12 : period === 'LAST_7_DAYS' ? 18 : 24;
+        this.kpiCards['conversionWhatsApp'].value = mockConversion;
+        this.kpiCards['conversionWhatsApp'].trend = '+15%';
+        this.kpiCards['conversionWhatsApp'].loading = false;
+        this.animateCounter('conversionWhatsApp', mockConversion);
+        this.updateChart('conversionWhatsApp', mockConversion);
       },
       error: () => {
         this.kpiCards['annoncesActives'].loading = false;
         this.kpiCards['annoncesActives'].error = 'Erreur lors du chargement des données';
         this.kpiCards['dossiersATraiter'].loading = false;
         this.kpiCards['dossiersATraiter'].error = 'Erreur lors du chargement des données';
+        this.kpiCards['conversionWhatsApp'].loading = false;
+        this.kpiCards['conversionWhatsApp'].error = 'Erreur serveur';
         this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des données du tableau de bord');
       }
     });
@@ -239,6 +278,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.loadingRecent = false;
         this.errorRecent = 'Erreur lors du chargement des derniers dossiers';
         this.ariaAnnouncer.announceAssertive('Erreur lors du chargement des derniers dossiers');
+      }
+    });
+  }
+
+  loadYieldAnnonces(): void {
+    this.loadingYield = true;
+    this.annonceApiService.list({ size: 100, sort: 'updatedAt,desc' }).subscribe({
+      next: (page) => {
+        this.yieldAnnonces = page.content.filter(a => a.aiScoreDetails && a.aiScoreDetails.includes('Yield Management'));
+        this.loadingYield = false;
+      },
+      error: () => {
+        this.loadingYield = false;
       }
     });
   }
@@ -281,6 +333,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     } else if (cardKey === 'dossiersATraiter' && this.dossiersChart) {
       this.dossiersChart.data.datasets[0].data = [...card.chartData];
       this.dossiersChart.update('none');
+    } else if (cardKey === 'conversionWhatsApp' && this.conversionWhatsAppChart) {
+      this.conversionWhatsAppChart.data.datasets[0].data = [...card.chartData];
+      this.conversionWhatsAppChart.update('none');
     }
   }
 
@@ -298,12 +353,19 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.kpiCards['dossiersATraiter']
       );
     }
+
+    if (this.conversionWhatsAppChartRef) {
+      this.conversionWhatsAppChart = await this.createChart(
+        this.conversionWhatsAppChartRef.nativeElement,
+        this.kpiCards['conversionWhatsApp']
+      );
+    }
   }
 
   async createChart(canvas: HTMLCanvasElement, card: KpiCard): Promise<Chart> {
     const chartModule = await import('chart.js/auto');
     const Chart = chartModule.Chart;
-    
+
     const config: ChartConfiguration = {
       type: 'line',
       data: {
@@ -380,13 +442,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   navigateToAnnoncesActives(): void {
-    this.router.navigate(['/annonces'], { 
+    this.router.navigate(['/annonces'], {
       queryParams: { status: 'ACTIVE' }
     });
   }
 
   navigateToDossiersATraiter(): void {
-    this.router.navigate(['/dossiers'], { 
+    this.router.navigate(['/dossiers'], {
       queryParams: { status: 'NEW' }
     });
   }
@@ -425,7 +487,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       event.preventDefault();
       event.stopPropagation();
     }
-    
+
     if (cardKey === 'annoncesActives') {
       this.navigateToAnnoncesActives();
     } else if (cardKey === 'dossiersATraiter') {
@@ -480,7 +542,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
 
     try {
       const Papa = await import('papaparse');
-      
+
       const csvData = this.recentDossiers.map(dossier => ({
         ID: dossier.id,
         'Lead Name': dossier.leadName,
@@ -490,20 +552,20 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }));
 
       const csv = Papa.unparse(csvData);
-      
+
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', `dossiers_${new Date().toISOString()}.csv`);
       link.style.visibility = 'hidden';
-      
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-      
+
       this.ariaAnnouncer.announcePolite('Export CSV terminé avec succès');
     } catch (error) {
       console.error('Failed to export CSV:', error);
@@ -525,13 +587,13 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         import('jspdf'),
         import('jspdf-autotable')
       ]);
-      
+
       const { jsPDF: JsPDFClass } = jsPDF;
       const doc = new JsPDFClass();
 
       doc.setFontSize(18);
       doc.text('Dashboard Report', 14, 20);
-      
+
       doc.setFontSize(12);
       doc.text(`Generated: ${new Date().toLocaleString()}`, 14, 30);
 
@@ -581,7 +643,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       }
 
       doc.save(`dashboard_report_${new Date().toISOString()}.pdf`);
-      
+
       this.ariaAnnouncer.announcePolite('Export PDF terminé avec succès');
     } catch (error) {
       console.error('Failed to export PDF:', error);

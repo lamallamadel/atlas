@@ -6,9 +6,13 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 @Entity
-@Table(name = "rate_limit_tier", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_rate_limit_tier_org_id", columnNames = {"org_id"})
-})
+@Table(
+        name = "rate_limit_tier",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_rate_limit_tier_org_id",
+                    columnNames = {"org_id"})
+        })
 public class RateLimitTier extends BaseEntity {
 
     @Id

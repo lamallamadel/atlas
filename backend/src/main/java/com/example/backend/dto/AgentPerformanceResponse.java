@@ -31,11 +31,15 @@ public class AgentPerformanceResponse {
         private Long dossiersWon;
         private Double winRate;
 
-        public AgentMetrics() {
-        }
+        public AgentMetrics() {}
 
-        public AgentMetrics(String agentId, Double averageResponseTimeHours, Long messagesSent, 
-                          Long appointmentsScheduled, Long dossiersAssigned, Long dossiersWon) {
+        public AgentMetrics(
+                String agentId,
+                Double averageResponseTimeHours,
+                Long messagesSent,
+                Long appointmentsScheduled,
+                Long dossiersAssigned,
+                Long dossiersWon) {
             this.agentId = agentId;
             this.averageResponseTimeHours = averageResponseTimeHours;
             this.messagesSent = messagesSent;

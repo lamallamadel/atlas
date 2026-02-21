@@ -3,17 +3,17 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.TemplateCategory;
 import com.example.backend.entity.enums.TemplateStatus;
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @Entity
-@Table(name = "whatsapp_template",
+@Table(
+        name = "whatsapp_template",
         uniqueConstraints = @UniqueConstraint(columnNames = {"org_id", "name", "language"}))
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 @EntityListeners(AuditingEntityListener.class)
@@ -45,7 +45,11 @@ public class WhatsAppTemplate extends BaseEntity {
     @Column(name = "components", columnDefinition = "jsonb")
     private List<Map<String, Object>> components;
 
-    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(
+            mappedBy = "template",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<TemplateVariable> variables = new ArrayList<>();
 
     @Column(name = "description", columnDefinition = "TEXT")

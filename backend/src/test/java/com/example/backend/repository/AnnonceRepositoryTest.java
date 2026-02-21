@@ -1,7 +1,11 @@
 package com.example.backend.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
+import java.math.BigDecimal;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.math.BigDecimal;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @DataJpaTest
 @ActiveProfiles("test")
 // Si tu utilises une vraie DB (Testcontainers / Docker / Postgres externe) pour les tests JPA,
@@ -25,8 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 // @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 class AnnonceRepositoryTest {
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
     @BeforeEach
     void setUp() {
@@ -106,8 +104,9 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
         // Optionnel (stabilité): annonceRepository.flush();
 
-        Specification<Annonce> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), AnnonceStatus.PUBLISHED);
+        Specification<Annonce> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), AnnonceStatus.PUBLISHED);
 
         List<Annonce> result = annonceRepository.findAll(spec);
 
@@ -123,8 +122,9 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
         // Optionnel (stabilité): annonceRepository.flush();
 
-        Specification<Annonce> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), AnnonceStatus.DRAFT);
+        Specification<Annonce> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), AnnonceStatus.DRAFT);
 
         List<Annonce> result = annonceRepository.findAll(spec);
 
@@ -139,8 +139,9 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Archived 1", AnnonceStatus.ARCHIVED));
         // Optionnel (stabilité): annonceRepository.flush();
 
-        Specification<Annonce> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), AnnonceStatus.ARCHIVED);
+        Specification<Annonce> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), AnnonceStatus.ARCHIVED);
 
         List<Annonce> result = annonceRepository.findAll(spec);
 
@@ -151,15 +152,17 @@ class AnnonceRepositoryTest {
     @Test
     void testStatusFilteringWithPagination() {
         for (int i = 0; i < 15; i++) {
-            annonceRepository.save(createAnnonce("org1", "Published " + i, AnnonceStatus.PUBLISHED));
+            annonceRepository.save(
+                    createAnnonce("org1", "Published " + i, AnnonceStatus.PUBLISHED));
         }
         for (int i = 0; i < 10; i++) {
             annonceRepository.save(createAnnonce("org1", "Draft " + i, AnnonceStatus.DRAFT));
         }
         // Optionnel (stabilité): annonceRepository.flush();
 
-        Specification<Annonce> spec = (root, query, criteriaBuilder) ->
-                criteriaBuilder.equal(root.get("status"), AnnonceStatus.PUBLISHED);
+        Specification<Annonce> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.equal(root.get("status"), AnnonceStatus.PUBLISHED);
         Pageable pageable = PageRequest.of(0, 10);
 
         Page<Annonce> result = annonceRepository.findAll(spec, pageable);
@@ -178,8 +181,9 @@ class AnnonceRepositoryTest {
         annonceRepository.save(createAnnonce("org1", "Draft 2", AnnonceStatus.DRAFT));
         // Optionnel (stabilité): annonceRepository.flush();
 
-        Specification<Annonce> spec = (root, query, criteriaBuilder) ->
-                root.get("status").in(AnnonceStatus.DRAFT, AnnonceStatus.PUBLISHED);
+        Specification<Annonce> spec =
+                (root, query, criteriaBuilder) ->
+                        root.get("status").in(AnnonceStatus.DRAFT, AnnonceStatus.PUBLISHED);
 
         List<Annonce> result = annonceRepository.findAll(spec);
 

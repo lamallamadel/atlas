@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 public class WorkflowValidationErrorResponse {
-    
+
     private String message;
     private String errorType;
     private List<String> missingRequiredFields;
@@ -19,25 +19,29 @@ public class WorkflowValidationErrorResponse {
     private List<String> allowedTransitions;
     private String actionableMessage;
 
-    public WorkflowValidationErrorResponse() {
-    }
+    public WorkflowValidationErrorResponse() {}
 
     public WorkflowValidationErrorResponse(String message, Map<String, Object> validationErrors) {
         this.message = message;
-        
+
         if (validationErrors != null) {
             this.missingRequiredFields = getListFromMap(validationErrors, "missingRequiredFields");
-            this.requiredFieldsActionableMessages = getListFromMap(validationErrors, "requiredFieldsActionableMessages");
-            this.roleAuthorizationError = getStringFromMap(validationErrors, "roleAuthorizationError");
-            this.roleActionableMessage = getStringFromMap(validationErrors, "roleActionableMessage");
+            this.requiredFieldsActionableMessages =
+                    getListFromMap(validationErrors, "requiredFieldsActionableMessages");
+            this.roleAuthorizationError =
+                    getStringFromMap(validationErrors, "roleAuthorizationError");
+            this.roleActionableMessage =
+                    getStringFromMap(validationErrors, "roleActionableMessage");
             this.preConditionError = getStringFromMap(validationErrors, "preConditionError");
-            this.preConditionActionableMessage = getStringFromMap(validationErrors, "preConditionActionableMessage");
+            this.preConditionActionableMessage =
+                    getStringFromMap(validationErrors, "preConditionActionableMessage");
             this.failedConditions = getListFromMap(validationErrors, "failedConditions");
-            this.conditionsActionableMessages = getListFromMap(validationErrors, "conditionsActionableMessages");
+            this.conditionsActionableMessages =
+                    getListFromMap(validationErrors, "conditionsActionableMessages");
             this.transitionError = getStringFromMap(validationErrors, "transition");
             this.allowedTransitions = getListFromMap(validationErrors, "allowedTransitions");
             this.actionableMessage = getStringFromMap(validationErrors, "actionableMessage");
-            
+
             this.errorType = determineErrorType(validationErrors);
         }
     }

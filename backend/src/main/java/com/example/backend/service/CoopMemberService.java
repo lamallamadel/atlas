@@ -11,14 +11,13 @@ import com.example.backend.repository.CoopGroupRepository;
 import com.example.backend.repository.CoopMemberRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class CoopMemberService {
@@ -28,10 +27,11 @@ public class CoopMemberService {
     private final CoopMemberMapper coopMemberMapper;
     private final NotificationService notificationService;
 
-    public CoopMemberService(CoopMemberRepository coopMemberRepository,
-                            CoopGroupRepository coopGroupRepository,
-                            CoopMemberMapper coopMemberMapper,
-                            NotificationService notificationService) {
+    public CoopMemberService(
+            CoopMemberRepository coopMemberRepository,
+            CoopGroupRepository coopGroupRepository,
+            CoopMemberMapper coopMemberMapper,
+            NotificationService notificationService) {
         this.coopMemberRepository = coopMemberRepository;
         this.coopGroupRepository = coopGroupRepository;
         this.coopMemberMapper = coopMemberMapper;
@@ -45,8 +45,14 @@ public class CoopMemberService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopGroup group = coopGroupRepository.findByIdAndOrgId(request.getGroupId(), orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop group not found with id: " + request.getGroupId()));
+        CoopGroup group =
+                coopGroupRepository
+                        .findByIdAndOrgId(request.getGroupId(), orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop group not found with id: "
+                                                        + request.getGroupId()));
 
         CoopMember member = coopMemberMapper.toEntity(request);
         member.setOrgId(orgId);
@@ -70,8 +76,13 @@ public class CoopMemberService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopMember member = coopMemberRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop member not found with id: " + id));
+        CoopMember member =
+                coopMemberRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop member not found with id: " + id));
 
         return coopMemberMapper.toResponse(member);
     }
@@ -102,12 +113,24 @@ public class CoopMemberService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopMember member = coopMemberRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop member not found with id: " + id));
+        CoopMember member =
+                coopMemberRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop member not found with id: " + id));
 
-        if (request.getGroupId() != null && !request.getGroupId().equals(member.getGroup().getId())) {
-            CoopGroup newGroup = coopGroupRepository.findByIdAndOrgId(request.getGroupId(), orgId)
-                    .orElseThrow(() -> new EntityNotFoundException("Coop group not found with id: " + request.getGroupId()));
+        if (request.getGroupId() != null
+                && !request.getGroupId().equals(member.getGroup().getId())) {
+            CoopGroup newGroup =
+                    coopGroupRepository
+                            .findByIdAndOrgId(request.getGroupId(), orgId)
+                            .orElseThrow(
+                                    () ->
+                                            new EntityNotFoundException(
+                                                    "Coop group not found with id: "
+                                                            + request.getGroupId()));
             member.setGroup(newGroup);
         }
 
@@ -125,8 +148,13 @@ public class CoopMemberService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        CoopMember member = coopMemberRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new EntityNotFoundException("Coop member not found with id: " + id));
+        CoopMember member =
+                coopMemberRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Coop member not found with id: " + id));
 
         coopMemberRepository.delete(member);
     }
@@ -145,8 +173,7 @@ public class CoopMemberService {
                     member.getEmail(),
                     "Welcome to " + group.getName(),
                     "coop-member-welcome",
-                    variables
-            );
+                    variables);
         } catch (Exception e) {
         }
     }

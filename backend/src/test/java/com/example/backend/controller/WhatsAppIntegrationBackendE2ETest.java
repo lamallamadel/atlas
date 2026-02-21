@@ -1,5 +1,10 @@
 package com.example.backend.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.entity.Dossier;
@@ -11,22 +16,16 @@ import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
+import java.nio.charset.StandardCharsets;
+import java.util.HexFormat;
+import java.util.List;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.util.HexFormat;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @BackendE2ETest
 class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
@@ -37,14 +36,11 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
     private static final String WEBHOOK_SECRET_1 = "webhook-secret-org1";
     private static final String WEBHOOK_SECRET_2 = "webhook-secret-org2";
 
-    @Autowired
-    private MessageRepository messageRepository;
+    @Autowired private MessageRepository messageRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private WhatsAppProviderConfigRepository configRepository;
+    @Autowired private WhatsAppProviderConfigRepository configRepository;
 
     @BeforeEach
     void setUp() {
@@ -83,21 +79,22 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void receiveInboundMessage_WithValidHmacSignature_ProcessesMessage() throws Exception {
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.valid-signature-test",
-                "+33612345678",
-                "1234567890",
-                "Test message with valid signature",
-                "John Doe"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.valid-signature-test",
+                        "+33612345678",
+                        "1234567890",
+                        "Test message with valid signature",
+                        "John Doe");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk())
                 .andExpect(content().string("OK"));
 
@@ -114,21 +111,22 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void receiveInboundMessage_WithInvalidHmacSignature_Returns401() throws Exception {
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.invalid-signature-test",
-                "+33612345678",
-                "1234567890",
-                "Test message with invalid signature",
-                "Jane Doe"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.invalid-signature-test",
+                        "+33612345678",
+                        "1234567890",
+                        "Test message with invalid signature",
+                        "Jane Doe");
 
         String invalidSignature = "sha256=invalidsignaturehash1234567890abcdef";
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", invalidSignature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", invalidSignature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Invalid signature"));
 
@@ -139,21 +137,22 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void receiveInboundMessage_PhoneNotFound_CreatesNewDossier() throws Exception {
         String newPhoneNumber = "+33698765432";
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.new-dossier-test",
-                newPhoneNumber,
-                "1234567890",
-                "Message for new dossier",
-                "New Contact"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.new-dossier-test",
+                        newPhoneNumber,
+                        "1234567890",
+                        "Message for new dossier",
+                        "New Contact");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk());
 
         List<Dossier> dossiers = dossierRepository.findAll();
@@ -183,21 +182,22 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         existingDossier.setLeadSource("Website");
         dossierRepository.save(existingDossier);
 
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.existing-dossier-test",
-                existingPhoneNumber,
-                "1234567890",
-                "Message to existing dossier",
-                "Contact Name From WhatsApp"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.existing-dossier-test",
+                        existingPhoneNumber,
+                        "1234567890",
+                        "Message to existing dossier",
+                        "Contact Name From WhatsApp");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk());
 
         List<Dossier> dossiers = dossierRepository.findAll();
@@ -212,21 +212,22 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void receiveInboundMessage_VerifyMessageEntityPersistedCorrectly() throws Exception {
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.message-entity-test",
-                "+33611223344",
-                "1234567890",
-                "Testing message entity fields",
-                "Test User"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.message-entity-test",
+                        "+33611223344",
+                        "1234567890",
+                        "Testing message entity fields",
+                        "Test User");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk());
 
         List<MessageEntity> messages = messageRepository.findAll();
@@ -244,43 +245,46 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    void receiveInboundMessage_DuplicateProviderMessageId_DoesNotCreateSecondMessage() throws Exception {
+    void receiveInboundMessage_DuplicateProviderMessageId_DoesNotCreateSecondMessage()
+            throws Exception {
         String duplicateMessageId = "wamid.duplicate-test";
-        String payload1 = createWhatsAppWebhookPayload(
-                duplicateMessageId,
-                "+33677889900",
-                "1234567890",
-                "First message",
-                "Duplicate Test User"
-        );
+        String payload1 =
+                createWhatsAppWebhookPayload(
+                        duplicateMessageId,
+                        "+33677889900",
+                        "1234567890",
+                        "First message",
+                        "Duplicate Test User");
 
         String signature1 = generateHmacSignature(payload1, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload1))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload1))
                 .andExpect(status().isOk());
 
         assertThat(messageRepository.findAll()).hasSize(1);
         assertThat(messageRepository.findAll().get(0).getContent()).isEqualTo("First message");
 
-        String payload2 = createWhatsAppWebhookPayload(
-                duplicateMessageId,
-                "+33677889900",
-                "1234567891",
-                "Second message (should be ignored)",
-                "Duplicate Test User"
-        );
+        String payload2 =
+                createWhatsAppWebhookPayload(
+                        duplicateMessageId,
+                        "+33677889900",
+                        "1234567891",
+                        "Second message (should be ignored)",
+                        "Duplicate Test User");
 
         String signature2 = generateHmacSignature(payload2, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload2))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature2)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload2))
                 .andExpect(status().isOk());
 
         List<MessageEntity> messages = messageRepository.findAll();
@@ -292,71 +296,77 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void receiveInboundMessage_CrossTenantRouting_ViaTenantHeader() throws Exception {
         String phoneNumber = "+33600111222";
-        
-        String payloadOrg1 = createWhatsAppWebhookPayload(
-                "wamid.org1-message",
-                phoneNumber,
-                "1234567890",
-                "Message for org1",
-                "User Org1"
-        );
+
+        String payloadOrg1 =
+                createWhatsAppWebhookPayload(
+                        "wamid.org1-message",
+                        phoneNumber,
+                        "1234567890",
+                        "Message for org1",
+                        "User Org1");
 
         String signatureOrg1 = generateHmacSignature(payloadOrg1, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signatureOrg1)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payloadOrg1))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signatureOrg1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payloadOrg1))
                 .andExpect(status().isOk());
 
-        String payloadOrg2 = createWhatsAppWebhookPayload(
-                "wamid.org2-message",
-                phoneNumber,
-                "1234567891",
-                "Message for org2",
-                "User Org2"
-        );
+        String payloadOrg2 =
+                createWhatsAppWebhookPayload(
+                        "wamid.org2-message",
+                        phoneNumber,
+                        "1234567891",
+                        "Message for org2",
+                        "User Org2");
 
         String signatureOrg2 = generateHmacSignature(payloadOrg2, WEBHOOK_SECRET_2);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_2)
-                        .header("X-Hub-Signature-256", signatureOrg2)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payloadOrg2))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_2)
+                                .header("X-Hub-Signature-256", signatureOrg2)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payloadOrg2))
                 .andExpect(status().isOk());
 
         List<MessageEntity> allMessages = messageRepository.findAll();
         assertThat(allMessages).hasSize(2);
 
-        MessageEntity messageOrg1 = allMessages.stream()
-                .filter(m -> m.getProviderMessageId().equals("wamid.org1-message"))
-                .findFirst()
-                .orElseThrow();
+        MessageEntity messageOrg1 =
+                allMessages.stream()
+                        .filter(m -> m.getProviderMessageId().equals("wamid.org1-message"))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(messageOrg1.getOrgId()).isEqualTo(ORG_ID_1);
         assertThat(messageOrg1.getContent()).isEqualTo("Message for org1");
 
-        MessageEntity messageOrg2 = allMessages.stream()
-                .filter(m -> m.getProviderMessageId().equals("wamid.org2-message"))
-                .findFirst()
-                .orElseThrow();
+        MessageEntity messageOrg2 =
+                allMessages.stream()
+                        .filter(m -> m.getProviderMessageId().equals("wamid.org2-message"))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(messageOrg2.getOrgId()).isEqualTo(ORG_ID_2);
         assertThat(messageOrg2.getContent()).isEqualTo("Message for org2");
 
         List<Dossier> allDossiers = dossierRepository.findAll();
         assertThat(allDossiers).hasSize(2);
 
-        Dossier dossierOrg1 = allDossiers.stream()
-                .filter(d -> d.getOrgId().equals(ORG_ID_1))
-                .findFirst()
-                .orElseThrow();
+        Dossier dossierOrg1 =
+                allDossiers.stream()
+                        .filter(d -> d.getOrgId().equals(ORG_ID_1))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(dossierOrg1.getLeadPhone()).isEqualTo(phoneNumber);
 
-        Dossier dossierOrg2 = allDossiers.stream()
-                .filter(d -> d.getOrgId().equals(ORG_ID_2))
-                .findFirst()
-                .orElseThrow();
+        Dossier dossierOrg2 =
+                allDossiers.stream()
+                        .filter(d -> d.getOrgId().equals(ORG_ID_2))
+                        .findFirst()
+                        .orElseThrow();
         assertThat(dossierOrg2.getLeadPhone()).isEqualTo(phoneNumber);
 
         assertThat(messageOrg1.getDossier().getId()).isEqualTo(dossierOrg1.getId());
@@ -374,32 +384,31 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         dossierOrg1.setStatus(DossierStatus.NEW);
         dossierRepository.save(dossierOrg1);
 
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.org2-isolated-test",
-                sharedPhoneNumber,
-                "1234567890",
-                "Message for org2 should create new dossier",
-                "User in Org2"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.org2-isolated-test",
+                        sharedPhoneNumber,
+                        "1234567890",
+                        "Message for org2 should create new dossier",
+                        "User in Org2");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_2);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_2)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_2)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk());
 
         List<Dossier> allDossiers = dossierRepository.findAll();
         assertThat(allDossiers).hasSize(2);
 
-        long org1DossierCount = allDossiers.stream()
-                .filter(d -> d.getOrgId().equals(ORG_ID_1))
-                .count();
-        long org2DossierCount = allDossiers.stream()
-                .filter(d -> d.getOrgId().equals(ORG_ID_2))
-                .count();
+        long org1DossierCount =
+                allDossiers.stream().filter(d -> d.getOrgId().equals(ORG_ID_1)).count();
+        long org2DossierCount =
+                allDossiers.stream().filter(d -> d.getOrgId().equals(ORG_ID_2)).count();
 
         assertThat(org1DossierCount).isEqualTo(1);
         assertThat(org2DossierCount).isEqualTo(1);
@@ -421,21 +430,22 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         closedDossier.setStatus(DossierStatus.WON);
         dossierRepository.save(closedDossier);
 
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.after-closed-dossier",
-                phoneNumber,
-                "1234567890",
-                "Message after dossier was closed",
-                "Contact Returning"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.after-closed-dossier",
+                        phoneNumber,
+                        "1234567890",
+                        "Message after dossier was closed",
+                        "Contact Returning");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk());
 
         List<Dossier> dossiers = dossierRepository.findAll();
@@ -448,7 +458,8 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    void receiveInboundMessage_ExistingDossierWithoutName_UpdatesWithContactName() throws Exception {
+    void receiveInboundMessage_ExistingDossierWithoutName_UpdatesWithContactName()
+            throws Exception {
         String phoneNumber = "+33600777888";
 
         Dossier dossierWithoutName = new Dossier();
@@ -458,40 +469,43 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         dossierWithoutName.setStatus(DossierStatus.NEW);
         dossierRepository.save(dossierWithoutName);
 
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.update-name-test",
-                phoneNumber,
-                "1234567890",
-                "Message with contact name",
-                "Contact Name to Update"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.update-name-test",
+                        phoneNumber,
+                        "1234567890",
+                        "Message with contact name",
+                        "Contact Name to Update");
 
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .header(TENANT_HEADER, ORG_ID_1)
-                        .header("X-Hub-Signature-256", signature)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header(TENANT_HEADER, ORG_ID_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isOk());
 
-        Dossier updatedDossier = dossierRepository.findById(dossierWithoutName.getId()).orElseThrow();
+        Dossier updatedDossier =
+                dossierRepository.findById(dossierWithoutName.getId()).orElseThrow();
         assertThat(updatedDossier.getLeadName()).isEqualTo("Contact Name to Update");
     }
 
     @Test
     void receiveInboundMessage_MissingOrgId_Returns400() throws Exception {
-        String payload = createWhatsAppWebhookPayload(
-                "wamid.missing-org-test",
-                "+33600999000",
-                "1234567890",
-                "Message without org",
-                "Test User"
-        );
+        String payload =
+                createWhatsAppWebhookPayload(
+                        "wamid.missing-org-test",
+                        "+33600999000",
+                        "1234567890",
+                        "Message without org",
+                        "Test User");
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(payload))
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
                 .andExpect(status().isBadRequest())
                 .andExpect(content().string("Missing organization context"));
 
@@ -499,8 +513,14 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         assertThat(dossierRepository.findAll()).isEmpty();
     }
 
-    private String createWhatsAppWebhookPayload(String messageId, String from, String timestamp, String messageText, String contactName) {
-        return String.format("""
+    private String createWhatsAppWebhookPayload(
+            String messageId,
+            String from,
+            String timestamp,
+            String messageText,
+            String contactName) {
+        return String.format(
+                """
                 {
                   "object": "whatsapp_business_account",
                   "entry": [{
@@ -532,12 +552,14 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
                     }]
                   }]
                 }
-                """, contactName, from, from, messageId, timestamp, messageText);
+                """,
+                contactName, from, from, messageId, timestamp, messageText);
     }
 
     private String generateHmacSignature(String payload, String secret) throws Exception {
         Mac mac = Mac.getInstance("HmacSHA256");
-        SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
+        SecretKeySpec secretKeySpec =
+                new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), "HmacSHA256");
         mac.init(secretKeySpec);
         byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
         return "sha256=" + HexFormat.of().formatHex(hash);

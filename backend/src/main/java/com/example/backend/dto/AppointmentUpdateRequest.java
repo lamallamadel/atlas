@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.AppointmentStatus;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Size;
-
 import java.time.LocalDateTime;
 
 public class AppointmentUpdateRequest {
@@ -23,8 +22,7 @@ public class AppointmentUpdateRequest {
 
     private AppointmentStatus status;
 
-    public AppointmentUpdateRequest() {
-    }
+    public AppointmentUpdateRequest() {}
 
     @AssertTrue(message = "Start time must be before end time")
     public boolean isValidTimeRange() {

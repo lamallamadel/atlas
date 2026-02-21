@@ -14,7 +14,8 @@ public class CursorPageRequest {
         this.sortField = "id";
     }
 
-    public CursorPageRequest(String cursor, Integer limit, Sort.Direction direction, String sortField) {
+    public CursorPageRequest(
+            String cursor, Integer limit, Sort.Direction direction, String sortField) {
         this.cursor = cursor;
         this.limit = limit != null ? limit : 20;
         this.direction = direction != null ? direction : Sort.Direction.DESC;

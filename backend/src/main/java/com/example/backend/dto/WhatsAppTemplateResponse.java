@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.TemplateCategory;
 import com.example.backend.entity.enums.TemplateStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;

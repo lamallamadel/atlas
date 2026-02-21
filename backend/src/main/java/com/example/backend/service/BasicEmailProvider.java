@@ -37,13 +37,18 @@ public class BasicEmailProvider implements EmailProvider {
 
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            throw new RuntimeException("Failed to send email notification to " + 
-                notification.getRecipient() + ": " + e.getMessage(), e);
+            throw new RuntimeException(
+                    "Failed to send email notification to "
+                            + notification.getRecipient()
+                            + ": "
+                            + e.getMessage(),
+                    e);
         }
     }
 
     private String extractBody(NotificationEntity notification) {
-        if (notification.getVariables() != null && notification.getVariables().containsKey("body")) {
+        if (notification.getVariables() != null
+                && notification.getVariables().containsKey("body")) {
             Object bodyObj = notification.getVariables().get("body");
             return bodyObj != null ? bodyObj.toString() : "";
         }

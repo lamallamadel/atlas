@@ -15,7 +15,7 @@
     "build:prod:all": "npm run build:prod:fr && npm run build:prod:en && npm run build:prod:es",
     "build:analyze": "ng build --configuration production --stats-json && npm run analyze:bundle",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --watch=false --browsers=ChromeHeadless",
+    "test": "ng test --watch=false --browsers=ChromeHeadless --code-coverage",
     "lint": "ng lint",
     "extract-i18n": "ng extract-i18n --output-path src/locale",
     "install-browsers": "playwright install",

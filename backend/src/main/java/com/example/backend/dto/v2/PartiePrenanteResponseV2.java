@@ -2,7 +2,6 @@ package com.example.backend.dto.v2;
 
 import com.example.backend.entity.enums.PartiePrenanteRole;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.Instant;
 
 @Schema(description = "Partie prenante response representation (API v2)")

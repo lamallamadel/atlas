@@ -4,8 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+
 import java.util.ArrayList;
 import java.util.List;
+
+
 import java.util.Map;
 
 @Schema(description = "Request body for creating or updating a workflow definition")
@@ -29,6 +32,7 @@ public class WorkflowDefinitionRequest {
 
     @Schema(description = "Whether this workflow is published", example = "false")
     private Boolean isPublished;
+
 
     @Schema(description = "Whether this is a template", example = "false")
     private Boolean isTemplate;
@@ -66,6 +70,12 @@ public class WorkflowDefinitionRequest {
     public void setDescription(String description) {
         this.description = description;
     }
+
+    @Schema(
+            description = "JSON object defining required fields for this transition",
+            nullable = true)
+    private Map<String, Object> requiredFieldsJson;
+
 
     public String getCaseType() {
         return caseType;

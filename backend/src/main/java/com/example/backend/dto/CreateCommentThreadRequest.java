@@ -4,11 +4,9 @@ import com.example.backend.entity.enums.CommentEntityType;
 import jakarta.validation.constraints.NotNull;
 
 public class CreateCommentThreadRequest {
-    @NotNull
-    private CommentEntityType entityType;
+    @NotNull private CommentEntityType entityType;
 
-    @NotNull
-    private Long entityId;
+    @NotNull private Long entityId;
 
     private String title;
 

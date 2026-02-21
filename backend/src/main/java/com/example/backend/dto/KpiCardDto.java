@@ -4,8 +4,7 @@ public class KpiCardDto {
     private Long value;
     private String trend;
 
-    public KpiCardDto() {
-    }
+    public KpiCardDto() {}
 
     public KpiCardDto(Long value, String trend) {
         this.value = value;

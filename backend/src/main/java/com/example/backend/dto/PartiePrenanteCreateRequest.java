@@ -1,13 +1,11 @@
 package com.example.backend.dto;
 
-import com.example.backend.entity.enums.PartiePrenanteRole;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-
 import java.util.Map;
 
 @Schema(description = "Request body for creating a partie prenante")
@@ -50,8 +48,7 @@ public class PartiePrenanteCreateRequest {
     @Schema(description = "Metadata", example = "{\"key\": \"value\"}")
     private Map<String, Object> meta;
 
-    public PartiePrenanteCreateRequest() {
-    }
+    public PartiePrenanteCreateRequest() {}
 
     public Long getDossierId() {
         return dossierId;

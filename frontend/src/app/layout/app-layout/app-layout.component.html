@@ -2,93 +2,56 @@
 
 <app-keyboard-shortcuts></app-keyboard-shortcuts>
 <app-command-palette></app-command-palette>
+<app-ai-agent-panel></app-ai-agent-panel>
 
 <mat-sidenav-container class="sidenav-container">
-  <mat-sidenav
-    #drawer
-    class="sidenav"
-    fixedInViewport
-    [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
-    [mode]="(isHandset$ | async) ? 'over' : 'side'"
-    [opened]="(isHandset$ | async) === false"
+  <mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+    [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false"
     [attr.aria-label]="'Menu de navigation principal'">
     <mat-toolbar class="sidenav-header" role="banner">
       <span class="brand-text">Atlas Immobilier</span>
     </mat-toolbar>
     <nav aria-label="Navigation principale">
       <mat-nav-list class="nav-list">
-        <a mat-list-item 
-           routerLink="/dashboard" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder au tableau de bord"
-           matTooltip="Raccourci: g puis h"
-           matTooltipPosition="right">
+        <a mat-list-item routerLink="/dashboard" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder au tableau de bord" matTooltip="Raccourci: g puis h" matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">dashboard</mat-icon>
           <span matListItemTitle>Tableau de bord</span>
         </a>
-        <a mat-list-item 
-           routerLink="/reports" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux rapports et KPIs">
+        <a mat-list-item routerLink="/reports" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder aux rapports et KPIs">
           <mat-icon matListItemIcon aria-hidden="true">insights</mat-icon>
           <span matListItemTitle>Rapports et KPIs</span>
         </a>
-        <a mat-list-item 
-           routerLink="/observability" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder au tableau de bord observabilité">
+        <a mat-list-item routerLink="/observability" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder au tableau de bord observabilité">
           <mat-icon matListItemIcon aria-hidden="true">analytics</mat-icon>
           <span matListItemTitle>Observabilité</span>
         </a>
-        <a mat-list-item 
-           routerLink="/tasks" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux tâches"
-           matTooltip="Raccourci: g puis t"
-           matTooltipPosition="right">
+        <a mat-list-item routerLink="/tasks" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder aux tâches" matTooltip="Raccourci: g puis t" matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">task</mat-icon>
           <span matListItemTitle>Tâches</span>
         </a>
-        <a mat-list-item 
-           routerLink="/calendar" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder au calendrier"
-           matTooltip="Raccourci: g puis c"
-           matTooltipPosition="right">
+        <a mat-list-item routerLink="/calendar" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder au calendrier" matTooltip="Raccourci: g puis c" matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">calendar_today</mat-icon>
           <span matListItemTitle>Calendrier</span>
         </a>
-        <a mat-list-item 
-           routerLink="/annonces" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux annonces"
-           matTooltip="Raccourci: g puis a"
-           matTooltipPosition="right">
+        <a mat-list-item routerLink="/annonces" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder aux annonces" matTooltip="Raccourci: g puis a" matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">campaign</mat-icon>
           <span matListItemTitle>Annonces</span>
         </a>
-        <a mat-list-item 
-           routerLink="/dossiers" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Accéder aux dossiers"
-           matTooltip="Raccourci: g puis d"
-           matTooltipPosition="right">
+        <a mat-list-item routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Accéder aux dossiers" matTooltip="Raccourci: g puis d" matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
-          <span matListItemTitle>Dossiers <span *ngIf="dossiersPendingCount$ | async as count" class="badge-count">({{ count }})</span></span>
+          <span matListItemTitle>Dossiers <span *ngIf="dossiersPendingCount$ | async as count" class="badge-count">({{
+              count }})</span></span>
         </a>
         <mat-divider></mat-divider>
-        <a mat-list-item 
-           routerLink="/workflow-admin" 
-           routerLinkActive="active" 
-           (click)="closeSidenavOnMobile()"
-           aria-label="Configuration des workflows">
+        <a mat-list-item routerLink="/workflow-admin" routerLinkActive="active" (click)="closeSidenavOnMobile()"
+          aria-label="Configuration des workflows">
           <mat-icon matListItemIcon aria-hidden="true">settings</mat-icon>
           <span matListItemTitle>Workflows</span>
         </a>
@@ -98,86 +61,52 @@
 
   <mat-sidenav-content class="sidenav-content">
     <mat-toolbar color="primary" class="top-toolbar" role="banner">
-      <button
-        type="button"
-        mat-icon-button
-        (click)="drawer.toggle()"
-        *ngIf="isHandset$ | async"
-        class="menu-button"
-        aria-label="Ouvrir le menu de navigation"
-        [attr.aria-expanded]="drawer.opened">
+      <button type="button" mat-icon-button (click)="drawer.toggle()" *ngIf="isHandset$ | async" class="menu-button"
+        aria-label="Ouvrir le menu de navigation" [attr.aria-expanded]="drawer.opened">
         <mat-icon aria-hidden="true">menu</mat-icon>
       </button>
-      
+
       <span class="toolbar-spacer"></span>
-      
+
       <app-global-search-bar></app-global-search-bar>
-      
+
       <app-api-status-indicator></app-api-status-indicator>
-      
+
       <span class="toolbar-spacer"></span>
-      
-      <button
-        mat-icon-button
-        (click)="toggleTheme()"
-        class="theme-toggle-button"
+
+      <button mat-icon-button (click)="toggleTheme()" class="theme-toggle-button"
         [attr.aria-label]="(isDarkTheme$ | async) ? 'Basculer en mode clair' : 'Basculer en mode sombre'"
-        [matTooltip]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'"
-        matTooltipPosition="below">
+        [matTooltip]="(isDarkTheme$ | async) ? 'Mode clair' : 'Mode sombre'" matTooltipPosition="below">
         <mat-icon aria-hidden="true">
           {{ (isDarkTheme$ | async) ? 'light_mode' : 'dark_mode' }}
         </mat-icon>
       </button>
 
-      <button
-        mat-icon-button
-        (click)="showKeyboardShortcuts()"
-        class="keyboard-shortcuts-button"
-        aria-label="Afficher les raccourcis clavier"
-        matTooltip="Raccourcis clavier (?)"
-        matTooltipPosition="below">
+      <button mat-icon-button (click)="showKeyboardShortcuts()" class="keyboard-shortcuts-button"
+        aria-label="Afficher les raccourcis clavier" matTooltip="Raccourcis clavier (?)" matTooltipPosition="below">
         <mat-icon aria-hidden="true">keyboard</mat-icon>
       </button>
 
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="notificationMenu"
-        class="notification-menu-button"
-        aria-label="Ouvrir le centre de notifications"
-        matTooltip="Notifications"
-        matTooltipPosition="below"
-        (menuOpened)="notificationMenuOpen = true"
-        (menuClosed)="notificationMenuOpen = false">
-        <mat-icon 
-          [matBadge]="(unreadNotificationCount$ | async) || 0" 
-          [matBadgeHidden]="(unreadNotificationCount$ | async) === 0"
-          matBadgeColor="warn"
-          matBadgeSize="small"
+      <button mat-icon-button [matMenuTriggerFor]="notificationMenu" class="notification-menu-button"
+        aria-label="Ouvrir le centre de notifications" matTooltip="Notifications" matTooltipPosition="below"
+        (menuOpened)="notificationMenuOpen = true" (menuClosed)="notificationMenuOpen = false">
+        <mat-icon [matBadge]="(unreadNotificationCount$ | async) || 0"
+          [matBadgeHidden]="(unreadNotificationCount$ | async) === 0" matBadgeColor="warn" matBadgeSize="small"
           aria-hidden="true">
           notifications
         </mat-icon>
       </button>
 
       <mat-menu #notificationMenu="matMenu" class="notification-dropdown-menu" aria-label="Centre de notifications">
-        <div (click)="$event.stopPropagation()" 
-             (keydown)="$event.stopPropagation()"
-             (keyup)="$event.stopPropagation()" 
-             (keypress)="$event.stopPropagation()"
-             class="notification-menu-content" 
-             tabindex="0"
-             role="region"
-             aria-label="Centre de notifications">
+        <div (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" (keyup)="$event.stopPropagation()"
+          (keypress)="$event.stopPropagation()" class="notification-menu-content" tabindex="0" role="region"
+          aria-label="Centre de notifications">
           <app-notification-center></app-notification-center>
         </div>
       </mat-menu>
 
-      <button
-        mat-icon-button
-        [matMenuTriggerFor]="helpMenu"
-        class="help-menu-button"
-        aria-label="Aide et guides interactifs"
-        matTooltip="Aide (?)"
-        matTooltipPosition="below">
+      <button mat-icon-button [matMenuTriggerFor]="helpMenu" class="help-menu-button"
+        aria-label="Aide et guides interactifs" matTooltip="Aide (?)" matTooltipPosition="below">
         <mat-icon aria-hidden="true">help_outline</mat-icon>
       </button>
 
@@ -187,7 +116,8 @@
           <span>Guides interactifs</span>
         </div>
         <mat-divider role="separator"></mat-divider>
-        <button mat-menu-item (click)="startTour('dossier-creation')" aria-label="Démarrer le guide de création de dossier">
+        <button mat-menu-item (click)="startTour('dossier-creation')"
+          aria-label="Démarrer le guide de création de dossier">
           <mat-icon aria-hidden="true">add_circle_outline</mat-icon>
           <span>Créer un dossier</span>
         </button>
@@ -209,20 +139,14 @@
           <span>Réinitialiser tous les guides</span>
         </button>
       </mat-menu>
-      
+
       <div class="user-menu-container">
-        <button
-          mat-icon-button
-          class="user-menu-button"
-          [matMenuTriggerFor]="userMenu"
-          aria-label="Ouvrir le menu utilisateur"
-          aria-haspopup="true"
-          [attr.aria-expanded]="userMenuOpen"
-          matTooltip="Menu utilisateur"
-          matTooltipPosition="below">
+        <button mat-icon-button class="user-menu-button" [matMenuTriggerFor]="userMenu"
+          aria-label="Ouvrir le menu utilisateur" aria-haspopup="true" [attr.aria-expanded]="userMenuOpen"
+          matTooltip="Menu utilisateur" matTooltipPosition="below">
           <mat-icon aria-hidden="true">account_circle</mat-icon>
         </button>
-        
+
         <mat-menu #userMenu="matMenu" class="user-dropdown-menu" aria-label="Options utilisateur">
           <div class="user-menu-header" mat-menu-item disabled>
             <div class="user-info">

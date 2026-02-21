@@ -1,3 +1,13 @@
+# Python / Jupyter
+__pycache__/
+*.py[cod]
+*.pyo
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+.env
+.venv/
+venv/
+
 # Java build artifacts
 *.class
 *.jar
@@ -450,6 +460,7 @@ backend/run-maven-install.js
 # Agent-created setup script (current session)
 setup-repo-packages.ps1
 
+
 # ML Service
 ml-service/venv/
 ml-service/env/
@@ -509,3 +520,8 @@ secrets/
 # Deployment
 deployment-logs/
 rollback-backups/
+
+# Local tool configs
+.gordonrc
+.claude/
+

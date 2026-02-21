@@ -3,11 +3,10 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Filter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.util.ArrayList;
 import java.util.List;
+import org.hibernate.annotations.Filter;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "dossier")
@@ -72,6 +71,9 @@ public class Dossier extends BaseEntity {
 
     @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AppointmentEntity> appointments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LeadActivity> activities = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -235,5 +237,24 @@ public class Dossier extends BaseEntity {
 
     public void setWorkflowVersion(Integer workflowVersion) {
         this.workflowVersion = workflowVersion;
+    }
+
+    public List<LeadActivity> getActivities() {
+        return activities;
+    }
+
+    public void setActivities(List<LeadActivity> activities) {
+        this.activities = activities;
+    }
+
+    public void addActivity(LeadActivity activity) {
+        activities.add(activity);
+        activity.setDossier(this);
+    }
+
+    public void removeActivity(LeadActivity activity) {
+        activities.remove(activity);
+        activity.setDossier(null);
+
     }
 }

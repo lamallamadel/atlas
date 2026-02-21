@@ -28,6 +28,30 @@ export function buildFakeJwt(orgId = 'ORG-001', username = 'e2e-user'): string {
   return `mock-${base64UrlEncode(header)}.${base64UrlEncode(payload)}.`;
 }
 
+async function clickMockAdminLogin(page: Page) {
+  const loginButton = page.getByRole('button', {
+    name: /Mock Admin Login|Se connecter en tant qu'administrateur test/i,
+  });
+
+  const hasLoginButton = await loginButton.count().then((count) => count > 0).catch(() => false);
+  if (!hasLoginButton) {
+    return;
+  }
+
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      await loginButton.click({ timeout: 2000, trial: true });
+      await loginButton.click({ timeout: 5000 });
+      return;
+    } catch (error) {
+      if (attempt === 3) {
+        throw error;
+      }
+      await page.waitForTimeout(200);
+    }
+  }
+}
+
 interface StableTestFixtures {
   authenticatedPage: Page;
   testUser: TestUserManager;
@@ -65,7 +89,7 @@ export const test = base.extend<StableTestFixtures>({
     
     if (hasOrgInput) {
       await orgInput.fill(orgId);
-      await page.locator('button:has-text("Mock Admin Login")').click();
+      await clickMockAdminLogin(page);
     }
 
     await page

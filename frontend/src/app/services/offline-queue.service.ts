@@ -84,7 +84,7 @@ export class OfflineQueueService {
         this.syncQueue();
       });
 
-    if ('serviceWorker' in navigator && 'sync' in (self as any).registration) {
+    if ('serviceWorker' in navigator && (self as any).registration && 'sync' in (self as any).registration) {
       navigator.serviceWorker.ready.then(registration => {
         return (registration as any).sync.register('offline-queue-sync');
       }).catch(err => {

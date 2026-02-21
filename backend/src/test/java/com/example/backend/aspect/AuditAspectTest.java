@@ -1,5 +1,7 @@
 package com.example.backend.aspect;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.dto.AnnonceCreateRequest;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.DossierCreateRequest;
@@ -13,6 +15,9 @@ import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.service.AnnonceService;
 import com.example.backend.service.DossierService;
 import com.example.backend.util.TenantContext;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,12 +26,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -34,14 +33,11 @@ class AuditAspectTest {
 
     private static final String DEFAULT_ORG = "org123";
 
-    @Autowired
-    private AnnonceService annonceService;
+    @Autowired private AnnonceService annonceService;
 
-    @Autowired
-    private DossierService dossierService;
+    @Autowired private DossierService dossierService;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
     @BeforeEach
     void setUp() {
@@ -223,17 +219,20 @@ class AuditAspectTest {
         assertThat(auditEvents.get(1).getAction()).isEqualTo(AuditAction.UPDATED);
         assertThat(auditEvents.get(2).getAction()).isEqualTo(AuditAction.UPDATED);
 
-        Map<String, Object> firstChanges = (Map<String, Object>) auditEvents.get(0).getDiff().get("changes");
+        Map<String, Object> firstChanges =
+                (Map<String, Object>) auditEvents.get(0).getDiff().get("changes");
         Map<String, Object> firstStatusChange = (Map<String, Object>) firstChanges.get("status");
         assertThat(firstStatusChange).containsEntry("before", "NEW");
         assertThat(firstStatusChange).containsEntry("after", "QUALIFIED");
 
-        Map<String, Object> secondChanges = (Map<String, Object>) auditEvents.get(1).getDiff().get("changes");
+        Map<String, Object> secondChanges =
+                (Map<String, Object>) auditEvents.get(1).getDiff().get("changes");
         Map<String, Object> secondStatusChange = (Map<String, Object>) secondChanges.get("status");
         assertThat(secondStatusChange).containsEntry("before", "QUALIFIED");
         assertThat(secondStatusChange).containsEntry("after", "APPOINTMENT");
 
-        Map<String, Object> thirdChanges = (Map<String, Object>) auditEvents.get(2).getDiff().get("changes");
+        Map<String, Object> thirdChanges =
+                (Map<String, Object>) auditEvents.get(2).getDiff().get("changes");
         Map<String, Object> thirdStatusChange = (Map<String, Object>) thirdChanges.get("status");
         assertThat(thirdStatusChange).containsEntry("before", "APPOINTMENT");
         assertThat(thirdStatusChange).containsEntry("after", "WON");
@@ -323,12 +322,10 @@ class AuditAspectTest {
             List<AuditEventEntity> allEvents = auditEventRepository.findAll();
             assertThat(allEvents).hasSize(2);
 
-            long org1Count = allEvents.stream()
-                    .filter(event -> "ORG1".equals(event.getOrgId()))
-                    .count();
-            long org2Count = allEvents.stream()
-                    .filter(event -> "ORG2".equals(event.getOrgId()))
-                    .count();
+            long org1Count =
+                    allEvents.stream().filter(event -> "ORG1".equals(event.getOrgId())).count();
+            long org2Count =
+                    allEvents.stream().filter(event -> "ORG2".equals(event.getOrgId())).count();
 
             assertThat(org1Count).isEqualTo(1);
             assertThat(org2Count).isEqualTo(1);
@@ -345,7 +342,8 @@ class AuditAspectTest {
 
         auditEventRepository.deleteAll();
 
-        com.example.backend.dto.AnnonceUpdateRequest updateRequest = new com.example.backend.dto.AnnonceUpdateRequest();
+        com.example.backend.dto.AnnonceUpdateRequest updateRequest =
+                new com.example.backend.dto.AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
 
         annonceService.update(created.getId(), updateRequest);
@@ -368,7 +366,8 @@ class AuditAspectTest {
 
         auditEventRepository.deleteAll();
 
-        com.example.backend.dto.AnnonceUpdateRequest updateRequest = new com.example.backend.dto.AnnonceUpdateRequest();
+        com.example.backend.dto.AnnonceUpdateRequest updateRequest =
+                new com.example.backend.dto.AnnonceUpdateRequest();
         updateRequest.setTitle("Updated Title");
         updateRequest.setPrice(BigDecimal.valueOf(150.00));
 

@@ -13,7 +13,8 @@ import org.springframework.stereotype.Repository;
 public interface AuditEventRepository extends JpaRepository<AuditEventEntity, Long> {
 
     // No ORDER BY: let Pageable sorting apply
-    @Query("""
+    @Query(
+            """
         SELECT a
         FROM AuditEventEntity a
         WHERE a.orgId = :orgId
@@ -24,11 +25,12 @@ public interface AuditEventRepository extends JpaRepository<AuditEventEntity, Lo
             @Param("orgId") String orgId,
             @Param("entityType") AuditEntityType entityType,
             @Param("entityId") Long entityId,
-            Pageable pageable
-    );
+            Pageable pageable);
 
-    // Aggregate all audit events for a dossier including related entities (parties, messages, appointments)
-    @Query("""
+    // Aggregate all audit events for a dossier including related entities (parties, messages,
+    // appointments)
+    @Query(
+            """
         SELECT a
         FROM AuditEventEntity a
         WHERE a.orgId = :orgId
@@ -46,8 +48,5 @@ public interface AuditEventRepository extends JpaRepository<AuditEventEntity, Lo
           )
     """)
     Page<AuditEventEntity> findByOrgIdAndDossierId(
-            @Param("orgId") String orgId,
-            @Param("dossierId") Long dossierId,
-            Pageable pageable
-    );
+            @Param("orgId") String orgId, @Param("dossierId") Long dossierId, Pageable pageable);
 }

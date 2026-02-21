@@ -1,5 +1,9 @@
 package com.example.backend;
 
+import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.AnnonceCreateRequest;
@@ -14,39 +18,33 @@ import com.example.backend.entity.enums.PartiePrenanteRole;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.utils.BackendE2ETestDataBuilder;
+import java.math.BigDecimal;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-
-import java.math.BigDecimal;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.context.ActiveProfiles;
 
 @BackendE2ETest
 @WithMockUser(roles = {"PRO", "ADMIN"})
+@ActiveProfiles("backend-e2e-h2")
 public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
 
     private static final String ORG_ID = "test-org-versioning";
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private BackendE2ETestDataBuilder testDataBuilder;
+    @Autowired private BackendE2ETestDataBuilder testDataBuilder;
 
     @BeforeEach
     void setUp() {
         annonceRepository.deleteAll();
         dossierRepository.deleteAll();
+        testDataBuilder.withOrgId(ORG_ID);
         testDataBuilder.deleteAllTestData();
     }
 
@@ -58,13 +56,15 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
 
     @Test
     void testV1DossiersEndpointStillWorksWithFlatStructure() throws Exception {
-        Annonce annonce = testDataBuilder.annonceBuilder()
-                .withTitle("Test Property")
-                .withType(AnnonceType.SALE)
-                .withPrice(new BigDecimal("350000"))
-                .withCity("Paris")
-                .withStatus(AnnonceStatus.PUBLISHED)
-                .persist();
+        Annonce annonce =
+                testDataBuilder
+                        .annonceBuilder()
+                        .withTitle("Test Property")
+                        .withType(AnnonceType.SALE)
+                        .withPrice(new BigDecimal("350000"))
+                        .withCity("Paris")
+                        .withStatus(AnnonceStatus.PUBLISHED)
+                        .persist();
 
         DossierCreateRequest request = new DossierCreateRequest();
         request.setAnnonceId(annonce.getId());
@@ -79,10 +79,13 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         party.setPhone("+33612345678");
         request.setInitialParty(party);
 
-        mockMvc.perform(post("/api/v1/dossiers")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        post("/api/v1/dossiers")
+                                                .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                        ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.annonceId", is(annonce.getId().intValue())))
@@ -98,13 +101,15 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
 
     @Test
     void testV2DossiersEndpointReturnsNestedStructure() throws Exception {
-        Annonce annonce = testDataBuilder.annonceBuilder()
-                .withTitle("Modern Apartment")
-                .withType(AnnonceType.SALE)
-                .withPrice(new BigDecimal("450000"))
-                .withCity("Lyon")
-                .withStatus(AnnonceStatus.PUBLISHED)
-                .persist();
+        Annonce annonce =
+                testDataBuilder
+                        .annonceBuilder()
+                        .withTitle("Modern Apartment")
+                        .withType(AnnonceType.SALE)
+                        .withPrice(new BigDecimal("450000"))
+                        .withCity("Lyon")
+                        .withStatus(AnnonceStatus.PUBLISHED)
+                        .persist();
 
         DossierCreateRequest request = new DossierCreateRequest();
         request.setAnnonceId(annonce.getId());
@@ -119,10 +124,13 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         party.setPhone("+33698765432");
         request.setInitialParty(party);
 
-        mockMvc.perform(post("/api/v2/dossiers")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        post("/api/v2/dossiers")
+                                                .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                        ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.annonce", notNullValue()))
@@ -134,7 +142,11 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.lead.name", is("Jane Smith")))
                 .andExpect(jsonPath("$.lead.source", is("Phone")))
                 .andExpect(jsonPath("$.audit", notNullValue()))
-                .andExpect(jsonPath("$.audit.createdAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
+                .andExpect(
+                        jsonPath(
+                                "$.audit.createdAt",
+                                matchesPattern(
+                                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
                 .andExpect(jsonPath("$.audit.createdBy", notNullValue()))
                 .andExpect(header().doesNotExist("Deprecation"));
     }
@@ -153,10 +165,13 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setCurrency("EUR");
         request.setStatus(AnnonceStatus.PUBLISHED);
 
-        mockMvc.perform(post("/api/v1/annonces")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        post("/api/v1/annonces")
+                                                .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                        ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is("Luxury Villa")))
@@ -184,10 +199,13 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
         request.setCurrency("EUR");
         request.setStatus(AnnonceStatus.PUBLISHED);
 
-        mockMvc.perform(post("/api/v2/annonces")
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID)))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                        post("/api/v2/annonces")
+                                                .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                        ORG_ID)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", notNullValue()))
                 .andExpect(jsonPath("$.title", is("City Center Apartment")))
@@ -201,27 +219,39 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.pricing.currency", is("EUR")))
                 .andExpect(jsonPath("$.pricing.pricePerSqm", is(20.0)))
                 .andExpect(jsonPath("$.audit", notNullValue()))
-                .andExpect(jsonPath("$.audit.createdAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
+                .andExpect(
+                        jsonPath(
+                                "$.audit.createdAt",
+                                matchesPattern(
+                                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
                 .andExpect(header().doesNotExist("Deprecation"));
     }
 
     @Test
     void testV1AndV2BothReturnDataForSameResource() throws Exception {
-        Dossier dossier = testDataBuilder.dossierBuilder()
-                .withLeadName("Test User")
-                .withLeadPhone("+33611223344")
-                .withInitialParty(PartiePrenanteRole.BUYER)
-                .persist();
+        Dossier dossier =
+                testDataBuilder
+                        .dossierBuilder()
+                        .withLeadName("Test User")
+                        .withLeadPhone("+33611223344")
+                        .withInitialParty(PartiePrenanteRole.BUYER)
+                        .persist();
 
-        mockMvc.perform(get("/api/v1/dossiers/" + dossier.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                get("/api/v1/dossiers/" + dossier.getId())
+                                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(dossier.getId().intValue())))
                 .andExpect(jsonPath("$.leadName", is("Test User")))
                 .andExpect(header().exists("Deprecation"));
 
-        mockMvc.perform(get("/api/v2/dossiers/" + dossier.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                get("/api/v2/dossiers/" + dossier.getId())
+                                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(dossier.getId().intValue())))
                 .andExpect(jsonPath("$.lead.name", is("Test User")))
@@ -230,33 +260,51 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
 
     @Test
     void testV2TimestampsAreISO8601WithTimezone() throws Exception {
-        Annonce annonce = testDataBuilder.annonceBuilder()
-                .withTitle("Timestamp Test")
-                .withType(AnnonceType.SALE)
-                .withPrice(new BigDecimal("300000"))
-                .withCity("Toulouse")
-                .withStatus(AnnonceStatus.PUBLISHED)
-                .persist();
+        Annonce annonce =
+                testDataBuilder
+                        .annonceBuilder()
+                        .withTitle("Timestamp Test")
+                        .withType(AnnonceType.SALE)
+                        .withPrice(new BigDecimal("300000"))
+                        .withCity("Toulouse")
+                        .withStatus(AnnonceStatus.PUBLISHED)
+                        .persist();
 
-        mockMvc.perform(get("/api/v2/annonces/" + annonce.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                get("/api/v2/annonces/" + annonce.getId())
+                                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                ORG_ID))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.audit.createdAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
-                .andExpect(jsonPath("$.audit.updatedAt", matchesPattern("\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")));
+                .andExpect(
+                        jsonPath(
+                                "$.audit.createdAt",
+                                matchesPattern(
+                                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")))
+                .andExpect(
+                        jsonPath(
+                                "$.audit.updatedAt",
+                                matchesPattern(
+                                        "\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z")));
     }
 
     @Test
     void testDeprecationHeadersOnlyPresentInV1() throws Exception {
-        Annonce annonce = testDataBuilder.annonceBuilder()
-                .withTitle("Header Test")
-                .withType(AnnonceType.SALE)
-                .withPrice(new BigDecimal("250000"))
-                .withCity("Bordeaux")
-                .withStatus(AnnonceStatus.PUBLISHED)
-                .persist();
+        Annonce annonce =
+                testDataBuilder
+                        .annonceBuilder()
+                        .withTitle("Header Test")
+                        .withType(AnnonceType.SALE)
+                        .withPrice(new BigDecimal("250000"))
+                        .withCity("Bordeaux")
+                        .withStatus(AnnonceStatus.PUBLISHED)
+                        .persist();
 
-        mockMvc.perform(get("/api/v1/annonces/" + annonce.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                get("/api/v1/annonces/" + annonce.getId())
+                                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(header().exists("Deprecation"))
                 .andExpect(header().string("Deprecation", "true"))
@@ -265,8 +313,11 @@ public class ApiVersioningIntegrationTest extends BaseBackendE2ETest {
                 .andExpect(header().exists("X-API-Warn"))
                 .andExpect(header().exists("Link"));
 
-        mockMvc.perform(get("/api/v2/annonces/" + annonce.getId())
-                        .with(jwt().jwt(jwt -> jwt.claim("org_id", ORG_ID))))
+        mockMvc.perform(
+                        withTenantHeaders(
+                                get("/api/v2/annonces/" + annonce.getId())
+                                        .with(jwtWithRoles(ORG_ID, "PRO", "ADMIN")),
+                                ORG_ID))
                 .andExpect(status().isOk())
                 .andExpect(header().doesNotExist("Deprecation"))
                 .andExpect(header().doesNotExist("Sunset"))

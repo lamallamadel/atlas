@@ -1,4 +1,14 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+
+
+import { FullCalendarComponent } from '@fullcalendar/angular';
+import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg, EventChangeArg } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
+import iCalendarPlugin from '@fullcalendar/icalendar';
+
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus, AppointmentCreateRequest, AppointmentUpdateRequest } from '../services/appointment-api.service';
 import { CalendarSyncService } from '../services/calendar-sync.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -407,7 +417,11 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
+
   handleEventResize(resizeInfo: any): void {
+
+  handleEventResize(resizeInfo: EventChangeArg): void {
+
     const appointmentId = parseInt(resizeInfo.event.id);
     const appointment = this.appointments.find(apt => apt.id === appointmentId);
 

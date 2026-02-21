@@ -6,6 +6,9 @@ import com.example.backend.entity.enums.AuditAction;
 import com.example.backend.entity.enums.AuditEntityType;
 import com.example.backend.repository.AuditEventRepository;
 import com.example.backend.util.TenantContext;
+import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
@@ -13,10 +16,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 @Service
 public class AuditEventService {
@@ -28,14 +27,16 @@ public class AuditEventService {
     }
 
     @Transactional(readOnly = true)
-    public Page<AuditEventResponse> listByEntity(AuditEntityType entityType, Long entityId, Pageable pageable) {
+    public Page<AuditEventResponse> listByEntity(
+            AuditEntityType entityType, Long entityId, Pageable pageable) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Page<AuditEventEntity> auditEvents = auditEventRepository.findByOrgIdAndEntityTypeAndEntityId(orgId, entityType,
-                entityId, pageable);
+        Page<AuditEventEntity> auditEvents =
+                auditEventRepository.findByOrgIdAndEntityTypeAndEntityId(
+                        orgId, entityType, entityId, pageable);
 
         return auditEvents.map(this::toResponse);
     }
@@ -47,7 +48,8 @@ public class AuditEventService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Page<AuditEventEntity> auditEvents = auditEventRepository.findByOrgIdAndDossierId(orgId, dossierId, pageable);
+        Page<AuditEventEntity> auditEvents =
+                auditEventRepository.findByOrgIdAndDossierId(orgId, dossierId, pageable);
 
         return auditEvents.map(this::toResponse);
     }

@@ -5,7 +5,6 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -23,7 +22,10 @@ public class CoopLotRequest {
     @Size(max = 10000, message = "Description must not exceed 10000 characters")
     private String description;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Surface area must be greater than or equal to 0")
+    @DecimalMin(
+            value = "0.0",
+            inclusive = true,
+            message = "Surface area must be greater than or equal to 0")
     private BigDecimal surfaceArea;
 
     private Integer floorNumber;
@@ -32,7 +34,10 @@ public class CoopLotRequest {
 
     private Integer bathrooms;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0")
+    @DecimalMin(
+            value = "0.0",
+            inclusive = true,
+            message = "Price must be greater than or equal to 0")
     private BigDecimal price;
 
     @Size(max = 3, message = "Currency must not exceed 3 characters")

@@ -1,5 +1,7 @@
 package com.example.backend.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.dto.WhatsAppWebhookPayload;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.MessageEntity;
@@ -11,16 +13,13 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.MessageRepository;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test")
@@ -30,20 +29,15 @@ class WhatsAppMessageProcessingServiceTest {
     private static final String ORG_ID = "org123";
     private static final String WEBHOOK_SECRET = "test-webhook-secret";
 
-    @Autowired
-    private WhatsAppMessageProcessingService service;
+    @Autowired private WhatsAppMessageProcessingService service;
 
-    @Autowired
-    private MessageRepository messageRepository;
+    @Autowired private MessageRepository messageRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private WhatsAppProviderConfigRepository configRepository;
+    @Autowired private WhatsAppProviderConfigRepository configRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
@@ -64,7 +58,8 @@ class WhatsAppMessageProcessingServiceTest {
 
     @Test
     void processInboundMessage_CreatesNewDossierAndMessage() throws Exception {
-        String payloadJson = """
+        String payloadJson =
+                """
                 {
                   "object": "whatsapp_business_account",
                   "entry": [{
@@ -98,7 +93,8 @@ class WhatsAppMessageProcessingServiceTest {
                 }
                 """;
 
-        WhatsAppWebhookPayload payload = objectMapper.readValue(payloadJson, WhatsAppWebhookPayload.class);
+        WhatsAppWebhookPayload payload =
+                objectMapper.readValue(payloadJson, WhatsAppWebhookPayload.class);
 
         service.processInboundMessage(payload, ORG_ID);
 
@@ -121,7 +117,8 @@ class WhatsAppMessageProcessingServiceTest {
 
     @Test
     void processInboundMessage_IdempotencyCheck_IgnoresDuplicates() throws Exception {
-        String payloadJson = """
+        String payloadJson =
+                """
                 {
                   "object": "whatsapp_business_account",
                   "entry": [{
@@ -155,7 +152,8 @@ class WhatsAppMessageProcessingServiceTest {
                 }
                 """;
 
-        WhatsAppWebhookPayload payload = objectMapper.readValue(payloadJson, WhatsAppWebhookPayload.class);
+        WhatsAppWebhookPayload payload =
+                objectMapper.readValue(payloadJson, WhatsAppWebhookPayload.class);
 
         service.processInboundMessage(payload, ORG_ID);
         assertThat(messageRepository.findAll()).hasSize(1);
@@ -173,7 +171,8 @@ class WhatsAppMessageProcessingServiceTest {
         existingDossier.setStatus(DossierStatus.QUALIFIED);
         dossierRepository.save(existingDossier);
 
-        String payloadJson = """
+        String payloadJson =
+                """
                 {
                   "object": "whatsapp_business_account",
                   "entry": [{
@@ -207,7 +206,8 @@ class WhatsAppMessageProcessingServiceTest {
                 }
                 """;
 
-        WhatsAppWebhookPayload payload = objectMapper.readValue(payloadJson, WhatsAppWebhookPayload.class);
+        WhatsAppWebhookPayload payload =
+                objectMapper.readValue(payloadJson, WhatsAppWebhookPayload.class);
 
         service.processInboundMessage(payload, ORG_ID);
 

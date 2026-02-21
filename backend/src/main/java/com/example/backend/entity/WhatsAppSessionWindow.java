@@ -1,20 +1,21 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.Filter;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Table(name = "whatsapp_session_window", 
-    indexes = {
-        @Index(name = "idx_session_org_phone", columnList = "org_id,phone_number"),
-        @Index(name = "idx_session_window_expires", columnList = "window_expires_at")
-    },
-    uniqueConstraints = {
-        @UniqueConstraint(name = "uk_session_org_phone", columnNames = {"org_id", "phone_number"})
-    }
-)
+@Table(
+        name = "whatsapp_session_window",
+        indexes = {
+            @Index(name = "idx_session_org_phone", columnList = "org_id,phone_number"),
+            @Index(name = "idx_session_window_expires", columnList = "window_expires_at")
+        },
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_session_org_phone",
+                    columnNames = {"org_id", "phone_number"})
+        })
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class WhatsAppSessionWindow extends BaseEntity {
 

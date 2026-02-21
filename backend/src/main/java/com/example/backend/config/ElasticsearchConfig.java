@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
@@ -9,8 +10,6 @@ import org.springframework.data.elasticsearch.repository.config.EnableElasticsea
 
 @Configuration
 @EnableElasticsearchRepositories(basePackages = "com.example.backend.repository.search")
-// The project drives ES enablement via the top-level `elasticsearch.enabled` property
-// (mapped from ELASTICSEARCH_ENABLED in docker-compose).
 @ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
 public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
@@ -25,13 +24,19 @@ public class ElasticsearchConfig extends ElasticsearchConfiguration {
 
     @Override
     public ClientConfiguration clientConfiguration() {
-        ClientConfiguration.MaybeSecureClientConfigurationBuilder builder = ClientConfiguration.builder()
-                .connectedTo(elasticsearchUris.replace("http://", "").replace("https://", ""));
+        String hosts = elasticsearchUris.replace("http://", "").replace("https://", "");
+        ClientConfiguration.MaybeSecureClientConfigurationBuilder base =
+                ClientConfiguration.builder().connectedTo(hosts);
 
         if (username != null && !username.isEmpty()) {
-            builder.withBasicAuth(username, password);
+            return base.withBasicAuth(username, password)
+                    .withConnectTimeout(Duration.ofSeconds(10))
+                    .withSocketTimeout(Duration.ofSeconds(30))
+                    .build();
         }
 
-        return builder.build();
+        return base.withConnectTimeout(Duration.ofSeconds(10))
+                .withSocketTimeout(Duration.ofSeconds(30))
+                .build();
     }
 }

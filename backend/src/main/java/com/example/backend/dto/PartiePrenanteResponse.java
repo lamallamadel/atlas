@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.PartiePrenanteRole;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -45,8 +44,7 @@ public class PartiePrenanteResponse {
     @Schema(description = "Timestamp when last updated", example = "2024-01-01T12:00:00")
     private LocalDateTime updatedAt;
 
-    public PartiePrenanteResponse() {
-    }
+    public PartiePrenanteResponse() {}
 
     public Long getId() {
         return id;

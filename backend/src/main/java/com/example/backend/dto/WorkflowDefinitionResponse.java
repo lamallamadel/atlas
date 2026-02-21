@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -33,6 +32,7 @@ public class WorkflowDefinitionResponse {
     @Schema(description = "Whether this workflow is published", example = "false")
     private Boolean isPublished;
 
+
     @Schema(description = "Whether this is a template", example = "false")
     private Boolean isTemplate;
 
@@ -56,6 +56,12 @@ public class WorkflowDefinitionResponse {
 
     @Schema(description = "Comma-separated list of final states")
     private String finalStates;
+
+    @Schema(
+            description = "JSON object defining required fields for this transition",
+            nullable = true)
+    private Map<String, Object> requiredFieldsJson;
+
 
     @Schema(description = "Timestamp when created", example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;

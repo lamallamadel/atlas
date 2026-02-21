@@ -11,6 +11,7 @@ import io.github.bucket4j.BucketConfiguration;
 import io.github.bucket4j.Refill;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
+
 import io.micrometer.core.instrument.Timer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RateLimitService {
@@ -36,7 +41,7 @@ public class RateLimitService {
     private final RateLimitTierRepository rateLimitTierRepository;
     private final RateLimitConfig rateLimitConfig;
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
-    
+
     private final Counter rateLimitHitsCounter;
     private final Counter rateLimitRejectionsCounter;
     private final Counter rateLimitOrgHitsCounter;
@@ -51,7 +56,7 @@ public class RateLimitService {
             MeterRegistry meterRegistry) {
         this.rateLimitTierRepository = rateLimitTierRepository;
         this.rateLimitConfig = rateLimitConfig;
-        
+
         this.rateLimitHitsCounter = Counter.builder("rate_limit.hits")
                 .description("Total number of requests that hit the rate limiter")
                 .register(meterRegistry);
@@ -74,23 +79,24 @@ public class RateLimitService {
                 .description("Time taken to perform rate limit checks")
                 .register(meterRegistry);
 
-        logger.info("RateLimitService initialized with in-memory buckets (Redis support available for future enhancement)");
+        logger.info(
+                "RateLimitService initialized with in-memory buckets (Redis support available for future enhancement)");
     }
 
     public boolean tryConsumeForOrg(String orgId) {
         return rateLimitCheckTimer.record(() -> {
             rateLimitHitsCounter.increment();
             rateLimitOrgHitsCounter.increment();
-            
+
             String key = BUCKET_KEY_PREFIX_ORG + orgId;
             boolean consumed = tryConsumeBucket(key, () -> createOrgBucketConfiguration(orgId));
-            
+
             if (!consumed) {
                 rateLimitRejectionsCounter.increment();
                 rateLimitOrgRejectionsCounter.increment();
                 logger.warn("Rate limit exceeded for orgId: {}", orgId);
             }
-            
+
             return consumed;
         });
     }
@@ -99,16 +105,16 @@ public class RateLimitService {
         return rateLimitCheckTimer.record(() -> {
             rateLimitHitsCounter.increment();
             rateLimitIpHitsCounter.increment();
-            
+
             String key = BUCKET_KEY_PREFIX_IP + ipAddress;
             boolean consumed = tryConsumeBucket(key, this::createIpBucketConfiguration);
-            
+
             if (!consumed) {
                 rateLimitRejectionsCounter.increment();
                 rateLimitIpRejectionsCounter.increment();
                 logger.warn("Rate limit exceeded for IP: {}", ipAddress);
             }
-            
+
             return consumed;
         });
     }
@@ -125,10 +131,10 @@ public class RateLimitService {
 
     private BucketConfiguration createOrgBucketConfiguration(String orgId) {
         int requestsPerMinute = getRateLimitForOrg(orgId);
+
         Bandwidth limit = Bandwidth.classic(
                 requestsPerMinute,
-                Refill.intervally(requestsPerMinute, Duration.ofMinutes(1))
-        );
+                Refill.intervally(requestsPerMinute, Duration.ofMinutes(1)));
         return BucketConfiguration.builder()
                 .addLimit(limit)
                 .build();
@@ -138,15 +144,15 @@ public class RateLimitService {
         int requestsPerMinute = rateLimitConfig.getIpBasedRequestsPerMinute();
         Bandwidth limit = Bandwidth.classic(
                 requestsPerMinute,
-                Refill.intervally(requestsPerMinute, Duration.ofMinutes(1))
-        );
+                Refill.intervally(requestsPerMinute, Duration.ofMinutes(1)));
         return BucketConfiguration.builder()
                 .addLimit(limit)
                 .build();
     }
 
     private int getRateLimitForOrg(String orgId) {
-        return rateLimitTierRepository.findByOrgId(orgId)
+        return rateLimitTierRepository
+                .findByOrgId(orgId)
                 .map(RateLimitTier::getRequestsPerMinute)
                 .orElse(rateLimitConfig.getDefaultRequestsPerMinute());
     }
@@ -160,8 +166,7 @@ public class RateLimitService {
 
     @Transactional(readOnly = true)
     public Optional<RateLimitTierDto> getRateLimitByOrgId(String orgId) {
-        return rateLimitTierRepository.findByOrgId(orgId)
-                .map(this::toDto);
+        return rateLimitTierRepository.findByOrgId(orgId).map(this::toDto);
     }
 
     @Transactional
@@ -173,33 +178,43 @@ public class RateLimitService {
         entity.setDescription(dto.getDescription());
 
         RateLimitTier saved = rateLimitTierRepository.save(entity);
-        
+
         clearBucketForOrg(dto.getOrgId());
-        
+
+        buckets.remove(dto.getOrgId());
+
         return toDto(saved);
     }
 
     @Transactional
     public RateLimitTierDto updateRateLimit(String orgId, RateLimitTierDto dto) {
-        RateLimitTier entity = rateLimitTierRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Rate limit not found for orgId: " + orgId));
+        RateLimitTier entity = rateLimitTierRepository
+                .findByOrgId(orgId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Rate limit not found for orgId: " + orgId));
 
         entity.setTierName(dto.getTierName());
         entity.setRequestsPerMinute(dto.getRequestsPerMinute());
         entity.setDescription(dto.getDescription());
 
         RateLimitTier updated = rateLimitTierRepository.save(entity);
-        
+
         clearBucketForOrg(orgId);
-        
+
+        buckets.remove(orgId);
+
         return toDto(updated);
     }
 
     @Transactional
     public void deleteRateLimit(String orgId) {
-        RateLimitTier entity = rateLimitTierRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Rate limit not found for orgId: " + orgId));
-        
+        RateLimitTier entity = rateLimitTierRepository
+                .findByOrgId(orgId)
+                .orElseThrow(
+                        () -> new IllegalArgumentException(
+                                "Rate limit not found for orgId: " + orgId));
+
         rateLimitTierRepository.delete(entity);
         clearBucketForOrg(orgId);
     }

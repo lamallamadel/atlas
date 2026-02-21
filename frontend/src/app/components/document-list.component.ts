@@ -21,7 +21,7 @@ export class DocumentListComponent implements OnInit {
     private documentApiService: DocumentApiService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadDocuments();
@@ -148,7 +148,7 @@ export class DocumentListComponent implements OnInit {
 
   getCategoryLabel(category?: string): string {
     if (!category) return '—';
-    
+
     const labels: Record<string, string> = {
       'Contract': 'Contrat',
       'Invoice': 'Facture',
@@ -156,13 +156,13 @@ export class DocumentListComponent implements OnInit {
       'Photo': 'Photo',
       'Other': 'Autre'
     };
-    
+
     return labels[category] || category;
   }
 
   getCategoryBadgeClass(category?: string): string {
     if (!category) return 'category-badge';
-    
+
     const classes: Record<string, string> = {
       'Contract': 'category-badge category-contract',
       'Invoice': 'category-badge category-invoice',
@@ -170,7 +170,7 @@ export class DocumentListComponent implements OnInit {
       'Photo': 'category-badge category-photo',
       'Other': 'category-badge category-other'
     };
-    
+
     return classes[category] || 'category-badge';
   }
 
@@ -180,5 +180,21 @@ export class DocumentListComponent implements OnInit {
 
   hasDocuments(): boolean {
     return this.documents.length > 0;
+  }
+
+  getAiStatusText(contentType: string | undefined): string | null {
+    if (!contentType) return null;
+    const match = contentType.match(/AI_STATUS:(VALIDE|INVALIDE)/);
+    if (match && match.length > 1) {
+      return match[1];
+    }
+    return null;
+  }
+
+  getAiStatusClass(contentType: string | undefined): string {
+    const status = this.getAiStatusText(contentType);
+    if (status === 'VALIDE') return 'ai-badge ai-valide';
+    if (status === 'INVALIDE') return 'ai-badge ai-invalide';
+    return 'ai-badge';
   }
 }

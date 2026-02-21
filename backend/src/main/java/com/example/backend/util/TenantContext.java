@@ -12,9 +12,9 @@ public final class TenantContext {
 
     /**
      * Backward-compatible alias.
-     * <p>
-     * The domain model uses the term {@code orgId}. Some code paths (notably reporting)
-     * were initially authored with a {@code tenantId} naming convention.
+     *
+     * <p>The domain model uses the term {@code orgId}. Some code paths (notably reporting) were
+     * initially authored with a {@code tenantId} naming convention.
      */
     public static void setTenantId(String tenantId) {
         setOrgId(tenantId);
@@ -24,9 +24,7 @@ public final class TenantContext {
         return ORG_ID.get();
     }
 
-    /**
-     * Backward-compatible alias for {@link #getOrgId()}.
-     */
+    /** Backward-compatible alias for {@link #getOrgId()}. */
     public static String getTenantId() {
         return getOrgId();
     }

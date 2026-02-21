@@ -4,14 +4,13 @@ import com.example.backend.dto.ReferentialTemplateDto;
 import com.example.backend.entity.ReferentialEntity;
 import com.example.backend.repository.ReferentialRepository;
 import com.example.backend.util.TenantContext;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReferentialTemplateService {
@@ -31,7 +30,10 @@ public class ReferentialTemplateService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        log.info("Exporting referential template for org: {} with categories: {}", orgId, categories);
+        log.info(
+                "Exporting referential template for org: {} with categories: {}",
+                orgId,
+                categories);
 
         ReferentialTemplateDto template = new ReferentialTemplateDto();
         template.setTemplateName("Referential Export - " + orgId);
@@ -41,12 +43,11 @@ public class ReferentialTemplateService {
         List<ReferentialTemplateDto.ReferentialTemplateItem> items = new ArrayList<>();
 
         for (String category : categories) {
-            List<ReferentialEntity> referentials = referentialRepository
-                    .findByCategoryOrderByDisplayOrderAsc(category);
+            List<ReferentialEntity> referentials =
+                    referentialRepository.findByCategoryOrderByDisplayOrderAsc(category);
 
-            items.addAll(referentials.stream()
-                    .map(this::toTemplateItem)
-                    .collect(Collectors.toList()));
+            items.addAll(
+                    referentials.stream().map(this::toTemplateItem).collect(Collectors.toList()));
         }
 
         template.setItems(items);
@@ -58,7 +59,8 @@ public class ReferentialTemplateService {
 
     @Transactional(readOnly = true)
     public ReferentialTemplateDto exportAllCategories() {
-        List<String> categories = List.of("CASE_TYPE", "CASE_STATUS", "LEAD_SOURCE", "LOSS_REASON", "WON_REASON");
+        List<String> categories =
+                List.of("CASE_TYPE", "CASE_STATUS", "LEAD_SOURCE", "LOSS_REASON", "WON_REASON");
         return exportTemplate(categories);
     }
 
@@ -69,23 +71,30 @@ public class ReferentialTemplateService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        log.info("Importing referential template '{}' for org: {}, overwrite: {}", 
-                template.getTemplateName(), orgId, overwriteExisting);
+        log.info(
+                "Importing referential template '{}' for org: {}, overwrite: {}",
+                template.getTemplateName(),
+                orgId,
+                overwriteExisting);
 
         int importedCount = 0;
 
         for (ReferentialTemplateDto.ReferentialTemplateItem item : template.getItems()) {
-            boolean exists = referentialRepository.existsByCategoryAndCode(item.getCategory(), item.getCode());
+            boolean exists =
+                    referentialRepository.existsByCategoryAndCode(
+                            item.getCategory(), item.getCode());
 
             if (exists && !overwriteExisting) {
-                log.debug("Skipping existing referential: {}/{}", item.getCategory(), item.getCode());
+                log.debug(
+                        "Skipping existing referential: {}/{}", item.getCategory(), item.getCode());
                 continue;
             }
 
             if (exists && overwriteExisting) {
-                ReferentialEntity existing = referentialRepository
-                        .findByCategoryAndCode(item.getCategory(), item.getCode())
-                        .orElseThrow();
+                ReferentialEntity existing =
+                        referentialRepository
+                                .findByCategoryAndCode(item.getCategory(), item.getCode())
+                                .orElseThrow();
 
                 if (!existing.getIsSystem()) {
                     existing.setLabel(item.getLabel());
@@ -111,8 +120,10 @@ public class ReferentialTemplateService {
         return importedCount;
     }
 
-    private ReferentialTemplateDto.ReferentialTemplateItem toTemplateItem(ReferentialEntity entity) {
-        ReferentialTemplateDto.ReferentialTemplateItem item = new ReferentialTemplateDto.ReferentialTemplateItem();
+    private ReferentialTemplateDto.ReferentialTemplateItem toTemplateItem(
+            ReferentialEntity entity) {
+        ReferentialTemplateDto.ReferentialTemplateItem item =
+                new ReferentialTemplateDto.ReferentialTemplateItem();
         item.setCategory(entity.getCategory());
         item.setCode(entity.getCode());
         item.setLabel(entity.getLabel());
@@ -122,7 +133,8 @@ public class ReferentialTemplateService {
         return item;
     }
 
-    private ReferentialEntity fromTemplateItem(ReferentialTemplateDto.ReferentialTemplateItem item, String orgId) {
+    private ReferentialEntity fromTemplateItem(
+            ReferentialTemplateDto.ReferentialTemplateItem item, String orgId) {
         ReferentialEntity entity = new ReferentialEntity();
         entity.setOrgId(orgId);
         entity.setCategory(item.getCategory());

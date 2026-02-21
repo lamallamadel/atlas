@@ -62,8 +62,7 @@ public class CoopLotController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update cooperative lot")
     public ResponseEntity<CoopLotResponse> update(
-            @PathVariable Long id,
-            @Valid @RequestBody CoopLotRequest request) {
+            @PathVariable Long id, @Valid @RequestBody CoopLotRequest request) {
         CoopLotResponse response = coopLotService.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -79,9 +78,10 @@ public class CoopLotController {
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+        Sort.Direction direction =
+                sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
         return PageRequest.of(page, size, Sort.by(direction, property));
     }
 }

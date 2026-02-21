@@ -98,7 +98,7 @@
               <div class="card-label">Total Queued</div>
             </div>
           </div>
-          <div class="summary-card" *ngFor="let channel of getChannelNames()">
+          <div class="summary-card" *ngFor="let channel of channelNames">
             <div class="card-content">
               <div class="card-value">{{ getQueueDepth(channel) }}</div>
               <div class="card-label">{{ channel }}</div>
@@ -125,7 +125,7 @@
       <mat-card-content>
         <!-- Latency Table -->
         <div class="latency-table">
-          <table mat-table [dataSource]="getChannelNames()" class="data-table">
+          <table mat-table [dataSource]="channelNames" class="data-table">
             <ng-container matColumnDef="channel">
               <th mat-header-cell *matHeaderCellDef>Channel</th>
               <td mat-cell *matCellDef="let channel">
@@ -244,7 +244,7 @@
             </div>
           </div>
           <div class="summary-card" 
-               *ngFor="let channel of getChannelNames()"
+               *ngFor="let channel of channelNames"
                [ngClass]="'dlq-status-' + getDlqStatus(channel)">
             <div class="card-content">
               <div class="card-value">{{ getDlqSize(channel) }}</div>
@@ -316,7 +316,7 @@
         <!-- Quota Cards -->
         <div class="quota-cards">
           <mat-card class="quota-card" 
-                    *ngFor="let channel of getChannelNames()" 
+                    *ngFor="let channel of channelNames" 
                     [ngClass]="getQuotaStatusClass(getQuotaUsage(channel)?.usagePercentage)">
             <mat-card-header>
               <mat-card-title class="quota-header">

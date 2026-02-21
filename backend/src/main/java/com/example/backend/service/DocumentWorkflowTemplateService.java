@@ -7,7 +7,7 @@ import com.example.backend.repository.WorkflowTemplateRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.util.*;
 
 @Service
@@ -37,7 +37,8 @@ public class DocumentWorkflowTemplateService {
         WorkflowTemplateEntity template = new WorkflowTemplateEntity();
         template.setOrgId("SYSTEM");
         template.setTemplateName("Purchase Agreement Workflow");
-        template.setDescription("Standard workflow for real estate purchase agreements with agent review, manager approval, client signature, and archival");
+        template.setDescription(
+                "Standard workflow for real estate purchase agreements with agent review, manager approval, client signature, and archival");
         template.setWorkflowType(DocumentWorkflowType.PURCHASE_AGREEMENT);
         template.setIsSystemTemplate(true);
         template.setIsActive(true);
@@ -54,8 +55,7 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("agent"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Manager Approval",
@@ -64,16 +64,14 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("manager"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Property Value Check",
                 "stepDescription", "Conditional approval for high-value properties",
                 "stepType", WorkflowStepType.CONDITIONAL_BRANCH.name(),
                 "conditionRules", Map.of("propertyValueThreshold", 500000),
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Client Signature",
@@ -82,15 +80,13 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("client"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Archive Document",
                 "stepDescription", "Archive signed document",
                 "stepType", WorkflowStepType.ARCHIVE.name(),
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         template.setStepsDefinition(steps);
         template.setDefaultConfig(Map.of("autoArchive", true, "notifyOnComplete", true));
@@ -119,8 +115,7 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("legal"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Property Manager Approval",
@@ -129,8 +124,7 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("property_manager"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Tenant Signature",
@@ -139,8 +133,7 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("tenant"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Landlord Signature",
@@ -149,15 +142,13 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("landlord"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Archive Contract",
                 "stepDescription", "Archive signed lease contract",
                 "stepType", WorkflowStepType.ARCHIVE.name(),
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         template.setStepsDefinition(steps);
         template.setDefaultConfig(Map.of("autoArchive", true, "notifyOnComplete", true));
@@ -186,8 +177,7 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("compliance"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Broker Manager Approval",
@@ -196,8 +186,7 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("broker_manager"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Client Authorization",
@@ -206,15 +195,13 @@ public class DocumentWorkflowTemplateService {
                 "assignedApprovers", List.of("client"),
                 "approvalsRequired", 1,
                 "requiresAllApprovers", true,
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         steps.add(Map.of(
                 "stepName", "Archive Mandate",
                 "stepDescription", "Archive authorized mandate",
                 "stepType", WorkflowStepType.ARCHIVE.name(),
-                "isParallel", false
-        ));
+                "isParallel", false));
 
         template.setStepsDefinition(steps);
         template.setDefaultConfig(Map.of("autoArchive", true, "notifyOnComplete", true, "mandateValidityDays", 90));

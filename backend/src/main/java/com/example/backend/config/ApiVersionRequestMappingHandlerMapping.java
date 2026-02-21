@@ -1,11 +1,10 @@
 package com.example.backend.config;
 
+import java.lang.reflect.Method;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.servlet.mvc.condition.PatternsRequestCondition;
 import org.springframework.web.servlet.mvc.method.RequestMappingInfo;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
-
-import java.lang.reflect.Method;
 
 public class ApiVersionRequestMappingHandlerMapping extends RequestMappingHandlerMapping {
 
@@ -21,21 +20,26 @@ public class ApiVersionRequestMappingHandlerMapping extends RequestMappingHandle
             String version = apiVersion.value();
             PatternsRequestCondition patterns = info.getPatternsCondition();
             if (patterns != null) {
-                String[] newPatterns = patterns.getPatterns().stream()
-                        .map(pattern -> "/api/" + version + pattern.replaceFirst("^/api/v[0-9]+", ""))
-                        .toArray(String[]::new);
-                
+                String[] newPatterns =
+                        patterns.getPatterns().stream()
+                                .map(
+                                        pattern ->
+                                                "/api/"
+                                                        + version
+                                                        + pattern.replaceFirst("^/api/v[0-9]+", ""))
+                                .toArray(String[]::new);
+
                 PatternsRequestCondition apiPattern = new PatternsRequestCondition(newPatterns);
-                info = new RequestMappingInfo(
-                        info.getName(),
-                        apiPattern,
-                        info.getMethodsCondition(),
-                        info.getParamsCondition(),
-                        info.getHeadersCondition(),
-                        info.getConsumesCondition(),
-                        info.getProducesCondition(),
-                        info.getCustomCondition()
-                );
+                info =
+                        new RequestMappingInfo(
+                                info.getName(),
+                                apiPattern,
+                                info.getMethodsCondition(),
+                                info.getParamsCondition(),
+                                info.getHeadersCondition(),
+                                info.getConsumesCondition(),
+                                info.getProducesCondition(),
+                                info.getCustomCondition());
             }
         }
 

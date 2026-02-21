@@ -2,7 +2,7 @@
 
 /* ========================================
    PAGE STRUCTURE
-   ======================================== */
+
 .page-container {
   min-height: 100vh;
   background: var(--color-neutral-50);
@@ -16,7 +16,7 @@
 
 /* ========================================
    BACK LINK
-   ======================================== */
+
 .link-back {
   display: inline-flex;
   align-items: center;
@@ -42,7 +42,7 @@
 
 /* ========================================
    STICKY DOSSIER HEADER - CRM STRUCTURE
-   ======================================== */
+
 .dossier-header {
   position: sticky;
   top: -1px;
@@ -151,8 +151,101 @@
 }
 
 /* ========================================
+   COACH VIRTUEL & NUDGING
+
+.coach-virtuel-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-4);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(168, 85, 247, 0.05));
+  border-left: 4px solid var(--color-primary-500);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-5);
+  margin-bottom: var(--spacing-6);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
+  border-right: 1px solid rgba(99, 102, 241, 0.2);
+  border-top: 1px solid rgba(99, 102, 241, 0.2);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.coach-icon-container {
+  background: var(--color-neutral-0);
+  border-radius: var(--radius-full);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.coach-icon {
+  font-size: var(--font-size-xl);
+}
+
+.coach-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-1);
+}
+
+.coach-header-row {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.explainer-icon {
+  font-size: 18px;
+  height: 18px;
+  width: 18px;
+  color: var(--color-primary-500);
+  cursor: help;
+  opacity: 0.8;
+  transition: opacity var(--duration-fast) ease;
+}
+
+.explainer-icon:hover {
+  opacity: 1;
+}
+
+.coach-title {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  color: var(--color-primary-700);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coach-message {
+  margin: 0;
+  font-size: var(--font-size-base);
+  color: var(--color-neutral-800);
+  font-weight: 500;
+  line-height: var(--line-height-relaxed);
+}
+
+.slide-in-top {
+  animation: slideInTop 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+}
+
+@keyframes slideInTop {
+  0% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ========================================
    MESSAGES & ALERTS
-   ======================================== */
+
 .warning-message,
 .error-message,
 .success-message {
@@ -183,7 +276,7 @@
 
 /* ========================================
    STATUS CHANGE SECTION
-   ======================================== */
+
 .status-change-section {
   padding: var(--spacing-5);
   margin-bottom: var(--spacing-6);
@@ -279,7 +372,7 @@
 
 /* ========================================
    MATERIAL TAB ENHANCEMENTS - LIMITED WIDTH
-   ======================================== */
+
 .tabs-container {
   width: 100%;
 }
@@ -338,6 +431,7 @@
     opacity: 0;
     transform: translateY(8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -346,7 +440,7 @@
 
 /* ========================================
    TAB CONTENT
-   ======================================== */
+
 .tab-content {
   padding: var(--spacing-6);
   min-height: 400px;
@@ -376,7 +470,7 @@
 
 /* ========================================
    SECTION ESSENTIEL
-   ======================================== */
+
 ::ng-deep .info-section-essential {
   background: var(--color-neutral-0);
   border-radius: var(--radius-xl);
@@ -454,7 +548,7 @@
 
 /* ========================================
    CSS GRID TWO-COLUMN LAYOUT WITH ELEVATION
-   ======================================== */
+
 .sections-container {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -511,7 +605,7 @@
 
 /* ========================================
    FIELD GROUPS
-   ======================================== */
+
 .field-group {
   display: flex;
   flex-direction: column;
@@ -539,7 +633,7 @@
 
 /* ========================================
    LEAD FORM
-   ======================================== */
+
 .lead-empty-state {
   display: flex;
   flex-direction: column;
@@ -593,7 +687,7 @@
 
 /* ========================================
    SYSTEM DETAILS SECTION
-   ======================================== */
+
 ::ng-deep .system-details-section {
   box-shadow: var(--shadow-sm);
   border-radius: var(--radius-lg);
@@ -624,7 +718,7 @@
 
 /* ========================================
    ADVANCED SECTION (Legacy support)
-   ======================================== */
+
 ::ng-deep .advanced-section {
   margin-top: var(--spacing-6);
   box-shadow: var(--shadow-sm);
@@ -637,7 +731,7 @@
 
 /* ========================================
    DATA TABLES
-   ======================================== */
+
 .data-table-wrapper {
   overflow-x: auto;
   border-radius: var(--radius-lg);
@@ -725,7 +819,7 @@
 
 /* ========================================
    TIMELINE VIEW (MESSAGES)
-   ======================================== */
+
 .timeline-view {
   display: flex;
   flex-direction: column;
@@ -787,7 +881,7 @@
 
 /* ========================================
    BADGES
-   ======================================== */
+
 .channel-badge,
 .direction-badge,
 .status-badge,
@@ -805,34 +899,120 @@
 /* WCAG AA Compliant Channel/Status Badges - 4.5:1 Contrast Ratio */
 
 /* Channel badges */
-.channel-email { background: #0d47a1; color: #ffffff; border: 1px solid #01579b; }
-.channel-sms { background: #1b5e20; color: #ffffff; border: 1px solid #0d5b1e; }
-.channel-phone { background: #e65100; color: #ffffff; border: 1px solid #bf360c; }
-.channel-whatsapp { background: #128c7e; color: #ffffff; border: 1px solid #075e54; }
-.channel-chat { background: #4527a0; color: #ffffff; border: 1px solid #311b92; }
-.channel-inapp { background: #616161; color: #ffffff; border: 1px solid #424242; }
-.channel-web { background: #283593; color: #ffffff; border: 1px solid #1a237e; }
+.channel-email {
+  background: #0d47a1;
+  color: #ffffff;
+  border: 1px solid #01579b;
+}
+
+.channel-sms {
+  background: #1b5e20;
+  color: #ffffff;
+  border: 1px solid #0d5b1e;
+}
+
+.channel-phone {
+  background: #e65100;
+  color: #ffffff;
+  border: 1px solid #bf360c;
+}
+
+.channel-whatsapp {
+  background: #128c7e;
+  color: #ffffff;
+  border: 1px solid #075e54;
+}
+
+.channel-chat {
+  background: #4527a0;
+  color: #ffffff;
+  border: 1px solid #311b92;
+}
+
+.channel-inapp {
+  background: #616161;
+  color: #ffffff;
+  border: 1px solid #424242;
+}
+
+.channel-web {
+  background: #283593;
+  color: #ffffff;
+  border: 1px solid #1a237e;
+}
 
 /* Direction badges */
-.direction-inbound { background: #2e7d32; color: #ffffff; border: 1px solid #1b5e20; }
-.direction-outbound { background: #0277bd; color: #ffffff; border: 1px solid #01579b; }
+.direction-inbound {
+  background: #2e7d32;
+  color: #ffffff;
+  border: 1px solid #1b5e20;
+}
+
+.direction-outbound {
+  background: #0277bd;
+  color: #ffffff;
+  border: 1px solid #01579b;
+}
 
 /* Status badges */
-.status-scheduled { background: #0277bd; color: #ffffff; border: 1px solid #01579b; }
-.status-confirmed { background: #2e7d32; color: #ffffff; border: 1px solid #1b5e20; }
-.status-completed { background: #1b5e20; color: #ffffff; border: 1px solid #0d5b1e; }
-.status-cancelled { background: #c62828; color: #ffffff; border: 1px solid #b71c1c; }
+.status-scheduled {
+  background: #0277bd;
+  color: #ffffff;
+  border: 1px solid #01579b;
+}
+
+.status-confirmed {
+  background: #2e7d32;
+  color: #ffffff;
+  border: 1px solid #1b5e20;
+}
+
+.status-completed {
+  background: #1b5e20;
+  color: #ffffff;
+  border: 1px solid #0d5b1e;
+}
+
+.status-cancelled {
+  background: #c62828;
+  color: #ffffff;
+  border: 1px solid #b71c1c;
+}
 
 /* Consent badges */
-.consent-granted { background: #2e7d32; color: #ffffff; border: 1px solid #1b5e20; }
-.consent-denied { background: #c62828; color: #ffffff; border: 1px solid #b71c1c; }
-.consent-revoked { background: #ef6c00; color: #ffffff; border: 1px solid #e65100; }
-.consent-pending { background: #0277bd; color: #ffffff; border: 1px solid #01579b; }
-.consent-expired { background: #616161; color: #ffffff; border: 1px solid #424242; }
+.consent-granted {
+  background: #2e7d32;
+  color: #ffffff;
+  border: 1px solid #1b5e20;
+}
+
+.consent-denied {
+  background: #c62828;
+  color: #ffffff;
+  border: 1px solid #b71c1c;
+}
+
+.consent-revoked {
+  background: #ef6c00;
+  color: #ffffff;
+  border: 1px solid #e65100;
+}
+
+.consent-pending {
+  background: #0277bd;
+  color: #ffffff;
+  border: 1px solid #01579b;
+}
+
+.consent-expired {
+  background: #616161;
+  color: #ffffff;
+  border: 1px solid #424242;
+}
 
 /* ========================================
    CONSENT CARDS
-   ======================================== */
+
 .consent-cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -1001,7 +1181,7 @@
 
 /* ========================================
    AUDIT TABLE
-   ======================================== */
+
 .audit-filters {
   display: flex;
   gap: var(--spacing-4);
@@ -1089,7 +1269,7 @@
 
 /* ========================================
    PARTIES PRENANTES TABLE
-   ======================================== */
+
 .parties-table .actions-column {
   width: 120px;
   text-align: center;
@@ -1222,7 +1402,7 @@
 
 /* ========================================
    EMPTY STATES
-   ======================================== */
+
 .empty-message {
   padding: var(--spacing-8);
   text-align: center;
@@ -1258,7 +1438,7 @@
 
 /* ========================================
    APPOINTMENTS
-   ======================================== */
+
 .appointment-datetime {
   display: flex;
   flex-direction: column;
@@ -1277,7 +1457,7 @@
 
 /* ========================================
    WHATSAPP TAB
-   ======================================== */
+
 .whatsapp-tab {
   padding: 0 !important;
   height: calc(100vh - 400px);
@@ -1334,14 +1514,12 @@
   overflow-y: auto;
   padding: var(--spacing-5);
   background: linear-gradient(to bottom, #e5ddd5 0%, #d1c4b7 100%);
-  background-image: 
-    repeating-linear-gradient(
-      45deg,
+  background-image:
+    repeating-linear-gradient(45deg,
       transparent,
       transparent 10px,
       rgba(255, 255, 255, 0.03) 10px,
-      rgba(255, 255, 255, 0.03) 20px
-    );
+      rgba(255, 255, 255, 0.03) 20px);
 }
 
 .chat-messages {
@@ -1390,6 +1568,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1733,7 +1912,7 @@
 
 /* ========================================
    UTILITIES
-   ======================================== */
+
 .link {
   color: var(--color-primary-500);
   text-decoration: none;
@@ -1764,10 +1943,10 @@
 
 /* ========================================
    RESPONSIVE LAYOUT - MOBILE SINGLE COLUMN
-   ======================================== */
+
 /* ========================================
    MOBILE FAB - FLOATING ACTION BUTTON
-   ======================================== */
+
 .mobile-fab {
   display: none;
 }
@@ -2013,11 +2192,12 @@
   .preview-bubble {
     max-width: 100%;
   }
+
 }
 
 /* ========================================
    COLLABORATION FEATURES
-   ======================================== */
+
 .collaboration-section {
   margin-bottom: var(--spacing-4);
 }
@@ -2060,3 +2240,6 @@
     grid-template-columns: 1fr;
   }
 }
+
+}
+

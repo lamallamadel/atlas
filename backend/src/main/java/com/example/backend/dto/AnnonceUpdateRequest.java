@@ -4,7 +4,6 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.AnnonceType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Size;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -25,13 +24,19 @@ public class AnnonceUpdateRequest {
     @Size(max = 500, message = "Address must not exceed 500 characters")
     private String address;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Surface must be greater than or equal to 0")
+    @DecimalMin(
+            value = "0.0",
+            inclusive = true,
+            message = "Surface must be greater than or equal to 0")
     private Double surface;
 
     @Size(max = 255, message = "City must not exceed 255 characters")
     private String city;
 
-    @DecimalMin(value = "0.0", inclusive = true, message = "Price must be greater than or equal to 0")
+    @DecimalMin(
+            value = "0.0",
+            inclusive = true,
+            message = "Price must be greater than or equal to 0")
     private BigDecimal price;
 
     @Size(max = 3, message = "Currency must not exceed 3 characters")
@@ -45,8 +50,7 @@ public class AnnonceUpdateRequest {
 
     private Map<String, Object> meta;
 
-    public AnnonceUpdateRequest() {
-    }
+    public AnnonceUpdateRequest() {}
 
     public String getTitle() {
         return title;

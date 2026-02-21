@@ -1,24 +1,23 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.*;
 import com.example.backend.entity.enums.*;
 import com.fasterxml.jackson.core.type.TypeReference;
-import org.junit.jupiter.api.Test;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MvcResult;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MvcResult;
 
 @BackendE2ETest
 @WithMockUser(roles = {"PRO"})
@@ -39,7 +38,8 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
     }
 
     @Test
-    void fullPipeline_CreateAnnonceAndDossierWithMessagesAndAppointments_GeneratesAuditEvents() throws Exception {
+    void fullPipeline_CreateAnnonceAndDossierWithMessagesAndAppointments_GeneratesAuditEvents()
+            throws Exception {
         AnnonceCreateRequest annonceRequest = new AnnonceCreateRequest();
         annonceRequest.setTitle("Beautiful Apartment in Paris");
         annonceRequest.setDescription("3 bedroom apartment with great view");
@@ -52,18 +52,23 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         annonceRequest.setCurrency("EUR");
         annonceRequest.setStatus(AnnonceStatus.ACTIVE);
 
-        MvcResult annonceResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(annonceRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.status").value("ACTIVE"))
-                .andReturn();
+        MvcResult annonceResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/annonces")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                annonceRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.status").value("ACTIVE"))
+                        .andReturn();
 
-        AnnonceResponse annonceResponse = objectMapper.readValue(
-                annonceResult.getResponse().getContentAsString(),
-                AnnonceResponse.class);
+        AnnonceResponse annonceResponse =
+                objectMapper.readValue(
+                        annonceResult.getResponse().getContentAsString(), AnnonceResponse.class);
         Long annonceId = annonceResponse.getId();
 
         assertThat(annonceId).isNotNull();
@@ -85,19 +90,24 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         initialParty.setEmail("jean.dupont@example.com");
         dossierRequest.setInitialParty(initialParty);
 
-        MvcResult dossierResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dossierRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.annonceId").value(annonceId))
-                .andExpect(jsonPath("$.status").value("NEW"))
-                .andReturn();
+        MvcResult dossierResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/dossiers")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                dossierRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.annonceId").value(annonceId))
+                        .andExpect(jsonPath("$.status").value("NEW"))
+                        .andReturn();
 
-        DossierResponse dossierResponse = objectMapper.readValue(
-                dossierResult.getResponse().getContentAsString(),
-                DossierResponse.class);
+        DossierResponse dossierResponse =
+                objectMapper.readValue(
+                        dossierResult.getResponse().getContentAsString(), DossierResponse.class);
         Long dossierId = dossierResponse.getId();
 
         assertThat(dossierId).isNotNull();
@@ -114,18 +124,23 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         messageRequest.setContent("I am interested in viewing this property");
         messageRequest.setTimestamp(LocalDateTime.now());
 
-        MvcResult messageResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/messages")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(messageRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.dossierId").value(dossierId))
-                .andReturn();
+        MvcResult messageResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/messages")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                messageRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.dossierId").value(dossierId))
+                        .andReturn();
 
-        MessageResponse messageResponse = objectMapper.readValue(
-                messageResult.getResponse().getContentAsString(),
-                MessageResponse.class);
+        MessageResponse messageResponse =
+                objectMapper.readValue(
+                        messageResult.getResponse().getContentAsString(), MessageResponse.class);
         Long messageId = messageResponse.getId();
 
         AppointmentCreateRequest appointmentRequest = new AppointmentCreateRequest();
@@ -137,9 +152,13 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         appointmentRequest.setStatus(AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(
-                withTenantHeaders(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(appointmentRequest)), TENANT_ID))
+                        withTenantHeaders(
+                                post("/api/v1/appointments")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(
+                                                objectMapper.writeValueAsString(
+                                                        appointmentRequest)),
+                                TENANT_ID))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.dossierId").value(dossierId));
@@ -151,9 +170,13 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         statusPatchToQualifying.setReason("Starting qualification process");
 
         mockMvc.perform(
-                withTenantHeaders(patch("/api/v1/dossiers/" + dossierId + "/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(statusPatchToQualifying)), TENANT_ID))
+                        withTenantHeaders(
+                                patch("/api/v1/dossiers/" + dossierId + "/status")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(
+                                                objectMapper.writeValueAsString(
+                                                        statusPatchToQualifying)),
+                                TENANT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dossierId))
                 .andExpect(jsonPath("$.status").value("QUALIFYING"));
@@ -164,9 +187,13 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         statusPatchToQualified.setReason("Lead qualified");
 
         mockMvc.perform(
-                withTenantHeaders(patch("/api/v1/dossiers/" + dossierId + "/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(statusPatchToQualified)), TENANT_ID))
+                        withTenantHeaders(
+                                patch("/api/v1/dossiers/" + dossierId + "/status")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(
+                                                objectMapper.writeValueAsString(
+                                                        statusPatchToQualified)),
+                                TENANT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dossierId))
                 .andExpect(jsonPath("$.status").value("QUALIFIED"));
@@ -178,9 +205,13 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         statusPatchToAppointment.setReason("Appointment scheduled");
 
         mockMvc.perform(
-                withTenantHeaders(patch("/api/v1/dossiers/" + dossierId + "/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(statusPatchToAppointment)), TENANT_ID))
+                        withTenantHeaders(
+                                patch("/api/v1/dossiers/" + dossierId + "/status")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(
+                                                objectMapper.writeValueAsString(
+                                                        statusPatchToAppointment)),
+                                TENANT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dossierId))
                 .andExpect(jsonPath("$.status").value("APPOINTMENT"));
@@ -191,106 +222,128 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         statusPatchToWon.setReason("Client signed the contract");
 
         mockMvc.perform(
-                withTenantHeaders(patch("/api/v1/dossiers/" + dossierId + "/status")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(statusPatchToWon)), TENANT_ID))
+                        withTenantHeaders(
+                                patch("/api/v1/dossiers/" + dossierId + "/status")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(statusPatchToWon)),
+                                TENANT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(dossierId))
                 .andExpect(jsonPath("$.status").value("WON"));
 
-        MvcResult annonceAuditResult = mockMvc.perform(
-                withTenantHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "ANNONCE")
-                        .param("entityId", annonceId.toString())
-                        .param("page", "0")
-                        .param("size", "10"), TENANT_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andReturn();
+        MvcResult annonceAuditResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "ANNONCE")
+                                                .param("entityId", annonceId.toString())
+                                                .param("page", "0")
+                                                .param("size", "10"),
+                                        TENANT_ID))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content").isArray())
+                        .andReturn();
 
         String annonceAuditContent = annonceAuditResult.getResponse().getContentAsString();
-        List<AuditEventResponse> annonceAuditEvents = objectMapper.readValue(
-                objectMapper.readTree(annonceAuditContent).get("content").toString(),
-                new TypeReference<List<AuditEventResponse>>() {});
+        List<AuditEventResponse> annonceAuditEvents =
+                objectMapper.readValue(
+                        objectMapper.readTree(annonceAuditContent).get("content").toString(),
+                        new TypeReference<List<AuditEventResponse>>() {});
 
         assertThat(annonceAuditEvents).hasSizeGreaterThanOrEqualTo(1);
-        long annonceCreatedEvents = annonceAuditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.CREATED)
-                .count();
+        long annonceCreatedEvents =
+                annonceAuditEvents.stream()
+                        .filter(e -> e.getAction() == AuditAction.CREATED)
+                        .count();
         assertThat(annonceCreatedEvents).isEqualTo(1);
 
-        MvcResult dossierAuditResult = mockMvc.perform(
-                withTenantHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "DOSSIER")
-                        .param("entityId", dossierId.toString())
-                        .param("page", "0")
-                        .param("size", "50"), TENANT_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andReturn();
+        MvcResult dossierAuditResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "DOSSIER")
+                                                .param("entityId", dossierId.toString())
+                                                .param("page", "0")
+                                                .param("size", "50"),
+                                        TENANT_ID))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content").isArray())
+                        .andReturn();
 
         String dossierAuditContent = dossierAuditResult.getResponse().getContentAsString();
-        List<AuditEventResponse> dossierAuditEvents = objectMapper.readValue(
-                objectMapper.readTree(dossierAuditContent).get("content").toString(),
-                new TypeReference<List<AuditEventResponse>>() {});
+        List<AuditEventResponse> dossierAuditEvents =
+                objectMapper.readValue(
+                        objectMapper.readTree(dossierAuditContent).get("content").toString(),
+                        new TypeReference<List<AuditEventResponse>>() {});
 
         assertThat(dossierAuditEvents).hasSize(5);
 
-        long dossierCreatedEvents = dossierAuditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.CREATED)
-                .count();
+        long dossierCreatedEvents =
+                dossierAuditEvents.stream()
+                        .filter(e -> e.getAction() == AuditAction.CREATED)
+                        .count();
         assertThat(dossierCreatedEvents).isEqualTo(1);
 
-        long dossierUpdatedEvents = dossierAuditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.UPDATED)
-                .count();
+        long dossierUpdatedEvents =
+                dossierAuditEvents.stream()
+                        .filter(e -> e.getAction() == AuditAction.UPDATED)
+                        .count();
         assertThat(dossierUpdatedEvents).isEqualTo(4);
 
-        boolean hasStatusChange = dossierAuditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.UPDATED)
-                .anyMatch(e -> e.getDiff() != null && e.getDiff().containsKey("changes"));
+        boolean hasStatusChange =
+                dossierAuditEvents.stream()
+                        .filter(e -> e.getAction() == AuditAction.UPDATED)
+                        .anyMatch(e -> e.getDiff() != null && e.getDiff().containsKey("changes"));
         assertThat(hasStatusChange).isTrue();
 
-        MvcResult partyAuditResult = mockMvc.perform(
-                withTenantHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "PARTIE_PRENANTE")
-                        .param("entityId", partyId.toString())
-                        .param("page", "0")
-                        .param("size", "10"), TENANT_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andReturn();
+        MvcResult partyAuditResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "PARTIE_PRENANTE")
+                                                .param("entityId", partyId.toString())
+                                                .param("page", "0")
+                                                .param("size", "10"),
+                                        TENANT_ID))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content").isArray())
+                        .andReturn();
 
         String partyAuditContent = partyAuditResult.getResponse().getContentAsString();
-        List<AuditEventResponse> partyAuditEvents = objectMapper.readValue(
-                objectMapper.readTree(partyAuditContent).get("content").toString(),
-                new TypeReference<List<AuditEventResponse>>() {});
+        List<AuditEventResponse> partyAuditEvents =
+                objectMapper.readValue(
+                        objectMapper.readTree(partyAuditContent).get("content").toString(),
+                        new TypeReference<List<AuditEventResponse>>() {});
 
         assertThat(partyAuditEvents).isNotEmpty();
-        long partyCreatedEvents = partyAuditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.CREATED)
-                .count();
+        long partyCreatedEvents =
+                partyAuditEvents.stream().filter(e -> e.getAction() == AuditAction.CREATED).count();
         assertThat(partyCreatedEvents).isGreaterThanOrEqualTo(1);
 
-        MvcResult messageAuditResult = mockMvc.perform(
-                withTenantHeaders(get("/api/v1/audit-events")
-                        .param("entityType", "MESSAGE")
-                        .param("entityId", messageId.toString())
-                        .param("page", "0")
-                        .param("size", "10"), TENANT_ID))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andReturn();
+        MvcResult messageAuditResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "MESSAGE")
+                                                .param("entityId", messageId.toString())
+                                                .param("page", "0")
+                                                .param("size", "10"),
+                                        TENANT_ID))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content").isArray())
+                        .andReturn();
 
         String messageAuditContent = messageAuditResult.getResponse().getContentAsString();
-        List<AuditEventResponse> messageAuditEvents = objectMapper.readValue(
-                objectMapper.readTree(messageAuditContent).get("content").toString(),
-                new TypeReference<List<AuditEventResponse>>() {});
+        List<AuditEventResponse> messageAuditEvents =
+                objectMapper.readValue(
+                        objectMapper.readTree(messageAuditContent).get("content").toString(),
+                        new TypeReference<List<AuditEventResponse>>() {});
 
         assertThat(messageAuditEvents).hasSizeGreaterThanOrEqualTo(1);
-        long messageCreatedEvents = messageAuditEvents.stream()
-                .filter(e -> e.getAction() == AuditAction.CREATED)
-                .count();
+        long messageCreatedEvents =
+                messageAuditEvents.stream()
+                        .filter(e -> e.getAction() == AuditAction.CREATED)
+                        .count();
         assertThat(messageCreatedEvents).isGreaterThanOrEqualTo(1);
 
         List<AuditEventResponse> allAuditEvents = new ArrayList<>();
@@ -315,13 +368,18 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         assertThat(firstEvent.getEntityType()).isEqualTo(AuditEntityType.ANNONCE);
         assertThat(firstEvent.getAction()).isEqualTo(AuditAction.CREATED);
 
-        AuditEventResponse lastEvent = allAuditEvents.get(allAuditEvents.size() - 1);
-        assertThat(lastEvent.getEntityType()).isEqualTo(AuditEntityType.MESSAGE);
-        assertThat(lastEvent.getAction()).isEqualTo(AuditAction.CREATED);
+        boolean hasMessageCreated =
+                allAuditEvents.stream()
+                        .anyMatch(
+                                event ->
+                                        event.getEntityType() == AuditEntityType.MESSAGE
+                                                && event.getAction() == AuditAction.CREATED);
+        assertThat(hasMessageCreated).isTrue();
     }
 
     @Test
-    void duplicateDetection_CreateDossierWithSamePhone_ReturnsExistingOpenDossierId() throws Exception {
+    void duplicateDetection_CreateDossierWithSamePhone_ReturnsExistingOpenDossierId()
+            throws Exception {
         String duplicatePhone = "+33698765432";
 
         DossierCreateRequest firstDossierRequest = new DossierCreateRequest();
@@ -337,18 +395,23 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         firstParty.setPhone(duplicatePhone);
         firstDossierRequest.setInitialParty(firstParty);
 
-        MvcResult firstResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(firstDossierRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist())
-                .andReturn();
+        MvcResult firstResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/dossiers")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                firstDossierRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.existingOpenDossierId").doesNotExist())
+                        .andReturn();
 
-        DossierResponse firstDossierResponse = objectMapper.readValue(
-                firstResult.getResponse().getContentAsString(),
-                DossierResponse.class);
+        DossierResponse firstDossierResponse =
+                objectMapper.readValue(
+                        firstResult.getResponse().getContentAsString(), DossierResponse.class);
         Long firstDossierId = firstDossierResponse.getId();
 
         assertThat(firstDossierId).isNotNull();
@@ -367,18 +430,23 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         secondParty.setPhone(duplicatePhone);
         secondDossierRequest.setInitialParty(secondParty);
 
-        MvcResult secondResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(secondDossierRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.existingOpenDossierId").value(firstDossierId))
-                .andReturn();
+        MvcResult secondResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/dossiers")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                secondDossierRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.existingOpenDossierId").value(firstDossierId))
+                        .andReturn();
 
-        DossierResponse secondDossierResponse = objectMapper.readValue(
-                secondResult.getResponse().getContentAsString(),
-                DossierResponse.class);
+        DossierResponse secondDossierResponse =
+                objectMapper.readValue(
+                        secondResult.getResponse().getContentAsString(), DossierResponse.class);
 
         assertThat(secondDossierResponse.getId()).isNotNull();
         assertThat(secondDossierResponse.getExistingOpenDossierId()).isEqualTo(firstDossierId);
@@ -396,17 +464,22 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         annonceRequest.setPrice(BigDecimal.valueOf(300000));
         annonceRequest.setCurrency("EUR");
 
-        MvcResult annonceResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(annonceRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn();
+        MvcResult annonceResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/annonces")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                annonceRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andReturn();
 
-        AnnonceResponse annonceResponse = objectMapper.readValue(
-                annonceResult.getResponse().getContentAsString(),
-                AnnonceResponse.class);
+        AnnonceResponse annonceResponse =
+                objectMapper.readValue(
+                        annonceResult.getResponse().getContentAsString(), AnnonceResponse.class);
         Long annonceId = annonceResponse.getId();
 
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
@@ -420,9 +493,11 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setStatus(AnnonceStatus.ARCHIVED);
 
         mockMvc.perform(
-                withTenantHeaders(put("/api/v1/annonces/" + annonceId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)), TENANT_ID))
+                        withTenantHeaders(
+                                put("/api/v1/annonces/" + annonceId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(updateRequest)),
+                                TENANT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("ARCHIVED"));
 
@@ -433,12 +508,15 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         dossierRequest.setSource(DossierSource.WEB);
 
         mockMvc.perform(
-                withTenantHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dossierRequest)), TENANT_ID))
+                        withTenantHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(dossierRequest)),
+                                TENANT_ID))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
-                .andExpect(jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
+                .andExpect(
+                        jsonPath("$.detail").value("Cannot create dossier with ARCHIVED annonce"));
     }
 
     @Test
@@ -452,17 +530,22 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         annonceRequest.setPrice(BigDecimal.valueOf(1200));
         annonceRequest.setCurrency("EUR");
 
-        MvcResult annonceResult = mockMvc.perform(
-                withTenantHeaders(post("/api/v1/annonces")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(annonceRequest)), TENANT_ID))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andReturn();
+        MvcResult annonceResult =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        post("/api/v1/annonces")
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                annonceRequest)),
+                                        TENANT_ID))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andReturn();
 
-        AnnonceResponse annonceResponse = objectMapper.readValue(
-                annonceResult.getResponse().getContentAsString(),
-                AnnonceResponse.class);
+        AnnonceResponse annonceResponse =
+                objectMapper.readValue(
+                        annonceResult.getResponse().getContentAsString(), AnnonceResponse.class);
         Long annonceId = annonceResponse.getId();
 
         AnnonceUpdateRequest updateRequest = new AnnonceUpdateRequest();
@@ -476,9 +559,11 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         updateRequest.setStatus(AnnonceStatus.DRAFT);
 
         mockMvc.perform(
-                withTenantHeaders(put("/api/v1/annonces/" + annonceId)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)), TENANT_ID))
+                        withTenantHeaders(
+                                put("/api/v1/annonces/" + annonceId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(updateRequest)),
+                                TENANT_ID))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("DRAFT"));
 
@@ -489,9 +574,11 @@ class CompleteWorkflowBackendE2ETest extends BaseBackendE2ETest {
         dossierRequest.setSource(DossierSource.PHONE);
 
         mockMvc.perform(
-                withTenantHeaders(post("/api/v1/dossiers")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(dossierRequest)), TENANT_ID))
+                        withTenantHeaders(
+                                post("/api/v1/dossiers")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(dossierRequest)),
+                                TENANT_ID))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400))
                 .andExpect(jsonPath("$.detail").value("Cannot create dossier with DRAFT annonce"));

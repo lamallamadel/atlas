@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmNavigationDialogComponent } from './confirm-navigation-dialog.component';
@@ -14,7 +14,7 @@ describe('ConfirmNavigationDialogComponent', () => {
 
     await TestBed.configureTestingModule({
       declarations: [ConfirmNavigationDialogComponent],
-      imports: [MatIconModule, MatButtonModule],
+      imports: [MatIconModule, MatButtonModule, MatDialogModule],
       providers: [
         { provide: MatDialogRef, useValue: spy }
       ]

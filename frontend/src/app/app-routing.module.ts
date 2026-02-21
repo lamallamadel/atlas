@@ -1,12 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
-import { DashboardComponent } from './pages/dashboard/dashboard.component';
-import { AnnoncesComponent } from './pages/annonces/annonces.component';
-import { AnnonceCreateComponent } from './pages/annonces/annonce-create.component';
-import { AnnonceDetailComponent } from './pages/annonces/annonce-detail.component';
-import { DossiersComponent } from './pages/dossiers/dossiers.component';
-import { DossierDetailComponent } from './pages/dossiers/dossier-detail.component';
 import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
@@ -30,12 +24,17 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', component: DashboardComponent, data: { animation: 'DashboardPage' } },
+      {
+        path: 'dashboard',
+        loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule),
+        data: { animation: 'DashboardPage' }
+      },
       { path: 'reports', component: ReportsDashboardComponent, data: { animation: 'ReportsPage' } },
       { path: 'observability', component: ObservabilityDashboardComponent, data: { animation: 'ObservabilityPage' } },
       { path: 'search', component: SearchComponent, data: { animation: 'SearchPage' } },
       { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
       { path: 'calendar', component: CalendarViewComponent, data: { animation: 'CalendarPage' } },
+
       { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
       { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
       { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
@@ -43,6 +42,18 @@ const routes: Routes = [
       { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
       { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } },
       { path: 'settings', component: SettingsPageComponent, data: { animation: 'SettingsPage' } },
+
+      {
+        path: 'annonces',
+        loadChildren: () => import('./pages/annonces/annonces.module').then(m => m.AnnoncesModule),
+        data: { animation: 'AnnoncesPage' }
+      },
+      {
+        path: 'dossiers',
+        loadChildren: () => import('./pages/dossiers/dossiers.module').then(m => m.DossiersModule),
+        data: { animation: 'DossiersPage' }
+      },
+
       { 
         path: 'workflow-admin', 
         loadChildren: () => import('./pages/workflow-admin/workflow-admin.module').then(m => m.WorkflowAdminModule),

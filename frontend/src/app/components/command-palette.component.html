@@ -1,18 +1,18 @@
-<div class="command-palette-overlay" 
-     *ngIf="visible$ | async" 
+<div class="command-palette-overlay"
+     *ngIf="visible$ | async"
      (click)="close()"
-     (keydown.escape)="close()" 
-     role="dialog" 
+     (keydown.escape)="close()"
+     role="dialog"
      aria-modal="true"
      aria-labelledby="command-palette-title"
      aria-describedby="command-palette-description"
      tabindex="-1">
-  <div class="command-palette" 
+  <div class="command-palette glass-card-elevated"
        appFocusTrap
        (click)="$event.stopPropagation()"
-       (keydown)="$event.stopPropagation()" 
+       (keydown)="$event.stopPropagation()"
        role="document">
-    
+
     <!-- Header -->
     <div class="command-header">
       <h2 id="command-palette-title" class="visually-hidden">Palette de commandes</h2>
@@ -20,12 +20,12 @@
         Tapez pour rechercher des commandes, annonces ou dossiers. Utilisez les flèches haut et bas pour naviguer, Entrée pour sélectionner, Échap pour fermer.
       </p>
       <div class="command-search">
-        <mat-icon class="search-icon">search</mat-icon>
+        <mat-icon class="search-icon" aria-hidden="true">search</mat-icon>
         <input
           #commandInput
           type="text"
           class="command-input"
-          placeholder="Tapez une commande, recherchez des annonces ou dossiers..."
+          placeholder="Tapez une commande, un nom de client, 'note', 'rdv'..."
           [(ngModel)]="searchQuery"
           (input)="onSearchChange()"
           (keydown)="onKeyDown($event)"
@@ -35,28 +35,30 @@
           aria-controls="command-list"
           [attr.aria-activedescendant]="'command-item-' + selectedIndex"
         />
-        <mat-spinner 
-          *ngIf="isSearching" 
-          diameter="20" 
-          class="search-spinner">
+        <mat-spinner
+          *ngIf="isSearching"
+          diameter="18"
+          class="search-spinner"
+          aria-label="Recherche en cours">
         </mat-spinner>
-        <div class="shortcut-hint">
-          <kbd>Ctrl+K</kbd>
+        <div class="shortcut-badge">
+          <kbd>Ctrl</kbd><span class="kbd-sep">+</span><kbd>K</kbd>
         </div>
       </div>
     </div>
 
     <!-- Results -->
-    <div class="command-list" 
+    <div class="command-list"
          *ngIf="filteredItems.length > 0"
          id="command-list"
          role="listbox">
       <ng-container *ngFor="let group of getGroupedItems()">
         <div class="command-category" role="presentation">
-          {{ group.category }}
+          <span class="category-label">{{ group.category }}</span>
+          <span class="category-count">{{ group.items.length }}</span>
         </div>
         <div
-          *ngFor="let item of group.items; let i = index"
+          *ngFor="let item of group.items"
           class="command-item"
           [class.selected]="filteredItems.indexOf(item) === selectedIndex"
           [id]="'command-item-' + filteredItems.indexOf(item)"
@@ -68,14 +70,25 @@
           tabindex="-1"
         >
           <div class="command-content">
-            <mat-icon class="command-icon">{{ getItemIcon(item) }}</mat-icon>
+            <div class="command-icon-wrap">
+              <mat-icon class="command-icon" aria-hidden="true">{{ getItemIcon(item) }}</mat-icon>
+            </div>
             <div class="command-details">
-              <div class="command-label">{{ getItemLabel(item) }}</div>
+              <!-- Label: with highlight segments if available, plain text otherwise -->
+              <div class="command-label">
+                <ng-container *ngIf="getHighlightSegments(item) as segs; else plainLabel">
+                  <ng-container *ngFor="let seg of segs">
+                    <mark class="highlight" *ngIf="seg.match">{{ seg.text }}</mark>
+                    <span *ngIf="!seg.match">{{ seg.text }}</span>
+                  </ng-container>
+                </ng-container>
+                <ng-template #plainLabel>{{ getItemLabel(item) }}</ng-template>
+              </div>
               <div class="command-description" *ngIf="getItemDescription(item)">
                 {{ getItemDescription(item) }}
               </div>
             </div>
-            <div class="command-shortcut" *ngIf="getItemShortcut(item)">
+            <div class="command-shortcut" *ngIf="getItemShortcut(item)" [attr.aria-label]="'Raccourci: ' + getItemShortcut(item)">
               <kbd>{{ getItemShortcut(item) }}</kbd>
             </div>
           </div>
@@ -85,15 +98,18 @@
 
     <!-- Empty State -->
     <div class="command-empty" *ngIf="filteredItems.length === 0 && !isSearching" role="status" aria-live="polite">
-      <mat-icon aria-hidden="true">search_off</mat-icon>
-      <p *ngIf="searchQuery">Aucun résultat trouvé pour "{{ searchQuery }}"</p>
+      <mat-icon aria-hidden="true">manage_search</mat-icon>
+      <p *ngIf="searchQuery">Aucun résultat pour <strong>"{{ searchQuery }}"</strong></p>
       <p *ngIf="!searchQuery">Commencez à taper pour rechercher...</p>
+      <p class="empty-hint" *ngIf="searchQuery">
+        Essayez : <em>"prosp"</em>, <em>"facture"</em>, <em>"rdv"</em>
+      </p>
     </div>
 
     <!-- Loading State -->
     <div class="command-loading" *ngIf="isSearching && searchQuery.length >= 2" role="status" aria-live="polite">
-      <mat-spinner diameter="40" aria-label="Recherche en cours"></mat-spinner>
-      <p>Recherche en cours...</p>
+      <mat-spinner diameter="32" aria-label="Recherche en cours"></mat-spinner>
+      <p>Recherche en cours dans la base...</p>
     </div>
 
     <!-- Footer -->

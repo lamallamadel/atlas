@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.ActivityVisibility;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -25,7 +24,9 @@ public class ActivityResponse {
     @Schema(description = "Activity visibility", example = "INTERNAL")
     private ActivityVisibility visibility;
 
-    @Schema(description = "Timestamp when the activity was created", example = "2024-01-01T12:00:00")
+    @Schema(
+            description = "Timestamp when the activity was created",
+            example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
 
     @Schema(description = "User who created the activity", example = "john.doe@example.com")

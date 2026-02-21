@@ -5,12 +5,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class OutboundMessageMapper {
-    
+
     public OutboundMessageResponse toResponse(OutboundMessageEntity entity) {
         if (entity == null) {
             return null;
         }
-        
+
         OutboundMessageResponse response = new OutboundMessageResponse();
         response.setId(entity.getId());
         response.setOrgId(entity.getOrgId());
@@ -30,7 +30,7 @@ public class OutboundMessageMapper {
         response.setErrorMessage(entity.getErrorMessage());
         response.setCreatedAt(entity.getCreatedAt());
         response.setUpdatedAt(entity.getUpdatedAt());
-        
+
         return response;
     }
 }

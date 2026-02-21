@@ -1,0 +1,95 @@
+# syntax=docker/dockerfile:1.5
+
+# -------------------------
+# Build stage
+# -------------------------
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /app
+
+# Copy build descriptors first (best cache hit)
+COPY pom.xml /app/pom.xml
+COPY settings.xml /app/settings.xml
+
+# Create toolchains inside the image layer (Linux-safe)
+RUN mkdir -p /root/.m2 && \
+    cat > /root/.m2/toolchains.xml <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>17</version>
+    </provides>
+    <configuration>
+      <jdkHome>${JAVA_HOME}</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
+EOF
+
+# Download deps with cache mounted ONLY on repository
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -ntp -s /app/settings.xml dependency:go-offline
+
+# Copy sources and build
+COPY src /app/src
+
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
+
+
+# -------------------------
+# JRE creation stage (jlink)
+# -------------------------
+FROM eclipse-temurin:17-jdk-alpine AS jre-builder
+WORKDIR /jre-build
+
+# Create minimal JRE with only required modules
+# Modules needed for Spring Boot application:
+# - java.base (required)
+# - java.logging (logging)
+# - java.management (JMX, monitoring)
+# - java.naming (JNDI for data sources)
+# - java.sql (JDBC)
+# - java.prefs (preferences)
+# - java.instrument (for agents)
+# - jdk.unsupported (some dependencies use Unsafe)
+# - jdk.crypto.ec (TLS/SSL)
+RUN jlink \
+    --add-modules java.base,java.logging,java.management,java.naming,java.sql,java.prefs,java.instrument,jdk.unsupported,jdk.crypto.ec \
+    --output /opt/java-minimal \
+    --compress=2 \
+    --strip-debug \
+    --no-header-files \
+    --no-man-pages
+
+# Verify JRE works
+RUN /opt/java-minimal/bin/java -version
+
+
+# -------------------------
+# Runtime stage (minimal)
+# -------------------------
+FROM alpine:3.18
+WORKDIR /app
+
+# Install minimal runtime dependencies (ca-certificates for HTTPS)
+RUN apk add --no-cache ca-certificates tini
+
+# Copy minimal JRE from builder
+COPY --from=jre-builder /opt/java-minimal /opt/java-minimal
+
+# Add java to PATH
+ENV PATH="/opt/java-minimal/bin:$PATH"
+
+# Verify Java is available
+RUN java -version
+
+# Copy the built jar
+COPY --from=build /app/target/*.jar /app/app.jar
+
+EXPOSE 8080
+
+# Use tini as init process (prevents zombie processes)
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["java", "-jar", "/app/app.jar"]

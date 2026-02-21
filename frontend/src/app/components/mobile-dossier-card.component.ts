@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DossierResponse } from '../services/dossier-api.service';
 
 export interface DossierAction {
-  type: 'call' | 'message' | 'view' | 'delete';
+  type: 'call' | 'message' | 'view' | 'delete' | 'archive';
   dossier: DossierResponse;
 }
 
@@ -30,8 +30,8 @@ export interface DossierAction {
       
       <!-- Background action indicators -->
       <div class="swipe-action-left" [class.visible]="swipeDirection === 'left' && swipeProgress > 0.3">
-        <mat-icon>delete</mat-icon>
-        <span>Supprimer</span>
+        <mat-icon>archive</mat-icon>
+        <span>Archiver</span>
       </div>
       
       <div class="swipe-action-right" [class.visible]="swipeDirection === 'right' && swipeProgress > 0.3">
@@ -320,7 +320,8 @@ export class MobileDossierCardComponent {
 
   onSwipeLeft(event: { deltaX: number; deltaY: number }): void {
     if (Math.abs(event.deltaX) > 100) {
-      this.action.emit({ type: 'delete', dossier: this.dossier });
+      // Swipe left = Archive / "Pas intéressé" (marks as LOST)
+      this.action.emit({ type: 'archive', dossier: this.dossier });
     }
     this.resetSwipe();
   }

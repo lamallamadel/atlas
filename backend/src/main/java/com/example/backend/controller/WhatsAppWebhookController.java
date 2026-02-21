@@ -35,11 +35,19 @@ public class WhatsAppWebhookController {
     }
 
     @GetMapping("/inbound")
-    @Operation(summary = "Webhook verification", description = "Handles WhatsApp webhook verification challenge")
+    @Operation(
+            summary = "Webhook verification",
+            description = "Handles WhatsApp webhook verification challenge")
     public ResponseEntity<String> verifyWebhook(
-            @Parameter(description = "Verification mode") @RequestParam(value = "hub.mode", required = false) String mode,
-            @Parameter(description = "Verification token") @RequestParam(value = "hub.verify_token", required = false) String token,
-            @Parameter(description = "Challenge to echo back") @RequestParam(value = "hub.challenge", required = false) String challenge) {
+            @Parameter(description = "Verification mode")
+                    @RequestParam(value = "hub.mode", required = false)
+                    String mode,
+            @Parameter(description = "Verification token")
+                    @RequestParam(value = "hub.verify_token", required = false)
+                    String token,
+            @Parameter(description = "Challenge to echo back")
+                    @RequestParam(value = "hub.challenge", required = false)
+                    String challenge) {
 
         if ("subscribe".equals(mode) && token != null) {
             log.info("Webhook verification requested with token: {}", token);
@@ -51,21 +59,23 @@ public class WhatsAppWebhookController {
 
     @PostMapping("/inbound")
     @Operation(
-        summary = "Receive inbound WhatsApp messages and delivery status", 
-        description = "Handles incoming WhatsApp webhook events including messages and delivery status updates with HMAC signature validation"
-    )
+            summary = "Receive inbound WhatsApp messages and delivery status",
+            description =
+                    "Handles incoming WhatsApp webhook events including messages and delivery status updates with HMAC signature validation")
     public ResponseEntity<String> receiveWebhook(
             @RequestHeader(value = "X-Org-Id", required = false) String orgIdHeader,
             @RequestHeader(value = "X-Hub-Signature-256", required = false) String signature,
             @RequestBody String rawPayload) {
 
-        String orgId = (orgIdHeader != null && !orgIdHeader.isBlank())
-                ? orgIdHeader
-                : TenantContext.getOrgId();
+        String orgId =
+                (orgIdHeader != null && !orgIdHeader.isBlank())
+                        ? orgIdHeader
+                        : TenantContext.getOrgId();
 
         if (orgId == null || orgId.isBlank()) {
             log.error("Organization ID not found for webhook call");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing organization context");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Missing organization context");
         }
 
         try {
@@ -78,7 +88,8 @@ public class WhatsAppWebhookController {
                 }
             }
 
-            WhatsAppWebhookPayload payload = objectMapper.readValue(rawPayload, WhatsAppWebhookPayload.class);
+            WhatsAppWebhookPayload payload =
+                    objectMapper.readValue(rawPayload, WhatsAppWebhookPayload.class);
             processingService.processInboundMessage(payload, orgId);
 
             return ResponseEntity.ok("OK");

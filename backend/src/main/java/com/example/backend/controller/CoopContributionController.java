@@ -31,7 +31,8 @@ public class CoopContributionController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Create a new contribution")
-    public ResponseEntity<CoopContributionResponse> create(@Valid @RequestBody CoopContributionRequest request) {
+    public ResponseEntity<CoopContributionResponse> create(
+            @Valid @RequestBody CoopContributionRequest request) {
         CoopContributionResponse response = coopContributionService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -56,7 +57,8 @@ public class CoopContributionController {
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(defaultValue = "id,asc") String sort) {
         Pageable pageable = createPageable(page, size, sort);
-        Page<CoopContributionResponse> response = coopContributionService.list(memberId, projectId, status, type, pageable);
+        Page<CoopContributionResponse> response =
+                coopContributionService.list(memberId, projectId, status, type, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -64,8 +66,7 @@ public class CoopContributionController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Update contribution")
     public ResponseEntity<CoopContributionResponse> update(
-            @PathVariable Long id,
-            @Valid @RequestBody CoopContributionRequest request) {
+            @PathVariable Long id, @Valid @RequestBody CoopContributionRequest request) {
         CoopContributionResponse response = coopContributionService.update(id, request);
         return ResponseEntity.ok(response);
     }
@@ -81,9 +82,10 @@ public class CoopContributionController {
     private Pageable createPageable(int page, int size, String sort) {
         String[] sortParams = sort.split(",");
         String property = sortParams[0];
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC
-                : Sort.Direction.ASC;
+        Sort.Direction direction =
+                sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
+                        ? Sort.Direction.DESC
+                        : Sort.Direction.ASC;
         return PageRequest.of(page, size, Sort.by(direction, property));
     }
 }

@@ -3,6 +3,8 @@ package com.example.backend.repository;
 import com.example.backend.entity.MessageEntity;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.MessageDirection;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -12,17 +14,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Repository
-public interface MessageRepository extends JpaRepository<MessageEntity, Long>, JpaSpecificationExecutor<MessageEntity> {
-    
-    @Query("SELECT m FROM MessageEntity m LEFT JOIN FETCH m.dossier WHERE m.dossier.id = :dossierId " +
-           "AND (:channel IS NULL OR m.channel = :channel) " +
-           "AND (:direction IS NULL OR m.direction = :direction) " +
-           "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
-           "AND (:endDate IS NULL OR m.timestamp <= :endDate)")
+public interface MessageRepository
+        extends JpaRepository<MessageEntity, Long>, JpaSpecificationExecutor<MessageEntity> {
+
+    @Query(
+            "SELECT m FROM MessageEntity m LEFT JOIN FETCH m.dossier WHERE m.dossier.id = :dossierId "
+                    + "AND (:channel IS NULL OR m.channel = :channel) "
+                    + "AND (:direction IS NULL OR m.direction = :direction) "
+                    + "AND (:startDate IS NULL OR m.timestamp >= :startDate) "
+                    + "AND (:endDate IS NULL OR m.timestamp <= :endDate)")
     List<MessageEntity> findByDossierIdWithFiltersUnpaged(
             @Param("dossierId") Long dossierId,
             @Param("channel") MessageChannel channel,
@@ -31,16 +32,19 @@ public interface MessageRepository extends JpaRepository<MessageEntity, Long>, J
             @Param("endDate") LocalDateTime endDate);
 
     @EntityGraph(attributePaths = {"dossier"})
-    @Query(value = "SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
-           "AND (:channel IS NULL OR m.channel = :channel) " +
-           "AND (:direction IS NULL OR m.direction = :direction) " +
-           "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
-           "AND (:endDate IS NULL OR m.timestamp <= :endDate)",
-           countQuery = "SELECT COUNT(m) FROM MessageEntity m WHERE m.dossier.id = :dossierId " +
-           "AND (:channel IS NULL OR m.channel = :channel) " +
-           "AND (:direction IS NULL OR m.direction = :direction) " +
-           "AND (:startDate IS NULL OR m.timestamp >= :startDate) " +
-           "AND (:endDate IS NULL OR m.timestamp <= :endDate)")
+    @Query(
+            value =
+                    "SELECT m FROM MessageEntity m WHERE m.dossier.id = :dossierId "
+                            + "AND (:channel IS NULL OR m.channel = :channel) "
+                            + "AND (:direction IS NULL OR m.direction = :direction) "
+                            + "AND m.timestamp >= COALESCE(:startDate, m.timestamp) "
+                            + "AND m.timestamp <= COALESCE(:endDate, m.timestamp)",
+            countQuery =
+                    "SELECT COUNT(m) FROM MessageEntity m WHERE m.dossier.id = :dossierId "
+                            + "AND (:channel IS NULL OR m.channel = :channel) "
+                            + "AND (:direction IS NULL OR m.direction = :direction) "
+                            + "AND m.timestamp >= COALESCE(:startDate, m.timestamp) "
+                            + "AND m.timestamp <= COALESCE(:endDate, m.timestamp)")
     Page<MessageEntity> findByDossierIdWithFilters(
             @Param("dossierId") Long dossierId,
             @Param("channel") MessageChannel channel,

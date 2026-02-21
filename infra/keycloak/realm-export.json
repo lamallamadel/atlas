@@ -26,10 +26,13 @@
       "standardFlowEnabled": true,
       "directAccessGrantsEnabled": true,
       "redirectUris": [
-        "http://localhost:4200/*"
+        "http://localhost:4200/*",
+        "https://afroware.app/*",
+        "https://afroware.app/auth/callback"
       ],
       "webOrigins": [
-        "http://localhost:4200"
+        "http://localhost:4200",
+        "https://afroware.app"
       ]
     }
   ],

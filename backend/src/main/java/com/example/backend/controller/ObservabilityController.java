@@ -1,16 +1,15 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.ClientErrorLogRequest;
+import jakarta.validation.Valid;
+import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/observability")
@@ -20,16 +19,17 @@ public class ObservabilityController {
 
     @PostMapping("/client-errors")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Map<String, Object>> logClientError(@Valid @RequestBody ClientErrorLogRequest request) {
-        
-        String logMessage = String.format(
-            "Client %s - Message: %s, URL: %s, UserAgent: %s, Timestamp: %s",
-            request.level().toUpperCase(),
-            request.message(),
-            request.url(),
-            request.userAgent(),
-            request.timestamp()
-        );
+    public ResponseEntity<Map<String, Object>> logClientError(
+            @Valid @RequestBody ClientErrorLogRequest request) {
+
+        String logMessage =
+                String.format(
+                        "Client %s - Message: %s, URL: %s, UserAgent: %s, Timestamp: %s",
+                        request.level().toUpperCase(),
+                        request.message(),
+                        request.url(),
+                        request.userAgent(),
+                        request.timestamp());
 
         if (request.stackTrace() != null && !request.stackTrace().isEmpty()) {
             logMessage += ", StackTrace: " + request.stackTrace();

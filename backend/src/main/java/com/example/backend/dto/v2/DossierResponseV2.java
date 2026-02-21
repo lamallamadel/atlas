@@ -3,7 +3,6 @@ package com.example.backend.dto.v2;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -56,14 +55,15 @@ public class DossierResponseV2 {
 
     @Schema(description = "Additional metadata")
     private Map<String, Object> metadata;
+    private List<com.example.backend.dto.LeadActivityResponse> recentActivities;
 
     public static class AnnonceInfoV2 {
         @Schema(description = "Annonce ID", example = "1")
         private Long id;
-        
+
         @Schema(description = "Annonce title", example = "Beautiful Apartment")
         private String title;
-        
+
         @Schema(description = "Annonce city", example = "Paris")
         private String city;
 
@@ -95,10 +95,10 @@ public class DossierResponseV2 {
     public static class LeadInfoV2 {
         @Schema(description = "Lead phone number", example = "+33612345678")
         private String phone;
-        
+
         @Schema(description = "Lead name", example = "John Doe")
         private String name;
-        
+
         @Schema(description = "Lead source", example = "Website")
         private String source;
 
@@ -130,13 +130,13 @@ public class DossierResponseV2 {
     public static class AuditInfoV2 {
         @Schema(description = "Timestamp when created (ISO-8601)", example = "2024-01-01T12:00:00Z")
         private Instant createdAt;
-        
+
         @Schema(description = "Timestamp when last updated (ISO-8601)", example = "2024-01-01T12:00:00Z")
         private Instant updatedAt;
-        
+
         @Schema(description = "User who created the resource")
         private String createdBy;
-        
+
         @Schema(description = "User who last updated the resource")
         private String updatedBy;
 
@@ -291,5 +291,13 @@ public class DossierResponseV2 {
 
     public void setMetadata(Map<String, Object> metadata) {
         this.metadata = metadata;
+    }
+
+    public List<com.example.backend.dto.LeadActivityResponse> getRecentActivities() {
+        return recentActivities;
+    }
+
+    public void setRecentActivities(List<com.example.backend.dto.LeadActivityResponse> recentActivities) {
+        this.recentActivities = recentActivities;
     }
 }

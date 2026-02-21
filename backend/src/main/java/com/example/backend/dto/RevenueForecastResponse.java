@@ -93,12 +93,14 @@ public class RevenueForecastResponse {
         private BigDecimal optimisticRevenue;
         private Integer expectedClosedDeals;
 
-        public RevenueForecastProjection() {
-        }
+        public RevenueForecastProjection() {}
 
-        public RevenueForecastProjection(Integer days, BigDecimal estimatedRevenue, 
-                                        BigDecimal conservativeRevenue, BigDecimal optimisticRevenue, 
-                                        Integer expectedClosedDeals) {
+        public RevenueForecastProjection(
+                Integer days,
+                BigDecimal estimatedRevenue,
+                BigDecimal conservativeRevenue,
+                BigDecimal optimisticRevenue,
+                Integer expectedClosedDeals) {
             this.days = days;
             this.estimatedRevenue = estimatedRevenue;
             this.conservativeRevenue = conservativeRevenue;
@@ -154,10 +156,10 @@ public class RevenueForecastResponse {
         private BigDecimal weightedValue;
         private Double weightPercentage;
 
-        public PipelineStageValue() {
-        }
+        public PipelineStageValue() {}
 
-        public PipelineStageValue(String stage, Long count, BigDecimal totalValue, Double weightPercentage) {
+        public PipelineStageValue(
+                String stage, Long count, BigDecimal totalValue, Double weightPercentage) {
             this.stage = stage;
             this.count = count;
             this.totalValue = totalValue;
@@ -213,15 +215,19 @@ public class RevenueForecastResponse {
         private Double historicalConversionRate;
         private BigDecimal forecastedRevenue;
 
-        public SourceForecast() {
-        }
+        public SourceForecast() {}
 
-        public SourceForecast(String source, Long opportunityCount, BigDecimal totalValue, Double historicalConversionRate) {
+        public SourceForecast(
+                String source,
+                Long opportunityCount,
+                BigDecimal totalValue,
+                Double historicalConversionRate) {
             this.source = source;
             this.opportunityCount = opportunityCount;
             this.totalValue = totalValue;
             this.historicalConversionRate = historicalConversionRate;
-            this.forecastedRevenue = totalValue.multiply(BigDecimal.valueOf(historicalConversionRate / 100.0));
+            this.forecastedRevenue =
+                    totalValue.multiply(BigDecimal.valueOf(historicalConversionRate / 100.0));
         }
 
         public String getSource() {

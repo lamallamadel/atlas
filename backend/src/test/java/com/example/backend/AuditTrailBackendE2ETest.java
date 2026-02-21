@@ -1,5 +1,9 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.*;
@@ -10,26 +14,16 @@ import com.example.backend.service.*;
 import com.example.backend.util.TenantContext;
 import com.example.backend.utils.BackendE2ETestDataBuilder;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MvcResult;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.web.servlet.MvcResult;
 
 @BackendE2ETest
 @WithMockUser(roles = {"PRO"})
@@ -38,59 +32,41 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     private static final String ORG_1 = "org-audit-e2e-1";
     private static final String ORG_2 = "org-audit-e2e-2";
 
-    @Autowired
-    private DossierService dossierService;
+    @Autowired private DossierService dossierService;
 
-    @Autowired
-    private PartiePrenanteService partiePrenanteService;
+    @Autowired private PartiePrenanteService partiePrenanteService;
 
-    @Autowired
-    private MessageService messageService;
+    @Autowired private MessageService messageService;
 
-    @Autowired
-    private AppointmentService appointmentService;
+    @Autowired private AppointmentService appointmentService;
 
-    @Autowired
-    private AnnonceService annonceService;
+    @Autowired private AnnonceService annonceService;
 
-    @Autowired
-    private ConsentementService consentementService;
+    @Autowired private ConsentementService consentementService;
 
-    @Autowired
-    private ActivityService activityService;
+    @Autowired private ActivityService activityService;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private PartiePrenanteRepository partiePrenanteRepository;
+    @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
-    @Autowired
-    private MessageRepository messageRepository;
+    @Autowired private MessageRepository messageRepository;
 
-    @Autowired
-    private AppointmentRepository appointmentRepository;
+    @Autowired private AppointmentRepository appointmentRepository;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private ConsentementRepository consentementRepository;
+    @Autowired private ConsentementRepository consentementRepository;
 
-    @Autowired
-    private ActivityRepository activityRepository;
+    @Autowired private ActivityRepository activityRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private jakarta.persistence.EntityManager entityManager;
+    @Autowired private jakarta.persistence.EntityManager entityManager;
 
-    @Autowired
-    private BackendE2ETestDataBuilder testDataBuilder;
+    @Autowired private BackendE2ETestDataBuilder testDataBuilder;
 
     @BeforeEach
     void setUp() {
@@ -259,7 +235,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(updateEvents.get(0).getAction()).isEqualTo(AuditAction.UPDATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> changes = (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
+        Map<String, Object> changes =
+                (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
         assertThat(changes).containsKey("firstName");
         assertThat(changes).containsKey("email");
 
@@ -298,7 +275,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(createEvents.get(0).getAction()).isEqualTo(AuditAction.CREATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> afterData = (Map<String, Object>) createEvents.get(0).getDiff().get("after");
+        Map<String, Object> afterData =
+                (Map<String, Object>) createEvents.get(0).getDiff().get("after");
         assertThat(afterData.get("content")).isEqualTo("Hello, I'm interested");
         assertThat(afterData.get("channel")).isEqualTo("EMAIL");
         assertThat(afterData.get("direction")).isEqualTo("INBOUND");
@@ -338,7 +316,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(createEvents.get(0).getAction()).isEqualTo(AuditAction.CREATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> afterData = (Map<String, Object>) createEvents.get(0).getDiff().get("after");
+        Map<String, Object> afterData =
+                (Map<String, Object>) createEvents.get(0).getDiff().get("after");
         assertThat(afterData.get("location")).isEqualTo("123 Main Street");
         assertThat(afterData.get("status")).isEqualTo("SCHEDULED");
 
@@ -354,7 +333,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(updateEvents.get(0).getAction()).isEqualTo(AuditAction.UPDATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> changes = (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
+        Map<String, Object> changes =
+                (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
         assertThat(changes).containsKey("location");
         assertThat(changes).containsKey("status");
 
@@ -397,7 +377,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(createEvents.get(0).getAction()).isEqualTo(AuditAction.CREATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> afterData = (Map<String, Object>) createEvents.get(0).getDiff().get("after");
+        Map<String, Object> afterData =
+                (Map<String, Object>) createEvents.get(0).getDiff().get("after");
         assertThat(afterData.get("title")).isEqualTo("Beautiful Apartment");
         assertThat(afterData.get("city")).isEqualTo("Paris");
         assertThat(afterData.get("type")).isEqualTo("SALE");
@@ -414,7 +395,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(updateEvents.get(0).getAction()).isEqualTo(AuditAction.UPDATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> changes = (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
+        Map<String, Object> changes =
+                (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
         assertThat(changes).containsKey("title");
         assertThat(changes).containsKey("price");
 
@@ -457,7 +439,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(createEvents.get(0).getAction()).isEqualTo(AuditAction.CREATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> afterData = (Map<String, Object>) createEvents.get(0).getDiff().get("after");
+        Map<String, Object> afterData =
+                (Map<String, Object>) createEvents.get(0).getDiff().get("after");
         assertThat(afterData.get("channel")).isEqualTo("EMAIL");
         assertThat(afterData.get("status")).isEqualTo("GRANTED");
 
@@ -473,7 +456,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(updateEvents.get(0).getAction()).isEqualTo(AuditAction.UPDATED);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> changes = (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
+        Map<String, Object> changes =
+                (Map<String, Object>) updateEvents.get(0).getDiff().get("changes");
         assertThat(changes).containsKey("channel");
         assertThat(changes).containsKey("status");
 
@@ -534,17 +518,17 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void getAuditEvents_FilterByEntityTypeAndId_ReturnsPaginatedResults() throws Exception {
         TenantContext.setOrgId(ORG_1);
-        
+
         auditEventRepository.deleteAll();
         dossierRepository.deleteAll();
         partiePrenanteRepository.deleteAll();
         entityManager.flush();
         entityManager.clear();
-        
+
         DossierCreateRequest createRequest = new DossierCreateRequest();
         createRequest.setLeadName("Test Dossier Filter");
         DossierResponse dossierResponse = dossierService.create(createRequest);
-        
+
         entityManager.flush();
         entityManager.clear();
 
@@ -552,22 +536,28 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         statusPatch.setStatus(DossierStatus.QUALIFIED);
         statusPatch.setStatusCode("CRM_QUALIFIED");
         dossierService.patchStatus(dossierResponse.getId(), statusPatch);
-        
+
         entityManager.flush();
         entityManager.clear();
 
-        MvcResult result = mockMvc.perform(withTenantHeaders(get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", dossierResponse.getId().toString())
-                                .param("page", "0")
-                                .param("size", "10") , ORG_1  ) )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.content.length()").value(2))
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andExpect(jsonPath("$.size").value(10))
-                .andExpect(jsonPath("$.number").value(0))
-                .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "DOSSIER")
+                                                .param(
+                                                        "entityId",
+                                                        dossierResponse.getId().toString())
+                                                .param("page", "0")
+                                                .param("size", "10"),
+                                        ORG_1))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content").isArray())
+                        .andExpect(jsonPath("$.content.length()").value(2))
+                        .andExpect(jsonPath("$.totalElements").value(2))
+                        .andExpect(jsonPath("$.size").value(10))
+                        .andExpect(jsonPath("$.number").value(0))
+                        .andReturn();
 
         String content = result.getResponse().getContentAsString();
         assertThat(content).contains("CREATED");
@@ -588,16 +578,13 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         }
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", dossier.getId().toString())
-                                .param("page", "0")
-                                .param("size", "2")
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", dossier.getId().toString())
+                                        .param("page", "0")
+                                        .param("size", "2"),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.totalElements").value(6))
@@ -605,16 +592,13 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
                 .andExpect(jsonPath("$.number").value(0));
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", dossier.getId().toString())
-                                .param("page", "1")
-                                .param("size", "2")
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", dossier.getId().toString())
+                                        .param("page", "1")
+                                        .param("size", "2"),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(2))
                 .andExpect(jsonPath("$.number").value(1));
@@ -654,20 +638,18 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         appointmentRequest.setStatus(AppointmentStatus.SCHEDULED);
         AppointmentResponse appointment = appointmentService.create(appointmentRequest);
 
-        MvcResult result = mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("dossierId", dossier.getId().toString())
-                                .param("page", "0")
-                                .param("size", "20")
-                               ,
-                        ORG_1
-                )
-        )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray())
-                .andExpect(jsonPath("$.totalElements").value(4))
-                .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("dossierId", dossier.getId().toString())
+                                                .param("page", "0")
+                                                .param("size", "20"),
+                                        ORG_1))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content").isArray())
+                        .andExpect(jsonPath("$.totalElements").value(4))
+                        .andReturn();
 
         String content = result.getResponse().getContentAsString();
         assertThat(content).contains("DOSSIER");
@@ -711,19 +693,17 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         party2Request.setEmail("party2@example.com");
         partiePrenanteService.create(party2Request);
 
-        MvcResult result = mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("dossierId", dossier1.getId().toString())
-                                .param("page", "0")
-                                .param("size", "20")
-                               ,
-                        ORG_1
-                )
-        )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(2))
-                .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("dossierId", dossier1.getId().toString())
+                                                .param("page", "0")
+                                                .param("size", "20"),
+                                        ORG_1))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.totalElements").value(2))
+                        .andReturn();
 
         String content = result.getResponse().getContentAsString();
         assertThat(content).contains("Dossier 1");
@@ -746,35 +726,31 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         org2Request.setLeadName("ORG2 Dossier");
         DossierResponse org2Dossier = dossierService.create(org2Request);
 
-        MvcResult org1Result = mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", org1Dossier.getId().toString())
-                               ,
-                        ORG_1
-                )
-        )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andReturn();
+        MvcResult org1Result =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "DOSSIER")
+                                                .param("entityId", org1Dossier.getId().toString()),
+                                        ORG_1))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.totalElements").value(1))
+                        .andReturn();
 
         String org1Content = org1Result.getResponse().getContentAsString();
         assertThat(org1Content).contains("ORG1 Dossier");
         assertThat(org1Content).doesNotContain("ORG2 Dossier");
 
-        MvcResult org2Result = mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", org2Dossier.getId().toString())
-                                ,
-                        ORG_2
-                )
-        )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andReturn();
+        MvcResult org2Result =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "DOSSIER")
+                                                .param("entityId", org2Dossier.getId().toString()),
+                                        ORG_2))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.totalElements").value(1))
+                        .andReturn();
 
         String org2Content = org2Result.getResponse().getContentAsString();
         assertThat(org2Content).contains("ORG2 Dossier");
@@ -789,14 +765,11 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         DossierResponse org1Dossier = dossierService.create(org1Request);
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", org1Dossier.getId().toString())
-                                ,
-                        ORG_2
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", org1Dossier.getId().toString()),
+                                ORG_2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(0))
                 .andExpect(jsonPath("$.content").isEmpty());
@@ -819,24 +792,18 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         partiePrenanteService.create(partyRequest);
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("dossierId", dossier.getId().toString())
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString()),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(2));
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("dossierId", dossier.getId().toString())
-                                ,
-                        ORG_2
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString()),
+                                ORG_2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(0));
     }
@@ -934,7 +901,8 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         assertThat(events).hasSize(1);
 
         @SuppressWarnings("unchecked")
-        Map<String, Object> beforeData = (Map<String, Object>) events.get(0).getDiff().get("before");
+        Map<String, Object> beforeData =
+                (Map<String, Object>) events.get(0).getDiff().get("before");
 
         assertThat(beforeData.get("id")).isEqualTo(appointment.getId().intValue());
         assertThat(beforeData.get("location")).isEqualTo("Office Building");
@@ -996,19 +964,17 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
             Thread.sleep(10);
         }
 
-        MvcResult result = mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", dossier.getId().toString())
-                               ,
-                        ORG_1
-                )
-        )
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].action").value("UPDATED"))
-                .andExpect(jsonPath("$.content[3].action").value("CREATED"))
-                .andReturn();
+        MvcResult result =
+                mockMvc.perform(
+                                withTenantHeaders(
+                                        get("/api/v1/audit-events")
+                                                .param("entityType", "DOSSIER")
+                                                .param("entityId", dossier.getId().toString()),
+                                        ORG_1))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.content[0].action").value("UPDATED"))
+                        .andExpect(jsonPath("$.content[3].action").value("CREATED"))
+                        .andReturn();
 
         String content = result.getResponse().getContentAsString();
         int firstUpdateIndex = content.indexOf("Update 2");
@@ -1030,15 +996,12 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         }
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", dossier.getId().toString())
-                                .param("sort", "createdAt,asc")
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", dossier.getId().toString())
+                                        .param("sort", "createdAt,asc"),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].action").value("CREATED"));
     }
@@ -1047,39 +1010,23 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
 
     @Test
     void getAuditEvents_WithoutRequiredParams_ReturnsBadRequest() throws Exception {
-        mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                               ,
-                        ORG_1
-                )
-        )
+        mockMvc.perform(withTenantHeaders(get("/api/v1/audit-events"), ORG_1))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void getAuditEvents_WithOnlyEntityType_ReturnsBadRequest() throws Exception {
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events").param("entityType", "DOSSIER"), ORG_1))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void getAuditEvents_WithOnlyEntityId_ReturnsBadRequest() throws Exception {
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityId", "123")
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events").param("entityId", "123"), ORG_1))
                 .andExpect(status().isBadRequest());
     }
 
@@ -1133,24 +1080,23 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         List<AuditEventEntity> allEvents = auditEventRepository.findAll();
         assertThat(allEvents).hasSizeGreaterThanOrEqualTo(6);
 
-        List<AuditEntityType> entityTypes = allEvents.stream()
-                .map(AuditEventEntity::getEntityType)
-                .distinct()
-                .toList();
+        List<AuditEntityType> entityTypes =
+                allEvents.stream().map(AuditEventEntity::getEntityType).distinct().toList();
 
-        assertThat(entityTypes).contains(
-                AuditEntityType.DOSSIER,
-                AuditEntityType.PARTIE_PRENANTE,
-                AuditEntityType.MESSAGE,
-                AuditEntityType.APPOINTMENT,
-                AuditEntityType.ANNONCE,
-                AuditEntityType.CONSENTEMENT
-        );
+        assertThat(entityTypes)
+                .contains(
+                        AuditEntityType.DOSSIER,
+                        AuditEntityType.PARTIE_PRENANTE,
+                        AuditEntityType.MESSAGE,
+                        AuditEntityType.APPOINTMENT,
+                        AuditEntityType.ANNONCE,
+                        AuditEntityType.CONSENTEMENT);
 
         for (AuditEventEntity event : allEvents) {
             assertThat(event.getEntityType()).isNotNull();
             assertThat(event.getEntityId()).isNotNull();
-            assertThat(event.getAction()).isIn(AuditAction.CREATED, AuditAction.UPDATED, AuditAction.DELETED);
+            assertThat(event.getAction())
+                    .isIn(AuditAction.CREATED, AuditAction.UPDATED, AuditAction.DELETED);
             assertThat(event.getOrgId()).isEqualTo(ORG_1);
             assertThat(event.getDiff()).isNotNull();
         }
@@ -1189,15 +1135,12 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         appointmentService.create(apptReq);
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("dossierId", dossier.getId().toString())
-                                .param("page", "0")
-                                .param("size", "50")
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("dossierId", dossier.getId().toString())
+                                        .param("page", "0")
+                                        .param("size", "50"),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(4))
                 .andExpect(jsonPath("$.content[?(@.entityType == 'DOSSIER')]").exists())
@@ -1231,38 +1174,29 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
         AnnonceResponse org2Annonce = annonceService.create(org2AnnonceReq);
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", org1Dossier.getId().toString())
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", org1Dossier.getId().toString()),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1));
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "ANNONCE")
-                                .param("entityId", org2Annonce.getId().toString())
-                               ,
-                        ORG_1
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "ANNONCE")
+                                        .param("entityId", org2Annonce.getId().toString()),
+                                ORG_1))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(0));
 
         mockMvc.perform(
-                withTenantHeaders(
-                        get("/api/v1/audit-events")
-                                .param("entityType", "DOSSIER")
-                                .param("entityId", org2Dossier.getId().toString())
-                                ,
-                        ORG_2
-                )
-        )
+                        withTenantHeaders(
+                                get("/api/v1/audit-events")
+                                        .param("entityType", "DOSSIER")
+                                        .param("entityId", org2Dossier.getId().toString()),
+                                ORG_2))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalElements").value(1));
     }

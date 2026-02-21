@@ -7,10 +7,10 @@ public class SearchResponseDto {
     private long totalHits;
     private boolean elasticsearchAvailable;
 
-    public SearchResponseDto() {
-    }
+    public SearchResponseDto() {}
 
-    public SearchResponseDto(List<SearchResultDto> results, long totalHits, boolean elasticsearchAvailable) {
+    public SearchResponseDto(
+            List<SearchResultDto> results, long totalHits, boolean elasticsearchAvailable) {
         this.results = results;
         this.totalHits = totalHits;
         this.elasticsearchAvailable = elasticsearchAvailable;

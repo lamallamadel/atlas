@@ -5,8 +5,7 @@ public class PipelineStageMetricsDto {
     private Long count;
     private Double percentage;
 
-    public PipelineStageMetricsDto() {
-    }
+    public PipelineStageMetricsDto() {}
 
     public PipelineStageMetricsDto(String stage, Long count, Double percentage) {
         this.stage = stage;

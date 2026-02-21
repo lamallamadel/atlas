@@ -3,7 +3,6 @@ package com.example.backend.dto;
 import com.example.backend.entity.enums.AuditAction;
 import com.example.backend.entity.enums.AuditEntityType;
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -28,11 +27,12 @@ public class AuditEventResponse {
     @Schema(description = "Diff/changes JSON object")
     private Map<String, Object> diff;
 
-    @Schema(description = "Timestamp when the audit event was created", example = "2024-01-01T12:00:00")
+    @Schema(
+            description = "Timestamp when the audit event was created",
+            example = "2024-01-01T12:00:00")
     private LocalDateTime createdAt;
 
-    public AuditEventResponse() {
-    }
+    public AuditEventResponse() {}
 
     public Long getId() {
         return id;

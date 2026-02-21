@@ -9,6 +9,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { EnhancedFormExampleComponent } from './enhanced-form-example.component';
 import { FormProgressIndicatorComponent } from './form-progress-indicator.component';
 import { InlineValidationSuggestionComponent } from './inline-validation-suggestion.component';
@@ -38,7 +40,9 @@ describe('EnhancedFormExampleComponent', () => {
         MatButtonModule,
         MatIconModule,
         MatCheckboxModule,
-        MatProgressSpinnerModule
+        MatProgressSpinnerModule,
+        MatTooltipModule,
+        MatProgressBarModule
       ],
       providers: [
         FormValidationService,

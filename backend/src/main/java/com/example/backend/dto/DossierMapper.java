@@ -1,14 +1,12 @@
 package com.example.backend.dto;
 
-import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.PartiePrenanteEntity;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
-import org.springframework.stereotype.Component;
-
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Component;
 
 @Component
 public class DossierMapper {
@@ -16,14 +14,15 @@ public class DossierMapper {
     private final PartiePrenanteMapper partiePrenanteMapper;
     private final AnnonceRepository annonceRepository;
 
-    public DossierMapper(PartiePrenanteMapper partiePrenanteMapper, AnnonceRepository annonceRepository) {
+    public DossierMapper(
+            PartiePrenanteMapper partiePrenanteMapper, AnnonceRepository annonceRepository) {
         this.partiePrenanteMapper = partiePrenanteMapper;
         this.annonceRepository = annonceRepository;
     }
 
     public Dossier toEntity(DossierCreateRequest request) {
         Dossier dossier = new Dossier();
-        if ( request.getSource() == null ) request.setSource( DossierSource.UNKNOWN ) ;
+        if (request.getSource() == null) request.setSource(DossierSource.UNKNOWN);
         dossier.setAnnonceId(request.getAnnonceId());
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setLeadName(request.getLeadName());
@@ -31,15 +30,20 @@ public class DossierMapper {
         dossier.setNotes(request.getNotes());
         dossier.setStatus(DossierStatus.NEW);
         dossier.setSource(request.getSource());
-        
+
         dossier.setCaseType(request.getCaseType());
-        dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : dossier.getStatus().name());
+        dossier.setStatusCode(
+                request.getStatusCode() != null
+                        ? request.getStatusCode()
+                        : dossier.getStatus().name());
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
 
         if (request.getInitialParty() != null) {
             PartiePrenanteEntity party = partiePrenanteMapper.toEntity(request.getInitialParty());
-            if (party.getName() == null && party.getFirstName() != null && party.getLastName() != null) {
+            if (party.getName() == null
+                    && party.getFirstName() != null
+                    && party.getLastName() != null) {
                 party.setName(party.getFirstName() + " " + party.getLastName());
             }
             dossier.addParty(party);
@@ -50,7 +54,7 @@ public class DossierMapper {
 
     public Dossier toEntityWithoutParties(DossierCreateRequest request) {
         Dossier dossier = new Dossier();
-        if ( request.getSource() == null ) request.setSource( DossierSource.UNKNOWN ) ;
+        if (request.getSource() == null) request.setSource(DossierSource.UNKNOWN);
         dossier.setAnnonceId(request.getAnnonceId());
         dossier.setLeadPhone(request.getLeadPhone());
         dossier.setLeadName(request.getLeadName());
@@ -58,9 +62,12 @@ public class DossierMapper {
         dossier.setNotes(request.getNotes());
         dossier.setStatus(DossierStatus.NEW);
         dossier.setSource(request.getSource());
-        
+
         dossier.setCaseType(request.getCaseType());
-        dossier.setStatusCode(request.getStatusCode() != null ? request.getStatusCode() : dossier.getStatus().name());
+        dossier.setStatusCode(
+                request.getStatusCode() != null
+                        ? request.getStatusCode()
+                        : dossier.getStatus().name());
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
 
@@ -74,8 +81,9 @@ public class DossierMapper {
         response.setAnnonceId(dossier.getAnnonceId());
 
         if (dossier.getAnnonceId() != null) {
-            annonceRepository.findById(dossier.getAnnonceId())
-                .ifPresent(annonce -> response.setAnnonceTitle(annonce.getTitle()));
+            annonceRepository
+                    .findById(dossier.getAnnonceId())
+                    .ifPresent(annonce -> response.setAnnonceTitle(annonce.getTitle()));
         }
 
         response.setLeadPhone(dossier.getLeadPhone());
@@ -85,8 +93,10 @@ public class DossierMapper {
         response.setNotes(dossier.getNotes());
         response.setStatus(dossier.getStatus());
         response.setCaseType(dossier.getCaseType());
-        response.setStatusCode(dossier.getStatusCode() != null ? dossier.getStatusCode() : 
-                (dossier.getStatus() != null ? dossier.getStatus().name() : null));
+        response.setStatusCode(
+                dossier.getStatusCode() != null
+                        ? dossier.getStatusCode()
+                        : (dossier.getStatus() != null ? dossier.getStatus().name() : null));
         response.setLossReason(dossier.getLossReason());
         response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());
@@ -98,10 +108,9 @@ public class DossierMapper {
 
         if (dossier.getParties() != null) {
             response.setParties(
-                dossier.getParties().stream()
-                    .map(partiePrenanteMapper::toResponse)
-                    .collect(Collectors.toList())
-            );
+                    dossier.getParties().stream()
+                            .map(partiePrenanteMapper::toResponse)
+                            .collect(Collectors.toList()));
         }
 
         return response;

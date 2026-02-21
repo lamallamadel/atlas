@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.ProjectStatus;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;

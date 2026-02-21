@@ -12,23 +12,21 @@ import com.example.backend.repository.search.AnnonceSearchRepository;
 import com.example.backend.repository.search.DossierSearchRepository;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
-import org.springframework.data.elasticsearch.core.SearchHit;
 import org.springframework.data.elasticsearch.core.SearchHits;
 import org.springframework.data.elasticsearch.core.query.Criteria;
 import org.springframework.data.elasticsearch.core.query.CriteriaQuery;
 import org.springframework.data.elasticsearch.core.query.Query;
 import org.springframework.stereotype.Service;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @ConditionalOnProperty(name = "elasticsearch.enabled", havingValue = "true", matchIfMissing = false)
@@ -45,25 +43,25 @@ public class SearchService {
     @Autowired(required = false)
     private DossierSearchRepository dossierSearchRepository;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @PersistenceContext private EntityManager entityManager;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public SearchResponseDto search(String query, String type, Map<String, Object> filters, int page, int size) {
+    public SearchResponseDto search(
+            String query, String type, Map<String, Object> filters, int page, int size) {
         String orgId = TenantContext.getOrgId();
 
         if (isElasticsearchAvailable()) {
             try {
                 return searchWithElasticsearch(query, type, filters, orgId, page, size);
             } catch (Exception e) {
-                logger.warn("Elasticsearch search failed, falling back to PostgreSQL: {}", e.getMessage());
+                logger.warn(
+                        "Elasticsearch search failed, falling back to PostgreSQL: {}",
+                        e.getMessage());
                 return searchWithPostgreSQL(query, type, filters, orgId, page, size);
             }
         } else {
@@ -72,18 +70,26 @@ public class SearchService {
         }
     }
 
-    private SearchResponseDto searchWithElasticsearch(String query, String type, Map<String, Object> filters, String orgId, int page, int size) {
+    private SearchResponseDto searchWithElasticsearch(
+            String query,
+            String type,
+            Map<String, Object> filters,
+            String orgId,
+            int page,
+            int size) {
         List<SearchResultDto> results = new ArrayList<>();
         long totalHits = 0;
 
         if (type == null || type.equalsIgnoreCase("annonce")) {
-            SearchHits<AnnonceDocument> annonceHits = searchAnnonces(query, filters, orgId, page, size);
+            SearchHits<AnnonceDocument> annonceHits =
+                    searchAnnonces(query, filters, orgId, page, size);
             results.addAll(convertAnnonceHits(annonceHits));
             totalHits += annonceHits.getTotalHits();
         }
 
         if (type == null || type.equalsIgnoreCase("dossier")) {
-            SearchHits<DossierDocument> dossierHits = searchDossiers(query, filters, orgId, page, size);
+            SearchHits<DossierDocument> dossierHits =
+                    searchDossiers(query, filters, orgId, page, size);
             results.addAll(convertDossierHits(dossierHits));
             totalHits += dossierHits.getTotalHits();
         }
@@ -96,17 +102,23 @@ public class SearchService {
         return new SearchResponseDto(results, totalHits, true);
     }
 
-    private SearchHits<AnnonceDocument> searchAnnonces(String query, Map<String, Object> filters, String orgId, int page, int size) {
+    private SearchHits<AnnonceDocument> searchAnnonces(
+            String query, Map<String, Object> filters, String orgId, int page, int size) {
         Criteria criteria = new Criteria("orgId").is(orgId);
 
         if (query != null && !query.isBlank()) {
-            Criteria queryCriteria = new Criteria()
-                    // Spring Data Elasticsearch Criteria.fuzzy(..) takes a single term.
-                    // Earlier versions accepted an additional float parameter; keep compatibility
-                    // with current dependency versions by using the supported signature.
-                    .or("title").fuzzy(query)
-                    .or("description").fuzzy(query)
-                    .or("address").fuzzy(query);
+            Criteria queryCriteria =
+                    new Criteria()
+                            // Spring Data Elasticsearch Criteria.fuzzy(..) takes a single term.
+                            // Earlier versions accepted an additional float parameter; keep
+                            // compatibility
+                            // with current dependency versions by using the supported signature.
+                            .or("title")
+                            .fuzzy(query)
+                            .or("description")
+                            .fuzzy(query)
+                            .or("address")
+                            .fuzzy(query);
             criteria = criteria.and(queryCriteria);
         }
 
@@ -126,13 +138,13 @@ public class SearchService {
         return elasticsearchOperations.search(searchQuery, AnnonceDocument.class);
     }
 
-    private SearchHits<DossierDocument> searchDossiers(String query, Map<String, Object> filters, String orgId, int page, int size) {
+    private SearchHits<DossierDocument> searchDossiers(
+            String query, Map<String, Object> filters, String orgId, int page, int size) {
         Criteria criteria = new Criteria("orgId").is(orgId);
 
         if (query != null && !query.isBlank()) {
-            Criteria queryCriteria = new Criteria()
-                    .or("leadName").fuzzy(query)
-                    .or("notes").fuzzy(query);
+            Criteria queryCriteria =
+                    new Criteria().or("leadName").fuzzy(query).or("notes").fuzzy(query);
             criteria = criteria.and(queryCriteria);
         }
 
@@ -151,40 +163,50 @@ public class SearchService {
 
     private List<SearchResultDto> convertAnnonceHits(SearchHits<AnnonceDocument> hits) {
         return hits.getSearchHits().stream()
-                .map(hit -> {
-                    AnnonceDocument doc = hit.getContent();
-                    return new SearchResultDto(
-                            doc.getId(),
-                            "annonce",
-                            doc.getTitle(),
-                            doc.getDescription(),
-                            (double) hit.getScore(),
-                            doc.getCreatedAt(),
-                            doc.getUpdatedAt()
-                    );
-                })
+                .map(
+                        hit -> {
+                            AnnonceDocument doc = hit.getContent();
+                            return new SearchResultDto(
+                                    doc.getId(),
+                                    "annonce",
+                                    doc.getTitle(),
+                                    doc.getDescription(),
+                                    (double) hit.getScore(),
+                                    doc.getCreatedAt(),
+                                    doc.getUpdatedAt());
+                        })
                 .collect(Collectors.toList());
     }
 
     private List<SearchResultDto> convertDossierHits(SearchHits<DossierDocument> hits) {
         return hits.getSearchHits().stream()
-                .map(hit -> {
-                    DossierDocument doc = hit.getContent();
-                    String title = "Dossier - " + (doc.getLeadName() != null ? doc.getLeadName() : "No name");
-                    return new SearchResultDto(
-                            doc.getId(),
-                            "dossier",
-                            title,
-                            doc.getNotes(),
-                            (double) hit.getScore(),
-                            doc.getCreatedAt(),
-                            doc.getUpdatedAt()
-                    );
-                })
+                .map(
+                        hit -> {
+                            DossierDocument doc = hit.getContent();
+                            String title =
+                                    "Dossier - "
+                                            + (doc.getLeadName() != null
+                                                    ? doc.getLeadName()
+                                                    : "No name");
+                            return new SearchResultDto(
+                                    doc.getId(),
+                                    "dossier",
+                                    title,
+                                    doc.getNotes(),
+                                    (double) hit.getScore(),
+                                    doc.getCreatedAt(),
+                                    doc.getUpdatedAt());
+                        })
                 .collect(Collectors.toList());
     }
 
-    private SearchResponseDto searchWithPostgreSQL(String query, String type, Map<String, Object> filters, String orgId, int page, int size) {
+    private SearchResponseDto searchWithPostgreSQL(
+            String query,
+            String type,
+            Map<String, Object> filters,
+            String orgId,
+            int page,
+            int size) {
         List<SearchResultDto> results = new ArrayList<>();
         long totalHits = 0;
 
@@ -203,16 +225,18 @@ public class SearchService {
         return new SearchResponseDto(results, totalHits, false);
     }
 
-    private List<Annonce> searchAnnoncesPostgres(String query, Map<String, Object> filters, int page, int size) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT a.* FROM annonce a WHERE a.org_id = :orgId"
-        );
+    private List<Annonce> searchAnnoncesPostgres(
+            String query, Map<String, Object> filters, int page, int size) {
+        StringBuilder sql = new StringBuilder("SELECT a.* FROM annonce a WHERE a.org_id = :orgId");
 
         if (query != null && !query.isBlank()) {
             sql.append(" AND (");
-            sql.append("to_tsvector('simple', COALESCE(a.title, '')) @@ plainto_tsquery('simple', :query)");
-            sql.append(" OR to_tsvector('simple', COALESCE(a.description, '')) @@ plainto_tsquery('simple', :query)");
-            sql.append(" OR to_tsvector('simple', COALESCE(a.address, '')) @@ plainto_tsquery('simple', :query)");
+            sql.append(
+                    "to_tsvector('simple', COALESCE(a.title, '')) @@ plainto_tsquery('simple', :query)");
+            sql.append(
+                    " OR to_tsvector('simple', COALESCE(a.description, '')) @@ plainto_tsquery('simple', :query)");
+            sql.append(
+                    " OR to_tsvector('simple', COALESCE(a.address, '')) @@ plainto_tsquery('simple', :query)");
             sql.append(")");
         }
 
@@ -231,7 +255,8 @@ public class SearchService {
         sql.append(" ORDER BY a.updated_at DESC");
         sql.append(" LIMIT :limit OFFSET :offset");
 
-        jakarta.persistence.Query nativeQuery = entityManager.createNativeQuery(sql.toString(), Annonce.class);
+        jakarta.persistence.Query nativeQuery =
+                entityManager.createNativeQuery(sql.toString(), Annonce.class);
         nativeQuery.setParameter("orgId", TenantContext.getOrgId());
 
         if (query != null && !query.isBlank()) {
@@ -258,15 +283,16 @@ public class SearchService {
         return results;
     }
 
-    private List<Dossier> searchDossiersPostgres(String query, Map<String, Object> filters, int page, int size) {
-        StringBuilder sql = new StringBuilder(
-                "SELECT d.* FROM dossier d WHERE d.org_id = :orgId"
-        );
+    private List<Dossier> searchDossiersPostgres(
+            String query, Map<String, Object> filters, int page, int size) {
+        StringBuilder sql = new StringBuilder("SELECT d.* FROM dossier d WHERE d.org_id = :orgId");
 
         if (query != null && !query.isBlank()) {
             sql.append(" AND (");
-            sql.append("to_tsvector('simple', COALESCE(d.lead_name, '')) @@ plainto_tsquery('simple', :query)");
-            sql.append(" OR to_tsvector('simple', COALESCE(d.notes, '')) @@ plainto_tsquery('simple', :query)");
+            sql.append(
+                    "to_tsvector('simple', COALESCE(d.lead_name, '')) @@ plainto_tsquery('simple', :query)");
+            sql.append(
+                    " OR to_tsvector('simple', COALESCE(d.notes, '')) @@ plainto_tsquery('simple', :query)");
             sql.append(")");
         }
 
@@ -282,7 +308,8 @@ public class SearchService {
         sql.append(" ORDER BY d.updated_at DESC");
         sql.append(" LIMIT :limit OFFSET :offset");
 
-        jakarta.persistence.Query nativeQuery = entityManager.createNativeQuery(sql.toString(), Dossier.class);
+        jakarta.persistence.Query nativeQuery =
+                entityManager.createNativeQuery(sql.toString(), Dossier.class);
         nativeQuery.setParameter("orgId", TenantContext.getOrgId());
 
         if (query != null && !query.isBlank()) {
@@ -308,37 +335,44 @@ public class SearchService {
 
     private List<SearchResultDto> convertAnnoncesToResults(List<Annonce> annonces) {
         return annonces.stream()
-                .map(a -> new SearchResultDto(
-                        a.getId(),
-                        "annonce",
-                        a.getTitle(),
-                        a.getDescription(),
-                        1.0,
-                        a.getCreatedAt(),
-                        a.getUpdatedAt()
-                ))
+                .map(
+                        a ->
+                                new SearchResultDto(
+                                        a.getId(),
+                                        "annonce",
+                                        a.getTitle(),
+                                        a.getDescription(),
+                                        1.0,
+                                        a.getCreatedAt(),
+                                        a.getUpdatedAt()))
                 .collect(Collectors.toList());
     }
 
     private List<SearchResultDto> convertDossiersToResults(List<Dossier> dossiers) {
         return dossiers.stream()
-                .map(d -> {
-                    String title = "Dossier - " + (d.getLeadName() != null ? d.getLeadName() : "No name");
-                    return new SearchResultDto(
-                            d.getId(),
-                            "dossier",
-                            title,
-                            d.getNotes(),
-                            1.0,
-                            d.getCreatedAt(),
-                            d.getUpdatedAt()
-                    );
-                })
+                .map(
+                        d -> {
+                            String title =
+                                    "Dossier - "
+                                            + (d.getLeadName() != null
+                                                    ? d.getLeadName()
+                                                    : "No name");
+                            return new SearchResultDto(
+                                    d.getId(),
+                                    "dossier",
+                                    title,
+                                    d.getNotes(),
+                                    1.0,
+                                    d.getCreatedAt(),
+                                    d.getUpdatedAt());
+                        })
                 .collect(Collectors.toList());
     }
 
     private boolean isElasticsearchAvailable() {
-        return elasticsearchOperations != null && annonceSearchRepository != null && dossierSearchRepository != null;
+        return elasticsearchOperations != null
+                && annonceSearchRepository != null
+                && dossierSearchRepository != null;
     }
 
     public void indexAnnonce(Annonce annonce) {
