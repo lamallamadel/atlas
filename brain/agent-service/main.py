@@ -81,9 +81,10 @@ def parse_with_rules(query: str) -> AgentResponse:
         actions=[], engine="rules"
     )
 
-async def process_with_ollama(query: str) -> AgentResponse:
+async def process_with_ollama(query: str, context: str | None = None) -> AgentResponse:
+    context_instruction = f"\n\nCONTEXTE IMMOBILIER (RAG):\n{context}\nUtilise ce contexte pour répondre à la question si c'est pertinent." if context else ""
     prompt = f"""Tu es Atlas IA, un agent immobilier.
-Analyse cette requête utilisateur : "{query}"
+Analyse cette requête utilisateur : "{query}"{context_instruction}
 Réponds UNIQUEMENT avec ce JSON valide:
 {{"intent_type": "SEARCH|CREATE|STATUS_CHANGE|SEND_MESSAGE|NAVIGATE|SCHEDULE_APPOINTMENT|UNKNOWN", "confidence": 0.9, "params": {{"city": "...", "propertyType": "..."}}, "answer": "Ta réponse textuelle à l'utilisateur", "actions": []}}
 """
@@ -128,7 +129,7 @@ async def process(req: AgentRequest, _: str = Depends(verify_api_key)):
         result = rule_result
     else:
         # 2. LLM si nécessaire et activé
-        result = await process_with_ollama(req.query)
+        result = await process_with_ollama(req.query, req.context)
         
     logger.info(f"Agent [{req.query[:20]}...] → {result.intent_type} ({round((time.time()-start)*1000)}ms)")
     return result

@@ -51,10 +51,33 @@ public class WhatsappService {
     public void processIncomingMessage(String from, String to, String body) {
         String phoneExtracted = from.replace("whatsapp:", "");
 
-        // 1. Call the Brain Agent Service FIRST to extract intent and parameters
+        // Find existing dossier to fetch Context before AI analysis
+        Dossier existingDossier = dossierRepository.findByLeadPhone(phoneExtracted).stream().findFirst().orElse(null);
+        String contextStr = null;
+
+        if (existingDossier != null && existingDossier.getAnnonceId() != null) {
+            Annonce annonce = annonceRepository.findById(existingDossier.getAnnonceId()).orElse(null);
+            if (annonce != null) {
+                // Formatting Context string based on entity metadata
+                contextStr = String.format(
+                        "CONTEXTE ANNONCE - Titre: %s | Prix: %s %s | Surface: %s m2 | Adresse: %s | Description: %s",
+                        annonce.getTitle() != null ? annonce.getTitle() : "Inconnu",
+                        annonce.getPrice() != null ? annonce.getPrice() : "Sur demande",
+                        annonce.getCurrency() != null ? annonce.getCurrency() : "",
+                        annonce.getSurface() != null ? annonce.getSurface() : "N/A",
+                        annonce.getAddress() != null ? annonce.getAddress() : "N/A",
+                        annonce.getDescription() != null ? annonce.getDescription() : "Aucune");
+            }
+        }
+
+        // 1. Call the Brain Agent Service FIRST to extract intent and parameters,
+        // providing context if any
         AiAgentRequest agentRequest = new AiAgentRequest();
         agentRequest.setQuery(body);
         agentRequest.setConversationId("whatsapp_" + phoneExtracted);
+        if (contextStr != null) {
+            agentRequest.setContext(contextStr);
+        }
 
         AiAgentResponse response = null;
         try {
