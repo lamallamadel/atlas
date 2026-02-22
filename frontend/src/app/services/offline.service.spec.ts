@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { take } from 'rxjs/operators';
 import { OfflineService, ConnectionStatus } from './offline.service';
 
 describe('OfflineService', () => {
@@ -18,7 +19,7 @@ describe('OfflineService', () => {
   });
 
   it('should provide connectivity observable', (done) => {
-    service.connectivity$.subscribe(state => {
+    service.connectivity$.pipe(take(1)).subscribe(state => {
       expect(state).toBeDefined();
       expect(state.status).toBeDefined();
       done();

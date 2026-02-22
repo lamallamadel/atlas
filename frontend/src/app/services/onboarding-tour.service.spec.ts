@@ -1,5 +1,7 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
+import { OAuthService } from 'angular-oauth2-oidc';
 import { OnboardingTourService } from './onboarding-tour.service';
 
 describe('OnboardingTourService', () => {
@@ -14,11 +16,17 @@ describe('OnboardingTourService', () => {
         })
       }
     });
+    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
+      'initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken',
+      'configure', 'setStorage', 'logOut', 'getAccessToken'
+    ]);
 
     TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
       providers: [
         OnboardingTourService,
-        { provide: Router, useValue: routerSpy }
+        { provide: Router, useValue: routerSpy },
+        { provide: OAuthService, useValue: mockOAuthService }
       ]
     });
 

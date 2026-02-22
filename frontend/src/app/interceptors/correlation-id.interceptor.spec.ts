@@ -77,8 +77,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Session expirée. Veuillez vous reconnecter.',
-        'Reconnecter',
-        jasmine.any(Function)
+        jasmine.objectContaining({ label: 'Reconnecter', handler: jasmine.any(Function) })
       );
     });
 
@@ -144,8 +143,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.warning).toHaveBeenCalledWith(
         'Resource already exists',
-        'Réessayer',
-        jasmine.any(Function)
+        jasmine.objectContaining({ label: 'Réessayer', handler: jasmine.any(Function) })
       );
     });
 
@@ -163,8 +161,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Internal error occurred',
-        'Réessayer',
-        jasmine.any(Function)
+        jasmine.objectContaining({ label: 'Réessayer', handler: jasmine.any(Function) })
       );
     });
 
@@ -182,8 +179,7 @@ describe('CorrelationIdInterceptor', () => {
 
       expect(toastService.error).toHaveBeenCalledWith(
         'Impossible de contacter le serveur. Vérifiez votre connexion.',
-        'Réessayer',
-        jasmine.any(Function)
+        jasmine.objectContaining({ label: 'Réessayer', handler: jasmine.any(Function) })
       );
     });
   });

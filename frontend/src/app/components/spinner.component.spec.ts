@@ -112,11 +112,9 @@ describe('SpinnerComponent', () => {
   it('should clear timeout on destroy', fakeAsync(() => {
     component.timeout = 1000;
     fixture.detectChanges();
-    
-    spyOn(window, 'clearTimeout');
     component.ngOnDestroy();
-    
-    expect(window.clearTimeout).toHaveBeenCalled();
+    tick(1000);
+    expect(component.showTimeoutMessage).toBe(false);
   }));
 
   it('should not set timeout when timeout is 0', () => {

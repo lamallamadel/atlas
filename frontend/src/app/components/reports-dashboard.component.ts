@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angula
 import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { ChartType } from 'chart.js';
 import {
   ReportingApiService,
   KpiReportResponse,
@@ -92,7 +93,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
       }
     }
   };
-  conversionFunnelChartType = 'bar';
+  conversionFunnelChartType: ChartType = 'bar';
 
   agentPerformanceChartData: any = {
     labels: [],
@@ -129,7 +130,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
       }
     }
   };
-  agentPerformanceChartType = 'bar';
+  agentPerformanceChartType: ChartType = 'bar';
 
   revenueForecastChartData: any = {
     labels: [],
@@ -182,7 +183,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
       }
     }
   };
-  revenueForecastChartType = 'line';
+  revenueForecastChartType: ChartType = 'line';
 
   leadSourceChartData: any = {
     labels: [],
@@ -226,7 +227,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
       }
     }
   };
-  leadSourceChartType = 'pie';
+  leadSourceChartType: ChartType = 'pie';
 
   constructor(
     private reportingService: ReportingApiService,

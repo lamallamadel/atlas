@@ -48,13 +48,8 @@ import { LoginComponent } from './pages/login/login.component';
 import { AccessDeniedComponent } from './pages/access-denied/access-denied.component';
 import { SessionExpiredComponent } from './pages/session-expired/session-expired.component';
 
-import { GenericTableComponent } from './components/generic-table.component';
-import { EmptyStateComponent } from './components/empty-state.component';
-import { BadgeStatusComponent } from './components/badge-status.component';
 import { BadgeComponent } from './components/badge.component';
 import { BadgeShowcaseComponent } from './components/badge-showcase.component';
-import { LoadingSkeletonComponent } from './components/loading-skeleton.component';
-import { SkeletonLoaderComponent } from './components/skeleton-loader.component';
 
 
 import { PartiePrenanteFormDialogComponent } from './components/partie-prenante-form-dialog.component';
@@ -79,21 +74,10 @@ import { FocusTrapDirective } from './directives/focus-trap.directive';
 import { LazyLoadImageDirective } from './directives/lazy-load-image.directive';
 import { InfiniteScrollDirective } from './directives/infinite-scroll.directive';
 
-import { SwipeGestureDirective } from './directives/swipe-gesture.directive';
 import { AnimatedButtonDirective } from './directives/animated-button.directive';
 import { AnimatedFocusDirective } from './directives/animated-focus.directive';
 import { MaintainScrollDirective } from './directives/maintain-scroll.directive';
-import { DateFormatPipe } from './pipes/date-format.pipe';
-import { PriceFormatPipe } from './pipes/price-format.pipe';
-import { PhoneFormatPipe } from './pipes/phone-format.pipe';
 import { LocalizePipe } from './pipes/localize.pipe';
-import { CollaborationPresenceComponent } from './components/collaboration-presence.component';
-import { CollaborationCursorComponent } from './components/collaboration-cursor.component';
-import { CollaborationActivityStreamComponent } from './components/collaboration-activity-stream.component';
-import { CollaborationFilterShareComponent } from './components/collaboration-filter-share.component';
-import { HighlightPipe } from './pipes/highlight.pipe';
-
-
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { registerLocaleData } from '@angular/common';
@@ -131,11 +115,9 @@ import { HttpCacheInterceptor } from './interceptors/http-cache.interceptor';
 import { VirtualScrollListComponent } from './components/virtual-scroll-list.component';
 import { MobileActionSheetComponent } from './components/mobile-action-sheet.component';
 
-import { MobileDossierCardComponent } from './components/mobile-dossier-card.component';
 import { LogoComponent } from './components/logo.component';
 import { LogoInlineComponent } from './components/logo-inline.component';
 import { CustomSpinnerComponent } from './components/custom-spinner.component';
-import { SpinnerComponent } from './components/spinner.component';
 import { LoadingButtonComponent } from './components/loading-button.component';
 import { AnimationsDemoComponent } from './components/animations-demo.component';
 import { ButtonExamplesComponent } from './components/button-examples.component';
@@ -180,13 +162,8 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     AccessDeniedComponent,
     SessionExpiredComponent,
 
-    GenericTableComponent,
-    EmptyStateComponent,
-    BadgeStatusComponent,
     BadgeComponent,
     BadgeShowcaseComponent,
-    LoadingSkeletonComponent,
-    SkeletonLoaderComponent,
 
 
     PartiePrenanteFormDialogComponent,
@@ -209,20 +186,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LazyLoadImageDirective,
     InfiniteScrollDirective,
 
-    SwipeGestureDirective,
     AnimatedButtonDirective,
     AnimatedFocusDirective,
     MaintainScrollDirective,
-    DateFormatPipe,
-    PriceFormatPipe,
-    PhoneFormatPipe,
     LocalizePipe,
-    HighlightPipe,
     WhatsappMessagingUiComponent,
-    CollaborationPresenceComponent,
-    CollaborationCursorComponent,
-    CollaborationActivityStreamComponent,
-    CollaborationFilterShareComponent,
 
     DocumentPreviewDialogComponent,
     LeadImportDialogComponent,
@@ -251,11 +219,9 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     VirtualScrollListComponent,
     MobileActionSheetComponent,
 
-    MobileDossierCardComponent,
     LogoComponent,
     LogoInlineComponent,
     CustomSpinnerComponent,
-    SpinnerComponent,
     LoadingButtonComponent,
     AnimationsDemoComponent,
     ButtonExamplesComponent,
