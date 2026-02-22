@@ -11,6 +11,7 @@ import { CommandPaletteComponent } from './command-palette.component';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { SearchApiService } from '../services/search-api.service';
 import { RecentNavigationService } from '../services/recent-navigation.service';
+import { AiAgentService } from '../services/ai-agent.service';
 
 describe('CommandPaletteComponent', () => {
   let component: CommandPaletteComponent;
@@ -44,6 +45,8 @@ describe('CommandPaletteComponent', () => {
     mockRecentNavService = jasmine.createSpyObj('RecentNavigationService', ['getRecentItems']);
     mockRecentNavService.getRecentItems.and.returnValue([]);
 
+    const mockAiAgentService = jasmine.createSpyObj('AiAgentService', ['openPanel']);
+
     await TestBed.configureTestingModule({
       declarations: [CommandPaletteComponent],
       imports: [
@@ -57,7 +60,8 @@ describe('CommandPaletteComponent', () => {
         { provide: MatDialog, useValue: mockDialog },
         { provide: KeyboardShortcutService, useValue: mockKeyboardService },
         { provide: SearchApiService, useValue: mockSearchService },
-        { provide: RecentNavigationService, useValue: mockRecentNavService }
+        { provide: RecentNavigationService, useValue: mockRecentNavService },
+        { provide: AiAgentService, useValue: mockAiAgentService }
       ]
     })
       .compileComponents();

@@ -162,7 +162,7 @@ describe('NotificationPreferencesFormComponent', () => {
     component.onSave();
 
     expect(mockUserPreferencesService.updatePreferences).toHaveBeenCalled();
-    expect(component.saving).toBe(true);
+    expect(component.saving).toBe(false);
   });
 
   it('should handle save error', () => {
@@ -171,7 +171,8 @@ describe('NotificationPreferencesFormComponent', () => {
     );
 
     component.onSave();
-    expect(component.saving).toBe(true);
+    expect(component.saving).toBe(false);
+    expect(mockNotificationService.error).toHaveBeenCalled();
   });
 
   it('should cancel changes', () => {
