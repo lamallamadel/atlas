@@ -38,6 +38,12 @@ import { DocumentListComponent } from '../components/document-list.component';
 import { DocumentUploadComponent } from '../components/document-upload.component';
 import { QuickActionsComponent } from '../components/quick-actions.component';
 import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
+import { SkeletonLoaderComponent } from '../components/skeleton-loader.component';
+import { CollaborationPresenceComponent } from '../components/collaboration-presence.component';
+import { CollaborationCursorComponent } from '../components/collaboration-cursor.component';
+import { CollaborationActivityStreamComponent } from '../components/collaboration-activity-stream.component';
+import { CollaborationFilterShareComponent } from '../components/collaboration-filter-share.component';
+import { SpinnerComponent } from '../components/spinner.component';
 
 @NgModule({
   declarations: [
@@ -55,7 +61,13 @@ import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
     DocumentListComponent,
     DocumentUploadComponent,
     QuickActionsComponent,
-    SwipeGestureDirective
+    SwipeGestureDirective,
+    SkeletonLoaderComponent,
+    CollaborationPresenceComponent,
+    CollaborationCursorComponent,
+    CollaborationActivityStreamComponent,
+    CollaborationFilterShareComponent,
+    SpinnerComponent
   ],
   imports: [
     CommonModule,
@@ -96,7 +108,13 @@ import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
     DocumentListComponent,
     DocumentUploadComponent,
     QuickActionsComponent,
-    SwipeGestureDirective
+    SwipeGestureDirective,
+    SkeletonLoaderComponent,
+    CollaborationPresenceComponent,
+    CollaborationCursorComponent,
+    CollaborationActivityStreamComponent,
+    CollaborationFilterShareComponent,
+    SpinnerComponent
   ]
 })
 export class SharedComponentsModule {}

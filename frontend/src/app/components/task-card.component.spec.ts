@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TaskCardComponent } from './task-card.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -14,6 +15,7 @@ describe('TaskCardComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ TaskCardComponent ],
       imports: [
+        NoopAnimationsModule,
         MatCardModule,
         MatCheckboxModule,
         MatIconModule,
