@@ -7,6 +7,7 @@ describe('KeyboardShortcutService', () => {
   let routerSpy: jasmine.SpyObj<Router>;
 
   beforeEach(() => {
+    localStorage.clear();
     const routerMock = jasmine.createSpyObj('Router', ['navigate']);
     
     TestBed.configureTestingModule({
@@ -18,8 +19,6 @@ describe('KeyboardShortcutService', () => {
     
     service = TestBed.inject(KeyboardShortcutService);
     routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
-    
-    localStorage.clear();
   });
 
   it('should be created', () => {

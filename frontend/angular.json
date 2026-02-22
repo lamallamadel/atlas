@@ -184,6 +184,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
+              "src/global-polyfill.js",
               "zone.js",
               "zone.js/testing",
               "@angular/localize/init"
