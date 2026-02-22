@@ -1,6 +1,7 @@
 import { TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { UserPreferencesService, UserPreferences, PendingUpdate } from './user-preferences.service';
+import { UserPreferencesService } from './user-preferences.service';
+import { UserPreferences, PendingUpdate } from '../models/user-preferences.model';
 import { OfflineService, ConnectionStatus } from './offline.service';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
@@ -48,10 +49,10 @@ describe('UserPreferencesService', () => {
 
   describe('Initialization', () => {
     it('should load preferences from server on initialization', fakeAsync(() => {
-      const mockPreferences = {
+      const mockPreferences: UserPreferences = {
         ui: { theme: 'dark', language: 'fr' },
         notifications: { emailEnabled: true }
-      };
+      } as any;
 
       const req = httpMock.expectOne(API_BASE);
       expect(req.request.method).toBe('GET');
@@ -66,11 +67,11 @@ describe('UserPreferencesService', () => {
     it('should load from localStorage if available', () => {
       const storedPrefs: UserPreferences = {
         ui: { theme: 'light' }
-      };
+      } as any;
       localStorage.setItem('user_preferences', JSON.stringify(storedPrefs));
 
       const newService = TestBed.inject(UserPreferencesService);
-      
+
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
 
@@ -95,7 +96,7 @@ describe('UserPreferencesService', () => {
       const emissions: UserPreferences[] = [];
       service.preferences$.subscribe(prefs => emissions.push(prefs));
 
-      const newPrefs = { ui: { theme: 'dark' } };
+      const newPrefs = { ui: { theme: 'dark' } } as any;
       service.setPreference('ui', newPrefs.ui);
 
       expect(emissions.length).toBeGreaterThan(0);
@@ -126,8 +127,8 @@ describe('UserPreferencesService', () => {
 
   describe('getPreferences()', () => {
     it('should return current preferences as observable', fakeAsync(() => {
-      const mockPrefs = { ui: { theme: 'dark' } };
-      
+      const mockPrefs = { ui: { theme: 'dark' } } as any;
+
       const req = httpMock.expectOne(API_BASE);
       req.flush(mockPrefs);
       tick();
@@ -140,8 +141,8 @@ describe('UserPreferencesService', () => {
 
   describe('getCurrentPreferences()', () => {
     it('should return current preferences synchronously', fakeAsync(() => {
-      const mockPrefs = { ui: { theme: 'dark' } };
-      
+      const mockPrefs = { ui: { theme: 'dark' } } as any;
+
       const req = httpMock.expectOne(API_BASE);
       req.flush(mockPrefs);
       tick();
@@ -156,8 +157,8 @@ describe('UserPreferencesService', () => {
       req.flush({});
       tick();
 
-      const categoryValues = { theme: 'dark', language: 'fr' };
-      
+      const categoryValues = { theme: 'dark', language: 'fr' } as any;
+
       service.updatePreferences('ui', categoryValues).subscribe(response => {
         expect(response.category).toBe('ui');
         expect(response.preferences).toEqual(categoryValues);
@@ -178,7 +179,7 @@ describe('UserPreferencesService', () => {
       req.flush({});
       tick();
 
-      const categoryValues = { theme: 'dark' };
+      const categoryValues = { theme: 'dark' } as any;
       service.updatePreferences('ui', categoryValues).subscribe();
 
       const stored = localStorage.getItem('user_preferences');
@@ -222,7 +223,7 @@ describe('UserPreferencesService', () => {
       offlineService.isOnline.and.returnValue(false);
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
-      
+
       httpMock.expectNone(`${API_BASE}/ui`);
       tick();
 
@@ -237,7 +238,7 @@ describe('UserPreferencesService', () => {
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
       service.updatePreferences('notifications', { emailEnabled: true }).subscribe();
-      
+
       tick();
 
       offlineService.isOnline.and.returnValue(true);
@@ -245,7 +246,7 @@ describe('UserPreferencesService', () => {
         status: ConnectionStatus.ONLINE,
         lastOnline: new Date()
       });
-      
+
       tick(1000);
 
       const req1 = httpMock.expectOne(`${API_BASE}/ui`);
@@ -291,7 +292,7 @@ describe('UserPreferencesService', () => {
         status: ConnectionStatus.ONLINE,
         lastOnline: new Date()
       });
-      
+
       tick(1000);
 
       const req1 = httpMock.expectOne(`${API_BASE}/ui`);
@@ -489,7 +490,7 @@ describe('UserPreferencesService', () => {
 
     it('should force sync on demand', fakeAsync(() => {
       service.forceSyncNow().subscribe();
-      
+
       const req = httpMock.expectOne(API_BASE);
       req.flush({ ui: { theme: 'dark' } });
       tick();

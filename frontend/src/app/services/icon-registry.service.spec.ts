@@ -101,10 +101,10 @@ describe('IconRegistryService', () => {
   it('should return metadata for all icons', () => {
     const metadata = service.getMetadata();
     expect(metadata.length).toBeGreaterThan(0);
-    expect(metadata[0]).toHaveProperty('id');
-    expect(metadata[0]).toHaveProperty('name');
-    expect(metadata[0]).toHaveProperty('category');
-    expect(metadata[0]).toHaveProperty('tags');
+    expect(metadata[0].id).toBeDefined();
+    expect(metadata[0].name).toBeDefined();
+    expect(metadata[0].category).toBeDefined();
+    expect(metadata[0].tags).toBeDefined();
   });
 
   it('should return metadata for specific icon', () => {
@@ -140,8 +140,8 @@ describe('IconRegistryService', () => {
   it('should return all categories', () => {
     const categories = service.getAllCategories();
     expect(categories.length).toBe(6);
-    expect(categories[0]).toHaveProperty('key');
-    expect(categories[0]).toHaveProperty('label');
+    expect(categories[0].key).toBeDefined();
+    expect(categories[0].label).toBeDefined();
   });
 
   it('should return false for isLoaded before icons are loaded', () => {
@@ -173,7 +173,7 @@ describe('IconRegistryService', () => {
   it('should have correct metadata for house types', () => {
     const houseTypes = service.getIconsByCategory('house-types');
     const iconIds = houseTypes.map(icon => icon.id);
-    
+
     expect(iconIds).toContain('re-house');
     expect(iconIds).toContain('re-apartment');
     expect(iconIds).toContain('re-villa');
@@ -185,7 +185,7 @@ describe('IconRegistryService', () => {
   it('should have correct metadata for rooms', () => {
     const rooms = service.getIconsByCategory('rooms');
     const iconIds = rooms.map(icon => icon.id);
-    
+
     expect(iconIds).toContain('re-bedroom');
     expect(iconIds).toContain('re-bathroom');
     expect(iconIds).toContain('re-kitchen');
@@ -197,7 +197,7 @@ describe('IconRegistryService', () => {
   it('should have correct metadata for amenities', () => {
     const amenities = service.getIconsByCategory('amenities');
     const iconIds = amenities.map(icon => icon.id);
-    
+
     expect(iconIds).toContain('re-pool');
     expect(iconIds).toContain('re-garden');
     expect(iconIds).toContain('re-parking');

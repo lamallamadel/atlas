@@ -28,7 +28,7 @@ describe('UiPreferencesFormComponent', () => {
   let themeService: jasmine.SpyObj<ThemeService>;
   let notificationService: jasmine.SpyObj<NotificationService>;
 
-  const mockPreferences = {
+  const mockPreferences: any = {
     ui: {
       theme: 'light',
       language: 'fr',
@@ -137,7 +137,7 @@ describe('UiPreferencesFormComponent', () => {
 
   it('should save preferences successfully', () => {
     userPreferencesService.updatePreferences.and.returnValue(of({ category: 'ui', preferences: {} }));
-    
+
     component.preferencesForm.patchValue({
       theme: 'dark',
       language: 'en'
@@ -155,7 +155,7 @@ describe('UiPreferencesFormComponent', () => {
 
   it('should handle save error', () => {
     userPreferencesService.updatePreferences.and.returnValue(throwError({ error: 'Error' }));
-    
+
     component.onSave();
 
     expect(notificationService.error).toHaveBeenCalled();
@@ -164,7 +164,7 @@ describe('UiPreferencesFormComponent', () => {
 
   it('should cancel changes', () => {
     const originalValues = { ...component.preferencesForm.value };
-    
+
     component.preferencesForm.patchValue({
       theme: 'dark'
     });
@@ -176,7 +176,7 @@ describe('UiPreferencesFormComponent', () => {
 
   it('should detect unsaved changes', () => {
     expect(component.hasUnsavedChanges()).toBe(false);
-    
+
     component.preferencesForm.patchValue({
       theme: 'dark'
     });
@@ -212,7 +212,7 @@ describe('UiPreferencesFormComponent', () => {
 
   it('should handle route selection', () => {
     const route = { path: '/tasks', label: 'Tâches', icon: 'task' };
-    
+
     component.onRouteSelected(route);
 
     expect(component.preferencesForm.get('defaultRoute')?.value).toBe('/tasks');
@@ -229,7 +229,7 @@ describe('UiPreferencesFormComponent', () => {
 
   it('should show sync notification when sync is enabled', () => {
     userPreferencesService.updatePreferences.and.returnValue(of({ category: 'ui', preferences: {} }));
-    
+
     component.preferencesForm.patchValue({
       syncDevices: true
     });
@@ -250,9 +250,9 @@ describe('UiPreferencesFormComponent', () => {
     });
 
     expect(component.preferencesForm.valid).toBe(false);
-    
+
     component.onSave();
-    
+
     expect(notificationService.warning).toHaveBeenCalled();
     expect(userPreferencesService.updatePreferences).not.toHaveBeenCalled();
   });

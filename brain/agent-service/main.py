@@ -10,9 +10,15 @@ import httpx
 class Settings(BaseSettings):
     api_key: str = "change-me-in-production"
     allowed_origins: list[str] = ["http://localhost:8080", "http://localhost:4200"]
+    
     ollama_url: str = "http://ollama:11434"
     ollama_model: str = "mistral:7b"
     ollama_enabled: bool = False
+    
+    openai_api_key: str = ""
+    openai_enabled: bool = False
+    openai_model: str = "gpt-4o-mini"
+    
     class Config:
         env_file = ".env"
 
@@ -115,6 +121,76 @@ Réponds UNIQUEMENT avec ce JSON valide:
         logger.error(f"Erreur Ollama: {e}")
         return parse_with_rules(query)
 
+async def process_with_openai(query: str, context: str | None = None) -> AgentResponse:
+    from openai import AsyncOpenAI
+    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    
+    context_instruction = f"\n\nCONTEXTE IMMOBILIER (RAG):\n{context}\nUtilise ce contexte pour répondre à la question." if context else ""
+    
+    try:
+        response = await client.chat.completions.create(
+            model=settings.openai_model,
+            messages=[
+                {"role": "system", "content": "Tu es Atlas IA, un agent immobilier expert travaillant pour l'Agence. Tu es poli, proactif et tu connais l'immobilier marocain."},
+                {"role": "user", "content": f"Analyse cette requête utilisateur : \"{query}\"{context_instruction}"}
+            ],
+            response_format={
+                "type": "json_schema",
+                "json_schema": {
+                    "name": "agent_action",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "intent_type": {
+                                "type": "string",
+                                "enum": ["SEARCH", "CREATE", "STATUS_CHANGE", "SEND_MESSAGE", "NAVIGATE", "SCHEDULE_APPOINTMENT", "UNKNOWN"]
+                            },
+                            "confidence": {"type": "number"},
+                            "params": {
+                                "type": "object",
+                                "additionalProperties": {"type": "string"}
+                            },
+                            "answer": {"type": "string"},
+                            "actions": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "type": {"type": "string"},
+                                        "params": {
+                                            "type": "object",
+                                            "additionalProperties": {"type": "string"}
+                                        }
+                                    },
+                                    "required": ["type", "params"],
+                                    "additionalProperties": False
+                                }
+                            }
+                        },
+                        "required": ["intent_type", "confidence", "params", "answer", "actions"],
+                        "additionalProperties": False
+                    }
+                }
+            },
+            temperature=0.0
+        )
+        
+        import json
+        data = json.loads(response.choices[0].message.content)
+        
+        return AgentResponse(
+            intent_type=data.get("intent_type", "UNKNOWN"),
+            confidence=data.get("confidence", 0.5),
+            params=data.get("params", {}),
+            answer=data.get("answer", "Voici ma réponse."),
+            actions=data.get("actions", []),
+            engine="openai"
+        )
+    except Exception as e:
+        logger.error(f"Erreur OpenAI: {e}")
+        return parse_with_rules(query)
+
 @app.get("/health")
 def health():
     return {"status": "ok", "version": "1.0.0"}
@@ -123,13 +199,20 @@ def health():
 async def process(req: AgentRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     
-    # 1. Règles d'abord (très rapide)
     rule_result = parse_with_rules(req.query)
-    if rule_result.confidence >= 0.8 or not settings.ollama_enabled:
+    
+    # 1. Règles d'abord (Très rapide, mots-clés stricts)
+    if rule_result.confidence >= 0.8:
         result = rule_result
-    else:
-        # 2. LLM si nécessaire et activé
+    # 2. OpenAI si activé
+    elif settings.openai_enabled and settings.openai_api_key:
+        result = await process_with_openai(req.query, req.context)
+    # 3. Ollama si configuré et activé
+    elif settings.ollama_enabled:
         result = await process_with_ollama(req.query, req.context)
+    # 4. Fallback sur rules
+    else:
+        result = rule_result
         
-    logger.info(f"Agent [{req.query[:20]}...] → {result.intent_type} ({round((time.time()-start)*1000)}ms)")
+    logger.info(f"Agent [{req.query[:20]}...] → {result.intent_type} ({round((time.time()-start)*1000)}ms) via {result.engine}")
     return result

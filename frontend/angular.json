@@ -59,7 +59,7 @@
               "src/styles/utilities.scss",
               "src/styles/print.scss",
               "src/styles/shepherd-theme.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -134,13 +134,19 @@
               "namedChunks": true
             },
             "fr": {
-              "localize": ["fr"]
+              "localize": [
+                "fr"
+              ]
             },
             "en": {
-              "localize": ["en"]
+              "localize": [
+                "en"
+              ]
             },
             "es": {
-              "localize": ["es"]
+              "localize": [
+                "es"
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -194,7 +200,7 @@
               "src/styles/utilities.scss",
               "src/styles/print.scss",
               "src/styles/shepherd-theme.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           }

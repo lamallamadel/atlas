@@ -198,7 +198,7 @@ export class LeadScoringConfigDialogComponent implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: { config?: LeadScoringConfig },
     private leadScoringApi: LeadScoringApiService,
     private toastService: ToastNotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initForm();
@@ -206,7 +206,7 @@ export class LeadScoringConfigDialogComponent implements OnInit {
 
   initForm(): void {
     const config = this.data?.config;
-    
+
     const formConfig: any = {
       configName: [config?.configName || 'Default Configuration', Validators.required],
       isActive: [config?.isActive !== undefined ? config.isActive : true],
@@ -255,17 +255,17 @@ export class LeadScoringConfigDialogComponent implements OnInit {
 
   formatLabel(key: string): string {
     return key.replace(/_/g, ' ')
-              .replace(/([A-Z])/g, ' $1')
-              .replace(/^./, str => str.toUpperCase())
-              .trim();
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
   }
 
   onSave(): void {
     if (this.configForm.valid) {
       this.saving = true;
-      
+
       const formValue = this.configForm.value;
-      
+
       const sourceWeights: { [key: string]: number } = {};
       this.sourceKeys.forEach(key => {
         sourceWeights[key] = formValue[`sourceWeight_${key}`];
@@ -299,12 +299,12 @@ export class LeadScoringConfigDialogComponent implements OnInit {
 
       saveOperation.subscribe({
         next: (result) => {
-          this.toastService.showSuccess('Configuration saved successfully');
+          this.toastService.success('Configuration saved successfully');
           this.dialogRef.close(result);
         },
         error: (error) => {
           console.error('Error saving configuration:', error);
-          this.toastService.showError('Failed to save configuration');
+          this.toastService.error('Failed to save configuration');
           this.saving = false;
         }
       });

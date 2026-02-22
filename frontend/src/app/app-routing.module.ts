@@ -35,12 +35,7 @@ const routes: Routes = [
       { path: 'tasks', component: TaskListComponent, data: { animation: 'TasksPage' } },
       { path: 'calendar', component: CalendarViewComponent, data: { animation: 'CalendarPage' } },
 
-      { path: 'annonces', component: AnnoncesComponent, data: { animation: 'AnnoncesPage' } },
-      { path: 'annonces/new', component: AnnonceCreateComponent, data: { animation: 'AnnonceCreatePage' } },
-      { path: 'annonces/:id', component: AnnonceDetailComponent, data: { animation: 'AnnonceDetailPage' } },
-      { path: 'annonces/:id/edit', component: AnnonceCreateComponent, data: { animation: 'AnnonceEditPage' } },
-      { path: 'dossiers', component: DossiersComponent, data: { animation: 'DossiersPage' } },
-      { path: 'dossiers/:id', component: DossierDetailComponent, data: { animation: 'DossierDetailPage' } },
+
       { path: 'settings', component: SettingsPageComponent, data: { animation: 'SettingsPage' } },
 
       {
@@ -54,8 +49,8 @@ const routes: Routes = [
         data: { animation: 'DossiersPage' }
       },
 
-      { 
-        path: 'workflow-admin', 
+      {
+        path: 'workflow-admin',
         loadChildren: () => import('./pages/workflow-admin/workflow-admin.module').then(m => m.WorkflowAdminModule),
         data: { animation: 'WorkflowAdminPage' }
       }

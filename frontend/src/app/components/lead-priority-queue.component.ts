@@ -363,7 +363,7 @@ export class LeadPriorityQueueComponent implements OnInit {
     private leadScoringApi: LeadScoringApiService,
     private router: Router,
     private toastService: ToastNotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadLeads();
@@ -378,7 +378,7 @@ export class LeadPriorityQueueComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading priority queue:', error);
-        this.toastService.showError('Failed to load priority leads');
+        this.toastService.error('Failed to load priority leads');
         this.loading = false;
       }
     });
@@ -392,12 +392,12 @@ export class LeadPriorityQueueComponent implements OnInit {
     this.loading = true;
     this.leadScoringApi.recalculateAllScores().subscribe({
       next: (result) => {
-        this.toastService.showSuccess('Score recalculation initiated');
+        this.toastService.success('Score recalculation initiated');
         setTimeout(() => this.loadLeads(), 2000);
       },
       error: (error) => {
         console.error('Error recalculating scores:', error);
-        this.toastService.showError('Failed to recalculate scores');
+        this.toastService.error('Failed to recalculate scores');
         this.loading = false;
       }
     });

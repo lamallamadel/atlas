@@ -22,7 +22,7 @@ export class MLInsightsDashboardComponent implements OnInit {
   modelMetricsChart: Chart | null = null;
   experimentComparisonChart: Chart | null = null;
 
-  constructor(private mlService: MLService) {}
+  constructor(private mlService: MLService) { }
 
   ngOnInit(): void {
     this.loadDashboardData();
@@ -59,11 +59,11 @@ export class MLInsightsDashboardComponent implements OnInit {
   }
 
   async loadModelVersions(): Promise<void> {
-    this.modelVersions = await this.mlService.getModelVersions().toPromise();
+    this.modelVersions = (await this.mlService.getModelVersions().toPromise()) || [];
   }
 
   async loadExperiments(): Promise<void> {
-    this.activeExperiments = await this.mlService.getExperiments().toPromise();
+    this.activeExperiments = (await this.mlService.getExperiments().toPromise()) || [];
   }
 
   renderCharts(): void {
@@ -192,7 +192,7 @@ export class MLInsightsDashboardComponent implements OnInit {
       this.experimentComparisonChart.destroy();
     }
 
-    const experimentWithMetrics = this.activeExperiments.filter(e => 
+    const experimentWithMetrics = this.activeExperiments.filter(e =>
       e.control_metrics && e.treatment_metrics
     );
 
@@ -301,7 +301,7 @@ export class MLInsightsDashboardComponent implements OnInit {
     const controlRate = experiment.control_metrics?.conversion_rate || 0;
     const treatmentRate = experiment.treatment_metrics?.conversion_rate || 0;
     const improvement = ((treatmentRate - controlRate) / controlRate * 100);
-    
+
     if (Math.abs(improvement) < 5) return 'Low';
     if (Math.abs(improvement) < 15) return 'Medium';
     return 'High';

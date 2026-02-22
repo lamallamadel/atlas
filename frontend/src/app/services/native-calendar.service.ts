@@ -26,7 +26,7 @@ export class NativeCalendarService {
   private readonly isNativePlatform = Capacitor.isNativePlatform();
   private readonly defaultCalendarTitle = 'Atlas Immobilier';
 
-  constructor() {}
+  constructor() { }
 
   /**
    * Request calendar permissions
@@ -37,7 +37,7 @@ export class NativeCalendarService {
     }
 
     return from(Calendar.requestPermissions()).pipe(
-      map((result) => ({
+      map((result: any) => ({
         granted: result.readWrite,
         message: result.readWrite ? 'Permissions granted' : 'Permissions denied'
       })),
@@ -57,7 +57,7 @@ export class NativeCalendarService {
     }
 
     return from(Calendar.checkPermissions()).pipe(
-      map((result) => ({ granted: result.readWrite })),
+      map((result: any) => ({ granted: result.readWrite })),
       catchError(() => of({ granted: false }))
     );
   }
@@ -91,7 +91,7 @@ export class NativeCalendarService {
     };
 
     return from(Calendar.createEvent(calendarEvent)).pipe(
-      map((result) => ({
+      map((result: any) => ({
         success: true,
         eventId: result.id
       })),
@@ -166,7 +166,7 @@ export class NativeCalendarService {
       startDate: startDate.toISOString(),
       endDate: endDate.toISOString()
     })).pipe(
-      map((result) => result.events || []),
+      map((result: any) => result.events || []),
       catchError((error) => {
         console.error('Error fetching calendar events:', error);
         return of([]);
@@ -183,7 +183,7 @@ export class NativeCalendarService {
     }
 
     return from(Calendar.listCalendars()).pipe(
-      map((result) => result.calendars || []),
+      map((result: any) => result.calendars || []),
       catchError((error) => {
         console.error('Error listing calendars:', error);
         return of([]);
@@ -204,7 +204,7 @@ export class NativeCalendarService {
       color: '#2c5aa0',
       isVisible: true
     })).pipe(
-      map((result) => ({
+      map((result: any) => ({
         success: true,
         eventId: result.id
       })),

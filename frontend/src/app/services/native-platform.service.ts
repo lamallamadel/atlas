@@ -29,7 +29,7 @@ export interface PlatformInfo {
 export class NativePlatformService {
   private readonly isNativePlatform = Capacitor.isNativePlatform();
   private readonly platform = Capacitor.getPlatform();
-  
+
   private readonly networkStatusSubject = new BehaviorSubject<ConnectionStatus | null>(null);
   private readonly appStateSubject = new BehaviorSubject<AppState | null>(null);
   private readonly keyboardSubject = new Subject<KeyboardInfo>();
@@ -285,7 +285,7 @@ export class NativePlatformService {
       return of(undefined);
     }
 
-    return from(Haptics.notification({ type })).pipe(
+    return from(Haptics.notification({ type: type as any })).pipe(
       catchError(() => of(undefined))
     );
   }
@@ -409,19 +409,19 @@ export class NativePlatformService {
    */
   private handleDeepLink(url: string): void {
     console.log('Deep link opened:', url);
-    
+
     // Parse WhatsApp callback URLs
     if (url.includes('atlasimmo://whatsapp/callback')) {
       const urlParams = new URLSearchParams(url.split('?')[1]);
       const code = urlParams.get('code');
       const state = urlParams.get('state');
-      
+
       // Dispatch event for WhatsApp callback handling
       window.dispatchEvent(new CustomEvent('whatsapp-callback', {
         detail: { code, state }
       }));
     }
-    
+
     // Handle other deep link patterns
     if (url.includes('atlasimmo://dossiers/')) {
       const dossierId = url.split('dossiers/')[1]?.split('?')[0];

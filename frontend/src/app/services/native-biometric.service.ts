@@ -25,7 +25,7 @@ export interface BiometricAvailability {
 export class NativeBiometricService {
   private readonly isNativePlatform = Capacitor.isNativePlatform();
 
-  constructor() {}
+  constructor() { }
 
   /**
    * Check if biometric authentication is available on the device
@@ -36,14 +36,14 @@ export class NativeBiometricService {
         available: false,
         biometryType: 'none',
         strongBiometricAvailable: false
-      });
+      } as BiometricAvailability);
     }
 
     return from(BiometricAuth.checkBiometry()).pipe(
-      map((result) => ({
-        available: result.isAvailable,
+      map((result: any) => ({
+        available: !!result.isAvailable,
         biometryType: this.mapBiometryType(result.biometryType),
-        strongBiometricAvailable: result.strongBiometryIsAvailable
+        strongBiometricAvailable: !!result.strongBiometryIsAvailable
       })),
       catchError((error) => {
         console.error('Error checking biometric availability:', error);
@@ -51,7 +51,7 @@ export class NativeBiometricService {
           available: false,
           biometryType: 'none',
           strongBiometricAvailable: false
-        });
+        } as BiometricAvailability);
       })
     );
   }
@@ -117,7 +117,7 @@ export class NativeBiometricService {
     }
 
     return from(BiometricAuth.checkBiometry()).pipe(
-      map((result) => result.isAvailable && result.strongBiometryIsAvailable),
+      map((result: any) => result.isAvailable && result.strongBiometryIsAvailable),
       catchError(() => of(false))
     );
   }
@@ -146,27 +146,27 @@ export class NativeBiometricService {
    */
   private mapErrorToMessage(error: any): string {
     const errorCode = error?.code || error?.message || '';
-    
+
     if (errorCode.includes('user_cancel') || errorCode.includes('USER_CANCELED')) {
       return 'Authentification annulée par l\'utilisateur';
     }
-    
+
     if (errorCode.includes('not_available') || errorCode.includes('NOT_AVAILABLE')) {
       return 'L\'authentification biométrique n\'est pas disponible';
     }
-    
+
     if (errorCode.includes('lockout') || errorCode.includes('LOCKOUT')) {
       return 'Trop de tentatives échouées. Veuillez réessayer plus tard.';
     }
-    
+
     if (errorCode.includes('no_hardware') || errorCode.includes('NO_HARDWARE')) {
       return 'Aucun capteur biométrique détecté sur cet appareil';
     }
-    
+
     if (errorCode.includes('not_enrolled') || errorCode.includes('NONE_ENROLLED')) {
       return 'Aucune donnée biométrique enregistrée sur cet appareil';
     }
-    
+
     return 'Erreur d\'authentification biométrique';
   }
 

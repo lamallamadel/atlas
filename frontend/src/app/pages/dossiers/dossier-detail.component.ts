@@ -58,13 +58,13 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
 
-  
+
   collaborationEnabled = false;
   currentUserId = 'user-' + Math.random().toString(36).substr(2, 9);
   currentUsername = 'Current User';
   private collaborationSubscriptions: Subscription[] = [];
   private noteEditTimeout: any;
-  
+
 
 
 
@@ -187,11 +187,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
 
     private recentNavigationService: RecentNavigationService,
     private collaborationService: CollaborationService
-  ) {}
-
-    private recentNavigationService: RecentNavigationService
   ) { }
-
 
   getAvailableStatusOptions(): DossierStatus[] {
     if (!this.dossier) {
@@ -348,7 +344,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
 
     const fieldName = 'notes';
     const cursorPosition = event.target.selectionStart;
-    
+
     this.collaborationService.updateCursor(fieldName, cursorPosition);
 
     if (this.noteEditTimeout) {

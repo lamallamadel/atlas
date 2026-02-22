@@ -72,9 +72,9 @@ export interface TemplateVersionRequest {
   providedIn: 'root'
 })
 export class WhatsAppTemplateApiService {
-  private apiUrl = `${environment.apiUrl}/api/whatsapp/templates`;
+  private apiUrl = `${environment.apiBaseUrl}/api/whatsapp/templates`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getAllTemplates(status?: string): Observable<WhatsAppTemplateResponse[]> {
     let params = new HttpParams();
@@ -103,7 +103,7 @@ export class WhatsAppTemplateApiService {
     if (filters.status) params = params.set('status', filters.status);
     if (filters.language) params = params.set('language', filters.language);
     if (filters.searchTerm) params = params.set('searchTerm', filters.searchTerm);
-    
+
     return this.http.get<WhatsAppTemplateResponse[]>(`${this.apiUrl}/search`, { params });
   }
 
