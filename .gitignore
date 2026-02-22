@@ -118,6 +118,8 @@ test-reports/
 test_output*.txt
 test-results*.txt
 backend/target/e2e-test-logs/
+frontend/t[0-9].txt
+frontend/test-*.txt
 
 # Playwright
 playwright-report/
