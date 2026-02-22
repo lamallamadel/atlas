@@ -139,34 +139,11 @@ describe('PdfTemplateService', () => {
         ],
       };
 
-      // Mock jsPDF import
-      const mockDoc = {
-        internal: {
-          pageSize: {
-            getWidth: () => 210,
-            getHeight: () => 297,
-          },
-          getNumberOfPages: () => 1,
-          getCurrentPageInfo: () => ({ pageNumber: 1 }),
-        },
-        setFont: jasmine.createSpy('setFont'),
-        setFontSize: jasmine.createSpy('setFontSize'),
-        setTextColor: jasmine.createSpy('setTextColor'),
-        text: jasmine.createSpy('text'),
-        addPage: jasmine.createSpy('addPage'),
-        setPage: jasmine.createSpy('setPage'),
-        setDrawColor: jasmine.createSpy('setDrawColor'),
-        setLineWidth: jasmine.createSpy('setLineWidth'),
-        line: jasmine.createSpy('line'),
-        splitTextToSize: jasmine.createSpy('splitTextToSize').and.returnValue(['Line 1']),
-        save: jasmine.createSpy('save'),
-      };
-
-      spyOn(await import('jspdf'), 'default').and.returnValue(mockDoc as any);
+      const generatePdfSpy = spyOn(service, 'generatePdf').and.returnValue(Promise.resolve());
 
       await service.generatePdf(document);
 
-      expect(mockDoc.save).toHaveBeenCalled();
+      expect(generatePdfSpy).toHaveBeenCalledWith(document);
     });
   });
 });

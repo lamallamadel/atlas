@@ -36,7 +36,7 @@ describe('LottieAnimationComponent', () => {
     let emittedError: Error | null = null;
     component.error.subscribe((err: Error) => { emittedError = err; });
 
-    spyOn(component as any, 'loadAnimation').and.returnValue(Promise.reject(new Error('Load failed')));
+    spyOn(component as any, 'loadAnimationData').and.returnValue(Promise.reject(new Error('Load failed')));
     fixture.detectChanges();
     tick(50);
     fixture.detectChanges();
