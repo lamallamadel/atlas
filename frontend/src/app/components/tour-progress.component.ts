@@ -13,10 +13,10 @@ import { UserPreferencesService } from '../services/user-preferences.service';
 })
 export class TourProgressComponent implements OnInit, OnDestroy {
   tours: TourDefinition[] = [];
-  completionPercentage: number = 0;
-  completedCount: number = 0;
-  totalCount: number = 0;
-  isLoading: boolean = true;
+  completionPercentage = 0;
+  completedCount = 0;
+  totalCount = 0;
+  isLoading = true;
   
   private destroy$ = new Subject<void>();
 

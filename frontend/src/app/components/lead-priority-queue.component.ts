@@ -52,10 +52,14 @@ import { ToastNotificationService } from '../services/toast-notification.service
         <div *ngIf="!loading && leads.length > 0" class="leads-list">
           <div *ngFor="let lead of leads" 
                class="lead-item" 
+               role="button"
+               tabindex="0"
                [class.urgent]="lead.urgencyLevel === 'urgent'"
                [class.high]="lead.urgencyLevel === 'high'"
                [class.medium]="lead.urgencyLevel === 'medium'"
-               (click)="viewDossier(lead.dossier.id)">
+               (click)="viewDossier(lead.dossier.id)"
+               (keydown.enter)="viewDossier(lead.dossier.id)"
+               (keydown.space)="$event.preventDefault(); viewDossier(lead.dossier.id)">
             
             <div class="lead-score">
               <div class="score-value">{{ lead.score.totalScore }}</div>

@@ -29,13 +29,13 @@ import { CustomerPortalService } from '../services/customer-portal.service';
 
       <form [formGroup]="requestForm" (ngSubmit)="submitRequest()" class="request-form">
         <div class="form-group">
-          <label>Date et heure souhaitée *</label>
-          <input type="datetime-local" formControlName="proposedStartTime" class="form-control">
+          <label for="proposedStartTime">Date et heure souhaitée *</label>
+          <input id="proposedStartTime" type="datetime-local" formControlName="proposedStartTime" class="form-control">
         </div>
 
         <div class="form-group">
-          <label>Durée estimée</label>
-          <select formControlName="duration" class="form-control">
+          <label for="duration">Durée estimée</label>
+          <select id="duration" formControlName="duration" class="form-control">
             <option value="30">30 minutes</option>
             <option value="60">1 heure</option>
             <option value="90">1h30</option>
@@ -44,15 +44,15 @@ import { CustomerPortalService } from '../services/customer-portal.service';
         </div>
 
         <div class="form-group">
-          <label>Lieu préféré</label>
-          <input type="text" formControlName="preferredLocation" 
+          <label for="preferredLocation">Lieu préféré</label>
+          <input id="preferredLocation" type="text" formControlName="preferredLocation" 
                  placeholder="Adresse ou lieu de rendez-vous" 
                  class="form-control">
         </div>
 
         <div class="form-group">
-          <label>Notes</label>
-          <textarea formControlName="notes" 
+          <label for="notes">Notes</label>
+          <textarea id="notes" formControlName="notes" 
                     placeholder="Informations complémentaires..." 
                     rows="3"
                     class="form-control"></textarea>

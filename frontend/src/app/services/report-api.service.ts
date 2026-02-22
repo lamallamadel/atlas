@@ -90,7 +90,7 @@ export class ReportApiService {
     URL.revokeObjectURL(url);
   }
 
-  async exportToCSV(data: any[], columns: ReportColumn[], filename: string = 'report.csv'): Promise<void> {
+  async exportToCSV(data: any[], columns: ReportColumn[], filename = 'report.csv'): Promise<void> {
     const Papa = await import('papaparse');
     
     const csvData = data.map(row => {
@@ -106,7 +106,7 @@ export class ReportApiService {
     this.downloadFile(blob, filename);
   }
 
-  async exportToExcel(data: any[], columns: ReportColumn[], filename: string = 'report.xlsx'): Promise<void> {
+  async exportToExcel(data: any[], columns: ReportColumn[], filename = 'report.xlsx'): Promise<void> {
     const XLSX = await import('xlsx');
     
     const worksheetData = [
@@ -132,7 +132,7 @@ export class ReportApiService {
     data: any[], 
     columns: ReportColumn[], 
     options: { title?: string; subtitle?: string; branding?: any } = {},
-    filename: string = 'report.pdf'
+    filename = 'report.pdf'
   ): Promise<void> {
     const [jsPDFModule] = await Promise.all([
       import('jspdf'),

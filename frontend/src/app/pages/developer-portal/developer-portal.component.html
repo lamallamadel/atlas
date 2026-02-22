@@ -178,19 +178,19 @@
   </div>
 
   <!-- Create API Key Dialog -->
-  <div *ngIf="showCreateApiKeyDialog" class="modal-overlay" (click)="showCreateApiKeyDialog = false">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+  <div *ngIf="showCreateApiKeyDialog" class="modal-overlay" role="button" tabindex="0" (click)="showCreateApiKeyDialog = false" (keydown.enter)="showCreateApiKeyDialog = false" (keydown.space)="$event.preventDefault(); showCreateApiKeyDialog = false">
+    <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
       <h2>Create API Key</h2>
       
       <div *ngIf="!newlyCreatedKey">
         <div class="form-group">
-          <label>Name *</label>
-          <input type="text" [(ngModel)]="newApiKey.name" placeholder="Production API Key">
+          <label for="api-key-name">Name *</label>
+          <input id="api-key-name" type="text" [(ngModel)]="newApiKey.name" placeholder="Production API Key">
         </div>
 
         <div class="form-group">
-          <label>Tier *</label>
-          <select [(ngModel)]="newApiKey.tier">
+          <label for="api-key-tier">Tier *</label>
+          <select id="api-key-tier" [(ngModel)]="newApiKey.tier">
             <option [value]="ApiTier.FREE">Free (60 req/min)</option>
             <option [value]="ApiTier.PRO">Pro (600 req/min)</option>
             <option [value]="ApiTier.ENTERPRISE">Enterprise (6000 req/min)</option>
@@ -198,8 +198,8 @@
         </div>
 
         <div class="form-group">
-          <label>Description</label>
-          <textarea [(ngModel)]="newApiKey.description" rows="3"></textarea>
+          <label for="api-key-desc">Description</label>
+          <textarea id="api-key-desc" [(ngModel)]="newApiKey.description" rows="3"></textarea>
         </div>
 
         <div class="modal-actions">
@@ -222,30 +222,30 @@
   </div>
 
   <!-- Create Webhook Dialog -->
-  <div *ngIf="showCreateWebhookDialog" class="modal-overlay" (click)="showCreateWebhookDialog = false">
-    <div class="modal-content" (click)="$event.stopPropagation()">
+  <div *ngIf="showCreateWebhookDialog" class="modal-overlay" role="button" tabindex="0" (click)="showCreateWebhookDialog = false" (keydown.enter)="showCreateWebhookDialog = false" (keydown.space)="$event.preventDefault(); showCreateWebhookDialog = false">
+    <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
       <h2>Create Webhook</h2>
 
       <div class="form-group">
-        <label>Name *</label>
-        <input type="text" [(ngModel)]="newWebhook.name" placeholder="Production Webhook">
+        <label for="webhook-name">Name *</label>
+        <input id="webhook-name" type="text" [(ngModel)]="newWebhook.name" placeholder="Production Webhook">
       </div>
 
       <div class="form-group">
-        <label>URL *</label>
-        <input type="url" [(ngModel)]="newWebhook.url" placeholder="https://your-app.com/webhooks">
+        <label for="webhook-url">URL *</label>
+        <input id="webhook-url" type="url" [(ngModel)]="newWebhook.url" placeholder="https://your-app.com/webhooks">
       </div>
 
       <div class="form-group">
-        <label>Event Type *</label>
-        <select [(ngModel)]="newWebhook.eventType">
+        <label for="webhook-event">Event Type *</label>
+        <select id="webhook-event" [(ngModel)]="newWebhook.eventType">
           <option *ngFor="let event of webhookEvents" [value]="event">{{ event }}</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label>Description</label>
-        <textarea [(ngModel)]="newWebhook.description" rows="3"></textarea>
+        <label for="webhook-desc">Description</label>
+        <textarea id="webhook-desc" [(ngModel)]="newWebhook.description" rows="3"></textarea>
       </div>
 
       <div class="modal-actions">

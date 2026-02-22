@@ -2,8 +2,8 @@
   <form [formGroup]="filterForm" class="filter-form">
     <!-- Logic Operator Toggle -->
     <div class="logic-operator-section">
-      <label class="logic-label">Conditions:</label>
-      <mat-button-toggle-group formControlName="logicOperator" aria-label="Opérateur logique">
+      <span class="logic-label" id="logic-operator-label">Conditions:</span>
+      <mat-button-toggle-group formControlName="logicOperator" aria-labelledby="logic-operator-label">
         <mat-button-toggle value="AND">ET (AND)</mat-button-toggle>
         <mat-button-toggle value="OR">OU (OR)</mat-button-toggle>
       </mat-button-toggle-group>

@@ -214,7 +214,7 @@ export class ToastNotificationService {
     if (typeof action === 'string') {
       return {
         label: action,
-        handler: () => {}
+        handler: () => { return; }
       };
     }
     

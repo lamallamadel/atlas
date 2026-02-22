@@ -1,5 +1,5 @@
 <div class="region-status-container">
-  <div class="current-region" (click)="toggleRegionSelector()">
+  <div class="current-region" role="button" tabindex="0" (click)="toggleRegionSelector()" (keydown.enter)="toggleRegionSelector()" (keydown.space)="$event.preventDefault(); toggleRegionSelector()">
     <span class="region-icon material-icons">language</span>
     <span class="region-name" *ngIf="currentRegion">{{ currentRegion.displayName }}</span>
     <span class="region-latency" *ngIf="currentRegion" [ngClass]="getLatencyClass(currentRegion.name)">
@@ -23,9 +23,13 @@
 
     <div class="region-list">
       <div class="region-item" *ngFor="let region of allRegions"
+           role="button"
+           tabindex="0"
            [class.active]="isCurrentRegion(region)"
            [class.disabled]="failoverInProgress"
-           (click)="switchRegion(region.name)">
+           (click)="switchRegion(region.name)"
+           (keydown.enter)="switchRegion(region.name)"
+           (keydown.space)="$event.preventDefault(); switchRegion(region.name)">
         <div class="region-info">
           <div class="region-header">
             <span class="region-title">{{ region.displayName }}</span>

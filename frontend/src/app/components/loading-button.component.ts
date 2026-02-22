@@ -79,11 +79,11 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 })
 export class LoadingButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
-  @Input() disabled: boolean = false;
-  @Input() loading: boolean = false;
-  @Input() buttonClass: string = '';
-  @Input() spinnerSize: number = 20;
-  @Input() spinnerColor: string = '#ffffff';
+  @Input() disabled = false;
+  @Input() loading = false;
+  @Input() buttonClass = '';
+  @Input() spinnerSize = 20;
+  @Input() spinnerColor = '#ffffff';
   
   @Output() clicked = new EventEmitter<MouseEvent>();
 

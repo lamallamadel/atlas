@@ -14,7 +14,7 @@ export class TemplateEditorComponent implements OnInit {
   @Output() cancel = new EventEmitter<void>();
 
   templateForm!: FormGroup;
-  previewText: string = '';
+  previewText = '';
   previewVariables: { [key: string]: string } = {};
 
   categories = [
@@ -118,8 +118,8 @@ export class TemplateEditorComponent implements OnInit {
     this.buttons.removeAt(index);
   }
 
-  addVariable(name: string = '', componentType: string = 'BODY', 
-              exampleValue: string = '', isRequired: boolean = true): void {
+  addVariable(name = '', componentType = 'BODY', 
+              exampleValue = '', isRequired = true): void {
     const position = this.variables.length + 1;
     const variableGroup = this.fb.group({
       variableName: [name || `var${position}`, Validators.required],

@@ -44,16 +44,16 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   @Input() datasets: ChartDataset[] = [];
   @Input() title?: string;
   @Input() subtitle?: string;
-  @Input() height: number = 400;
-  @Input() aspectRatio: number = 2;
-  @Input() animation: boolean = true;
-  @Input() showLegend: boolean = true;
-  @Input() showGrid: boolean = true;
-  @Input() showTooltips: boolean = true;
-  @Input() darkMode: boolean = false;
-  @Input() stacked: boolean = false;
+  @Input() height = 400;
+  @Input() aspectRatio = 2;
+  @Input() animation = true;
+  @Input() showLegend = true;
+  @Input() showGrid = true;
+  @Input() showTooltips = true;
+  @Input() darkMode = false;
+  @Input() stacked = false;
   @Input() customOptions?: ChartOptions;
-  @Input() enableExport: boolean = true;
+  @Input() enableExport = true;
 
   @Output() chartClick = new EventEmitter<any>();
   @Output() chartHover = new EventEmitter<any>();
@@ -255,7 +255,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
     return { ...baseOptions, ...this.customOptions };
   }
 
-  private getColorForIndex(index: number, alpha: number = 1): string {
+  private getColorForIndex(index: number, alpha = 1): string {
     const colors = [
       { r: 44, g: 90, b: 160 },    // primary
       { r: 66, g: 136, b: 206 },   // secondary
@@ -289,9 +289,9 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
     const meta = this.chart.getDatasetMeta(0);
     if (!meta || !meta.data) return;
 
-    meta.data.forEach((bar: any, index: number) => {
+    meta.data.forEach((_bar: unknown, index: number) => {
       setTimeout(() => {
-        bar.y = bar.y;
+        if (this.chart) this.chart.update('none');
       }, index * 50);
     });
   }

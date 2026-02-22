@@ -36,7 +36,7 @@ export class DeveloperPortalApiService {
     return this.http.delete<void>(`${this.baseUrl}/api-keys/${id}`);
   }
 
-  getApiKeyUsage(id: number, days: number = 30): Observable<ApiUsage[]> {
+  getApiKeyUsage(id: number, days = 30): Observable<ApiUsage[]> {
     const params = new HttpParams().set('days', days.toString());
     return this.http.get<ApiUsage[]>(`${this.baseUrl}/api-keys/${id}/usage`, { params });
   }
@@ -62,7 +62,7 @@ export class DeveloperPortalApiService {
     return this.http.delete<void>(`${this.baseUrl}/webhooks/${id}`);
   }
 
-  getWebhookDeliveries(id: number, page: number = 0, size: number = 20): Observable<{ content: WebhookDelivery[] }> {
+  getWebhookDeliveries(id: number, page = 0, size = 20): Observable<{ content: WebhookDelivery[] }> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());

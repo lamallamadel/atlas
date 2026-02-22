@@ -15,7 +15,7 @@ class StubLottieAnimationComponent {
   @Input() loop!: boolean;
   @Input() autoplay!: boolean;
   @Input() showControls!: boolean;
-  @Output() error = new EventEmitter<Error>();
+  @Output() animationError = new EventEmitter<Error>();
 }
 
 describe('AnimatedEmptyStateComponent', () => {
@@ -134,7 +134,7 @@ describe('AnimatedEmptyStateComponent', () => {
     component.primaryAction = {
       label: 'Primary Action',
       icon: 'add',
-      handler: () => {}
+      handler: () => { /* no-op for test */ }
     };
     fixture.detectChanges();
 
@@ -150,7 +150,7 @@ describe('AnimatedEmptyStateComponent', () => {
     component.secondaryAction = {
       label: 'Secondary Action',
       icon: 'close',
-      handler: () => {}
+      handler: () => { /* no-op for test */ }
     };
     fixture.detectChanges();
 

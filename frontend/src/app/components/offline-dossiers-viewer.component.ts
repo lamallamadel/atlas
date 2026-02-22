@@ -37,7 +37,7 @@ interface CachedDossier {
           }"
           (swipeRight)="viewDossier(dossier.id)"
           class="dossier-card-wrapper">
-          <div class="dossier-card" (click)="viewDossier(dossier.id)">
+          <div class="dossier-card" role="button" tabindex="0" (click)="viewDossier(dossier.id)" (keydown.enter)="viewDossier(dossier.id)" (keydown.space)="$event.preventDefault(); viewDossier(dossier.id)">
             <div class="dossier-header">
               <div class="dossier-avatar">
                 {{ getInitials(dossier.leadName) }}

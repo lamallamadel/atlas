@@ -26,7 +26,7 @@ export class NativeCalendarService {
   private readonly isNativePlatform = Capacitor.isNativePlatform();
   private readonly defaultCalendarTitle = 'Atlas Immobilier';
 
-  constructor() { }
+  constructor() { /* no-op */ }
 
   /**
    * Request calendar permissions

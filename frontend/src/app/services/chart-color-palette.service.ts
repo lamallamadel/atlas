@@ -251,7 +251,7 @@ export class ChartColorPaletteService {
     return luminance > 0.5 ? '#212121' : '#FFFFFF';
   }
 
-  generateGradient(color: string, steps: number = 5): string[] {
+  generateGradient(color: string, steps = 5): string[] {
     const rgba = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
     if (!rgba) return [color];
 
@@ -269,7 +269,7 @@ export class ChartColorPaletteService {
     return gradient;
   }
 
-  registerCustomPalette(name: string, colors: string[], accessible: boolean = false, wcagLevel: 'AA' | 'AAA' = 'AA'): void {
+  registerCustomPalette(name: string, colors: string[], accessible = false, wcagLevel: 'AA' | 'AAA' = 'AA'): void {
     const alphaColors = colors.map(c => this.getColorWithAlpha(c, 0.2));
     this.palettes.set(name, {
       name,

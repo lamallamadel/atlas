@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CustomerPortalActivity } from '../models/customer-portal.models';
 
 @Component({
@@ -107,8 +107,6 @@ import { CustomerPortalActivity } from '../models/customer-portal.models';
     }
   `]
 })
-export class DossierTimelineViewComponent implements OnInit {
+export class DossierTimelineViewComponent {
   @Input() activities: CustomerPortalActivity[] = [];
-
-  ngOnInit(): void {}
 }

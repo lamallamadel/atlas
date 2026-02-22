@@ -32,7 +32,7 @@ export interface CloseProbability {
 })
 export class PredictiveAnalyticsService {
 
-  constructor() {}
+  constructor() { /* no-op */ }
 
   performLinearRegression(xValues: number[], yValues: number[]): LinearRegressionResult {
     if (xValues.length !== yValues.length || xValues.length === 0) {

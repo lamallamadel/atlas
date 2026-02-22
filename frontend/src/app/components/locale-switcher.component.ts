@@ -102,7 +102,7 @@ import { I18nService, SupportedLocale } from '../services/i18n.service';
 })
 export class LocaleSwitcherComponent implements OnInit {
   supportedLocales: SupportedLocale[] = [];
-  currentLocale: string = 'fr';
+  currentLocale = 'fr';
   currentLocaleInfo?: SupportedLocale;
 
   constructor(private i18nService: I18nService) {}

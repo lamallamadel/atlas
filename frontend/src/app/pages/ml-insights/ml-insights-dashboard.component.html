@@ -23,15 +23,15 @@
       <div class="card-body">
         <div class="info-grid">
           <div class="info-item">
-            <label>Version:</label>
+            <span class="info-label">Version:</span>
             <span class="badge badge-primary">{{ modelInfo.version }}</span>
           </div>
           <div class="info-item">
-            <label>Training Data Size:</label>
+            <span class="info-label">Training Data Size:</span>
             <span>{{ modelInfo.training_data_size | number }}</span>
           </div>
           <div class="info-item">
-            <label>Activated:</label>
+            <span class="info-label">Activated:</span>
             <span>{{ modelInfo.activated_at | date: 'short' }}</span>
           </div>
         </div>

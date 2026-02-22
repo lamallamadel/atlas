@@ -28,7 +28,7 @@
       *ngFor="let group of groupedAppointments; trackBy: trackByGroup"
       [class.expanded]="isGroupExpanded(group.dateLabel)">
       
-      <div class="date-header" (click)="toggleGroup(group.dateLabel)">
+      <div class="date-header" role="button" tabindex="0" (click)="toggleGroup(group.dateLabel)" (keydown.enter)="toggleGroup(group.dateLabel)" (keydown.space)="$event.preventDefault(); toggleGroup(group.dateLabel)">
         <div class="date-info">
           <h3 class="date-label">{{ group.dateLabel }}</h3>
           <span class="appointment-count">{{ group.appointments.length }} rendez-vous</span>
@@ -42,7 +42,11 @@
         <div 
           class="appointment-item" 
           *ngFor="let appointment of group.appointments; trackBy: trackByAppointment"
+          role="button"
+          tabindex="0"
           (click)="onAppointmentClick(appointment)"
+          (keydown.enter)="onAppointmentClick(appointment)"
+          (keydown.space)="$event.preventDefault(); onAppointmentClick(appointment)"
           [class.mobile]="isMobile">
           
           <div class="appointment-status-indicator" 

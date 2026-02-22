@@ -55,9 +55,9 @@ import { ToastNotificationService } from '../services/toast-notification.service
           <mat-tab label="Source Weights">
             <div class="tab-content">
               <div class="weight-item" *ngFor="let source of sourceKeys">
-                <label>{{ formatLabel(source) }}</label>
+                <label [attr.for]="'sourceWeight_' + source">{{ formatLabel(source) }}</label>
                 <mat-slider min="0" max="30" step="1" discrete>
-                  <input matSliderThumb [formControlName]="'sourceWeight_' + source">
+                  <input [id]="'sourceWeight_' + source" matSliderThumb [formControlName]="'sourceWeight_' + source">
                 </mat-slider>
                 <span class="weight-value">{{ configForm.get('sourceWeight_' + source)?.value }}</span>
               </div>
@@ -67,9 +67,9 @@ import { ToastNotificationService } from '../services/toast-notification.service
           <mat-tab label="Engagement Weights">
             <div class="tab-content">
               <div class="weight-item" *ngFor="let engagement of engagementKeys">
-                <label>{{ formatLabel(engagement) }}</label>
+                <label [attr.for]="'engagementWeight_' + engagement">{{ formatLabel(engagement) }}</label>
                 <mat-slider min="0" max="20" step="1" discrete>
-                  <input matSliderThumb [formControlName]="'engagementWeight_' + engagement">
+                  <input [id]="'engagementWeight_' + engagement" matSliderThumb [formControlName]="'engagementWeight_' + engagement">
                 </mat-slider>
                 <span class="weight-value">{{ configForm.get('engagementWeight_' + engagement)?.value }}</span>
               </div>
@@ -79,9 +79,9 @@ import { ToastNotificationService } from '../services/toast-notification.service
           <mat-tab label="Property Match Weights">
             <div class="tab-content">
               <div class="weight-item" *ngFor="let property of propertyKeys">
-                <label>{{ formatLabel(property) }}</label>
+                <label [attr.for]="'propertyWeight_' + property">{{ formatLabel(property) }}</label>
                 <mat-slider min="0" max="20" step="1" discrete>
-                  <input matSliderThumb [formControlName]="'propertyWeight_' + property">
+                  <input [id]="'propertyWeight_' + property" matSliderThumb [formControlName]="'propertyWeight_' + property">
                 </mat-slider>
                 <span class="weight-value">{{ configForm.get('propertyWeight_' + property)?.value }}</span>
               </div>

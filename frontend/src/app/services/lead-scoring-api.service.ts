@@ -75,7 +75,7 @@ export class LeadScoringApiService {
     return this.http.get<LeadScore>(`${this.apiUrl}/score/${dossierId}`);
   }
 
-  getPriorityQueue(limit: number = 50): Observable<LeadPriority[]> {
+  getPriorityQueue(limit = 50): Observable<LeadPriority[]> {
     const params = new HttpParams().set('limit', limit.toString());
     return this.http.get<LeadPriority[]>(`${this.apiUrl}/priority-queue`, { params });
   }

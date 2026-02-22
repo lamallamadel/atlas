@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CustomerPortalDocument } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
 
@@ -13,7 +13,7 @@ import { CustomerPortalService } from '../services/customer-portal.service';
       </div>
 
       <div class="document-grid">
-        <div *ngFor="let doc of documents" class="document-card" (click)="downloadDocument(doc)">
+        <div *ngFor="let doc of documents" class="document-card" role="button" tabindex="0" (click)="downloadDocument(doc)" (keydown.enter)="downloadDocument(doc)" (keydown.space)="$event.preventDefault(); downloadDocument(doc)">
           <div class="document-icon">
             <span *ngIf="isImage(doc)">🖼️</span>
             <span *ngIf="isPdf(doc)">📄</span>
@@ -122,12 +122,10 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     }
   `]
 })
-export class ClientDocumentLibraryComponent implements OnInit {
+export class ClientDocumentLibraryComponent {
   @Input() documents: CustomerPortalDocument[] = [];
 
   constructor(private portalService: CustomerPortalService) {}
-
-  ngOnInit(): void {}
 
   downloadDocument(doc: CustomerPortalDocument): void {
     this.portalService.downloadDocument(doc.id).subscribe(blob => {

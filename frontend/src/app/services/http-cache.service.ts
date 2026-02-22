@@ -12,7 +12,7 @@ export interface CacheEntry {
 export class HttpCacheService {
     private cache = new Map<string, CacheEntry>();
 
-    constructor() { }
+    constructor() { /* no-op */ }
 
     get(url: string): HttpResponse<any> | null {
         const entry = this.cache.get(url);
@@ -27,7 +27,7 @@ export class HttpCacheService {
         return entry.response;
     }
 
-    put(url: string, response: HttpResponse<any>, ttlMs: number = 60000): void {
+    put(url: string, response: HttpResponse<any>, ttlMs = 60000): void {
         const entry: CacheEntry = {
             response,
             expiry: Date.now() + ttlMs

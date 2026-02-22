@@ -7,8 +7,8 @@ import { Directive, ElementRef, HostListener, Renderer2, OnInit, Input } from '@
   selector: 'input[appAnimatedFocus], textarea[appAnimatedFocus], select[appAnimatedFocus], [contenteditable][appAnimatedFocus]'
 })
 export class AnimatedFocusDirective implements OnInit {
-  @Input() pulseColor: string = 'rgba(59, 130, 246, 0.5)';
-  @Input() pulseSize: string = '3px';
+  @Input() pulseColor = 'rgba(59, 130, 246, 0.5)';
+  @Input() pulseSize = '3px';
 
   constructor(
     private el: ElementRef,

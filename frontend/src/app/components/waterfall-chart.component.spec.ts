@@ -29,8 +29,7 @@ describe('WaterfallChartComponent', () => {
 
         fixture.detectChanges();
 
-        // @ts-ignore: testing private method
-        const data = component.computeWaterfallData();
+        const data = (component as { computeWaterfallData: () => { totals: number[]; floats: number[]; colors: string[] } }).computeWaterfallData();
 
         // Initial isTotal: true -> runs from 0 to 100.
         // Gain -> runs from 100 to 150.
@@ -56,7 +55,6 @@ describe('WaterfallChartComponent', () => {
             entries: new SimpleChange(null, component.entries, false)
         });
 
-        // @ts-ignore: checking if private method was called
-        expect(component.buildChart).toHaveBeenCalled();
+        expect((component as { buildChart: jasmine.Spy }).buildChart).toHaveBeenCalled();
     });
 });

@@ -293,7 +293,7 @@ export class NativePlatformService {
   /**
    * Trigger haptic vibration
    */
-  hapticVibrate(duration: number = 300): Observable<void> {
+  hapticVibrate(duration = 300): Observable<void> {
     if (!this.isNativePlatform) {
       return of(undefined);
     }

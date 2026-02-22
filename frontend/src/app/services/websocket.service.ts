@@ -17,7 +17,7 @@ export class WebSocketService {
   private connected$ = new BehaviorSubject<boolean>(false);
   private messageSubjects: Map<string, Subject<any>> = new Map();
 
-  constructor() { }
+  constructor() { /* no-op */ }
 
   connect(userId: string, username: string): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -28,7 +28,7 @@ export class WebSocketService {
 
       this.stompClient = new Client({
         webSocketFactory: () => new SockJS('http://localhost:8080/ws'),
-        debug: (str) => { },
+        debug: (_str: string) => { /* no-op */ },
         onConnect: (frame: IFrame) => {
           console.log('WebSocket connected:', frame);
           this.connected$.next(true);

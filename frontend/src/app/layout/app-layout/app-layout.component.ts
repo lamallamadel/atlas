@@ -29,7 +29,7 @@ export class AppLayoutComponent implements OnInit {
   isDarkTheme$: Observable<boolean>;
   dossiersPendingCount$: Observable<number>;
   unreadNotificationCount$: Observable<number>;
-  tourCompletionPercentage: number = 0;
+  tourCompletionPercentage = 0;
 
   constructor(
     private breakpointObserver: BreakpointObserver,

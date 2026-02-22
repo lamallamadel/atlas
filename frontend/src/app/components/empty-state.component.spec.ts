@@ -222,7 +222,7 @@ describe('EmptyStateComponent', () => {
     it('should have aria-label on action buttons', () => {
       component.primaryAction = {
         label: 'Create new',
-        handler: () => {}
+        handler: () => { /* no-op for test */ }
       };
       fixture.detectChanges();
 

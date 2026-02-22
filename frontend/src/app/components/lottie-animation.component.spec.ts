@@ -43,7 +43,7 @@ describe('LottieAnimationComponent', () => {
         await (component as any).loadAnimationData();
       } catch (err) {
         (component as any).useFallback = true;
-        component.error.emit(err as Error);
+        component.animationError.emit(err as Error);
         component['cdr'].markForCheck();
       }
     });

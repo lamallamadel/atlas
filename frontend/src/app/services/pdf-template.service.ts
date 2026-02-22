@@ -142,7 +142,7 @@ export class PdfTemplateService {
     'Document confidentiel - Usage interne uniquement. ' +
     'Les informations contenues dans ce document sont la propriété d\'Atlas Immobilier.';
 
-  constructor() {}
+  constructor() { /* no-op */ }
 
   /**
    * Generate a professional PDF document

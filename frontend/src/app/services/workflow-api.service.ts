@@ -106,8 +106,8 @@ export class WorkflowApiService {
     caseType?: string,
     isActive?: boolean,
     isPublished?: boolean,
-    page: number = 0,
-    size: number = 20
+    page = 0,
+    size = 20
   ): Observable<PageResponse<WorkflowDefinition>> {
     let params = new HttpParams()
       .set('page', page.toString())

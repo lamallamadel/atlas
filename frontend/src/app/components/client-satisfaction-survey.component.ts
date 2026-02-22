@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ClientSatisfactionSurvey } from '../models/customer-portal.models';
 import { CustomerPortalService } from '../services/customer-portal.service';
@@ -11,49 +11,65 @@ import { CustomerPortalService } from '../services/customer-portal.service';
       <p class="survey-intro">Votre avis nous aide à améliorer nos services</p>
       
       <form [formGroup]="surveyForm" (ngSubmit)="submitSurvey()" class="survey-form">
-        <div class="rating-group">
-          <label>Satisfaction générale *</label>
-          <div class="star-rating">
+        <fieldset class="rating-group">
+          <legend>Satisfaction générale *</legend>
+          <div class="star-rating" role="group" aria-label="Satisfaction générale">
             <span *ngFor="let star of [1,2,3,4,5]" 
+                  role="button"
+                  tabindex="0"
                   (click)="setRating('overallRating', star)"
+                  (keydown.enter)="setRating('overallRating', star)"
+                  (keydown.space)="$event.preventDefault(); setRating('overallRating', star)"
                   [class.active]="surveyForm.value.overallRating >= star"
                   class="star">★</span>
           </div>
-        </div>
+        </fieldset>
 
-        <div class="rating-group">
-          <label>Communication *</label>
-          <div class="star-rating">
+        <fieldset class="rating-group">
+          <legend>Communication *</legend>
+          <div class="star-rating" role="group" aria-label="Communication">
             <span *ngFor="let star of [1,2,3,4,5]" 
+                  role="button"
+                  tabindex="0"
                   (click)="setRating('communicationRating', star)"
+                  (keydown.enter)="setRating('communicationRating', star)"
+                  (keydown.space)="$event.preventDefault(); setRating('communicationRating', star)"
                   [class.active]="surveyForm.value.communicationRating >= star"
                   class="star">★</span>
           </div>
-        </div>
+        </fieldset>
 
-        <div class="rating-group">
-          <label>Réactivité *</label>
-          <div class="star-rating">
+        <fieldset class="rating-group">
+          <legend>Réactivité *</legend>
+          <div class="star-rating" role="group" aria-label="Réactivité">
             <span *ngFor="let star of [1,2,3,4,5]" 
+                  role="button"
+                  tabindex="0"
                   (click)="setRating('responsivenessRating', star)"
+                  (keydown.enter)="setRating('responsivenessRating', star)"
+                  (keydown.space)="$event.preventDefault(); setRating('responsivenessRating', star)"
                   [class.active]="surveyForm.value.responsivenessRating >= star"
                   class="star">★</span>
           </div>
-        </div>
+        </fieldset>
 
-        <div class="rating-group">
-          <label>Professionnalisme *</label>
-          <div class="star-rating">
+        <fieldset class="rating-group">
+          <legend>Professionnalisme *</legend>
+          <div class="star-rating" role="group" aria-label="Professionnalisme">
             <span *ngFor="let star of [1,2,3,4,5]" 
+                  role="button"
+                  tabindex="0"
                   (click)="setRating('professionalismRating', star)"
+                  (keydown.enter)="setRating('professionalismRating', star)"
+                  (keydown.space)="$event.preventDefault(); setRating('professionalismRating', star)"
                   [class.active]="surveyForm.value.professionalismRating >= star"
                   class="star">★</span>
           </div>
-        </div>
+        </fieldset>
 
         <div class="form-group">
-          <label>Commentaires</label>
-          <textarea formControlName="comments" 
+          <label for="survey-comments">Commentaires</label>
+          <textarea id="survey-comments" formControlName="comments" 
                     placeholder="Partagez votre expérience..."
                     rows="4"
                     class="form-control"></textarea>
@@ -180,7 +196,7 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     }
   `]
 })
-export class ClientSatisfactionSurveyComponent implements OnInit {
+export class ClientSatisfactionSurveyComponent {
   @Input() dossierId!: number;
   surveyForm: FormGroup;
   submitting = false;
@@ -198,8 +214,6 @@ export class ClientSatisfactionSurveyComponent implements OnInit {
       comments: ['']
     });
   }
-
-  ngOnInit(): void {}
 
   setRating(field: string, value: number): void {
     this.surveyForm.patchValue({ [field]: value });

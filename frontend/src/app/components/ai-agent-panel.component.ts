@@ -26,7 +26,7 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
   template: `
     <div
       class="ai-panel-fab"
-      *ngIf="!(panelOpen$ | async)"
+      *ngIf="(panelOpen$ | async) === false"
       (click)="openPanel()"
       (keydown.enter)="openPanel()"
       (keydown.space)="$event.preventDefault(); openPanel()"

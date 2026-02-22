@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import * as d3 from 'd3';
 import { WorkflowApiService, WorkflowDefinition, WorkflowState, WorkflowTransition } from '../services/workflow-api.service';
@@ -23,7 +23,7 @@ interface D3Link extends d3.SimulationLinkDatum<D3Node> {
   templateUrl: './workflow-builder.component.html',
   styleUrls: ['./workflow-builder.component.css']
 })
-export class WorkflowBuilderComponent implements OnInit, AfterViewInit {
+export class WorkflowBuilderComponent implements AfterViewInit {
   @ViewChild('svgCanvas', { static: false }) svgCanvas!: ElementRef<SVGElement>;
 
   workflowForm: FormGroup;
@@ -79,8 +79,6 @@ export class WorkflowBuilderComponent implements OnInit, AfterViewInit {
       allowedRoles: ['ADMIN,AGENT,MANAGER']
     });
   }
-
-  ngOnInit(): void {}
 
   ngAfterViewInit(): void {
     this.initializeSvg();

@@ -240,7 +240,7 @@ export class NativeFilesystemService {
    * List files in a directory
    */
   listFiles(
-    path: string = '',
+    path = '',
     directory: Directory = this.documentsDir
   ): Observable<string[]> {
     if (!this.isNativePlatform) {
@@ -456,7 +456,7 @@ export class NativeFilesystemService {
   /**
    * Convert base64 to blob
    */
-  base64ToBlob(base64: string, contentType: string = ''): Blob {
+  base64ToBlob(base64: string, contentType = ''): Blob {
     const byteCharacters = atob(base64.split(',')[1] || base64);
     const byteArrays = [];
 

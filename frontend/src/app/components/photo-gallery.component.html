@@ -23,7 +23,7 @@
         [class.editable]="editable"
         cdkDrag
         [cdkDragDisabled]="!editable"
-        (click)="openLightbox(photos.indexOf(photo))">
+        role="button" tabindex="0" (click)="openLightbox(photos.indexOf(photo))" (keydown.enter)="openLightbox(photos.indexOf(photo))" (keydown.space)="$event.preventDefault(); openLightbox(photos.indexOf(photo))">
         
         <div class="photo-wrapper">
           <div 
@@ -69,9 +69,13 @@
 <div 
   *ngIf="lightboxOpen" 
   class="lightbox-overlay"
-  (click)="closeLightbox()">
+  role="button"
+  tabindex="0"
+  (click)="closeLightbox()"
+  (keydown.enter)="closeLightbox()"
+  (keydown.space)="$event.preventDefault(); closeLightbox()">
   
-  <div class="lightbox-container" (click)="$event.stopPropagation()">
+  <div class="lightbox-container" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
     <button 
       mat-icon-button 
       class="lightbox-close"
@@ -156,8 +160,12 @@
         <div 
           *ngFor="let photo of photos; let i = index"
           class="thumbnail-item"
+          role="button"
+          tabindex="0"
           [class.active]="i === currentPhotoIndex"
-          (click)="goToThumbnail(i)">
+          (click)="goToThumbnail(i)"
+          (keydown.enter)="goToThumbnail(i)"
+          (keydown.space)="$event.preventDefault(); goToThumbnail(i)">
           <img 
             [src]="getThumbnailUrl(photo)"
             [alt]="photo.alt || photo.title || 'Miniature'"

@@ -5,8 +5,8 @@ export const Calendar = {
     listEventsInRange: async () => ({ events: [] }),
     listCalendars: async () => ({ calendars: [] }),
     createCalendar: async () => ({ id: '1' }),
-    deleteEvent: async () => { },
-    deleteCalendar: async () => { }
+    deleteEvent: async () => { return; },
+    deleteCalendar: async () => { return; }
 };
 export type CalendarEvent = any;
 export type CalendarEventOptions = any;

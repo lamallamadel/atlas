@@ -35,9 +35,9 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
   @Input() showControls = false;
   
   @Output() animationCreated = new EventEmitter<any>();
-  @Output() complete = new EventEmitter<void>();
+  @Output() animationComplete = new EventEmitter<void>();
   @Output() loopComplete = new EventEmitter<void>();
-  @Output() error = new EventEmitter<Error>();
+  @Output() animationError = new EventEmitter<Error>();
   
   @ViewChild('lottieContainer', { static: true }) lottieContainer!: ElementRef;
   
@@ -86,7 +86,7 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
       
       this.lottieInstance.addEventListener('complete', () => {
         if (!this.destroyed) {
-          this.complete.emit();
+          this.animationComplete.emit();
         }
       });
       
@@ -108,7 +108,7 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
     } catch (err) {
       console.error('Failed to load Lottie animation:', err);
       this.useFallback = true;
-      this.error.emit(err as Error);
+      this.animationError.emit(err as Error);
       this.cdr.markForCheck();
     }
   }

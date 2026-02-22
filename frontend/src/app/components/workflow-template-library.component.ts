@@ -12,7 +12,7 @@ import { Router } from '@angular/router';
 export class WorkflowTemplateLibraryComponent implements OnInit {
   templates: WorkflowTemplate[] = [];
   filteredTemplates: WorkflowTemplate[] = [];
-  selectedCategory: string = '';
+  selectedCategory = '';
   categories = ['SALE', 'RENTAL', 'MANDATE', 'CONSTRUCTION'];
   isLoading = false;
 

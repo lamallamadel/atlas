@@ -23,11 +23,11 @@ export interface PinchEvent {
   standalone: true
 })
 export class MobileGesturesDirective implements OnDestroy {
-  @Input() swipeThreshold: number = 50; // pixels
-  @Input() longPressDelay: number = 500; // ms
-  @Input() doubleTapDelay: number = 300; // ms
-  @Input() enableHaptics: boolean = true;
-  @Input() preventContextMenu: boolean = true;
+  @Input() swipeThreshold = 50; // pixels
+  @Input() longPressDelay = 500; // ms
+  @Input() doubleTapDelay = 300; // ms
+  @Input() enableHaptics = true;
+  @Input() preventContextMenu = true;
 
   @Output() swipe = new EventEmitter<SwipeEvent>();
   @Output() swipeLeft = new EventEmitter<SwipeEvent>();
@@ -38,12 +38,12 @@ export class MobileGesturesDirective implements OnDestroy {
   @Output() doubleTap = new EventEmitter<TouchEvent>();
   @Output() pinch = new EventEmitter<PinchEvent>();
 
-  private touchStartX: number = 0;
-  private touchStartY: number = 0;
-  private touchStartTime: number = 0;
-  private lastTapTime: number = 0;
+  private touchStartX = 0;
+  private touchStartY = 0;
+  private touchStartTime = 0;
+  private lastTapTime = 0;
   private longPressTimer: any;
-  private initialPinchDistance: number = 0;
+  private initialPinchDistance = 0;
   private isNative = Capacitor.isNativePlatform();
 
   constructor(private el: ElementRef) {

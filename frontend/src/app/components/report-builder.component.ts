@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { ReportApiService, CustomReportDefinition, ReportColumn, ReportExportOptions } from '../services/report-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -21,7 +21,7 @@ interface MetricOption {
   templateUrl: './report-builder.component.html',
   styleUrls: ['./report-builder.component.scss']
 })
-export class ReportBuilderComponent implements OnInit {
+export class ReportBuilderComponent {
   availableDimensions: DimensionOption[] = [
     { id: 'date', label: 'Date', description: 'Group by date' },
     { id: 'status', label: 'Status', description: 'Group by dossier status' },
@@ -55,8 +55,6 @@ export class ReportBuilderComponent implements OnInit {
     private reportApiService: ReportApiService,
     private snackBar: MatSnackBar
   ) {}
-
-  ngOnInit(): void {}
 
   dropDimension(event: CdkDragDrop<DimensionOption[]>): void {
     if (event.previousContainer === event.container) {

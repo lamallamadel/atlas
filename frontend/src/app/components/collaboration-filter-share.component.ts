@@ -15,7 +15,11 @@ import { Subscription } from 'rxjs';
       <div class="filter-list">
         <div *ngFor="let filter of sharedFilters" 
              class="filter-item"
-             (click)="applyFilter(filter)">
+             role="button"
+             tabindex="0"
+             (click)="applyFilter(filter)"
+             (keydown.enter)="applyFilter(filter)"
+             (keydown.space)="$event.preventDefault(); applyFilter(filter)">
           <div class="filter-icon">
             <span>📊</span>
           </div>

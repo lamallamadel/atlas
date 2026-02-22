@@ -6,18 +6,18 @@ import { ChartDataset, ChartFilterConfig, ChartDataTransform } from '../models/c
 })
 export class ChartUtilsService {
 
-  formatCurrency(value: number, currency: string = '€', decimals: number = 2): string {
+  formatCurrency(value: number, currency = '€', decimals = 2): string {
     return `${value.toFixed(decimals)}${currency}`;
   }
 
-  formatNumber(value: number, decimals: number = 0): string {
+  formatNumber(value: number, decimals = 0): string {
     return value.toLocaleString('fr-FR', { 
       minimumFractionDigits: decimals,
       maximumFractionDigits: decimals
     });
   }
 
-  formatPercentage(value: number, decimals: number = 1): string {
+  formatPercentage(value: number, decimals = 1): string {
     return `${value.toFixed(decimals)}%`;
   }
 
@@ -98,14 +98,16 @@ export class ChartUtilsService {
     switch (period) {
       case 'day':
         return date.toISOString().split('T')[0];
-      case 'week':
+      case 'week': {
         const weekNumber = this.getWeekNumber(date);
         return `${date.getFullYear()}-W${weekNumber}`;
+      }
       case 'month':
         return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`;
-      case 'quarter':
+      case 'quarter': {
         const quarter = Math.floor(date.getMonth() / 3) + 1;
         return `${date.getFullYear()}-Q${quarter}`;
+      }
       case 'year':
         return date.getFullYear().toString();
       default:
@@ -141,7 +143,7 @@ export class ChartUtilsService {
     });
   }
 
-  smoothData(data: number[], windowSize: number = 3): number[] {
+  smoothData(data: number[], windowSize = 3): number[] {
     if (windowSize < 1 || data.length < windowSize) return data;
 
     const smoothed: number[] = [];
@@ -156,7 +158,7 @@ export class ChartUtilsService {
     return smoothed;
   }
 
-  normalizeData(data: number[], min: number = 0, max: number = 100): number[] {
+  normalizeData(data: number[], min = 0, max = 100): number[] {
     const dataMin = Math.min(...data);
     const dataMax = Math.max(...data);
     
@@ -211,7 +213,7 @@ export class ChartUtilsService {
     return result;
   }
 
-  detectOutliers(data: number[], threshold: number = 2): number[] {
+  detectOutliers(data: number[], threshold = 2): number[] {
     const mean = this.aggregateData(data, 'average');
     const stdDev = this.calculateStandardDeviation(data, mean);
     
@@ -373,7 +375,7 @@ export class ChartUtilsService {
     return result;
   }
 
-  generateMockData(count: number, min: number = 0, max: number = 100): number[] {
+  generateMockData(count: number, min = 0, max = 100): number[] {
     const data: number[] = [];
     for (let i = 0; i < count; i++) {
       data.push(Math.floor(Math.random() * (max - min + 1)) + min);
@@ -381,7 +383,7 @@ export class ChartUtilsService {
     return data;
   }
 
-  generateTrendData(count: number, start: number, trend: 'up' | 'down' | 'flat', variance: number = 10): number[] {
+  generateTrendData(count: number, start: number, trend: 'up' | 'down' | 'flat', variance = 10): number[] {
     const data: number[] = [];
     let current = start;
     const trendFactor = trend === 'up' ? 1 : trend === 'down' ? -1 : 0;

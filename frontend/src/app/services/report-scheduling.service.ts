@@ -207,7 +207,7 @@ export class ReportSchedulingService {
         }
         break;
 
-      case 'weekly':
+      case 'weekly': {
         const targetDay = dayOfWeek ?? 1;
         const currentDay = nextRun.getDay();
         let daysToAdd = targetDay - currentDay;
@@ -216,14 +216,16 @@ export class ReportSchedulingService {
         }
         nextRun.setDate(nextRun.getDate() + daysToAdd);
         break;
+      }
 
-      case 'monthly':
+      case 'monthly': {
         const targetDate = dayOfMonth ?? 1;
         nextRun.setDate(targetDate);
         if (nextRun <= now) {
           nextRun.setMonth(nextRun.getMonth() + 1);
         }
         break;
+      }
     }
 
     return nextRun;

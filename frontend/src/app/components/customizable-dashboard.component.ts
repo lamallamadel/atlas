@@ -141,8 +141,8 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       </div>
 
       <!-- Template Selector Modal -->
-      <div class="modal-overlay" *ngIf="showTemplateSelector" role="dialog" aria-modal="true" (click)="showTemplateSelector = false">
-        <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-overlay" *ngIf="showTemplateSelector" role="dialog" aria-modal="true" tabindex="0" (click)="showTemplateSelector = false" (keydown.enter)="showTemplateSelector = false" (keydown.space)="$event.preventDefault(); showTemplateSelector = false">
+        <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>Choisir un template</h2>
             <button class="btn-icon" (click)="showTemplateSelector = false">
@@ -174,8 +174,8 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       </div>
 
       <!-- Widget Library Modal -->
-      <div class="modal-overlay" *ngIf="showWidgetLibrary" role="dialog" aria-modal="true" (click)="showWidgetLibrary = false">
-        <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-overlay" *ngIf="showWidgetLibrary" role="dialog" aria-modal="true" tabindex="0" (click)="showWidgetLibrary = false" (keydown.enter)="showWidgetLibrary = false" (keydown.space)="$event.preventDefault(); showWidgetLibrary = false">
+        <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>Bibliothèque de widgets</h2>
             <button class="btn-icon" (click)="showWidgetLibrary = false">
@@ -202,8 +202,8 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       </div>
 
       <!-- Import Dialog -->
-      <div class="modal-overlay" *ngIf="showImportDialog" role="dialog" aria-modal="true" (click)="showImportDialog = false">
-        <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-overlay" *ngIf="showImportDialog" role="dialog" aria-modal="true" tabindex="0" (click)="showImportDialog = false" (keydown.enter)="showImportDialog = false" (keydown.space)="$event.preventDefault(); showImportDialog = false">
+        <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
           <div class="modal-header">
             <h2>Importer configuration</h2>
             <button class="btn-icon" (click)="showImportDialog = false">

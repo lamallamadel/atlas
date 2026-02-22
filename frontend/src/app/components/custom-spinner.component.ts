@@ -72,7 +72,7 @@ import { Component, Input } from '@angular/core';
   `]
 })
 export class CustomSpinnerComponent {
-  @Input() size: number = 24;
-  @Input() color: string = '#3b82f6';
-  @Input() trackColor: string = '#e5e7eb';
+  @Input() size = 24;
+  @Input() color = '#3b82f6';
+  @Input() trackColor = '#e5e7eb';
 }

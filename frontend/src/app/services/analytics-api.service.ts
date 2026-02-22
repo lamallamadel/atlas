@@ -117,7 +117,7 @@ export class AnalyticsApiService {
     return this.http.get<AnalyticsResponse>(`${this.apiUrl}/market-trends`, { params });
   }
 
-  getRevenueForecast(forecastMonths: number = 6): Observable<AnalyticsResponse> {
+  getRevenueForecast(forecastMonths = 6): Observable<AnalyticsResponse> {
     const params = new HttpParams().set('forecastMonths', forecastMonths.toString());
     return this.http.get<AnalyticsResponse>(`${this.apiUrl}/revenue-forecast`, { params });
   }
@@ -126,7 +126,7 @@ export class AnalyticsApiService {
     return this.http.post<ScheduledReportResponse>(this.reportsUrl, request);
   }
 
-  getScheduledReports(page: number = 0, size: number = 20): Observable<any> {
+  getScheduledReports(page = 0, size = 20): Observable<any> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());
@@ -149,7 +149,7 @@ export class AnalyticsApiService {
     return this.http.post<CustomQuery>(this.queriesUrl, query);
   }
 
-  getCustomQueries(page: number = 0, size: number = 20): Observable<any> {
+  getCustomQueries(page = 0, size = 20): Observable<any> {
     const params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString());

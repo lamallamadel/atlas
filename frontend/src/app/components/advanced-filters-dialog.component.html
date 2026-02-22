@@ -68,8 +68,8 @@
 </div>
 
 <!-- Save Preset Dialog -->
-<div *ngIf="showSaveDialog" class="save-dialog-overlay" (click)="closeSaveDialog()">
-  <div class="save-dialog-content" (click)="$event.stopPropagation()">
+<div *ngIf="showSaveDialog" class="save-dialog-overlay" role="button" tabindex="0" (click)="closeSaveDialog()" (keydown.enter)="closeSaveDialog()" (keydown.space)="$event.preventDefault(); closeSaveDialog()">
+  <div class="save-dialog-content" role="dialog" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
     <h3>Sauvegarder le filtre</h3>
     
     <mat-form-field appearance="outline" class="full-width">

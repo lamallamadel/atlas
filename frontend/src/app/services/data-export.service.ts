@@ -34,10 +34,10 @@ export class DataExportService {
   constructor(private http: HttpClient) {}
 
   requestExport(
-    requestType: string = 'full',
-    exportFormat: string = 'json',
-    includeDocuments: boolean = true,
-    includeAuditLogs: boolean = false
+    requestType = 'full',
+    exportFormat = 'json',
+    includeDocuments = true,
+    includeAuditLogs = false
   ): Observable<DataExportRequest> {
     return this.http.post<DataExportRequest>(`${this.baseUrl}/request`, {
       requestType,

@@ -133,8 +133,7 @@ export class OnboardingTourService {
   private getUserId(): string | null {
     // Get user ID from auth service or use a default for demo
     try {
-      // @ts-ignore - getCurrentUserId may not exist in all implementations
-      return this.authService.getCurrentUserId?.() || 'demo-user';
+      return (this.authService as { getCurrentUserId?: () => string }).getCurrentUserId?.() || 'demo-user';
     } catch {
       return 'demo-user';
     }

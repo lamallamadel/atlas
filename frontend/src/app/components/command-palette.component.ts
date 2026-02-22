@@ -444,7 +444,7 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
       if (isNaturalLanguage || !hasResults) {
         const agentCommand: CommandItem = {
           id: 'ask-agent',
-          label: `Demander à Atlas IA : « ${this.searchQuery.trim()} »`,
+          label: `Demander à Atlas IA : « ${this.searchQuery.trim()} »`,
           description: 'Analyse en langage naturel — recherche, création, navigation…',
           icon: 'auto_awesome',
           category: 'Agent IA',

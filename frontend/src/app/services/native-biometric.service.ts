@@ -25,7 +25,7 @@ export interface BiometricAvailability {
 export class NativeBiometricService {
   private readonly isNativePlatform = Capacitor.isNativePlatform();
 
-  constructor() { }
+  constructor() { /* no-op */ }
 
   /**
    * Check if biometric authentication is available on the device
@@ -60,7 +60,7 @@ export class NativeBiometricService {
    * Authenticate user with biometrics
    * @param reason - The reason for authentication (displayed to user)
    */
-  authenticate(reason: string = 'Veuillez vous authentifier'): Observable<BiometricAuthResult> {
+  authenticate(reason = 'Veuillez vous authentifier'): Observable<BiometricAuthResult> {
     if (!this.isNativePlatform) {
       return of({
         success: false,

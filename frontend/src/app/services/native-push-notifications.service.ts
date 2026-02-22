@@ -200,8 +200,8 @@ export class NativePushNotificationsService {
     importance: 1 | 2 | 3 | 4 | 5 = 3,
     description?: string,
     sound?: string,
-    vibration: boolean = true,
-    lights: boolean = true
+    vibration = true,
+    lights = true
   ): Observable<boolean> {
     if (!this.isNativePlatform || Capacitor.getPlatform() !== 'android') {
       return of(false);
