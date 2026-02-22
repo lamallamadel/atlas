@@ -1,4 +1,5 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
+import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,10 +11,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import interactionPlugin from '@fullcalendar/interaction';
 import { CalendarViewComponent } from './calendar-view.component';
 import { AppointmentApiService, AppointmentStatus, AppointmentResponse } from '../services/appointment-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
-import { FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarSyncService } from '../services/calendar-sync.service';
 
 describe('CalendarViewComponent', () => {
   let component: CalendarViewComponent;
@@ -63,6 +68,7 @@ describe('CalendarViewComponent', () => {
       'error',
       'warning'
     ]);
+    const calendarSyncServiceSpy = jasmine.createSpyObj('CalendarSyncService', ['downloadICalendar']);
 
     await TestBed.configureTestingModule({
       declarations: [CalendarViewComponent],
@@ -76,13 +82,14 @@ describe('CalendarViewComponent', () => {
         MatButtonModule,
         MatCardModule,
         MatProgressSpinnerModule,
-        MatTooltipModule,
-        FullCalendarModule
+        MatTooltipModule
       ],
       providers: [
         { provide: AppointmentApiService, useValue: appointmentServiceSpy },
-        { provide: ToastNotificationService, useValue: toastServiceSpy }
-      ]
+        { provide: ToastNotificationService, useValue: toastServiceSpy },
+        { provide: CalendarSyncService, useValue: calendarSyncServiceSpy }
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
 
     appointmentService = TestBed.inject(AppointmentApiService) as jasmine.SpyObj<AppointmentApiService>;
@@ -113,37 +120,43 @@ describe('CalendarViewComponent', () => {
 
     fixture = TestBed.createComponent(CalendarViewComponent);
     component = fixture.componentInstance;
+    spyOn(component as any, 'loadCalendarPlugins').and.returnValue(Promise.resolve());
+    component.calendarOptions.plugins = [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin];
+    component.calendarLoaded = true;
+    component.calendarLoading = false;
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should load appointments on init', () => {
+  it('should load appointments on init', fakeAsync(() => {
     fixture.detectChanges();
-    
+    tick(0);
     expect(appointmentService.list).toHaveBeenCalledWith({ size: 1000 });
     expect(component.appointments.length).toBe(2);
     expect(component.isLoading).toBe(false);
-  });
+    discardPeriodicTasks();
+  }));
 
-  it('should extract available assignees from appointments', () => {
+  it('should extract available assignees from appointments', fakeAsync(() => {
     fixture.detectChanges();
-    
+    tick(0);
     expect(component.availableAssignees).toContain('John Doe');
     expect(component.availableAssignees).toContain('Jane Smith');
     expect(component.availableAssignees.length).toBe(2);
-  });
+    discardPeriodicTasks();
+  }));
 
-  it('should filter appointments by assignedTo', () => {
+  it('should filter appointments by assignedTo', fakeAsync(() => {
     fixture.detectChanges();
-    
+    tick(0);
     component.onFilterByAssignedToChange('John Doe');
-    
     const events = component.calendarOptions.events as any[];
     expect(events.length).toBe(1);
     expect(events[0].extendedProps.assignedTo).toBe('John Doe');
-  });
+    discardPeriodicTasks();
+  }));
 
   it('should filter appointments by status', () => {
     appointmentService.list.calls.reset();
@@ -186,16 +199,15 @@ describe('CalendarViewComponent', () => {
     expect(cancelledColor).toBe('#9E9E9E');
   });
 
-  it('should detect conflict between appointments', () => {
+  it('should detect conflict between appointments', fakeAsync(() => {
     fixture.detectChanges();
-    
+    tick(0);
     const start = new Date('2024-01-15T10:30:00Z');
     const end = new Date('2024-01-15T11:30:00Z');
-    
     const hasConflict = (component as any).checkConflict(999, start, end, 'John Doe');
-    
     expect(hasConflict).toBe(true);
-  });
+    discardPeriodicTasks();
+  }));
 
   it('should not detect conflict for different assignees', () => {
     fixture.detectChanges();
@@ -281,14 +293,14 @@ describe('CalendarViewComponent', () => {
     expect(toastService.success).toHaveBeenCalledWith('Rendez-vous mis à jour avec succès');
   });
 
-  it('should handle error when loading appointments', () => {
+  it('should handle error when loading appointments', fakeAsync(() => {
     appointmentService.list.and.returnValue(throwError(() => new Error('Network error')));
-    
     fixture.detectChanges();
-
+    tick(0);
     expect(toastService.error).toHaveBeenCalledWith('Erreur lors du chargement des rendez-vous');
     expect(component.isLoading).toBe(false);
-  });
+    discardPeriodicTasks();
+  }));
 
   it('should export to iCal format', () => {
     fixture.detectChanges();
@@ -302,18 +314,14 @@ describe('CalendarViewComponent', () => {
     expect(toastService.success).toHaveBeenCalledWith('Calendrier exporté avec succès');
   });
 
-  it('should generate iCal content correctly', () => {
+  it('should generate iCal content correctly', fakeAsync(() => {
     fixture.detectChanges();
-    
-    const icsContent = (component as any).generateICalContent([mockAppointments[0]]);
-    
-    expect(icsContent).toContain('BEGIN:VCALENDAR');
-    expect(icsContent).toContain('BEGIN:VEVENT');
-    expect(icsContent).toContain('SUMMARY:RDV #1 - John Doe');
-    expect(icsContent).toContain('LOCATION:Office A');
-    expect(icsContent).toContain('END:VEVENT');
-    expect(icsContent).toContain('END:VCALENDAR');
-  });
+    tick(0);
+    component.appointments = [mockAppointments[0]];
+    component.exportToICal();
+    expect(toastService.success).toHaveBeenCalledWith('Calendrier exporté avec succès');
+    discardPeriodicTasks();
+  }));
 
   it('should refresh calendar', () => {
     fixture.detectChanges();

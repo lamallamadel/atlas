@@ -16,6 +16,17 @@ describe('RegionRoutingService', () => {
   });
 
   afterEach(() => {
+    const ipapiReqs = httpMock.match(req => req.url === 'https://ipapi.co/json/');
+    ipapiReqs.forEach(req => req.flush({
+      country: 'FR',
+      continent: 'EU',
+      city: 'Paris',
+      latitude: 48.8,
+      longitude: 2.3,
+      timezone: 'Europe/Paris'
+    }));
+    const healthReqs = httpMock.match(req => !!(req.url && req.url.includes('/actuator/health')));
+    healthReqs.forEach(req => req.flush({ status: 'UP' }));
     httpMock.verify();
     localStorage.clear();
   });

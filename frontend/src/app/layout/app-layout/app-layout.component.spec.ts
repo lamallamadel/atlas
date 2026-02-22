@@ -9,6 +9,8 @@ import { of } from 'rxjs';
 import { AppLayoutComponent } from './app-layout.component';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
+import { DossierApiService } from '../../services/dossier-api.service';
+import { NotificationApiService } from '../../services/notification-api.service';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
 
 @Component({ selector: 'app-global-search-bar', template: '' })
@@ -29,13 +31,20 @@ describe('AppLayoutComponent', () => {
     mockBreakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
     mockBreakpointObserver.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
 
+    const mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['getPendingCount']);
+    mockDossierApiService.getPendingCount.and.returnValue(of(0));
+    const mockNotificationApiService = jasmine.createSpyObj('NotificationApiService', ['getUnreadCount']);
+    mockNotificationApiService.getUnreadCount.and.returnValue(of(0));
+
     await TestBed.configureTestingModule({
       declarations: [AppLayoutComponent, GlobalSearchBarStubComponent],
       imports: [RouterTestingModule, MaterialTestingModule],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: ThemeService, useValue: mockThemeService },
-        { provide: BreakpointObserver, useValue: mockBreakpointObserver }
+        { provide: BreakpointObserver, useValue: mockBreakpointObserver },
+        { provide: DossierApiService, useValue: mockDossierApiService },
+        { provide: NotificationApiService, useValue: mockNotificationApiService }
       ],
       schemas: [NO_ERRORS_SCHEMA]
     }).compileComponents();
@@ -84,21 +93,18 @@ describe('AppLayoutComponent', () => {
     });
   });
 
-  it('should close sidenav on mobile when closeSidenavOnMobile is called', async () => {
-    // Set up a fresh component with isHandset matching true
+  it('should close sidenav on mobile when closeSidenavOnMobile is called', () => {
     mockBreakpointObserver.observe.and.returnValue(of({ matches: true, breakpoints: {} }));
     const testFixture = TestBed.createComponent(AppLayoutComponent);
     const testComponent = testFixture.componentInstance;
-    
-    // Create and assign drawer spy BEFORE detectChanges to ensure ngOnInit subscription references the spy
+
     const drawerSpy = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
     testComponent.drawer = drawerSpy;
-    
+
     testFixture.detectChanges();
-    
+
     testComponent.closeSidenavOnMobile();
-    await testFixture.whenStable();
-    
+
     expect(drawerSpy.close).toHaveBeenCalled();
   });
 

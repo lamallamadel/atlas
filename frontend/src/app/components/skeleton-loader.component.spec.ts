@@ -199,7 +199,8 @@ describe('SkeletonLoaderComponent', () => {
     it('should mark skeleton content as aria-hidden', () => {
       component.variant = 'card';
       fixture.detectChanges();
-      const skeletonContent = debugElement.query(By.css('.skeleton-card'));
+      const skeletonContent = debugElement.query(By.css('.skeleton-card[aria-hidden="true"]'));
+      expect(skeletonContent).toBeTruthy();
       expect(skeletonContent.nativeElement.getAttribute('aria-hidden')).toBe('true');
     });
   });

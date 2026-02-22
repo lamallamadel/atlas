@@ -15,7 +15,7 @@ export class RegionRoutingInterceptor implements HttpInterceptor {
   private readonly REQUEST_TIMEOUT = 30000;
   private readonly MAX_RETRIES = 2;
 
-  constructor(private regionRoutingService: RegionRoutingService) {}
+  constructor(private regionRoutingService: RegionRoutingService) { }
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     if (this.isExternalRequest(request)) {
@@ -49,7 +49,7 @@ export class RegionRoutingInterceptor implements HttpInterceptor {
             if (error.status >= 500 || error.status === 0) {
               console.warn(`Retrying request to ${currentRegion.name}, attempt ${retryCount}`);
               return new Observable(subscriber => {
-                setTimeout(() => subscriber.next(), 1000 * retryCount);
+                setTimeout(() => subscriber.next(null as any), 1000 * retryCount);
               });
             }
           }
@@ -93,9 +93,9 @@ export class RegionRoutingInterceptor implements HttpInterceptor {
   private getNextHealthyRegion(currentRegion: string): string {
     const allRegions = this.regionRoutingService.getAllRegions();
     const otherRegions = allRegions.filter(r => r.name !== currentRegion);
-    
+
     otherRegions.sort((a, b) => a.priority - b.priority);
-    
+
     return otherRegions.length > 0 ? otherRegions[0].name : currentRegion;
   }
 
@@ -107,7 +107,7 @@ export class RegionRoutingInterceptor implements HttpInterceptor {
         latency,
         timestamp: new Date().toISOString()
       });
-      
+
       navigator.sendBeacon('/api/metrics/latency', data);
     }
   }

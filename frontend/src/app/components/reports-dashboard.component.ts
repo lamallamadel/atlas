@@ -331,37 +331,6 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.error = null;
 
-
-    this.reportingService.getKpiReport(this.dateFrom, this.dateTo).subscribe({
-      next: (data) => {
-        this.kpiReport = data;
-      },
-      error: (err) => {
-        this.error = 'Failed to load KPI report';
-        console.error(err);
-        this.loading = false;
-      }
-    });
-
-    this.reportingService.getPipelineSummary().subscribe({
-      next: (data) => {
-        this.pipelineSummary = data;
-      },
-      error: (err) => {
-        this.error = 'Failed to load pipeline summary';
-        console.error(err);
-        this.loading = false;
-      }
-    });
-
-    this.reportingService.getAnalyticsData(this.dateFrom, this.dateTo).subscribe({
-      next: async (data) => {
-        this.analyticsData = data;
-        this.updateConversionFunnelChart(data.conversionFunnel);
-        this.updateAgentPerformanceChart(data.agentPerformance);
-        this.updateRevenueForecastChart(data.revenueForecast);
-        this.updateLeadSourceChart(data.leadSources);
-
     forkJoin({
       kpi: this.reportingService.getKpiReport(this.dateFrom, this.dateTo).pipe(
         catchError(err => { console.error('KPI report error:', err); return of(null); })
@@ -373,7 +342,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
         catchError(err => { console.error('Analytics data error:', err); return of(null); })
       )
     }).subscribe({
-      next: ({ kpi, pipeline, analytics }) => {
+      next: async ({ kpi, pipeline, analytics }) => {
         this.kpiReport = kpi;
         this.pipelineSummary = pipeline;
         if (analytics) {
@@ -559,7 +528,7 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
-      
+
       link.setAttribute('href', url);
       link.setAttribute('download', `analytics-report-${this.dateFrom}-to-${this.dateTo}.csv`);
       link.style.visibility = 'hidden';
@@ -588,13 +557,13 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
 
       const doc = new jsPDF();
       const pageWidth = doc.internal.pageSize.getWidth();
-      
+
       doc.setFontSize(18);
       doc.text('Analytics Dashboard Report', pageWidth / 2, 15, { align: 'center' });
-      
+
       doc.setFontSize(10);
       doc.text(`Date Range: ${this.dateFrom} to ${this.dateTo}`, pageWidth / 2, 22, { align: 'center' });
-      
+
       let yPos = 30;
 
       doc.setFontSize(14);

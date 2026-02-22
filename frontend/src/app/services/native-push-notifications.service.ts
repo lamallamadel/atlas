@@ -32,7 +32,7 @@ export interface NotificationPayload {
 })
 export class NativePushNotificationsService {
   private readonly isNativePlatform = Capacitor.isNativePlatform();
-  
+
   private readonly tokenSubject = new BehaviorSubject<string | null>(null);
   private readonly notificationReceivedSubject = new Subject<PushNotificationSchema>();
   private readonly notificationActionSubject = new Subject<ActionPerformed>();
@@ -64,7 +64,7 @@ export class NativePushNotificationsService {
     });
 
     // Notification received (app in foreground)
-    PushNotifications.addListener('pushNotificationReceived', 
+    PushNotifications.addListener('pushNotificationReceived',
       (notification: PushNotificationSchema) => {
         console.log('Push notification received:', notification);
         this.notificationReceivedSubject.next(notification);
@@ -72,7 +72,7 @@ export class NativePushNotificationsService {
     );
 
     // Notification action performed (user tapped)
-    PushNotifications.addListener('pushNotificationActionPerformed', 
+    PushNotifications.addListener('pushNotificationActionPerformed',
       (notification: ActionPerformed) => {
         console.log('Push notification action performed:', notification);
         this.notificationActionSubject.next(notification);
@@ -164,7 +164,7 @@ export class NativePushNotificationsService {
     }
 
     return from(PushNotifications.removeDeliveredNotifications({
-      notifications: notificationIds.map(id => ({ id }))
+      notifications: notificationIds.map(id => ({ id } as any))
     })).pipe(
       map(() => true),
       catchError((error) => {
@@ -307,7 +307,7 @@ export class NativePushNotificationsService {
    */
   handleNotificationAction(action: ActionPerformed): { route: string; params?: any } | null {
     const data = action.notification.data;
-    
+
     if (!data) {
       return { route: '/' };
     }
@@ -319,30 +319,30 @@ export class NativePushNotificationsService {
           route: `/dossiers/${data.dossierId}`,
           params: { tab: 'messages' }
         };
-      
+
       case 'appointment':
         return {
           route: `/calendar`,
           params: { eventId: data.eventId }
         };
-      
+
       case 'task':
         return {
           route: `/dossiers/${data.dossierId}`,
           params: { tab: 'tasks', taskId: data.taskId }
         };
-      
+
       case 'dossier_update':
         return {
           route: `/dossiers/${data.dossierId}`
         };
-      
+
       case 'whatsapp':
         return {
           route: `/dossiers/${data.dossierId}`,
           params: { tab: 'whatsapp' }
         };
-      
+
       default:
         return { route: '/' };
     }

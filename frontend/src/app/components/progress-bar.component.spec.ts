@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ProgressBarComponent } from './progress-bar.component';
 import { SimpleChange } from '@angular/core';
@@ -50,6 +50,7 @@ describe('ProgressBarComponent', () => {
     tick(200);
     expect(component.progress).toBeGreaterThan(0);
     expect(component.progress).toBeLessThan(90);
+    discardPeriodicTasks();
   }));
 
   it('should complete progress when navigation ends', fakeAsync(() => {
@@ -69,6 +70,7 @@ describe('ProgressBarComponent', () => {
     
     tick(200);
     expect(component.progress).toBe(0);
+    discardPeriodicTasks();
   }));
 
   it('should not exceed 90% progress during navigation', fakeAsync(() => {
@@ -82,6 +84,7 @@ describe('ProgressBarComponent', () => {
     }
     
     expect(component.progress).toBeLessThanOrEqual(90);
+    discardPeriodicTasks();
   }));
 
   it('should clear interval on component destroy', () => {

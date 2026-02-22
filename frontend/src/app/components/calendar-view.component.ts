@@ -49,7 +49,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   showListView = false;
   calendarLoaded = false;
   calendarLoading = false;
-  
+
   calendarOptions: any = {
     plugins: [],
     initialView: 'timeGridWeek',
@@ -124,7 +124,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     private dialog: MatDialog,
     private toastService: ToastNotificationService,
     private breakpointObserver: BreakpointObserver
-  ) {}
+  ) { }
 
   async ngOnInit(): Promise<void> {
     this.breakpointObserver
@@ -191,7 +191,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   loadAppointments(): void {
     this.isLoading = true;
     const params: any = { size: 1000 };
-    
+
     if (this.filterByStatus) {
       params.status = this.filterByStatus;
     }
@@ -354,12 +354,12 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     }
 
     const conflicts = this.detectConflicts(appointmentId, newStart, newEnd, appointment.assignedTo);
-    
+
     if (conflicts.length > 0) {
-      const conflictMessages = conflicts.map(c => 
+      const conflictMessages = conflicts.map(c =>
         `RDV #${c.id} (${this.formatTime(c.startTime)} - ${this.formatTime(c.endTime)})`
       ).join(', ');
-      
+
       this.toastService.warning(`Conflit détecté avec: ${conflictMessages}`);
       dropInfo.revert();
       return;
@@ -367,13 +367,13 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
     const oldStartTime = appointment.startTime;
     const oldEndTime = appointment.endTime;
-    
+
     const optimisticUpdate = {
       ...appointment,
       startTime: newStart.toISOString(),
       endTime: newEnd.toISOString()
     };
-    
+
     const index = this.appointments.findIndex(apt => apt.id === appointmentId);
     if (index !== -1) {
       this.appointments[index] = optimisticUpdate;
@@ -401,7 +401,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error updating appointment:', error);
-          
+
           if (index !== -1) {
             this.appointments[index] = {
               ...appointment,
@@ -409,7 +409,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
               endTime: oldEndTime
             };
           }
-          
+
           this.updateCalendarEvents();
           this.toastService.error('Erreur lors du déplacement du rendez-vous');
           dropInfo.revert();
@@ -417,8 +417,6 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       });
   }
 
-
-  handleEventResize(resizeInfo: any): void {
 
   handleEventResize(resizeInfo: EventChangeArg): void {
 
@@ -439,7 +437,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     }
 
     const conflicts = this.detectConflicts(appointmentId, newStart, newEnd, appointment.assignedTo);
-    
+
     if (conflicts.length > 0) {
       this.toastService.warning('Conflit détecté : redimensionnement impossible');
       resizeInfo.revert();
@@ -448,13 +446,13 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
     const oldStartTime = appointment.startTime;
     const oldEndTime = appointment.endTime;
-    
+
     const optimisticUpdate = {
       ...appointment,
       startTime: newStart.toISOString(),
       endTime: newEnd.toISOString()
     };
-    
+
     const index = this.appointments.findIndex(apt => apt.id === appointmentId);
     if (index !== -1) {
       this.appointments[index] = optimisticUpdate;
@@ -482,7 +480,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error resizing appointment:', error);
-          
+
           if (index !== -1) {
             this.appointments[index] = {
               ...appointment,
@@ -490,7 +488,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
               endTime: oldEndTime
             };
           }
-          
+
           this.updateCalendarEvents();
           this.toastService.error('Erreur lors de la modification du rendez-vous');
           resizeInfo.revert();
@@ -528,9 +526,9 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   }
 
   private formatTime(dateString: string): string {
-    return new Date(dateString).toLocaleTimeString('fr-FR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateString).toLocaleTimeString('fr-FR', {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   }
 
@@ -654,7 +652,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
       filteredAppointments,
       `appointments_${new Date().toISOString().split('T')[0]}.ics`
     );
-    
+
     this.toastService.success('Calendrier exporté avec succès');
   }
 

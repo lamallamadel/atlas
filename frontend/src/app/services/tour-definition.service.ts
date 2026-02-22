@@ -68,7 +68,7 @@ export class TourDefinitionService {
       category: 'core',
       estimatedTime: 3,
       requiredRoute: '/dashboard',
-      steps: []
+      steps: [{ id: 'step1', title: 'Bienvenue', text: 'Bienvenue sur le tableau de bord.' }]
     });
 
     this.tours.set('create-dossier', {

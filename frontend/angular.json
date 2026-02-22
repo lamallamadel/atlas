@@ -59,7 +59,7 @@
               "src/styles/utilities.scss",
               "src/styles/print.scss",
               "src/styles/shepherd-theme.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
@@ -134,13 +134,19 @@
               "namedChunks": true
             },
             "fr": {
-              "localize": ["fr"]
+              "localize": [
+                "fr"
+              ]
             },
             "en": {
-              "localize": ["en"]
+              "localize": [
+                "en"
+              ]
             },
             "es": {
-              "localize": ["es"]
+              "localize": [
+                "es"
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -178,6 +184,7 @@
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
             "polyfills": [
+              "src/global-polyfill.js",
               "zone.js",
               "zone.js/testing",
               "@angular/localize/init"
@@ -194,7 +201,7 @@
               "src/styles/utilities.scss",
               "src/styles/print.scss",
               "src/styles/shepherd-theme.css",
-              "src/styles.css"
+              "src/styles.scss"
             ],
             "scripts": []
           }

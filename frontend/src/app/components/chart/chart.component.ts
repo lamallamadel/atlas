@@ -104,7 +104,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
       backgroundColor: dataset.backgroundColor || this.getColorForIndex(index, 0.2),
       borderColor: dataset.borderColor || this.getColorForIndex(index, 1),
       borderWidth: dataset.borderWidth ?? 2,
-      fill: dataset.fill ?? (this.type === 'area' || this.type === 'radar'),
+      fill: dataset.fill ?? ((this.type as string) === 'area' || this.type === 'radar'),
       tension: dataset.tension ?? 0.4,
       pointRadius: dataset.pointRadius ?? 4,
       pointHoverRadius: dataset.pointHoverRadius ?? 6
@@ -285,7 +285,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private animateBarStagger(): void {
     if (!this.animation || !this.chart) return;
-    
+
     const meta = this.chart.getDatasetMeta(0);
     if (!meta || !meta.data) return;
 
@@ -298,7 +298,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
 
   private animateLineProgressive(): void {
     if (!this.animation || !this.chart) return;
-    
+
   }
 
   private updateChart(): void {
@@ -356,7 +356,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
     const canvas = this.canvasRef.nativeElement;
     const svg = this.canvasToSVG(canvas);
     const blob = new Blob([svg], { type: 'image/svg+xml' });
-    
+
     this.downloadBlob(blob, `${filename}.svg`);
     this.exportComplete.emit({ format: 'svg', blob });
   }
@@ -380,9 +380,9 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
     const width = canvas.width;
     const height = canvas.height;
     const imageData = ctx.getImageData(0, 0, width, height);
-    
+
     const dataUrl = canvas.toDataURL('image/png');
-    
+
     return `<?xml version="1.0" encoding="UTF-8"?>
 <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
   <image width="${width}" height="${height}" xlink:href="${dataUrl}"/>

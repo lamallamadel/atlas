@@ -64,9 +64,11 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       case 401:
         this.toastService.error(
           'Session expirée. Veuillez vous reconnecter.',
-          'Reconnecter',
-          () => {
-            this.authService.handleSessionExpired();
+          {
+            label: 'Reconnecter',
+            handler: () => {
+              this.authService.handleSessionExpired();
+            }
           }
         );
         break;
@@ -94,8 +96,10 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
         const conflictMessage = problemDetail?.detail || 'Un conflit est survenu. Veuillez réessayer.';
         this.toastService.warning(
           conflictMessage,
-          'Réessayer',
-          () => this.retryRequest(originalRequest, correlationId)
+          {
+            label: 'Réessayer',
+            handler: () => this.retryRequest(originalRequest, correlationId)
+          }
         );
         break;
       }
@@ -104,8 +108,10 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
         const serverErrorMessage = problemDetail?.detail || 'Une erreur interne est survenue.';
         this.toastService.error(
           serverErrorMessage,
-          'Réessayer',
-          () => this.retryRequest(originalRequest, correlationId)
+          {
+            label: 'Réessayer',
+            handler: () => this.retryRequest(originalRequest, correlationId)
+          }
         );
         break;
       }
@@ -115,8 +121,10 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
       case 503: {
         this.toastService.error(
           'Impossible de contacter le serveur. Vérifiez votre connexion.',
-          'Réessayer',
-          () => this.retryRequest(originalRequest, correlationId)
+          {
+            label: 'Réessayer',
+            handler: () => this.retryRequest(originalRequest, correlationId)
+          }
         );
         break;
       }
@@ -125,8 +133,10 @@ export class CorrelationIdInterceptor implements HttpInterceptor {
         if (error.status >= 500) {
           this.toastService.error(
             'Une erreur serveur est survenue.',
-            'Réessayer',
-            () => this.retryRequest(originalRequest, correlationId)
+            {
+              label: 'Réessayer',
+              handler: () => this.retryRequest(originalRequest, correlationId)
+            }
           );
         }
         break;

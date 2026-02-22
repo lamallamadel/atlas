@@ -160,22 +160,22 @@ Chart.register(...registerables);
 })
 export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   activeTabIndex = 0;
-  
+
   metabaseDashboardUrl: SafeResourceUrl | null = null;
   metabaseQuestionUrl: SafeResourceUrl | null = null;
-  
+
   cohortData: AnalyticsResponse | null = null;
   funnelData: AnalyticsResponse | null = null;
   agentPerformanceData: AnalyticsResponse | null = null;
   marketTrendsData: AnalyticsResponse | null = null;
   revenueForecastData: AnalyticsResponse | null = null;
-  
+
   cohortChart: Chart | null = null;
   funnelChart: Chart | null = null;
   agentChart: Chart | null = null;
   marketChart: Chart | null = null;
   revenueChart: Chart | null = null;
-  
+
   loading = false;
   dateRange = {
     start: this.getDefaultStartDate(),
@@ -185,7 +185,7 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private analyticsService: AnalyticsApiService,
     private sanitizer: DomSanitizer
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadMetabaseDashboard();
@@ -376,8 +376,8 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
       this.revenueChart.destroy();
     }
 
-    const historicalData = this.revenueForecastData.data.filter(d => d.metadata?.type === 'historical');
-    const forecastData = this.revenueForecastData.data.filter(d => d.metadata?.type === 'forecast');
+    const historicalData = this.revenueForecastData.data.filter(d => d.metadata?.['type'] === 'historical');
+    const forecastData = this.revenueForecastData.data.filter(d => d.metadata?.['type'] === 'forecast');
 
     this.revenueChart = new Chart(canvas, {
       type: 'line',
@@ -409,8 +409,8 @@ export class AnalyticsDashboardComponent implements OnInit, OnDestroy {
   drillDownToCohort(index: number): void {
     const dataPoint = this.cohortData?.data[index];
     if (dataPoint) {
-      this.analyticsService.generateQuestionEmbedUrl('2', { 
-        cohort_month: dataPoint.date 
+      this.analyticsService.generateQuestionEmbedUrl('2', {
+        cohort_month: dataPoint.date
       }).subscribe({
         next: (response) => {
           this.metabaseQuestionUrl = this.sanitizer.bypassSecurityTrustResourceUrl(response.embedUrl);

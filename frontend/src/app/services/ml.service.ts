@@ -7,9 +7,9 @@ import { environment } from '../../environments/environment';
   providedIn: 'root'
 })
 export class MLService {
-  private apiUrl = `${environment.apiUrl}/api/ml`;
+  private apiUrl = `${environment.apiBaseUrl}/api/ml`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   predictConversion(dossierId: number): Observable<any> {
     return this.http.post(`${this.apiUrl}/predict/${dossierId}`, {});

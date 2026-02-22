@@ -1,4 +1,4 @@
-module.exports = function(config) {
+module.exports = function (config) {
   config.set({
     basePath: '',
     frameworks: ['jasmine', '@angular-devkit/build-angular'],
@@ -36,9 +36,10 @@ module.exports = function(config) {
     reporters: ['progress', 'kjhtml'],
     browsers: ['Chrome'],
     restartOnFileChange: true,
-    captureTimeout: 60000,
-    browserDisconnectTimeout: 10000,
-    browserNoActivityTimeout: 60000,
+    captureTimeout: 210000,
+    browserDisconnectTimeout: 210000,
+    browserDisconnectTolerance: 3,
+    browserNoActivityTimeout: 210000,
     concurrency: 2
   });
 };

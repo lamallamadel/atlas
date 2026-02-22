@@ -218,20 +218,11 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     PhoneFormatPipe,
     LocalizePipe,
     HighlightPipe,
-    WhatsappThreadComponent,
-    WhatsappMessageInputComponent,
-    TemplateSelectionSheetComponent,
-    WhatsappMessagingContainerComponent,
+    WhatsappMessagingUiComponent,
     CollaborationPresenceComponent,
     CollaborationCursorComponent,
     CollaborationActivityStreamComponent,
     CollaborationFilterShareComponent,
-    MessagingTabComponent,
-    OutboundMessageListComponent,
-    OutboundMessageFormComponent,
-    DocumentListComponent,
-    DocumentUploadComponent,
-
 
     DocumentPreviewDialogComponent,
     LeadImportDialogComponent,
@@ -284,8 +275,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
     LocaleSwitcherComponent,
     SettingsPageComponent,
     UiPreferencesFormComponent,
-    NotificationPreferencesFormComponent
-
+    NotificationPreferencesFormComponent,
     WaterfallChartComponent,
     AiAgentPanelComponent
 

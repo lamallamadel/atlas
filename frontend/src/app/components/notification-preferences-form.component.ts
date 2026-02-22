@@ -56,113 +56,113 @@ interface NotificationExample {
 })
 export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
-  
+
   preferencesForm!: FormGroup;
   loading = false;
   saving = false;
-  
+
   // Original values for dirty check
-  private originalValues: Record<string, unknown> = {};
-  
+  originalValues: Record<string, unknown> = {};
+
   // Notification channels
   channels: NotificationChannel[] = [
-    { 
-      id: 'email', 
-      label: 'Email', 
+    {
+      id: 'email',
+      label: 'Email',
       description: 'Recevez des notifications par email',
       icon: 'email',
-      enabled: true 
+      enabled: true
     },
-    { 
-      id: 'sms', 
-      label: 'SMS', 
+    {
+      id: 'sms',
+      label: 'SMS',
       description: 'Recevez des alertes par SMS',
       icon: 'sms',
-      enabled: false 
+      enabled: false
     },
-    { 
-      id: 'inApp', 
-      label: 'Dans l\'application', 
+    {
+      id: 'inApp',
+      label: 'Dans l\'application',
       description: 'Notifications dans l\'interface',
       icon: 'notifications',
-      enabled: true 
+      enabled: true
     },
-    { 
-      id: 'push', 
-      label: 'Push', 
+    {
+      id: 'push',
+      label: 'Push',
       description: 'Notifications push dans le navigateur',
       icon: 'notifications_active',
-      enabled: true 
+      enabled: true
     }
   ];
-  
+
   // Notification types
   notificationTypes: NotificationType[] = [
-    { 
-      id: 'newDossier', 
-      label: 'Nouveau dossier', 
+    {
+      id: 'newDossier',
+      label: 'Nouveau dossier',
       description: 'Notification lors de la création d\'un nouveau dossier',
       icon: 'folder',
-      enabled: true 
+      enabled: true
     },
-    { 
-      id: 'newMessage', 
-      label: 'Nouveau message', 
+    {
+      id: 'newMessage',
+      label: 'Nouveau message',
       description: 'Notification lors de la réception d\'un message',
       icon: 'message',
-      enabled: true 
+      enabled: true
     },
-    { 
-      id: 'appointment', 
-      label: 'Rendez-vous', 
+    {
+      id: 'appointment',
+      label: 'Rendez-vous',
       description: 'Rappels de rendez-vous à venir',
       icon: 'event',
-      enabled: true 
+      enabled: true
     },
-    { 
-      id: 'statusChange', 
-      label: 'Changement de statut', 
+    {
+      id: 'statusChange',
+      label: 'Changement de statut',
       description: 'Notification lors du changement de statut d\'un dossier',
       icon: 'update',
-      enabled: true 
+      enabled: true
     }
   ];
-  
+
   // Digest frequencies
   digestFrequencies: DigestFrequency[] = [
-    { 
-      value: 'instant', 
-      label: 'Instantané', 
+    {
+      value: 'instant',
+      label: 'Instantané',
       description: 'Recevoir les notifications immédiatement',
-      icon: 'flash_on' 
+      icon: 'flash_on'
     },
-    { 
-      value: 'hourly', 
-      label: 'Horaire', 
+    {
+      value: 'hourly',
+      label: 'Horaire',
       description: 'Grouper les notifications par heure',
-      icon: 'schedule' 
+      icon: 'schedule'
     },
-    { 
-      value: 'daily', 
-      label: 'Quotidien', 
+    {
+      value: 'daily',
+      label: 'Quotidien',
       description: 'Recevoir un résumé quotidien',
-      icon: 'today' 
+      icon: 'today'
     }
   ];
-  
+
   // Preview examples
   exampleNotifications: NotificationExample[] = [];
-  
+
   // Quiet hours range (default: 22h-8h)
   quietHoursStart = 22;
   quietHoursEnd = 8;
   quietHoursEnabled = false;
-  
+
   constructor(
     private fb: FormBuilder,
     private userPreferencesService: UserPreferencesService,
     private notificationService: NotificationService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.initializeForm();
@@ -183,18 +183,18 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
       smsEnabled: [false],
       inAppEnabled: [true],
       pushEnabled: [true],
-      
+
       // Notification types
       newDossierEnabled: [true],
       newMessageEnabled: [true],
       appointmentEnabled: [true],
       statusChangeEnabled: [true],
-      
+
       // Quiet hours
       quietHoursEnabled: [false],
       quietHoursStart: [22, [Validators.min(0), Validators.max(23)]],
       quietHoursEnd: [8, [Validators.min(0), Validators.max(23)]],
-      
+
       // Digest frequency
       digestFrequency: ['instant', Validators.required]
     });
@@ -202,33 +202,33 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
 
   private loadPreferences(): void {
     this.loading = true;
-    
+
     this.userPreferencesService.getPreferences()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (preferences) => {
           if (preferences.notifications) {
             const notifPrefs = preferences.notifications;
-            const notifPrefsExtended = notifPrefs as Record<string, unknown>;
-            
+            const notifPrefsExtended = notifPrefs as any;
+
             this.preferencesForm.patchValue({
               emailEnabled: notifPrefs.emailEnabled !== false,
               smsEnabled: notifPrefs.smsEnabled || false,
               inAppEnabled: notifPrefs.inAppEnabled !== false,
               pushEnabled: notifPrefs.pushEnabled !== false,
-              
+
               newDossierEnabled: (notifPrefsExtended.newDossierEnabled as boolean) !== false,
               newMessageEnabled: (notifPrefsExtended.newMessageEnabled as boolean) !== false,
               appointmentEnabled: (notifPrefsExtended.appointmentEnabled as boolean) !== false,
               statusChangeEnabled: (notifPrefsExtended.statusChangeEnabled as boolean) !== false,
-              
+
               quietHoursEnabled: (notifPrefsExtended.quietHoursEnabled as boolean) || false,
               quietHoursStart: (notifPrefsExtended.quietHoursStart as number) || 22,
               quietHoursEnd: (notifPrefsExtended.quietHoursEnd as number) || 8,
-              
+
               digestFrequency: (notifPrefsExtended.digestFrequency as string) || 'instant'
             });
-            
+
             this.updateChannelsFromForm();
             this.updateTypesFromForm();
             this.updateQuietHoursFromForm();
@@ -280,9 +280,9 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
   private updateExampleNotifications(): void {
     const formValue = this.preferencesForm.value;
     const now = new Date();
-    
+
     this.exampleNotifications = [];
-    
+
     if (formValue.newDossierEnabled) {
       this.exampleNotifications.push({
         title: 'Nouveau dossier',
@@ -292,7 +292,7 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
         icon: 'folder'
       });
     }
-    
+
     if (formValue.newMessageEnabled) {
       this.exampleNotifications.push({
         title: 'Nouveau message',
@@ -302,7 +302,7 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
         icon: 'message'
       });
     }
-    
+
     if (formValue.appointmentEnabled) {
       this.exampleNotifications.push({
         title: 'Rendez-vous à venir',
@@ -312,7 +312,7 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
         icon: 'event'
       });
     }
-    
+
     if (formValue.statusChangeEnabled) {
       this.exampleNotifications.push({
         title: 'Changement de statut',
@@ -338,16 +338,16 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
       smsEnabled: formValue.smsEnabled,
       inAppEnabled: formValue.inAppEnabled,
       pushEnabled: formValue.pushEnabled,
-      
+
       newDossierEnabled: formValue.newDossierEnabled,
       newMessageEnabled: formValue.newMessageEnabled,
       appointmentEnabled: formValue.appointmentEnabled,
       statusChangeEnabled: formValue.statusChangeEnabled,
-      
+
       quietHoursEnabled: formValue.quietHoursEnabled,
       quietHoursStart: formValue.quietHoursStart,
       quietHoursEnd: formValue.quietHoursEnd,
-      
+
       digestFrequency: formValue.digestFrequency
     };
 
@@ -412,7 +412,7 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
     const now = new Date();
     const diffMs = date.getTime() - now.getTime();
     const diffMins = Math.floor(diffMs / 60000);
-    
+
     if (diffMins < 0) {
       const absMins = Math.abs(diffMins);
       if (absMins < 60) {
@@ -433,10 +433,10 @@ export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
     if (!this.quietHoursEnabled) {
       return false;
     }
-    
+
     const now = new Date();
     const currentHour = now.getHours();
-    
+
     if (this.quietHoursStart < this.quietHoursEnd) {
       // Normal range (e.g., 1h-5h)
       return currentHour >= this.quietHoursStart && currentHour < this.quietHoursEnd;

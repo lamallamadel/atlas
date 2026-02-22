@@ -7,6 +7,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { OAuthService } from 'angular-oauth2-oidc';
 
 import { TourProgressComponent } from './tour-progress.component';
 import { TourDefinitionService } from '../services/tour-definition.service';
@@ -18,6 +19,10 @@ describe('TourProgressComponent', () => {
   let fixture: ComponentFixture<TourProgressComponent>;
 
   beforeEach(async () => {
+    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
+      'initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken',
+      'configure', 'setStorage', 'logOut', 'getAccessToken'
+    ]);
     await TestBed.configureTestingModule({
       declarations: [ TourProgressComponent ],
       imports: [
@@ -33,7 +38,8 @@ describe('TourProgressComponent', () => {
       providers: [
         TourDefinitionService,
         OnboardingTourService,
-        UserPreferencesService
+        UserPreferencesService,
+        { provide: OAuthService, useValue: mockOAuthService }
       ]
     })
     .compileComponents();

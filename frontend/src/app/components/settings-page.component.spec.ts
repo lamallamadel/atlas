@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -179,15 +179,14 @@ describe('SettingsPageComponent', () => {
     expect(component.areFormsValid()).toBeFalse();
   });
 
-  it('should update theme preview on theme change', () => {
+  it('should update theme preview on theme change', fakeAsync(() => {
     fixture.detectChanges();
 
     component.appearanceForm.patchValue({ theme: 'dark' });
-
-    fixture.detectChanges();
+    tick(150);
 
     expect(component.previewTheme).toBe('dark');
-  });
+  }));
 
   it('should format preview date correctly', () => {
     fixture.detectChanges();

@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
 import { NavigationService } from './navigation.service';
 import { Subject } from 'rxjs';
@@ -41,14 +41,15 @@ describe('NavigationService', () => {
     expect(service.getRouteAnimation()).toBe('fadeIn');
   });
 
-  it('should save and restore scroll position', () => {
+  it('should save and restore scroll position', fakeAsync(() => {
     const scrollToSpy = spyOn(window, 'scrollTo');
     
     service.saveScrollPosition('/test-route');
     service.restoreScrollPosition('/test-route');
     
+    tick(0); // flush setTimeout(0) used in restoreScrollPosition
     expect(scrollToSpy).toHaveBeenCalled();
-  });
+  }));
 
   it('should navigate back with correct animation', (done) => {
     routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
@@ -98,7 +99,7 @@ describe('NavigationService', () => {
     expect(service.canGoBack()).toBeTruthy();
   });
 
-  it('should correctly report canGoForward', () => {
+  it('should correctly report canGoForward', (done) => {
     routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
     routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
     
@@ -108,6 +109,7 @@ describe('NavigationService', () => {
     
     setTimeout(() => {
       expect(service.canGoForward()).toBeTruthy();
+      done();
     }, 100);
   });
 });

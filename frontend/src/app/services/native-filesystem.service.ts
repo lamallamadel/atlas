@@ -225,7 +225,7 @@ export class NativeFilesystemService {
         name: path.split('/').pop() || path,
         size: result.size,
         mtime: result.mtime,
-        ctime: result.ctime,
+        ctime: result.ctime || 0,
         type: result.type,
         uri: result.uri
       })),
@@ -267,7 +267,7 @@ export class NativeFilesystemService {
    * Copy a file
    */
   copyFile(
-    from: string,
+    fromPathStr: string,
     to: string,
     directory: Directory = this.documentsDir
   ): Observable<FileOperationResult> {
@@ -275,7 +275,7 @@ export class NativeFilesystemService {
       return of({ success: false, error: 'Filesystem not available on web' });
     }
 
-    const fromPath = `${this.appFolder}/${from}`;
+    const fromPath = `${this.appFolder}/${fromPathStr}`;
     const toPath = `${this.appFolder}/${to}`;
 
     return from(
@@ -303,7 +303,7 @@ export class NativeFilesystemService {
    * Rename/move a file
    */
   renameFile(
-    from: string,
+    fromPathStr: string,
     to: string,
     directory: Directory = this.documentsDir
   ): Observable<FileOperationResult> {
@@ -311,7 +311,7 @@ export class NativeFilesystemService {
       return of({ success: false, error: 'Filesystem not available on web' });
     }
 
-    const fromPath = `${this.appFolder}/${from}`;
+    const fromPath = `${this.appFolder}/${fromPathStr}`;
     const toPath = `${this.appFolder}/${to}`;
 
     return from(
@@ -463,11 +463,11 @@ export class NativeFilesystemService {
     for (let offset = 0; offset < byteCharacters.length; offset += 512) {
       const slice = byteCharacters.slice(offset, offset + 512);
       const byteNumbers = new Array(slice.length);
-      
+
       for (let i = 0; i < slice.length; i++) {
         byteNumbers[i] = slice.charCodeAt(i);
       }
-      
+
       const byteArray = new Uint8Array(byteNumbers);
       byteArrays.push(byteArray);
     }

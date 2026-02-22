@@ -1,4 +1,5 @@
 import { CapacitorConfig } from '@capacitor/cli';
+import { KeyboardResize, KeyboardStyle } from '@capacitor/keyboard';
 
 const config: CapacitorConfig = {
   appId: 'com.atlas.immobilier',
@@ -34,8 +35,8 @@ const config: CapacitorConfig = {
       overlaysWebView: false
     },
     Keyboard: {
-      resize: 'body',
-      style: 'dark',
+      resize: KeyboardResize.Body,
+      style: KeyboardStyle.Dark,
       resizeOnFullScreen: true
     },
     PushNotifications: {

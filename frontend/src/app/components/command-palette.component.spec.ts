@@ -5,12 +5,14 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of, BehaviorSubject } from 'rxjs';
+import { of, BehaviorSubject, Subject } from 'rxjs';
+import { NavigationEnd } from '@angular/router';
 
 import { CommandPaletteComponent } from './command-palette.component';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { SearchApiService } from '../services/search-api.service';
 import { RecentNavigationService } from '../services/recent-navigation.service';
+import { AiAgentService } from '../services/ai-agent.service';
 
 describe('CommandPaletteComponent', () => {
   let component: CommandPaletteComponent;
@@ -25,7 +27,10 @@ describe('CommandPaletteComponent', () => {
   beforeEach(async () => {
     visibleSubject = new BehaviorSubject<boolean>(false);
 
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockRouter = jasmine.createSpyObj('Router', ['navigate'], {
+      url: '/',
+      events: of(new NavigationEnd(1, '/', '/'))
+    });
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
 
     mockKeyboardService = {
@@ -44,6 +49,8 @@ describe('CommandPaletteComponent', () => {
     mockRecentNavService = jasmine.createSpyObj('RecentNavigationService', ['getRecentItems']);
     mockRecentNavService.getRecentItems.and.returnValue([]);
 
+    const mockAiAgentService = jasmine.createSpyObj('AiAgentService', ['openPanel']);
+
     await TestBed.configureTestingModule({
       declarations: [CommandPaletteComponent],
       imports: [
@@ -57,7 +64,8 @@ describe('CommandPaletteComponent', () => {
         { provide: MatDialog, useValue: mockDialog },
         { provide: KeyboardShortcutService, useValue: mockKeyboardService },
         { provide: SearchApiService, useValue: mockSearchService },
-        { provide: RecentNavigationService, useValue: mockRecentNavService }
+        { provide: RecentNavigationService, useValue: mockRecentNavService },
+        { provide: AiAgentService, useValue: mockAiAgentService }
       ]
     })
       .compileComponents();
@@ -89,19 +97,18 @@ describe('CommandPaletteComponent', () => {
     }, 150);
   });
 
-  it('should filter commands based on search query', () => {
+  it('should filter commands based on search query', fakeAsync(() => {
     component.searchQuery = 'dossier';
     component.onSearchChange();
+    tick(350);
 
-    setTimeout(() => {
-      const filteredIds = component.filteredItems
-        .filter(item => 'action' in item)
-        .map((item: any) => item.id);
+    const filteredIds = component.filteredItems
+      .filter((item: any) => 'action' in item)
+      .map((item: any) => item.id);
 
-      expect(filteredIds).toContain('create-dossier');
-      expect(filteredIds).toContain('nav-dossiers');
-    }, 350);
-  });
+    expect(filteredIds).toContain('create-dossier');
+    expect(filteredIds).toContain('nav-dossiers');
+  }));
 
   it('should handle arrow down key navigation', () => {
     component.filteredItems = component.globalCommands;

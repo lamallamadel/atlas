@@ -6,6 +6,7 @@ import { NativePushNotificationsService } from './native-push-notifications.serv
 import { NativeBiometricService } from './native-biometric.service';
 import { NativeCalendarService } from './native-calendar.service';
 import { NativeFilesystemService } from './native-filesystem.service';
+import { Style } from '@capacitor/status-bar';
 import { filter, take } from 'rxjs/operators';
 
 /**
@@ -25,7 +26,7 @@ export class NativeAppInitService {
     private biometricService: NativeBiometricService,
     private calendarService: NativeCalendarService,
     private filesystemService: NativeFilesystemService
-  ) {}
+  ) { }
 
   /**
    * Initialize native app features
@@ -78,9 +79,9 @@ export class NativeAppInitService {
 
     // Set status bar style based on platform
     if (platformInfo?.platform === 'ios') {
-      this.platformService.setStatusBarStyle('LIGHT', '#2c5aa0').subscribe();
+      this.platformService.setStatusBarStyle(Style.Light, '#2c5aa0').subscribe();
     } else if (platformInfo?.platform === 'android') {
-      this.platformService.setStatusBarStyle('LIGHT', '#2c5aa0').subscribe();
+      this.platformService.setStatusBarStyle(Style.Light, '#2c5aa0').subscribe();
     }
 
     // Get device info for analytics
@@ -100,7 +101,7 @@ export class NativeAppInitService {
   private async initializePushNotifications(): Promise<void> {
     // Check permissions
     const permission = await this.pushService.checkPermissions().toPromise();
-    
+
     if (!permission?.granted) {
       // Request permissions on first launch
       const firstLaunch = !localStorage.getItem('appLaunched');
@@ -155,7 +156,7 @@ export class NativeAppInitService {
     window.addEventListener('whatsapp-callback', (event: any) => {
       const { code, state } = event.detail;
       console.log('WhatsApp callback received:', { code, state });
-      
+
       // Route to WhatsApp integration page with callback params
       this.router.navigate(['/settings/integrations/whatsapp'], {
         queryParams: { code, state }
@@ -185,7 +186,7 @@ export class NativeAppInitService {
     this.platformService.networkStatus$.subscribe(status => {
       if (status) {
         console.log('Network status changed:', status);
-        
+
         if (!status.connected) {
           this.onOffline();
         } else {
@@ -202,10 +203,10 @@ export class NativeAppInitService {
     if (this.platformService.isAndroid()) {
       this.platformService.backButton$.subscribe(() => {
         console.log('Hardware back button pressed');
-        
+
         // Check if we can navigate back
         const canGoBack = this.router.url !== '/';
-        
+
         if (canGoBack) {
           this.router.navigate(['..']);
         } else {
@@ -262,7 +263,7 @@ export class NativeAppInitService {
     console.log('Device is offline');
     // Show offline indicator
     this.showOfflineMessage();
-    
+
     // Enable offline mode
     localStorage.setItem('offlineMode', 'true');
   }
@@ -274,10 +275,10 @@ export class NativeAppInitService {
     console.log('Device is online');
     // Hide offline indicator
     this.hideOfflineMessage();
-    
+
     // Disable offline mode
     localStorage.removeItem('offlineMode');
-    
+
     // Sync offline changes
     this.syncOfflineChanges();
   }
@@ -355,13 +356,13 @@ export class NativeAppInitService {
    */
   async checkBiometricAuth(): Promise<boolean> {
     const biometricEnabled = localStorage.getItem('biometricEnabled') === 'true';
-    
+
     if (!biometricEnabled) {
       return true;
     }
 
     const availability = await this.biometricService.checkBiometricAvailability().toPromise();
-    
+
     if (!availability?.available) {
       return true;
     }

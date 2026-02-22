@@ -74,8 +74,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       trendValue: 0,
       badgeColor: '#4caf50',
       description: 'Leads en attente'
-
-      trend: ''
     },
     conversionWhatsApp: {
       title: 'Conversion WhatsApp %',
@@ -86,8 +84,8 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
       icon: 'connect_without_contact',
       color: '#25D366',
       chartData: [4, 6, 8, 10, 15, 18, 24],
-      trend: ''
-
+      trend: '',
+      trendValue: 0
     }
   };
 

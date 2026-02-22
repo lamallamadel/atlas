@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
-import { MatChipsModule } from '@angular/material/chip';
+import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ESignatureApiService } from '../services/esignature-api.service';
 import { SignatureRequest, SignatureStatus } from '../models/esignature.models';
@@ -280,7 +280,7 @@ export class SignatureStatusTrackerComponent implements OnInit, OnDestroy {
   signatureRequests: SignatureRequest[] = [];
   private refreshSubscription?: Subscription;
 
-  constructor(private eSignatureService: ESignatureApiService) {}
+  constructor(private eSignatureService: ESignatureApiService) { }
 
   ngOnInit(): void {
     this.loadSignatureRequests();

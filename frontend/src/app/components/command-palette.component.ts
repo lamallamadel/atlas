@@ -504,7 +504,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
    *  - Fuzzy char match   = 10 + ratio of chars matched
    */
   private fuzzyScore(query: string, text: string): FuzzyResult {
-    if (!text || !query) return { score: 0, segments: [{ text, match: false }] };
+    if (text == null || typeof text !== 'string') text = '';
+    if (!text || !query) return { score: 0, segments: [{ text: String(text), match: false }] };
 
     const textLower = text.toLowerCase();
     const queryLower = query.toLowerCase();
