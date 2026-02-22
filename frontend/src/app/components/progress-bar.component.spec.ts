@@ -50,6 +50,7 @@ describe('ProgressBarComponent', () => {
     tick(200);
     expect(component.progress).toBeGreaterThan(0);
     expect(component.progress).toBeLessThan(90);
+    discardPeriodicTasks();
   }));
 
   it('should complete progress when navigation ends', fakeAsync(() => {

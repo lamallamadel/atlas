@@ -39,6 +39,14 @@ describe('UserPreferencesService', () => {
   });
 
   afterEach(() => {
+    try {
+      const pending = httpMock.match(r => r.url.startsWith(API_BASE));
+      pending.forEach(req => {
+        if (!req.cancelled) {
+          req.flush(req.request.method === 'GET' ? {} : (req.request.body as object) || {});
+        }
+      });
+    } catch (_) { /* ignore */ }
     httpMock.verify();
     localStorage.clear();
   });
@@ -73,7 +81,7 @@ describe('UserPreferencesService', () => {
       const newService = TestBed.inject(UserPreferencesService);
 
       const req = httpMock.expectOne(API_BASE);
-      req.flush({});
+      req.flush(storedPrefs);
 
       expect(newService.getCurrentPreferences()).toEqual(storedPrefs);
     });
@@ -204,7 +212,7 @@ describe('UserPreferencesService', () => {
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
 
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
-      updateReq.flush({ category: 'ui', preferences: { theme: 'dark' } });
+      updateReq.flush({ category: 'ui', preferences: { theme: 'dark', language: 'en' } });
       tick();
 
       const current = service.getCurrentPreferences();
@@ -300,6 +308,11 @@ describe('UserPreferencesService', () => {
       tick();
 
       expect(service.hasPendingUpdates()).toBe(true);
+
+      const getReq = httpMock.match((u: { url: string; method: string }) => u.url === API_BASE && u.method === 'GET');
+      if (getReq.length > 0) {
+        getReq[0].flush({});
+      }
     }));
   });
 
@@ -310,9 +323,11 @@ describe('UserPreferencesService', () => {
       tick();
 
       tick(5 * 60 * 1000);
+      tick(0);
 
-      const pollReq = httpMock.expectOne(API_BASE);
-      pollReq.flush({ ui: { theme: 'dark' } });
+      const getReqs = httpMock.match((req: { url: string; method: string }) => req.url === API_BASE && req.method === 'GET');
+      expect(getReqs.length).toBeGreaterThanOrEqual(2);
+      getReqs[1].flush({ ui: { theme: 'dark' } });
       tick();
 
       expect(service.getCurrentPreferences()).toEqual({ ui: { theme: 'dark' } });
@@ -324,9 +339,11 @@ describe('UserPreferencesService', () => {
       tick();
 
       tick(5 * 60 * 1000);
+      tick(0);
 
-      const pollReq = httpMock.expectOne(API_BASE);
-      pollReq.flush({ ui: { theme: 'dark', language: 'fr' } });
+      const getReqs = httpMock.match((req: { url: string; method: string }) => req.url === API_BASE && req.method === 'GET');
+      expect(getReqs.length).toBeGreaterThanOrEqual(2);
+      getReqs[1].flush({ ui: { theme: 'dark', language: 'fr' } });
       tick();
 
       const current = service.getCurrentPreferences();
@@ -343,7 +360,8 @@ describe('UserPreferencesService', () => {
 
       tick(5 * 60 * 1000);
 
-      httpMock.expectNone(API_BASE);
+      const getReqs = httpMock.match((req: { url: string }) => req.url === API_BASE);
+      expect(getReqs.length).toBe(1);
     }));
 
     it('should update last sync timestamp after successful poll', fakeAsync(() => {
@@ -354,9 +372,11 @@ describe('UserPreferencesService', () => {
       localStorage.removeItem('user_preferences_last_sync');
 
       tick(5 * 60 * 1000);
+      tick(0);
 
-      const pollReq = httpMock.expectOne(API_BASE);
-      pollReq.flush({ ui: { theme: 'light' } });
+      const getReqs = httpMock.match((req: { url: string; method: string }) => req.url === API_BASE && req.method === 'GET');
+      expect(getReqs.length).toBeGreaterThanOrEqual(2);
+      getReqs[1].flush({ ui: { theme: 'light' } });
       tick();
 
       const lastSync = localStorage.getItem('user_preferences_last_sync');

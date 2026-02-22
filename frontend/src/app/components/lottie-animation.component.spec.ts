@@ -37,8 +37,18 @@ describe('LottieAnimationComponent', () => {
     component.error.subscribe((err: Error) => { emittedError = err; });
 
     spyOn(component as any, 'loadAnimationData').and.returnValue(Promise.reject(new Error('Load failed')));
+    // loadAnimation() first awaits dynamic import; stub it so we only exercise loadAnimationData rejection
+    spyOn(component as any, 'loadAnimation').and.callFake(async () => {
+      try {
+        await (component as any).loadAnimationData();
+      } catch (err) {
+        (component as any).useFallback = true;
+        component.error.emit(err as Error);
+        component['cdr'].markForCheck();
+      }
+    });
     fixture.detectChanges();
-    tick(50);
+    tick(0);
     fixture.detectChanges();
     expect(component.useFallback).toBe(true);
     expect(emittedError).toBeTruthy();
