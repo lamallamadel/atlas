@@ -44,6 +44,3 @@ VALUES
     ('Rendez-vous cette semaine', 'DOSSIER', 'Dossiers avec rendez-vous planifiés cette semaine', 
      '{"conditions":[{"field":"hasAppointment","operator":"EQUALS","value":"true"},{"field":"appointmentDate","operator":"THIS_WEEK","value":""}],"logicOperator":"AND"}', 
      true, true, 'default', 'system');
-
-
-

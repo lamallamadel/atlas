@@ -26,6 +26,3 @@ CREATE INDEX idx_appointment_dossier_id ON appointment(dossier_id);
 CREATE INDEX idx_appointment_start_time ON appointment(start_time);
 CREATE INDEX idx_appointment_assigned_to ON appointment(assigned_to);
 CREATE INDEX idx_appointment_status ON appointment(status);
-
-
-
