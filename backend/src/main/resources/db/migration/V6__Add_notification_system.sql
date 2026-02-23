@@ -2,7 +2,7 @@
 CREATE TABLE notification (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL,
+    obj_type VARCHAR(50) NOT NULL,
     status VARCHAR(50) NOT NULL,
     template_id VARCHAR(255) NOT NULL,
     variables ${json_type},
@@ -23,6 +23,10 @@ CREATE TABLE notification (
 -- Create indexes for notification table
 CREATE INDEX idx_notification_org_id ON notification(org_id);
 CREATE INDEX idx_notification_status ON notification(status);
-CREATE INDEX idx_notification_type ON notification(type);
+CREATE INDEX idx_notification_type ON notification(obj_type);
 CREATE INDEX idx_notification_created_at ON notification(created_at);
 CREATE INDEX idx_notification_status_retry ON notification(status, retry_count);
+
+
+
+
