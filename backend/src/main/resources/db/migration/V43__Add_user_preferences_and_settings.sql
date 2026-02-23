@@ -26,7 +26,7 @@ CREATE TABLE organization_settings (
 CREATE TABLE system_config (
     id BIGSERIAL PRIMARY KEY,
     config_key VARCHAR(255) NOT NULL,
-    value TEXT,
+    config_value TEXT,
     category VARCHAR(100),
     encrypted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -52,6 +52,6 @@ COMMENT ON COLUMN organization_settings.version IS 'Version number for optimisti
 
 COMMENT ON TABLE system_config IS 'Stores system-wide configuration key-value pairs';
 COMMENT ON COLUMN system_config.config_key IS 'Configuration key (unique)';
-COMMENT ON COLUMN system_config.value IS 'Configuration value as text';
+COMMENT ON COLUMN system_config.config_value IS 'Configuration value as text';
 COMMENT ON COLUMN system_config.category IS 'Optional category for grouping configurations';
 COMMENT ON COLUMN system_config.encrypted IS 'Flag indicating if the value is encrypted';
