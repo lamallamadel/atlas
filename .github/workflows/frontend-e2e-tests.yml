@@ -38,7 +38,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Cache Angular build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: frontend/.angular/cache
           key: ${{ runner.os }}-angular-cache-${{ hashFiles('frontend/package-lock.json') }}
@@ -182,7 +182,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
@@ -190,7 +190,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Cache Angular build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: frontend/.angular/cache
           key: ${{ runner.os }}-angular-cache-${{ hashFiles('frontend/package-lock.json') }}
@@ -328,7 +328,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
@@ -336,7 +336,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Cache Angular build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: frontend/.angular/cache
           key: ${{ runner.os }}-angular-cache-${{ hashFiles('frontend/package-lock.json') }}
