@@ -107,12 +107,15 @@ deploy-backend:
 
 test-frontend:
   stage: test
-  image: node:18-alpine
+  image: node:18-bookworm
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       changes:
         - frontend/**/*
         - .gitlab-ci.yml
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq chromium
+    - export CHROME_BIN=/usr/bin/chromium
   cache:
     key: "npm-$CI_COMMIT_REF_SLUG"
     paths:
@@ -122,7 +125,7 @@ test-frontend:
     - cd frontend
     - npm ci --prefer-offline
     - npm run lint
-    - npm test -- --watch=false --browsers=ChromeHeadless
+    - npm test -- --watch=false --browsers=ChromeHeadlessCI
   artifacts:
     reports:
       junit: frontend/junit.xml
