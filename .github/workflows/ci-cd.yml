@@ -1,5 +1,8 @@
 name: CI/CD Pipeline
 
+# 🔧 To switch providers:
+# Change "branches: [master]" to your target branch/remote
+# Currently set for GitHub Actions on master branch
 on:
   push:
     branches:
@@ -31,16 +34,26 @@ jobs:
       - name: Detect changed paths
         id: changes
         run: |
-          if git diff origin/master...HEAD --quiet -- backend/; then
-            echo "backend=false" >> $GITHUB_OUTPUT
+          # Get the list of changed files between HEAD and the merge base
+          if git rev-parse origin/master >/dev/null 2>&1; then
+            MERGE_BASE=$(git merge-base HEAD origin/master)
           else
-            echo "backend=true" >> $GITHUB_OUTPUT
+            # Fallback for first push or if origin/master doesn't exist
+            MERGE_BASE=$(git rev-list --max-parents=0 HEAD)
           fi
           
-          if git diff origin/master...HEAD --quiet -- frontend/; then
-            echo "frontend=false" >> $GITHUB_OUTPUT
+          CHANGED_FILES=$(git diff --name-only $MERGE_BASE HEAD || git diff --name-only HEAD~1 HEAD)
+          
+          if echo "$CHANGED_FILES" | grep -q "^backend/"; then
+            echo "backend=true" >> $GITHUB_OUTPUT
           else
+            echo "backend=false" >> $GITHUB_OUTPUT
+          fi
+          
+          if echo "$CHANGED_FILES" | grep -q "^frontend/"; then
             echo "frontend=true" >> $GITHUB_OUTPUT
+          else
+            echo "frontend=false" >> $GITHUB_OUTPUT
           fi
 
   # ============ BACKEND ============
