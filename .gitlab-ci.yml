@@ -125,7 +125,7 @@ test-frontend:
     - cd frontend
     - npm ci --prefer-offline
     - npm run lint
-    - npm test -- --watch=false --browsers=ChromeHeadlessCI
+    - npm test -- --watch=false --browsers ChromeHeadlessCI
   artifacts:
     reports:
       junit: frontend/junit.xml
