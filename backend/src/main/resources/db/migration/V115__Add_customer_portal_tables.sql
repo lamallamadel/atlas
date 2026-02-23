@@ -42,7 +42,7 @@ CREATE TABLE client_appointment_request (
     proposed_end_time TIMESTAMP NOT NULL,
     preferred_location VARCHAR(500),
     notes TEXT,
-    status_VARCHAR(50) NOT NULL DEFAULT 'PENDING',
+    status_ VARCHAR(50) NOT NULL DEFAULT 'PENDING',
     agent_response TEXT,
     appointment_id BIGINT,
     responded_at TIMESTAMP,
@@ -72,4 +72,6 @@ CREATE TABLE client_satisfaction_survey (
 
 CREATE INDEX idx_client_satisfaction_survey_dossier ON client_satisfaction_survey(dossier_id, created_at);
 CREATE INDEX idx_client_satisfaction_survey_trigger ON client_satisfaction_survey(org_id, trigger_type, trigger_entity_id);
+
+
 

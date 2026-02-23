@@ -129,3 +129,5 @@ CREATE INDEX IF NOT EXISTS idx_activity_updated_by ON activity(updated_by);
 
 CREATE INDEX IF NOT EXISTS idx_message_template_created_by ON message_template(created_by);
 CREATE INDEX IF NOT EXISTS idx_message_template_updated_by ON message_template(updated_by);
+
+

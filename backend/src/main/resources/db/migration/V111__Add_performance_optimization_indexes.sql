@@ -82,3 +82,5 @@ CREATE INDEX IF NOT EXISTS idx_document_category_created ON document(category, c
 -- PostgreSQL will automatically analyze tables during autovacuum
 -- For production PostgreSQL, run ANALYZE manually or enable autovacuum
 
+
+

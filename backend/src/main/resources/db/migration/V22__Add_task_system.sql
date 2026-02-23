@@ -24,7 +24,9 @@ CREATE INDEX idx_task_org_id ON task(org_id);
 CREATE INDEX idx_task_dossier_id ON task(dossier_id);
 CREATE INDEX idx_task_assigned_to ON task(assigned_to);
 CREATE INDEX idx_task_due_date ON task(due_date);
-CREATE INDEX idx_task_status ON task(status);
+CREATE INDEX idx_task_status ON task(status_);
 CREATE INDEX idx_task_priority ON task(priority);
 CREATE INDEX idx_task_assigned_to_status ON task(assigned_to, status);
 CREATE INDEX idx_task_due_date_status ON task(due_date, status);
+
+

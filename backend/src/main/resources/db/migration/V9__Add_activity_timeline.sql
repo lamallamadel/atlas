@@ -18,3 +18,5 @@ CREATE INDEX idx_activity_created_at ON activity(created_at);
 CREATE INDEX idx_activity_type ON activity(obj_type);
 CREATE INDEX idx_activity_visibility ON activity(visibility);
 
+
+

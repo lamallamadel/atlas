@@ -27,3 +27,5 @@ CREATE INDEX idx_ref_version_category ON referential_version(category);
 -- Add change tracking columns to referential table
 ALTER TABLE referential ADD COLUMN version BIGINT DEFAULT 1;
 ALTER TABLE referential ADD COLUMN last_change_type VARCHAR(50);
+
+

@@ -100,3 +100,5 @@ INSERT INTO message_template (org_id, name, category, channel, subject, content,
 ('default', 'Suivi post-rendez-vous', 'FOLLOW_UP', 'EMAIL', 'Suite à notre rendez-vous', 'Bonjour {{leadName}},\n\nMerci pour le temps que vous m''avez accordé lors de notre rendez-vous.\n\nAvez-vous des questions supplémentaires ? Je reste à votre disposition.\n\nCordialement', '["leadName"]'),
 ('default', 'Première qualification', 'QUALIFICATION', 'EMAIL', 'Informations complémentaires', 'Bonjour {{leadName}},\n\nMerci pour votre intérêt. Pour mieux vous accompagner, pourriez-vous me préciser :\n- Votre budget\n- Vos critères prioritaires\n- Votre calendrier de recherche\n\nJe reviendrai vers vous rapidement.\n\nCordialement', '["leadName"]');
 
+
+

@@ -31,3 +31,5 @@ SET role = 'BUYER'
 WHERE role IS NULL;
 
 ALTER TABLE partie_prenante ALTER COLUMN role SET NOT NULL;
+
+

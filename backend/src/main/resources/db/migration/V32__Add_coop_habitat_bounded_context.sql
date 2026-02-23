@@ -35,7 +35,7 @@ CREATE TABLE coop_member (
     date_of_birth DATE,
     member_number VARCHAR(100) UNIQUE,
     join_date DATE,
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     meta ${json_type},
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -54,7 +54,7 @@ CREATE TABLE coop_project (
     location VARCHAR(500),
     city VARCHAR(255),
     postal_code VARCHAR(20),
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     start_date DATE,
     expected_completion_date DATE,
     completion_date DATE,
@@ -82,7 +82,7 @@ CREATE TABLE coop_lot (
     bathrooms INTEGER,
     price DECIMAL(15, 2),
     currency VARCHAR(3),
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     meta ${json_type},
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -101,7 +101,7 @@ CREATE TABLE coop_contribution (
     obj_type VARCHAR(50) NOT NULL,
     amount DECIMAL(15, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL,
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     due_date DATE,
     payment_date DATE,
     reference_number VARCHAR(100),
@@ -122,27 +122,29 @@ CREATE INDEX idx_coop_group_created_at ON coop_group(created_at);
 -- Indexes for coop_member
 CREATE INDEX idx_coop_member_org_id ON coop_member(org_id);
 CREATE INDEX idx_coop_member_group_id ON coop_member(group_id);
-CREATE INDEX idx_coop_member_status ON coop_member(status);
+CREATE INDEX idx_coop_member_status ON coop_member(status_);
 CREATE INDEX idx_coop_member_email ON coop_member(email);
 CREATE INDEX idx_coop_member_member_number ON coop_member(member_number);
 
 -- Indexes for coop_project
 CREATE INDEX idx_coop_project_org_id ON coop_project(org_id);
 CREATE INDEX idx_coop_project_group_id ON coop_project(group_id);
-CREATE INDEX idx_coop_project_status ON coop_project(status);
+CREATE INDEX idx_coop_project_status ON coop_project(status_);
 CREATE INDEX idx_coop_project_created_at ON coop_project(created_at);
 
 -- Indexes for coop_lot
 CREATE INDEX idx_coop_lot_org_id ON coop_lot(org_id);
 CREATE INDEX idx_coop_lot_project_id ON coop_lot(project_id);
 CREATE INDEX idx_coop_lot_member_id ON coop_lot(member_id);
-CREATE INDEX idx_coop_lot_status ON coop_lot(status);
+CREATE INDEX idx_coop_lot_status ON coop_lot(status_);
 
 -- Indexes for coop_contribution
 CREATE INDEX idx_coop_contribution_org_id ON coop_contribution(org_id);
 CREATE INDEX idx_coop_contribution_member_id ON coop_contribution(member_id);
 CREATE INDEX idx_coop_contribution_project_id ON coop_contribution(project_id);
-CREATE INDEX idx_coop_contribution_status ON coop_contribution(status);
+CREATE INDEX idx_coop_contribution_status ON coop_contribution(status_);
 CREATE INDEX idx_coop_contribution_due_date ON coop_contribution(due_date);
 CREATE INDEX idx_coop_contribution_type ON coop_contribution(obj_type);
+
+
 

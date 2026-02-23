@@ -19,3 +19,5 @@ END $$;
 
 -- Add comment
 COMMENT ON COLUMN user_preferences.tour_progress IS 'Stores guided tour progress and completion state as JSON';
+
+

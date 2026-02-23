@@ -30,3 +30,5 @@ CREATE INDEX idx_template_version_number ON whatsapp_template_version(template_i
 -- Create indexes for Meta submission tracking
 CREATE INDEX idx_whatsapp_template_meta_submission ON whatsapp_template(meta_submission_id) WHERE meta_submission_id IS NOT NULL;
 CREATE INDEX idx_whatsapp_template_current_version ON whatsapp_template(current_version);
+
+

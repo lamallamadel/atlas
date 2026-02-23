@@ -10,7 +10,7 @@ CREATE TABLE annonce (
     city VARCHAR(255),
     price DECIMAL(15, 2),
     currency VARCHAR(3),
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
@@ -25,7 +25,7 @@ CREATE TABLE dossier (
     lead_phone VARCHAR(50),
     lead_name VARCHAR(255),
     lead_source VARCHAR(100),
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
@@ -76,7 +76,7 @@ CREATE TABLE message (
     recipient VARCHAR(255),
     content TEXT,
     message_type VARCHAR(50),
-    status_VARCHAR(50),
+    status_ VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
@@ -91,7 +91,7 @@ CREATE TABLE appointment (
     dossier_id BIGINT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     location VARCHAR(500),
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -117,12 +117,12 @@ CREATE TABLE audit_event (
 
 -- Indexes on annonce
 CREATE INDEX idx_annonce_org_id ON annonce(org_id);
-CREATE INDEX idx_annonce_status ON annonce(status);
+CREATE INDEX idx_annonce_status ON annonce(status_);
 CREATE INDEX idx_annonce_created_at ON annonce(created_at);
 
 -- Indexes on dossier
 CREATE INDEX idx_dossier_org_id ON dossier(org_id);
-CREATE INDEX idx_dossier_status ON dossier(status);
+CREATE INDEX idx_dossier_status ON dossier(status_);
 CREATE INDEX idx_dossier_created_at ON dossier(created_at);
 CREATE INDEX idx_dossier_lead_phone ON dossier(lead_phone);
 
@@ -138,12 +138,14 @@ CREATE INDEX idx_message_created_at ON message(created_at);
 
 -- Indexes on appointment
 CREATE INDEX idx_appointment_org_id ON appointment(org_id);
-CREATE INDEX idx_appointment_status ON appointment(status);
+CREATE INDEX idx_appointment_status ON appointment(status_);
 CREATE INDEX idx_appointment_created_at ON appointment(created_at);
 
 -- Indexes on audit_event
 CREATE INDEX idx_audit_event_org_id ON audit_event(org_id);
 CREATE INDEX idx_audit_event_created_at ON audit_event(created_at);
 CREATE INDEX idx_audit_event_entity ON audit_event(entity_type, entity_id);
+
+
 
 

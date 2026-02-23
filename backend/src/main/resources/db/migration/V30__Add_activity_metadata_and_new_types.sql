@@ -11,3 +11,5 @@ COMMENT ON COLUMN activity.metadata IS 'Standardized JSON metadata for activity 
 - CONSENT_GRANTED: {consentementId, channel, consentType, status, consentMeta, timestamp}
 - CONSENT_REVOKED: {consentementId, channel, consentType, status, previousStatus, consentMeta, timestamp}';
 
+
+

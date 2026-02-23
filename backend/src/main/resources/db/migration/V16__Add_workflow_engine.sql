@@ -57,3 +57,5 @@ ALTER TABLE dossier ADD COLUMN IF NOT EXISTS won_reason VARCHAR(100);
 -- Create index for case_type
 CREATE INDEX IF NOT EXISTS idx_dossier_case_type ON dossier(case_type);
 
+
+

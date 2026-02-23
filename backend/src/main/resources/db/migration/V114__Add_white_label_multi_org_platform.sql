@@ -74,7 +74,7 @@ CREATE TABLE tenant_provisioning (
     CONSTRAINT uk_tenant_provisioning_org_id UNIQUE (org_id)
 );
 
-CREATE INDEX idx_tenant_provisioning_status ON tenant_provisioning(status);
+CREATE INDEX idx_tenant_provisioning_status ON tenant_provisioning(status_);
 CREATE INDEX idx_tenant_provisioning_email ON tenant_provisioning(admin_user_email);
 
 -- 3. Tenant Usage Tracking (for Billing)
@@ -162,7 +162,7 @@ CREATE TABLE stripe_subscription (
 );
 
 CREATE INDEX idx_stripe_subscription_org_id ON stripe_subscription(org_id);
-CREATE INDEX idx_stripe_subscription_status ON stripe_subscription(status);
+CREATE INDEX idx_stripe_subscription_status ON stripe_subscription(status_);
 CREATE INDEX idx_stripe_subscription_customer ON stripe_subscription(stripe_customer_id);
 CREATE INDEX idx_stripe_subscription_next_billing ON stripe_subscription(next_billing_date);
 
@@ -207,7 +207,7 @@ CREATE TABLE data_export_request (
 );
 
 CREATE INDEX idx_data_export_org_id ON data_export_request(org_id);
-CREATE INDEX idx_data_export_status ON data_export_request(status);
+CREATE INDEX idx_data_export_status ON data_export_request(status_);
 CREATE INDEX idx_data_export_requester ON data_export_request(requester_email);
 CREATE INDEX idx_data_export_expires ON data_export_request(download_url_expires_at);
 
@@ -250,7 +250,7 @@ CREATE TABLE custom_domain_mapping (
 
 CREATE INDEX idx_custom_domain_org_id ON custom_domain_mapping(org_id);
 CREATE INDEX idx_custom_domain_domain ON custom_domain_mapping(domain);
-CREATE INDEX idx_custom_domain_status ON custom_domain_mapping(status);
+CREATE INDEX idx_custom_domain_status ON custom_domain_mapping(status_);
 CREATE INDEX idx_custom_domain_primary ON custom_domain_mapping(org_id, is_primary) WHERE is_primary = true;
 
 -- 7. Onboarding Progress Tracking
@@ -325,4 +325,6 @@ CREATE TABLE feature_flag (
 CREATE INDEX idx_feature_flag_org_id ON feature_flag(org_id);
 CREATE INDEX idx_feature_flag_key ON feature_flag(feature_key);
 CREATE INDEX idx_feature_flag_enabled ON feature_flag(org_id, enabled);
+
+
 

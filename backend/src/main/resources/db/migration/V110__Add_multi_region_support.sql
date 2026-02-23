@@ -73,7 +73,7 @@ CREATE TRIGGER referential_version_trigger
 CREATE TABLE IF NOT EXISTS region_health (
     id BIGSERIAL PRIMARY KEY,
     region VARCHAR(50) NOT NULL,
-    status_VARCHAR(20) NOT NULL,
+    status_ VARCHAR(20) NOT NULL,
     latency_ms INTEGER,
     error_count INTEGER DEFAULT 0,
     last_check TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -105,4 +105,6 @@ CREATE TABLE IF NOT EXISTS failover_event (
 
 CREATE INDEX IF NOT EXISTS idx_failover_event_created ON failover_event(created_at);
 CREATE INDEX IF NOT EXISTS idx_failover_event_source ON failover_event(source_region);
+
+
 

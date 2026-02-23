@@ -11,3 +11,5 @@ CREATE TABLE IF NOT EXISTS lead_activity (
 
 CREATE INDEX IF NOT EXISTS idx_lead_activity_dossier_id ON lead_activity(dossier_id);
 CREATE INDEX IF NOT EXISTS idx_lead_activity_created_at ON lead_activity(created_at DESC);
+
+

@@ -1,2 +1,4 @@
 ALTER TABLE annonce ADD COLUMN IF NOT EXISTS ai_score INTEGER;
 ALTER TABLE annonce ADD COLUMN IF NOT EXISTS ai_score_details TEXT;
+
+

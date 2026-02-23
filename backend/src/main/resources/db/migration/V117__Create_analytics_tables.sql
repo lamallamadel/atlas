@@ -73,3 +73,5 @@ CREATE INDEX idx_custom_query_approved ON custom_query(is_approved);
 CREATE INDEX idx_custom_query_category ON custom_query(category);
 CREATE INDEX idx_custom_query_public ON custom_query(is_public);
 
+
+

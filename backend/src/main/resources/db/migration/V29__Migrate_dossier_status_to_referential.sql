@@ -24,3 +24,5 @@ CREATE INDEX IF NOT EXISTS idx_dossier_case_type_status_code ON dossier(case_typ
 COMMENT ON COLUMN dossier.status_code IS 'References CASE_STATUS referential code. Replaces enum-based status for flexible status management.';
 COMMENT ON COLUMN dossier.case_type IS 'References CASE_TYPE referential code. Determines which workflow and status codes are applicable.';
 
+
+

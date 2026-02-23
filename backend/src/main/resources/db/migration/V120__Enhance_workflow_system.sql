@@ -102,7 +102,7 @@ CREATE TABLE workflow_simulation (
     current_state VARCHAR(50) NOT NULL,
     test_data_json ${json_type},
     execution_log ${json_type},
-    status_VARCHAR(50),
+    status_ VARCHAR(50),
     result_json ${json_type},
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -157,5 +157,7 @@ COMMENT ON COLUMN workflow_transition_rule.actions_json IS 'JSON array of action
 
 COMMENT ON COLUMN dossier.workflow_definition_id IS 'References the workflow definition used by this dossier';
 COMMENT ON COLUMN dossier.workflow_version IS 'Workflow version snapshot to maintain consistency during updates';
+
+
 
 

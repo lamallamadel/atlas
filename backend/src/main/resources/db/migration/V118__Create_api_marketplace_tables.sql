@@ -5,7 +5,7 @@ CREATE TABLE api_key (
     obj_name VARCHAR(255) NOT NULL,
     key_hash VARCHAR(255) NOT NULL UNIQUE,
     key_prefix VARCHAR(20) NOT NULL,
-    status_VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    status_ VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     tier VARCHAR(20) NOT NULL DEFAULT 'FREE',
     description VARCHAR(1000),
     scopes VARCHAR(1000),
@@ -27,7 +27,7 @@ CREATE TABLE webhook_subscription (
     obj_name VARCHAR(255) NOT NULL,
     url VARCHAR(2048) NOT NULL,
     event_type VARCHAR(100) NOT NULL,
-    status_VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    status_ VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     secret VARCHAR(255) NOT NULL,
     description VARCHAR(1000),
     retry_policy ${json_type},
@@ -53,7 +53,7 @@ CREATE TABLE webhook_delivery (
     subscription_id BIGINT NOT NULL,
     event_type VARCHAR(100) NOT NULL,
     payload ${json_type},
-    status_VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    status_ VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     attempt_count INTEGER DEFAULT 0,
     next_retry_at TIMESTAMP,
     last_attempt_at TIMESTAMP,
@@ -68,7 +68,7 @@ CREATE TABLE webhook_delivery (
 );
 
 CREATE INDEX idx_webhook_delivery_subscription ON webhook_delivery(subscription_id);
-CREATE INDEX idx_webhook_delivery_status ON webhook_delivery(status);
+CREATE INDEX idx_webhook_delivery_status ON webhook_delivery(status_);
 CREATE INDEX idx_webhook_delivery_next_retry ON webhook_delivery(next_retry_at);
 
 -- API Usage Analytics
@@ -91,4 +91,6 @@ CREATE TABLE api_usage (
 
 CREATE INDEX idx_api_usage_api_key_date ON api_usage(api_key_id, usage_date);
 CREATE INDEX idx_api_usage_org_date ON api_usage(org_id, usage_date);
+
+
 

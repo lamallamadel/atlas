@@ -34,3 +34,5 @@ COMMENT ON COLUMN user_preferences.general_preferences IS 'JSON object for misce
 COMMENT ON COLUMN user_preferences.theme IS 'UI theme preference (light, dark, auto)';
 COMMENT ON COLUMN user_preferences.language IS 'Preferred language code (fr, en, etc.)';
 COMMENT ON COLUMN user_preferences.role_template IS 'Name of the applied role-based template (agent, manager, admin)';
+
+

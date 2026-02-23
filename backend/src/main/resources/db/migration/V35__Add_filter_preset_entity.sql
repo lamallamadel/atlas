@@ -45,3 +45,5 @@ VALUES
      '{"conditions":[{"field":"hasAppointment","operator":"EQUALS","value":"true"},{"field":"appointmentDate","operator":"THIS_WEEK","value":""}],"logicOperator":"AND"}', 
      true, true, 'default', 'system');
 
+
+

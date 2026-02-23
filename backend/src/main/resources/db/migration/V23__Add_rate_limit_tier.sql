@@ -20,3 +20,5 @@ INSERT INTO rate_limit_tier (org_id, tier_name, requests_per_minute, description
 VALUES 
     ('default', 'STANDARD', 100, 'Default standard tier with 100 requests per minute', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
     ('premium-example', 'PREMIUM', 1000, 'Example premium tier with 1000 requests per minute', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+

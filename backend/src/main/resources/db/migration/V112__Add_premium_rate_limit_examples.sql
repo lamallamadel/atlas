@@ -17,3 +17,5 @@ INSERT INTO rate_limit_tier (org_id, tier_name, requests_per_minute, description
 VALUES 
     ('free-tier-example', 'FREE', 30, 'Example free tier with 30 requests per minute', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
 ON CONFLICT (org_id) DO NOTHING;
+
+

@@ -56,3 +56,5 @@ COMMENT ON COLUMN system_config.config_value IS 'Configuration value as text';
 COMMENT ON COLUMN system_config.category IS 'Optional category for grouping configurations';
 COMMENT ON COLUMN system_config.encrypted IS 'Flag indicating if the value is encrypted';
 
+
+

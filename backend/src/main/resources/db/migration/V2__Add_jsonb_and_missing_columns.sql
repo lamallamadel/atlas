@@ -26,3 +26,5 @@ CREATE INDEX idx_annonce_city ON annonce(city);
 -- Add composite index on message(dossier_id, created_at)
 CREATE INDEX idx_message_dossier_created ON message(dossier_id, created_at);
 
+
+

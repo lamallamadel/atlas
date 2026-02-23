@@ -53,7 +53,7 @@ CREATE TABLE ab_test_experiment (
     control_method VARCHAR(50) NOT NULL,
     treatment_method VARCHAR(50) NOT NULL,
     traffic_split DOUBLE PRECISION DEFAULT 0.5,
-    status_VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     started_at TIMESTAMP,
     ended_at TIMESTAMP,
     control_metrics ${json_type},
@@ -68,5 +68,7 @@ CREATE TABLE ab_test_experiment (
 CREATE INDEX idx_ab_test_experiment_org_id ON ab_test_experiment(org_id);
 CREATE INDEX idx_ab_test_experiment_status ON ab_test_experiment(status, org_id);
 CREATE INDEX idx_ab_test_experiment_started_at ON ab_test_experiment(started_at DESC);
+
+
 
 

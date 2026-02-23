@@ -14,8 +14,8 @@ ALTER TABLE notification ADD COLUMN dossier_id BIGINT;
 ALTER TABLE notification ADD CONSTRAINT fk_notification_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE;
 CREATE INDEX idx_notification_dossier_id ON notification(dossier_id);
 
--- 5. ADD status_VARCHAR(50) to consentement with default 'GRANTED'
-ALTER TABLE consentement ADD COLUMN status_VARCHAR(50) DEFAULT 'GRANTED';
+-- 5. ADD status_ VARCHAR(50) to consentement with default 'GRANTED'
+ALTER TABLE consentement ADD COLUMN status_ VARCHAR(50) DEFAULT 'GRANTED';
 
 -- 6. UPDATE existing data to ensure consistency
 -- Update consentement status based on granted field
@@ -27,6 +27,8 @@ END WHERE status IS NULL;
 
 -- Make status NOT NULL after setting defaults
 ALTER TABLE consentement ALTER COLUMN status SET NOT NULL;
+
+
 
 
 
