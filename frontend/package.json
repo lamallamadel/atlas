@@ -139,7 +139,7 @@
     "@types/sockjs-client": "^1.5.4",
     "@types/xlsx": "^0.0.36",
     "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
+    "@typescript-eslint/parser": "^8.56.1",
     "axe-core": "^4.8.3",
     "axe-playwright": "^2.0.1",
     "eslint": "^8.57.1",
