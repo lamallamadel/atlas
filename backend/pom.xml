@@ -420,7 +420,7 @@
 
                 <groupId>io.gatling</groupId>
                 <artifactId>gatling-maven-plugin</artifactId>
-                <version>4.7.0</version>
+                <version>4.21.0</version>
                 <configuration>
                     <simulationClass>com.example.backend.loadtest.DossierCreationLoadTest</simulationClass>
                     <runMultipleSimulations>true</runMultipleSimulations>
