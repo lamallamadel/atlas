@@ -49,7 +49,7 @@ jobs:
       
       - name: Generate test report
         if: always() && github.event.pull_request.head.repo.fork == false
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: E2E Test Results (H2)
           path: |
@@ -171,7 +171,7 @@ jobs:
       
       - name: Generate test report
         if: always()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: E2E Test Results (PostgreSQL)
           path: |
