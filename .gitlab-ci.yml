@@ -1,22 +1,25 @@
 # ─────────────────────────────────────────────────────────────
-# Atlas Immobilier — GitLab CI/CD → Hetzner deploy
+# Atlas Immobilier — GitLab CI/CD Pipeline
 #
-# Stages:
-#   build   — Angular production bundle (only when frontend changes)
-#   deploy  — rsync dist + nginx reload / docker compose build + up
+# Déploie sur master branch uniquement
+# Change detection automatique :
+#   - backend/ modifié → test backend → deploy backend
+#   - frontend/ modifié → build + test → deploy frontend
+#   - les deux → tous les jobs en parallèle
 #
 # Required CI/CD variables (Settings → CI/CD → Variables):
 #   DEPLOY_SSH_KEY   — private ed25519 key for lamal@46.225.187.158
 # ─────────────────────────────────────────────────────────────
 
 stages:
+  - test
   - build
   - deploy
 
 variables:
   DEPLOY_HOST: "46.225.187.158"
   DEPLOY_USER: "lamal"
-  DEPLOY_DIR:  "/opt/atlas"
+  DEPLOY_DIR: "/opt/atlas"
 
 # ── Reusable SSH setup ────────────────────────────────────────
 .ssh_setup:
@@ -29,66 +32,29 @@ variables:
     - chmod 644 ~/.ssh/known_hosts
 
 # ─────────────────────────────────────────────────────────────
-# FRONTEND
-# ─────────────────────────────────────────────────────────────
-
-build-frontend:
-  stage: build
-  image: node:18-alpine
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - frontend/**/*
-        - infra/nginx.conf
-        - .gitlab-ci.yml
-  cache:
-    key: "npm-$CI_COMMIT_REF_SLUG"
-    paths:
-      - frontend/node_modules/
-    policy: pull-push
-  script:
-    - cd frontend
-    - npm ci --prefer-offline
-    - npm run build
-  artifacts:
-    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
-    paths:
-      - frontend/dist/frontend/
-    expire_in: 1 hour
-
-deploy-frontend:
-  stage: deploy
-  image: debian:bookworm-slim
-  needs:
-    - job: build-frontend
-      artifacts: true
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-      changes:
-        - frontend/**/*
-        - infra/nginx.conf
-        - .gitlab-ci.yml
-  extends: .ssh_setup
-  script:
-    - echo "→ Syncing dist to $DEPLOY_HOST…"
-    - rsync -az --delete --checksum
-        frontend/dist/frontend/
-        "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DIR/frontend/dist/frontend/"
-    - echo "→ Reloading Nginx…"
-    - |
-      ssh "$DEPLOY_USER@$DEPLOY_HOST" "
-        set -e
-        cd $DEPLOY_DIR && git pull origin master --quiet
-        docker exec nginx nginx -s reload
-        echo '✓ Nginx reloaded'
-      "
-  environment:
-    name: production/frontend
-    url: https://afroware.app
-
-# ─────────────────────────────────────────────────────────────
 # BACKEND
 # ─────────────────────────────────────────────────────────────
+
+test-backend:
+  stage: test
+  image: maven:3.9-eclipse-temurin-17
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+        - .gitlab-ci.yml
+  cache:
+    key: "maven-$CI_COMMIT_REF_SLUG"
+    paths:
+      - backend/.m2/repository/
+  script:
+    - cd backend
+    - mvn -B -ntp verify -Dspring.profiles.active=test
+  artifacts:
+    reports:
+      junit: backend/target/surefire-reports/TEST-*.xml
+    expire_in: 1 week
+  allow_failure: false
 
 deploy-backend:
   stage: deploy
@@ -99,6 +65,8 @@ deploy-backend:
         - backend/**/*
         - infra/docker-compose.yml
         - .gitlab-ci.yml
+  needs:
+    - job: test-backend
   extends: .ssh_setup
   script:
     - echo "→ Pulling code and rebuilding backend on $DEPLOY_HOST…"
@@ -131,3 +99,89 @@ deploy-backend:
   environment:
     name: production/backend
     url: https://api.afroware.app
+  allow_failure: false
+
+# ─────────────────────────────────────────────────────────────
+# FRONTEND
+# ─────────────────────────────────────────────────────────────
+
+test-frontend:
+  stage: test
+  image: node:18-alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
+  cache:
+    key: "npm-$CI_COMMIT_REF_SLUG"
+    paths:
+      - frontend/node_modules/
+    policy: pull-push
+  script:
+    - cd frontend
+    - npm ci --prefer-offline
+    - npm run lint
+    - npm test -- --watch=false --browsers=ChromeHeadless
+  artifacts:
+    reports:
+      junit: frontend/junit.xml
+    expire_in: 1 week
+  allow_failure: false
+
+build-frontend:
+  stage: build
+  image: node:18-alpine
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+        - .gitlab-ci.yml
+  needs:
+    - job: test-frontend
+  cache:
+    key: "npm-$CI_COMMIT_REF_SLUG"
+    paths:
+      - frontend/node_modules/
+    policy: pull
+  script:
+    - cd frontend
+    - npm ci --prefer-offline
+    - npm run build
+  artifacts:
+    name: "frontend-dist-$CI_COMMIT_SHORT_SHA"
+    paths:
+      - frontend/dist/frontend/
+    expire_in: 1 hour
+  allow_failure: false
+
+deploy-frontend:
+  stage: deploy
+  image: debian:bookworm-slim
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+        - infra/nginx.conf
+        - .gitlab-ci.yml
+  needs:
+    - job: build-frontend
+      artifacts: true
+  extends: .ssh_setup
+  script:
+    - echo "→ Syncing dist to $DEPLOY_HOST…"
+    - rsync -az --delete --checksum
+        frontend/dist/frontend/
+        "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_DIR/frontend/dist/frontend/"
+    - echo "→ Reloading Nginx…"
+    - |
+      ssh "$DEPLOY_USER@$DEPLOY_HOST" "
+        set -e
+        cd $DEPLOY_DIR && git pull origin master --quiet
+        docker exec nginx nginx -s reload
+        echo '✓ Nginx reloaded'
+      "
+  environment:
+    name: production/frontend
+    url: https://afroware.app
+  allow_failure: false
