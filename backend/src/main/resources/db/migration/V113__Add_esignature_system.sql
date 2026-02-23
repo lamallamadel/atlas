@@ -59,3 +59,4 @@ CREATE INDEX idx_signature_request_status ON signature_request(org_id, status);
 CREATE INDEX idx_signature_request_expires ON signature_request(expires_at) WHERE status IN ('PENDING', 'SENT', 'VIEWED');
 
 
+

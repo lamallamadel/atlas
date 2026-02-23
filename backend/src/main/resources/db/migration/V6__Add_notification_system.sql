@@ -22,10 +22,11 @@ CREATE TABLE notification (
 
 -- Create indexes for notification table
 CREATE INDEX idx_notification_org_id ON notification(org_id);
-CREATE INDEX idx_notification_status ON notification(status_);
+CREATE INDEX idx_notification_status ON notification(status);
 CREATE INDEX idx_notification_type ON notification(obj_type);
 CREATE INDEX idx_notification_created_at ON notification(created_at);
 CREATE INDEX idx_notification_status_retry ON notification(status, retry_count);
+
 
 
 
