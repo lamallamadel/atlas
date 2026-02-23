@@ -47,7 +47,7 @@ module.exports = function (config) {
         flags: ['--no-sandbox', '--disable-gpu', '--remote-debugging-port=9222']
       }
     },
-    browsers: ['ChromeHeadlessCI'],
+    browsers: process.env.CI ? ['ChromeHeadlessCI'] : ['Chrome'],
     restartOnFileChange: true,
     captureTimeout: 210000,
     browserDisconnectTimeout: 210000,

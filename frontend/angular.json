@@ -183,6 +183,7 @@
         "test": {
           "builder": "@angular-devkit/build-angular:karma",
           "options": {
+            "karmaConfig": "karma.conf.js",
             "polyfills": [
               "src/global-polyfill.js",
               "zone.js",
