@@ -69,3 +69,4 @@ CREATE INDEX idx_ab_test_experiment_org_id ON ab_test_experiment(org_id);
 CREATE INDEX idx_ab_test_experiment_status ON ab_test_experiment(status, org_id);
 CREATE INDEX idx_ab_test_experiment_started_at ON ab_test_experiment(started_at DESC);
 
+

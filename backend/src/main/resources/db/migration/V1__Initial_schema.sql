@@ -106,7 +106,7 @@ CREATE TABLE audit_event (
     org_id VARCHAR(255) NOT NULL,
     entity_type VARCHAR(100) NOT NULL,
     entity_id BIGINT NOT NULL,
-    action VARCHAR(50) NOT NULL,
+    obj_action VARCHAR(50) NOT NULL,
     user_id VARCHAR(255),
     changes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -145,4 +145,5 @@ CREATE INDEX idx_appointment_created_at ON appointment(created_at);
 CREATE INDEX idx_audit_event_org_id ON audit_event(org_id);
 CREATE INDEX idx_audit_event_created_at ON audit_event(created_at);
 CREATE INDEX idx_audit_event_entity ON audit_event(entity_type, entity_id);
+
 
