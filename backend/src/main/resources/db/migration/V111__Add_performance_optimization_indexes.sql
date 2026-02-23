@@ -4,7 +4,7 @@
 -- Annonce table indexes for common query patterns
 -- Note: Removed partial WHERE clause for H2 compatibility (H2 doesn't support partial indexes)
 CREATE INDEX IF NOT EXISTS idx_annonce_status_city ON annonce(status, city);
-CREATE INDEX IF NOT EXISTS idx_annonce_type_price ON annonce(type, price);
+CREATE INDEX IF NOT EXISTS idx_annonce_type_price ON annonce(obj_type, price);
 CREATE INDEX IF NOT EXISTS idx_annonce_created_at_desc ON annonce(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_annonce_org_status ON annonce(org_id, status);
 
@@ -81,3 +81,4 @@ CREATE INDEX IF NOT EXISTS idx_document_category_created ON document(category, c
 -- Note: ANALYZE statements removed for H2 compatibility (H2 doesn't support ANALYZE)
 -- PostgreSQL will automatically analyze tables during autovacuum
 -- For production PostgreSQL, run ANALYZE manually or enable autovacuum
+

@@ -11,7 +11,7 @@ CREATE TABLE outbound_message (
     template_code VARCHAR(255),
     subject VARCHAR(500),
     payload_json ${json_type},
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     provider_message_id VARCHAR(255),
     idempotency_key VARCHAR(255) NOT NULL,
     attempt_count INTEGER NOT NULL DEFAULT 0,
@@ -32,7 +32,7 @@ CREATE TABLE outbound_attempt (
     org_id VARCHAR(255) NOT NULL,
     outbound_message_id BIGINT NOT NULL,
     attempt_no INTEGER NOT NULL,
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     error_code VARCHAR(100),
     error_message TEXT,
     provider_response_json ${json_type},
@@ -56,3 +56,4 @@ CREATE INDEX idx_outbound_message_status_attempts ON outbound_message(status, at
 CREATE INDEX idx_outbound_attempt_org_id ON outbound_attempt(org_id);
 CREATE INDEX idx_outbound_attempt_message_id ON outbound_attempt(outbound_message_id);
 CREATE INDEX idx_outbound_attempt_next_retry ON outbound_attempt(next_retry_at);
+

@@ -2,10 +2,10 @@
 CREATE TABLE api_key (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    obj_name VARCHAR(255) NOT NULL,
     key_hash VARCHAR(255) NOT NULL UNIQUE,
     key_prefix VARCHAR(20) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    status_VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     tier VARCHAR(20) NOT NULL DEFAULT 'FREE',
     description VARCHAR(1000),
     scopes VARCHAR(1000),
@@ -24,10 +24,10 @@ CREATE INDEX idx_api_key_org_status ON api_key(org_id, status);
 CREATE TABLE webhook_subscription (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    obj_name VARCHAR(255) NOT NULL,
     url VARCHAR(2048) NOT NULL,
     event_type VARCHAR(100) NOT NULL,
-    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    status_VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
     secret VARCHAR(255) NOT NULL,
     description VARCHAR(1000),
     retry_policy ${json_type},
@@ -53,7 +53,7 @@ CREATE TABLE webhook_delivery (
     subscription_id BIGINT NOT NULL,
     event_type VARCHAR(100) NOT NULL,
     payload ${json_type},
-    status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
+    status_VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     attempt_count INTEGER DEFAULT 0,
     next_retry_at TIMESTAMP,
     last_attempt_at TIMESTAMP,
@@ -91,3 +91,4 @@ CREATE TABLE api_usage (
 
 CREATE INDEX idx_api_usage_api_key_date ON api_usage(api_key_id, usage_date);
 CREATE INDEX idx_api_usage_org_date ON api_usage(org_id, usage_date);
+

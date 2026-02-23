@@ -10,7 +10,7 @@ CREATE TABLE annonce (
     city VARCHAR(255),
     price DECIMAL(15, 2),
     currency VARCHAR(3),
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
@@ -25,7 +25,7 @@ CREATE TABLE dossier (
     lead_phone VARCHAR(50),
     lead_name VARCHAR(255),
     lead_source VARCHAR(100),
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
@@ -38,8 +38,8 @@ CREATE TABLE partie_prenante (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
     dossier_id BIGINT NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    name VARCHAR(255),
+    obj_type VARCHAR(50) NOT NULL,
+    obj_name VARCHAR(255),
     phone VARCHAR(50),
     email VARCHAR(255),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -76,7 +76,7 @@ CREATE TABLE message (
     recipient VARCHAR(255),
     content TEXT,
     message_type VARCHAR(50),
-    status VARCHAR(50),
+    status_VARCHAR(50),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by VARCHAR(255),
@@ -91,7 +91,7 @@ CREATE TABLE appointment (
     dossier_id BIGINT NOT NULL,
     scheduled_at TIMESTAMP NOT NULL,
     location VARCHAR(500),
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     notes TEXT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -145,3 +145,4 @@ CREATE INDEX idx_appointment_created_at ON appointment(created_at);
 CREATE INDEX idx_audit_event_org_id ON audit_event(org_id);
 CREATE INDEX idx_audit_event_created_at ON audit_event(created_at);
 CREATE INDEX idx_audit_event_entity ON audit_event(entity_type, entity_id);
+

@@ -1,7 +1,7 @@
 -- Fix schema mismatches between V1 and later migrations
 
 -- 1. ALTER appointment.org_id from BIGINT to VARCHAR(255)
-ALTER TABLE appointment ALTER COLUMN org_id TYPE VARCHAR(255);
+ALTER TABLE appointment ALTER COLUMN org_id obj_type VARCHAR(255);
 
 -- 2. ADD channel VARCHAR(50) NOT NULL to message table with default 'EMAIL'
 ALTER TABLE message ADD COLUMN channel VARCHAR(50) NOT NULL DEFAULT 'EMAIL';
@@ -14,8 +14,8 @@ ALTER TABLE notification ADD COLUMN dossier_id BIGINT;
 ALTER TABLE notification ADD CONSTRAINT fk_notification_dossier FOREIGN KEY (dossier_id) REFERENCES dossier(id) ON DELETE CASCADE;
 CREATE INDEX idx_notification_dossier_id ON notification(dossier_id);
 
--- 5. ADD status VARCHAR(50) to consentement with default 'GRANTED'
-ALTER TABLE consentement ADD COLUMN status VARCHAR(50) DEFAULT 'GRANTED';
+-- 5. ADD status_VARCHAR(50) to consentement with default 'GRANTED'
+ALTER TABLE consentement ADD COLUMN status_VARCHAR(50) DEFAULT 'GRANTED';
 
 -- 6. UPDATE existing data to ensure consistency
 -- Update consentement status based on granted field
@@ -27,6 +27,7 @@ END WHERE status IS NULL;
 
 -- Make status NOT NULL after setting defaults
 ALTER TABLE consentement ALTER COLUMN status SET NOT NULL;
+
 
 
 

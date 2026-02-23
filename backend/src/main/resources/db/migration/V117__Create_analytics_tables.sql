@@ -4,7 +4,7 @@
 CREATE TABLE scheduled_report (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    obj_name VARCHAR(255) NOT NULL,
     description VARCHAR(1000),
     report_type VARCHAR(100) NOT NULL,
     frequency VARCHAR(50) NOT NULL,
@@ -52,7 +52,7 @@ CREATE INDEX idx_analytics_metric_category ON analytics_metric(category);
 CREATE TABLE custom_query (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    obj_name VARCHAR(255) NOT NULL,
     description VARCHAR(1000),
     sql_query TEXT NOT NULL,
     parameters ${json_type},
@@ -72,3 +72,4 @@ CREATE INDEX idx_custom_query_org_id ON custom_query(org_id);
 CREATE INDEX idx_custom_query_approved ON custom_query(is_approved);
 CREATE INDEX idx_custom_query_category ON custom_query(category);
 CREATE INDEX idx_custom_query_public ON custom_query(is_public);
+

@@ -4,7 +4,7 @@
 CREATE TABLE coop_group (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    obj_name VARCHAR(255) NOT NULL,
     description TEXT,
     registration_number VARCHAR(100),
     address VARCHAR(500),
@@ -35,7 +35,7 @@ CREATE TABLE coop_member (
     date_of_birth DATE,
     member_number VARCHAR(100) UNIQUE,
     join_date DATE,
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     meta ${json_type},
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -49,12 +49,12 @@ CREATE TABLE coop_project (
     id BIGSERIAL PRIMARY KEY,
     org_id VARCHAR(255) NOT NULL,
     group_id BIGINT NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    obj_name VARCHAR(255) NOT NULL,
     description TEXT,
     location VARCHAR(500),
     city VARCHAR(255),
     postal_code VARCHAR(20),
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     start_date DATE,
     expected_completion_date DATE,
     completion_date DATE,
@@ -82,7 +82,7 @@ CREATE TABLE coop_lot (
     bathrooms INTEGER,
     price DECIMAL(15, 2),
     currency VARCHAR(3),
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     meta ${json_type},
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -98,10 +98,10 @@ CREATE TABLE coop_contribution (
     org_id VARCHAR(255) NOT NULL,
     member_id BIGINT NOT NULL,
     project_id BIGINT,
-    type VARCHAR(50) NOT NULL,
+    obj_type VARCHAR(50) NOT NULL,
     amount DECIMAL(15, 2) NOT NULL,
     currency VARCHAR(3) NOT NULL,
-    status VARCHAR(50) NOT NULL,
+    status_VARCHAR(50) NOT NULL,
     due_date DATE,
     payment_date DATE,
     reference_number VARCHAR(100),
@@ -144,4 +144,5 @@ CREATE INDEX idx_coop_contribution_member_id ON coop_contribution(member_id);
 CREATE INDEX idx_coop_contribution_project_id ON coop_contribution(project_id);
 CREATE INDEX idx_coop_contribution_status ON coop_contribution(status);
 CREATE INDEX idx_coop_contribution_due_date ON coop_contribution(due_date);
-CREATE INDEX idx_coop_contribution_type ON coop_contribution(type);
+CREATE INDEX idx_coop_contribution_type ON coop_contribution(obj_type);
+
