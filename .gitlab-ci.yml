@@ -93,6 +93,13 @@ deploy-backend:
           sleep 5
         done
         echo '✗ Backend did not become healthy within 2 minutes'
+        echo '--- Elasticsearch logs (last 100 lines) ---'
+        docker logs elasticsearch --tail=100 2>/dev/null || true
+        echo '--- Elasticsearch health state ---'
+        docker inspect elasticsearch --format='{{json .State.Health}}' 2>/dev/null || true
+        echo '--- All containers ---'
+        docker ps -a 2>/dev/null || true
+        echo '--- Backend logs (last 40 lines) ---'
         docker logs backend_app --tail=40
         exit 1
       "
