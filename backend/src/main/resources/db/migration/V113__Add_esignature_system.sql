@@ -56,4 +56,4 @@ CREATE INDEX idx_signature_request_org_id ON signature_request(org_id);
 CREATE INDEX idx_signature_request_dossier ON signature_request(dossier_id, org_id);
 CREATE INDEX idx_signature_request_envelope ON signature_request(envelope_id, org_id);
 CREATE INDEX idx_signature_request_status ON signature_request(org_id, status);
-CREATE INDEX idx_signature_request_expires ON signature_request(expires_at) WHERE status IN ('PENDING', 'SENT', 'VIEWED');
+-- Note: partial index idx_signature_request_expires moved to migration-postgres (H2 doesn't support partial indexes)

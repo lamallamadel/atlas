@@ -81,19 +81,6 @@ public class RateLimitFilter extends OncePerRequestFilter {
                     rateLimitExceeded = true;
                     rateLimitType = "IP address";
                     logger.warn("Rate limit exceeded for public endpoint. IP: {}, Path: {}", ipAddress, path);
-
-                    ProblemDetail problemDetail =
-                            ProblemDetail.forStatusAndDetail(
-                                    HttpStatus.TOO_MANY_REQUESTS,
-                                    "Rate limit exceeded. Please try again later.");
-                    problemDetail.setTitle("Too Many Requests");
-
-                    response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
-                    response.setContentType(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
-                    response.setHeader("Retry-After", String.valueOf(RETRY_AFTER_SECONDS));
-                    response.getWriter().write(objectMapper.writeValueAsString(problemDetail));
-                    return;
-
                 }
             }
         }

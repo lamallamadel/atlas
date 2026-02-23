@@ -39,7 +39,7 @@ CREATE TABLE white_label_config (
 );
 
 CREATE INDEX idx_white_label_org_id ON white_label_config(org_id);
-CREATE INDEX idx_white_label_custom_domain ON white_label_config(custom_domain) WHERE custom_domain IS NOT NULL;
+-- Note: partial index idx_white_label_custom_domain moved to migration-postgres (H2 doesn't support partial indexes)
 CREATE INDEX idx_white_label_ssl_status ON white_label_config(ssl_certificate_status);
 
 -- 2. Tenant Provisioning Tracking
@@ -251,7 +251,7 @@ CREATE TABLE custom_domain_mapping (
 CREATE INDEX idx_custom_domain_org_id ON custom_domain_mapping(org_id);
 CREATE INDEX idx_custom_domain_domain ON custom_domain_mapping(domain);
 CREATE INDEX idx_custom_domain_status ON custom_domain_mapping(status);
-CREATE INDEX idx_custom_domain_primary ON custom_domain_mapping(org_id, is_primary) WHERE is_primary = true;
+-- Note: partial index idx_custom_domain_primary moved to migration-postgres (H2 doesn't support partial indexes)
 
 -- 7. Onboarding Progress Tracking
 CREATE TABLE tenant_onboarding (

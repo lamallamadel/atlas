@@ -49,7 +49,6 @@ class RateLimitFilterTest {
     @Test
     void shouldAllowRequestWhenRateLimitingDisabled() throws Exception {
         rateLimitConfig.setEnabled(false);
-        when(request.getRequestURI()).thenReturn("/api/v1/test");
 
         rateLimitFilter.doFilterInternal(request, response, filterChain);
 

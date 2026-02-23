@@ -18,7 +18,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Profile("!test & !backend-e2e")
 public class BrainScoringService {
 
     private static final Logger log = LoggerFactory.getLogger(BrainScoringService.class);

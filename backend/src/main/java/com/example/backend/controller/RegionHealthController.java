@@ -25,15 +25,15 @@ public class RegionHealthController {
         Map<String, Object> response = new HashMap<>();
         response.put("region", multiRegionConfig.getCurrentRegion());
         response.put("replicationEnabled", multiRegionConfig.isReplicationEnabled());
-        
-        MultiRegionConfig.RegionConfig currentRegion = 
+
+        MultiRegionConfig.RegionConfig currentRegion =
             multiRegionConfig.getRegions().get(multiRegionConfig.getCurrentRegion());
-        
+
         if (currentRegion != null) {
             response.put("isPrimary", currentRegion.isPrimary());
             response.put("endpoint", currentRegion.getEndpoint());
         }
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -45,11 +45,11 @@ public class RegionHealthController {
     @GetMapping("/replication/status")
     public ResponseEntity<Map<String, Object>> getReplicationStatus() {
         Map<String, Object> response = new HashMap<>();
-        
+
         try {
             List<Map<String, Object>> slots = replicationService.getReplicationStatus();
             List<Map<String, Object>> subscriptions = replicationService.getSubscriptionStatus();
-            
+
             response.put("replicationSlots", slots);
             response.put("subscriptions", subscriptions);
             response.put("status", "healthy");
@@ -57,7 +57,7 @@ public class RegionHealthController {
             response.put("status", "error");
             response.put("error", e.getMessage());
         }
-        
+
         return ResponseEntity.ok(response);
     }
 
@@ -65,20 +65,20 @@ public class RegionHealthController {
     public ResponseEntity<Map<String, String>> setupSubscription(
             @RequestParam String remoteRegion,
             @RequestParam String connectionString) {
-        
+
         try {
             replicationService.createSubscriptionToRemoteRegion(remoteRegion, connectionString);
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("status", "success");
             response.put("message", "Subscription created to " + remoteRegion);
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, String> response = new HashMap<>();
             response.put("status", "error");
             response.put("message", e.getMessage());
-            
+
             return ResponseEntity.status(500).body(response);
         }
     }
@@ -89,7 +89,7 @@ public class RegionHealthController {
         health.put("region", multiRegionConfig.getCurrentRegion());
         health.put("status", "UP");
         health.put("timestamp", System.currentTimeMillis());
-        
+
         return ResponseEntity.ok(health);
     }
 }

@@ -33,7 +33,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-@Profile("!test & !backend-e2e")
 public class BrainClientService {
 
     private static final Logger log = LoggerFactory.getLogger(BrainClientService.class);

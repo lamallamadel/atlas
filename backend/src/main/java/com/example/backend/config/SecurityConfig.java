@@ -127,10 +127,13 @@ public class SecurityConfig {
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .requestMatchers("/api-docs/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/api/v1/webhooks/**").permitAll()
+                        .requestMatchers("/api/v1/observability/health").permitAll()
                         .requestMatchers("/api/public/v1/**").permitAll()
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint((request, response, authException) ->
+                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED))
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())))
@@ -277,13 +280,22 @@ public class SecurityConfig {
                     }
                 }
 
+                // Parse role from token: mock-role-pro-token → PRO, mock-role-user-token → USER, default → ADMIN
+                List<String> roles;
+                if (token.contains("role-pro")) {
+                    roles = List.of("PRO");
+                } else if (token.contains("role-user")) {
+                    roles = List.of("USER");
+                } else {
+                    roles = List.of("ADMIN");
+                }
+
                 // Accept valid mock tokens
                 var jwtBuilder = Jwt.withTokenValue(token)
                         .header("alg", "none")
                         .claim("sub", "test-user")
-                        // compatible with extractRoles()
-                        .claim("roles", List.of("ADMIN"))
-                        .claim("realm_access", Map.of("roles", List.of("ADMIN")))
+                        .claim("roles", roles)
+                        .claim("realm_access", Map.of("roles", roles))
                         .issuedAt(Instant.now())
                         .expiresAt(Instant.now().plusSeconds(3600));
 

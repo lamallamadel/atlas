@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -23,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -45,17 +47,19 @@ class AppointmentControllerTest {
 
     @Autowired private DossierRepository dossierRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-            T withHeaders(T builder) {
-        return (T)
-                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends MockHttpServletRequestBuilder> T withHeaders(T builder) {
+        return (T) builder
+            .header(ORG_ID_HEADER, ORG_ID)
+            .header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder, String orgId) {
-        return (T)
-                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID);
-    }
+        return (T)  builder
+                .header(ORG_ID_HEADER, orgId)
+                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    };
+
 
     @BeforeEach
     void setUp() {
@@ -80,6 +84,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -102,6 +107,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -120,6 +126,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
@@ -140,6 +147,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
@@ -160,6 +168,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -178,6 +187,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated());
@@ -196,6 +206,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/appointments")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isForbidden());
@@ -259,6 +270,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/appointments/" + appointment.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
@@ -284,6 +296,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/appointments/" + appointment.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
@@ -300,6 +313,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/appointments/99999")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -320,6 +334,7 @@ class AppointmentControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/appointments/" + appointment.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -335,14 +350,14 @@ class AppointmentControllerTest {
                         LocalDateTime.of(2024, 6, 1, 10, 0),
                         LocalDateTime.of(2024, 6, 1, 11, 0));
 
-        mockMvc.perform(withHeaders(delete("/api/v1/appointments/" + appointment.getId())))
+        mockMvc.perform(withHeaders(delete("/api/v1/appointments/" + appointment.getId()).with(csrf())))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void delete_NonExistentAppointment_Returns404() throws Exception {
-        mockMvc.perform(withHeaders(delete("/api/v1/appointments/99999")))
+        mockMvc.perform(withHeaders(delete("/api/v1/appointments/99999").with(csrf())))
                 .andExpect(status().isNotFound());
     }
 

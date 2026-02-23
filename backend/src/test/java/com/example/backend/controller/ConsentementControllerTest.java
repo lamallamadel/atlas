@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -57,7 +58,10 @@ class ConsentementControllerTest {
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder) {
         return (T)
-                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+                builder
+                    .header(ORG_ID_HEADER, ORG_ID)
+                    .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                    .header("Authorization", "Bearer mock-token");
     }
 
     @BeforeEach
@@ -90,6 +94,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -138,6 +143,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -156,6 +162,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -172,6 +179,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -193,6 +201,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -214,6 +223,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -229,6 +239,7 @@ class ConsentementControllerTest {
 
         mockMvc.perform(
                         post("/api/v1/consentements")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(CORRELATION_ID_HEADER, CORRELATION_ID)
                                 .content(objectMapper.writeValueAsString(request)))
@@ -248,6 +259,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         post("/api/v1/consentements")
                                 .with(anonymous())
+                                .with(csrf())
                                 .header(ORG_ID_HEADER, ORG_ID)
                                 .header(CORRELATION_ID_HEADER, CORRELATION_ID)
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -273,6 +285,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated());
@@ -447,6 +460,7 @@ class ConsentementControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/consentements")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());

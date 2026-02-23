@@ -21,6 +21,6 @@ public interface WorkflowStepRepository extends JpaRepository<WorkflowStepEntity
 
     List<WorkflowStepEntity> findByWorkflowIdAndStatusAndOrgId(Long workflowId, WorkflowStepStatus status, String orgId);
 
-    @Query("SELECT s FROM WorkflowStepEntity s WHERE s.orgId = :orgId AND s.status = :status AND :approverId MEMBER OF s.assignedApprovers")
+    @Query(value = "SELECT * FROM workflow_step WHERE org_id = :orgId AND status = :#{#status.name()} AND CAST(assigned_approvers AS VARCHAR) LIKE CONCAT('%', :approverId, '%')", nativeQuery = true)
     List<WorkflowStepEntity> findPendingStepsForApprover(@Param("orgId") String orgId, @Param("status") WorkflowStepStatus status, @Param("approverId") String approverId);
 }

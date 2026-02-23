@@ -17,7 +17,7 @@ CREATE TABLE ml_model_version (
 );
 
 CREATE INDEX idx_ml_model_version_org_id ON ml_model_version(org_id);
-CREATE INDEX idx_ml_model_version_is_active ON ml_model_version(org_id, is_active) WHERE is_active = true;
+-- Note: partial index idx_ml_model_version_is_active moved to migration-postgres (H2 doesn't support partial indexes)
 CREATE INDEX idx_ml_model_version_trained_at ON ml_model_version(trained_at DESC);
 
 -- ML Prediction table

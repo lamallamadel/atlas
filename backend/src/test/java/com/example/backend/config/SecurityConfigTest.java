@@ -1,5 +1,6 @@
 package com.example.backend.config;
 
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,7 +52,9 @@ class SecurityConfigTest {
         Annonce annonce = createAnnonce("ORG1");
         annonce = annonceRepository.save(annonce);
 
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId()).header("X-Org-Id", "ORG1"))
+        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
+                .header("X-Org-Id", "ORG1")
+                .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
@@ -61,7 +64,9 @@ class SecurityConfigTest {
         Annonce annonce = createAnnonce("ORG1");
         annonce = annonceRepository.save(annonce);
 
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId()).header("X-Org-Id", "ORG1"))
+        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
+                .header("X-Org-Id", "ORG1")
+                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 
@@ -87,6 +92,7 @@ class SecurityConfigTest {
         mockMvc.perform(
                         post("/api/v1/annonces")
                                 .header("X-Org-Id", "ORG1")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
@@ -100,6 +106,7 @@ class SecurityConfigTest {
         mockMvc.perform(
                         post("/api/v1/annonces")
                                 .header("X-Org-Id", "ORG1")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());

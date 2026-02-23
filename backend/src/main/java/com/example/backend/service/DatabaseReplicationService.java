@@ -45,6 +45,7 @@ public class DatabaseReplicationService {
         "audit_event"
     );
 
+
     @PostConstruct
     public void initialize() {
         if (!multiRegionConfig.isReplicationEnabled()) {
@@ -52,9 +53,20 @@ public class DatabaseReplicationService {
             return;
         }
 
+        try (Connection conn = dataSource.getConnection()) {
+            String dbUrl = conn.getMetaData().getURL();
+            if (dbUrl.startsWith("jdbc:h2")) {
+                logger.info("H2 database detected - skipping replication setup");
+                return;
+            }
+        } catch (SQLException e) {
+            logger.warn("Could not determine database type, skipping replication", e);
+            return;
+        }
+
         try {
             setupLogicalReplication();
-            logger.info("Database replication initialized for region: {}", 
+            logger.info("Database replication initialized for region: {}",
                 multiRegionConfig.getCurrentRegion());
         } catch (Exception e) {
             logger.error("Failed to initialize database replication", e);
@@ -69,7 +81,7 @@ public class DatabaseReplicationService {
             }
 
             createPublicationForGlobalEntities();
-            
+
             if (multiRegionConfig.getReplication().isIsolateRegionalData()) {
                 logger.info("Regional data isolation is enabled - regional entities will not be replicated");
             }
@@ -84,32 +96,32 @@ public class DatabaseReplicationService {
         String query = "SELECT setting FROM pg_settings WHERE name = 'wal_level'";
         var stmt = conn.createStatement();
         var rs = stmt.executeQuery(query);
-        
+
         if (rs.next()) {
             String walLevel = rs.getString("setting");
             return "logical".equals(walLevel);
         }
-        
+
         return false;
     }
 
     @Transactional
     public void createPublicationForGlobalEntities() {
         String publicationName = multiRegionConfig.getReplication().getPublicationName();
-        
+
         try {
             jdbcTemplate.execute(String.format("DROP PUBLICATION IF EXISTS %s", publicationName));
-            
+
             String tables = String.join(", ", GLOBAL_ENTITIES);
             String createPublicationSql = String.format(
                 "CREATE PUBLICATION %s FOR TABLE %s",
                 publicationName,
                 tables
             );
-            
+
             jdbcTemplate.execute(createPublicationSql);
             logger.info("Created publication {} for global entities", publicationName);
-            
+
         } catch (Exception e) {
             logger.error("Failed to create publication for global entities", e);
             throw new RuntimeException("Failed to create publication", e);
@@ -123,13 +135,13 @@ public class DatabaseReplicationService {
             return;
         }
 
-        String subscriptionName = multiRegionConfig.getReplication().getSubscriptionName() 
+        String subscriptionName = multiRegionConfig.getReplication().getSubscriptionName()
             + "_" + remoteRegion.replace("-", "_");
         String publicationName = multiRegionConfig.getReplication().getPublicationName();
-        
+
         try {
             jdbcTemplate.execute(String.format("DROP SUBSCRIPTION IF EXISTS %s", subscriptionName));
-            
+
             String createSubscriptionSql = String.format(
                 "CREATE SUBSCRIPTION %s CONNECTION '%s' PUBLICATION %s " +
                 "WITH (copy_data = true, create_slot = true)",
@@ -137,10 +149,10 @@ public class DatabaseReplicationService {
                 connectionString,
                 publicationName
             );
-            
+
             jdbcTemplate.execute(createSubscriptionSql);
             logger.info("Created subscription {} to region {}", subscriptionName, remoteRegion);
-            
+
         } catch (Exception e) {
             logger.error("Failed to create subscription to remote region {}", remoteRegion, e);
             throw new RuntimeException("Failed to create subscription", e);
@@ -149,7 +161,7 @@ public class DatabaseReplicationService {
 
     public List<Map<String, Object>> getReplicationStatus() {
         String query = """
-            SELECT 
+            SELECT
                 slot_name,
                 plugin,
                 slot_type,
@@ -159,20 +171,20 @@ public class DatabaseReplicationService {
                 confirmed_flush_lsn
             FROM pg_replication_slots
             """;
-        
+
         return jdbcTemplate.queryForList(query);
     }
 
     public List<Map<String, Object>> getSubscriptionStatus() {
         String query = """
-            SELECT 
+            SELECT
                 subname,
                 subenabled,
                 subconninfo,
                 subslotname
             FROM pg_subscription
             """;
-        
+
         return jdbcTemplate.queryForList(query);
     }
 
@@ -183,7 +195,7 @@ public class DatabaseReplicationService {
             return;
         }
 
-        logger.info("Resolving conflict for table {} record {} using strategy {}", 
+        logger.info("Resolving conflict for table {} record {} using strategy {}",
             tableName, recordId, strategy);
     }
 
@@ -198,7 +210,7 @@ public class DatabaseReplicationService {
     @Transactional
     public void addRegionIdentifier() {
         String currentRegion = multiRegionConfig.getCurrentRegion();
-        
+
         for (String table : REGIONAL_ENTITIES) {
             try {
                 String checkColumnSql = String.format(
@@ -206,9 +218,9 @@ public class DatabaseReplicationService {
                     "WHERE table_name = '%s' AND column_name = 'region'",
                     table
                 );
-                
+
                 List<Map<String, Object>> columns = jdbcTemplate.queryForList(checkColumnSql);
-                
+
                 if (columns.isEmpty()) {
                     String alterTableSql = String.format(
                         "ALTER TABLE %s ADD COLUMN IF NOT EXISTS region VARCHAR(50) DEFAULT '%s'",
@@ -218,7 +230,7 @@ public class DatabaseReplicationService {
                     jdbcTemplate.execute(alterTableSql);
                     logger.info("Added region column to table {}", table);
                 }
-                
+
             } catch (Exception e) {
                 logger.error("Failed to add region identifier to table {}", table, e);
             }

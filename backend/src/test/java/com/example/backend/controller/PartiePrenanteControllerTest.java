@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,6 +25,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -47,10 +49,11 @@ class PartiePrenanteControllerTest {
 
     @Autowired private DossierRepository dossierRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-            T withHeaders(T builder) {
-        return (T)
-                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    private <T extends MockHttpServletRequestBuilder> T withHeaders(T builder) {
+        return (T) builder
+            .header(ORG_ID_HEADER, ORG_ID)
+            .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+            .header("Authorization", "Bearer mock-token");
     }
 
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
@@ -92,6 +95,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -128,6 +132,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -147,6 +152,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -169,6 +175,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -191,6 +198,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -208,6 +216,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -231,6 +240,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/parties-prenantes")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -324,6 +334,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
@@ -361,6 +372,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
@@ -378,6 +390,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/parties-prenantes/999")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -407,6 +420,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -434,6 +448,7 @@ class PartiePrenanteControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 put("/api/v1/parties-prenantes/" + entity.getId())
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -456,14 +471,14 @@ class PartiePrenanteControllerTest {
         entity.setLastName("Smith");
         entity = partiePrenanteRepository.save(entity);
 
-        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId())))
+        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId()).with(csrf())))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void delete_NonExistingId_Returns404() throws Exception {
-        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/999")))
+        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/999").with(csrf())))
                 .andExpect(status().isNotFound());
     }
 
@@ -484,7 +499,7 @@ class PartiePrenanteControllerTest {
         entity.setLastName("Smith");
         entity = partiePrenanteRepository.save(entity);
 
-        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId())))
+        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId()).with(csrf())))
                 .andExpect(status().isNotFound());
     }
 
@@ -505,7 +520,12 @@ class PartiePrenanteControllerTest {
         entity.setLastName("Smith");
         entity = partiePrenanteRepository.save(entity);
 
-        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId())))
+        mockMvc.perform(
+                        delete("/api/v1/parties-prenantes/" + entity.getId())
+                                .with(csrf())
+                                .header(ORG_ID_HEADER, ORG_ID)
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .header("Authorization", "Bearer mock-role-pro-token"))
                 .andExpect(status().isForbidden());
     }
 

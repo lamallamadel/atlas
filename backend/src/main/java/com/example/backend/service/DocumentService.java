@@ -19,9 +19,11 @@ import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.lang.Nullable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -63,7 +65,7 @@ public class DocumentService {
             DossierRepository dossierRepository,
             DocumentMapper documentMapper,
             FileStorageStrategy fileStorageStrategy,
-            BrainClientService brainClientService) {
+            @Autowired(required = false) @Nullable BrainClientService brainClientService) {
         this.documentRepository = documentRepository;
         this.dossierRepository = dossierRepository;
         this.documentMapper = documentMapper;

@@ -29,45 +29,17 @@ CREATE TABLE IF NOT EXISTS replication_conflict (
 CREATE INDEX IF NOT EXISTS idx_replication_conflict_table ON replication_conflict(table_name, record_id);
 CREATE INDEX IF NOT EXISTS idx_replication_conflict_created ON replication_conflict(created_at);
 
+-- Create stub tables for organization and app_user if they don't exist (production tables from V100-V107)
+CREATE TABLE IF NOT EXISTS organization (id BIGSERIAL PRIMARY KEY);
+CREATE TABLE IF NOT EXISTS app_user (id BIGSERIAL PRIMARY KEY);
+
 -- Add version tracking for conflict resolution (last-write-wins)
 ALTER TABLE organization ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1;
 ALTER TABLE app_user ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1;
 ALTER TABLE user_preferences ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1;
 ALTER TABLE referential ADD COLUMN IF NOT EXISTS version BIGINT DEFAULT 1;
 
--- Create trigger to increment version on update
-CREATE OR REPLACE FUNCTION increment_version()
-RETURNS TRIGGER AS $$
-BEGIN
-    NEW.version = OLD.version + 1;
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Apply version increment triggers to global entities
-DROP TRIGGER IF EXISTS organization_version_trigger ON organization;
-CREATE TRIGGER organization_version_trigger
-    BEFORE UPDATE ON organization
-    FOR EACH ROW
-    EXECUTE FUNCTION increment_version();
-
-DROP TRIGGER IF EXISTS app_user_version_trigger ON app_user;
-CREATE TRIGGER app_user_version_trigger
-    BEFORE UPDATE ON app_user
-    FOR EACH ROW
-    EXECUTE FUNCTION increment_version();
-
-DROP TRIGGER IF EXISTS user_preferences_version_trigger ON user_preferences;
-CREATE TRIGGER user_preferences_version_trigger
-    BEFORE UPDATE ON user_preferences
-    FOR EACH ROW
-    EXECUTE FUNCTION increment_version();
-
-DROP TRIGGER IF EXISTS referential_version_trigger ON referential;
-CREATE TRIGGER referential_version_trigger
-    BEFORE UPDATE ON referential
-    FOR EACH ROW
-    EXECUTE FUNCTION increment_version();
+-- Note: PostgreSQL-specific triggers (CREATE FUNCTION ... LANGUAGE plpgsql) are in db/migration-postgres
 
 -- Create region health monitoring table
 CREATE TABLE IF NOT EXISTS region_health (
@@ -84,11 +56,16 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_region_health_region ON region_health(regi
 
 -- Initialize region health data
 INSERT INTO region_health (region, status, latency_ms, last_check)
-VALUES 
-    ('eu-west-1', 'UP', 0, CURRENT_TIMESTAMP),
-    ('us-east-1', 'UP', 0, CURRENT_TIMESTAMP),
-    ('ap-southeast-1', 'UP', 0, CURRENT_TIMESTAMP)
-ON CONFLICT (region) DO NOTHING;
+SELECT 'eu-west-1', 'UP', 0, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM region_health WHERE region = 'eu-west-1');
+
+INSERT INTO region_health (region, status, latency_ms, last_check)
+SELECT 'us-east-1', 'UP', 0, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM region_health WHERE region = 'us-east-1');
+
+INSERT INTO region_health (region, status, latency_ms, last_check)
+SELECT 'ap-southeast-1', 'UP', 0, CURRENT_TIMESTAMP
+WHERE NOT EXISTS (SELECT 1 FROM region_health WHERE region = 'ap-southeast-1');
 
 -- Create failover events table
 CREATE TABLE IF NOT EXISTS failover_event (

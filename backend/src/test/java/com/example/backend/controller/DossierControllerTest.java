@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -27,6 +28,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -52,10 +54,12 @@ class DossierControllerTest {
 
     @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
-    private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-            T withHeaders(T builder) {
-        return (T)
-                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+
+    private <T extends MockHttpServletRequestBuilder> T withHeaders(T builder) {
+        return (T) builder
+            .header(ORG_ID_HEADER, ORG_ID)
+            .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+            .header("Authorization", "Bearer mock-token");
     }
 
     @BeforeEach
@@ -99,6 +103,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -143,6 +148,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -184,6 +190,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -225,6 +232,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -266,6 +274,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -288,6 +297,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -304,6 +314,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -326,6 +337,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -382,6 +394,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -399,6 +412,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -418,6 +432,7 @@ class DossierControllerTest {
 
         mockMvc.perform(
                         post("/api/v1/dossiers")
+                                .with(csrf())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(CORRELATION_ID_HEADER, CORRELATION_ID)
                                 .content(objectMapper.writeValueAsString(request)))
@@ -446,6 +461,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/dossiers")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest())
@@ -489,6 +505,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 patch("/api/v1/dossiers/" + dossier.getId() + "/status")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(patchRequest))))
                 .andExpect(status().isOk())
@@ -504,6 +521,7 @@ class DossierControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 patch("/api/v1/dossiers/999/status")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(patchRequest))))
                 .andExpect(status().isNotFound());

@@ -13,7 +13,7 @@ CREATE TABLE scheduled_report (
     parameters ${json_type},
     day_of_week VARCHAR(10),
     day_of_month INTEGER,
-    hour INTEGER,
+    hour_of_day INTEGER,
     enabled BOOLEAN NOT NULL DEFAULT true,
     last_run_at TIMESTAMP,
     next_run_at TIMESTAMP,
@@ -27,7 +27,7 @@ CREATE TABLE scheduled_report (
 );
 
 CREATE INDEX idx_scheduled_report_org_id ON scheduled_report(org_id);
-CREATE INDEX idx_scheduled_report_next_run ON scheduled_report(next_run_at) WHERE enabled = true;
+-- Note: partial index idx_scheduled_report_next_run moved to migration-postgres (H2 doesn't support partial indexes)
 CREATE INDEX idx_scheduled_report_enabled ON scheduled_report(enabled);
 
 -- Analytics Metrics (Data Warehouse)

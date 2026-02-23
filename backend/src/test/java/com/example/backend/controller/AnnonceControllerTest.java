@@ -74,7 +74,7 @@ import org.springframework.test.web.servlet.MockMvc;
                         com.example.backend.config.OpenApiConfig.class
                     })
         })
-@Import(AnnonceControllerTestConfiguration.class)
+@Import(ControllerTestConfiguration.class)
 @org.springframework.test.context.TestPropertySource(
         properties = {
             "spring.security.oauth2.resourceserver.jwt.issuer-uri=mock",

@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@Profile("!test & !backend-e2e")
 public class YieldManagementService {
 
     private static final Logger log = LoggerFactory.getLogger(YieldManagementService.class);

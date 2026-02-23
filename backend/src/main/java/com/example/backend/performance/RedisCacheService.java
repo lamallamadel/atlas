@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 public class RedisCacheService {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisCacheService.class);
-    
+
     private final StringRedisTemplate redisTemplate;
     private final ObjectMapper objectMapper;
 
@@ -40,7 +41,7 @@ public class RedisCacheService {
     @Value("${cache.ttl.active-annonces:300}")
     private long activeAnnoncesTtl;
 
-    public RedisCacheService(StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+    public RedisCacheService(@Autowired(required = false) StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
     }
@@ -62,7 +63,7 @@ public class RedisCacheService {
             String json = redisTemplate.opsForValue().get(key);
             if (json != null) {
                 logger.debug("Cache hit for active annonces");
-                List<T> result = objectMapper.readValue(json, 
+                List<T> result = objectMapper.readValue(json,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
                 return Optional.of(result);
             }
@@ -155,7 +156,7 @@ public class RedisCacheService {
             String json = redisTemplate.opsForValue().get(key);
             if (json != null) {
                 logger.debug("Cache hit for referential data '{}'", type);
-                List<T> result = objectMapper.readValue(json, 
+                List<T> result = objectMapper.readValue(json,
                     objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
                 return Optional.of(result);
             }
@@ -221,12 +222,12 @@ public class RedisCacheService {
         long cacheSize = getCacheSize();
         logger.info("=== Redis Cache Statistics ===");
         logger.info("Total cached keys: {}", cacheSize);
-        
+
         long annonceCount = countKeysByPattern("annonce:*");
         long dossierCount = countKeysByPattern("dossier:*");
         long referentialCount = countKeysByPattern("referential:*");
         long userPrefCount = countKeysByPattern("user_preferences:*");
-        
+
         logger.info("Cached annonces: {}", annonceCount);
         logger.info("Cached dossiers: {}", dossierCount);
         logger.info("Cached referential data: {}", referentialCount);

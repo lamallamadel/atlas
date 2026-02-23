@@ -24,9 +24,9 @@ CREATE TABLE whatsapp_template_version (
 -- Create indexes for whatsapp_template_version
 CREATE INDEX idx_template_version_org_id ON whatsapp_template_version(org_id);
 CREATE INDEX idx_template_version_template_id ON whatsapp_template_version(template_id);
-CREATE INDEX idx_template_version_active ON whatsapp_template_version(template_id, is_active) WHERE is_active = true;
+-- Note: partial index idx_template_version_active moved to migration-postgres (H2 doesn't support partial indexes)
 CREATE INDEX idx_template_version_number ON whatsapp_template_version(template_id, version_number);
 
 -- Create indexes for Meta submission tracking
-CREATE INDEX idx_whatsapp_template_meta_submission ON whatsapp_template(meta_submission_id) WHERE meta_submission_id IS NOT NULL;
+-- Note: partial index idx_whatsapp_template_meta_submission moved to migration-postgres (H2 doesn't support partial indexes)
 CREATE INDEX idx_whatsapp_template_current_version ON whatsapp_template(current_version);

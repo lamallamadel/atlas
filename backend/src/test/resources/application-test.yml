@@ -6,8 +6,10 @@ spring:
       - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   datasource:
-    url: jdbc:h2:mem:testdb
+    url: "jdbc:h2:mem:testdb;INIT=CREATE DOMAIN IF NOT EXISTS JSONB AS JSON\\;"
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -19,6 +21,7 @@ spring:
     properties:
       hibernate:
         format_sql: false
+        dialect: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -51,6 +54,9 @@ spring:
   cache:
     type: simple
 
+  batch:
+    job:
+      enabled: false
 
 keycloak:
   admin:

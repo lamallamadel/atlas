@@ -10,6 +10,7 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;

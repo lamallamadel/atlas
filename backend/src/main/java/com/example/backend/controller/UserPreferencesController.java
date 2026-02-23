@@ -100,7 +100,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(schemas);
         }
 
-        @GetMapping("/{userId}")
+        @GetMapping("/by-user/{userId}")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Get user preferences", description = "Retrieves all preferences for a specific user including dashboard layout and widget settings")
         @ApiResponses(value = {
@@ -113,7 +113,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(preferences);
         }
 
-        @PutMapping("/{userId}")
+        @PutMapping("/by-user/{userId}")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Update user preferences", description = "Updates all preferences for a specific user")
         @ApiResponses(value = {
@@ -126,7 +126,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(updated);
         }
 
-        @PutMapping("/{userId}/dashboard-layout")
+        @PutMapping("/by-user/{userId}/dashboard-layout")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Update dashboard layout", description = "Updates only the dashboard layout configuration for a user")
         @ApiResponses(value = {
@@ -139,7 +139,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(updated);
         }
 
-        @PutMapping("/{userId}/widget-settings")
+        @PutMapping("/by-user/{userId}/widget-settings")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Update widget settings", description = "Updates only the widget-specific settings for a user")
         @ApiResponses(value = {
@@ -152,7 +152,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(updated);
         }
 
-        @PostMapping("/{userId}/apply-template")
+        @PostMapping("/by-user/{userId}/apply-template")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Apply role-based template", description = "Applies a pre-configured dashboard template based on user role (agent, manager, admin)")
         @ApiResponses(value = {
@@ -165,7 +165,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(updated);
         }
 
-        @DeleteMapping("/{userId}")
+        @DeleteMapping("/by-user/{userId}")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Delete user preferences", description = "Deletes all preferences for a specific user")
         @ApiResponses(value = {
@@ -177,7 +177,7 @@ public class UserPreferencesController {
                 return ResponseEntity.noContent().build();
         }
 
-        @PostMapping("/{userId}/export")
+        @PostMapping("/by-user/{userId}/export")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Export dashboard configuration", description = "Exports the current dashboard configuration as JSON for backup or sharing")
         @ApiResponses(value = {
@@ -202,7 +202,7 @@ public class UserPreferencesController {
                 return ResponseEntity.ok(export);
         }
 
-        @PostMapping("/{userId}/import")
+        @PostMapping("/by-user/{userId}/import")
         @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
         @Operation(summary = "Import dashboard configuration", description = "Imports a dashboard configuration from JSON backup")
         @ApiResponses(value = {

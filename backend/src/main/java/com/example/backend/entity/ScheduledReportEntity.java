@@ -56,7 +56,7 @@ public class ScheduledReportEntity extends BaseEntity {
     @Column(name = "day_of_month")
     private Integer dayOfMonth;
 
-    @Column(name = "hour")
+    @Column(name = "hour_of_day")
     private Integer hour;
 
     @Column(name = "enabled", nullable = false)

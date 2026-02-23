@@ -20,9 +20,9 @@ public class HibernateStatisticsConfig {
         SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
         Statistics statistics = sessionFactory.getStatistics();
         statistics.setStatisticsEnabled(true);
-        
+
         logger.info("Hibernate statistics enabled for performance monitoring");
-        
-        return new HibernateStatisticsLogger(statistics);
+
+        return new HibernateStatisticsLogger(entityManagerFactory);
     }
 }

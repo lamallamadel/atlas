@@ -1,7 +1,11 @@
 package com.example.backend.controller;
 
+import com.example.backend.filter.ApiKeyAuthenticationFilter;
 import com.example.backend.filter.CorrelationIdFilter;
+import com.example.backend.filter.PublicApiRateLimitFilter;
 import com.example.backend.filter.TenantFilter;
+import com.example.backend.service.ApiKeyService;
+import com.example.backend.service.ApiUsageTrackingService;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -57,16 +61,37 @@ import org.springframework.security.web.SecurityFilterChain;
 @TestConfiguration
 @org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity(
         prePostEnabled = true)
-public class AnnonceControllerTestConfiguration {
+public class ControllerTestConfiguration {
 
     private static final Logger log =
-            LoggerFactory.getLogger(AnnonceControllerTestConfiguration.class);
+            LoggerFactory.getLogger(ControllerTestConfiguration.class);
+
+    @Bean
+    public ApiKeyService apiKeyService() {
+        return org.mockito.Mockito.mock(ApiKeyService.class);
+    }
+
+    @Bean
+    public ApiUsageTrackingService apiUsageTrackingService() {
+        return org.mockito.Mockito.mock(ApiUsageTrackingService.class);
+    }
+
+    @Bean
+    public ApiKeyAuthenticationFilter apiKeyAuthenticationFilter(
+            ApiKeyService apiKeyService, ApiUsageTrackingService apiUsageTrackingService) {
+        return new ApiKeyAuthenticationFilter(apiKeyService, apiUsageTrackingService);
+    }
+
+    @Bean
+    public PublicApiRateLimitFilter publicApiRateLimitFilter() {
+        return new PublicApiRateLimitFilter();
+    }
 
     /**
      * Constructor that logs when this configuration is being loaded. This helps identify if the
      * test configuration is being picked up by Spring.
      */
-    public AnnonceControllerTestConfiguration() {
+    public ControllerTestConfiguration() {
         log.info("╔════════════════════════════════════════════════════════════════╗");
         log.info("║ AnnonceControllerTestConfiguration INITIALIZING               ║");
         log.info("║ This configuration provides all beans needed for @WebMvcTest  ║");

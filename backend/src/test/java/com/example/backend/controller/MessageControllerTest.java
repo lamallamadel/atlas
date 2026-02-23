@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -48,13 +49,15 @@ class MessageControllerTest {
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder) {
         return (T)
-                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                        .header("Authorization", "Bearer mock-token");
     }
 
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder, String orgId) {
         return (T)
-                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                    .header("Authorization", "Bearer mock-token");
     }
 
     @BeforeEach
@@ -78,6 +81,7 @@ class MessageControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/messages")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated())
@@ -100,6 +104,7 @@ class MessageControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/messages")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
@@ -118,6 +123,7 @@ class MessageControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/messages")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(invalidRequest)))
                 .andExpect(status().isBadRequest());
@@ -136,6 +142,7 @@ class MessageControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/messages")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isNotFound());
@@ -156,6 +163,7 @@ class MessageControllerTest {
         mockMvc.perform(
                         withHeaders(
                                 post("/api/v1/messages")
+                                        .with(csrf())
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isCreated());
@@ -174,10 +182,13 @@ class MessageControllerTest {
         request.setTimestamp(LocalDateTime.now());
 
         mockMvc.perform(
-                        withHeaders(
-                                post("/api/v1/messages")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(request))))
+                        post("/api/v1/messages")
+                                .with(csrf())
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                                .header(ORG_ID_HEADER, ORG_ID)
+                                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                                .header("Authorization", "Bearer mock-role-user-token"))
                 .andExpect(status().isForbidden());
     }
 

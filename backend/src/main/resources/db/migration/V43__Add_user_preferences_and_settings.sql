@@ -1,4 +1,4 @@
--- V38: Add user preferences and settings system
+-- V43: Add user preferences and settings system
 -- Description: Creates tables for user preferences, organization settings, and system configuration
 
 -- User preferences table (renamed to avoid conflict with existing user_preferences)
@@ -25,33 +25,17 @@ CREATE TABLE organization_settings (
 -- System configuration table
 CREATE TABLE system_config (
     id BIGSERIAL PRIMARY KEY,
-    key VARCHAR(255) NOT NULL,
-    value TEXT,
+    config_key VARCHAR(255) NOT NULL,
+    config_value TEXT,
     category VARCHAR(100),
     encrypted BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uk_system_config_key UNIQUE (key)
+    CONSTRAINT uk_system_config_key UNIQUE (config_key)
 );
 
 -- Indexes for better query performance
 CREATE INDEX idx_user_preferences_v2_user_id ON user_preferences_v2(user_id);
 CREATE INDEX idx_organization_settings_org_id ON organization_settings(org_id);
-CREATE INDEX idx_system_config_key ON system_config(key);
-CREATE INDEX idx_system_config_category ON system_config(category) WHERE category IS NOT NULL;
-
--- Comments for documentation
-COMMENT ON TABLE user_preferences_v2 IS 'Stores user-specific preferences in JSON format';
-COMMENT ON COLUMN user_preferences_v2.user_id IS 'The ID of the user (from Keycloak or auth system)';
-COMMENT ON COLUMN user_preferences_v2.preferences IS 'JSON object containing all user preferences';
-
-COMMENT ON TABLE organization_settings IS 'Stores organization-level settings with versioning';
-COMMENT ON COLUMN organization_settings.org_id IS 'The organization identifier';
-COMMENT ON COLUMN organization_settings.settings IS 'JSON object containing organization settings';
-COMMENT ON COLUMN organization_settings.version IS 'Version number for optimistic locking';
-
-COMMENT ON TABLE system_config IS 'Stores system-wide configuration key-value pairs';
-COMMENT ON COLUMN system_config.key IS 'Configuration key (unique)';
-COMMENT ON COLUMN system_config.value IS 'Configuration value as text';
-COMMENT ON COLUMN system_config.category IS 'Optional category for grouping configurations';
-COMMENT ON COLUMN system_config.encrypted IS 'Flag indicating if the value is encrypted';
+CREATE INDEX idx_system_config_key ON system_config(config_key);
+CREATE INDEX idx_system_config_category ON system_config(category);
