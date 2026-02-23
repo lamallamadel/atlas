@@ -75,8 +75,6 @@ management:
   endpoint:
     health:
 
-      show-details: always
-
       show-details: when-authorized
     proposal-service:
       base-url: "http://localhost:8002"
