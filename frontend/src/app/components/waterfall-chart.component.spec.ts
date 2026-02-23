@@ -29,7 +29,7 @@ describe('WaterfallChartComponent', () => {
 
         fixture.detectChanges();
 
-        const data = (component as { computeWaterfallData: () => { totals: number[]; floats: number[]; colors: string[] } }).computeWaterfallData();
+        const data = (component as unknown as { computeWaterfallData: () => { totals: number[]; floats: number[]; colors: string[] } }).computeWaterfallData();
 
         // Initial isTotal: true -> runs from 0 to 100.
         // Gain -> runs from 100 to 150.
@@ -55,6 +55,6 @@ describe('WaterfallChartComponent', () => {
             entries: new SimpleChange(null, component.entries, false)
         });
 
-        expect((component as { buildChart: jasmine.Spy }).buildChart).toHaveBeenCalled();
+        expect((component as unknown as { buildChart: jasmine.Spy }).buildChart).toHaveBeenCalled();
     });
 });

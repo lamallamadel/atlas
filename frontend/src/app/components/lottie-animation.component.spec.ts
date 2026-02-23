@@ -34,7 +34,7 @@ describe('LottieAnimationComponent', () => {
   it('should set useFallback to true on animation load error', fakeAsync(() => {
     component.animationType = 'search-empty';
     let emittedError: Error | null = null;
-    component.error.subscribe((err: Error) => { emittedError = err; });
+    component.animationError.subscribe((err: Error) => { emittedError = err; });
 
     spyOn(component as any, 'loadAnimationData').and.returnValue(Promise.reject(new Error('Load failed')));
     // loadAnimation() first awaits dynamic import; stub it so we only exercise loadAnimationData rejection
@@ -90,10 +90,10 @@ describe('LottieAnimationComponent', () => {
   });
 
   it('should emit complete event', (done) => {
-    component.complete.subscribe(() => {
+    component.animationComplete.subscribe(() => {
       done();
     });
-    component.complete.emit();
+    component.animationComplete.emit();
   });
 
   it('should emit loopComplete event', (done) => {
