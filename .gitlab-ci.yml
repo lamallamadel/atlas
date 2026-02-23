@@ -74,7 +74,7 @@ deploy-backend:
       ssh "$DEPLOY_USER@$DEPLOY_HOST" "
         set -e
         cd $DEPLOY_DIR
-        git pull origin master --quiet
+        git fetch origin && git reset --hard origin/master
         cd infra
         docker compose build backend
         docker compose up -d backend
@@ -181,7 +181,7 @@ deploy-frontend:
     - |
       ssh "$DEPLOY_USER@$DEPLOY_HOST" "
         set -e
-        cd $DEPLOY_DIR && git pull origin master --quiet
+        cd $DEPLOY_DIR && git fetch origin && git reset --hard origin/master
         docker exec nginx nginx -s reload
         echo '✓ Nginx reloaded'
       "
