@@ -76,3 +76,6 @@ CREATE INDEX IF NOT EXISTS idx_document_category_created ON document(category, c
 -- Note: ANALYZE statements removed for H2 compatibility (H2 doesn't support ANALYZE)
 -- PostgreSQL will automatically analyze tables during autovacuum
 -- For production PostgreSQL, run ANALYZE manually or enable autovacuum
+
+
+

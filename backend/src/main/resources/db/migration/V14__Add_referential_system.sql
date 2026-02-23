@@ -37,3 +37,5 @@ UPDATE dossier SET case_type = 'CRM_LEAD_BUY' WHERE case_type IS NULL;
 -- Add index on new columns
 CREATE INDEX idx_dossier_case_type ON dossier(case_type);
 CREATE INDEX idx_dossier_status_code ON dossier(status_code);
+
+

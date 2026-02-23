@@ -35,3 +35,5 @@ CREATE TABLE IF NOT EXISTS whatsapp_rate_limit (
 );
 
 CREATE INDEX IF NOT EXISTS idx_rate_limit_org_reset ON whatsapp_rate_limit(org_id, reset_at);
+
+

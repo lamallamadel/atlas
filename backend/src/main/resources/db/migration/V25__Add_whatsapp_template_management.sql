@@ -6,7 +6,7 @@ CREATE TABLE whatsapp_template (
     name VARCHAR(512) NOT NULL,
     language VARCHAR(10) NOT NULL,
     category VARCHAR(50) NOT NULL,
-    status VARCHAR(50) NOT NULL,
+    status_ VARCHAR(50) NOT NULL,
     whatsapp_template_id VARCHAR(255),
     components ${json_type},
     description TEXT,
@@ -38,7 +38,7 @@ CREATE TABLE template_variable (
 
 -- Create indexes for whatsapp_template
 CREATE INDEX idx_whatsapp_template_org_id ON whatsapp_template(org_id);
-CREATE INDEX idx_whatsapp_template_status ON whatsapp_template(status);
+CREATE INDEX idx_whatsapp_template_status ON whatsapp_template(status_);
 CREATE INDEX idx_whatsapp_template_name ON whatsapp_template(name);
 CREATE INDEX idx_whatsapp_template_language ON whatsapp_template(language);
 CREATE INDEX idx_whatsapp_template_category ON whatsapp_template(category);
@@ -48,3 +48,6 @@ CREATE INDEX idx_template_variable_org_id ON template_variable(org_id);
 CREATE INDEX idx_template_variable_template_id ON template_variable(template_id);
 CREATE INDEX idx_template_variable_component_type ON template_variable(component_type);
 CREATE INDEX idx_template_variable_position ON template_variable(position);
+
+
+

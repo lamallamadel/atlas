@@ -24,3 +24,5 @@ CREATE INDEX idx_dossier_status_history_org_id ON dossier_status_history(org_id)
 CREATE INDEX idx_dossier_status_history_dossier_id ON dossier_status_history(dossier_id);
 CREATE INDEX idx_dossier_status_history_transitioned_at ON dossier_status_history(transitioned_at);
 CREATE INDEX idx_dossier_status_history_user_id ON dossier_status_history(user_id);
+
+

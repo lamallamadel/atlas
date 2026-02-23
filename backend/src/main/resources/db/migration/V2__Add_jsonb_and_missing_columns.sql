@@ -3,7 +3,7 @@ ALTER TABLE annonce ADD COLUMN photos_json ${json_type};
 ALTER TABLE annonce ADD COLUMN rules_json ${json_type};
 
 -- Add missing scalar columns to annonce
-ALTER TABLE annonce ADD COLUMN type VARCHAR(100);
+ALTER TABLE annonce ADD COLUMN obj_type VARCHAR(100);
 ALTER TABLE annonce ADD COLUMN address VARCHAR(500);
 ALTER TABLE annonce ADD COLUMN surface DECIMAL(10, 2);
 
@@ -25,3 +25,6 @@ CREATE INDEX idx_annonce_city ON annonce(city);
 
 -- Add composite index on message(dossier_id, created_at)
 CREATE INDEX idx_message_dossier_created ON message(dossier_id, created_at);
+
+
+

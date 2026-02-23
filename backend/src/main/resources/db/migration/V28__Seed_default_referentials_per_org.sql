@@ -20,3 +20,5 @@
 -- This UPDATE statement is retained for backward compatibility with existing data
 -- that may have been created by earlier versions of this migration.
 UPDATE referential SET version = 1 WHERE org_id = 'DEFAULT-ORG' AND version IS NULL;
+
+

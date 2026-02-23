@@ -52,3 +52,5 @@ COMMENT ON COLUMN lead_scoring_config.source_weights IS 'JSON map of lead source
 COMMENT ON COLUMN lead_scoring_config.engagement_weights IS 'JSON map of engagement types to their weight values';
 COMMENT ON COLUMN lead_scoring_config.property_match_weights IS 'JSON map of property match criteria to their weight values';
 COMMENT ON COLUMN lead_score.score_breakdown IS 'Detailed breakdown of how the score was calculated';
+
+

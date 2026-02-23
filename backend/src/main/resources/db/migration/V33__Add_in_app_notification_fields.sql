@@ -4,4 +4,7 @@ ALTER TABLE notification ADD COLUMN IF NOT EXISTS message TEXT;
 ALTER TABLE notification ADD COLUMN IF NOT EXISTS action_url VARCHAR(500);
 
 -- Add index for unread notifications query performance (H2 compatible - no WHERE clause)
-CREATE INDEX IF NOT EXISTS idx_notification_unread ON notification(type, read_at);
+CREATE INDEX IF NOT EXISTS idx_notification_unread ON notification(obj_type, read_at);
+
+
+

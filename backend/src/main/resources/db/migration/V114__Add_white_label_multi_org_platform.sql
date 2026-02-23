@@ -325,3 +325,7 @@ CREATE TABLE feature_flag (
 CREATE INDEX idx_feature_flag_org_id ON feature_flag(org_id);
 CREATE INDEX idx_feature_flag_key ON feature_flag(feature_key);
 CREATE INDEX idx_feature_flag_enabled ON feature_flag(org_id, enabled);
+
+
+
+

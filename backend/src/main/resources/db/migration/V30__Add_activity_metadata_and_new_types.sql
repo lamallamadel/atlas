@@ -10,3 +10,6 @@ COMMENT ON COLUMN activity.metadata IS 'Standardized JSON metadata for activity 
 - APPOINTMENT_COMPLETED: {appointmentId, status, startTime, endTime, location, assignedTo, notes, timestamp}
 - CONSENT_GRANTED: {consentementId, channel, consentType, status, consentMeta, timestamp}
 - CONSENT_REVOKED: {consentementId, channel, consentType, status, previousStatus, consentMeta, timestamp}';
+
+
+

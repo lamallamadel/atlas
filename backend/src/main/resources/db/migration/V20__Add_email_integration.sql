@@ -46,3 +46,5 @@ CREATE INDEX IF NOT EXISTS idx_dossier_lead_email ON dossier(lead_email);
 
 -- Add email to partie_prenante index if not exists
 CREATE INDEX IF NOT EXISTS idx_partie_prenante_email ON partie_prenante(email);
+
+

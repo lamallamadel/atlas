@@ -21,3 +21,5 @@ CREATE INDEX idx_document_org_id ON document(org_id);
 CREATE INDEX idx_document_dossier_id ON document(dossier_id);
 CREATE INDEX idx_document_created_at ON document(created_at);
 CREATE INDEX idx_document_file_type ON document(file_type);
+
+

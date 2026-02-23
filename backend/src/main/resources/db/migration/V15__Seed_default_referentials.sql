@@ -81,3 +81,5 @@ INSERT INTO referential (org_id, category, code, label, description, display_ord
 ('DEFAULT-ORG', 'WON_REASON', 'RENTED', 'Loué', 'Rented', 5, true, true),
 ('DEFAULT-ORG', 'WON_REASON', 'PROJECT_DELIVERED', 'Projet livré', 'Project delivered', 6, true, true),
 ('DEFAULT-ORG', 'WON_REASON', 'OTHER', 'Autre', 'Other reason', 7, true, true);
+
+

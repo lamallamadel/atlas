@@ -8,3 +8,5 @@ ALTER TABLE message ADD COLUMN timestamp TIMESTAMP NOT NULL DEFAULT CURRENT_TIME
 
 -- 3. Create index on timestamp for performance
 CREATE INDEX idx_message_timestamp ON message(timestamp);
+
+

@@ -2,7 +2,7 @@
 -- Created as part of performance optimization layer implementation
 
 -- Annonce table indexes
-CREATE INDEX IF NOT EXISTS idx_annonce_status ON annonce(status);
+CREATE INDEX IF NOT EXISTS idx_annonce_status ON annonce(status_);
 CREATE INDEX IF NOT EXISTS idx_annonce_type ON annonce(type);
 CREATE INDEX IF NOT EXISTS idx_annonce_city ON annonce(city);
 CREATE INDEX IF NOT EXISTS idx_annonce_org_id_status ON annonce(org_id, status);
@@ -14,7 +14,7 @@ CREATE INDEX IF NOT EXISTS idx_annonce_created_at ON annonce(created_at);
 CREATE INDEX IF NOT EXISTS idx_dossier_annonce_id ON dossier(annonce_id);
 CREATE INDEX IF NOT EXISTS idx_dossier_lead_phone ON dossier(lead_phone);
 CREATE INDEX IF NOT EXISTS idx_dossier_lead_email ON dossier(lead_email);
-CREATE INDEX IF NOT EXISTS idx_dossier_status ON dossier(status);
+CREATE INDEX IF NOT EXISTS idx_dossier_status ON dossier(status_);
 CREATE INDEX IF NOT EXISTS idx_dossier_case_type ON dossier(case_type);
 CREATE INDEX IF NOT EXISTS idx_dossier_created_by ON dossier(created_by);
 CREATE INDEX IF NOT EXISTS idx_dossier_source ON dossier(source);
@@ -30,7 +30,7 @@ CREATE INDEX IF NOT EXISTS idx_partie_prenante_email ON partie_prenante(email);
 
 -- Appointment table indexes
 CREATE INDEX IF NOT EXISTS idx_appointment_dossier_id ON appointment(dossier_id);
-CREATE INDEX IF NOT EXISTS idx_appointment_status ON appointment(status);
+CREATE INDEX IF NOT EXISTS idx_appointment_status ON appointment(status_);
 CREATE INDEX IF NOT EXISTS idx_appointment_start_time ON appointment(start_time);
 CREATE INDEX IF NOT EXISTS idx_appointment_end_time ON appointment(end_time);
 
@@ -44,12 +44,12 @@ CREATE INDEX IF NOT EXISTS idx_message_dossier_id_timestamp ON message(dossier_i
 
 -- Notification table indexes
 CREATE INDEX IF NOT EXISTS idx_notification_dossier_id ON notification(dossier_id);
-CREATE INDEX IF NOT EXISTS idx_notification_status ON notification(status);
+CREATE INDEX IF NOT EXISTS idx_notification_status ON notification(status_);
 CREATE INDEX IF NOT EXISTS idx_notification_type ON notification(type);
 CREATE INDEX IF NOT EXISTS idx_notification_created_at ON notification(created_at);
 
 -- Outbound Message table indexes
-CREATE INDEX IF NOT EXISTS idx_outbound_message_status ON outbound_message(status);
+CREATE INDEX IF NOT EXISTS idx_outbound_message_status ON outbound_message(status_);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_attempt_count ON outbound_message(attempt_count);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_channel ON outbound_message(channel);
 CREATE INDEX IF NOT EXISTS idx_outbound_message_created_at ON outbound_message(created_at);
@@ -58,7 +58,7 @@ CREATE INDEX IF NOT EXISTS idx_outbound_message_org_id_status ON outbound_messag
 
 -- Outbound Attempt table indexes
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_message_id ON outbound_attempt(outbound_message_id);
-CREATE INDEX IF NOT EXISTS idx_outbound_attempt_status ON outbound_attempt(status);
+CREATE INDEX IF NOT EXISTS idx_outbound_attempt_status ON outbound_attempt(status_);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempt_no ON outbound_attempt(attempt_no);
 CREATE INDEX IF NOT EXISTS idx_outbound_attempt_next_retry_at ON outbound_attempt(next_retry_at);
 --CREATE INDEX IF NOT EXISTS idx_outbound_attempt_attempted_at ON outbound_attempt(attempted_at);
@@ -68,3 +68,5 @@ CREATE INDEX IF NOT EXISTS idx_dossier_status_history_dossier_id ON dossier_stat
 CREATE INDEX IF NOT EXISTS idx_dossier_status_history_from_status ON dossier_status_history(from_status);
 CREATE INDEX IF NOT EXISTS idx_dossier_status_history_to_status ON dossier_status_history(to_status);
 CREATE INDEX IF NOT EXISTS idx_dossier_status_history_transitioned_at ON dossier_status_history(transitioned_at);
+
+

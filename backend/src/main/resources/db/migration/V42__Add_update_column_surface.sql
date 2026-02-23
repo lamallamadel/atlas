@@ -1,0 +1,2 @@
+ALTER TABLE annonce ALTER COLUMN surface DOUBLE;
+

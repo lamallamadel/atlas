@@ -58,3 +58,5 @@ COMMENT ON TABLE sms_rate_limit IS 'Rate limiting and quota management for SMS s
 COMMENT ON COLUMN sms_rate_limit.quota_limit IS 'Maximum number of SMS messages allowed in the rate limit window';
 COMMENT ON COLUMN sms_rate_limit.messages_sent_count IS 'Current count of messages sent in the current window';
 COMMENT ON COLUMN sms_rate_limit.throttle_until IS 'Timestamp until which sending is throttled due to rate limit errors';
+
+

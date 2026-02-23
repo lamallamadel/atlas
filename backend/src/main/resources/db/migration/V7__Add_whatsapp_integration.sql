@@ -25,3 +25,5 @@ CREATE TABLE whatsapp_provider_config (
 );
 
 CREATE INDEX idx_whatsapp_provider_config_org_id ON whatsapp_provider_config(org_id);
+
+
