@@ -1,7 +1,11 @@
 spring:
   application:
     name: backend
-  
+
+  batch:
+    job:
+      name: dailyETLJob
+
   jpa:
     hibernate:
       ddl-auto: validate

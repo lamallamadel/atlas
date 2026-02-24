@@ -34,6 +34,11 @@ spring:
     placeholders:
       json_type: JSON
 
+  batch:
+    job:
+      name: dailyETLJob
+      enabled: false
+
   mail:
     host: localhost
     port: 3025

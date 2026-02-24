@@ -45,6 +45,11 @@ spring:
     out-of-order: false
     ignore-missing-migrations: false
 
+  batch:
+    job:
+      name: dailyETLJob
+      enabled: false
+
   mail:
     host: localhost
     port: 3025
