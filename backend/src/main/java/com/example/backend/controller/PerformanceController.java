@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import com.example.backend.performance.PerformanceMonitoringService;
 import com.example.backend.performance.RedisCacheService;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 import com.example.backend.util.DatabaseIndexAudit;
@@ -18,6 +19,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1/performance")
 @ConditionalOnProperty(name = "performance.monitoring.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnBean(RedisCacheService.class)
 public class PerformanceController {
 
     private final PerformanceMonitoringService performanceMonitoring;

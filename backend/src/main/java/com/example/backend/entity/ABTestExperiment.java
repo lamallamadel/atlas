@@ -46,11 +46,11 @@ public class ABTestExperiment extends BaseEntity {
     private LocalDateTime endedAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "control_metrics", columnDefinition = "jsonb")
+    @Column(name = "control_metrics")
     private Map<String, Object> controlMetrics = new HashMap<>();
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "treatment_metrics", columnDefinition = "jsonb")
+    @Column(name = "treatment_metrics")
     private Map<String, Object> treatmentMetrics = new HashMap<>();
 
     @Column(name = "winner", length = 50)

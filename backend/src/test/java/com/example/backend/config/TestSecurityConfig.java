@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -16,11 +17,12 @@ public class TestSecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(TestSecurityConfig.class);
 
     /**
-     * IMPORTANT: ne pas appeler ce bean "objectMapper" pour éviter le conflit avec JacksonConfig
-     * (overriding désactivé).
+     * ObjectMapper pour les tests qui ne chargent pas le contexte complet (sans JacksonConfig).
+     * Ne crée le bean que s'il n'existe pas déjà (évite le conflit avec JacksonConfig en @SpringBootTest).
      */
     @Bean(name = "objectMapper")
     @Primary
+    @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper objectMapper() {
         log.debug("Configuring test ObjectMapper with JavaTimeModule and custom settings");
         ObjectMapper mapper = new ObjectMapper();

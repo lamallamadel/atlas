@@ -4,6 +4,8 @@ spring:
       - org.springframework.boot.autoconfigure.elasticsearch.ElasticsearchRestClientAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchDataAutoConfiguration
       - org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration
   data:
     elasticsearch:
       repositories:
@@ -23,6 +25,10 @@ spring:
           issuer-uri: mock
   cache:
     type: simple
+
+cache:
+  redis:
+    enabled: false
 
 keycloak:
   admin:
