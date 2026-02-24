@@ -47,7 +47,7 @@ public class DocumentVersionEntity extends BaseEntity {
     private Boolean isCurrent = false;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "metadata", columnDefinition = "${json_type}")
+    @Column(name = "metadata")
     private Map<String, Object> metadata;
 
     @Column(name = "uploaded_by", length = 255)

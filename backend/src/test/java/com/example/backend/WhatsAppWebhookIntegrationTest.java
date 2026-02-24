@@ -102,10 +102,15 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     }
 
     private void createWhatsAppProviderConfig() {
+        createWhatsAppProviderConfig(TENANT_1);
+    }
+
+    private void createWhatsAppProviderConfig(String orgId) {
         WhatsAppProviderConfig config = new WhatsAppProviderConfig();
-        config.setOrgId(TENANT_1);
+        config.setOrgId(orgId);
         config.setPhoneNumberId("123456789");
         config.setApiKeyEncrypted("test-api-key");
+        config.setApiSecretEncrypted("test-api-secret");
         config.setWebhookSecretEncrypted(WEBHOOK_SECRET);
         config.setEnabled(true);
         config.setCreatedAt(LocalDateTime.now());
@@ -559,14 +564,15 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     }
 
     @Test
-    @WithMockUser
     @DisplayName("Delivery status - should handle organization mismatch")
     void testDeliveryStatus_OrgMismatch() throws Exception {
         OutboundMessageEntity message = createOutboundMessage("wamid.orgmismatch", OutboundMessageStatus.SENDING);
+        createWhatsAppProviderConfig("different-org");
 
         String payload = createDeliveryStatusPayload("wamid.orgmismatch", "delivered", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
+        // Webhook is permitAll(); call without @WithMockUser so request is anonymous (like real WhatsApp callbacks)
         mockMvc.perform(post(WEBHOOK_ENDPOINT)
                 .header("X-Org-Id", "different-org")
                 .header("X-Hub-Signature-256", signature)

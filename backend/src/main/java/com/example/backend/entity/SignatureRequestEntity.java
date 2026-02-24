@@ -3,6 +3,8 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.SignatureStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -31,7 +33,8 @@ public class SignatureRequestEntity extends BaseEntity {
     @Column(name = "status", nullable = false, length = 50)
     private SignatureStatus status = SignatureStatus.PENDING;
 
-    @Column(name = "signers", columnDefinition = "${json_type}")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "signers")
     private String signers;
 
     @Column(name = "subject", length = 500)
@@ -70,7 +73,8 @@ public class SignatureRequestEntity extends BaseEntity {
     @Column(name = "certificate_path", length = 1000)
     private String certificatePath;
 
-    @Column(name = "audit_trail", columnDefinition = "${json_type}")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "audit_trail")
     private String auditTrail;
 
     @Column(name = "workflow_triggered", nullable = false)

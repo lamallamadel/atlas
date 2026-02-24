@@ -10,7 +10,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
-import com.example.backend.config.TestMailConfiguration;
 import com.example.backend.dto.NotificationCreateRequest;
 import com.example.backend.dto.NotificationResponse;
 import com.example.backend.entity.Dossier;
@@ -28,7 +27,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -36,7 +34,6 @@ import org.springframework.test.web.servlet.MvcResult;
 
 @BackendE2ETest
 @WithMockUser(roles = {"PRO"})
-@Import(TestMailConfiguration.class)
 class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     private static final String ORG_ID = "test-org-123";

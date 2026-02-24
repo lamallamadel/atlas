@@ -44,7 +44,7 @@ public class WorkflowStepEntity extends BaseEntity {
     private WorkflowStepStatus status = WorkflowStepStatus.PENDING;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "assigned_approvers", columnDefinition = "${json_type}")
+    @Column(name = "assigned_approvers")
     private List<String> assignedApprovers;
 
     @Column(name = "approvals_required")
@@ -54,11 +54,11 @@ public class WorkflowStepEntity extends BaseEntity {
     private Integer approvalsReceived = 0;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "step_config", columnDefinition = "${json_type}")
+    @Column(name = "step_config")
     private Map<String, Object> stepConfig;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "condition_rules", columnDefinition = "${json_type}")
+    @Column(name = "condition_rules")
     private Map<String, Object> conditionRules;
 
     @Column(name = "started_at")

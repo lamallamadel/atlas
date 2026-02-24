@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "system_config", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_system_config_key", columnNames = {"key"})
+    @UniqueConstraint(name = "uk_system_config_key", columnNames = {"config_key"})
 })
 public class SystemConfig {
 
@@ -14,10 +14,10 @@ public class SystemConfig {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "key", nullable = false, length = 255)
+    @Column(name = "config_key", nullable = false, length = 255)
     private String key;
 
-    @Column(name = "value", columnDefinition = "TEXT")
+    @Column(name = "config_value", columnDefinition = "TEXT")
     private String value;
 
     @Column(name = "category", length = 100)

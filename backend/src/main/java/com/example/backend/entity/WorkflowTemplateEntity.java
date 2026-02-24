@@ -32,11 +32,11 @@ public class WorkflowTemplateEntity extends BaseEntity {
     private DocumentWorkflowType workflowType;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "steps_definition", columnDefinition = "${json_type}")
+    @Column(name = "steps_definition")
     private List<Map<String, Object>> stepsDefinition;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "default_config", columnDefinition = "${json_type}")
+    @Column(name = "default_config")
     private Map<String, Object> defaultConfig;
 
     @Column(name = "is_system_template", nullable = false)

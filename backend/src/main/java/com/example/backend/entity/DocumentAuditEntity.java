@@ -44,7 +44,7 @@ public class DocumentAuditEntity extends BaseEntity {
     private String description;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "metadata", columnDefinition = "${json_type}")
+    @Column(name = "metadata")
     private Map<String, Object> metadata;
 
     @Column(name = "ip_address", length = 45)

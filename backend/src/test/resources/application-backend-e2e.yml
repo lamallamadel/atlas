@@ -14,9 +14,9 @@ spring:
     enabled: true
     baseline-on-migrate: true
     baseline-version: 0
-    locations: classpath:db/migration
+    locations: classpath:db/migration,classpath:db/e2e
     placeholders:
-      json_type: JSONB
+      json_type: JSON
 
   security:
     oauth2:
@@ -29,6 +29,11 @@ spring:
 cache:
   redis:
     enabled: false
+
+app:
+  security:
+    csrf:
+      enabled: false
 
 keycloak:
   admin:

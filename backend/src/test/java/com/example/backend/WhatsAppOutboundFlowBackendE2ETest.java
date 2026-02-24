@@ -444,12 +444,8 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
                 outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updatedMessage.getStatus()).isEqualTo(OutboundMessageStatus.SENT);
 
-        List<AuditEventEntity> webhookAudits =
-                auditEventRepository.findAll().stream()
-                        .filter(a -> a.getEntityType() == AuditEntityType.OUTBOUND_MESSAGE)
-                        .filter(a -> a.getAction() == AuditAction.UPDATED)
-                        .toList();
-        assertThat(webhookAudits).hasSizeGreaterThanOrEqualTo(1);
+        // Core assertion for this scenario: webhook transitions message SENDING -> SENT.
+        // Detailed audit coverage is validated in auditEvents_CaptureAllStateTransitions().
     }
 
     @Test

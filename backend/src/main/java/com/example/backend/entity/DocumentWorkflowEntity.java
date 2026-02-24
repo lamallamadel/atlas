@@ -46,11 +46,11 @@ public class DocumentWorkflowEntity extends BaseEntity {
     private Integer currentStepOrder;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "workflow_config", columnDefinition = "${json_type}")
+    @Column(name = "workflow_config")
     private Map<String, Object> workflowConfig;
 
     @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "context_data", columnDefinition = "${json_type}")
+    @Column(name = "context_data")
     private Map<String, Object> contextData;
 
     @Column(name = "initiated_by", length = 255)

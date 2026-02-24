@@ -2,6 +2,8 @@ package com.example.backend.entity;
 
 import jakarta.persistence.*;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -33,7 +35,8 @@ public class ContractTemplateEntity extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "signature_fields", columnDefinition = "${json_type}")
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "signature_fields")
     private String signatureFields;
 
     @Column(name = "is_active", nullable = false)

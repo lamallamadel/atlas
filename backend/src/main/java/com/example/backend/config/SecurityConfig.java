@@ -33,6 +33,9 @@ import org.springframework.security.oauth2.jwt.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
+import org.springframework.security.oauth2.server.resource.web.DefaultBearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
@@ -62,7 +65,6 @@ public class SecurityConfig {
     private boolean csrfEnabled;
 
     @Bean
-
     public SecurityFilterChain filterChain(HttpSecurity http, CorrelationIdFilter correlationIdFilter,
             CsrfCookieFilter csrfCookieFilter,
             ApiKeyAuthenticationFilter apiKeyAuthenticationFilter,
@@ -132,8 +134,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll())
                 .oauth2ResourceServer(oauth2 -> oauth2
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED))
+                        .bearerTokenResolver(webhookAwareBearerTokenResolver())
+                        .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint())
                         .jwt(jwt -> jwt
                                 .decoder(jwtDecoder())
                                 .jwtAuthenticationConverter(jwtAuthenticationConverter())))
@@ -171,6 +173,21 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", configuration);
         return source;
+    }
+
+    /**
+     * Ignore Bearer token extraction for webhook routes so permitAll() can apply.
+     * This avoids 401 on webhook callbacks without Authorization header.
+     */
+    private BearerTokenResolver webhookAwareBearerTokenResolver() {
+        DefaultBearerTokenResolver delegate = new DefaultBearerTokenResolver();
+        return request -> {
+            String path = request.getRequestURI();
+            if (path != null && path.startsWith("/api/v1/webhooks/")) {
+                return null;
+            }
+            return delegate.resolve(request);
+        };
     }
 
     private static List<String> parseAllowedOrigins(String raw, String activeProfiles) {

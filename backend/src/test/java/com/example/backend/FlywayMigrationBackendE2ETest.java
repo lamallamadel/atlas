@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
+import java.sql.Connection;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,6 +36,17 @@ class FlywayMigrationBackendE2ETest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    private String expectedJsonPlaceholder() {
+        try (Connection connection = dataSource.getConnection()) {
+            String databaseName = connection.getMetaData().getDatabaseProductName();
+            return databaseName != null && databaseName.toLowerCase().contains("postgres")
+                    ? "JSONB"
+                    : "JSON";
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to determine database type for Flyway assertions", e);
+        }
+    }
 
     @Test
     void testFlywayMigrationsExecutedSuccessfully() {
@@ -108,8 +120,8 @@ class FlywayMigrationBackendE2ETest {
     @Test
     void testJsonColumnsCreatedSuccessfully() {
         List<String> jsonColumns = jdbcTemplate.queryForList(
-            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS " +
-            "WHERE TABLE_NAME = 'ANNONCE' AND COLUMN_NAME IN ('PHOTOS_JSON', 'RULES_JSON')",
+            "SELECT UPPER(COLUMN_NAME) FROM INFORMATION_SCHEMA.COLUMNS " +
+            "WHERE UPPER(TABLE_NAME) = 'ANNONCE' AND UPPER(COLUMN_NAME) IN ('PHOTOS_JSON', 'RULES_JSON')",
             String.class
         );
 
@@ -122,13 +134,17 @@ class FlywayMigrationBackendE2ETest {
     void testJsonColumnsHaveCorrectType() {
         List<String> columnTypes = jdbcTemplate.queryForList(
             "SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS " +
-            "WHERE TABLE_NAME = 'ANNONCE' AND COLUMN_NAME IN ('PHOTOS_JSON', 'RULES_JSON')",
+            "WHERE UPPER(TABLE_NAME) = 'ANNONCE' AND UPPER(COLUMN_NAME) IN ('PHOTOS_JSON', 'RULES_JSON')",
             String.class
         );
 
+        String expectedJsonType = expectedJsonPlaceholder();
         assertThat(columnTypes)
-            .as("JSON columns should have JSON type in H2")
-            .allMatch(type -> type.equals("JSON") || type.equals("CHARACTER VARYING"));
+            .as("JSON columns should match expected type for active database profile")
+            .allMatch(type ->
+                type != null
+                    && (type.equalsIgnoreCase(expectedJsonType)
+                        || type.equalsIgnoreCase("CHARACTER VARYING")));
     }
 
     @Test
@@ -147,9 +163,10 @@ class FlywayMigrationBackendE2ETest {
 
     @Test
     void testFlywayConfigurationUsesJsonTypePlaceholder() {
+        String expectedJsonType = expectedJsonPlaceholder();
         assertThat(flyway.getConfiguration().getPlaceholders())
             .as("Flyway should have json_type placeholder configured")
-            .containsEntry("json_type", "JSON");
+            .containsEntry("json_type", expectedJsonType);
     }
 
     @Test
@@ -184,7 +201,8 @@ class FlywayMigrationBackendE2ETest {
 
         for (String tableName : expectedTables) {
             Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?",
+                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES " +
+                "WHERE UPPER(TABLE_NAME) = ? AND UPPER(TABLE_SCHEMA) = 'PUBLIC'",
                 Integer.class,
                 tableName
             );
