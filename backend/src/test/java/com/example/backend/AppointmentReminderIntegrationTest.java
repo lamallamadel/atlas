@@ -34,6 +34,8 @@ class AppointmentReminderIntegrationTest {
     private DossierRepository dossierRepository;
     @Autowired
     private OutboundMessageRepository outboundMessageRepository;
+    @Autowired
+    private com.example.backend.repository.ConsentementRepository consentRepository;
 
     private Dossier testDossier;
 
@@ -54,8 +56,8 @@ class AppointmentReminderIntegrationTest {
         consent.setOrgId("org-test");
         consent.setDossier(testDossier);
         consent.setChannel(com.example.backend.entity.enums.ConsentementChannel.WHATSAPP);
+        consent.setConsentType(com.example.backend.entity.enums.ConsentementType.TRANSACTIONNEL);
         consent.setStatus(com.example.backend.entity.enums.ConsentementStatus.GRANTED);
-        consent.setOptInIp("127.0.0.1");
         consentRepository.save(consent);
     }
 
