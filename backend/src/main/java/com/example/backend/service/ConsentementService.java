@@ -42,18 +42,21 @@ public class ConsentementService {
     private final ConsentementMapper consentementMapper;
     private final ActivityService activityService;
     private final OutboundMessageService outboundMessageService;
+    private final ConsentEventService consentEventService;
 
     public ConsentementService(
             ConsentementRepository consentementRepository,
             DossierRepository dossierRepository,
             ConsentementMapper consentementMapper,
             ActivityService activityService,
-            OutboundMessageService outboundMessageService) {
+            OutboundMessageService outboundMessageService,
+            ConsentEventService consentEventService) {
         this.consentementRepository = consentementRepository;
         this.dossierRepository = dossierRepository;
         this.consentementMapper = consentementMapper;
         this.activityService = activityService;
         this.outboundMessageService = outboundMessageService;
+        this.consentEventService = consentEventService;
     }
 
     @Transactional
@@ -98,6 +101,11 @@ public class ConsentementService {
 
         if (saved.getStatus() == ConsentementStatus.GRANTED) {
             logConsentGrantedActivity(saved);
+            consentEventService.emitEvent(saved, "GRANTED", null, null);
+        } else if (saved.getStatus() == ConsentementStatus.DENIED) {
+            consentEventService.emitEvent(saved, "DENIED", null, null);
+        } else if (saved.getStatus() == ConsentementStatus.PENDING) {
+            consentEventService.emitEvent(saved, "PENDING", null, null);
         }
 
         return consentementMapper.toResponse(saved);
@@ -145,9 +153,15 @@ public class ConsentementService {
         if (previousStatus != ConsentementStatus.GRANTED
                 && updated.getStatus() == ConsentementStatus.GRANTED) {
             logConsentGrantedActivity(updated);
+            consentEventService.emitEvent(updated, "GRANTED", previousStatus, null);
         } else if (previousStatus == ConsentementStatus.GRANTED
                 && updated.getStatus() == ConsentementStatus.REVOKED) {
             logConsentRevokedActivity(updated, previousStatus);
+            consentEventService.emitEvent(updated, "REVOKED", previousStatus, null);
+        } else if (updated.getStatus() == ConsentementStatus.EXPIRED) {
+            consentEventService.emitEvent(updated, "EXPIRED", previousStatus, null);
+        } else if (previousStatus != updated.getStatus()) {
+            consentEventService.emitEvent(updated, "STATUS_CHANGED", previousStatus, null);
         }
 
         return consentementMapper.toResponse(updated);
@@ -376,6 +390,11 @@ public class ConsentementService {
         ConsentementEntity updated = consentementRepository.save(consentement);
 
         logConsentRenewedActivity(updated, oldExpiresAt);
+        
+        Map<String, Object> renewalMetadata = new HashMap<>();
+        renewalMetadata.put("previousExpiresAt", oldExpiresAt != null ? oldExpiresAt.toString() : null);
+        renewalMetadata.put("newExpiresAt", newExpiresAt.toString());
+        consentEventService.emitEvent(updated, "RENEWED", updated.getStatus(), renewalMetadata);
 
         return consentementMapper.toResponse(updated);
     }

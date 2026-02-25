@@ -19,6 +19,7 @@ public class ConsentExpirationScheduler {
 
     private final ConsentementRepository consentementRepository;
     private final ConsentementService consentementService;
+    private final ConsentEventService consentEventService;
 
     @Value("${consent.expiration.enabled:true}")
     private boolean expirationEnabled;
@@ -28,9 +29,11 @@ public class ConsentExpirationScheduler {
 
     public ConsentExpirationScheduler(
             ConsentementRepository consentementRepository,
-            ConsentementService consentementService) {
+            ConsentementService consentementService,
+            ConsentEventService consentEventService) {
         this.consentementRepository = consentementRepository;
         this.consentementService = consentementService;
+        this.consentEventService = consentEventService;
     }
 
     @Scheduled(cron = "${consent.expiration.cron:0 0 2 * * ?}")
@@ -60,9 +63,13 @@ public class ConsentExpirationScheduler {
 
         for (ConsentementEntity consent : expiredConsents) {
             try {
+                ConsentementStatus previousStatus = consent.getStatus();
                 consent.setStatus(ConsentementStatus.EXPIRED);
                 consent.setUpdatedAt(now);
                 consentementRepository.save(consent);
+                
+                consentEventService.emitEvent(consent, "EXPIRED", previousStatus, null);
+                
                 successCount++;
                 logger.info(
                         "Expired consent: id={}, dossierId={}, channel={}, type={}",
