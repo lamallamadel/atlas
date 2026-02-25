@@ -4,9 +4,6 @@ import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.WhatsAppProviderConfig;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,36 +78,12 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
                     sessionWindowService.isWithinSessionWindow(message.getOrgId(), message.getTo());
             boolean hasTemplate =
                     message.getTemplateCode() != null && !message.getTemplateCode().isEmpty();
-            // #region agent log
-            debugNdjson(
-                    "run1",
-                    "H3",
-                    "WhatsAppCloudApiProvider.send:window-check",
-                    "Computed session/template gate",
-                    Map.of(
-                            "orgId", message.getOrgId(),
-                            "messageId", String.valueOf(message.getId()),
-                            "to", String.valueOf(message.getTo()),
-                            "withinSessionWindow", withinSessionWindow,
-                            "hasTemplate", hasTemplate));
-            // #endregion
 
             if (!withinSessionWindow && !hasTemplate) {
                 logger.warn(
                         "Message outside 24h window without template: messageId={}, to={}",
                         message.getId(),
                         message.getTo());
-                // #region agent log
-                debugNdjson(
-                        "run1",
-                        "H3",
-                        "WhatsAppCloudApiProvider.send:session-expired-return",
-                        "Returning SESSION_EXPIRED branch",
-                        Map.of(
-                                "orgId", message.getOrgId(),
-                                "messageId", String.valueOf(message.getId()),
-                                "to", String.valueOf(message.getTo())));
-                // #endregion
                 return ProviderSendResult.failure(
                         "SESSION_EXPIRED",
                         "Cannot send freeform message outside 24-hour session window. Use a template message instead.",
@@ -290,40 +263,12 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
                         errorCode,
                         errorMessage,
                         errorInfo.isRetryable());
-                // #region agent log
-                debugNdjson(
-                        "run1",
-                        "H1_H2",
-                        "WhatsAppCloudApiProvider.handleHttpError:parsed-code",
-                        "Parsed HTTP error payload",
-                        Map.of(
-                                "messageId", String.valueOf(message.getId()),
-                                "status", String.valueOf(e.getStatusCode().value()),
-                                "errorCode", String.valueOf(errorCode),
-                                "rawMessageLength",
-                                        errorMessage == null ? -1 : errorMessage.length(),
-                                "mapperRetryable", errorInfo.isRetryable(),
-                                "statusRetryable", e.getStatusCode().is5xxServerError()));
-                // #endregion
 
                 String safeMessage =
                         sanitizeErrorMessage(
                                 errorMessage != null ? errorMessage : errorInfo.getMessage());
                 boolean retryable =
                         e.getStatusCode().is5xxServerError() || errorInfo.isRetryable();
-                // #region agent log
-                debugNdjson(
-                        "run1",
-                        "H1_H2",
-                        "WhatsAppCloudApiProvider.handleHttpError:final-return",
-                        "Returning parsed-code failure",
-                        Map.of(
-                                "messageId", String.valueOf(message.getId()),
-                                "status", String.valueOf(e.getStatusCode().value()),
-                                "errorCode", String.valueOf(errorCode),
-                                "safeMessageLength", safeMessage.length(),
-                                "finalRetryable", retryable));
-                // #endregion
                 return ProviderSendResult.failure(errorCode, safeMessage, retryable, null);
             }
 
@@ -486,27 +431,5 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
                         "$1=***");
 
         return message;
-    }
-
-    private void debugNdjson(
-            String runId, String hypothesisId, String location, String message, Map<String, Object> data) {
-        try {
-            String payload =
-                    objectMapper.writeValueAsString(
-                            Map.of(
-                                    "sessionId", "12ec52",
-                                    "runId", runId,
-                                    "hypothesisId", hypothesisId,
-                                    "location", location,
-                                    "message", message,
-                                    "data", data,
-                                    "timestamp", System.currentTimeMillis()));
-            Files.writeString(
-                    Path.of("c:\\Users\\PRO\\work\\immo\\debug-12ec52.log"),
-                    payload + System.lineSeparator(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
-        } catch (Exception ignore) {
-        }
     }
 }

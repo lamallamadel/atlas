@@ -21,7 +21,14 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
     private static final Logger log = LoggerFactory.getLogger("com.example.backend");
 
     private static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    private static final String SESSION_ID_HEADER = "X-Session-Id";
+    private static final String RUN_ID_HEADER = "X-Run-Id";
+    private static final String HYPOTHESIS_ID_HEADER = "X-Hypothesis-Id";
+
     private static final String CORRELATION_ID_MDC_KEY = "correlationId";
+    private static final String SESSION_ID_MDC_KEY = "sessionId";
+    private static final String RUN_ID_MDC_KEY = "runId";
+    private static final String HYPOTHESIS_ID_MDC_KEY = "hypothesisId";
 
     @Override
     protected void doFilterInternal(
@@ -33,9 +40,23 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             correlationId = UUID.randomUUID().toString();
         }
 
+        String sessionId = request.getHeader(SESSION_ID_HEADER);
+        String runId = request.getHeader(RUN_ID_HEADER);
+        String hypothesisId = request.getHeader(HYPOTHESIS_ID_HEADER);
+
         try {
             MDC.put(CORRELATION_ID_MDC_KEY, correlationId);
             response.setHeader(CORRELATION_ID_HEADER, correlationId);
+
+            if (sessionId != null && !sessionId.trim().isEmpty()) {
+                MDC.put(SESSION_ID_MDC_KEY, sessionId);
+            }
+            if (runId != null && !runId.trim().isEmpty()) {
+                MDC.put(RUN_ID_MDC_KEY, runId);
+            }
+            if (hypothesisId != null && !hypothesisId.trim().isEmpty()) {
+                MDC.put(HYPOTHESIS_ID_MDC_KEY, hypothesisId);
+            }
 
             // Important pour les tests: la valeur doit apparaître dans les logs
             log.info(
@@ -47,6 +68,9 @@ public class CorrelationIdFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
         } finally {
             MDC.remove(CORRELATION_ID_MDC_KEY);
+            MDC.remove(SESSION_ID_MDC_KEY);
+            MDC.remove(RUN_ID_MDC_KEY);
+            MDC.remove(HYPOTHESIS_ID_MDC_KEY);
         }
     }
 }

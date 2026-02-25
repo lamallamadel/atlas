@@ -90,6 +90,17 @@ public class OutboundJobWorker {
                 MDC.put("messageId", String.valueOf(message.getId()));
                 MDC.put("channel", message.getChannel().name());
 
+                // Propagate tracking context from message to MDC
+                if (message.getSessionId() != null) {
+                    MDC.put("sessionId", message.getSessionId());
+                }
+                if (message.getRunId() != null) {
+                    MDC.put("runId", message.getRunId());
+                }
+                if (message.getHypothesisId() != null) {
+                    MDC.put("hypothesisId", message.getHypothesisId());
+                }
+
                 try {
                     if (isReadyForProcessing(message)) {
                         processMessage(message);
@@ -103,6 +114,9 @@ public class OutboundJobWorker {
                 } finally {
                     MDC.remove("messageId");
                     MDC.remove("channel");
+                    MDC.remove("sessionId");
+                    MDC.remove("runId");
+                    MDC.remove("hypothesisId");
                 }
             }
 

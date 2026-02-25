@@ -69,6 +69,15 @@ public class OutboundMessageEntity extends BaseEntity {
     @Column(name = "error_message", columnDefinition = "TEXT")
     private String errorMessage;
 
+    @Column(name = "session_id", length = 255)
+    private String sessionId;
+
+    @Column(name = "run_id", length = 255)
+    private String runId;
+
+    @Column(name = "hypothesis_id", length = 255)
+    private String hypothesisId;
+
     public Long getId() {
         return id;
     }
@@ -187,5 +196,29 @@ public class OutboundMessageEntity extends BaseEntity {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
+    }
+
+    public String getRunId() {
+        return runId;
+    }
+
+    public void setRunId(String runId) {
+        this.runId = runId;
+    }
+
+    public String getHypothesisId() {
+        return hypothesisId;
+    }
+
+    public void setHypothesisId(String hypothesisId) {
+        this.hypothesisId = hypothesisId;
     }
 }

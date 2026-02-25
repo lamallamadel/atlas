@@ -21,9 +21,6 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import org.hibernate.Session;
 
 import java.time.LocalDateTime;
@@ -78,16 +75,6 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         TenantContext.clear();
         TenantContext.setOrgId(TENANT_1);
 
-        // #region agent log
-        debugNdjson(
-                "run1",
-                "H4",
-                "WhatsAppProviderIntegrationTest.setUp:before-clean",
-                "Session window count before cleanup",
-                Map.of(
-                        "tenant", TENANT_1,
-                        "sessionWindowCount", sessionWindowRepository.count()));
-        // #endregion
         outboundAttemptRepository.deleteAll();
         outboundMessageRepository.deleteAll();
         Session session = entityManager.unwrap(Session.class);
@@ -100,16 +87,6 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         dossierRepository.deleteAll();
         whatsAppProviderConfigRepository.deleteAll();
 
-        // #region agent log
-        debugNdjson(
-                "run1",
-                "H4",
-                "WhatsAppProviderIntegrationTest.setUp:after-clean",
-                "Session window count after cleanup",
-                Map.of(
-                        "tenant", TENANT_1,
-                        "sessionWindowCount", sessionWindowRepository.count()));
-        // #endregion
         createWhatsAppProviderConfig();
     }
 
@@ -541,17 +518,6 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         dossier.setUpdatedAt(LocalDateTime.now());
         dossier = dossierRepository.save(dossier);
 
-        // #region agent log
-        debugNdjson(
-                "run1",
-                "H4",
-                "WhatsAppProviderIntegrationTest.createOutboundMessage:before-window-insert",
-                "Checking existing session window before insert",
-                Map.of(
-                        "tenant", TENANT_1,
-                        "phone", TEST_PHONE,
-                        "existingSessionWindowCount", sessionWindowRepository.count()));
-        // #endregion
         WhatsAppSessionWindow window = new WhatsAppSessionWindow();
         window.setOrgId(TENANT_1);
         window.setPhoneNumber(TEST_PHONE);
@@ -608,27 +574,5 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         message.setPayloadJson(payload);
 
         return outboundMessageRepository.save(message);
-    }
-
-    private void debugNdjson(
-            String runId, String hypothesisId, String location, String message, Map<String, Object> data) {
-        try {
-            String payload =
-                    objectMapper.writeValueAsString(
-                            Map.of(
-                                    "sessionId", "12ec52",
-                                    "runId", runId,
-                                    "hypothesisId", hypothesisId,
-                                    "location", location,
-                                    "message", message,
-                                    "data", data,
-                                    "timestamp", System.currentTimeMillis()));
-            Files.writeString(
-                    Path.of("c:\\Users\\PRO\\work\\immo\\debug-12ec52.log"),
-                    payload + System.lineSeparator(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
-        } catch (Exception ignore) {
-        }
     }
 }

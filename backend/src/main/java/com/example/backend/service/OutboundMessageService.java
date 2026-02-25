@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -107,6 +108,11 @@ public class OutboundMessageService {
         message.setIdempotencyKey(idempotencyKey);
         message.setAttemptCount(0);
         message.setMaxAttempts(5);
+
+        // Capture MDC context for propagation to async workers
+        message.setSessionId(MDC.get("sessionId"));
+        message.setRunId(MDC.get("runId"));
+        message.setHypothesisId(MDC.get("hypothesisId"));
 
         LocalDateTime now = LocalDateTime.now();
         message.setCreatedAt(now);

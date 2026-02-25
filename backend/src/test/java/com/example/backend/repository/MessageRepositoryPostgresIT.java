@@ -10,9 +10,6 @@ import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.MessageDirection;
 import jakarta.persistence.EntityManager;
 import jakarta.validation.ConstraintViolationException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.AfterEach;
@@ -46,26 +43,6 @@ import org.springframework.test.context.ActiveProfiles;
 class MessageRepositoryPostgresIT {
 
     private static final Logger log = LoggerFactory.getLogger(MessageRepositoryPostgresIT.class);
-    static {
-        // #region agent log
-        debugNdjsonStatic(
-                "run1",
-                "H5",
-                "MessageRepositoryPostgresIT.static",
-                "Class loaded with environment",
-                "{"
-                        + "\"springProfilesActive\":\""
-                        + safe(System.getProperty("spring.profiles.active"))
-                        + "\","
-                        + "\"testDatabase\":\""
-                        + safe(System.getProperty("test.database"))
-                        + "\","
-                        + "\"dockerHost\":\""
-                        + safe(System.getenv("DOCKER_HOST"))
-                        + "\""
-                        + "}");
-        // #endregion
-    }
 
     @Autowired private MessageRepository messageRepository;
 
@@ -80,21 +57,6 @@ class MessageRepositoryPostgresIT {
 
     @BeforeEach
     void setUp() {
-        // #region agent log
-        debugNdjsonStatic(
-                "run1",
-                "H5",
-                "MessageRepositoryPostgresIT.setUp:start",
-                "BeforeEach entered",
-                "{"
-                        + "\"springProfilesActive\":\""
-                        + safe(System.getProperty("spring.profiles.active"))
-                        + "\","
-                        + "\"testDatabase\":\""
-                        + safe(System.getProperty("test.database"))
-                        + "\""
-                        + "}");
-        // #endregion
         log.info("╔════════════════════════════════════════════════════════════════════════════╗");
         log.info("║ Test Setup: Creating Test Data                                             ║");
         log.info("╚════════════════════════════════════════════════════════════════════════════╝");
@@ -713,44 +675,5 @@ class MessageRepositoryPostgresIT {
 
         // Log full stack trace for debugging
         log.error("Full stack trace:", e);
-    }
-
-    private static void debugNdjsonStatic(
-            String runId, String hypothesisId, String location, String message, String dataJson) {
-        try {
-            String line =
-                    "{"
-                            + "\"sessionId\":\"12ec52\","
-                            + "\"runId\":\""
-                            + safe(runId)
-                            + "\","
-                            + "\"hypothesisId\":\""
-                            + safe(hypothesisId)
-                            + "\","
-                            + "\"location\":\""
-                            + safe(location)
-                            + "\","
-                            + "\"message\":\""
-                            + safe(message)
-                            + "\","
-                            + "\"data\":"
-                            + dataJson
-                            + ",\"timestamp\":"
-                            + System.currentTimeMillis()
-                            + "}";
-            Files.writeString(
-                    Path.of("c:\\Users\\PRO\\work\\immo\\debug-12ec52.log"),
-                    line + System.lineSeparator(),
-                    StandardOpenOption.CREATE,
-                    StandardOpenOption.APPEND);
-        } catch (Exception ignore) {
-        }
-    }
-
-    private static String safe(String value) {
-        if (value == null) {
-            return "";
-        }
-        return value.replace("\\", "\\\\").replace("\"", "\\\"");
     }
 }
