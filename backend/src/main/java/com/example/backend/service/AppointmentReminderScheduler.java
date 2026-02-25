@@ -1,7 +1,6 @@
 package com.example.backend.service;
 
 import com.example.backend.entity.AppointmentEntity;
-import com.example.backend.entity.PartiePrenante;
 import com.example.backend.entity.enums.AppointmentStatus;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.AppointmentRepository;
@@ -78,13 +77,16 @@ public class AppointmentReminderScheduler {
     }
 
     private void sendReminder(AppointmentEntity appointment) {
-        if (appointment.getDossier() == null || appointment.getDossier().getPartiePrenante() == null) {
-            logger.warn("Appointment {} has no dossier or partie prenante. Skipping reminder.", appointment.getId());
+        if (appointment.getDossier() == null) {
+            logger.warn("Appointment {} has no dossier. Skipping reminder.", appointment.getId());
             return;
         }
 
-        PartiePrenante client = appointment.getDossier().getPartiePrenante();
-        String clientName = client.getFirstName() != null ? client.getFirstName() : "Client";
+        String clientName = appointment.getDossier().getLeadName();
+        if (clientName == null || clientName.trim().isEmpty()) {
+            clientName = "Client";
+        }
+
         String agentName = appointment.getAssignedTo() != null ? appointment.getAssignedTo() : "votre conseiller";
         String location = appointment.getLocation() != null ? appointment.getLocation() : "notre agence";
 
@@ -95,10 +97,10 @@ public class AppointmentReminderScheduler {
                 "Bonjour %s, nous vous rappelons votre rendez-vous prévu le %s à %s pour la visite %s. Votre agent %s sera sur place.",
                 clientName, dateStr, timeStr, location, agentName);
 
-        String phoneNumber = client.getPhone();
+        String phoneNumber = appointment.getDossier().getLeadPhone();
         if (phoneNumber == null || phoneNumber.trim().isEmpty()) {
-            logger.warn("Client {} has no phone number. Skipping WhatsApp reminder for appointment {}.", clientName,
-                    appointment.getId());
+            logger.warn("Dossier {} has no lead phone number. Skipping WhatsApp reminder for appointment {}.",
+                    appointment.getDossier().getId(), appointment.getId());
             return;
         }
 
@@ -106,14 +108,17 @@ public class AppointmentReminderScheduler {
 
         // Queue message via existing outbound infra (which handles consent, retry, rate
         // limit)
-        outboundMessageService.queueMessage(
+        java.util.Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("body", messageContent);
+
+        outboundMessageService.createOutboundMessage(
                 appointment.getDossier().getId(),
-                appointment.getOrgId(),
                 MessageChannel.WHATSAPP,
                 phoneNumber,
-                messageContent,
-                "appointment_reminder",
-                null // reference
+                null, // templateCode is null for our custom internal freeform template
+                "Rappel de rendez-vous", // subject
+                payload,
+                "appointment_reminder_" + appointment.getId() // idempotencyKey
         );
 
         // Update the flag to avoid duplicate reminders
