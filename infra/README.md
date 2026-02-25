@@ -34,6 +34,35 @@ docker compose up -d
 docker compose ps
 ```
 
+
+## Local LLM via Modular MAX (OpenAI-compatible)
+
+Cette stack inclut un service **Modular MAX** (profil Compose `ai`) pour exposer une API compatible OpenAI sur :
+
+- `http://localhost:${MODULAR_MAX_PORT:-8008}/v1/chat/completions`
+
+### Démarrage
+
+```bash
+cd infra
+cp .env.example .env
+docker compose --profile ai up -d modular-max agent-service
+```
+
+### Vérification API compatible OpenAI
+
+```bash
+curl http://localhost:8008/v1/chat/completions \
+  -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer local-dev-key' \
+  -d '{
+    "model": "Llama-3.1-8B-Instruct-GGUF",
+    "messages": [{"role":"user","content":"Dis bonjour en français"}]
+  }'
+```
+
+`agent-service` est configuré pour utiliser cette API via `OPENAI_BASE_URL=http://modular-max:8000/v1`, ce qui garde la compatibilité avec les clients OpenAI existants.
+
 ## URLs et ports (par défaut — local)
 
 - Backend API: http://localhost:8080

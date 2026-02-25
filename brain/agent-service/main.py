@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     openai_api_key: str = ""
     openai_enabled: bool = False
     openai_model: str = "gpt-4o-mini"
+    openai_base_url: str | None = None
     
     class Config:
         env_file = ".env"
@@ -123,7 +124,8 @@ Réponds UNIQUEMENT avec ce JSON valide:
 
 async def process_with_openai(query: str, context: str | None = None) -> AgentResponse:
     from openai import AsyncOpenAI
-    client = AsyncOpenAI(api_key=settings.openai_api_key)
+    api_key = settings.openai_api_key or "local-dev-key"
+    client = AsyncOpenAI(api_key=api_key, base_url=settings.openai_base_url)
     
     context_instruction = f"\n\nCONTEXTE IMMOBILIER (RAG):\n{context}\nUtilise ce contexte pour répondre à la question." if context else ""
     
@@ -205,7 +207,7 @@ async def process(req: AgentRequest, _: str = Depends(verify_api_key)):
     if rule_result.confidence >= 0.8:
         result = rule_result
     # 2. OpenAI si activé
-    elif settings.openai_enabled and settings.openai_api_key:
+    elif settings.openai_enabled:
         result = await process_with_openai(req.query, req.context)
     # 3. Ollama si configuré et activé
     elif settings.ollama_enabled:

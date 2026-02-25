@@ -326,6 +326,10 @@ services:
       API_KEY: ${BRAIN_API_KEY:-change-me-in-production}
       OLLAMA_URL: ${OLLAMA_URL:-http://ollama:11434}
       OLLAMA_ENABLED: ${OLLAMA_ENABLED:-false}
+      OPENAI_ENABLED: ${OPENAI_ENABLED:-true}
+      OPENAI_BASE_URL: ${OPENAI_BASE_URL:-http://modular-max:8000/v1}
+      OPENAI_MODEL: ${OPENAI_MODEL:-Llama-3.1-8B-Instruct-GGUF}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-local-dev-key}
     healthcheck:
       test: [ "CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')" ]
       interval: 30s
@@ -349,6 +353,20 @@ services:
       timeout: 10s
       retries: 3
       start_period: 15s
+
+  modular-max:
+    image: modular/max-openai-api:latest
+    container_name: modular-max
+    restart: unless-stopped
+    ports:
+      - "${MODULAR_MAX_PORT:-8008}:8000"
+    environment:
+      MAX_MODEL: ${MAX_MODEL:-modularai/Llama-3.1-8B-Instruct-GGUF}
+      MAX_THREADS: ${MAX_THREADS:-4}
+      MAX_CONTEXT_LENGTH: ${MAX_CONTEXT_LENGTH:-8192}
+    volumes:
+      - max_models:/root/.cache/modular
+    profiles: [ "ai" ]
 
   ollama:
     image: ollama/ollama:latest
@@ -392,3 +410,5 @@ volumes:
     name: grafana_data
   ollama_data:
     name: ollama_data
+  max_models:
+    name: max_models
