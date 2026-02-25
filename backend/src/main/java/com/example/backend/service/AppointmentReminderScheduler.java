@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.AppointmentRepository;
 import java.time.LocalDateTime;
@@ -118,7 +119,8 @@ public class AppointmentReminderScheduler {
                 null, // templateCode is null for our custom internal freeform template
                 "Rappel de rendez-vous", // subject
                 payload,
-                "appointment_reminder_" + appointment.getId() // idempotencyKey
+                "appointment_reminder_" + appointment.getId(), // idempotencyKey
+                ConsentementType.TRANSACTIONNEL // appointment reminders are transactional, not marketing
         );
 
         // Update the flag to avoid duplicate reminders

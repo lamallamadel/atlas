@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.entity.ClientAuthToken;
 import com.example.backend.entity.Dossier;
+import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.repository.ClientAuthTokenRepository;
 import com.example.backend.repository.DossierRepository;
 import io.jsonwebtoken.Jwts;
@@ -101,7 +102,8 @@ public class MagicLinkAuthService {
                     "MAGIC_LINK",
                     "Accès à votre portail client",
                     payloadJson,
-                    "magic-link-" + dossier.getId() + "-" + System.currentTimeMillis());
+                    "magic-link-" + dossier.getId() + "-" + System.currentTimeMillis(),
+                    ConsentementType.TRANSACTIONNEL);
         } else if ("WHATSAPP".equalsIgnoreCase(channel) && dossier.getLeadPhone() != null) {
             outboundMessageService.createOutboundMessage(
                     dossier.getId(),
@@ -110,7 +112,8 @@ public class MagicLinkAuthService {
                     "MAGIC_LINK",
                     null,
                     payloadJson,
-                    "magic-link-" + dossier.getId() + "-" + System.currentTimeMillis());
+                    "magic-link-" + dossier.getId() + "-" + System.currentTimeMillis(),
+                    ConsentementType.TRANSACTIONNEL);
         } else if ("SMS".equalsIgnoreCase(channel) && dossier.getLeadPhone() != null) {
             outboundMessageService.createOutboundMessage(
                     dossier.getId(),
@@ -119,7 +122,8 @@ public class MagicLinkAuthService {
                     "MAGIC_LINK",
                     null,
                     payloadJson,
-                    "magic-link-" + dossier.getId() + "-" + System.currentTimeMillis());
+                    "magic-link-" + dossier.getId() + "-" + System.currentTimeMillis(),
+                    ConsentementType.TRANSACTIONNEL);
         }
     }
 
