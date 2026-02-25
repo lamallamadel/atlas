@@ -1,103 +1,118 @@
 package com.example.backend.controller;
 
-import com.example.backend.dto.WhatsAppWebhookPayload;
-import com.example.backend.service.WhatsAppMessageProcessingService;
-import com.example.backend.service.WhatsAppWebhookSignatureValidator;
+import com.example.backend.service.ConversationStateManager;
 import com.example.backend.util.TenantContext;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/webhooks/whatsapp")
-@Tag(name = "WhatsApp Webhooks", description = "API for receiving WhatsApp webhook events")
+@RequestMapping("/api/webhooks/whatsapp")
 public class WhatsAppWebhookController {
 
     private static final Logger log = LoggerFactory.getLogger(WhatsAppWebhookController.class);
 
-    private final WhatsAppMessageProcessingService processingService;
-    private final WhatsAppWebhookSignatureValidator signatureValidator;
-    private final ObjectMapper objectMapper;
+    private final ConversationStateManager conversationStateManager;
 
-    public WhatsAppWebhookController(
-            WhatsAppMessageProcessingService processingService,
-            WhatsAppWebhookSignatureValidator signatureValidator,
-            ObjectMapper objectMapper) {
-        this.processingService = processingService;
-        this.signatureValidator = signatureValidator;
-        this.objectMapper = objectMapper;
+    public WhatsAppWebhookController(ConversationStateManager conversationStateManager) {
+        this.conversationStateManager = conversationStateManager;
     }
 
-    @GetMapping("/inbound")
-    @Operation(
-            summary = "Webhook verification",
-            description = "Handles WhatsApp webhook verification challenge")
+    @GetMapping
     public ResponseEntity<String> verifyWebhook(
-            @Parameter(description = "Verification mode")
-                    @RequestParam(value = "hub.mode", required = false)
-                    String mode,
-            @Parameter(description = "Verification token")
-                    @RequestParam(value = "hub.verify_token", required = false)
-                    String token,
-            @Parameter(description = "Challenge to echo back")
-                    @RequestParam(value = "hub.challenge", required = false)
-                    String challenge) {
+            @RequestParam("hub.mode") String mode,
+            @RequestParam("hub.verify_token") String token,
+            @RequestParam("hub.challenge") String challenge) {
+        
+        log.info("WhatsApp webhook verification request received");
 
-        if ("subscribe".equals(mode) && token != null) {
-            log.info("Webhook verification requested with token: {}", token);
+        if ("subscribe".equals(mode) && "your_verify_token".equals(token)) {
+            log.info("Webhook verified successfully");
             return ResponseEntity.ok(challenge);
         }
 
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Verification failed");
+        log.warn("Webhook verification failed");
+        return ResponseEntity.status(403).body("Verification failed");
     }
 
-    @PostMapping("/inbound")
-    @Operation(
-            summary = "Receive inbound WhatsApp messages and delivery status",
-            description =
-                    "Handles incoming WhatsApp webhook events including messages and delivery status updates with HMAC signature validation")
-    public ResponseEntity<String> receiveWebhook(
-            @RequestHeader(value = "X-Org-Id", required = false) String orgIdHeader,
-            @RequestHeader(value = "X-Hub-Signature-256", required = false) String signature,
-            @RequestBody String rawPayload) {
-
-        String orgId =
-                (orgIdHeader != null && !orgIdHeader.isBlank())
-                        ? orgIdHeader
-                        : TenantContext.getOrgId();
-
-        if (orgId == null || orgId.isBlank()) {
-            log.error("Organization ID not found for webhook call");
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Missing organization context");
-        }
+    @PostMapping
+    public ResponseEntity<Void> receiveWebhook(@RequestBody Map<String, Object> payload) {
+        log.info("WhatsApp webhook received: {}", payload);
 
         try {
-            TenantContext.setOrgId(orgId);
+            processWebhookPayload(payload);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            log.error("Error processing WhatsApp webhook", e);
+            return ResponseEntity.status(500).build();
+        }
+    }
 
-            if (signature != null && !signature.isBlank()) {
-                if (!signatureValidator.validateSignature(rawPayload, signature, orgId)) {
-                    log.warn("Invalid signature for webhook from org: {}", orgId);
-                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid signature");
+    private void processWebhookPayload(Map<String, Object> payload) {
+        if (payload.get("entry") instanceof java.util.List<?> entries) {
+            for (Object entryObj : entries) {
+                if (entryObj instanceof Map<?, ?> entry) {
+                    processEntry((Map<String, Object>) entry);
                 }
             }
+        }
+    }
 
-            WhatsAppWebhookPayload payload =
-                    objectMapper.readValue(rawPayload, WhatsAppWebhookPayload.class);
-            processingService.processInboundMessage(payload, orgId);
+    @SuppressWarnings("unchecked")
+    private void processEntry(Map<String, Object> entry) {
+        if (entry.get("changes") instanceof java.util.List<?> changes) {
+            for (Object changeObj : changes) {
+                if (changeObj instanceof Map<?, ?> change) {
+                    Map<String, Object> value = (Map<String, Object>) ((Map<?, ?>) change).get("value");
+                    if (value != null) {
+                        processValue(value);
+                    }
+                }
+            }
+        }
+    }
 
-            return ResponseEntity.ok("OK");
+    @SuppressWarnings("unchecked")
+    private void processValue(Map<String, Object> value) {
+        if (value.get("messages") instanceof java.util.List<?> messages) {
+            for (Object messageObj : messages) {
+                if (messageObj instanceof Map<?, ?> message) {
+                    processMessage((Map<String, Object>) message);
+                }
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private void processMessage(Map<String, Object> message) {
+        String from = (String) message.get("from");
+        String messageId = (String) message.get("id");
+        String type = (String) message.get("type");
+
+        if ("text".equals(type) && message.get("text") instanceof Map<?, ?> textObj) {
+            Map<String, Object> text = (Map<String, Object>) textObj;
+            String body = (String) text.get("body");
+
+            if (body != null && from != null) {
+                String orgId = extractOrgIdFromContext();
+                if (orgId != null) {
+                    conversationStateManager.processInboundMessage(orgId, from, body, messageId);
+                } else {
+                    log.warn("Could not extract orgId from webhook, using default");
+                    conversationStateManager.processInboundMessage("default", from, body, messageId);
+                }
+            }
+        }
+    }
+
+    private String extractOrgIdFromContext() {
+        try {
+            return TenantContext.getOrgId();
         } catch (Exception e) {
-            log.error("Error processing WhatsApp webhook for org {}: {}", orgId, e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Processing error");
-        } finally {
-            TenantContext.clear();
+            log.debug("Could not extract orgId from TenantContext", e);
+            return null;
         }
     }
 }

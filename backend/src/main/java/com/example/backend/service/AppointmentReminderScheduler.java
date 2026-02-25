@@ -35,6 +35,7 @@ public class AppointmentReminderScheduler {
     private final OutboundMessageService outboundMessageService;
     private final ActivityService activityService;
     private final TemplateInterpolationService templateInterpolationService;
+    private final ConversationStateManager conversationStateManager;
 
     @Value("${appointment.reminder.enabled:true}")
     private boolean remindersEnabled;
@@ -46,11 +47,13 @@ public class AppointmentReminderScheduler {
             AppointmentRepository appointmentRepository,
             OutboundMessageService outboundMessageService,
             ActivityService activityService,
-            TemplateInterpolationService templateInterpolationService) {
+            TemplateInterpolationService templateInterpolationService,
+            ConversationStateManager conversationStateManager) {
         this.appointmentRepository = appointmentRepository;
         this.outboundMessageService = outboundMessageService;
         this.activityService = activityService;
         this.templateInterpolationService = templateInterpolationService;
+        this.conversationStateManager = conversationStateManager;
     }
 
     @Scheduled(cron = "${appointment.reminder.cron:0 0/15 * * * ?}")
@@ -145,6 +148,10 @@ public class AppointmentReminderScheduler {
 
                 logger.info("Successfully queued reminder for appointment {} via {} to {}", 
                         appointment.getId(), channel, recipientContact);
+                
+                if (channel == MessageChannel.WHATSAPP) {
+                    initializeConversationForReminder(appointment, recipientContact);
+                }
                 
                 reminderSent = true;
                 logSuccessfulReminder(appointment, channel, attemptedChannels, failureReasons);
@@ -347,6 +354,26 @@ public class AppointmentReminderScheduler {
         } catch (Exception e) {
             logger.warn("Failed to log all-channels-failed event for appointment {}: {}", 
                     appointment.getId(), e.getMessage());
+        }
+    }
+
+    private void initializeConversationForReminder(AppointmentEntity appointment, String phoneNumber) {
+        try {
+            String orgId = appointment.getOrgId();
+            Long dossierId = appointment.getDossier() != null ? appointment.getDossier().getId() : null;
+            
+            conversationStateManager.initializeConversation(
+                    orgId, 
+                    phoneNumber, 
+                    appointment.getId(), 
+                    dossierId
+            );
+            
+            logger.info("Initialized conversation flow for appointment {} with phone {}", 
+                    appointment.getId(), phoneNumber);
+        } catch (Exception e) {
+            logger.error("Failed to initialize conversation for appointment {}: {}", 
+                    appointment.getId(), e.getMessage(), e);
         }
     }
 }
