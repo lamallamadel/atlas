@@ -20,6 +20,8 @@ public class AppointmentResponse {
     private String createdBy;
     private String updatedBy;
     private List<String> warnings;
+    private List<String> reminderChannels;
+    private String templateCode;
 
     public AppointmentResponse() {}
 
@@ -133,5 +135,21 @@ public class AppointmentResponse {
 
     public void setWarnings(List<String> warnings) {
         this.warnings = warnings;
+    }
+
+    public List<String> getReminderChannels() {
+        return reminderChannels;
+    }
+
+    public void setReminderChannels(List<String> reminderChannels) {
+        this.reminderChannels = reminderChannels;
+    }
+
+    public String getTemplateCode() {
+        return templateCode;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
     }
 }

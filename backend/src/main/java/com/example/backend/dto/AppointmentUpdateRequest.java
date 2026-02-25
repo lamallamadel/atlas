@@ -4,6 +4,7 @@ import com.example.backend.entity.enums.AppointmentStatus;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class AppointmentUpdateRequest {
 
@@ -21,6 +22,11 @@ public class AppointmentUpdateRequest {
     private String notes;
 
     private AppointmentStatus status;
+
+    private List<String> reminderChannels;
+
+    @Size(max = 255, message = "Template code must not exceed 255 characters")
+    private String templateCode;
 
     public AppointmentUpdateRequest() {}
 
@@ -78,5 +84,21 @@ public class AppointmentUpdateRequest {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public List<String> getReminderChannels() {
+        return reminderChannels;
+    }
+
+    public void setReminderChannels(List<String> reminderChannels) {
+        this.reminderChannels = reminderChannels;
+    }
+
+    public String getTemplateCode() {
+        return templateCode;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
     }
 }

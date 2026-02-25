@@ -48,6 +48,8 @@ public class AppointmentMapper {
         appointment.setNotes(request.getNotes());
         appointment.setStatus(
                 request.getStatus() != null ? request.getStatus() : AppointmentStatus.SCHEDULED);
+        appointment.setReminderChannels(request.getReminderChannels());
+        appointment.setTemplateCode(request.getTemplateCode());
 
         return appointment;
     }
@@ -71,6 +73,12 @@ public class AppointmentMapper {
         if (request.getStatus() != null) {
             appointment.setStatus(request.getStatus());
         }
+        if (request.getReminderChannels() != null) {
+            appointment.setReminderChannels(request.getReminderChannels());
+        }
+        if (request.getTemplateCode() != null) {
+            appointment.setTemplateCode(request.getTemplateCode());
+        }
     }
 
     public AppointmentResponse toResponse(AppointmentEntity appointment) {
@@ -89,6 +97,8 @@ public class AppointmentMapper {
         response.setUpdatedAt(appointment.getUpdatedAt());
         response.setCreatedBy(appointment.getCreatedBy());
         response.setUpdatedBy(appointment.getUpdatedBy());
+        response.setReminderChannels(appointment.getReminderChannels());
+        response.setTemplateCode(appointment.getTemplateCode());
         return response;
     }
 }

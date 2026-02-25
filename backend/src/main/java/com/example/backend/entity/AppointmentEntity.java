@@ -3,7 +3,10 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.AppointmentStatus;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.annotation.CreatedBy;
 import org.springframework.data.annotation.LastModifiedBy;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -44,6 +47,13 @@ public class AppointmentEntity extends BaseEntity {
 
     @Column(name = "reminder_sent", nullable = false)
     private Boolean reminderSent = false;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "reminder_channels", columnDefinition = "jsonb")
+    private List<String> reminderChannels;
+
+    @Column(name = "template_code", length = 255)
+    private String templateCode;
 
     @CreatedBy
     @Column(name = "created_by", length = 255)
@@ -139,5 +149,21 @@ public class AppointmentEntity extends BaseEntity {
 
     public void setReminderSent(Boolean reminderSent) {
         this.reminderSent = reminderSent;
+    }
+
+    public List<String> getReminderChannels() {
+        return reminderChannels;
+    }
+
+    public void setReminderChannels(List<String> reminderChannels) {
+        this.reminderChannels = reminderChannels;
+    }
+
+    public String getTemplateCode() {
+        return templateCode;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
     }
 }
