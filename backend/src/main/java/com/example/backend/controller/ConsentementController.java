@@ -168,4 +168,37 @@ public class ConsentementController {
             return ResponseEntity.ok(response);
         }
     }
+
+    @PostMapping("/{id:\\d+}/renew")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Renew consent",
+            description =
+                    "Renews a consent by updating its expiration date (expires_at) to 1 year from now. Logs a CONSENT_RENEWED activity event with previous and new expiration timestamps.")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Consent renewed successfully",
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                ConsentementResponse.class))),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Consent not found",
+                        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public ResponseEntity<ConsentementResponse> renew(
+            @Parameter(description = "ID of the consent to renew", required = true) @PathVariable
+                    Long id) {
+        try {
+            ConsentementResponse response = consentementService.renew(id);
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }

@@ -9,5 +9,6 @@ public enum ActivityType {
     MESSAGE_SENT,
     MESSAGE_FAILED,
     CONSENT_GRANTED,
-    CONSENT_REVOKED
+    CONSENT_REVOKED,
+    CONSENT_RENEWED
 }

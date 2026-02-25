@@ -8,11 +8,14 @@ import com.example.backend.entity.ConsentementEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
+import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,20 +34,26 @@ public class ConsentementService {
 
     private static final Logger logger = LoggerFactory.getLogger(ConsentementService.class);
 
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
     private final ConsentementRepository consentementRepository;
     private final DossierRepository dossierRepository;
     private final ConsentementMapper consentementMapper;
     private final ActivityService activityService;
+    private final OutboundMessageService outboundMessageService;
 
     public ConsentementService(
             ConsentementRepository consentementRepository,
             DossierRepository dossierRepository,
             ConsentementMapper consentementMapper,
-            ActivityService activityService) {
+            ActivityService activityService,
+            OutboundMessageService outboundMessageService) {
         this.consentementRepository = consentementRepository;
         this.dossierRepository = dossierRepository;
         this.consentementMapper = consentementMapper;
         this.activityService = activityService;
+        this.outboundMessageService = outboundMessageService;
     }
 
     @Transactional
@@ -327,5 +336,206 @@ public class ConsentementService {
                         e);
             }
         }
+    }
+
+    @Transactional
+    public ConsentementResponse renew(Long id) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        ConsentementEntity consentement =
+                consentementRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Consentement not found with id: " + id));
+
+        if (!orgId.equals(consentement.getOrgId())) {
+            throw new EntityNotFoundException("Consentement not found with id: " + id);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime newExpiresAt = now.plusYears(1);
+
+        LocalDateTime oldExpiresAt = consentement.getExpiresAt();
+        consentement.setExpiresAt(newExpiresAt);
+        consentement.setUpdatedAt(now);
+
+        Map<String, Object> meta =
+                consentement.getMeta() != null
+                        ? new HashMap<>(consentement.getMeta())
+                        : new HashMap<>();
+        meta.put("previousExpiresAt", oldExpiresAt != null ? oldExpiresAt.toString() : null);
+        meta.put("renewedAt", now.toString());
+        meta.put("renewedBy", orgId);
+        consentement.setMeta(meta);
+
+        ConsentementEntity updated = consentementRepository.save(consentement);
+
+        logConsentRenewedActivity(updated, oldExpiresAt);
+
+        return consentementMapper.toResponse(updated);
+    }
+
+    private void logConsentRenewedActivity(
+            ConsentementEntity consentement, LocalDateTime oldExpiresAt) {
+        if (activityService != null && consentement.getDossier() != null) {
+            try {
+                String description =
+                        String.format(
+                                "Consent renewed for %s via %s until %s",
+                                consentement.getConsentType(),
+                                consentement.getChannel(),
+                                consentement.getExpiresAt() != null
+                                        ? consentement.getExpiresAt().format(DATE_FORMATTER)
+                                        : "no expiration");
+
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("consentementId", consentement.getId());
+                metadata.put("channel", consentement.getChannel().name());
+                metadata.put("consentType", consentement.getConsentType().name());
+                metadata.put("status", consentement.getStatus().name());
+                metadata.put(
+                        "previousExpiresAt",
+                        oldExpiresAt != null ? oldExpiresAt.toString() : null);
+                metadata.put(
+                        "newExpiresAt",
+                        consentement.getExpiresAt() != null
+                                ? consentement.getExpiresAt().toString()
+                                : null);
+                if (consentement.getMeta() != null) {
+                    metadata.put("consentMeta", consentement.getMeta());
+                }
+                metadata.put("timestamp", LocalDateTime.now().toString());
+
+                activityService.logActivity(
+                        consentement.getDossier().getId(),
+                        ActivityType.CONSENT_RENEWED,
+                        description,
+                        metadata);
+            } catch (Exception e) {
+                logger.warn(
+                        "Failed to log CONSENT_RENEWED activity for consentement {}: {}",
+                        consentement.getId(),
+                        e.getMessage(),
+                        e);
+            }
+        }
+    }
+
+    public void sendExpirationReminder(ConsentementEntity consent) {
+        if (consent.getDossier() == null) {
+            logger.warn("Consent {} has no dossier. Skipping reminder.", consent.getId());
+            return;
+        }
+
+        if (consent.getExpiresAt() == null) {
+            logger.warn(
+                    "Consent {} has no expiration date. Skipping reminder.", consent.getId());
+            return;
+        }
+
+        Dossier dossier = consent.getDossier();
+        String clientName = dossier.getLeadName();
+        if (clientName == null || clientName.trim().isEmpty()) {
+            clientName = "Client";
+        }
+
+        String expiryDate = consent.getExpiresAt().format(DATE_FORMATTER);
+        String consentTypeLabel = getConsentTypeLabel(consent.getConsentType());
+        String channelLabel = getChannelLabel(consent.getChannel());
+
+        String messageContent =
+                String.format(
+                        "Bonjour %s, votre consentement pour %s via %s expire le %s. Veuillez le renouveler pour continuer à recevoir nos communications.",
+                        clientName, consentTypeLabel, channelLabel, expiryDate);
+
+        String recipientContact = getRecipientContact(dossier, consent);
+        if (recipientContact == null || recipientContact.trim().isEmpty()) {
+            logger.warn(
+                    "Dossier {} has no contact for channel {}. Skipping reminder for consent {}.",
+                    dossier.getId(),
+                    consent.getChannel(),
+                    consent.getId());
+            return;
+        }
+
+        MessageChannel messageChannel = mapConsentChannelToMessageChannel(consent.getChannel());
+
+        logger.info(
+                "Sending expiration reminder for consent {} to {} via {}",
+                consent.getId(),
+                recipientContact,
+                messageChannel);
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("body", messageContent);
+
+        try {
+            outboundMessageService.createOutboundMessage(
+                    dossier.getId(),
+                    messageChannel,
+                    recipientContact,
+                    null,
+                    "Rappel d'expiration de consentement",
+                    payload,
+                    "consent_expiration_reminder_" + consent.getId(),
+                    ConsentementType.MARKETING);
+
+            logger.info("Expiration reminder queued for consent {}", consent.getId());
+        } catch (Exception e) {
+            logger.error(
+                    "Failed to queue expiration reminder for consent {}: {}",
+                    consent.getId(),
+                    e.getMessage(),
+                    e);
+        }
+    }
+
+    private String getConsentTypeLabel(ConsentementType type) {
+        return switch (type) {
+            case MARKETING -> "communications marketing";
+            case TRANSACTIONNEL -> "communications transactionnelles";
+            case PROFILING -> "profilage";
+            case GESTIONNEL -> "communications de gestion";
+            case RECHERCHE -> "recherche";
+        };
+    }
+
+    private String getChannelLabel(
+            com.example.backend.entity.enums.ConsentementChannel channel) {
+        return switch (channel) {
+            case EMAIL -> "email";
+            case SMS -> "SMS";
+            case WHATSAPP -> "WhatsApp";
+            case PHONE -> "téléphone";
+            case POSTAL_MAIL -> "courrier postal";
+            case IN_PERSON -> "en personne";
+        };
+    }
+
+    private String getRecipientContact(
+            Dossier dossier, ConsentementEntity consent) {
+        return switch (consent.getChannel()) {
+            case EMAIL -> dossier.getLeadEmail();
+            case SMS, WHATSAPP, PHONE -> dossier.getLeadPhone();
+            case POSTAL_MAIL, IN_PERSON -> null;
+        };
+    }
+
+    private MessageChannel mapConsentChannelToMessageChannel(
+            com.example.backend.entity.enums.ConsentementChannel channel) {
+        return switch (channel) {
+            case EMAIL -> MessageChannel.EMAIL;
+            case SMS -> MessageChannel.SMS;
+            case WHATSAPP -> MessageChannel.WHATSAPP;
+            case PHONE -> MessageChannel.PHONE;
+            case POSTAL_MAIL, IN_PERSON ->
+                    throw new IllegalArgumentException(
+                            "Channel " + channel + " does not support digital messages");
+        };
     }
 }

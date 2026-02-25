@@ -231,6 +231,35 @@ public class OutboundMessageService {
                             latestConsent.getStatus(), channel, consentType));
         }
 
+        if (latestConsent.getExpiresAt() != null && latestConsent.getExpiresAt().isBefore(LocalDateTime.now())) {
+            logger.warn(
+                    "Consent expired for dossier {}, channel {}, type {}. Expired at: {}",
+                    dossierId,
+                    channel,
+                    consentType,
+                    latestConsent.getExpiresAt());
+
+            if (auditEventService != null) {
+                try {
+                    auditEventService.logEvent(
+                            "DOSSIER",
+                            dossierId,
+                            "BLOCKED_BY_POLICY",
+                            String.format(
+                                    "Outbound message blocked: consent expired on %s for channel %s, type %s",
+                                    latestConsent.getExpiresAt(), channel, consentType));
+                } catch (Exception e) {
+                    logger.warn("Failed to log audit event for blocked message", e);
+                }
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    String.format(
+                            "Consent required: Consent expired on %s for channel %s and type %s. Message blocked by policy.",
+                            latestConsent.getExpiresAt(), channel, consentType));
+        }
+
         if (consentType == ConsentementType.MARKETING) {
             validateMarketingConsentMetadata(latestConsent, dossierId, channel);
         }

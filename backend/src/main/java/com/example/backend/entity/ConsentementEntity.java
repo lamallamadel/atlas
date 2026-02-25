@@ -4,6 +4,7 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -34,6 +35,9 @@ public class ConsentementEntity extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, length = 50)
     private ConsentementStatus status;
+
+    @Column(name = "expires_at")
+    private LocalDateTime expiresAt;
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "meta_json")
@@ -85,5 +89,13 @@ public class ConsentementEntity extends BaseEntity {
 
     public void setMeta(Map<String, Object> meta) {
         this.meta = meta;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
     }
 }
