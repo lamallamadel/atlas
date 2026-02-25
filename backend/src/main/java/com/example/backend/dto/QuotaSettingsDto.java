@@ -21,10 +21,10 @@ public class QuotaSettingsDto {
     @NotBlank(message = "Rate limit tier is required")
     private String rateLimitTier;
 
-    public QuotaSettingsDto() {
-    }
+    public QuotaSettingsDto() {}
 
-    public QuotaSettingsDto(Integer maxUsers, Integer maxDossiers, Long maxStorage, String rateLimitTier) {
+    public QuotaSettingsDto(
+            Integer maxUsers, Integer maxDossiers, Long maxStorage, String rateLimitTier) {
         this.maxUsers = maxUsers;
         this.maxDossiers = maxDossiers;
         this.maxStorage = maxStorage;

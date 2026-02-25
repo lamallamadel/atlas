@@ -555,8 +555,8 @@ public class WorkflowValidationService {
         }
 
         if (!errors.isEmpty()) {
-            throw new WorkflowValidationException("Workflow structure validation failed", 
-                    Map.of("errors", errors));
+            throw new WorkflowValidationException(
+                    "Workflow structure validation failed", Map.of("errors", errors));
         }
     }
 }

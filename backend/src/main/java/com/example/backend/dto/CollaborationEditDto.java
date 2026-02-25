@@ -15,10 +15,16 @@ public class CollaborationEditDto {
     private Instant timestamp;
     private Map<String, Object> metadata;
 
-    public CollaborationEditDto() {
-    }
+    public CollaborationEditDto() {}
 
-    public CollaborationEditDto(String userId, String username, Long dossierId, String fieldName, Object newValue, Object oldValue, Integer version) {
+    public CollaborationEditDto(
+            String userId,
+            String username,
+            Long dossierId,
+            String fieldName,
+            Object newValue,
+            Object oldValue,
+            Integer version) {
         this.userId = userId;
         this.username = username;
         this.dossierId = dossierId;

@@ -14,8 +14,7 @@ public class OrganizationSettingsResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public OrganizationSettingsResponse() {
-    }
+    public OrganizationSettingsResponse() {}
 
     public Long getId() {
         return id;

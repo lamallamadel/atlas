@@ -1,25 +1,22 @@
 package com.example.backend.service;
 
-import com.example.backend.service.AiAgentService;
 import com.example.backend.dto.AiAgentRequest;
 import com.example.backend.dto.AiAgentResponse;
+import com.example.backend.entity.Annonce;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
+import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import com.example.backend.entity.Annonce;
-import com.example.backend.repository.AnnonceRepository;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
-
-import java.util.Optional;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class WhatsappService {
@@ -38,7 +35,9 @@ public class WhatsappService {
     @Value("${twilio.whatsapp-number:}")
     private String twilioWhatsappNumber; // e.g. "whatsapp:+14155238886"
 
-    public WhatsappService(DossierRepository dossierRepository, AnnonceRepository annonceRepository,
+    public WhatsappService(
+            DossierRepository dossierRepository,
+            AnnonceRepository annonceRepository,
             AiAgentService aiAgentService,
             RestTemplate restTemplate) {
         this.dossierRepository = dossierRepository;
@@ -52,21 +51,26 @@ public class WhatsappService {
         String phoneExtracted = from.replace("whatsapp:", "");
 
         // Find existing dossier to fetch Context before AI analysis
-        Dossier existingDossier = dossierRepository.findByLeadPhone(phoneExtracted).stream().findFirst().orElse(null);
+        Dossier existingDossier =
+                dossierRepository.findByLeadPhone(phoneExtracted).stream().findFirst().orElse(null);
         String contextStr = null;
 
         if (existingDossier != null && existingDossier.getAnnonceId() != null) {
-            Annonce annonce = annonceRepository.findById(existingDossier.getAnnonceId()).orElse(null);
+            Annonce annonce =
+                    annonceRepository.findById(existingDossier.getAnnonceId()).orElse(null);
             if (annonce != null) {
                 // Formatting Context string based on entity metadata
-                contextStr = String.format(
-                        "CONTEXTE ANNONCE - Titre: %s | Prix: %s %s | Surface: %s m2 | Adresse: %s | Description: %s",
-                        annonce.getTitle() != null ? annonce.getTitle() : "Inconnu",
-                        annonce.getPrice() != null ? annonce.getPrice() : "Sur demande",
-                        annonce.getCurrency() != null ? annonce.getCurrency() : "",
-                        annonce.getSurface() != null ? annonce.getSurface() : "N/A",
-                        annonce.getAddress() != null ? annonce.getAddress() : "N/A",
-                        annonce.getDescription() != null ? annonce.getDescription() : "Aucune");
+                contextStr =
+                        String.format(
+                                "CONTEXTE ANNONCE - Titre: %s | Prix: %s %s | Surface: %s m2 | Adresse: %s | Description: %s",
+                                annonce.getTitle() != null ? annonce.getTitle() : "Inconnu",
+                                annonce.getPrice() != null ? annonce.getPrice() : "Sur demande",
+                                annonce.getCurrency() != null ? annonce.getCurrency() : "",
+                                annonce.getSurface() != null ? annonce.getSurface() : "N/A",
+                                annonce.getAddress() != null ? annonce.getAddress() : "N/A",
+                                annonce.getDescription() != null
+                                        ? annonce.getDescription()
+                                        : "Aucune");
             }
         }
 
@@ -84,7 +88,8 @@ public class WhatsappService {
             response = aiAgentService.process(agentRequest);
         } catch (Exception e) {
             System.err.println("Error processing WhatsApp message via Brain: " + e.getMessage());
-            sendWhatsappMessage(from,
+            sendWhatsappMessage(
+                    from,
                     "Désolé, je rencontre des difficultés techniques. Un conseiller va prendre le relais sous peu.");
             return;
         }
@@ -93,7 +98,9 @@ public class WhatsappService {
         String orgId = "agency_a_tenant"; // Default for MVP B2B Launch if not found
         Long extractedAnnonceId = null;
 
-        if (response != null && response.getIntent() != null && response.getIntent().getParams() != null) {
+        if (response != null
+                && response.getIntent() != null
+                && response.getIntent().getParams() != null) {
             Object idObj = response.getIntent().getParams().get("annonce_id");
             if (idObj != null) {
                 try {
@@ -120,9 +127,11 @@ public class WhatsappService {
     private Dossier getOrCreateDossier(String phone, String orgId, Long annonceId) {
         // Look up by phone and orgId (since the same prospect could contact multiple
         // agencies)
-        Dossier dossier = dossierRepository.findByLeadPhone(phone).stream()
-                .filter(d -> orgId.equals(d.getOrgId()))
-                .findFirst().orElse(null);
+        Dossier dossier =
+                dossierRepository.findByLeadPhone(phone).stream()
+                        .filter(d -> orgId.equals(d.getOrgId()))
+                        .findFirst()
+                        .orElse(null);
 
         if (dossier == null) {
             // Create a new prospect (Lead) since we don't know them in this agency
@@ -148,13 +157,20 @@ public class WhatsappService {
     }
 
     public void sendWhatsappMessage(String to, String messageBody) {
-        if (twilioAccountSid == null || twilioAccountSid.isEmpty() || twilioAuthToken == null
+        if (twilioAccountSid == null
+                || twilioAccountSid.isEmpty()
+                || twilioAuthToken == null
                 || twilioAuthToken.isEmpty()) {
-            System.out.println("TWILIO SECRETS MISSING! Simulating WhatsApp message to " + to + ": " + messageBody);
+            System.out.println(
+                    "TWILIO SECRETS MISSING! Simulating WhatsApp message to "
+                            + to
+                            + ": "
+                            + messageBody);
             return;
         }
 
-        String url = "https://api.twilio.com/2010-04-01/Accounts/" + twilioAccountSid + "/Messages.json";
+        String url =
+                "https://api.twilio.com/2010-04-01/Accounts/" + twilioAccountSid + "/Messages.json";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);

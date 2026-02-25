@@ -3,13 +3,12 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.DocumentWorkflowType;
 import com.example.backend.entity.enums.WorkflowStatus;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @Entity
 @Table(name = "document_workflow")

@@ -11,15 +11,14 @@ import com.example.backend.service.AutoQualificationService;
 import com.example.backend.service.LeadScoringEngine;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/lead-scoring")
@@ -34,14 +33,15 @@ public class LeadScoringConfigController {
     private final DossierMapper dossierMapper;
     private final AutoQualificationService autoQualificationService;
 
-    public LeadScoringConfigController(LeadScoringConfigRepository configRepository,
-                                      LeadScoringConfigMapper configMapper,
-                                      LeadScoringEngine scoringEngine,
-                                      LeadScoreRepository leadScoreRepository,
-                                      LeadScoreMapper leadScoreMapper,
-                                      DossierRepository dossierRepository,
-                                      DossierMapper dossierMapper,
-                                      AutoQualificationService autoQualificationService) {
+    public LeadScoringConfigController(
+            LeadScoringConfigRepository configRepository,
+            LeadScoringConfigMapper configMapper,
+            LeadScoringEngine scoringEngine,
+            LeadScoreRepository leadScoreRepository,
+            LeadScoreMapper leadScoreMapper,
+            DossierRepository dossierRepository,
+            DossierMapper dossierMapper,
+            AutoQualificationService autoQualificationService) {
         this.configRepository = configRepository;
         this.configMapper = configMapper;
         this.scoringEngine = scoringEngine;
@@ -55,9 +55,8 @@ public class LeadScoringConfigController {
     @GetMapping("/config")
     public ResponseEntity<List<LeadScoringConfigResponse>> getAllConfigs() {
         List<LeadScoringConfig> configs = configRepository.findAll();
-        List<LeadScoringConfigResponse> responses = configs.stream()
-                .map(configMapper::toResponse)
-                .collect(Collectors.toList());
+        List<LeadScoringConfigResponse> responses =
+                configs.stream().map(configMapper::toResponse).collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
 
@@ -68,9 +67,8 @@ public class LeadScoringConfigController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        LeadScoringConfig config = configRepository.findActiveConfig(orgId)
-                .orElse(null);
-        
+        LeadScoringConfig config = configRepository.findActiveConfig(orgId).orElse(null);
+
         if (config == null) {
             return ResponseEntity.notFound().build();
         }
@@ -80,13 +78,19 @@ public class LeadScoringConfigController {
 
     @GetMapping("/config/{id}")
     public ResponseEntity<LeadScoringConfigResponse> getConfig(@PathVariable Long id) {
-        LeadScoringConfig config = configRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Config not found with id: " + id));
+        LeadScoringConfig config =
+                configRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Config not found with id: " + id));
         return ResponseEntity.ok(configMapper.toResponse(config));
     }
 
     @PostMapping("/config")
-    public ResponseEntity<LeadScoringConfigResponse> createConfig(@RequestBody LeadScoringConfigRequest request) {
+    public ResponseEntity<LeadScoringConfigResponse> createConfig(
+            @RequestBody LeadScoringConfigRequest request) {
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -103,11 +107,15 @@ public class LeadScoringConfigController {
 
     @PutMapping("/config/{id}")
     public ResponseEntity<LeadScoringConfigResponse> updateConfig(
-            @PathVariable Long id,
-            @RequestBody LeadScoringConfigRequest request) {
-        
-        LeadScoringConfig config = configRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Config not found with id: " + id));
+            @PathVariable Long id, @RequestBody LeadScoringConfigRequest request) {
+
+        LeadScoringConfig config =
+                configRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Config not found with id: " + id));
 
         configMapper.updateEntity(config, request);
         config.setUpdatedAt(LocalDateTime.now());
@@ -124,8 +132,13 @@ public class LeadScoringConfigController {
 
     @PostMapping("/calculate/{dossierId}")
     public ResponseEntity<LeadScoreResponse> calculateScore(@PathVariable Long dossierId) {
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         LeadScore score = scoringEngine.calculateScore(dossier);
         return ResponseEntity.ok(leadScoreMapper.toResponse(score));
@@ -133,9 +146,8 @@ public class LeadScoringConfigController {
 
     @GetMapping("/score/{dossierId}")
     public ResponseEntity<LeadScoreResponse> getScore(@PathVariable Long dossierId) {
-        LeadScore score = leadScoreRepository.findByDossierId(dossierId)
-                .orElse(null);
-        
+        LeadScore score = leadScoreRepository.findByDossierId(dossierId).orElse(null);
+
         if (score == null) {
             return ResponseEntity.notFound().build();
         }
@@ -146,21 +158,21 @@ public class LeadScoringConfigController {
     @GetMapping("/priority-queue")
     public ResponseEntity<List<LeadPriorityResponse>> getPriorityQueue(
             @RequestParam(defaultValue = "50") int limit) {
-        
+
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        List<Dossier> highPriorityLeads = autoQualificationService.getHighPriorityLeads(orgId, limit);
-        
-        List<Long> dossierIds = highPriorityLeads.stream()
-                .map(Dossier::getId)
-                .collect(Collectors.toList());
+        List<Dossier> highPriorityLeads =
+                autoQualificationService.getHighPriorityLeads(orgId, limit);
+
+        List<Long> dossierIds =
+                highPriorityLeads.stream().map(Dossier::getId).collect(Collectors.toList());
 
         List<LeadScore> scores = leadScoreRepository.findByDossierIdIn(dossierIds);
-        Map<Long, LeadScore> scoreMap = scores.stream()
-                .collect(Collectors.toMap(LeadScore::getDossierId, s -> s));
+        Map<Long, LeadScore> scoreMap =
+                scores.stream().collect(Collectors.toMap(LeadScore::getDossierId, s -> s));
 
         LeadScoringConfig config = configRepository.findActiveConfig(orgId).orElse(null);
         int threshold = config != null ? config.getAutoQualificationThreshold() : 70;
@@ -177,10 +189,10 @@ public class LeadScoringConfigController {
             }
         }
 
-        responses.sort((a, b) -> Integer.compare(
-                b.getScore().getTotalScore(), 
-                a.getScore().getTotalScore()
-        ));
+        responses.sort(
+                (a, b) ->
+                        Integer.compare(
+                                b.getScore().getTotalScore(), a.getScore().getTotalScore()));
 
         return ResponseEntity.ok(responses);
     }
@@ -194,10 +206,8 @@ public class LeadScoringConfigController {
 
         autoQualificationService.recalculateAllScores(orgId);
 
-        return ResponseEntity.ok(Map.of(
-                "message", "Score recalculation initiated",
-                "orgId", orgId
-        ));
+        return ResponseEntity.ok(
+                Map.of("message", "Score recalculation initiated", "orgId", orgId));
     }
 
     private String determineUrgencyLevel(int score, int threshold) {

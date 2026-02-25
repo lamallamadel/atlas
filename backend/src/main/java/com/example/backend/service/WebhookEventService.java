@@ -1,25 +1,19 @@
 package com.example.backend.service;
 
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.stereotype.Service;
 
 /**
- * Service for triggering webhook events.
- * Integrate this into existing services to send webhook notifications.
- * 
- * Example integration in DossierService:
- * 
- * @Autowired
- * private WebhookEventService webhookEventService;
- * 
- * // In createDossier method:
- * public Dossier createDossier(...) {
- *     Dossier saved = dossierRepository.save(dossier);
- *     webhookEventService.triggerDossierCreated(saved);
- *     return saved;
+ * Service for triggering webhook events. Integrate this into existing services to send webhook
+ * notifications.
+ *
+ * <p>Example integration in DossierService: @Autowired private WebhookEventService
+ * webhookEventService;
+ *
+ * <p>// In createDossier method: public Dossier createDossier(...) { Dossier saved =
+ * dossierRepository.save(dossier); webhookEventService.triggerDossierCreated(saved); return saved;
  * }
  */
 @Service
@@ -38,7 +32,7 @@ public class WebhookEventService {
         payload.put("event", "dossier.created");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createDossierPayload(dossier));
-        
+
         webhookService.triggerWebhook("dossier.created", payload);
     }
 
@@ -47,7 +41,7 @@ public class WebhookEventService {
         payload.put("event", "dossier.updated");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createDossierPayload(dossier));
-        
+
         webhookService.triggerWebhook("dossier.updated", payload);
     }
 
@@ -55,12 +49,12 @@ public class WebhookEventService {
         Map<String, Object> payload = new HashMap<>();
         payload.put("event", "dossier.status_changed");
         payload.put("timestamp", LocalDateTime.now().toString());
-        
+
         Map<String, Object> data = createDossierPayload(dossier);
         data.put("oldStatus", oldStatus);
         data.put("newStatus", newStatus);
         payload.put("data", data);
-        
+
         webhookService.triggerWebhook("dossier.status_changed", payload);
     }
 
@@ -71,7 +65,7 @@ public class WebhookEventService {
         payload.put("event", "message.received");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createMessagePayload(message));
-        
+
         webhookService.triggerWebhook("message.received", payload);
     }
 
@@ -80,7 +74,7 @@ public class WebhookEventService {
         payload.put("event", "message.sent");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createMessagePayload(message));
-        
+
         webhookService.triggerWebhook("message.sent", payload);
     }
 
@@ -91,7 +85,7 @@ public class WebhookEventService {
         payload.put("event", "appointment.scheduled");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createAppointmentPayload(appointment));
-        
+
         webhookService.triggerWebhook("appointment.scheduled", payload);
     }
 
@@ -100,7 +94,7 @@ public class WebhookEventService {
         payload.put("event", "appointment.updated");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createAppointmentPayload(appointment));
-        
+
         webhookService.triggerWebhook("appointment.updated", payload);
     }
 
@@ -109,7 +103,7 @@ public class WebhookEventService {
         payload.put("event", "appointment.cancelled");
         payload.put("timestamp", LocalDateTime.now().toString());
         payload.put("data", createAppointmentPayload(appointment));
-        
+
         webhookService.triggerWebhook("appointment.cancelled", payload);
     }
 

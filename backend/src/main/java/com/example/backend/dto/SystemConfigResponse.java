@@ -17,11 +17,15 @@ public class SystemConfigResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public SystemConfigResponse() {
-    }
+    public SystemConfigResponse() {}
 
-    public SystemConfigResponse(Long id, NetworkSettingsDto networkSettings, SecuritySettingsDto securitySettings, 
-                               PerformanceSettingsDto performanceSettings, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public SystemConfigResponse(
+            Long id,
+            NetworkSettingsDto networkSettings,
+            SecuritySettingsDto securitySettings,
+            PerformanceSettingsDto performanceSettings,
+            LocalDateTime createdAt,
+            LocalDateTime updatedAt) {
         this.id = id;
         this.networkSettings = networkSettings;
         this.securitySettings = securitySettings;
@@ -114,8 +118,7 @@ public class SystemConfigResponse {
         private List<SystemConfigResponse> configs;
         private int totalCount;
 
-        public ConfigListResponse() {
-        }
+        public ConfigListResponse() {}
 
         public ConfigListResponse(List<SystemConfigResponse> configs, int totalCount) {
             this.configs = configs;
@@ -146,10 +149,10 @@ public class SystemConfigResponse {
         private Map<String, Object> details;
         private LocalDateTime checkedAt;
 
-        public ConfigHealthResponse() {
-        }
+        public ConfigHealthResponse() {}
 
-        public ConfigHealthResponse(boolean valid, String status, List<String> errors, Map<String, Object> details) {
+        public ConfigHealthResponse(
+                boolean valid, String status, List<String> errors, Map<String, Object> details) {
             this.valid = valid;
             this.status = status;
             this.errors = errors;
@@ -204,8 +207,7 @@ public class SystemConfigResponse {
         private int configsReloaded;
         private LocalDateTime reloadedAt;
 
-        public ConfigReloadResponse() {
-        }
+        public ConfigReloadResponse() {}
 
         public ConfigReloadResponse(boolean success, String message, int configsReloaded) {
             this.success = success;

@@ -1,5 +1,9 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.entity.*;
@@ -8,6 +12,11 @@ import com.example.backend.repository.*;
 import com.example.backend.service.*;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import java.time.LocalDateTime;
+import java.util.*;
+import org.hibernate.Session;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,56 +28,34 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import org.hibernate.Session;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 @BackendE2ETest
 @ActiveProfiles({"backend-e2e", "backend-e2e-h2"})
-@TestPropertySource(properties = {
-    "outbound.worker.enabled=false"
-})
+@TestPropertySource(properties = {"outbound.worker.enabled=false"})
 class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
 
     private static final String TENANT_1 = "org-whatsapp-provider-test";
     private static final String TEST_PHONE = "+33612345678";
 
-    @Autowired
-    private OutboundMessageRepository outboundMessageRepository;
+    @Autowired private OutboundMessageRepository outboundMessageRepository;
 
-    @Autowired
-    private OutboundAttemptRepository outboundAttemptRepository;
+    @Autowired private OutboundAttemptRepository outboundAttemptRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private WhatsAppProviderConfigRepository whatsAppProviderConfigRepository;
+    @Autowired private WhatsAppProviderConfigRepository whatsAppProviderConfigRepository;
 
-    @Autowired
-    private WhatsAppSessionWindowRepository sessionWindowRepository;
+    @Autowired private WhatsAppSessionWindowRepository sessionWindowRepository;
 
-    @Autowired
-    private WhatsAppRateLimitRepository whatsAppRateLimitRepository;
+    @Autowired private WhatsAppRateLimitRepository whatsAppRateLimitRepository;
 
-    @Autowired
-    private WhatsAppCloudApiProvider whatsAppProvider;
+    @Autowired private WhatsAppCloudApiProvider whatsAppProvider;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
     @MockBean(name = "restTemplate")
     private RestTemplate restTemplate;
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    @PersistenceContext private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
@@ -113,22 +100,19 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - successful send returns provider message ID")
     void testProvider_SuccessfulSend() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
-        
+
         Map<String, Object> apiResponse = new HashMap<>();
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> messageInfo = new HashMap<>();
         messageInfo.put("id", "wamid.success123");
         messages.add(messageInfo);
         apiResponse.put("messages", messages);
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenReturn(ResponseEntity.ok(apiResponse));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(ResponseEntity.ok(apiResponse));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -142,10 +126,11 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - HTTP 400 error parsed correctly")
     void testProvider_Http400Error() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
-        
-        String errorResponseBody = """
+
+        String errorResponseBody =
+                """
             {
                 "error": {
                     "message": "Invalid parameter",
@@ -154,18 +139,15 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
                 }
             }
             """;
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenThrow(new HttpClientErrorException(
-            HttpStatus.BAD_REQUEST,
-            "Bad Request",
-            errorResponseBody.getBytes(),
-            null
-        ));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(
+                        new HttpClientErrorException(
+                                HttpStatus.BAD_REQUEST,
+                                "Bad Request",
+                                errorResponseBody.getBytes(),
+                                null));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -179,10 +161,11 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - HTTP 429 rate limit error")
     void testProvider_Http429RateLimit() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
-        
-        String errorResponseBody = """
+
+        String errorResponseBody =
+                """
             {
                 "error": {
                     "message": "Rate limit exceeded",
@@ -193,18 +176,15 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
                 }
             }
             """;
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenThrow(new HttpClientErrorException(
-            HttpStatus.TOO_MANY_REQUESTS,
-            "Too Many Requests",
-            errorResponseBody.getBytes(),
-            null
-        ));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(
+                        new HttpClientErrorException(
+                                HttpStatus.TOO_MANY_REQUESTS,
+                                "Too Many Requests",
+                                errorResponseBody.getBytes(),
+                                null));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -218,10 +198,11 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - HTTP 500 server error is retryable")
     void testProvider_Http500ServerError() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
-        
-        String errorResponseBody = """
+
+        String errorResponseBody =
+                """
             {
                 "error": {
                     "message": "Internal server error",
@@ -229,18 +210,15 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
                 }
             }
             """;
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenThrow(new HttpServerErrorException(
-            HttpStatus.INTERNAL_SERVER_ERROR,
-            "Internal Server Error",
-            errorResponseBody.getBytes(),
-            null
-        ));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(
+                        new HttpServerErrorException(
+                                HttpStatus.INTERNAL_SERVER_ERROR,
+                                "Internal Server Error",
+                                errorResponseBody.getBytes(),
+                                null));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -272,28 +250,25 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - template message allowed outside session window")
     void testProvider_TemplateAllowedOutsideWindow() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
         message.setTemplateCode("welcome_template");
-        
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("language", "en");
         message.setPayloadJson(payload);
         outboundMessageRepository.save(message);
-        
+
         Map<String, Object> apiResponse = new HashMap<>();
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> messageInfo = new HashMap<>();
         messageInfo.put("id", "wamid.template123");
         messages.add(messageInfo);
         apiResponse.put("messages", messages);
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenReturn(ResponseEntity.ok(apiResponse));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(ResponseEntity.ok(apiResponse));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -305,7 +280,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - quota check prevents sending")
     void testProvider_QuotaCheckPrevents() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         WhatsAppRateLimit rateLimit = new WhatsAppRateLimit();
         rateLimit.setOrgId(TENANT_1);
         rateLimit.setQuotaLimit(10);
@@ -315,7 +290,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         rateLimit.setCreatedAt(LocalDateTime.now());
         rateLimit.setUpdatedAt(LocalDateTime.now());
         whatsAppRateLimitRepository.save(rateLimit);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
 
         ProviderSendResult result = whatsAppProvider.send(message);
@@ -323,7 +298,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorCode()).isEqualTo("QUOTA_EXCEEDED");
         assertThat(result.isRetryable()).isTrue();
-        
+
         verify(restTemplate, never()).exchange(anyString(), any(), any(), any(Class.class));
     }
 
@@ -332,11 +307,12 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - disabled provider returns error")
     void testProvider_DisabledProvider() {
         TenantContext.setOrgId(TENANT_1);
-        
-        WhatsAppProviderConfig config = whatsAppProviderConfigRepository.findByOrgId(TENANT_1).orElseThrow();
+
+        WhatsAppProviderConfig config =
+                whatsAppProviderConfigRepository.findByOrgId(TENANT_1).orElseThrow();
         config.setEnabled(false);
         whatsAppProviderConfigRepository.save(config);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
 
         ProviderSendResult result = whatsAppProvider.send(message);
@@ -344,7 +320,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         assertThat(result.isSuccess()).isFalse();
         assertThat(result.getErrorCode()).isEqualTo("PROVIDER_DISABLED");
         assertThat(result.isRetryable()).isFalse();
-        
+
         verify(restTemplate, never()).exchange(anyString(), any(), any(), any(Class.class));
     }
 
@@ -353,24 +329,21 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - phone number normalization")
     void testProvider_PhoneNormalization() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
         message.setTo("336 12 34 56 78");
         outboundMessageRepository.save(message);
-        
+
         Map<String, Object> apiResponse = new HashMap<>();
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> messageInfo = new HashMap<>();
         messageInfo.put("id", "wamid.normalized123");
         messages.add(messageInfo);
         apiResponse.put("messages", messages);
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenReturn(ResponseEntity.ok(apiResponse));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(ResponseEntity.ok(apiResponse));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -382,31 +355,31 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - error message sanitization")
     void testProvider_ErrorMessageSanitization() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
-        
+
         String longError = "Error: " + "x".repeat(600);
-        
-        String errorResponseBody = String.format("""
+
+        String errorResponseBody =
+                String.format(
+                        """
             {
                 "error": {
                     "message": "%s",
                     "code": 131000
                 }
             }
-            """, longError);
-        
+            """,
+                        longError);
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenThrow(new HttpClientErrorException(
-            HttpStatus.BAD_REQUEST,
-            "Bad Request",
-            errorResponseBody.getBytes(),
-            null
-        ));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(
+                        new HttpClientErrorException(
+                                HttpStatus.BAD_REQUEST,
+                                "Bad Request",
+                                errorResponseBody.getBytes(),
+                                null));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -430,7 +403,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - session window updated after successful send")
     void testProvider_SessionWindowUpdatedAfterSend() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         WhatsAppSessionWindow window = new WhatsAppSessionWindow();
         window.setOrgId(TENANT_1);
         window.setPhoneNumber(TEST_PHONE);
@@ -440,30 +413,28 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         window.setCreatedAt(LocalDateTime.now().minusHours(1));
         window.setUpdatedAt(LocalDateTime.now().minusHours(1));
         window = sessionWindowRepository.save(window);
-        
+
         OutboundMessageEntity message =
                 createOutboundMessageWithoutSessionWindow(OutboundMessageStatus.QUEUED);
-        
+
         Map<String, Object> apiResponse = new HashMap<>();
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> messageInfo = new HashMap<>();
         messageInfo.put("id", "wamid.outbound123");
         messages.add(messageInfo);
         apiResponse.put("messages", messages);
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenReturn(ResponseEntity.ok(apiResponse));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenReturn(ResponseEntity.ok(apiResponse));
 
         LocalDateTime beforeSend = LocalDateTime.now();
         ProviderSendResult result = whatsAppProvider.send(message);
 
         assertThat(result.isSuccess()).isTrue();
-        
-        WhatsAppSessionWindow updated = sessionWindowRepository.findById(window.getId()).orElseThrow();
+
+        WhatsAppSessionWindow updated =
+                sessionWindowRepository.findById(window.getId()).orElseThrow();
         assertThat(updated.getLastOutboundMessageAt()).isNotNull();
         assertThat(updated.getLastOutboundMessageAt()).isAfterOrEqualTo(beforeSend.minusSeconds(2));
     }
@@ -473,10 +444,11 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - complex error response parsing")
     void testProvider_ComplexErrorResponseParsing() {
         TenantContext.setOrgId(TENANT_1);
-        
+
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
-        
-        String errorResponseBody = """
+
+        String errorResponseBody =
+                """
             {
                 "error": {
                     "message": "Template parameter error",
@@ -489,18 +461,15 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
                 }
             }
             """;
-        
+
         when(restTemplate.exchange(
-            anyString(),
-            eq(HttpMethod.POST),
-            any(HttpEntity.class),
-            eq(Map.class)
-        )).thenThrow(new HttpClientErrorException(
-            HttpStatus.BAD_REQUEST,
-            "Bad Request",
-            errorResponseBody.getBytes(),
-            null
-        ));
+                        anyString(), eq(HttpMethod.POST), any(HttpEntity.class), eq(Map.class)))
+                .thenThrow(
+                        new HttpClientErrorException(
+                                HttpStatus.BAD_REQUEST,
+                                "Bad Request",
+                                errorResponseBody.getBytes(),
+                                null));
 
         ProviderSendResult result = whatsAppProvider.send(message);
 
@@ -539,11 +508,11 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         message.setMaxAttempts(5);
         message.setCreatedAt(LocalDateTime.now());
         message.setUpdatedAt(LocalDateTime.now());
-        
+
         Map<String, Object> payload = new HashMap<>();
         payload.put("body", "Test message");
         message.setPayloadJson(payload);
-        
+
         return outboundMessageRepository.save(message);
     }
 

@@ -5,38 +5,32 @@ import com.example.backend.entity.enums.ReportFrequency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Map;
 
 public class ScheduledReportRequest {
-    
-    @NotBlank
-    private String name;
-    
+
+    @NotBlank private String name;
+
     private String description;
-    
-    @NotBlank
-    private String reportType;
-    
-    @NotNull
-    private ReportFrequency frequency;
-    
-    @NotNull
-    private ReportFormat format;
-    
-    @NotEmpty
-    private List<String> recipients;
-    
+
+    @NotBlank private String reportType;
+
+    @NotNull private ReportFrequency frequency;
+
+    @NotNull private ReportFormat format;
+
+    @NotEmpty private List<String> recipients;
+
     private Map<String, Object> parameters;
-    
+
     private DayOfWeek dayOfWeek;
-    
+
     private Integer dayOfMonth;
-    
+
     private Integer hour;
-    
+
     private Boolean enabled;
 
     public String getName() {

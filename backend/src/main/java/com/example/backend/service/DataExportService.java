@@ -3,12 +3,6 @@ package com.example.backend.service;
 import com.example.backend.entity.*;
 import com.example.backend.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -17,6 +11,11 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DataExportService {
@@ -81,8 +80,13 @@ public class DataExportService {
     public void processExportRequest(Long requestId) {
         logger.info("Processing data export request: {}", requestId);
 
-        DataExportRequestEntity request = exportRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalStateException("Export request not found: " + requestId));
+        DataExportRequestEntity request =
+                exportRequestRepository
+                        .findById(requestId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "Export request not found: " + requestId));
 
         try {
             request.setStatus("processing");
@@ -117,12 +121,14 @@ public class DataExportService {
 
     private String generateExportFile(DataExportRequestEntity request) throws Exception {
         String orgId = request.getOrgId();
-        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String filename = String.format("export_%s_%s.%s", orgId, timestamp, request.getExportFormat());
-        
+        String timestamp =
+                LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String filename =
+                String.format("export_%s_%s.%s", orgId, timestamp, request.getExportFormat());
+
         Path exportDir = Paths.get(System.getProperty("java.io.tmpdir"), "data-exports");
         Files.createDirectories(exportDir);
-        
+
         String exportPath = exportDir.resolve(filename).toString();
 
         Map<String, Object> exportData = new HashMap<>();
@@ -197,8 +203,13 @@ public class DataExportService {
 
     @Transactional
     public void incrementDownloadCount(Long requestId) {
-        DataExportRequestEntity request = exportRequestRepository.findById(requestId)
-                .orElseThrow(() -> new IllegalStateException("Export request not found: " + requestId));
+        DataExportRequestEntity request =
+                exportRequestRepository
+                        .findById(requestId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "Export request not found: " + requestId));
 
         request.setDownloadCount(request.getDownloadCount() + 1);
         exportRequestRepository.save(request);

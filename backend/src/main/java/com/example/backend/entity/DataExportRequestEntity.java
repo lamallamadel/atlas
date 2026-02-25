@@ -81,44 +81,163 @@ public class DataExportRequestEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getOrgId() { return orgId; }
-    public void setOrgId(String orgId) { this.orgId = orgId; }
-    public String getRequestType() { return requestType; }
-    public void setRequestType(String requestType) { this.requestType = requestType; }
-    public String getRequesterEmail() { return requesterEmail; }
-    public void setRequesterEmail(String requesterEmail) { this.requesterEmail = requesterEmail; }
-    public String getRequesterUserId() { return requesterUserId; }
-    public void setRequesterUserId(String requesterUserId) { this.requesterUserId = requesterUserId; }
-    public String getExportFormat() { return exportFormat; }
-    public void setExportFormat(String exportFormat) { this.exportFormat = exportFormat; }
-    public Boolean getIncludeDocuments() { return includeDocuments; }
-    public void setIncludeDocuments(Boolean includeDocuments) { this.includeDocuments = includeDocuments; }
-    public Boolean getIncludeAuditLogs() { return includeAuditLogs; }
-    public void setIncludeAuditLogs(Boolean includeAuditLogs) { this.includeAuditLogs = includeAuditLogs; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public LocalDateTime getProcessingStartedAt() { return processingStartedAt; }
-    public void setProcessingStartedAt(LocalDateTime processingStartedAt) { this.processingStartedAt = processingStartedAt; }
-    public LocalDateTime getProcessingCompletedAt() { return processingCompletedAt; }
-    public void setProcessingCompletedAt(LocalDateTime processingCompletedAt) { this.processingCompletedAt = processingCompletedAt; }
-    public String getExportFilePath() { return exportFilePath; }
-    public void setExportFilePath(String exportFilePath) { this.exportFilePath = exportFilePath; }
-    public Long getExportFileSizeBytes() { return exportFileSizeBytes; }
-    public void setExportFileSizeBytes(Long exportFileSizeBytes) { this.exportFileSizeBytes = exportFileSizeBytes; }
-    public String getDownloadUrl() { return downloadUrl; }
-    public void setDownloadUrl(String downloadUrl) { this.downloadUrl = downloadUrl; }
-    public LocalDateTime getDownloadUrlExpiresAt() { return downloadUrlExpiresAt; }
-    public void setDownloadUrlExpiresAt(LocalDateTime downloadUrlExpiresAt) { this.downloadUrlExpiresAt = downloadUrlExpiresAt; }
-    public Integer getDownloadCount() { return downloadCount; }
-    public void setDownloadCount(Integer downloadCount) { this.downloadCount = downloadCount; }
-    public Integer getMaxDownloads() { return maxDownloads; }
-    public void setMaxDownloads(Integer maxDownloads) { this.maxDownloads = maxDownloads; }
-    public String getErrorMessage() { return errorMessage; }
-    public void setErrorMessage(String errorMessage) { this.errorMessage = errorMessage; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
+    public String getRequestType() {
+        return requestType;
+    }
+
+    public void setRequestType(String requestType) {
+        this.requestType = requestType;
+    }
+
+    public String getRequesterEmail() {
+        return requesterEmail;
+    }
+
+    public void setRequesterEmail(String requesterEmail) {
+        this.requesterEmail = requesterEmail;
+    }
+
+    public String getRequesterUserId() {
+        return requesterUserId;
+    }
+
+    public void setRequesterUserId(String requesterUserId) {
+        this.requesterUserId = requesterUserId;
+    }
+
+    public String getExportFormat() {
+        return exportFormat;
+    }
+
+    public void setExportFormat(String exportFormat) {
+        this.exportFormat = exportFormat;
+    }
+
+    public Boolean getIncludeDocuments() {
+        return includeDocuments;
+    }
+
+    public void setIncludeDocuments(Boolean includeDocuments) {
+        this.includeDocuments = includeDocuments;
+    }
+
+    public Boolean getIncludeAuditLogs() {
+        return includeAuditLogs;
+    }
+
+    public void setIncludeAuditLogs(Boolean includeAuditLogs) {
+        this.includeAuditLogs = includeAuditLogs;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getProcessingStartedAt() {
+        return processingStartedAt;
+    }
+
+    public void setProcessingStartedAt(LocalDateTime processingStartedAt) {
+        this.processingStartedAt = processingStartedAt;
+    }
+
+    public LocalDateTime getProcessingCompletedAt() {
+        return processingCompletedAt;
+    }
+
+    public void setProcessingCompletedAt(LocalDateTime processingCompletedAt) {
+        this.processingCompletedAt = processingCompletedAt;
+    }
+
+    public String getExportFilePath() {
+        return exportFilePath;
+    }
+
+    public void setExportFilePath(String exportFilePath) {
+        this.exportFilePath = exportFilePath;
+    }
+
+    public Long getExportFileSizeBytes() {
+        return exportFileSizeBytes;
+    }
+
+    public void setExportFileSizeBytes(Long exportFileSizeBytes) {
+        this.exportFileSizeBytes = exportFileSizeBytes;
+    }
+
+    public String getDownloadUrl() {
+        return downloadUrl;
+    }
+
+    public void setDownloadUrl(String downloadUrl) {
+        this.downloadUrl = downloadUrl;
+    }
+
+    public LocalDateTime getDownloadUrlExpiresAt() {
+        return downloadUrlExpiresAt;
+    }
+
+    public void setDownloadUrlExpiresAt(LocalDateTime downloadUrlExpiresAt) {
+        this.downloadUrlExpiresAt = downloadUrlExpiresAt;
+    }
+
+    public Integer getDownloadCount() {
+        return downloadCount;
+    }
+
+    public void setDownloadCount(Integer downloadCount) {
+        this.downloadCount = downloadCount;
+    }
+
+    public Integer getMaxDownloads() {
+        return maxDownloads;
+    }
+
+    public void setMaxDownloads(Integer maxDownloads) {
+        this.maxDownloads = maxDownloads;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

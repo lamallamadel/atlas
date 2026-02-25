@@ -1,5 +1,10 @@
 package com.example.backend;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import com.example.backend.dto.WhatsAppWebhookPayload;
@@ -9,29 +14,19 @@ import com.example.backend.repository.*;
 import com.example.backend.service.*;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.util.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.web.servlet.MvcResult;
-
-import java.time.LocalDateTime;
-import java.util.*;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @BackendE2ETest
 @ActiveProfiles({"backend-e2e", "backend-e2e-h2"})
-@TestPropertySource(properties = {
-    "outbound.worker.enabled=false"
-})
+@TestPropertySource(properties = {"outbound.worker.enabled=false"})
 class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
 
     private static final String TENANT_1 = "org-whatsapp-webhook-test";
@@ -39,35 +34,25 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     private static final String WEBHOOK_ENDPOINT = "/api/v1/webhooks/whatsapp/inbound";
     private static final String WEBHOOK_SECRET = "test-webhook-secret-12345";
 
-    @Autowired
-    private OutboundMessageRepository outboundMessageRepository;
+    @Autowired private OutboundMessageRepository outboundMessageRepository;
 
-    @Autowired
-    private OutboundAttemptRepository outboundAttemptRepository;
+    @Autowired private OutboundAttemptRepository outboundAttemptRepository;
 
-    @Autowired
-    private MessageRepository messageRepository;
+    @Autowired private MessageRepository messageRepository;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private WhatsAppProviderConfigRepository whatsAppProviderConfigRepository;
+    @Autowired private WhatsAppProviderConfigRepository whatsAppProviderConfigRepository;
 
-    @Autowired
-    private WhatsAppSessionWindowRepository sessionWindowRepository;
+    @Autowired private WhatsAppSessionWindowRepository sessionWindowRepository;
 
-    @Autowired
-    private ActivityRepository activityRepository;
+    @Autowired private ActivityRepository activityRepository;
 
-    @Autowired
-    private AuditEventRepository auditEventRepository;
+    @Autowired private AuditEventRepository auditEventRepository;
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
 
-    @Autowired
-    private WhatsAppWebhookSignatureValidator signatureValidator;
+    @Autowired private WhatsAppWebhookSignatureValidator signatureValidator;
 
     @Autowired(required = false)
     private StringRedisTemplate redisTemplate;
@@ -75,7 +60,7 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @BeforeEach
     void setUp() {
         TenantContext.clear();
-        
+
         outboundAttemptRepository.deleteAll();
         outboundMessageRepository.deleteAll();
         messageRepository.deleteAll();
@@ -91,7 +76,7 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @AfterEach
     void tearDown() {
         TenantContext.clear();
-        
+
         if (redisTemplate != null) {
             try {
                 Set<String> keys = redisTemplate.keys("whatsapp:*");
@@ -126,25 +111,27 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     void testWebhookVerification_Success() throws Exception {
         String challenge = "test-challenge-" + UUID.randomUUID();
 
-        mockMvc.perform(get(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .param("hub.mode", "subscribe")
-                .param("hub.verify_token", "any-token")
-                .param("hub.challenge", challenge))
-            .andExpect(status().isOk())
-            .andExpect(content().string(challenge));
+        mockMvc.perform(
+                        get(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .param("hub.mode", "subscribe")
+                                .param("hub.verify_token", "any-token")
+                                .param("hub.challenge", challenge))
+                .andExpect(status().isOk())
+                .andExpect(content().string(challenge));
     }
 
     @Test
     @WithMockUser
     @DisplayName("Webhook verification - should return forbidden when invalid mode")
     void testWebhookVerification_InvalidMode() throws Exception {
-        mockMvc.perform(get(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .param("hub.mode", "invalid")
-                .param("hub.verify_token", "any-token")
-                .param("hub.challenge", "challenge"))
-            .andExpect(status().isForbidden());
+        mockMvc.perform(
+                        get(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .param("hub.mode", "invalid")
+                                .param("hub.verify_token", "any-token")
+                                .param("hub.challenge", "challenge"))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -154,13 +141,14 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createInboundMessagePayload("+33612345678", "Hello, I'm interested");
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk())
-            .andExpect(content().string("OK"));
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk())
+                .andExpect(content().string("OK"));
 
         List<Dossier> dossiers = dossierRepository.findAll();
         assertThat(dossiers).hasSize(1);
@@ -197,12 +185,13 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createInboundMessagePayload("+33612345678", "Follow-up message");
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
         List<Dossier> dossiers = dossierRepository.findAll();
         assertThat(dossiers).hasSize(1);
@@ -217,19 +206,22 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - sent")
     void testDeliveryStatus_Sent() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.test123", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.test123", OutboundMessageStatus.SENDING);
 
         String payload = createDeliveryStatusPayload("wamid.test123", "sent", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.SENT);
         assertThat(updated.getErrorCode()).isNull();
         assertThat(updated.getErrorMessage()).isNull();
@@ -239,19 +231,22 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - delivered")
     void testDeliveryStatus_Delivered() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.test456", OutboundMessageStatus.SENT);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.test456", OutboundMessageStatus.SENT);
 
         String payload = createDeliveryStatusPayload("wamid.test456", "delivered", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.DELIVERED);
         assertThat(updated.getErrorCode()).isNull();
         assertThat(updated.getErrorMessage()).isNull();
@@ -261,19 +256,22 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - read (treated as delivered)")
     void testDeliveryStatus_Read() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.test789", OutboundMessageStatus.DELIVERED);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.test789", OutboundMessageStatus.DELIVERED);
 
         String payload = createDeliveryStatusPayload("wamid.test789", "read", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.DELIVERED);
     }
 
@@ -281,7 +279,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 131021 (recipient not on WhatsApp)")
     void testDeliveryStatus_Failed_RecipientNotOnWhatsApp() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail131021", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail131021", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(131021);
@@ -291,14 +290,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail131021", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("131021");
         assertThat(updated.getErrorMessage()).contains("not registered on WhatsApp");
@@ -308,7 +309,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 132015 (outside 24h window)")
     void testDeliveryStatus_Failed_OutsideWindow() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail132015", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail132015", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(132015);
@@ -318,14 +320,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail132015", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("132015");
     }
@@ -334,7 +338,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 132016 (template required)")
     void testDeliveryStatus_Failed_TemplateRequired() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail132016", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail132016", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(132016);
@@ -344,14 +349,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail132016", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("132016");
     }
@@ -360,7 +367,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 130 (rate limit)")
     void testDeliveryStatus_Failed_RateLimit() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail130", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail130", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(130);
@@ -370,14 +378,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail130", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("130");
     }
@@ -386,7 +396,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 131042 (invalid phone format)")
     void testDeliveryStatus_Failed_InvalidPhoneFormat() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail131042", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail131042", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(131042);
@@ -396,14 +407,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail131042", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("131042");
     }
@@ -412,7 +425,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 133004 (template not found)")
     void testDeliveryStatus_Failed_TemplateNotFound() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail133004", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail133004", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(133004);
@@ -422,14 +436,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail133004", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("133004");
     }
@@ -438,7 +454,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - failed with error code 132068 (account blocked)")
     void testDeliveryStatus_Failed_AccountBlocked() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.fail132068", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.fail132068", OutboundMessageStatus.SENDING);
 
         WhatsAppWebhookPayload.StatusError error = new WhatsAppWebhookPayload.StatusError();
         error.setCode(132068);
@@ -448,14 +465,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.fail132068", "failed", error);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("132068");
     }
@@ -464,7 +483,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - should not update if already failed")
     void testDeliveryStatus_NoUpdateWhenAlreadyFailed() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.alreadyfailed", OutboundMessageStatus.FAILED);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.alreadyfailed", OutboundMessageStatus.FAILED);
         message.setErrorCode("131021");
         message.setErrorMessage("Already failed");
         outboundMessageRepository.save(message);
@@ -472,14 +492,16 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.alreadyfailed", "delivered", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.FAILED);
         assertThat(updated.getErrorCode()).isEqualTo("131021");
     }
@@ -488,19 +510,22 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - should not update if already delivered")
     void testDeliveryStatus_NoUpdateWhenAlreadyDelivered() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.alreadydelivered", OutboundMessageStatus.DELIVERED);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.alreadydelivered", OutboundMessageStatus.DELIVERED);
 
         String payload = createDeliveryStatusPayload("wamid.alreadydelivered", "sent", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.DELIVERED);
     }
 
@@ -511,12 +536,13 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createInboundMessagePayload("+33612345678", "Test message");
         String invalidSignature = "sha256=invalid";
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", invalidSignature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isUnauthorized());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", invalidSignature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isUnauthorized());
 
         List<MessageEntity> messages = messageRepository.findAll();
         assertThat(messages).isEmpty();
@@ -528,11 +554,12 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     void testWebhook_NoSignature() throws Exception {
         String payload = createInboundMessagePayload("+33612345678", "Test message");
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
         List<MessageEntity> messages = messageRepository.findAll();
         assertThat(messages).hasSize(1);
@@ -544,10 +571,11 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     void testWebhook_MissingOrgId() throws Exception {
         String payload = createInboundMessagePayload("+33612345678", "Test message");
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isBadRequest());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -557,32 +585,37 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         String payload = createDeliveryStatusPayload("wamid.unknown999", "delivered", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("Delivery status - should handle organization mismatch")
     void testDeliveryStatus_OrgMismatch() throws Exception {
-        OutboundMessageEntity message = createOutboundMessage("wamid.orgmismatch", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message =
+                createOutboundMessage("wamid.orgmismatch", OutboundMessageStatus.SENDING);
         createWhatsAppProviderConfig("different-org");
 
         String payload = createDeliveryStatusPayload("wamid.orgmismatch", "delivered", null);
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        // Webhook is permitAll(); call without @WithMockUser so request is anonymous (like real WhatsApp callbacks)
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", "different-org")
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        // Webhook is permitAll(); call without @WithMockUser so request is anonymous (like real
+        // WhatsApp callbacks)
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", "different-org")
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated = outboundMessageRepository.findById(message.getId()).orElseThrow();
+        OutboundMessageEntity updated =
+                outboundMessageRepository.findById(message.getId()).orElseThrow();
         assertThat(updated.getStatus()).isEqualTo(OutboundMessageStatus.SENDING);
     }
 
@@ -590,26 +623,30 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @WithMockUser
     @DisplayName("Delivery status - multiple status updates in one webhook")
     void testDeliveryStatus_MultipleStatuses() throws Exception {
-        OutboundMessageEntity message1 = createOutboundMessage("wamid.multi1", OutboundMessageStatus.SENDING);
-        OutboundMessageEntity message2 = createOutboundMessage("wamid.multi2", OutboundMessageStatus.SENT);
+        OutboundMessageEntity message1 =
+                createOutboundMessage("wamid.multi1", OutboundMessageStatus.SENDING);
+        OutboundMessageEntity message2 =
+                createOutboundMessage("wamid.multi2", OutboundMessageStatus.SENT);
 
-        String payload = createMultipleDeliveryStatusPayload(
-            List.of("wamid.multi1", "wamid.multi2"),
-            List.of("sent", "delivered")
-        );
+        String payload =
+                createMultipleDeliveryStatusPayload(
+                        List.of("wamid.multi1", "wamid.multi2"), List.of("sent", "delivered"));
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
-        OutboundMessageEntity updated1 = outboundMessageRepository.findById(message1.getId()).orElseThrow();
+        OutboundMessageEntity updated1 =
+                outboundMessageRepository.findById(message1.getId()).orElseThrow();
         assertThat(updated1.getStatus()).isEqualTo(OutboundMessageStatus.SENT);
 
-        OutboundMessageEntity updated2 = outboundMessageRepository.findById(message2.getId()).orElseThrow();
+        OutboundMessageEntity updated2 =
+                outboundMessageRepository.findById(message2.getId()).orElseThrow();
         assertThat(updated2.getStatus()).isEqualTo(OutboundMessageStatus.DELIVERED);
     }
 
@@ -618,7 +655,7 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Inbound message - duplicate message should be ignored")
     void testInboundMessage_DuplicateIgnored() throws Exception {
         String messageId = "wamid.inbound123";
-        
+
         MessageEntity existingMessage = new MessageEntity();
         existingMessage.setOrgId(TENANT_1);
         existingMessage.setChannel(MessageChannel.WHATSAPP);
@@ -628,7 +665,7 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         existingMessage.setTimestamp(LocalDateTime.now());
         existingMessage.setCreatedAt(LocalDateTime.now());
         existingMessage.setUpdatedAt(LocalDateTime.now());
-        
+
         Dossier dossier = new Dossier();
         dossier.setOrgId(TENANT_1);
         dossier.setLeadPhone("+33612345678");
@@ -636,26 +673,29 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         dossier.setCreatedAt(LocalDateTime.now());
         dossier.setUpdatedAt(LocalDateTime.now());
         dossier = dossierRepository.save(dossier);
-        
+
         existingMessage.setDossier(dossier);
         messageRepository.save(existingMessage);
 
-        String payload = createInboundMessagePayloadWithId(messageId, "+33612345678", "Duplicate message");
+        String payload =
+                createInboundMessagePayloadWithId(messageId, "+33612345678", "Duplicate message");
         String signature = signatureValidator.computeSignature(payload, WEBHOOK_SECRET);
 
-        mockMvc.perform(post(WEBHOOK_ENDPOINT)
-                .header("X-Org-Id", TENANT_1)
-                .header("X-Hub-Signature-256", signature)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(payload))
-            .andExpect(status().isOk());
+        mockMvc.perform(
+                        post(WEBHOOK_ENDPOINT)
+                                .header("X-Org-Id", TENANT_1)
+                                .header("X-Hub-Signature-256", signature)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(payload))
+                .andExpect(status().isOk());
 
         List<MessageEntity> messages = messageRepository.findAll();
         assertThat(messages).hasSize(1);
         assertThat(messages.get(0).getContent()).isEqualTo("Original message");
     }
 
-    private OutboundMessageEntity createOutboundMessage(String providerMessageId, OutboundMessageStatus status) {
+    private OutboundMessageEntity createOutboundMessage(
+            String providerMessageId, OutboundMessageStatus status) {
         Dossier dossier = new Dossier();
         dossier.setOrgId(TENANT_1);
         dossier.setLeadPhone(TEST_PHONE);
@@ -680,10 +720,12 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
     }
 
     private String createInboundMessagePayload(String from, String messageBody) throws Exception {
-        return createInboundMessagePayloadWithId("wamid.inbound" + System.currentTimeMillis(), from, messageBody);
+        return createInboundMessagePayloadWithId(
+                "wamid.inbound" + System.currentTimeMillis(), from, messageBody);
     }
 
-    private String createInboundMessagePayloadWithId(String messageId, String from, String messageBody) throws Exception {
+    private String createInboundMessagePayloadWithId(
+            String messageId, String from, String messageBody) throws Exception {
         Map<String, Object> payload = new HashMap<>();
         payload.put("object", "whatsapp_business_account");
 
@@ -713,11 +755,11 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         message.put("id", messageId);
         message.put("timestamp", String.valueOf(System.currentTimeMillis() / 1000));
         message.put("type", "text");
-        
+
         Map<String, Object> text = new HashMap<>();
         text.put("body", messageBody);
         message.put("text", text);
-        
+
         value.put("messages", List.of(message));
 
         change.put("value", value);
@@ -727,7 +769,9 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         return objectMapper.writeValueAsString(payload);
     }
 
-    private String createDeliveryStatusPayload(String messageId, String status, WhatsAppWebhookPayload.StatusError error) throws Exception {
+    private String createDeliveryStatusPayload(
+            String messageId, String status, WhatsAppWebhookPayload.StatusError error)
+            throws Exception {
         Map<String, Object> payload = new HashMap<>();
         payload.put("object", "whatsapp_business_account");
 
@@ -768,7 +812,8 @@ class WhatsAppWebhookIntegrationTest extends BaseBackendE2ETest {
         return objectMapper.writeValueAsString(payload);
     }
 
-    private String createMultipleDeliveryStatusPayload(List<String> messageIds, List<String> statuses) throws Exception {
+    private String createMultipleDeliveryStatusPayload(
+            List<String> messageIds, List<String> statuses) throws Exception {
         Map<String, Object> payload = new HashMap<>();
         payload.put("object", "whatsapp_business_account");
 

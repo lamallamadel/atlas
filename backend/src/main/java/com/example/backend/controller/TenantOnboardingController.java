@@ -5,13 +5,12 @@ import com.example.backend.repository.TenantOnboardingRepository;
 import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/onboarding")
@@ -30,9 +29,10 @@ public class TenantOnboardingController {
         String orgId = TenantContext.getOrgId();
         String userId = authentication.getName();
 
-        TenantOnboardingEntity onboarding = onboardingRepository
-                .findByOrgIdAndUserId(orgId, userId)
-                .orElseGet(() -> createOnboarding(orgId, userId));
+        TenantOnboardingEntity onboarding =
+                onboardingRepository
+                        .findByOrgIdAndUserId(orgId, userId)
+                        .orElseGet(() -> createOnboarding(orgId, userId));
 
         return ResponseEntity.ok(onboarding);
     }
@@ -40,15 +40,15 @@ public class TenantOnboardingController {
     @PostMapping("/step/{stepName}/complete")
     @Operation(summary = "Mark onboarding step as completed")
     public ResponseEntity<TenantOnboardingEntity> completeStep(
-            @PathVariable String stepName,
-            Authentication authentication) {
-        
+            @PathVariable String stepName, Authentication authentication) {
+
         String orgId = TenantContext.getOrgId();
         String userId = authentication.getName();
 
-        TenantOnboardingEntity onboarding = onboardingRepository
-                .findByOrgIdAndUserId(orgId, userId)
-                .orElseGet(() -> createOnboarding(orgId, userId));
+        TenantOnboardingEntity onboarding =
+                onboardingRepository
+                        .findByOrgIdAndUserId(orgId, userId)
+                        .orElseGet(() -> createOnboarding(orgId, userId));
 
         markStepComplete(onboarding, stepName);
         updateProgress(onboarding);
@@ -63,9 +63,10 @@ public class TenantOnboardingController {
         String orgId = TenantContext.getOrgId();
         String userId = authentication.getName();
 
-        TenantOnboardingEntity onboarding = onboardingRepository
-                .findByOrgIdAndUserId(orgId, userId)
-                .orElseGet(() -> createOnboarding(orgId, userId));
+        TenantOnboardingEntity onboarding =
+                onboardingRepository
+                        .findByOrgIdAndUserId(orgId, userId)
+                        .orElseGet(() -> createOnboarding(orgId, userId));
 
         onboarding.setProgressPercent(100);
         onboarding.setOnboardingCompletedAt(LocalDateTime.now());

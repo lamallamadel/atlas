@@ -18,8 +18,7 @@ public class RateLimitHealthIndicator implements HealthIndicator {
         Health.Builder builder = new Health.Builder();
 
         if (!rateLimitConfig.getEnabled()) {
-            return builder
-                    .up()
+            return builder.up()
                     .withDetail("enabled", false)
                     .withDetail("message", "Rate limiting is disabled")
                     .build();
@@ -30,8 +29,10 @@ public class RateLimitHealthIndicator implements HealthIndicator {
                 .withDetail("mode", "in-memory")
                 .withDetail("storage", "local")
                 .withDetail("message", "Using in-memory rate limiting")
-                .withDetail("defaultRequestsPerMinute", rateLimitConfig.getDefaultRequestsPerMinute())
-                .withDetail("ipBasedRequestsPerMinute", rateLimitConfig.getIpBasedRequestsPerMinute())
+                .withDetail(
+                        "defaultRequestsPerMinute", rateLimitConfig.getDefaultRequestsPerMinute())
+                .withDetail(
+                        "ipBasedRequestsPerMinute", rateLimitConfig.getIpBasedRequestsPerMinute())
                 .withDetail("redisSupport", "available for future enhancement");
 
         return builder.build();

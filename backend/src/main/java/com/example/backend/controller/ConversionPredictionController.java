@@ -11,12 +11,11 @@ import com.example.backend.service.PredictiveLeadScoringService;
 import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/ml")
@@ -28,10 +27,11 @@ public class ConversionPredictionController {
     private final ABTestingService abTestingService;
     private final DossierRepository dossierRepository;
 
-    public ConversionPredictionController(PredictiveLeadScoringService predictiveService,
-                                         ModelTrainingService trainingService,
-                                         ABTestingService abTestingService,
-                                         DossierRepository dossierRepository) {
+    public ConversionPredictionController(
+            PredictiveLeadScoringService predictiveService,
+            ModelTrainingService trainingService,
+            ABTestingService abTestingService,
+            DossierRepository dossierRepository) {
         this.predictiveService = predictiveService;
         this.trainingService = trainingService;
         this.abTestingService = abTestingService;
@@ -42,9 +42,11 @@ public class ConversionPredictionController {
     @PreAuthorize("hasAuthority('SCOPE_lead:write')")
     @Operation(summary = "Get ML prediction for a lead")
     public ResponseEntity<MLPrediction> predictConversion(@PathVariable Long dossierId) {
-        Dossier dossier = dossierRepository.findById(dossierId)
-            .orElseThrow(() -> new RuntimeException("Dossier not found"));
-        
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(() -> new RuntimeException("Dossier not found"));
+
         MLPrediction prediction = predictiveService.predictLeadConversion(dossier);
         return ResponseEntity.ok(prediction);
     }
@@ -71,8 +73,8 @@ public class ConversionPredictionController {
     @PostMapping("/predict/{dossierId}/outcome")
     @PreAuthorize("hasAuthority('SCOPE_lead:write')")
     @Operation(summary = "Record actual outcome for a prediction")
-    public ResponseEntity<Void> recordOutcome(@PathVariable Long dossierId, 
-                                              @RequestParam Integer outcome) {
+    public ResponseEntity<Void> recordOutcome(
+            @PathVariable Long dossierId, @RequestParam Integer outcome) {
         predictiveService.recordActualOutcome(dossierId, outcome);
         return ResponseEntity.ok().build();
     }
@@ -128,19 +130,27 @@ public class ConversionPredictionController {
     @PostMapping("/ab-test")
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "Create A/B test experiment")
-    public ResponseEntity<ABTestExperiment> createExperiment(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<ABTestExperiment> createExperiment(
+            @RequestBody Map<String, Object> request) {
         String orgId = TenantContext.getOrgId();
         String experimentName = (String) request.get("experiment_name");
         String description = (String) request.get("description");
         String controlMethod = (String) request.get("control_method");
         String treatmentMethod = (String) request.get("treatment_method");
-        Double trafficSplit = request.containsKey("traffic_split") 
-            ? ((Number) request.get("traffic_split")).doubleValue() 
-            : 0.5;
+        Double trafficSplit =
+                request.containsKey("traffic_split")
+                        ? ((Number) request.get("traffic_split")).doubleValue()
+                        : 0.5;
 
-        ABTestExperiment experiment = abTestingService.createExperiment(
-            orgId, experimentName, description, controlMethod, treatmentMethod, trafficSplit);
-        
+        ABTestExperiment experiment =
+                abTestingService.createExperiment(
+                        orgId,
+                        experimentName,
+                        description,
+                        controlMethod,
+                        treatmentMethod,
+                        trafficSplit);
+
         return ResponseEntity.ok(experiment);
     }
 
@@ -156,7 +166,8 @@ public class ConversionPredictionController {
     @GetMapping("/ab-test/{experimentId}/metrics")
     @PreAuthorize("hasAuthority('SCOPE_admin')")
     @Operation(summary = "Get A/B test experiment metrics")
-    public ResponseEntity<Map<String, Object>> getExperimentMetrics(@PathVariable Long experimentId) {
+    public ResponseEntity<Map<String, Object>> getExperimentMetrics(
+            @PathVariable Long experimentId) {
         Map<String, Object> metrics = abTestingService.calculateExperimentMetrics(experimentId);
         return ResponseEntity.ok(metrics);
     }

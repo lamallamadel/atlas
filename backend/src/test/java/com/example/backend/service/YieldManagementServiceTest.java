@@ -10,31 +10,25 @@ import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.LeadActivityRepository;
-import org.junit.jupiter.api.BeforeEach;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-
 @ExtendWith(MockitoExtension.class)
 class YieldManagementServiceTest {
 
-    @Mock
-    private AnnonceRepository annonceRepository;
+    @Mock private AnnonceRepository annonceRepository;
 
-    @Mock
-    private DossierRepository dossierRepository;
+    @Mock private DossierRepository dossierRepository;
 
-    @Mock
-    private LeadActivityRepository leadActivityRepository;
+    @Mock private LeadActivityRepository leadActivityRepository;
 
-    @InjectMocks
-    private YieldManagementService yieldManagementService;
+    @InjectMocks private YieldManagementService yieldManagementService;
 
     @Test
     void evaluateYield_HighInterest_IncreasesPrice() {
@@ -49,7 +43,8 @@ class YieldManagementServiceTest {
         // * 3 = 18
         when(dossierRepository.countByAnnonceIdAndCreatedAtAfter(eq(1L), any(LocalDateTime.class)))
                 .thenReturn(6L);
-        when(leadActivityRepository.countActivitiesByAnnonceIdAndCreatedAtAfter(eq(1L), any(LocalDateTime.class)))
+        when(leadActivityRepository.countActivitiesByAnnonceIdAndCreatedAtAfter(
+                        eq(1L), any(LocalDateTime.class)))
                 .thenReturn(0L);
 
         // Act
@@ -75,7 +70,8 @@ class YieldManagementServiceTest {
         // activity
         when(dossierRepository.countByAnnonceIdAndCreatedAtAfter(eq(2L), any(LocalDateTime.class)))
                 .thenReturn(0L);
-        when(leadActivityRepository.countActivitiesByAnnonceIdAndCreatedAtAfter(eq(2L), any(LocalDateTime.class)))
+        when(leadActivityRepository.countActivitiesByAnnonceIdAndCreatedAtAfter(
+                        eq(2L), any(LocalDateTime.class)))
                 .thenReturn(1L);
 
         // Act
@@ -84,7 +80,8 @@ class YieldManagementServiceTest {
         // Assert
         verify(annonceRepository, times(1)).save(annonce);
         assertThat(annonce.getPrice().intValue()).isEqualTo(200000); // Price shouldn't change
-        assertThat(annonce.getAiScoreDetails()).contains("Yield Management: Faible intérêt après 30 jours");
+        assertThat(annonce.getAiScoreDetails())
+                .contains("Yield Management: Faible intérêt après 30 jours");
     }
 
     @Test
@@ -99,7 +96,8 @@ class YieldManagementServiceTest {
         // Simulate moderate interest: weekly=10, monthly=10
         when(dossierRepository.countByAnnonceIdAndCreatedAtAfter(eq(3L), any(LocalDateTime.class)))
                 .thenReturn(2L);
-        when(leadActivityRepository.countActivitiesByAnnonceIdAndCreatedAtAfter(eq(3L), any(LocalDateTime.class)))
+        when(leadActivityRepository.countActivitiesByAnnonceIdAndCreatedAtAfter(
+                        eq(3L), any(LocalDateTime.class)))
                 .thenReturn(4L);
 
         // Act

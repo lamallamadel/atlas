@@ -61,7 +61,11 @@ public class WhatsAppTemplate extends BaseEntity {
     @Column(name = "current_version", nullable = false)
     private Integer currentVersion = 1;
 
-    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(
+            mappedBy = "template",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true,
+            fetch = FetchType.LAZY)
     private List<WhatsAppTemplateVersion> versions = new ArrayList<>();
 
     @Column(name = "meta_submission_id", length = 255)

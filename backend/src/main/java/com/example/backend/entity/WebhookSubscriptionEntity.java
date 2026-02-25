@@ -4,16 +4,17 @@ import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Type;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "webhook_subscription", indexes = {
-    @Index(name = "idx_webhook_subscription_org_status", columnList = "org_id, status"),
-    @Index(name = "idx_webhook_subscription_event_type", columnList = "event_type")
-})
+@Table(
+        name = "webhook_subscription",
+        indexes = {
+            @Index(name = "idx_webhook_subscription_org_status", columnList = "org_id, status"),
+            @Index(name = "idx_webhook_subscription_event_type", columnList = "event_type")
+        })
 public class WebhookSubscriptionEntity extends BaseEntity {
 
     @Id
@@ -68,7 +69,9 @@ public class WebhookSubscriptionEntity extends BaseEntity {
     private Integer successCount = 0;
 
     public enum WebhookStatus {
-        ACTIVE, PAUSED, DISABLED
+        ACTIVE,
+        PAUSED,
+        DISABLED
     }
 
     public static class RetryPolicy {

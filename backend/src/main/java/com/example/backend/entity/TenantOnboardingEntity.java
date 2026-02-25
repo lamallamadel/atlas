@@ -1,15 +1,19 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "tenant_onboarding", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_tenant_onboarding_org_user", columnNames = {"org_id", "user_id"})
-})
+@Table(
+        name = "tenant_onboarding",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_tenant_onboarding_org_user",
+                    columnNames = {"org_id", "user_id"})
+        })
 public class TenantOnboardingEntity {
 
     @Id
@@ -89,42 +93,155 @@ public class TenantOnboardingEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getOrgId() { return orgId; }
-    public void setOrgId(String orgId) { this.orgId = orgId; }
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-    public Map<String, Object> getCompletedSteps() { return completedSteps; }
-    public void setCompletedSteps(Map<String, Object> completedSteps) { this.completedSteps = completedSteps; }
-    public String getCurrentStep() { return currentStep; }
-    public void setCurrentStep(String currentStep) { this.currentStep = currentStep; }
-    public Integer getTotalSteps() { return totalSteps; }
-    public void setTotalSteps(Integer totalSteps) { this.totalSteps = totalSteps; }
-    public Integer getProgressPercent() { return progressPercent; }
-    public void setProgressPercent(Integer progressPercent) { this.progressPercent = progressPercent; }
-    public LocalDateTime getOnboardingStartedAt() { return onboardingStartedAt; }
-    public void setOnboardingStartedAt(LocalDateTime onboardingStartedAt) { this.onboardingStartedAt = onboardingStartedAt; }
-    public LocalDateTime getOnboardingCompletedAt() { return onboardingCompletedAt; }
-    public void setOnboardingCompletedAt(LocalDateTime onboardingCompletedAt) { this.onboardingCompletedAt = onboardingCompletedAt; }
-    public Boolean getProfileCompleted() { return profileCompleted; }
-    public void setProfileCompleted(Boolean profileCompleted) { this.profileCompleted = profileCompleted; }
-    public Boolean getBrandingConfigured() { return brandingConfigured; }
-    public void setBrandingConfigured(Boolean brandingConfigured) { this.brandingConfigured = brandingConfigured; }
-    public Boolean getFirstDossierCreated() { return firstDossierCreated; }
-    public void setFirstDossierCreated(Boolean firstDossierCreated) { this.firstDossierCreated = firstDossierCreated; }
-    public Boolean getTeamMemberInvited() { return teamMemberInvited; }
-    public void setTeamMemberInvited(Boolean teamMemberInvited) { this.teamMemberInvited = teamMemberInvited; }
-    public Boolean getIntegrationConfigured() { return integrationConfigured; }
-    public void setIntegrationConfigured(Boolean integrationConfigured) { this.integrationConfigured = integrationConfigured; }
-    public Boolean getWorkflowConfigured() { return workflowConfigured; }
-    public void setWorkflowConfigured(Boolean workflowConfigured) { this.workflowConfigured = workflowConfigured; }
-    public Map<String, Object> getDismissedTooltips() { return dismissedTooltips; }
-    public void setDismissedTooltips(Map<String, Object> dismissedTooltips) { this.dismissedTooltips = dismissedTooltips; }
-    public Map<String, Object> getWatchedTutorials() { return watchedTutorials; }
-    public void setWatchedTutorials(Map<String, Object> watchedTutorials) { this.watchedTutorials = watchedTutorials; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public Map<String, Object> getCompletedSteps() {
+        return completedSteps;
+    }
+
+    public void setCompletedSteps(Map<String, Object> completedSteps) {
+        this.completedSteps = completedSteps;
+    }
+
+    public String getCurrentStep() {
+        return currentStep;
+    }
+
+    public void setCurrentStep(String currentStep) {
+        this.currentStep = currentStep;
+    }
+
+    public Integer getTotalSteps() {
+        return totalSteps;
+    }
+
+    public void setTotalSteps(Integer totalSteps) {
+        this.totalSteps = totalSteps;
+    }
+
+    public Integer getProgressPercent() {
+        return progressPercent;
+    }
+
+    public void setProgressPercent(Integer progressPercent) {
+        this.progressPercent = progressPercent;
+    }
+
+    public LocalDateTime getOnboardingStartedAt() {
+        return onboardingStartedAt;
+    }
+
+    public void setOnboardingStartedAt(LocalDateTime onboardingStartedAt) {
+        this.onboardingStartedAt = onboardingStartedAt;
+    }
+
+    public LocalDateTime getOnboardingCompletedAt() {
+        return onboardingCompletedAt;
+    }
+
+    public void setOnboardingCompletedAt(LocalDateTime onboardingCompletedAt) {
+        this.onboardingCompletedAt = onboardingCompletedAt;
+    }
+
+    public Boolean getProfileCompleted() {
+        return profileCompleted;
+    }
+
+    public void setProfileCompleted(Boolean profileCompleted) {
+        this.profileCompleted = profileCompleted;
+    }
+
+    public Boolean getBrandingConfigured() {
+        return brandingConfigured;
+    }
+
+    public void setBrandingConfigured(Boolean brandingConfigured) {
+        this.brandingConfigured = brandingConfigured;
+    }
+
+    public Boolean getFirstDossierCreated() {
+        return firstDossierCreated;
+    }
+
+    public void setFirstDossierCreated(Boolean firstDossierCreated) {
+        this.firstDossierCreated = firstDossierCreated;
+    }
+
+    public Boolean getTeamMemberInvited() {
+        return teamMemberInvited;
+    }
+
+    public void setTeamMemberInvited(Boolean teamMemberInvited) {
+        this.teamMemberInvited = teamMemberInvited;
+    }
+
+    public Boolean getIntegrationConfigured() {
+        return integrationConfigured;
+    }
+
+    public void setIntegrationConfigured(Boolean integrationConfigured) {
+        this.integrationConfigured = integrationConfigured;
+    }
+
+    public Boolean getWorkflowConfigured() {
+        return workflowConfigured;
+    }
+
+    public void setWorkflowConfigured(Boolean workflowConfigured) {
+        this.workflowConfigured = workflowConfigured;
+    }
+
+    public Map<String, Object> getDismissedTooltips() {
+        return dismissedTooltips;
+    }
+
+    public void setDismissedTooltips(Map<String, Object> dismissedTooltips) {
+        this.dismissedTooltips = dismissedTooltips;
+    }
+
+    public Map<String, Object> getWatchedTutorials() {
+        return watchedTutorials;
+    }
+
+    public void setWatchedTutorials(Map<String, Object> watchedTutorials) {
+        this.watchedTutorials = watchedTutorials;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

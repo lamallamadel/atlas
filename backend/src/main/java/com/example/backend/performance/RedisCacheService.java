@@ -2,20 +2,17 @@ package com.example.backend.performance;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @ConditionalOnProperty(name = "cache.redis.enabled", havingValue = "true", matchIfMissing = true)
@@ -41,7 +38,9 @@ public class RedisCacheService {
     @Value("${cache.ttl.active-annonces:300}")
     private long activeAnnoncesTtl;
 
-    public RedisCacheService(@Autowired(required = false) StringRedisTemplate redisTemplate, ObjectMapper objectMapper) {
+    public RedisCacheService(
+            @Autowired(required = false) StringRedisTemplate redisTemplate,
+            ObjectMapper objectMapper) {
         this.redisTemplate = redisTemplate;
         this.objectMapper = objectMapper;
     }
@@ -63,8 +62,12 @@ public class RedisCacheService {
             String json = redisTemplate.opsForValue().get(key);
             if (json != null) {
                 logger.debug("Cache hit for active annonces");
-                List<T> result = objectMapper.readValue(json,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
+                List<T> result =
+                        objectMapper.readValue(
+                                json,
+                                objectMapper
+                                        .getTypeFactory()
+                                        .constructCollectionType(List.class, clazz));
                 return Optional.of(result);
             }
         } catch (Exception e) {
@@ -156,8 +159,12 @@ public class RedisCacheService {
             String json = redisTemplate.opsForValue().get(key);
             if (json != null) {
                 logger.debug("Cache hit for referential data '{}'", type);
-                List<T> result = objectMapper.readValue(json,
-                    objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
+                List<T> result =
+                        objectMapper.readValue(
+                                json,
+                                objectMapper
+                                        .getTypeFactory()
+                                        .constructCollectionType(List.class, clazz));
                 return Optional.of(result);
             }
         } catch (Exception e) {

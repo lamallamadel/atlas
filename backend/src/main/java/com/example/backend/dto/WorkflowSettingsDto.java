@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -24,10 +23,14 @@ public class WorkflowSettingsDto {
         this.statusTransitionRules = new HashMap<>();
     }
 
-    public WorkflowSettingsDto(List<String> enabledFeatures, List<String> defaultCaseTypes, Map<String, List<String>> statusTransitionRules) {
+    public WorkflowSettingsDto(
+            List<String> enabledFeatures,
+            List<String> defaultCaseTypes,
+            Map<String, List<String>> statusTransitionRules) {
         this.enabledFeatures = enabledFeatures != null ? enabledFeatures : new ArrayList<>();
         this.defaultCaseTypes = defaultCaseTypes != null ? defaultCaseTypes : new ArrayList<>();
-        this.statusTransitionRules = statusTransitionRules != null ? statusTransitionRules : new HashMap<>();
+        this.statusTransitionRules =
+                statusTransitionRules != null ? statusTransitionRules : new HashMap<>();
     }
 
     public List<String> getEnabledFeatures() {

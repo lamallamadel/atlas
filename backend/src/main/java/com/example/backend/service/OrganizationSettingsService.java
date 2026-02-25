@@ -6,9 +6,9 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.exception.UnauthorizedAccessException;
 import com.example.backend.repository.OrganizationSettingsRepository;
 import com.example.backend.util.TenantContext;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -18,9 +18,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class OrganizationSettingsService {
@@ -46,8 +43,14 @@ public class OrganizationSettingsService {
     public OrganizationSettingsResponse getSettings(String orgId) {
         logger.debug("Getting organization settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization settings not found for orgId: " + orgId));
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Organization settings not found for orgId: "
+                                                        + orgId));
 
         return mapToResponse(entity);
     }
@@ -66,13 +69,15 @@ public class OrganizationSettingsService {
 
     @Transactional
     @CacheEvict(value = CACHE_NAME, allEntries = true)
-    public OrganizationSettingsResponse createSettings(String orgId, OrganizationSettingsUpdateRequest request) {
+    public OrganizationSettingsResponse createSettings(
+            String orgId, OrganizationSettingsUpdateRequest request) {
         validateAdminAccess();
-        
+
         logger.debug("Creating organization settings for orgId={}", orgId);
 
         if (organizationSettingsRepository.existsByOrgId(orgId)) {
-            throw new IllegalArgumentException("Organization settings already exist for orgId: " + orgId);
+            throw new IllegalArgumentException(
+                    "Organization settings already exist for orgId: " + orgId);
         }
 
         OrganizationSettings entity = new OrganizationSettings();
@@ -89,13 +94,20 @@ public class OrganizationSettingsService {
 
     @Transactional
     @CacheEvict(value = CACHE_NAME, allEntries = true)
-    public OrganizationSettingsResponse updateSettings(String orgId, OrganizationSettingsUpdateRequest request) {
+    public OrganizationSettingsResponse updateSettings(
+            String orgId, OrganizationSettingsUpdateRequest request) {
         validateAdminAccess();
-        
+
         logger.debug("Updating organization settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization settings not found for orgId: " + orgId));
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Organization settings not found for orgId: "
+                                                        + orgId));
 
         updateEntityFromRequest(entity, request);
 
@@ -109,23 +121,28 @@ public class OrganizationSettingsService {
     @CacheEvict(value = CACHE_NAME, allEntries = true)
     public OrganizationSettingsResponse updateBranding(String orgId, BrandingSettingsDto branding) {
         validateAdminAccess();
-        
+
         logger.debug("Updating branding settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseGet(() -> {
-                    OrganizationSettings newEntity = new OrganizationSettings();
-                    newEntity.setOrgId(orgId);
-                    newEntity.setSettings(new HashMap<>());
-                    return newEntity;
-                });
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseGet(
+                                () -> {
+                                    OrganizationSettings newEntity = new OrganizationSettings();
+                                    newEntity.setOrgId(orgId);
+                                    newEntity.setSettings(new HashMap<>());
+                                    return newEntity;
+                                });
 
         Map<String, Object> settings = entity.getSettings();
         if (settings == null) {
             settings = new HashMap<>();
         }
 
-        settings.put("branding", objectMapper.convertValue(branding, new TypeReference<Map<String, Object>>() {}));
+        settings.put(
+                "branding",
+                objectMapper.convertValue(branding, new TypeReference<Map<String, Object>>() {}));
         entity.setSettings(settings);
 
         OrganizationSettings saved = organizationSettingsRepository.save(entity);
@@ -136,18 +153,22 @@ public class OrganizationSettingsService {
 
     @Transactional
     @CacheEvict(value = CACHE_NAME, allEntries = true)
-    public OrganizationSettingsResponse updateIntegrations(String orgId, IntegrationSettingsDto integrations) {
+    public OrganizationSettingsResponse updateIntegrations(
+            String orgId, IntegrationSettingsDto integrations) {
         validateAdminAccess();
-        
+
         logger.debug("Updating integration settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseGet(() -> {
-                    OrganizationSettings newEntity = new OrganizationSettings();
-                    newEntity.setOrgId(orgId);
-                    newEntity.setSettings(new HashMap<>());
-                    return newEntity;
-                });
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseGet(
+                                () -> {
+                                    OrganizationSettings newEntity = new OrganizationSettings();
+                                    newEntity.setOrgId(orgId);
+                                    newEntity.setSettings(new HashMap<>());
+                                    return newEntity;
+                                });
 
         Map<String, Object> settings = entity.getSettings();
         if (settings == null) {
@@ -155,7 +176,10 @@ public class OrganizationSettingsService {
         }
 
         IntegrationSettingsDto encryptedIntegrations = encryptIntegrationCredentials(integrations);
-        settings.put("integrations", objectMapper.convertValue(encryptedIntegrations, new TypeReference<Map<String, Object>>() {}));
+        settings.put(
+                "integrations",
+                objectMapper.convertValue(
+                        encryptedIntegrations, new TypeReference<Map<String, Object>>() {}));
         entity.setSettings(settings);
 
         OrganizationSettings saved = organizationSettingsRepository.save(entity);
@@ -168,23 +192,28 @@ public class OrganizationSettingsService {
     @CacheEvict(value = CACHE_NAME, allEntries = true)
     public OrganizationSettingsResponse updateWorkflow(String orgId, WorkflowSettingsDto workflow) {
         validateAdminAccess();
-        
+
         logger.debug("Updating workflow settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseGet(() -> {
-                    OrganizationSettings newEntity = new OrganizationSettings();
-                    newEntity.setOrgId(orgId);
-                    newEntity.setSettings(new HashMap<>());
-                    return newEntity;
-                });
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseGet(
+                                () -> {
+                                    OrganizationSettings newEntity = new OrganizationSettings();
+                                    newEntity.setOrgId(orgId);
+                                    newEntity.setSettings(new HashMap<>());
+                                    return newEntity;
+                                });
 
         Map<String, Object> settings = entity.getSettings();
         if (settings == null) {
             settings = new HashMap<>();
         }
 
-        settings.put("workflow", objectMapper.convertValue(workflow, new TypeReference<Map<String, Object>>() {}));
+        settings.put(
+                "workflow",
+                objectMapper.convertValue(workflow, new TypeReference<Map<String, Object>>() {}));
         entity.setSettings(settings);
 
         OrganizationSettings saved = organizationSettingsRepository.save(entity);
@@ -197,23 +226,28 @@ public class OrganizationSettingsService {
     @CacheEvict(value = CACHE_NAME, allEntries = true)
     public OrganizationSettingsResponse updateQuotas(String orgId, QuotaSettingsDto quotas) {
         validateAdminAccess();
-        
+
         logger.debug("Updating quota settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseGet(() -> {
-                    OrganizationSettings newEntity = new OrganizationSettings();
-                    newEntity.setOrgId(orgId);
-                    newEntity.setSettings(new HashMap<>());
-                    return newEntity;
-                });
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseGet(
+                                () -> {
+                                    OrganizationSettings newEntity = new OrganizationSettings();
+                                    newEntity.setOrgId(orgId);
+                                    newEntity.setSettings(new HashMap<>());
+                                    return newEntity;
+                                });
 
         Map<String, Object> settings = entity.getSettings();
         if (settings == null) {
             settings = new HashMap<>();
         }
 
-        settings.put("quotas", objectMapper.convertValue(quotas, new TypeReference<Map<String, Object>>() {}));
+        settings.put(
+                "quotas",
+                objectMapper.convertValue(quotas, new TypeReference<Map<String, Object>>() {}));
         entity.setSettings(settings);
 
         OrganizationSettings saved = organizationSettingsRepository.save(entity);
@@ -226,11 +260,12 @@ public class OrganizationSettingsService {
     @CacheEvict(value = CACHE_NAME, allEntries = true)
     public void deleteSettings(String orgId) {
         validateAdminAccess();
-        
+
         logger.debug("Deleting organization settings for orgId={}", orgId);
 
         if (!organizationSettingsRepository.existsByOrgId(orgId)) {
-            throw new ResourceNotFoundException("Organization settings not found for orgId: " + orgId);
+            throw new ResourceNotFoundException(
+                    "Organization settings not found for orgId: " + orgId);
         }
 
         organizationSettingsRepository.deleteByOrgId(orgId);
@@ -241,8 +276,14 @@ public class OrganizationSettingsService {
     public BrandingSettingsDto getBranding(String orgId) {
         logger.debug("Getting branding settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization settings not found for orgId: " + orgId));
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Organization settings not found for orgId: "
+                                                        + orgId));
 
         return extractBranding(entity.getSettings());
     }
@@ -250,11 +291,17 @@ public class OrganizationSettingsService {
     @Transactional(readOnly = true)
     public IntegrationSettingsDto getIntegrations(String orgId) {
         validateAdminAccess();
-        
+
         logger.debug("Getting integration settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization settings not found for orgId: " + orgId));
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Organization settings not found for orgId: "
+                                                        + orgId));
 
         IntegrationSettingsDto integrations = extractIntegrations(entity.getSettings());
         return decryptIntegrationCredentials(integrations);
@@ -264,8 +311,14 @@ public class OrganizationSettingsService {
     public WorkflowSettingsDto getWorkflow(String orgId) {
         logger.debug("Getting workflow settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization settings not found for orgId: " + orgId));
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Organization settings not found for orgId: "
+                                                        + orgId));
 
         return extractWorkflow(entity.getSettings());
     }
@@ -274,50 +327,72 @@ public class OrganizationSettingsService {
     public QuotaSettingsDto getQuotas(String orgId) {
         logger.debug("Getting quota settings for orgId={}", orgId);
 
-        OrganizationSettings entity = organizationSettingsRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("Organization settings not found for orgId: " + orgId));
+        OrganizationSettings entity =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Organization settings not found for orgId: "
+                                                        + orgId));
 
         return extractQuotas(entity.getSettings());
     }
 
     private void validateAdminAccess() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
+
         if (authentication == null || !authentication.isAuthenticated()) {
             throw new UnauthorizedAccessException("User is not authenticated");
         }
 
-        boolean isAdmin = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
+        boolean isAdmin =
+                authentication.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .anyMatch(authority -> authority.equals("ROLE_ADMIN"));
 
         if (!isAdmin) {
             logger.warn("Unauthorized access attempt by user: {}", authentication.getName());
-            throw new UnauthorizedAccessException("Only administrators can modify organization settings");
+            throw new UnauthorizedAccessException(
+                    "Only administrators can modify organization settings");
         }
     }
 
-    private void updateEntityFromRequest(OrganizationSettings entity, OrganizationSettingsUpdateRequest request) {
+    private void updateEntityFromRequest(
+            OrganizationSettings entity, OrganizationSettingsUpdateRequest request) {
         Map<String, Object> settings = entity.getSettings();
         if (settings == null) {
             settings = new HashMap<>();
         }
 
         if (request.getBranding() != null) {
-            settings.put("branding", objectMapper.convertValue(request.getBranding(), new TypeReference<Map<String, Object>>() {}));
+            settings.put(
+                    "branding",
+                    objectMapper.convertValue(
+                            request.getBranding(), new TypeReference<Map<String, Object>>() {}));
         }
 
         if (request.getIntegrations() != null) {
-            IntegrationSettingsDto encryptedIntegrations = encryptIntegrationCredentials(request.getIntegrations());
-            settings.put("integrations", objectMapper.convertValue(encryptedIntegrations, new TypeReference<Map<String, Object>>() {}));
+            IntegrationSettingsDto encryptedIntegrations =
+                    encryptIntegrationCredentials(request.getIntegrations());
+            settings.put(
+                    "integrations",
+                    objectMapper.convertValue(
+                            encryptedIntegrations, new TypeReference<Map<String, Object>>() {}));
         }
 
         if (request.getWorkflow() != null) {
-            settings.put("workflow", objectMapper.convertValue(request.getWorkflow(), new TypeReference<Map<String, Object>>() {}));
+            settings.put(
+                    "workflow",
+                    objectMapper.convertValue(
+                            request.getWorkflow(), new TypeReference<Map<String, Object>>() {}));
         }
 
         if (request.getQuotas() != null) {
-            settings.put("quotas", objectMapper.convertValue(request.getQuotas(), new TypeReference<Map<String, Object>>() {}));
+            settings.put(
+                    "quotas",
+                    objectMapper.convertValue(
+                            request.getQuotas(), new TypeReference<Map<String, Object>>() {}));
         }
 
         entity.setSettings(settings);
@@ -334,10 +409,10 @@ public class OrganizationSettingsService {
         Map<String, Object> settings = entity.getSettings();
         if (settings != null) {
             response.setBranding(extractBranding(settings));
-            
+
             IntegrationSettingsDto integrations = extractIntegrations(settings);
             response.setIntegrations(stripCredentialsForResponse(integrations));
-            
+
             response.setWorkflow(extractWorkflow(settings));
             response.setQuotas(extractQuotas(settings));
         }
@@ -405,7 +480,8 @@ public class OrganizationSettingsService {
         }
     }
 
-    private IntegrationSettingsDto encryptIntegrationCredentials(IntegrationSettingsDto integrations) {
+    private IntegrationSettingsDto encryptIntegrationCredentials(
+            IntegrationSettingsDto integrations) {
         IntegrationSettingsDto encrypted = new IntegrationSettingsDto();
 
         if (integrations.getWhatsapp() != null) {
@@ -436,7 +512,8 @@ public class OrganizationSettingsService {
         if (credentials.getCredentials() != null) {
             for (Map.Entry<String, String> entry : credentials.getCredentials().entrySet()) {
                 if (entry.getValue() != null && !entry.getValue().isEmpty()) {
-                    encryptedCreds.put(entry.getKey(), fieldEncryptionService.encrypt(entry.getValue()));
+                    encryptedCreds.put(
+                            entry.getKey(), fieldEncryptionService.encrypt(entry.getValue()));
                 }
             }
         }
@@ -445,7 +522,8 @@ public class OrganizationSettingsService {
         return encrypted;
     }
 
-    private IntegrationSettingsDto decryptIntegrationCredentials(IntegrationSettingsDto integrations) {
+    private IntegrationSettingsDto decryptIntegrationCredentials(
+            IntegrationSettingsDto integrations) {
         IntegrationSettingsDto decrypted = new IntegrationSettingsDto();
 
         if (integrations.getWhatsapp() != null) {
@@ -477,7 +555,8 @@ public class OrganizationSettingsService {
             for (Map.Entry<String, String> entry : credentials.getCredentials().entrySet()) {
                 if (entry.getValue() != null && !entry.getValue().isEmpty()) {
                     try {
-                        decryptedCreds.put(entry.getKey(), fieldEncryptionService.decrypt(entry.getValue()));
+                        decryptedCreds.put(
+                                entry.getKey(), fieldEncryptionService.decrypt(entry.getValue()));
                     } catch (Exception e) {
                         logger.error("Failed to decrypt credential key: {}", entry.getKey(), e);
                         decryptedCreds.put(entry.getKey(), "***DECRYPTION_ERROR***");
@@ -490,7 +569,8 @@ public class OrganizationSettingsService {
         return decrypted;
     }
 
-    private IntegrationSettingsDto stripCredentialsForResponse(IntegrationSettingsDto integrations) {
+    private IntegrationSettingsDto stripCredentialsForResponse(
+            IntegrationSettingsDto integrations) {
         IntegrationSettingsDto stripped = new IntegrationSettingsDto();
 
         if (integrations.getWhatsapp() != null) {
@@ -523,11 +603,11 @@ public class OrganizationSettingsService {
 
     public IntegrationTestResponse testIntegrationConnection(IntegrationTestRequest request) {
         validateAdminAccess();
-        
+
         logger.debug("Testing integration connection for provider: {}", request.getProviderType());
-        
+
         String providerType = request.getProviderType().toLowerCase();
-        
+
         try {
             switch (providerType) {
                 case "whatsapp":
@@ -537,7 +617,8 @@ public class OrganizationSettingsService {
                 case "sms":
                     return testSmsConnection(request);
                 default:
-                    return IntegrationTestResponse.failure("Unknown provider type: " + request.getProviderType());
+                    return IntegrationTestResponse.failure(
+                            "Unknown provider type: " + request.getProviderType());
             }
         } catch (Exception e) {
             logger.error("Integration test failed for provider: {}", providerType, e);
@@ -547,14 +628,14 @@ public class OrganizationSettingsService {
 
     private IntegrationTestResponse testWhatsAppConnection(IntegrationTestRequest request) {
         Map<String, String> credentials = request.getCredentials();
-        
+
         if (credentials == null || !credentials.containsKey("accessToken")) {
             return IntegrationTestResponse.failure("WhatsApp access token is required");
         }
 
         String accessToken = credentials.get("accessToken");
         String phoneNumberId = credentials.get("phoneNumberId");
-        
+
         if (accessToken == null || accessToken.isEmpty()) {
             return IntegrationTestResponse.failure("WhatsApp access token cannot be empty");
         }
@@ -564,51 +645,55 @@ public class OrganizationSettingsService {
         }
 
         logger.info("WhatsApp connection test successful for phone number ID: {}", phoneNumberId);
-        
+
         Map<String, Object> details = new HashMap<>();
         details.put("provider", "WhatsApp Cloud API");
         details.put("phoneNumberId", phoneNumberId);
-        
-        return IntegrationTestResponse.success("WhatsApp connection configured successfully", details);
+
+        return IntegrationTestResponse.success(
+                "WhatsApp connection configured successfully", details);
     }
 
     private IntegrationTestResponse testEmailConnection(IntegrationTestRequest request) {
         Map<String, String> credentials = request.getCredentials();
         Map<String, Object> config = request.getConfig();
-        
+
         if (credentials == null || config == null) {
-            return IntegrationTestResponse.failure("Email credentials and configuration are required");
+            return IntegrationTestResponse.failure(
+                    "Email credentials and configuration are required");
         }
 
         String apiKey = credentials.get("apiKey");
-        String provider = config.get("provider") != null ? config.get("provider").toString() : "sendgrid";
-        
+        String provider =
+                config.get("provider") != null ? config.get("provider").toString() : "sendgrid";
+
         if (apiKey == null || apiKey.isEmpty()) {
             return IntegrationTestResponse.failure("Email API key is required");
         }
 
         logger.info("Email connection test successful for provider: {}", provider);
-        
+
         Map<String, Object> details = new HashMap<>();
         details.put("provider", provider);
-        
+
         return IntegrationTestResponse.success("Email connection configured successfully", details);
     }
 
     private IntegrationTestResponse testSmsConnection(IntegrationTestRequest request) {
         Map<String, String> credentials = request.getCredentials();
         Map<String, Object> config = request.getConfig();
-        
+
         if (credentials == null) {
             return IntegrationTestResponse.failure("SMS credentials are required");
         }
 
         String accountSid = credentials.get("accountSid");
         String authToken = credentials.get("authToken");
-        String provider = config != null && config.get("provider") != null 
-            ? config.get("provider").toString() 
-            : "twilio";
-        
+        String provider =
+                config != null && config.get("provider") != null
+                        ? config.get("provider").toString()
+                        : "twilio";
+
         if (accountSid == null || accountSid.isEmpty()) {
             return IntegrationTestResponse.failure("SMS account SID is required");
         }
@@ -618,11 +703,11 @@ public class OrganizationSettingsService {
         }
 
         logger.info("SMS connection test successful for provider: {}", provider);
-        
+
         Map<String, Object> details = new HashMap<>();
         details.put("provider", provider);
         details.put("accountSid", accountSid);
-        
+
         return IntegrationTestResponse.success("SMS connection configured successfully", details);
     }
 }

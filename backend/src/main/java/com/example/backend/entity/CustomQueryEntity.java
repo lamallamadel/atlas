@@ -2,12 +2,11 @@ package com.example.backend.entity;
 
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.Type;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "custom_query")

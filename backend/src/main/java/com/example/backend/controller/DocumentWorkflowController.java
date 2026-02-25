@@ -4,13 +4,12 @@ import com.example.backend.dto.*;
 import com.example.backend.entity.*;
 import com.example.backend.service.*;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/document-workflows")
@@ -43,23 +42,23 @@ public class DocumentWorkflowController {
             @PathVariable Long workflowId,
             @RequestHeader("X-Org-Id") String orgId,
             @RequestHeader("X-User-Id") String userId) {
-        DocumentWorkflowResponse response = workflowService.startWorkflow(workflowId, orgId, userId);
+        DocumentWorkflowResponse response =
+                workflowService.startWorkflow(workflowId, orgId, userId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{workflowId}")
     public ResponseEntity<DocumentWorkflowResponse> getWorkflow(
-            @PathVariable Long workflowId,
-            @RequestHeader("X-Org-Id") String orgId) {
+            @PathVariable Long workflowId, @RequestHeader("X-Org-Id") String orgId) {
         DocumentWorkflowResponse response = workflowService.getWorkflow(workflowId, orgId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/document/{documentId}")
     public ResponseEntity<List<DocumentWorkflowResponse>> getWorkflowsByDocument(
-            @PathVariable Long documentId,
-            @RequestHeader("X-Org-Id") String orgId) {
-        List<DocumentWorkflowResponse> workflows = workflowService.getWorkflowsByDocument(documentId, orgId);
+            @PathVariable Long documentId, @RequestHeader("X-Org-Id") String orgId) {
+        List<DocumentWorkflowResponse> workflows =
+                workflowService.getWorkflowsByDocument(documentId, orgId);
         return ResponseEntity.ok(workflows);
     }
 
@@ -84,17 +83,16 @@ public class DocumentWorkflowController {
 
     @GetMapping("/approvals/pending")
     public ResponseEntity<List<WorkflowApprovalEntity>> getPendingApprovals(
-            @RequestHeader("X-Org-Id") String orgId,
-            @RequestHeader("X-User-Id") String userId) {
+            @RequestHeader("X-Org-Id") String orgId, @RequestHeader("X-User-Id") String userId) {
         List<WorkflowApprovalEntity> approvals = workflowService.getPendingApprovals(userId, orgId);
         return ResponseEntity.ok(approvals);
     }
 
     @GetMapping("/documents/{documentId}/audit")
     public ResponseEntity<List<DocumentAuditEntity>> getDocumentAuditTrail(
-            @PathVariable Long documentId,
-            @RequestHeader("X-Org-Id") String orgId) {
-        List<DocumentAuditEntity> auditTrail = workflowService.getDocumentAuditTrail(documentId, orgId);
+            @PathVariable Long documentId, @RequestHeader("X-Org-Id") String orgId) {
+        List<DocumentAuditEntity> auditTrail =
+                workflowService.getDocumentAuditTrail(documentId, orgId);
         return ResponseEntity.ok(auditTrail);
     }
 
@@ -106,7 +104,8 @@ public class DocumentWorkflowController {
             @RequestHeader("X-Org-Id") String orgId,
             @RequestHeader("X-User-Id") String userId) {
         try {
-            DocumentVersionEntity version = versionService.createVersion(documentId, file, versionNotes, orgId, userId);
+            DocumentVersionEntity version =
+                    versionService.createVersion(documentId, file, versionNotes, orgId, userId);
             return ResponseEntity.status(HttpStatus.CREATED).body(version);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -115,16 +114,14 @@ public class DocumentWorkflowController {
 
     @GetMapping("/documents/{documentId}/versions")
     public ResponseEntity<List<DocumentVersionEntity>> getDocumentVersions(
-            @PathVariable Long documentId,
-            @RequestHeader("X-Org-Id") String orgId) {
+            @PathVariable Long documentId, @RequestHeader("X-Org-Id") String orgId) {
         List<DocumentVersionEntity> versions = versionService.getVersions(documentId, orgId);
         return ResponseEntity.ok(versions);
     }
 
     @GetMapping("/documents/{documentId}/versions/current")
     public ResponseEntity<DocumentVersionEntity> getCurrentVersion(
-            @PathVariable Long documentId,
-            @RequestHeader("X-Org-Id") String orgId) {
+            @PathVariable Long documentId, @RequestHeader("X-Org-Id") String orgId) {
         DocumentVersionEntity version = versionService.getCurrentVersion(documentId, orgId);
         return ResponseEntity.ok(version);
     }
@@ -143,11 +140,12 @@ public class DocumentWorkflowController {
     public ResponseEntity<Map<String, Object>> compareVersions(
             @Valid @RequestBody DocumentVersionCompareRequest request,
             @RequestHeader("X-Org-Id") String orgId) {
-        Map<String, Object> comparison = versionService.compareVersions(
-                request.getDocumentId(),
-                request.getFromVersion(),
-                request.getToVersion(),
-                orgId);
+        Map<String, Object> comparison =
+                versionService.compareVersions(
+                        request.getDocumentId(),
+                        request.getFromVersion(),
+                        request.getToVersion(),
+                        orgId);
         return ResponseEntity.ok(comparison);
     }
 
@@ -167,8 +165,7 @@ public class DocumentWorkflowController {
 
     @GetMapping("/templates/{templateId}")
     public ResponseEntity<WorkflowTemplateEntity> getTemplate(
-            @PathVariable Long templateId,
-            @RequestHeader("X-Org-Id") String orgId) {
+            @PathVariable Long templateId, @RequestHeader("X-Org-Id") String orgId) {
         WorkflowTemplateEntity template = templateService.getTemplate(templateId, orgId);
         return ResponseEntity.ok(template);
     }
@@ -178,7 +175,8 @@ public class DocumentWorkflowController {
             @RequestBody WorkflowTemplateEntity template,
             @RequestHeader("X-Org-Id") String orgId,
             @RequestHeader("X-User-Id") String userId) {
-        WorkflowTemplateEntity created = templateService.createCustomTemplate(template, orgId, userId);
+        WorkflowTemplateEntity created =
+                templateService.createCustomTemplate(template, orgId, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -187,14 +185,14 @@ public class DocumentWorkflowController {
             @PathVariable Long templateId,
             @RequestBody WorkflowTemplateEntity template,
             @RequestHeader("X-Org-Id") String orgId) {
-        WorkflowTemplateEntity updated = templateService.updateTemplate(templateId, template, orgId);
+        WorkflowTemplateEntity updated =
+                templateService.updateTemplate(templateId, template, orgId);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/templates/{templateId}")
     public ResponseEntity<Void> deleteTemplate(
-            @PathVariable Long templateId,
-            @RequestHeader("X-Org-Id") String orgId) {
+            @PathVariable Long templateId, @RequestHeader("X-Org-Id") String orgId) {
         templateService.deleteTemplate(templateId, orgId);
         return ResponseEntity.noContent().build();
     }

@@ -54,12 +54,11 @@ class DossierControllerTest {
 
     @Autowired private PartiePrenanteRepository partiePrenanteRepository;
 
-
     private <T extends MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-            .header(ORG_ID_HEADER, ORG_ID)
-            .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-            .header("Authorization", "Bearer mock-token");
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                        .header("Authorization", "Bearer mock-token");
     }
 
     @BeforeEach

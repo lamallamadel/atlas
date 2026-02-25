@@ -1,10 +1,9 @@
 package com.example.backend.service;
 
+import java.util.Locale;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
-
-import java.util.Locale;
 
 @Service
 public class I18nService {
@@ -35,7 +34,8 @@ public class I18nService {
         return getMessageOrDefault(code, args, defaultMessage, LocaleContextHolder.getLocale());
     }
 
-    public String getMessageOrDefault(String code, Object[] args, String defaultMessage, Locale locale) {
+    public String getMessageOrDefault(
+            String code, Object[] args, String defaultMessage, Locale locale) {
         return messageSource.getMessage(code, args, defaultMessage, locale);
     }
 
@@ -49,7 +49,7 @@ public class I18nService {
     }
 
     public String getSuccessMessage(String operation, String entityType) {
-        return getMessage("success." + operation, new Object[]{entityType});
+        return getMessage("success." + operation, new Object[] {entityType});
     }
 
     public String getEmailSubject(String emailType) {

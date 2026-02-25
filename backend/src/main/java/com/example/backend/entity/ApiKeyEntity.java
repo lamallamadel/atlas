@@ -6,10 +6,12 @@ import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "api_key", indexes = {
-    @Index(name = "idx_api_key_key_hash", columnList = "key_hash"),
-    @Index(name = "idx_api_key_org_status", columnList = "org_id, status")
-})
+@Table(
+        name = "api_key",
+        indexes = {
+            @Index(name = "idx_api_key_key_hash", columnList = "key_hash"),
+            @Index(name = "idx_api_key_org_status", columnList = "org_id, status")
+        })
 public class ApiKeyEntity extends BaseEntity {
 
     @Id
@@ -51,11 +53,15 @@ public class ApiKeyEntity extends BaseEntity {
     private String scopes;
 
     public enum ApiKeyStatus {
-        ACTIVE, REVOKED, EXPIRED
+        ACTIVE,
+        REVOKED,
+        EXPIRED
     }
 
     public enum ApiTier {
-        FREE, PRO, ENTERPRISE
+        FREE,
+        PRO,
+        ENTERPRISE
     }
 
     public Long getId() {

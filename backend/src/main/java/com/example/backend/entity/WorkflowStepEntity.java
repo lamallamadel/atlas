@@ -3,14 +3,13 @@ package com.example.backend.entity;
 import com.example.backend.entity.enums.WorkflowStepStatus;
 import com.example.backend.entity.enums.WorkflowStepType;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "workflow_step")

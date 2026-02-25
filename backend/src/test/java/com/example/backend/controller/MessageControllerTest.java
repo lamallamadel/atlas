@@ -49,15 +49,17 @@ class MessageControllerTest {
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder) {
         return (T)
-                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                builder.header(ORG_ID_HEADER, ORG_ID)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
                         .header("Authorization", "Bearer mock-token");
     }
 
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder, String orgId) {
         return (T)
-                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                    .header("Authorization", "Bearer mock-token");
+                builder.header(ORG_ID_HEADER, orgId)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                        .header("Authorization", "Bearer mock-token");
     }
 
     @BeforeEach

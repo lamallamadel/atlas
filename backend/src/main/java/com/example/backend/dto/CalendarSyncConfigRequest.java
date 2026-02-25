@@ -3,16 +3,15 @@ package com.example.backend.dto;
 import jakarta.validation.constraints.NotBlank;
 
 public class CalendarSyncConfigRequest {
-    
+
     @NotBlank(message = "Provider is required")
     private String provider;
-    
+
     private Boolean autoSync;
-    
+
     private Integer syncInterval;
 
-    public CalendarSyncConfigRequest() {
-    }
+    public CalendarSyncConfigRequest() {}
 
     public String getProvider() {
         return provider;

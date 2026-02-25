@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.ReportFormat;
 import com.example.backend.entity.enums.ReportFrequency;
-
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;

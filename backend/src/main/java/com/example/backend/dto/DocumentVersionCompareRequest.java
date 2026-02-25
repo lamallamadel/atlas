@@ -4,14 +4,11 @@ import jakarta.validation.constraints.NotNull;
 
 public class DocumentVersionCompareRequest {
 
-    @NotNull
-    private Long documentId;
+    @NotNull private Long documentId;
 
-    @NotNull
-    private Integer fromVersion;
+    @NotNull private Integer fromVersion;
 
-    @NotNull
-    private Integer toVersion;
+    @NotNull private Integer toVersion;
 
     public Long getDocumentId() {
         return documentId;

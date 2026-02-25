@@ -7,12 +7,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
+import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -71,8 +68,11 @@ public class RateLimitFilter extends OncePerRequestFilter {
 
                     rateLimitExceeded = true;
                     rateLimitType = "organization";
-                    logger.warn("Rate limit exceeded for organization. OrgId: {}, Path: {}, IP: {}", 
-                            orgId, path, getClientIpAddress(request));
+                    logger.warn(
+                            "Rate limit exceeded for organization. OrgId: {}, Path: {}, IP: {}",
+                            orgId,
+                            path,
+                            getClientIpAddress(request));
                 }
             } else if (isPublicEndpoint(path)) {
                 String ipAddress = getClientIpAddress(request);
@@ -80,7 +80,10 @@ public class RateLimitFilter extends OncePerRequestFilter {
                 if (!allowed) {
                     rateLimitExceeded = true;
                     rateLimitType = "IP address";
-                    logger.warn("Rate limit exceeded for public endpoint. IP: {}, Path: {}", ipAddress, path);
+                    logger.warn(
+                            "Rate limit exceeded for public endpoint. IP: {}, Path: {}",
+                            ipAddress,
+                            path);
                 }
             }
         }
@@ -93,11 +96,14 @@ public class RateLimitFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private void sendRateLimitExceededResponse(HttpServletResponse response, String rateLimitType) throws IOException {
-        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(
-                HttpStatus.TOO_MANY_REQUESTS,
-                String.format("Rate limit exceeded for %s. Please try again later.", rateLimitType)
-        );
+    private void sendRateLimitExceededResponse(HttpServletResponse response, String rateLimitType)
+            throws IOException {
+        ProblemDetail problemDetail =
+                ProblemDetail.forStatusAndDetail(
+                        HttpStatus.TOO_MANY_REQUESTS,
+                        String.format(
+                                "Rate limit exceeded for %s. Please try again later.",
+                                rateLimitType));
         problemDetail.setTitle("Too Many Requests");
         problemDetail.setProperty("retryAfter", RETRY_AFTER_SECONDS);
         problemDetail.setProperty("limitType", rateLimitType);
@@ -119,8 +125,7 @@ public class RateLimitFilter extends OncePerRequestFilter {
     }
 
     private boolean isPublicEndpoint(String path) {
-        return path.startsWith("/api/v1/webhooks/")
-                || path.startsWith("/api/v1/public/");
+        return path.startsWith("/api/v1/webhooks/") || path.startsWith("/api/v1/public/");
     }
 
     private String getClientIpAddress(HttpServletRequest request) {

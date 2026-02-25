@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.WebhookSubscriptionEntity;
-
 import java.time.LocalDateTime;
 
 public class WebhookSubscriptionResponse {
@@ -21,7 +20,8 @@ public class WebhookSubscriptionResponse {
     private LocalDateTime createdAt;
     private String secret;
 
-    public static WebhookSubscriptionResponse from(WebhookSubscriptionEntity entity, boolean includeSecret) {
+    public static WebhookSubscriptionResponse from(
+            WebhookSubscriptionEntity entity, boolean includeSecret) {
         WebhookSubscriptionResponse response = new WebhookSubscriptionResponse();
         response.setId(entity.getId());
         response.setName(entity.getName());

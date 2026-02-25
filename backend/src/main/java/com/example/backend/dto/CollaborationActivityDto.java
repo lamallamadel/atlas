@@ -11,10 +11,15 @@ public class CollaborationActivityDto {
     private Object data;
     private Instant timestamp;
 
-    public CollaborationActivityDto() {
-    }
+    public CollaborationActivityDto() {}
 
-    public CollaborationActivityDto(String userId, String username, Long dossierId, String activityType, String description, Object data) {
+    public CollaborationActivityDto(
+            String userId,
+            String username,
+            Long dossierId,
+            String activityType,
+            String description,
+            Object data) {
         this.userId = userId;
         this.username = username;
         this.dossierId = dossierId;

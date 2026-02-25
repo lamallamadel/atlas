@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 public class IntegrationTestRequest {
@@ -15,10 +14,10 @@ public class IntegrationTestRequest {
 
     private Map<String, Object> config;
 
-    public IntegrationTestRequest() {
-    }
+    public IntegrationTestRequest() {}
 
-    public IntegrationTestRequest(String providerType, Map<String, String> credentials, Map<String, Object> config) {
+    public IntegrationTestRequest(
+            String providerType, Map<String, String> credentials, Map<String, Object> config) {
         this.providerType = providerType;
         this.credentials = credentials;
         this.config = config;

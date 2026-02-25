@@ -14,7 +14,6 @@ public class HibernateStatisticsLogger {
     private static final Logger logger = LoggerFactory.getLogger(HibernateStatisticsLogger.class);
     private final Statistics statistics;
 
-
     public HibernateStatisticsLogger(EntityManagerFactory entityManagerFactory) {
         this.statistics = entityManagerFactory.unwrap(SessionFactory.class).getStatistics();
     }
@@ -66,14 +65,18 @@ public class HibernateStatisticsLogger {
         long queryExecutionCount = statistics.getQueryExecutionCount();
 
         if (entityFetchCount > queryExecutionCount * 10) {
-            logger.warn("⚠️ POTENTIAL N+1 QUERY DETECTED: Entity fetch count ({}) is much higher than query count ({})",
-                entityFetchCount, queryExecutionCount);
+            logger.warn(
+                    "⚠️ POTENTIAL N+1 QUERY DETECTED: Entity fetch count ({}) is much higher than query count ({})",
+                    entityFetchCount,
+                    queryExecutionCount);
             logger.warn("Consider using JOIN FETCH or @EntityGraph to optimize queries");
         }
 
         if (collectionFetchCount > queryExecutionCount * 5) {
-            logger.warn("⚠️ POTENTIAL N+1 QUERY DETECTED: Collection fetch count ({}) is much higher than query count ({})",
-                collectionFetchCount, queryExecutionCount);
+            logger.warn(
+                    "⚠️ POTENTIAL N+1 QUERY DETECTED: Collection fetch count ({}) is much higher than query count ({})",
+                    collectionFetchCount,
+                    queryExecutionCount);
             logger.warn("Consider using JOIN FETCH for collections or batch fetching");
         }
     }
@@ -87,8 +90,11 @@ public class HibernateStatisticsLogger {
             long avgTime = executionCount > 0 ? totalTime / executionCount : 0;
 
             if (executionCount > 100) {
-                logger.info("Query: {} | Executions: {} | Avg Time: {}ms",
-                    truncateQuery(query), executionCount, avgTime);
+                logger.info(
+                        "Query: {} | Executions: {} | Avg Time: {}ms",
+                        truncateQuery(query),
+                        executionCount,
+                        avgTime);
             }
         }
     }

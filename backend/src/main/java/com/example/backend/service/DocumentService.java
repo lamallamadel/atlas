@@ -1,13 +1,13 @@
 package com.example.backend.service;
 
+import com.example.backend.brain.BrainClientService;
+import com.example.backend.brain.dto.DocumentVerifyRequest;
+import com.example.backend.brain.dto.DocumentVerifyResponse;
 import com.example.backend.dto.DocumentMapper;
 import com.example.backend.dto.DocumentResponse;
 import com.example.backend.entity.DocumentEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.exception.FileValidationException;
-import com.example.backend.brain.BrainClientService;
-import com.example.backend.brain.dto.DocumentVerifyRequest;
-import com.example.backend.brain.dto.DocumentVerifyResponse;
 import com.example.backend.repository.DocumentRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
@@ -36,18 +36,19 @@ public class DocumentService {
 
     private static final Logger logger = LoggerFactory.getLogger(DocumentService.class);
 
-    private static final List<String> ALLOWED_CONTENT_TYPES = Arrays.asList(
-            "application/pdf",
-            "image/jpeg",
-            "image/jpg",
-            "image/png",
-            "image/gif",
-            "application/msword",
-            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            "application/vnd.ms-excel",
-            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            "text/plain",
-            "text/csv");
+    private static final List<String> ALLOWED_CONTENT_TYPES =
+            Arrays.asList(
+                    "application/pdf",
+                    "image/jpeg",
+                    "image/jpg",
+                    "image/png",
+                    "image/gif",
+                    "application/msword",
+                    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/vnd.ms-excel",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "text/plain",
+                    "text/csv");
 
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -80,11 +81,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository
-                .findById(dossierId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(
-                                "Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -100,8 +103,9 @@ public class DocumentService {
             long size = file.getSize();
 
             InputStream inputStream = file.getInputStream();
-            String storagePath = fileStorageStrategy.store(
-                    orgId, dossierId, fileName, inputStream, size, contentType);
+            String storagePath =
+                    fileStorageStrategy.store(
+                            orgId, dossierId, fileName, inputStream, size, contentType);
 
             DocumentEntity document = new DocumentEntity();
             document.setOrgId(orgId);
@@ -146,11 +150,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        DocumentEntity document = documentRepository
-                .findById(documentId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(
-                                "Document not found with id: " + documentId));
+        DocumentEntity document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Document not found with id: " + documentId));
 
         if (!orgId.equals(document.getOrgId())) {
             throw new EntityNotFoundException("Document not found with id: " + documentId);
@@ -166,11 +172,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        DocumentEntity document = documentRepository
-                .findById(documentId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(
-                                "Document not found with id: " + documentId));
+        DocumentEntity document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Document not found with id: " + documentId));
 
         if (!orgId.equals(document.getOrgId())) {
             throw new EntityNotFoundException("Document not found with id: " + documentId);
@@ -193,11 +201,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        DocumentEntity document = documentRepository
-                .findById(documentId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(
-                                "Document not found with id: " + documentId));
+        DocumentEntity document =
+                documentRepository
+                        .findById(documentId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Document not found with id: " + documentId));
 
         if (!orgId.equals(document.getOrgId())) {
             throw new EntityNotFoundException("Document not found with id: " + documentId);
@@ -213,11 +223,13 @@ public class DocumentService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        Dossier dossier = dossierRepository
-                .findById(dossierId)
-                .orElseThrow(
-                        () -> new EntityNotFoundException(
-                                "Dossier not found with id: " + dossierId));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Dossier not found with id: " + dossierId));
 
         if (!orgId.equals(dossier.getOrgId())) {
             throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
@@ -259,23 +271,28 @@ public class DocumentService {
             request.setCategory(document.getCategory());
             request.setFileName(document.getFileName());
 
-            Optional<DocumentVerifyResponse> responseOpt = brainClientService.verifyDocument(request);
+            Optional<DocumentVerifyResponse> responseOpt =
+                    brainClientService.verifyDocument(request);
             if (responseOpt.isPresent()) {
                 DocumentVerifyResponse response = responseOpt.get();
                 // We update the document directly with the AI's analysis
                 // In a real application, you might want to store this in a separate table or
                 // JSON column
-                String flagStr = response.getFlags() != null && !response.getFlags().isEmpty()
-                        ? " | Flags: " + String.join(",", response.getFlags())
-                        : "";
+                String flagStr =
+                        response.getFlags() != null && !response.getFlags().isEmpty()
+                                ? " | Flags: " + String.join(",", response.getFlags())
+                                : "";
 
                 String valStatus = response.isValid() ? "VALIDE" : "INVALIDE";
                 // Misusing content_type just as a quick mockup property for frontend display
                 document.setContentType(document.getContentType() + " | AI_STATUS:" + valStatus);
                 documentRepository.save(document);
 
-                logger.info("AI Verification complete for doc ID {}: Valid={} Confidence={}",
-                        document.getId(), response.isValid(), response.getConfidence());
+                logger.info(
+                        "AI Verification complete for doc ID {}: Valid={} Confidence={}",
+                        document.getId(),
+                        response.isValid(),
+                        response.getConfidence());
             }
         } catch (Exception e) {
             logger.warn("AI verification failed for document ID {}", document.getId(), e);

@@ -23,7 +23,10 @@ public class DossierResponseV2 {
     @Schema(description = "Lead contact information")
     private LeadInfoV2 lead;
 
-    @Schema(description = "Dossier notes", example = "Customer interested in property X", nullable = true)
+    @Schema(
+            description = "Dossier notes",
+            example = "Customer interested in property X",
+            nullable = true)
     private String notes;
 
     @Schema(description = "Current status of the dossier", example = "NEW")
@@ -55,6 +58,7 @@ public class DossierResponseV2 {
 
     @Schema(description = "Additional metadata")
     private Map<String, Object> metadata;
+
     private List<com.example.backend.dto.LeadActivityResponse> recentActivities;
 
     public static class AnnonceInfoV2 {
@@ -131,7 +135,9 @@ public class DossierResponseV2 {
         @Schema(description = "Timestamp when created (ISO-8601)", example = "2024-01-01T12:00:00Z")
         private Instant createdAt;
 
-        @Schema(description = "Timestamp when last updated (ISO-8601)", example = "2024-01-01T12:00:00Z")
+        @Schema(
+                description = "Timestamp when last updated (ISO-8601)",
+                example = "2024-01-01T12:00:00Z")
         private Instant updatedAt;
 
         @Schema(description = "User who created the resource")
@@ -297,7 +303,8 @@ public class DossierResponseV2 {
         return recentActivities;
     }
 
-    public void setRecentActivities(List<com.example.backend.dto.LeadActivityResponse> recentActivities) {
+    public void setRecentActivities(
+            List<com.example.backend.dto.LeadActivityResponse> recentActivities) {
         this.recentActivities = recentActivities;
     }
 }

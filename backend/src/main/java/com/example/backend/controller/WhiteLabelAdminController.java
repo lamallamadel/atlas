@@ -6,17 +6,18 @@ import com.example.backend.service.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/admin/white-label")
 @PreAuthorize("hasRole('SUPER_ADMIN')")
-@Tag(name = "White-Label Admin", description = "Super-admin APIs for managing tenant branding and configuration")
+@Tag(
+        name = "White-Label Admin",
+        description = "Super-admin APIs for managing tenant branding and configuration")
 public class WhiteLabelAdminController {
 
     private final WhiteLabelService whiteLabelService;
@@ -42,8 +43,7 @@ public class WhiteLabelAdminController {
     @PutMapping("/{orgId}")
     @Operation(summary = "Update white-label configuration")
     public ResponseEntity<WhiteLabelConfigEntity> updateConfig(
-            @PathVariable String orgId,
-            @Valid @RequestBody WhiteLabelConfigEntity config) {
+            @PathVariable String orgId, @Valid @RequestBody WhiteLabelConfigEntity config) {
         WhiteLabelConfigEntity updated = whiteLabelService.createOrUpdate(orgId, config);
         return ResponseEntity.ok(updated);
     }
@@ -60,9 +60,7 @@ public class WhiteLabelAdminController {
     public ResponseEntity<String> getThemeCss(@PathVariable String orgId) {
         Map<String, String> theme = themeService.getTenantTheme(orgId);
         String css = themeService.generateCssProperties(theme);
-        return ResponseEntity.ok()
-                .header("Content-Type", "text/css")
-                .body(css);
+        return ResponseEntity.ok().header("Content-Type", "text/css").body(css);
     }
 
     @GetMapping("/{orgId}/features")
@@ -78,10 +76,15 @@ public class WhiteLabelAdminController {
             @PathVariable String orgId,
             @PathVariable String featureKey,
             @RequestParam boolean enabled) {
-        
-        FeatureFlagEntity feature = featureFlagRepository.findByOrgIdAndFeatureKey(orgId, featureKey)
-                .orElseThrow(() -> new IllegalArgumentException("Feature not found: " + featureKey));
-        
+
+        FeatureFlagEntity feature =
+                featureFlagRepository
+                        .findByOrgIdAndFeatureKey(orgId, featureKey)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Feature not found: " + featureKey));
+
         feature.setEnabled(enabled);
         FeatureFlagEntity updated = featureFlagRepository.save(feature);
         return ResponseEntity.ok(updated);
@@ -90,14 +93,8 @@ public class WhiteLabelAdminController {
     @PutMapping("/{orgId}/ssl")
     @Operation(summary = "Update SSL certificate status")
     public ResponseEntity<Void> updateSslStatus(
-            @PathVariable String orgId,
-            @RequestBody Map<String, Object> sslInfo) {
-        whiteLabelService.updateSslCertificate(
-            orgId,
-            (String) sslInfo.get("status"),
-            null,
-            null
-        );
+            @PathVariable String orgId, @RequestBody Map<String, Object> sslInfo) {
+        whiteLabelService.updateSslCertificate(orgId, (String) sslInfo.get("status"), null, null);
         return ResponseEntity.ok().build();
     }
 }

@@ -3,16 +3,15 @@ package com.example.backend.service;
 import com.example.backend.entity.WhiteLabelConfigEntity;
 import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.WhiteLabelConfigRepository;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 public class WhiteLabelService {
@@ -27,21 +26,29 @@ public class WhiteLabelService {
     @Transactional(readOnly = true)
     @Cacheable(value = "whiteLabelConfig", key = "#orgId")
     public WhiteLabelConfigEntity getConfig(String orgId) {
-        return repository.findByOrgId(orgId)
-                .orElseThrow(() -> new ResourceNotFoundException("White-label config not found for orgId: " + orgId));
+        return repository
+                .findByOrgId(orgId)
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        "White-label config not found for orgId: " + orgId));
     }
 
     @Transactional(readOnly = true)
     public WhiteLabelConfigEntity getConfigByDomain(String domain) {
-        return repository.findByCustomDomain(domain)
-                .orElseThrow(() -> new ResourceNotFoundException("White-label config not found for domain: " + domain));
+        return repository
+                .findByCustomDomain(domain)
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        "White-label config not found for domain: " + domain));
     }
 
     @Transactional
     @CacheEvict(value = "whiteLabelConfig", key = "#orgId")
     public WhiteLabelConfigEntity createOrUpdate(String orgId, WhiteLabelConfigEntity config) {
         WhiteLabelConfigEntity existing = repository.findByOrgId(orgId).orElse(null);
-        
+
         if (existing != null) {
             updateExistingConfig(existing, config);
             return repository.save(existing);
@@ -54,7 +61,8 @@ public class WhiteLabelService {
         }
     }
 
-    private void updateExistingConfig(WhiteLabelConfigEntity existing, WhiteLabelConfigEntity updated) {
+    private void updateExistingConfig(
+            WhiteLabelConfigEntity existing, WhiteLabelConfigEntity updated) {
         if (updated.getLogoUrl() != null) {
             existing.setLogoUrl(updated.getLogoUrl());
         }
@@ -95,7 +103,8 @@ public class WhiteLabelService {
 
     @Transactional
     @CacheEvict(value = "whiteLabelConfig", key = "#orgId")
-    public void updateSslCertificate(String orgId, String status, LocalDateTime issuedAt, LocalDateTime expiresAt) {
+    public void updateSslCertificate(
+            String orgId, String status, LocalDateTime issuedAt, LocalDateTime expiresAt) {
         WhiteLabelConfigEntity config = getConfig(orgId);
         config.setSslCertificateStatus(status);
         config.setSslCertificateIssuedAt(issuedAt);

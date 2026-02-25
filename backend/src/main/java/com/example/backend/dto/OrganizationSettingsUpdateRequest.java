@@ -4,20 +4,15 @@ import jakarta.validation.Valid;
 
 public class OrganizationSettingsUpdateRequest {
 
-    @Valid
-    private BrandingSettingsDto branding;
+    @Valid private BrandingSettingsDto branding;
 
-    @Valid
-    private IntegrationSettingsDto integrations;
+    @Valid private IntegrationSettingsDto integrations;
 
-    @Valid
-    private WorkflowSettingsDto workflow;
+    @Valid private WorkflowSettingsDto workflow;
 
-    @Valid
-    private QuotaSettingsDto quotas;
+    @Valid private QuotaSettingsDto quotas;
 
-    public OrganizationSettingsUpdateRequest() {
-    }
+    public OrganizationSettingsUpdateRequest() {}
 
     public BrandingSettingsDto getBranding() {
         return branding;

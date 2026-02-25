@@ -9,20 +9,24 @@ public class BrandingSettingsDto {
     @Size(max = 1000, message = "Logo URL must not exceed 1000 characters")
     private String logo;
 
-    @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Primary color must be a valid hex color (e.g., #FF5733)")
+    @Pattern(
+            regexp = "^#[0-9A-Fa-f]{6}$",
+            message = "Primary color must be a valid hex color (e.g., #FF5733)")
     private String primaryColor;
 
-    @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Secondary color must be a valid hex color (e.g., #33FF57)")
+    @Pattern(
+            regexp = "^#[0-9A-Fa-f]{6}$",
+            message = "Secondary color must be a valid hex color (e.g., #33FF57)")
     private String secondaryColor;
 
     @NotBlank(message = "Company name is required")
     @Size(max = 255, message = "Company name must not exceed 255 characters")
     private String companyName;
 
-    public BrandingSettingsDto() {
-    }
+    public BrandingSettingsDto() {}
 
-    public BrandingSettingsDto(String logo, String primaryColor, String secondaryColor, String companyName) {
+    public BrandingSettingsDto(
+            String logo, String primaryColor, String secondaryColor, String companyName) {
         this.logo = logo;
         this.primaryColor = primaryColor;
         this.secondaryColor = secondaryColor;

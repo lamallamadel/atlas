@@ -10,10 +10,15 @@ public class RateLimitStatsDto {
     private Long ipRejections;
     private Double rejectionRate;
 
-    public RateLimitStatsDto() {
-    }
+    public RateLimitStatsDto() {}
 
-    public RateLimitStatsDto(Long totalHits, Long totalRejections, Long orgHits, Long orgRejections, Long ipHits, Long ipRejections) {
+    public RateLimitStatsDto(
+            Long totalHits,
+            Long totalRejections,
+            Long orgHits,
+            Long orgRejections,
+            Long ipHits,
+            Long ipRejections) {
         this.totalHits = totalHits;
         this.totalRejections = totalRejections;
         this.orgHits = orgHits;

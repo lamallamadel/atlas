@@ -77,13 +77,12 @@ class UserPreferencesControllerTest {
     private static final String ORG_ID = "org123";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-    T withOrgHeaders(T builder) {
+            T withOrgHeaders(T builder) {
         return (T)
-            builder.header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                .header("Authorization", "Bearer mock-token");
+                builder.header(ORG_ID_HEADER, ORG_ID)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                        .header("Authorization", "Bearer mock-token");
     }
 
     @Test
@@ -92,7 +91,9 @@ class UserPreferencesControllerTest {
         UserPreferencesDTO dto = createTestDTO();
         when(userPreferencesService.getUserPreferences(TEST_USER_ID)).thenReturn(dto);
 
-        mockMvc.perform(withOrgHeaders(get("/api/v1/user/preferences/by-user/{userId}", TEST_USER_ID)))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                get("/api/v1/user/preferences/by-user/{userId}", TEST_USER_ID)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(TEST_USER_ID))
                 .andExpect(jsonPath("$.theme").value("dark"));
@@ -106,11 +107,12 @@ class UserPreferencesControllerTest {
                         eq(TEST_USER_ID), any(UserPreferencesDTO.class)))
                 .thenReturn(dto);
 
-        mockMvc.perform(withOrgHeaders(
-                        put("/api/v1/user/preferences/by-user/{userId}", TEST_USER_ID)
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(dto))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                put("/api/v1/user/preferences/by-user/{userId}", TEST_USER_ID)
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(dto))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(TEST_USER_ID));
     }
@@ -124,11 +126,14 @@ class UserPreferencesControllerTest {
         UserPreferencesDTO dto = createTestDTO();
         when(userPreferencesService.updateDashboardLayout(eq(TEST_USER_ID), any())).thenReturn(dto);
 
-        mockMvc.perform(withOrgHeaders(
-                        put("/api/v1/user/preferences/by-user/{userId}/dashboard-layout", TEST_USER_ID)
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(layout))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                put(
+                                                "/api/v1/user/preferences/by-user/{userId}/dashboard-layout",
+                                                TEST_USER_ID)
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(layout))))
                 .andExpect(status().isOk());
     }
 
@@ -139,10 +144,13 @@ class UserPreferencesControllerTest {
         dto.setRoleTemplate("agent");
         when(userPreferencesService.applyRoleTemplate(TEST_USER_ID, "agent")).thenReturn(dto);
 
-        mockMvc.perform(withOrgHeaders(
-                        post("/api/v1/user/preferences/by-user/{userId}/apply-template", TEST_USER_ID)
-                                .with(csrf())
-                                .param("template", "agent")))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post(
+                                                "/api/v1/user/preferences/by-user/{userId}/apply-template",
+                                                TEST_USER_ID)
+                                        .with(csrf())
+                                        .param("template", "agent")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.roleTemplate").value("agent"));
     }
@@ -150,8 +158,10 @@ class UserPreferencesControllerTest {
     @Test
     @WithMockUser(roles = "PRO")
     void deleteUserPreferences_DeletesSuccessfully() throws Exception {
-        mockMvc.perform(withOrgHeaders(
-                delete("/api/v1/user/preferences/by-user/{userId}", TEST_USER_ID).with(csrf())))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                delete("/api/v1/user/preferences/by-user/{userId}", TEST_USER_ID)
+                                        .with(csrf())))
                 .andExpect(status().isNoContent());
 
         verify(userPreferencesService).deleteUserPreferences(TEST_USER_ID);
@@ -163,8 +173,12 @@ class UserPreferencesControllerTest {
         UserPreferencesDTO dto = createTestDTO();
         when(userPreferencesService.getUserPreferences(TEST_USER_ID)).thenReturn(dto);
 
-        mockMvc.perform(withOrgHeaders(
-                post("/api/v1/user/preferences/by-user/{userId}/export", TEST_USER_ID).with(csrf())))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post(
+                                                "/api/v1/user/preferences/by-user/{userId}/export",
+                                                TEST_USER_ID)
+                                        .with(csrf())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.dashboardLayout").exists());
     }
@@ -179,11 +193,14 @@ class UserPreferencesControllerTest {
         UserPreferencesDTO dto = createTestDTO();
         when(userPreferencesService.saveUserPreferences(eq(TEST_USER_ID), any())).thenReturn(dto);
 
-        mockMvc.perform(withOrgHeaders(
-                        post("/api/v1/user/preferences/by-user/{userId}/import", TEST_USER_ID)
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(config))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post(
+                                                "/api/v1/user/preferences/by-user/{userId}/import",
+                                                TEST_USER_ID)
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(config))))
                 .andExpect(status().isOk());
     }
 

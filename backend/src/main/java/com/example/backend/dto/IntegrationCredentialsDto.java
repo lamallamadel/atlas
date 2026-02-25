@@ -1,17 +1,15 @@
 package com.example.backend.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import java.util.HashMap;
 import java.util.Map;
 
 public class IntegrationCredentialsDto {
 
     private Boolean enabled;
-    
-    @JsonIgnore
-    private Map<String, String> credentials;
-    
+
+    @JsonIgnore private Map<String, String> credentials;
+
     private Map<String, Object> config;
 
     public IntegrationCredentialsDto() {
@@ -19,7 +17,8 @@ public class IntegrationCredentialsDto {
         this.config = new HashMap<>();
     }
 
-    public IntegrationCredentialsDto(Boolean enabled, Map<String, String> credentials, Map<String, Object> config) {
+    public IntegrationCredentialsDto(
+            Boolean enabled, Map<String, String> credentials, Map<String, Object> config) {
         this.enabled = enabled;
         this.credentials = credentials != null ? credentials : new HashMap<>();
         this.config = config != null ? config : new HashMap<>();

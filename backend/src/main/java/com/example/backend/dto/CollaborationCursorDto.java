@@ -11,10 +11,15 @@ public class CollaborationCursorDto {
     private String color;
     private Instant timestamp;
 
-    public CollaborationCursorDto() {
-    }
+    public CollaborationCursorDto() {}
 
-    public CollaborationCursorDto(String userId, String username, Long dossierId, String fieldName, Integer cursorPosition, String color) {
+    public CollaborationCursorDto(
+            String userId,
+            String username,
+            Long dossierId,
+            String fieldName,
+            Integer cursorPosition,
+            String color) {
         this.userId = userId;
         this.username = username;
         this.dossierId = dossierId;

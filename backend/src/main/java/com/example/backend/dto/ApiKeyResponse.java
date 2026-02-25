@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.ApiKeyEntity;
-
 import java.time.LocalDateTime;
 
 public class ApiKeyResponse {

@@ -6,15 +6,13 @@ import jakarta.validation.constraints.Pattern;
 
 public class CreateWebhookSubscriptionRequest {
 
-    @NotBlank
-    private String name;
+    @NotBlank private String name;
 
     @NotBlank
     @Pattern(regexp = "^https?://.*", message = "URL must start with http:// or https://")
     private String url;
 
-    @NotBlank
-    private String eventType;
+    @NotBlank private String eventType;
 
     private String description;
 

@@ -19,10 +19,10 @@ public class NetworkSettingsDto {
     @Max(300000)
     private Integer readTimeout;
 
-    public NetworkSettingsDto() {
-    }
+    public NetworkSettingsDto() {}
 
-    public NetworkSettingsDto(String proxyHost, Integer proxyPort, Integer connectTimeout, Integer readTimeout) {
+    public NetworkSettingsDto(
+            String proxyHost, Integer proxyPort, Integer connectTimeout, Integer readTimeout) {
         this.proxyHost = proxyHost;
         this.proxyPort = proxyPort;
         this.connectTimeout = connectTimeout;

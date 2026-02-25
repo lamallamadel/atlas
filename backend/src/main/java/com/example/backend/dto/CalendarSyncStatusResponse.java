@@ -3,14 +3,13 @@ package com.example.backend.dto;
 import java.time.LocalDateTime;
 
 public class CalendarSyncStatusResponse {
-    
+
     private String provider;
     private Boolean syncEnabled;
     private LocalDateTime lastSync;
     private LocalDateTime nextSync;
 
-    public CalendarSyncStatusResponse() {
-    }
+    public CalendarSyncStatusResponse() {}
 
     public String getProvider() {
         return provider;

@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
@@ -17,7 +16,9 @@ public class UiPreferencesDto {
     private String language;
 
     @Schema(description = "UI density (compact, comfortable, spacious)", example = "comfortable")
-    @Pattern(regexp = "^(compact|comfortable|spacious)$", message = "Density must be one of: compact, comfortable, spacious")
+    @Pattern(
+            regexp = "^(compact|comfortable|spacious)$",
+            message = "Density must be one of: compact, comfortable, spacious")
     private String density;
 
     @Schema(description = "Default route on login", example = "/dashboard")
@@ -25,8 +26,7 @@ public class UiPreferencesDto {
     @Pattern(regexp = "^/.*$", message = "Default route must start with /")
     private String defaultRoute;
 
-    public UiPreferencesDto() {
-    }
+    public UiPreferencesDto() {}
 
     public UiPreferencesDto(String theme, String language, String density, String defaultRoute) {
         this.theme = theme;

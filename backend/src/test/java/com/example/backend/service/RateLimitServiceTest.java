@@ -1,5 +1,10 @@
 package com.example.backend.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.example.backend.config.RateLimitConfig;
 import com.example.backend.dto.RateLimitStatsDto;
 import com.example.backend.dto.RateLimitTierDto;
@@ -8,26 +13,19 @@ import com.example.backend.repository.RateLimitTierRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
 @ExtendWith(MockitoExtension.class)
 class RateLimitServiceTest {
 
-    @Mock
-    private RateLimitTierRepository rateLimitTierRepository;
+    @Mock private RateLimitTierRepository rateLimitTierRepository;
 
     private RateLimitConfig rateLimitConfig;
     private MeterRegistry meterRegistry;
@@ -39,14 +37,11 @@ class RateLimitServiceTest {
         rateLimitConfig.setDefaultRequestsPerMinute(100);
         rateLimitConfig.setIpBasedRequestsPerMinute(60);
         rateLimitConfig.setUseRedis(false);
-        
+
         meterRegistry = new SimpleMeterRegistry();
-        
-        rateLimitService = new RateLimitService(
-                rateLimitTierRepository,
-                rateLimitConfig,
-                meterRegistry
-        );
+
+        rateLimitService =
+                new RateLimitService(rateLimitTierRepository, rateLimitConfig, meterRegistry);
     }
 
     @Test
@@ -89,11 +84,8 @@ class RateLimitServiceTest {
     @Test
     void shouldRejectRequestWhenIpLimitExceeded() {
         rateLimitConfig.setIpBasedRequestsPerMinute(1);
-        rateLimitService = new RateLimitService(
-                rateLimitTierRepository,
-                rateLimitConfig,
-                meterRegistry
-        );
+        rateLimitService =
+                new RateLimitService(rateLimitTierRepository, rateLimitConfig, meterRegistry);
 
         rateLimitService.tryConsumeForIp("192.168.1.100");
         boolean result = rateLimitService.tryConsumeForIp("192.168.1.100");
@@ -110,7 +102,7 @@ class RateLimitServiceTest {
 
         Counter hitsCounter = meterRegistry.find("rate_limit.hits").counter();
         Counter orgHitsCounter = meterRegistry.find("rate_limit.org.hits").counter();
-        
+
         assertThat(hitsCounter).isNotNull();
         assertThat(hitsCounter.count()).isEqualTo(1.0);
         assertThat(orgHitsCounter).isNotNull();
@@ -123,7 +115,7 @@ class RateLimitServiceTest {
 
         Counter hitsCounter = meterRegistry.find("rate_limit.hits").counter();
         Counter ipHitsCounter = meterRegistry.find("rate_limit.ip.hits").counter();
-        
+
         assertThat(hitsCounter).isNotNull();
         assertThat(hitsCounter.count()).isEqualTo(1.0);
         assertThat(ipHitsCounter).isNotNull();
@@ -133,18 +125,15 @@ class RateLimitServiceTest {
     @Test
     void shouldTrackRejectionsInMetrics() {
         rateLimitConfig.setIpBasedRequestsPerMinute(1);
-        rateLimitService = new RateLimitService(
-                rateLimitTierRepository,
-                rateLimitConfig,
-                meterRegistry
-        );
+        rateLimitService =
+                new RateLimitService(rateLimitTierRepository, rateLimitConfig, meterRegistry);
 
         rateLimitService.tryConsumeForIp("192.168.1.100");
         rateLimitService.tryConsumeForIp("192.168.1.100");
 
         Counter rejectionsCounter = meterRegistry.find("rate_limit.rejections").counter();
         Counter ipRejectionsCounter = meterRegistry.find("rate_limit.ip.rejections").counter();
-        
+
         assertThat(rejectionsCounter).isNotNull();
         assertThat(rejectionsCounter.count()).isEqualTo(1.0);
         assertThat(ipRejectionsCounter).isNotNull();
@@ -153,10 +142,10 @@ class RateLimitServiceTest {
 
     @Test
     void shouldReturnAllRateLimits() {
-        List<RateLimitTier> tiers = Arrays.asList(
-                createRateLimitTier("org1", "STANDARD", 100),
-                createRateLimitTier("org2", "PREMIUM", 1000)
-        );
+        List<RateLimitTier> tiers =
+                Arrays.asList(
+                        createRateLimitTier("org1", "STANDARD", 100),
+                        createRateLimitTier("org2", "PREMIUM", 1000));
         when(rateLimitTierRepository.findAll()).thenReturn(tiers);
 
         List<RateLimitTierDto> result = rateLimitService.getAllRateLimits();
@@ -263,7 +252,8 @@ class RateLimitServiceTest {
         assertThat(stats.getIpRejections()).isEqualTo(0L);
     }
 
-    private RateLimitTier createRateLimitTier(String orgId, String tierName, int requestsPerMinute) {
+    private RateLimitTier createRateLimitTier(
+            String orgId, String tierName, int requestsPerMinute) {
         RateLimitTier tier = new RateLimitTier();
         tier.setId(1L);
         tier.setOrgId(orgId);

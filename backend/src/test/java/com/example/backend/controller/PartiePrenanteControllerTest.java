@@ -50,10 +50,10 @@ class PartiePrenanteControllerTest {
     @Autowired private DossierRepository dossierRepository;
 
     private <T extends MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-            .header(ORG_ID_HEADER, ORG_ID)
-            .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-            .header("Authorization", "Bearer mock-token");
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                        .header("Authorization", "Bearer mock-token");
     }
 
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
@@ -471,7 +471,9 @@ class PartiePrenanteControllerTest {
         entity.setLastName("Smith");
         entity = partiePrenanteRepository.save(entity);
 
-        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId()).with(csrf())))
+        mockMvc.perform(
+                        withHeaders(
+                                delete("/api/v1/parties-prenantes/" + entity.getId()).with(csrf())))
                 .andExpect(status().isNoContent());
     }
 
@@ -499,7 +501,9 @@ class PartiePrenanteControllerTest {
         entity.setLastName("Smith");
         entity = partiePrenanteRepository.save(entity);
 
-        mockMvc.perform(withHeaders(delete("/api/v1/parties-prenantes/" + entity.getId()).with(csrf())))
+        mockMvc.perform(
+                        withHeaders(
+                                delete("/api/v1/parties-prenantes/" + entity.getId()).with(csrf())))
                 .andExpect(status().isNotFound());
     }
 

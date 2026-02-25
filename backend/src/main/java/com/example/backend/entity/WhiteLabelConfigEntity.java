@@ -1,17 +1,22 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Map;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 @Entity
-@Table(name = "white_label_config", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_white_label_org_id", columnNames = {"org_id"}),
-    @UniqueConstraint(name = "uk_white_label_custom_domain", columnNames = {"custom_domain"})
-})
+@Table(
+        name = "white_label_config",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_white_label_org_id",
+                    columnNames = {"org_id"}),
+            @UniqueConstraint(
+                    name = "uk_white_label_custom_domain",
+                    columnNames = {"custom_domain"})
+        })
 public class WhiteLabelConfigEntity {
 
     @Id

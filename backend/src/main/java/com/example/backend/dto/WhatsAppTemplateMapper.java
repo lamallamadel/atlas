@@ -2,11 +2,7 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.TemplateVariable;
 import com.example.backend.entity.WhatsAppTemplate;
-
 import com.example.backend.entity.WhatsAppTemplateVersion;
-
-
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;

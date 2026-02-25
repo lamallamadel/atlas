@@ -77,17 +77,22 @@ public class DossierMapperV2 {
         if (dossier.getActivities() != null) {
             response.setRecentActivities(
                     dossier.getActivities().stream()
-                            .map(activity -> {
-                                com.example.backend.dto.LeadActivityResponse actRes = new com.example.backend.dto.LeadActivityResponse();
-                                actRes.setId(activity.getId());
-                                actRes.setActivityType(activity.getActivityType());
-                                actRes.setDescription(activity.getDescription());
-                                actRes.setScoreImpact(activity.getScoreImpact());
-                                if (activity.getCreatedAt() != null) {
-                                    actRes.setCreatedAt(activity.getCreatedAt().atZone(ZoneOffset.UTC).toInstant());
-                                }
-                                return actRes;
-                            })
+                            .map(
+                                    activity -> {
+                                        com.example.backend.dto.LeadActivityResponse actRes =
+                                                new com.example.backend.dto.LeadActivityResponse();
+                                        actRes.setId(activity.getId());
+                                        actRes.setActivityType(activity.getActivityType());
+                                        actRes.setDescription(activity.getDescription());
+                                        actRes.setScoreImpact(activity.getScoreImpact());
+                                        if (activity.getCreatedAt() != null) {
+                                            actRes.setCreatedAt(
+                                                    activity.getCreatedAt()
+                                                            .atZone(ZoneOffset.UTC)
+                                                            .toInstant());
+                                        }
+                                        return actRes;
+                                    })
                             .collect(Collectors.toList()));
         }
 

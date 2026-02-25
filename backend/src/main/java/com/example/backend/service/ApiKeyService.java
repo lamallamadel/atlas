@@ -2,15 +2,14 @@ package com.example.backend.service;
 
 import com.example.backend.entity.ApiKeyEntity;
 import com.example.backend.repository.ApiKeyRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ApiKeyService {
@@ -25,9 +24,13 @@ public class ApiKeyService {
     }
 
     @Transactional
-    public ApiKeyCreateResult createApiKey(String orgId, String name, String description, 
-                                          ApiKeyEntity.ApiTier tier, String scopes, 
-                                          LocalDateTime expiresAt) {
+    public ApiKeyCreateResult createApiKey(
+            String orgId,
+            String name,
+            String description,
+            ApiKeyEntity.ApiTier tier,
+            String scopes,
+            LocalDateTime expiresAt) {
         String apiKey = generateApiKey();
         String keyPrefix = apiKey.substring(0, 12);
         String keyHash = passwordEncoder.encode(apiKey);
@@ -50,28 +53,32 @@ public class ApiKeyService {
 
     public Optional<ApiKeyEntity> validateApiKey(String apiKey) {
         List<ApiKeyEntity> candidates = apiKeyRepository.findAll();
-        
+
         for (ApiKeyEntity key : candidates) {
             if (passwordEncoder.matches(apiKey, key.getKeyHash())) {
                 if (key.getStatus() != ApiKeyEntity.ApiKeyStatus.ACTIVE) {
                     return Optional.empty();
                 }
-                if (key.getExpiresAt() != null && key.getExpiresAt().isBefore(LocalDateTime.now())) {
+                if (key.getExpiresAt() != null
+                        && key.getExpiresAt().isBefore(LocalDateTime.now())) {
                     return Optional.empty();
                 }
                 return Optional.of(key);
             }
         }
-        
+
         return Optional.empty();
     }
 
     @Transactional
     public void updateLastUsed(Long apiKeyId) {
-        apiKeyRepository.findById(apiKeyId).ifPresent(key -> {
-            key.setLastUsedAt(LocalDateTime.now());
-            apiKeyRepository.save(key);
-        });
+        apiKeyRepository
+                .findById(apiKeyId)
+                .ifPresent(
+                        key -> {
+                            key.setLastUsedAt(LocalDateTime.now());
+                            apiKeyRepository.save(key);
+                        });
     }
 
     public List<ApiKeyEntity> getApiKeysByOrg(String orgId) {
@@ -79,18 +86,19 @@ public class ApiKeyService {
     }
 
     public Optional<ApiKeyEntity> getApiKey(Long id, String orgId) {
-        return apiKeyRepository.findById(id)
-            .filter(key -> key.getOrgId().equals(orgId));
+        return apiKeyRepository.findById(id).filter(key -> key.getOrgId().equals(orgId));
     }
 
     @Transactional
     public void revokeApiKey(Long id, String orgId) {
-        apiKeyRepository.findById(id)
-            .filter(key -> key.getOrgId().equals(orgId))
-            .ifPresent(key -> {
-                key.setStatus(ApiKeyEntity.ApiKeyStatus.REVOKED);
-                apiKeyRepository.save(key);
-            });
+        apiKeyRepository
+                .findById(id)
+                .filter(key -> key.getOrgId().equals(orgId))
+                .ifPresent(
+                        key -> {
+                            key.setStatus(ApiKeyEntity.ApiKeyStatus.REVOKED);
+                            apiKeyRepository.save(key);
+                        });
     }
 
     private String generateApiKey() {

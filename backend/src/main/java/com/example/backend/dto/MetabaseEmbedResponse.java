@@ -5,8 +5,7 @@ public class MetabaseEmbedResponse {
     private String token;
     private Long expiresAt;
 
-    public MetabaseEmbedResponse() {
-    }
+    public MetabaseEmbedResponse() {}
 
     public MetabaseEmbedResponse(String embedUrl, String token, Long expiresAt) {
         this.embedUrl = embedUrl;

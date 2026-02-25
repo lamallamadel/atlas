@@ -9,11 +9,10 @@ import com.example.backend.repository.WorkflowDefinitionRepository;
 import com.example.backend.repository.WorkflowSimulationRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.*;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WorkflowSimulationService {
@@ -38,11 +37,18 @@ public class WorkflowSimulationService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        WorkflowDefinition workflow = workflowDefinitionRepository.findById(request.getWorkflowDefinitionId())
-                .orElseThrow(() -> new EntityNotFoundException("Workflow not found with id: " + request.getWorkflowDefinitionId()));
+        WorkflowDefinition workflow =
+                workflowDefinitionRepository
+                        .findById(request.getWorkflowDefinitionId())
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Workflow not found with id: "
+                                                        + request.getWorkflowDefinitionId()));
 
         if (!orgId.equals(workflow.getOrgId())) {
-            throw new EntityNotFoundException("Workflow not found with id: " + request.getWorkflowDefinitionId());
+            throw new EntityNotFoundException(
+                    "Workflow not found with id: " + request.getWorkflowDefinitionId());
         }
 
         WorkflowSimulation simulation = simulationMapper.toEntity(request);
@@ -56,7 +62,8 @@ public class WorkflowSimulationService {
             String currentState = request.getCurrentState();
             Map<String, Object> testData = request.getTestDataJson();
 
-            executionLog.add(createLogEntry("START", "Simulation started", currentState, null, true, null));
+            executionLog.add(
+                    createLogEntry("START", "Simulation started", currentState, null, true, null));
 
             List<Map<String, Object>> transitions = workflow.getTransitionsJson();
             List<String> possibleTransitions = new ArrayList<>();
@@ -83,12 +90,26 @@ public class WorkflowSimulationService {
             simulation.setResultJson(result);
             simulation.setStatus("COMPLETED");
 
-            executionLog.add(createLogEntry("END", "Simulation completed successfully", currentState, null, true, null));
+            executionLog.add(
+                    createLogEntry(
+                            "END",
+                            "Simulation completed successfully",
+                            currentState,
+                            null,
+                            true,
+                            null));
 
         } catch (Exception e) {
             simulation.setStatus("FAILED");
             result.put("error", e.getMessage());
-            executionLog.add(createLogEntry("ERROR", "Simulation failed: " + e.getMessage(), null, null, false, e.getMessage()));
+            executionLog.add(
+                    createLogEntry(
+                            "ERROR",
+                            "Simulation failed: " + e.getMessage(),
+                            null,
+                            null,
+                            false,
+                            e.getMessage()));
         }
 
         simulation.setCreatedAt(LocalDateTime.now());
@@ -105,12 +126,10 @@ public class WorkflowSimulationService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        List<WorkflowSimulation> simulations = simulationRepository
-                .findByWorkflowDefinitionId(workflowDefinitionId, orgId);
+        List<WorkflowSimulation> simulations =
+                simulationRepository.findByWorkflowDefinitionId(workflowDefinitionId, orgId);
 
-        return simulations.stream()
-                .map(simulationMapper::toResponse)
-                .toList();
+        return simulations.stream().map(simulationMapper::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -120,8 +139,13 @@ public class WorkflowSimulationService {
             throw new IllegalStateException("Organization ID not found in context");
         }
 
-        WorkflowSimulation simulation = simulationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Simulation not found with id: " + id));
+        WorkflowSimulation simulation =
+                simulationRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Simulation not found with id: " + id));
 
         if (!orgId.equals(simulation.getOrgId())) {
             throw new EntityNotFoundException("Simulation not found with id: " + id);
@@ -130,7 +154,10 @@ public class WorkflowSimulationService {
         return simulationMapper.toResponse(simulation);
     }
 
-    private boolean validateTransition(Map<String, Object> transition, Map<String, Object> testData, List<Map<String, Object>> log) {
+    private boolean validateTransition(
+            Map<String, Object> transition,
+            Map<String, Object> testData,
+            List<Map<String, Object>> log) {
         String fromState = (String) transition.get("fromState");
         String toState = (String) transition.get("toState");
         String label = (String) transition.get("label");
@@ -147,10 +174,14 @@ public class WorkflowSimulationService {
             }
 
             if (!missingFields.isEmpty()) {
-                log.add(createLogEntry("VALIDATION_FAILED",
-                        "Transition '" + label + "' failed validation",
-                        fromState, toState, false,
-                        "Missing required fields: " + String.join(", ", missingFields)));
+                log.add(
+                        createLogEntry(
+                                "VALIDATION_FAILED",
+                                "Transition '" + label + "' failed validation",
+                                fromState,
+                                toState,
+                                false,
+                                "Missing required fields: " + String.join(", ", missingFields)));
                 return false;
             }
         }
@@ -160,25 +191,41 @@ public class WorkflowSimulationService {
         if (conditions != null && !conditions.isEmpty()) {
             boolean conditionsMet = evaluateConditions(conditions, testData);
             if (!conditionsMet) {
-                log.add(createLogEntry("CONDITION_FAILED",
-                        "Transition '" + label + "' conditions not met",
-                        fromState, toState, false,
-                        "Business conditions not satisfied"));
+                log.add(
+                        createLogEntry(
+                                "CONDITION_FAILED",
+                                "Transition '" + label + "' conditions not met",
+                                fromState,
+                                toState,
+                                false,
+                                "Business conditions not satisfied"));
                 return false;
             }
         }
 
-        log.add(createLogEntry("VALIDATION_SUCCESS",
-                "Transition '" + label + "' validation passed",
-                fromState, toState, true, null));
+        log.add(
+                createLogEntry(
+                        "VALIDATION_SUCCESS",
+                        "Transition '" + label + "' validation passed",
+                        fromState,
+                        toState,
+                        true,
+                        null));
         return true;
     }
 
-    private boolean evaluateConditions(Map<String, Object> conditions, Map<String, Object> testData) {
+    private boolean evaluateConditions(
+            Map<String, Object> conditions, Map<String, Object> testData) {
         return true;
     }
 
-    private Map<String, Object> createLogEntry(String eventType, String message, String fromState, String toState, boolean success, String error) {
+    private Map<String, Object> createLogEntry(
+            String eventType,
+            String message,
+            String fromState,
+            String toState,
+            boolean success,
+            String error) {
         Map<String, Object> logEntry = new HashMap<>();
         logEntry.put("timestamp", LocalDateTime.now().toString());
         logEntry.put("eventType", eventType);

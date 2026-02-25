@@ -52,9 +52,10 @@ class SecurityConfigTest {
         Annonce annonce = createAnnonce("ORG1");
         annonce = annonceRepository.save(annonce);
 
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                .header("X-Org-Id", "ORG1")
-                .with(csrf()))
+        mockMvc.perform(
+                        delete("/api/v1/annonces/" + annonce.getId())
+                                .header("X-Org-Id", "ORG1")
+                                .with(csrf()))
                 .andExpect(status().isForbidden());
     }
 
@@ -64,9 +65,10 @@ class SecurityConfigTest {
         Annonce annonce = createAnnonce("ORG1");
         annonce = annonceRepository.save(annonce);
 
-        mockMvc.perform(delete("/api/v1/annonces/" + annonce.getId())
-                .header("X-Org-Id", "ORG1")
-                .with(csrf()))
+        mockMvc.perform(
+                        delete("/api/v1/annonces/" + annonce.getId())
+                                .header("X-Org-Id", "ORG1")
+                                .with(csrf()))
                 .andExpect(status().isNoContent());
     }
 

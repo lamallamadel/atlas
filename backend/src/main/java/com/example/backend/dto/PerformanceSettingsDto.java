@@ -15,10 +15,13 @@ public class PerformanceSettingsDto {
     @Min(1)
     private Long maxFileUploadSize;
 
-    public PerformanceSettingsDto() {
-    }
+    public PerformanceSettingsDto() {}
 
-    public PerformanceSettingsDto(Boolean cacheEnabled, Integer batchSize, Integer asyncPoolSize, Long maxFileUploadSize) {
+    public PerformanceSettingsDto(
+            Boolean cacheEnabled,
+            Integer batchSize,
+            Integer asyncPoolSize,
+            Long maxFileUploadSize) {
         this.cacheEnabled = cacheEnabled;
         this.batchSize = batchSize;
         this.asyncPoolSize = asyncPoolSize;

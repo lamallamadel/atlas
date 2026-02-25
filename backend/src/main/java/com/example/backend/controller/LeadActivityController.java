@@ -27,21 +27,22 @@ public class LeadActivityController {
             @PathVariable("id") Long dossierId,
             @Valid @RequestBody LeadActivityLogRequest request) {
 
-        LeadActivity activity = leadActivityService.logActivity(
-                dossierId,
-                request.getActivityType(),
-                request.getDescription(),
-                request.getScoreImpact());
+        LeadActivity activity =
+                leadActivityService.logActivity(
+                        dossierId,
+                        request.getActivityType(),
+                        request.getDescription(),
+                        request.getScoreImpact());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(activity));
     }
 
     @GetMapping
-    public ResponseEntity<List<LeadActivityResponse>> getActivities(@PathVariable("id") Long dossierId) {
+    public ResponseEntity<List<LeadActivityResponse>> getActivities(
+            @PathVariable("id") Long dossierId) {
         List<LeadActivity> activities = leadActivityService.getActivitiesForDossier(dossierId);
-        List<LeadActivityResponse> responses = activities.stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+        List<LeadActivityResponse> responses =
+                activities.stream().map(this::toResponse).collect(Collectors.toList());
         return ResponseEntity.ok(responses);
     }
 

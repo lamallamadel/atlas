@@ -7,12 +7,11 @@ import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/public/v1")
@@ -31,9 +30,7 @@ public class PublicApiV1Controller {
     @GetMapping("/dossiers")
     @Operation(summary = "List dossiers", description = "Retrieve a paginated list of dossiers")
     public ResponseEntity<Page<DossierResponse>> listDossiers(
-        @RequestAttribute("orgId") String orgId,
-        Pageable pageable
-    ) {
+            @RequestAttribute("orgId") String orgId, Pageable pageable) {
         // Set orgId in tenant context for service layer
         TenantContext.setOrgId(orgId);
         try {
@@ -47,9 +44,7 @@ public class PublicApiV1Controller {
     @GetMapping("/dossiers/{id}")
     @Operation(summary = "Get dossier", description = "Retrieve a specific dossier by ID")
     public ResponseEntity<DossierResponse> getDossier(
-        @RequestAttribute("orgId") String orgId,
-        @PathVariable Long id
-    ) {
+            @RequestAttribute("orgId") String orgId, @PathVariable Long id) {
         // Set orgId in tenant context for service layer
         TenantContext.setOrgId(orgId);
         try {
@@ -65,9 +60,7 @@ public class PublicApiV1Controller {
     @PostMapping("/webhooks/test")
     @Operation(summary = "Test webhook", description = "Send a test webhook event")
     public ResponseEntity<Map<String, String>> testWebhook(
-        @RequestAttribute("orgId") String orgId,
-        @RequestBody Map<String, Object> payload
-    ) {
+            @RequestAttribute("orgId") String orgId, @RequestBody Map<String, Object> payload) {
         webhookService.triggerWebhook("test.event", payload);
         return ResponseEntity.ok(Map.of("message", "Test webhook triggered"));
     }

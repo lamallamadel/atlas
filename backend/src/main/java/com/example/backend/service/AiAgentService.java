@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -73,12 +72,11 @@ public class AiAgentService {
             intent.setConfidence(0.85);
             res.setAnswer("Je lance la recherche pour vous.");
             Map<String, Object> params = new HashMap<>();
-            if (lower.contains("casablanca"))
-                params.put("city", "Casablanca");
-            if (lower.contains("t3"))
-                params.put("propertyType", "T3");
+            if (lower.contains("casablanca")) params.put("city", "Casablanca");
+            if (lower.contains("t3")) params.put("propertyType", "T3");
             intent.setParams(params);
-        } else if (lower.contains("créer") || (lower.contains("nouveau") && lower.contains("dossier"))) {
+        } else if (lower.contains("créer")
+                || (lower.contains("nouveau") && lower.contains("dossier"))) {
             intent.setType("CREATE");
             intent.setConfidence(0.9);
             res.setAnswer("Je vous ouvre le formulaire de création de dossier.");

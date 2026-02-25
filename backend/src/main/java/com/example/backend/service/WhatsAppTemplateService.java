@@ -10,14 +10,12 @@ import com.example.backend.repository.TemplateVariableRepository;
 import com.example.backend.repository.WhatsAppTemplateRepository;
 import com.example.backend.repository.WhatsAppTemplateVersionRepository;
 import com.example.backend.util.TenantContext;
-import java.util.List;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WhatsAppTemplateService {
@@ -64,10 +62,11 @@ public class WhatsAppTemplateService {
         return templateRepository
                 .findByNameAndLanguage(name, language)
                 .orElseThrow(
-                        () -> new ResourceNotFoundException(
-                                String.format(
-                                        "Template not found with name: %s and language: %s",
-                                        name, language)));
+                        () ->
+                                new ResourceNotFoundException(
+                                        String.format(
+                                                "Template not found with name: %s and language: %s",
+                                                name, language)));
     }
 
     @Transactional
@@ -195,7 +194,8 @@ public class WhatsAppTemplateService {
     public WhatsAppTemplate pauseTemplate(Long id) {
         WhatsAppTemplate template = getTemplateById(id);
 
-        if (template.getStatus() != TemplateStatus.APPROVED && template.getStatus() != TemplateStatus.ACTIVE) {
+        if (template.getStatus() != TemplateStatus.APPROVED
+                && template.getStatus() != TemplateStatus.ACTIVE) {
             throw new IllegalStateException("Only approved or active templates can be paused");
         }
 
@@ -211,8 +211,8 @@ public class WhatsAppTemplateService {
             throw new IllegalStateException("Template has not been submitted for approval");
         }
 
-        MetaBusinessApiService.TemplateApprovalStatus status = metaBusinessApiService
-                .pollApprovalStatus(template.getMetaSubmissionId());
+        MetaBusinessApiService.TemplateApprovalStatus status =
+                metaBusinessApiService.pollApprovalStatus(template.getMetaSubmissionId());
 
         template.setStatus(status.getStatus());
         if (status.getWhatsappTemplateId() != null) {
@@ -254,8 +254,8 @@ public class WhatsAppTemplateService {
     }
 
     @Transactional(readOnly = true)
-    public List<WhatsAppTemplate> searchTemplates(TemplateCategory category, TemplateStatus status,
-            String language, String searchTerm) {
+    public List<WhatsAppTemplate> searchTemplates(
+            TemplateCategory category, TemplateStatus status, String language, String searchTerm) {
         return templateRepository.searchTemplates(category, status, language, searchTerm);
     }
 
@@ -300,9 +300,14 @@ public class WhatsAppTemplateService {
 
     @Transactional(readOnly = true)
     public WhatsAppTemplateVersion getTemplateVersion(Long templateId, Integer versionNumber) {
-        return versionRepository.findByTemplateIdAndVersionNumber(templateId, versionNumber)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        String.format("Version %d not found for template %d", versionNumber, templateId)));
+        return versionRepository
+                .findByTemplateIdAndVersionNumber(templateId, versionNumber)
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        String.format(
+                                                "Version %d not found for template %d",
+                                                versionNumber, templateId)));
     }
 
     @Transactional
@@ -310,11 +315,13 @@ public class WhatsAppTemplateService {
         WhatsAppTemplate template = getTemplateById(templateId);
         WhatsAppTemplateVersion version = getTemplateVersion(templateId, versionNumber);
 
-        versionRepository.findActiveVersionByTemplateId(templateId)
-                .ifPresent(activeVersion -> {
-                    activeVersion.setIsActive(false);
-                    versionRepository.save(activeVersion);
-                });
+        versionRepository
+                .findActiveVersionByTemplateId(templateId)
+                .ifPresent(
+                        activeVersion -> {
+                            activeVersion.setIsActive(false);
+                            versionRepository.save(activeVersion);
+                        });
 
         template.setComponents(version.getComponents());
         template.setDescription(version.getDescription());
@@ -330,7 +337,8 @@ public class WhatsAppTemplateService {
                 variable.setTemplate(template);
                 variable.setVariableName((String) varMap.get("variableName"));
                 variable.setComponentType(
-                        com.example.backend.entity.enums.ComponentType.valueOf((String) varMap.get("componentType")));
+                        com.example.backend.entity.enums.ComponentType.valueOf(
+                                (String) varMap.get("componentType")));
                 variable.setPosition((Integer) varMap.get("position"));
                 variable.setExampleValue((String) varMap.get("exampleValue"));
                 variable.setDescription((String) varMap.get("description"));

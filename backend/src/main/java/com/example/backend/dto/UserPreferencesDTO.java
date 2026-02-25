@@ -1,11 +1,7 @@
 package com.example.backend.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import jakarta.validation.constraints.NotNull;
-
-
-
 import java.util.Map;
 
 @Schema(description = "User preferences data transfer object")
@@ -122,8 +118,7 @@ public class UserPreferencesDTO {
         @Schema(description = "Preference values for the category")
         private Map<String, Object> preferences;
 
-        public CategoryPreferencesResponse() {
-        }
+        public CategoryPreferencesResponse() {}
 
         public CategoryPreferencesResponse(String category, Map<String, Object> preferences) {
             this.category = category;

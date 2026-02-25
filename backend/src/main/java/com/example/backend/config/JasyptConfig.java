@@ -19,12 +19,15 @@ public class JasyptConfig {
     public StringEncryptor stringEncryptor() {
         PooledPBEStringEncryptor encryptor = new PooledPBEStringEncryptor();
         SimpleStringPBEConfig config = new SimpleStringPBEConfig();
-        
-        String password = encryptorPassword != null ? encryptorPassword : System.getenv("JASYPT_ENCRYPTOR_PASSWORD");
+
+        String password =
+                encryptorPassword != null
+                        ? encryptorPassword
+                        : System.getenv("JASYPT_ENCRYPTOR_PASSWORD");
         if (password == null) {
             password = "default-dev-password-change-in-production";
         }
-        
+
         config.setPassword(password);
         config.setAlgorithm("PBEWITHHMACSHA512ANDAES_256");
         config.setKeyObtentionIterations("1000");
@@ -33,7 +36,7 @@ public class JasyptConfig {
         config.setSaltGeneratorClassName("org.jasypt.salt.RandomSaltGenerator");
         config.setIvGeneratorClassName("org.jasypt.iv.RandomIvGenerator");
         config.setStringOutputType("base64");
-        
+
         encryptor.setConfig(config);
         return encryptor;
     }

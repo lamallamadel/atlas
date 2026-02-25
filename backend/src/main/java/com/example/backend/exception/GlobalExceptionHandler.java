@@ -254,16 +254,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedAccessException.class)
     public ResponseEntity<ProblemDetail> handleUnauthorizedAccessException(
             UnauthorizedAccessException ex, HttpServletRequest request) {
-        ProblemDetail problemDetail = new ProblemDetail(
-                "about:blank",
-                "Forbidden",
-                HttpStatus.FORBIDDEN.value(),
-                ex.getMessage(),
-                request.getRequestURI()
-        );
+        ProblemDetail problemDetail =
+                new ProblemDetail(
+                        "about:blank",
+                        "Forbidden",
+                        HttpStatus.FORBIDDEN.value(),
+                        ex.getMessage(),
+                        request.getRequestURI());
 
-        return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .contentType(MediaType.parseMediaType(PROBLEM_JSON_MEDIA_TYPE))
                 .body(problemDetail);
     }

@@ -14,8 +14,7 @@ public class UserLocalePreferenceDto {
     private String numberFormat;
     private String currency;
 
-    public UserLocalePreferenceDto() {
-    }
+    public UserLocalePreferenceDto() {}
 
     public UserLocalePreferenceDto(String locale) {
         this.locale = locale;

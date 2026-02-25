@@ -3,8 +3,7 @@ package com.example.backend.dto;
 public class CalendarAuthUrlResponse {
     private String authUrl;
 
-    public CalendarAuthUrlResponse() {
-    }
+    public CalendarAuthUrlResponse() {}
 
     public CalendarAuthUrlResponse(String authUrl) {
         this.authUrl = authUrl;

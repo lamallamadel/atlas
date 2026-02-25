@@ -4,14 +4,11 @@ import jakarta.validation.Valid;
 
 public class IntegrationSettingsDto {
 
-    @Valid
-    private IntegrationCredentialsDto whatsapp;
+    @Valid private IntegrationCredentialsDto whatsapp;
 
-    @Valid
-    private IntegrationCredentialsDto email;
+    @Valid private IntegrationCredentialsDto email;
 
-    @Valid
-    private IntegrationCredentialsDto sms;
+    @Valid private IntegrationCredentialsDto sms;
 
     public IntegrationSettingsDto() {
         this.whatsapp = new IntegrationCredentialsDto();
@@ -19,7 +16,10 @@ public class IntegrationSettingsDto {
         this.sms = new IntegrationCredentialsDto();
     }
 
-    public IntegrationSettingsDto(IntegrationCredentialsDto whatsapp, IntegrationCredentialsDto email, IntegrationCredentialsDto sms) {
+    public IntegrationSettingsDto(
+            IntegrationCredentialsDto whatsapp,
+            IntegrationCredentialsDto email,
+            IntegrationCredentialsDto sms) {
         this.whatsapp = whatsapp;
         this.email = email;
         this.sms = sms;

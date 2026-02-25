@@ -1,7 +1,7 @@
 package com.example.backend.service;
 
-import com.example.backend.dto.UserPreferencesDTO;
 import com.example.backend.dto.UserLocalePreferenceDto;
+import com.example.backend.dto.UserPreferencesDTO;
 import com.example.backend.entity.OrganizationSettings;
 import com.example.backend.entity.UserPreferences;
 import com.example.backend.entity.UserPreferencesEntity;
@@ -10,7 +10,6 @@ import com.example.backend.repository.SystemConfigRepository;
 import com.example.backend.repository.UserPreferencesRepository;
 import com.example.backend.repository.UserPreferencesV2Repository;
 import com.example.backend.util.TenantContext;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,10 +17,10 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion;
 import com.networknt.schema.ValidationMessage;
-
+import java.util.*;
 import java.util.HashMap;
 import java.util.Map;
-
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
@@ -29,42 +28,27 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-import java.util.*;
-import java.util.stream.Collectors;
-
 /**
  * UserPreferencesService - Comprehensive User Preferences Management
- * 
- * Features:
- * 1. Category-based preferences (ui, notifications, formats, shortcuts)
- * 2. JSON Schema validation for each category
- * 3. Three-level inheritance: User -> Organization -> System defaults
- * 4. L1 caching with @Cacheable to avoid repeated database queries
- * 5. Automatic audit trail via AuditAspect on modifications
- * 
- * Categories:
- * - ui: theme, sidebar, dashboard layout, density
- * - notifications: email, push, SMS, quiet hours
- * - formats: locale, date/time formats, timezone, currency
- * - shortcuts: keyboard shortcuts configuration
- * 
- * Inheritance Logic:
- * System defaults <- Organization settings <- User preferences
- * User preferences override organization, which overrides system defaults
- * 
- * Caching:
- * - Cache key: userId:category
- * - TTL: 30 minutes (configured in CacheConfig)
- * - Eviction: automatic on set/reset operations
- * 
- * Audit Trail:
- * - Captured by AuditAspect for set/reset operations
- * - Includes before/after snapshots and diff calculation
- * - Entity type: USER_PREFERENCES
+ *
+ * <p>Features: 1. Category-based preferences (ui, notifications, formats, shortcuts) 2. JSON Schema
+ * validation for each category 3. Three-level inheritance: User -> Organization -> System defaults
+ * 4. L1 caching with @Cacheable to avoid repeated database queries 5. Automatic audit trail via
+ * AuditAspect on modifications
+ *
+ * <p>Categories: - ui: theme, sidebar, dashboard layout, density - notifications: email, push, SMS,
+ * quiet hours - formats: locale, date/time formats, timezone, currency - shortcuts: keyboard
+ * shortcuts configuration
+ *
+ * <p>Inheritance Logic: System defaults <- Organization settings <- User preferences User
+ * preferences override organization, which overrides system defaults
+ *
+ * <p>Caching: - Cache key: userId:category - TTL: 30 minutes (configured in CacheConfig) -
+ * Eviction: automatic on set/reset operations
+ *
+ * <p>Audit Trail: - Captured by AuditAspect for set/reset operations - Includes before/after
+ * snapshots and diff calculation - Entity type: USER_PREFERENCES
  */
-
-
 @Service
 public class UserPreferencesService {
 
@@ -98,12 +82,11 @@ public class UserPreferencesService {
     }
 
     /**
-     * Initialize JSON schemas for each category.
-     * Schemas are loaded once at service initialization.
+     * Initialize JSON schemas for each category. Schemas are loaded once at service initialization.
      */
     private void initializeSchemas() {
         JsonSchemaFactory factory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
-        
+
         schemaCache.put(CATEGORY_UI, factory.getSchema(getUiSchema()));
         schemaCache.put(CATEGORY_NOTIFICATIONS, factory.getSchema(getNotificationsSchema()));
         schemaCache.put(CATEGORY_FORMATS, factory.getSchema(getFormatsSchema()));
@@ -252,51 +235,56 @@ public class UserPreferencesService {
     @Cacheable(value = CACHE_NAME, key = "#userId + ':' + #category")
     public Map<String, Object> getPreferencesByCategory(String userId, String category) {
         logger.debug("Getting preferences for userId={}, category={}", userId, category);
-        
+
         validateCategory(category);
-        
+
         Map<String, Object> userPrefs = getUserPreferencesMap(userId);
         Map<String, Object> orgPrefs = getOrganizationPreferencesMap();
         Map<String, Object> systemPrefs = getSystemPreferencesMap();
-        
+
         Map<String, Object> categoryUserPrefs = extractCategory(userPrefs, category);
         Map<String, Object> categoryOrgPrefs = extractCategory(orgPrefs, category);
         Map<String, Object> categorySystemPrefs = extractCategory(systemPrefs, category);
-        
-        Map<String, Object> merged = mergePreferences(categorySystemPrefs, categoryOrgPrefs, categoryUserPrefs);
-        
+
+        Map<String, Object> merged =
+                mergePreferences(categorySystemPrefs, categoryOrgPrefs, categoryUserPrefs);
+
         logger.debug("Merged preferences for category={}: {}", category, merged);
         return merged;
     }
 
     @Transactional
     @CacheEvict(value = CACHE_NAME, key = "#userId + ':' + #category")
-    public Map<String, Object> setPreferencesByCategory(String userId, String category, Map<String, Object> preferences) {
+    public Map<String, Object> setPreferencesByCategory(
+            String userId, String category, Map<String, Object> preferences) {
         logger.debug("Setting preferences for userId={}, category={}", userId, category);
-        
+
         validateCategory(category);
         validatePreferences(category, preferences);
-        
-        UserPreferences userPreferences = userPreferencesV2Repository.findByUserId(userId)
-                .orElseGet(() -> {
-                    UserPreferences newPrefs = new UserPreferences();
-                    newPrefs.setUserId(userId);
-                    newPrefs.setPreferences(new HashMap<>());
-                    return newPrefs;
-                });
-        
+
+        UserPreferences userPreferences =
+                userPreferencesV2Repository
+                        .findByUserId(userId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferences newPrefs = new UserPreferences();
+                                    newPrefs.setUserId(userId);
+                                    newPrefs.setPreferences(new HashMap<>());
+                                    return newPrefs;
+                                });
+
         Map<String, Object> allPreferences = userPreferences.getPreferences();
         if (allPreferences == null) {
             allPreferences = new HashMap<>();
         }
-        
+
         allPreferences.put(category, preferences);
         userPreferences.setPreferences(allPreferences);
-        
+
         UserPreferences saved = userPreferencesV2Repository.save(userPreferences);
-        
+
         logger.info("Preferences saved for userId={}, category={}", userId, category);
-        
+
         return extractCategory(saved.getPreferences(), category);
     }
 
@@ -304,29 +292,29 @@ public class UserPreferencesService {
     @CacheEvict(value = CACHE_NAME, key = "#userId + ':' + #category")
     public Map<String, Object> resetPreferencesByCategory(String userId, String category) {
         logger.debug("Resetting preferences for userId={}, category={}", userId, category);
-        
+
         validateCategory(category);
-        
+
         Optional<UserPreferences> optionalPrefs = userPreferencesV2Repository.findByUserId(userId);
         if (optionalPrefs.isPresent()) {
             UserPreferences userPreferences = optionalPrefs.get();
             Map<String, Object> allPreferences = userPreferences.getPreferences();
-            
+
             if (allPreferences != null) {
                 allPreferences.remove(category);
                 userPreferences.setPreferences(allPreferences);
                 userPreferencesV2Repository.save(userPreferences);
             }
         }
-        
+
         Map<String, Object> orgPrefs = getOrganizationPreferencesMap();
         Map<String, Object> systemPrefs = getSystemPreferencesMap();
-        
+
         Map<String, Object> categoryOrgPrefs = extractCategory(orgPrefs, category);
         Map<String, Object> categorySystemPrefs = extractCategory(systemPrefs, category);
-        
+
         Map<String, Object> merged = mergePreferences(categorySystemPrefs, categoryOrgPrefs, null);
-        
+
         logger.info("Preferences reset for userId={}, category={}", userId, category);
         return merged;
     }
@@ -335,21 +323,28 @@ public class UserPreferencesService {
     @Cacheable(value = CACHE_NAME, key = "#userId + ':all'")
     public Map<String, Object> getAllPreferences(String userId) {
         logger.debug("Getting all preferences for userId={}", userId);
-        
+
         Map<String, Object> userPrefs = getUserPreferencesMap(userId);
         Map<String, Object> orgPrefs = getOrganizationPreferencesMap();
         Map<String, Object> systemPrefs = getSystemPreferencesMap();
-        
+
         Map<String, Object> result = new HashMap<>();
-        
-        for (String category : Arrays.asList(CATEGORY_UI, CATEGORY_NOTIFICATIONS, CATEGORY_FORMATS, CATEGORY_SHORTCUTS)) {
+
+        for (String category :
+                Arrays.asList(
+                        CATEGORY_UI,
+                        CATEGORY_NOTIFICATIONS,
+                        CATEGORY_FORMATS,
+                        CATEGORY_SHORTCUTS)) {
             Map<String, Object> categoryUserPrefs = extractCategory(userPrefs, category);
             Map<String, Object> categoryOrgPrefs = extractCategory(orgPrefs, category);
             Map<String, Object> categorySystemPrefs = extractCategory(systemPrefs, category);
-            
-            result.put(category, mergePreferences(categorySystemPrefs, categoryOrgPrefs, categoryUserPrefs));
+
+            result.put(
+                    category,
+                    mergePreferences(categorySystemPrefs, categoryOrgPrefs, categoryUserPrefs));
         }
-        
+
         return result;
     }
 
@@ -357,36 +352,41 @@ public class UserPreferencesService {
     @CacheEvict(value = CACHE_NAME, allEntries = true)
     public Map<String, Object> resetAllPreferences(String userId) {
         logger.debug("Resetting all preferences for userId={}", userId);
-        
+
         Optional<UserPreferences> optionalPrefs = userPreferencesV2Repository.findByUserId(userId);
         if (optionalPrefs.isPresent()) {
             userPreferencesV2Repository.delete(optionalPrefs.get());
         }
-        
+
         Map<String, Object> orgPrefs = getOrganizationPreferencesMap();
         Map<String, Object> systemPrefs = getSystemPreferencesMap();
-        
+
         Map<String, Object> result = new HashMap<>();
-        
-        for (String category : Arrays.asList(CATEGORY_UI, CATEGORY_NOTIFICATIONS, CATEGORY_FORMATS, CATEGORY_SHORTCUTS)) {
+
+        for (String category :
+                Arrays.asList(
+                        CATEGORY_UI,
+                        CATEGORY_NOTIFICATIONS,
+                        CATEGORY_FORMATS,
+                        CATEGORY_SHORTCUTS)) {
             Map<String, Object> categoryOrgPrefs = extractCategory(orgPrefs, category);
             Map<String, Object> categorySystemPrefs = extractCategory(systemPrefs, category);
-            
+
             result.put(category, mergePreferences(categorySystemPrefs, categoryOrgPrefs, null));
         }
-        
+
         logger.info("All preferences reset for userId={}", userId);
         return result;
     }
 
     public Map<String, Map<String, Object>> getAllSchemas() {
         Map<String, Map<String, Object>> schemas = new HashMap<>();
-        
+
         schemas.put(CATEGORY_UI, parseSchemaString(getUiSchema()));
         schemas.put(CATEGORY_NOTIFICATIONS, parseSchemaString(getNotificationsSchema()));
         schemas.put(CATEGORY_FORMATS, parseSchemaString(getFormatsSchema()));
         schemas.put(CATEGORY_SHORTCUTS, parseSchemaString(getShortcutsSchema()));
-        
+
         return schemas;
     }
 
@@ -401,8 +401,13 @@ public class UserPreferencesService {
     }
 
     private void validateCategory(String category) {
-        if (!Arrays.asList(CATEGORY_UI, CATEGORY_NOTIFICATIONS, CATEGORY_FORMATS, CATEGORY_SHORTCUTS).contains(category)) {
-            throw new IllegalArgumentException("Invalid category: " + category + ". Must be one of: ui, notifications, formats, shortcuts");
+        if (!Arrays.asList(
+                        CATEGORY_UI, CATEGORY_NOTIFICATIONS, CATEGORY_FORMATS, CATEGORY_SHORTCUTS)
+                .contains(category)) {
+            throw new IllegalArgumentException(
+                    "Invalid category: "
+                            + category
+                            + ". Must be one of: ui, notifications, formats, shortcuts");
         }
     }
 
@@ -410,31 +415,35 @@ public class UserPreferencesService {
         if (preferences == null) {
             throw new IllegalArgumentException("Preferences cannot be null");
         }
-        
+
         JsonSchema schema = schemaCache.get(category);
         if (schema == null) {
             logger.warn("No schema found for category: {}", category);
             return;
         }
-        
+
         try {
             String json = objectMapper.writeValueAsString(preferences);
             JsonNode jsonNode = objectMapper.readTree(json);
             Set<ValidationMessage> errors = schema.validate(jsonNode);
-            
+
             if (!errors.isEmpty()) {
-                String errorMessages = errors.stream()
-                        .map(ValidationMessage::getMessage)
-                        .collect(Collectors.joining(", "));
-                throw new IllegalArgumentException("Validation failed for category " + category + ": " + errorMessages);
+                String errorMessages =
+                        errors.stream()
+                                .map(ValidationMessage::getMessage)
+                                .collect(Collectors.joining(", "));
+                throw new IllegalArgumentException(
+                        "Validation failed for category " + category + ": " + errorMessages);
             }
         } catch (JsonProcessingException e) {
-            throw new IllegalArgumentException("Invalid JSON for category " + category + ": " + e.getMessage());
+            throw new IllegalArgumentException(
+                    "Invalid JSON for category " + category + ": " + e.getMessage());
         }
     }
 
     private Map<String, Object> getUserPreferencesMap(String userId) {
-        return userPreferencesV2Repository.findByUserId(userId)
+        return userPreferencesV2Repository
+                .findByUserId(userId)
                 .map(UserPreferences::getPreferences)
                 .orElse(new HashMap<>());
     }
@@ -444,51 +453,57 @@ public class UserPreferencesService {
         if (orgId == null) {
             return new HashMap<>();
         }
-        
-        return organizationSettingsRepository.findByOrgId(orgId)
+
+        return organizationSettingsRepository
+                .findByOrgId(orgId)
                 .map(OrganizationSettings::getSettings)
-                .map(settings -> {
-                    Object preferencesObj = settings.get("preferences");
-                    if (preferencesObj instanceof Map) {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> preferencesMap = (Map<String, Object>) preferencesObj;
-                        return preferencesMap;
-                    }
-                    return new HashMap<String, Object>();
-                })
+                .map(
+                        settings -> {
+                            Object preferencesObj = settings.get("preferences");
+                            if (preferencesObj instanceof Map) {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> preferencesMap =
+                                        (Map<String, Object>) preferencesObj;
+                                return preferencesMap;
+                            }
+                            return new HashMap<String, Object>();
+                        })
                 .orElse(new HashMap<>());
     }
 
     private Map<String, Object> getSystemPreferencesMap() {
-        return systemConfigRepository.findByKey("preferences.defaults")
-                .map(config -> {
-                    try {
-                        @SuppressWarnings("unchecked")
-                        Map<String, Object> map = objectMapper.readValue(config.getValue(), Map.class);
-                        return map;
-                    } catch (JsonProcessingException e) {
-                        logger.error("Failed to parse system preferences", e);
-                        return new HashMap<String, Object>();
-                    }
-                })
+        return systemConfigRepository
+                .findByKey("preferences.defaults")
+                .map(
+                        config -> {
+                            try {
+                                @SuppressWarnings("unchecked")
+                                Map<String, Object> map =
+                                        objectMapper.readValue(config.getValue(), Map.class);
+                                return map;
+                            } catch (JsonProcessingException e) {
+                                logger.error("Failed to parse system preferences", e);
+                                return new HashMap<String, Object>();
+                            }
+                        })
                 .orElse(getDefaultSystemPreferences());
     }
 
     private Map<String, Object> getDefaultSystemPreferences() {
         Map<String, Object> defaults = new HashMap<>();
-        
+
         Map<String, Object> ui = new HashMap<>();
         ui.put("theme", "light");
         ui.put("sidebarCollapsed", false);
         ui.put("density", "comfortable");
         defaults.put(CATEGORY_UI, ui);
-        
+
         Map<String, Object> notifications = new HashMap<>();
         notifications.put("emailEnabled", true);
         notifications.put("pushEnabled", true);
         notifications.put("smsEnabled", false);
         defaults.put(CATEGORY_NOTIFICATIONS, notifications);
-        
+
         Map<String, Object> formats = new HashMap<>();
         formats.put("locale", "fr");
         formats.put("dateFormat", "dd/MM/yyyy");
@@ -497,10 +512,10 @@ public class UserPreferencesService {
         formats.put("currency", "EUR");
         formats.put("numberFormat", "1 234,56");
         defaults.put(CATEGORY_FORMATS, formats);
-        
+
         Map<String, Object> shortcuts = new HashMap<>();
         defaults.put(CATEGORY_SHORTCUTS, shortcuts);
-        
+
         return defaults;
     }
 
@@ -509,12 +524,12 @@ public class UserPreferencesService {
         if (preferences == null) {
             return new HashMap<>();
         }
-        
+
         Object categoryObj = preferences.get(category);
         if (categoryObj instanceof Map) {
             return new HashMap<>((Map<String, Object>) categoryObj);
         }
-        
+
         return new HashMap<>();
     }
 
@@ -522,21 +537,21 @@ public class UserPreferencesService {
             Map<String, Object> systemPrefs,
             Map<String, Object> orgPrefs,
             Map<String, Object> userPrefs) {
-        
+
         Map<String, Object> result = new HashMap<>();
-        
+
         if (systemPrefs != null) {
             result.putAll(deepCopy(systemPrefs));
         }
-        
+
         if (orgPrefs != null) {
             deepMerge(result, orgPrefs);
         }
-        
+
         if (userPrefs != null) {
             deepMerge(result, userPrefs);
         }
-        
+
         return result;
     }
 
@@ -546,7 +561,7 @@ public class UserPreferencesService {
             String key = entry.getKey();
             Object sourceValue = entry.getValue();
             Object targetValue = target.get(key);
-            
+
             if (sourceValue instanceof Map && targetValue instanceof Map) {
                 deepMerge((Map<String, Object>) targetValue, (Map<String, Object>) sourceValue);
             } else {
@@ -560,7 +575,7 @@ public class UserPreferencesService {
         if (obj == null) {
             return null;
         }
-        
+
         if (obj instanceof Map) {
             Map<String, Object> original = (Map<String, Object>) obj;
             Map<String, Object> copy = new HashMap<>();
@@ -569,7 +584,7 @@ public class UserPreferencesService {
             }
             return (T) copy;
         }
-        
+
         if (obj instanceof List) {
             List<Object> original = (List<Object>) obj;
             List<Object> copy = new ArrayList<>();
@@ -578,7 +593,7 @@ public class UserPreferencesService {
             }
             return (T) copy;
         }
-        
+
         return obj;
     }
 
@@ -706,14 +721,16 @@ public class UserPreferencesService {
         String orgId = TenantContext.getOrgId();
         logger.debug("Updating tour progress for userId={}, orgId={}", userId, orgId);
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> {
-                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
-                    newEntity.setUserId(userId);
-                    newEntity.setOrgId(orgId);
-                    return newEntity;
-                });
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                                    newEntity.setUserId(userId);
+                                    newEntity.setOrgId(orgId);
+                                    return newEntity;
+                                });
 
         entity.setTourProgress(tourProgress);
         UserPreferencesEntity saved = userPreferencesRepository.save(entity);
@@ -839,10 +856,11 @@ public class UserPreferencesService {
     public UserLocalePreferenceDto getUserLocalePreference() {
         String userId = TenantContext.getUserId();
         String orgId = TenantContext.getOrgId();
-        
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> createDefaultPreferences(userId, orgId));
+
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(() -> createDefaultPreferences(userId, orgId));
 
         String locale = entity.getLanguage() != null ? entity.getLanguage() : "fr";
         return new UserLocalePreferenceDto(locale);
@@ -853,21 +871,26 @@ public class UserPreferencesService {
     public UserLocalePreferenceDto saveUserLocalePreference(UserLocalePreferenceDto preferenceDto) {
         String userId = TenantContext.getUserId();
         String orgId = TenantContext.getOrgId();
-        
-        logger.debug("Saving locale preference for userId={}, orgId={}, locale={}", 
-                     userId, orgId, preferenceDto.getLocale());
 
-        UserPreferencesEntity entity = userPreferencesRepository
-                .findByUserIdAndOrgId(userId, orgId)
-                .orElseGet(() -> {
-                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
-                    newEntity.setUserId(userId);
-                    newEntity.setOrgId(orgId);
-                    return newEntity;
-                });
+        logger.debug(
+                "Saving locale preference for userId={}, orgId={}, locale={}",
+                userId,
+                orgId,
+                preferenceDto.getLocale());
+
+        UserPreferencesEntity entity =
+                userPreferencesRepository
+                        .findByUserIdAndOrgId(userId, orgId)
+                        .orElseGet(
+                                () -> {
+                                    UserPreferencesEntity newEntity = new UserPreferencesEntity();
+                                    newEntity.setUserId(userId);
+                                    newEntity.setOrgId(orgId);
+                                    return newEntity;
+                                });
 
         entity.setLanguage(preferenceDto.getLocale());
-        
+
         Map<String, Object> generalPrefs = entity.getGeneralPreferences();
         if (generalPrefs == null) {
             generalPrefs = new HashMap<>();
@@ -879,8 +902,11 @@ public class UserPreferencesService {
         entity.setGeneralPreferences(generalPrefs);
 
         userPreferencesRepository.save(entity);
-        logger.info("Locale preference saved for userId={}, orgId={}, locale={}", 
-                    userId, orgId, preferenceDto.getLocale());
+        logger.info(
+                "Locale preference saved for userId={}, orgId={}, locale={}",
+                userId,
+                orgId,
+                preferenceDto.getLocale());
 
         return preferenceDto;
     }

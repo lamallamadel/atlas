@@ -2,8 +2,8 @@ package com.example.backend.controller;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.anonymous;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -58,10 +58,9 @@ class ConsentementControllerTest {
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder) {
         return (T)
-                builder
-                    .header(ORG_ID_HEADER, ORG_ID)
-                    .header(CORRELATION_ID_HEADER, CORRELATION_ID)
-                    .header("Authorization", "Bearer mock-token");
+                builder.header(ORG_ID_HEADER, ORG_ID)
+                        .header(CORRELATION_ID_HEADER, CORRELATION_ID)
+                        .header("Authorization", "Bearer mock-token");
     }
 
     @BeforeEach

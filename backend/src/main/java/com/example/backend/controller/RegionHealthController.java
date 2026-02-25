@@ -2,23 +2,20 @@ package com.example.backend.controller;
 
 import com.example.backend.config.MultiRegionConfig;
 import com.example.backend.service.DatabaseReplicationService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/region")
 public class RegionHealthController {
 
-    @Autowired
-    private MultiRegionConfig multiRegionConfig;
+    @Autowired private MultiRegionConfig multiRegionConfig;
 
-    @Autowired
-    private DatabaseReplicationService replicationService;
+    @Autowired private DatabaseReplicationService replicationService;
 
     @GetMapping("/current")
     public ResponseEntity<Map<String, Object>> getCurrentRegion() {
@@ -27,7 +24,7 @@ public class RegionHealthController {
         response.put("replicationEnabled", multiRegionConfig.isReplicationEnabled());
 
         MultiRegionConfig.RegionConfig currentRegion =
-            multiRegionConfig.getRegions().get(multiRegionConfig.getCurrentRegion());
+                multiRegionConfig.getRegions().get(multiRegionConfig.getCurrentRegion());
 
         if (currentRegion != null) {
             response.put("isPrimary", currentRegion.isPrimary());
@@ -63,8 +60,7 @@ public class RegionHealthController {
 
     @PostMapping("/replication/setup-subscription")
     public ResponseEntity<Map<String, String>> setupSubscription(
-            @RequestParam String remoteRegion,
-            @RequestParam String connectionString) {
+            @RequestParam String remoteRegion, @RequestParam String connectionString) {
 
         try {
             replicationService.createSubscriptionToRemoteRegion(remoteRegion, connectionString);

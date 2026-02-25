@@ -3,10 +3,6 @@ package com.example.backend.service;
 import com.example.backend.dto.ContractTemplateRequest;
 import com.example.backend.entity.ContractTemplateEntity;
 import com.example.backend.repository.ContractTemplateRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,6 +10,9 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.UUID;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class ContractTemplateService {
@@ -27,10 +26,8 @@ public class ContractTemplateService {
 
     @Transactional
     public ContractTemplateEntity uploadTemplate(
-            ContractTemplateRequest request,
-            MultipartFile file,
-            String orgId,
-            String userId) throws IOException {
+            ContractTemplateRequest request, MultipartFile file, String orgId, String userId)
+            throws IOException {
 
         String fileName = file.getOriginalFilename();
         String uniqueFileName = UUID.randomUUID() + "_" + fileName;
@@ -68,14 +65,18 @@ public class ContractTemplateService {
     }
 
     public ContractTemplateEntity getTemplate(Long id, String orgId) {
-        return contractTemplateRepository.findByIdAndOrgId(id, orgId)
+        return contractTemplateRepository
+                .findByIdAndOrgId(id, orgId)
                 .orElseThrow(() -> new IllegalArgumentException("Template not found"));
     }
 
     @Transactional
-    public ContractTemplateEntity updateTemplate(Long id, ContractTemplateRequest request, String orgId) {
-        ContractTemplateEntity template = contractTemplateRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Template not found"));
+    public ContractTemplateEntity updateTemplate(
+            Long id, ContractTemplateRequest request, String orgId) {
+        ContractTemplateEntity template =
+                contractTemplateRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Template not found"));
 
         template.setTemplateName(request.getTemplateName());
         template.setTemplateType(request.getTemplateType());
@@ -88,8 +89,10 @@ public class ContractTemplateService {
 
     @Transactional
     public void deleteTemplate(Long id, String orgId) {
-        ContractTemplateEntity template = contractTemplateRepository.findByIdAndOrgId(id, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Template not found"));
+        ContractTemplateEntity template =
+                contractTemplateRepository
+                        .findByIdAndOrgId(id, orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Template not found"));
 
         template.setIsActive(false);
         contractTemplateRepository.save(template);

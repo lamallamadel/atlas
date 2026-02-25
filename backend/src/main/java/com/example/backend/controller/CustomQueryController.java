@@ -4,6 +4,8 @@ import com.example.backend.entity.CustomQueryEntity;
 import com.example.backend.service.CustomQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -12,9 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/custom-queries")
@@ -31,8 +30,7 @@ public class CustomQueryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Create custom query", description = "Creates a new custom SQL query")
     public ResponseEntity<CustomQueryEntity> createCustomQuery(
-            @RequestBody CustomQueryEntity query,
-            Authentication authentication) {
+            @RequestBody CustomQueryEntity query, Authentication authentication) {
         String orgId = "default";
         CustomQueryEntity created = customQueryService.createCustomQuery(orgId, query);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -40,7 +38,9 @@ public class CustomQueryController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "List custom queries", description = "Returns a paginated list of custom queries")
+    @Operation(
+            summary = "List custom queries",
+            description = "Returns a paginated list of custom queries")
     public ResponseEntity<Page<CustomQueryEntity>> getCustomQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
@@ -55,8 +55,7 @@ public class CustomQueryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Get custom query", description = "Returns a single custom query by ID")
     public ResponseEntity<CustomQueryEntity> getCustomQuery(
-            @PathVariable Long id,
-            Authentication authentication) {
+            @PathVariable Long id, Authentication authentication) {
         String orgId = "default";
         CustomQueryEntity query = customQueryService.getCustomQuery(id, orgId);
         return ResponseEntity.ok(query);
@@ -78,8 +77,7 @@ public class CustomQueryController {
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
     @Operation(summary = "Delete custom query", description = "Deletes a custom query")
     public ResponseEntity<Void> deleteCustomQuery(
-            @PathVariable Long id,
-            Authentication authentication) {
+            @PathVariable Long id, Authentication authentication) {
         String orgId = "default";
         customQueryService.deleteCustomQuery(id, orgId);
         return ResponseEntity.noContent().build();
@@ -93,7 +91,8 @@ public class CustomQueryController {
             @RequestBody Map<String, Object> params,
             Authentication authentication) {
         String orgId = "default";
-        List<Map<String, Object>> results = customQueryService.executeCustomQuery(id, orgId, params);
+        List<Map<String, Object>> results =
+                customQueryService.executeCustomQuery(id, orgId, params);
         return ResponseEntity.ok(results);
     }
 
@@ -101,8 +100,7 @@ public class CustomQueryController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Approve custom query", description = "Approves a query for execution")
     public ResponseEntity<CustomQueryEntity> approveQuery(
-            @PathVariable Long id,
-            Authentication authentication) {
+            @PathVariable Long id, Authentication authentication) {
         String userId = authentication.getName();
         CustomQueryEntity approved = customQueryService.approveQuery(id, userId);
         return ResponseEntity.ok(approved);
@@ -119,10 +117,11 @@ public class CustomQueryController {
 
     @GetMapping("/category/{category}")
     @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
-    @Operation(summary = "List queries by category", description = "Returns queries in a specific category")
+    @Operation(
+            summary = "List queries by category",
+            description = "Returns queries in a specific category")
     public ResponseEntity<List<CustomQueryEntity>> getQueriesByCategory(
-            @PathVariable String category,
-            Authentication authentication) {
+            @PathVariable String category, Authentication authentication) {
         String orgId = "default";
         List<CustomQueryEntity> queries = customQueryService.getQueriesByCategory(orgId, category);
         return ResponseEntity.ok(queries);

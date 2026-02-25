@@ -2,10 +2,9 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.WorkflowStepStatus;
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 import org.hibernate.annotations.Filter;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "workflow_approval")

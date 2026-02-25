@@ -1,15 +1,19 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
-@Table(name = "feature_flag", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_feature_flag_org_key", columnNames = {"org_id", "feature_key"})
-})
+@Table(
+        name = "feature_flag",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_feature_flag_org_key",
+                    columnNames = {"org_id", "feature_key"})
+        })
 public class FeatureFlagEntity {
 
     @Id
@@ -63,28 +67,99 @@ public class FeatureFlagEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getOrgId() { return orgId; }
-    public void setOrgId(String orgId) { this.orgId = orgId; }
-    public String getFeatureKey() { return featureKey; }
-    public void setFeatureKey(String featureKey) { this.featureKey = featureKey; }
-    public String getFeatureName() { return featureName; }
-    public void setFeatureName(String featureName) { this.featureName = featureName; }
-    public String getFeatureDescription() { return featureDescription; }
-    public void setFeatureDescription(String featureDescription) { this.featureDescription = featureDescription; }
-    public Boolean getEnabled() { return enabled; }
-    public void setEnabled(Boolean enabled) { this.enabled = enabled; }
-    public String getAvailableInPlans() { return availableInPlans; }
-    public void setAvailableInPlans(String availableInPlans) { this.availableInPlans = availableInPlans; }
-    public Boolean getRequiresAddon() { return requiresAddon; }
-    public void setRequiresAddon(Boolean requiresAddon) { this.requiresAddon = requiresAddon; }
-    public Integer getRolloutPercentage() { return rolloutPercentage; }
-    public void setRolloutPercentage(Integer rolloutPercentage) { this.rolloutPercentage = rolloutPercentage; }
-    public Map<String, Object> getUserSegments() { return userSegments; }
-    public void setUserSegments(Map<String, Object> userSegments) { this.userSegments = userSegments; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
+    public String getFeatureKey() {
+        return featureKey;
+    }
+
+    public void setFeatureKey(String featureKey) {
+        this.featureKey = featureKey;
+    }
+
+    public String getFeatureName() {
+        return featureName;
+    }
+
+    public void setFeatureName(String featureName) {
+        this.featureName = featureName;
+    }
+
+    public String getFeatureDescription() {
+        return featureDescription;
+    }
+
+    public void setFeatureDescription(String featureDescription) {
+        this.featureDescription = featureDescription;
+    }
+
+    public Boolean getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getAvailableInPlans() {
+        return availableInPlans;
+    }
+
+    public void setAvailableInPlans(String availableInPlans) {
+        this.availableInPlans = availableInPlans;
+    }
+
+    public Boolean getRequiresAddon() {
+        return requiresAddon;
+    }
+
+    public void setRequiresAddon(Boolean requiresAddon) {
+        this.requiresAddon = requiresAddon;
+    }
+
+    public Integer getRolloutPercentage() {
+        return rolloutPercentage;
+    }
+
+    public void setRolloutPercentage(Integer rolloutPercentage) {
+        this.rolloutPercentage = rolloutPercentage;
+    }
+
+    public Map<String, Object> getUserSegments() {
+        return userSegments;
+    }
+
+    public void setUserSegments(Map<String, Object> userSegments) {
+        this.userSegments = userSegments;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

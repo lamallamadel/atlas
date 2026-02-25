@@ -13,8 +13,7 @@ public class AnalyticsResponse {
         private Object value;
         private Map<String, Object> metadata;
 
-        public DataPoint() {
-        }
+        public DataPoint() {}
 
         public DataPoint(String date, Object value) {
             this.date = date;

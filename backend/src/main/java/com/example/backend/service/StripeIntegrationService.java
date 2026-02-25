@@ -2,16 +2,15 @@ package com.example.backend.service;
 
 import com.example.backend.entity.StripeSubscriptionEntity;
 import com.example.backend.repository.StripeSubscriptionRepository;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
 
 @Service
 public class StripeIntegrationService {
@@ -33,10 +32,7 @@ public class StripeIntegrationService {
 
     @Transactional
     public StripeSubscriptionEntity createSubscription(
-            String orgId,
-            String planTier,
-            String billingPeriod,
-            String customerEmail) {
+            String orgId, String planTier, String billingPeriod, String customerEmail) {
 
         logger.info("Creating Stripe subscription for orgId={}, plan={}", orgId, planTier);
 
@@ -97,7 +93,8 @@ public class StripeIntegrationService {
         return "cus_mock_" + orgId.replace("-", "").substring(0, 14);
     }
 
-    private String createStripeSubscription(String customerId, String planTier, String billingPeriod) {
+    private String createStripeSubscription(
+            String customerId, String planTier, String billingPeriod) {
         logger.debug("Creating Stripe subscription for customer={}", customerId);
         return "sub_mock_" + System.currentTimeMillis();
     }
@@ -126,8 +123,9 @@ public class StripeIntegrationService {
 
     private void handleSubscriptionUpdated(Map<String, Object> data) {
         String subscriptionId = (String) data.get("subscriptionId");
-        Optional<StripeSubscriptionEntity> subOpt = subscriptionRepository.findByStripeSubscriptionId(subscriptionId);
-        
+        Optional<StripeSubscriptionEntity> subOpt =
+                subscriptionRepository.findByStripeSubscriptionId(subscriptionId);
+
         if (subOpt.isPresent()) {
             StripeSubscriptionEntity subscription = subOpt.get();
             subscription.setStatus((String) data.getOrDefault("status", subscription.getStatus()));
@@ -138,8 +136,9 @@ public class StripeIntegrationService {
 
     private void handleSubscriptionDeleted(Map<String, Object> data) {
         String subscriptionId = (String) data.get("subscriptionId");
-        Optional<StripeSubscriptionEntity> subOpt = subscriptionRepository.findByStripeSubscriptionId(subscriptionId);
-        
+        Optional<StripeSubscriptionEntity> subOpt =
+                subscriptionRepository.findByStripeSubscriptionId(subscriptionId);
+
         if (subOpt.isPresent()) {
             StripeSubscriptionEntity subscription = subOpt.get();
             subscription.setStatus("canceled");
@@ -152,8 +151,9 @@ public class StripeIntegrationService {
 
     private void handlePaymentSucceeded(Map<String, Object> data) {
         String customerId = (String) data.get("customerId");
-        Optional<StripeSubscriptionEntity> subOpt = subscriptionRepository.findByStripeCustomerId(customerId);
-        
+        Optional<StripeSubscriptionEntity> subOpt =
+                subscriptionRepository.findByStripeCustomerId(customerId);
+
         if (subOpt.isPresent()) {
             StripeSubscriptionEntity subscription = subOpt.get();
             subscription.setLastPaymentStatus("succeeded");
@@ -165,8 +165,9 @@ public class StripeIntegrationService {
 
     private void handlePaymentFailed(Map<String, Object> data) {
         String customerId = (String) data.get("customerId");
-        Optional<StripeSubscriptionEntity> subOpt = subscriptionRepository.findByStripeCustomerId(customerId);
-        
+        Optional<StripeSubscriptionEntity> subOpt =
+                subscriptionRepository.findByStripeCustomerId(customerId);
+
         if (subOpt.isPresent()) {
             StripeSubscriptionEntity subscription = subOpt.get();
             subscription.setLastPaymentStatus("failed");
@@ -182,8 +183,13 @@ public class StripeIntegrationService {
 
     @Transactional
     public Map<String, Object> calculateMonthlyBill(String orgId) {
-        StripeSubscriptionEntity subscription = subscriptionRepository.findByOrgId(orgId)
-                .orElseThrow(() -> new IllegalStateException("No subscription found for orgId: " + orgId));
+        StripeSubscriptionEntity subscription =
+                subscriptionRepository
+                        .findByOrgId(orgId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalStateException(
+                                                "No subscription found for orgId: " + orgId));
 
         Map<String, Object> usage = usageTrackingService.getCurrentPeriodUsage(orgId);
 
@@ -195,7 +201,8 @@ public class StripeIntegrationService {
         long storageOverage = Math.max(0, totalStorageGb - subscription.getIncludedStorageGb());
 
         int messageOverageCost = messageOverage * subscription.getMessageOveragePriceCents();
-        int storageOverageCost = (int) (storageOverage * subscription.getStorageOveragePriceCents());
+        int storageOverageCost =
+                (int) (storageOverage * subscription.getStorageOveragePriceCents());
 
         int totalCents = subscription.getBasePriceCents() + messageOverageCost + storageOverageCost;
 

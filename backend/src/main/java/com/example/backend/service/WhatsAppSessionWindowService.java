@@ -2,6 +2,8 @@ package com.example.backend.service;
 
 import com.example.backend.entity.WhatsAppSessionWindow;
 import com.example.backend.repository.WhatsAppSessionWindowRepository;
+import io.micrometer.observation.annotation.Observed;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -73,7 +75,9 @@ public class WhatsAppSessionWindowService {
     }
 
     @Transactional(readOnly = true)
-    public boolean isWithinSessionWindow(String orgId, String phoneNumber) {
+    @Observed(name = "whatsapp.session.check", contextualName = "whatsapp-session-window-check")
+    public boolean isWithinSessionWindow(
+            @SpanTag("org.id") String orgId, @SpanTag("phone.number") String phoneNumber) {
         String normalizedPhone = normalizePhoneNumber(phoneNumber);
 
         Optional<WhatsAppSessionWindow> session =

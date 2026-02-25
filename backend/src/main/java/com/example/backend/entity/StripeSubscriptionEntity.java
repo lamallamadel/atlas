@@ -1,18 +1,25 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.Map;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
-import java.time.LocalDateTime;
-import java.util.Map;
-
 @Entity
-@Table(name = "stripe_subscription", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_stripe_subscription_org_id", columnNames = {"org_id"}),
-    @UniqueConstraint(name = "uk_stripe_customer_id", columnNames = {"stripe_customer_id"}),
-    @UniqueConstraint(name = "uk_stripe_subscription_id", columnNames = {"stripe_subscription_id"})
-})
+@Table(
+        name = "stripe_subscription",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_stripe_subscription_org_id",
+                    columnNames = {"org_id"}),
+            @UniqueConstraint(
+                    name = "uk_stripe_customer_id",
+                    columnNames = {"stripe_customer_id"}),
+            @UniqueConstraint(
+                    name = "uk_stripe_subscription_id",
+                    columnNames = {"stripe_subscription_id"})
+        })
 public class StripeSubscriptionEntity {
 
     @Id

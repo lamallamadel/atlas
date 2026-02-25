@@ -14,31 +14,34 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ActivityRepository extends JpaRepository<ActivityEntity, Long> {
 
-        Page<ActivityEntity> findByDossierIdOrderByCreatedAtDesc(Long dossierId, Pageable pageable);
+    Page<ActivityEntity> findByDossierIdOrderByCreatedAtDesc(Long dossierId, Pageable pageable);
 
-        @Query("SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility ORDER BY a.createdAt DESC")
-        Page<ActivityEntity> findByDossierIdAndVisibility(
-                        @Param("dossierId") Long dossierId,
-                        @Param("visibility") ActivityVisibility visibility,
-                        Pageable pageable);
+    @Query(
+            "SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility ORDER BY a.createdAt DESC")
+    Page<ActivityEntity> findByDossierIdAndVisibility(
+            @Param("dossierId") Long dossierId,
+            @Param("visibility") ActivityVisibility visibility,
+            Pageable pageable);
 
-        @Query("SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.createdAt BETWEEN :startDate AND :endDate ORDER BY a.createdAt DESC")
-        Page<ActivityEntity> findByDossierIdAndCreatedAtBetween(
-                        @Param("dossierId") Long dossierId,
-                        @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate,
-                        Pageable pageable);
+    @Query(
+            "SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.createdAt BETWEEN :startDate AND :endDate ORDER BY a.createdAt DESC")
+    Page<ActivityEntity> findByDossierIdAndCreatedAtBetween(
+            @Param("dossierId") Long dossierId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 
-        @Query("SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility AND a.createdAt BETWEEN :startDate AND :endDate ORDER BY a.createdAt DESC")
-        Page<ActivityEntity> findByDossierIdAndVisibilityAndCreatedAtBetween(
-                        @Param("dossierId") Long dossierId,
-                        @Param("visibility") ActivityVisibility visibility,
-                        @Param("startDate") LocalDateTime startDate,
-                        @Param("endDate") LocalDateTime endDate,
-                        Pageable pageable);
+    @Query(
+            "SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility AND a.createdAt BETWEEN :startDate AND :endDate ORDER BY a.createdAt DESC")
+    Page<ActivityEntity> findByDossierIdAndVisibilityAndCreatedAtBetween(
+            @Param("dossierId") Long dossierId,
+            @Param("visibility") ActivityVisibility visibility,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable);
 
-        @Query("SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility ORDER BY a.createdAt DESC")
-        List<ActivityEntity> findByDossierIdAndVisibilityOrderByCreatedAtDesc(
-                        @Param("dossierId") Long dossierId,
-                        @Param("visibility") ActivityVisibility visibility);
+    @Query(
+            "SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility ORDER BY a.createdAt DESC")
+    List<ActivityEntity> findByDossierIdAndVisibilityOrderByCreatedAtDesc(
+            @Param("dossierId") Long dossierId, @Param("visibility") ActivityVisibility visibility);
 }

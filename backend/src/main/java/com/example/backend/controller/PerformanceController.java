@@ -2,38 +2,35 @@ package com.example.backend.controller;
 
 import com.example.backend.performance.PerformanceMonitoringService;
 import com.example.backend.performance.RedisCacheService;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-
-import com.example.backend.util.DatabaseIndexAudit;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
-
 @RestController
 @RequestMapping("/api/v1/performance")
-@ConditionalOnProperty(name = "performance.monitoring.enabled", havingValue = "true", matchIfMissing = true)
+@ConditionalOnProperty(
+        name = "performance.monitoring.enabled",
+        havingValue = "true",
+        matchIfMissing = true)
 @ConditionalOnBean(RedisCacheService.class)
 public class PerformanceController {
 
     private final PerformanceMonitoringService performanceMonitoring;
     private final RedisCacheService cacheService;
 
-    public PerformanceController(PerformanceMonitoringService performanceMonitoring,
-            RedisCacheService cacheService) {
+    public PerformanceController(
+            PerformanceMonitoringService performanceMonitoring, RedisCacheService cacheService) {
         this.performanceMonitoring = performanceMonitoring;
         this.cacheService = cacheService;
     }
 
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics() {
-        PerformanceMonitoringService.PerformanceMetrics metrics = performanceMonitoring.getCurrentMetrics();
+        PerformanceMonitoringService.PerformanceMetrics metrics =
+                performanceMonitoring.getCurrentMetrics();
 
         Map<String, Object> response = new HashMap<>();
 

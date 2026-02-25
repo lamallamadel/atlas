@@ -33,8 +33,7 @@ public class AnnonceResponse {
     private String createdBy;
     private String updatedBy;
 
-    public AnnonceResponse() {
-    }
+    public AnnonceResponse() {}
 
     public Long getId() {
         return id;

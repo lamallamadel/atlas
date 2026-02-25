@@ -255,6 +255,5 @@ public class Dossier extends BaseEntity {
     public void removeActivity(LeadActivity activity) {
         activities.remove(activity);
         activity.setDossier(null);
-
     }
 }

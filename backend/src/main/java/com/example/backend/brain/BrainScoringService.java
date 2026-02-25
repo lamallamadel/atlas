@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -94,17 +93,20 @@ public class BrainScoringService {
                 return;
             }
 
-            List<Annonce> recentAnnonces = annonceRepository.findTop50ByOrgIdOrderByCreatedAtDesc(annonce.getOrgId());
+            List<Annonce> recentAnnonces =
+                    annonceRepository.findTop50ByOrgIdOrderByCreatedAtDesc(annonce.getOrgId());
 
-            List<DupliAnnonceDto> dupliDtos = recentAnnonces.stream()
-                    .map(
-                            a -> new DupliAnnonceDto(
-                                    a.getId(),
-                                    a.getTitle(),
-                                    a.getDescription() != null
-                                            ? a.getDescription()
-                                            : ""))
-                    .toList();
+            List<DupliAnnonceDto> dupliDtos =
+                    recentAnnonces.stream()
+                            .map(
+                                    a ->
+                                            new DupliAnnonceDto(
+                                                    a.getId(),
+                                                    a.getTitle(),
+                                                    a.getDescription() != null
+                                                            ? a.getDescription()
+                                                            : ""))
+                            .toList();
 
             if (dupliDtos.size() < 2) {
                 return;
@@ -123,16 +125,23 @@ public class BrainScoringService {
 
                     if ("DOUBLON_CERTAIN".equals(doublon.getStatut())) {
                         annonce.setFraudStatut("FRAUDULEUX");
-                        annonce.setFraudScore(Math.max(
-                                annonce.getFraudScore() != null ? annonce.getFraudScore() : 0, 90));
+                        annonce.setFraudScore(
+                                Math.max(
+                                        annonce.getFraudScore() != null
+                                                ? annonce.getFraudScore()
+                                                : 0,
+                                        90));
                         annonceRepository.save(annonce);
                     } else if ("DOUBLON_PROBABLE".equals(doublon.getStatut())) {
                         if (annonce.getFraudStatut() == null
                                 || "SAIN".equals(annonce.getFraudStatut())) {
                             annonce.setFraudStatut("SUSPECT");
-                            annonce.setFraudScore(Math.max(
-                                    annonce.getFraudScore() != null ? annonce.getFraudScore() : 0,
-                                    50));
+                            annonce.setFraudScore(
+                                    Math.max(
+                                            annonce.getFraudScore() != null
+                                                    ? annonce.getFraudScore()
+                                                    : 0,
+                                            50));
                             annonceRepository.save(annonce);
                         }
                     }

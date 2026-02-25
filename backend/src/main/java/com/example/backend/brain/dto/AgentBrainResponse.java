@@ -1,8 +1,8 @@
 package com.example.backend.brain.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 import java.util.Map;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class AgentBrainResponse {
     @JsonProperty("intent_type")

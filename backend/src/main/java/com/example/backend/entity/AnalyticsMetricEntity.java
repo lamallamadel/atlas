@@ -2,19 +2,22 @@ package com.example.backend.entity;
 
 import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
-import org.hibernate.annotations.Type;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "analytics_metric", indexes = {
-    @Index(name = "idx_analytics_metric_org_type_date", columnList = "org_id, metric_type, metric_date"),
-    @Index(name = "idx_analytics_metric_date", columnList = "metric_date"),
-    @Index(name = "idx_analytics_metric_category", columnList = "category")
-})
+@Table(
+        name = "analytics_metric",
+        indexes = {
+            @Index(
+                    name = "idx_analytics_metric_org_type_date",
+                    columnList = "org_id, metric_type, metric_date"),
+            @Index(name = "idx_analytics_metric_date", columnList = "metric_date"),
+            @Index(name = "idx_analytics_metric_category", columnList = "category")
+        })
 public class AnalyticsMetricEntity {
 
     @Id

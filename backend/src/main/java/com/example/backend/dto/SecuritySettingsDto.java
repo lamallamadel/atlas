@@ -8,18 +8,20 @@ public class SecuritySettingsDto {
     @Min(60)
     private Integer sessionTimeout;
 
-    @NotBlank
-    private String passwordPolicy;
+    @NotBlank private String passwordPolicy;
 
     private Boolean mfaEnabled;
 
     @Min(1)
     private Integer maxLoginAttempts;
 
-    public SecuritySettingsDto() {
-    }
+    public SecuritySettingsDto() {}
 
-    public SecuritySettingsDto(Integer sessionTimeout, String passwordPolicy, Boolean mfaEnabled, Integer maxLoginAttempts) {
+    public SecuritySettingsDto(
+            Integer sessionTimeout,
+            String passwordPolicy,
+            Boolean mfaEnabled,
+            Integer maxLoginAttempts) {
         this.sessionTimeout = sessionTimeout;
         this.passwordPolicy = passwordPolicy;
         this.mfaEnabled = mfaEnabled;

@@ -14,15 +14,22 @@ public class LeadActivityService {
     private final LeadActivityRepository leadActivityRepository;
     private final DossierRepository dossierRepository;
 
-    public LeadActivityService(LeadActivityRepository leadActivityRepository, DossierRepository dossierRepository) {
+    public LeadActivityService(
+            LeadActivityRepository leadActivityRepository, DossierRepository dossierRepository) {
         this.leadActivityRepository = leadActivityRepository;
         this.dossierRepository = dossierRepository;
     }
 
     @Transactional
-    public LeadActivity logActivity(Long dossierId, String activityType, String description, Integer scoreImpact) {
-        Dossier dossier = dossierRepository.findById(dossierId)
-                .orElseThrow(() -> new IllegalArgumentException("Dossier not found: " + dossierId));
+    public LeadActivity logActivity(
+            Long dossierId, String activityType, String description, Integer scoreImpact) {
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Dossier not found: " + dossierId));
 
         LeadActivity activity = new LeadActivity();
         activity.setDossier(dossier);

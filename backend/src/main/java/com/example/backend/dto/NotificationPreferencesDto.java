@@ -20,10 +20,10 @@ public class NotificationPreferencesDto {
     @Valid
     private QuietHours quietHours;
 
-    public NotificationPreferencesDto() {
-    }
+    public NotificationPreferencesDto() {}
 
-    public NotificationPreferencesDto(Boolean enableEmail, Boolean enableSms, Boolean enableInApp, QuietHours quietHours) {
+    public NotificationPreferencesDto(
+            Boolean enableEmail, Boolean enableSms, Boolean enableInApp, QuietHours quietHours) {
         this.enableEmail = enableEmail;
         this.enableSms = enableSms;
         this.enableInApp = enableInApp;
@@ -66,18 +66,21 @@ public class NotificationPreferencesDto {
     public static class QuietHours {
 
         @Schema(description = "Start time in HH:mm format", example = "22:00")
-        @Pattern(regexp = "^([01]\\d|2[0-3]):[0-5]\\d$", message = "Start time must be in HH:mm format (00:00 to 23:59)")
+        @Pattern(
+                regexp = "^([01]\\d|2[0-3]):[0-5]\\d$",
+                message = "Start time must be in HH:mm format (00:00 to 23:59)")
         private String startTime;
 
         @Schema(description = "End time in HH:mm format", example = "08:00")
-        @Pattern(regexp = "^([01]\\d|2[0-3]):[0-5]\\d$", message = "End time must be in HH:mm format (00:00 to 23:59)")
+        @Pattern(
+                regexp = "^([01]\\d|2[0-3]):[0-5]\\d$",
+                message = "End time must be in HH:mm format (00:00 to 23:59)")
         private String endTime;
 
         @Schema(description = "Enable quiet hours", example = "true")
         private Boolean enabled;
 
-        public QuietHours() {
-        }
+        public QuietHours() {}
 
         public QuietHours(String startTime, String endTime, Boolean enabled) {
             this.startTime = startTime;

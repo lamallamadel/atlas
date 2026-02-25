@@ -1,11 +1,13 @@
 package com.example.backend;
 
-import com.example.backend.config.RateLimitConfig;
+import static org.assertj.core.api.Assertions.assertThat;
+
 import com.example.backend.dto.RateLimitTierDto;
 import com.example.backend.entity.RateLimitTier;
 import com.example.backend.repository.RateLimitTierRepository;
 import com.example.backend.service.RateLimitService;
 import io.micrometer.core.instrument.MeterRegistry;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,23 +15,16 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @ActiveProfiles({"test", "backend-e2e-h2"})
 @Transactional
 class RateLimitIntegrationTest {
 
-    @Autowired
-    private RateLimitService rateLimitService;
+    @Autowired private RateLimitService rateLimitService;
 
-    @Autowired
-    private RateLimitTierRepository rateLimitTierRepository;
+    @Autowired private RateLimitTierRepository rateLimitTierRepository;
 
-    @Autowired
-    private MeterRegistry meterRegistry;
+    @Autowired private MeterRegistry meterRegistry;
 
     private String testOrgId = "integration-test-org";
 

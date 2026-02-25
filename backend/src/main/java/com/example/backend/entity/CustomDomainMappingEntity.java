@@ -4,9 +4,13 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "custom_domain_mapping", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_custom_domain_domain", columnNames = {"domain"})
-})
+@Table(
+        name = "custom_domain_mapping",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_custom_domain_domain",
+                    columnNames = {"domain"})
+        })
 public class CustomDomainMappingEntity {
 
     @Id
@@ -83,44 +87,163 @@ public class CustomDomainMappingEntity {
         updatedAt = LocalDateTime.now();
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-    public String getOrgId() { return orgId; }
-    public void setOrgId(String orgId) { this.orgId = orgId; }
-    public String getDomain() { return domain; }
-    public void setDomain(String domain) { this.domain = domain; }
-    public String getSubdomain() { return subdomain; }
-    public void setSubdomain(String subdomain) { this.subdomain = subdomain; }
-    public Boolean getIsPrimary() { return isPrimary; }
-    public void setIsPrimary(Boolean isPrimary) { this.isPrimary = isPrimary; }
-    public Boolean getDnsConfigured() { return dnsConfigured; }
-    public void setDnsConfigured(Boolean dnsConfigured) { this.dnsConfigured = dnsConfigured; }
-    public LocalDateTime getDnsVerifiedAt() { return dnsVerifiedAt; }
-    public void setDnsVerifiedAt(LocalDateTime dnsVerifiedAt) { this.dnsVerifiedAt = dnsVerifiedAt; }
-    public String getCnameTarget() { return cnameTarget; }
-    public void setCnameTarget(String cnameTarget) { this.cnameTarget = cnameTarget; }
-    public String getTxtVerificationCode() { return txtVerificationCode; }
-    public void setTxtVerificationCode(String txtVerificationCode) { this.txtVerificationCode = txtVerificationCode; }
-    public Boolean getSslEnabled() { return sslEnabled; }
-    public void setSslEnabled(Boolean sslEnabled) { this.sslEnabled = sslEnabled; }
-    public String getSslProvider() { return sslProvider; }
-    public void setSslProvider(String sslProvider) { this.sslProvider = sslProvider; }
-    public String getSslCertificateArn() { return sslCertificateArn; }
-    public void setSslCertificateArn(String sslCertificateArn) { this.sslCertificateArn = sslCertificateArn; }
-    public LocalDateTime getSslIssuedAt() { return sslIssuedAt; }
-    public void setSslIssuedAt(LocalDateTime sslIssuedAt) { this.sslIssuedAt = sslIssuedAt; }
-    public LocalDateTime getSslExpiresAt() { return sslExpiresAt; }
-    public void setSslExpiresAt(LocalDateTime sslExpiresAt) { this.sslExpiresAt = sslExpiresAt; }
-    public Boolean getSslAutoRenew() { return sslAutoRenew; }
-    public void setSslAutoRenew(Boolean sslAutoRenew) { this.sslAutoRenew = sslAutoRenew; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    public LocalDateTime getLastVerificationAttempt() { return lastVerificationAttempt; }
-    public void setLastVerificationAttempt(LocalDateTime lastVerificationAttempt) { this.lastVerificationAttempt = lastVerificationAttempt; }
-    public Integer getVerificationAttempts() { return verificationAttempts; }
-    public void setVerificationAttempts(Integer verificationAttempts) { this.verificationAttempts = verificationAttempts; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getOrgId() {
+        return orgId;
+    }
+
+    public void setOrgId(String orgId) {
+        this.orgId = orgId;
+    }
+
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
+    public String getSubdomain() {
+        return subdomain;
+    }
+
+    public void setSubdomain(String subdomain) {
+        this.subdomain = subdomain;
+    }
+
+    public Boolean getIsPrimary() {
+        return isPrimary;
+    }
+
+    public void setIsPrimary(Boolean isPrimary) {
+        this.isPrimary = isPrimary;
+    }
+
+    public Boolean getDnsConfigured() {
+        return dnsConfigured;
+    }
+
+    public void setDnsConfigured(Boolean dnsConfigured) {
+        this.dnsConfigured = dnsConfigured;
+    }
+
+    public LocalDateTime getDnsVerifiedAt() {
+        return dnsVerifiedAt;
+    }
+
+    public void setDnsVerifiedAt(LocalDateTime dnsVerifiedAt) {
+        this.dnsVerifiedAt = dnsVerifiedAt;
+    }
+
+    public String getCnameTarget() {
+        return cnameTarget;
+    }
+
+    public void setCnameTarget(String cnameTarget) {
+        this.cnameTarget = cnameTarget;
+    }
+
+    public String getTxtVerificationCode() {
+        return txtVerificationCode;
+    }
+
+    public void setTxtVerificationCode(String txtVerificationCode) {
+        this.txtVerificationCode = txtVerificationCode;
+    }
+
+    public Boolean getSslEnabled() {
+        return sslEnabled;
+    }
+
+    public void setSslEnabled(Boolean sslEnabled) {
+        this.sslEnabled = sslEnabled;
+    }
+
+    public String getSslProvider() {
+        return sslProvider;
+    }
+
+    public void setSslProvider(String sslProvider) {
+        this.sslProvider = sslProvider;
+    }
+
+    public String getSslCertificateArn() {
+        return sslCertificateArn;
+    }
+
+    public void setSslCertificateArn(String sslCertificateArn) {
+        this.sslCertificateArn = sslCertificateArn;
+    }
+
+    public LocalDateTime getSslIssuedAt() {
+        return sslIssuedAt;
+    }
+
+    public void setSslIssuedAt(LocalDateTime sslIssuedAt) {
+        this.sslIssuedAt = sslIssuedAt;
+    }
+
+    public LocalDateTime getSslExpiresAt() {
+        return sslExpiresAt;
+    }
+
+    public void setSslExpiresAt(LocalDateTime sslExpiresAt) {
+        this.sslExpiresAt = sslExpiresAt;
+    }
+
+    public Boolean getSslAutoRenew() {
+        return sslAutoRenew;
+    }
+
+    public void setSslAutoRenew(Boolean sslAutoRenew) {
+        this.sslAutoRenew = sslAutoRenew;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getLastVerificationAttempt() {
+        return lastVerificationAttempt;
+    }
+
+    public void setLastVerificationAttempt(LocalDateTime lastVerificationAttempt) {
+        this.lastVerificationAttempt = lastVerificationAttempt;
+    }
+
+    public Integer getVerificationAttempts() {
+        return verificationAttempts;
+    }
+
+    public void setVerificationAttempts(Integer verificationAttempts) {
+        this.verificationAttempts = verificationAttempts;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
 }

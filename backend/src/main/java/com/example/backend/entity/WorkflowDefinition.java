@@ -1,19 +1,14 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 
 @Entity
 @Table(name = "workflow_definition")
@@ -197,8 +192,7 @@ public class WorkflowDefinition extends BaseEntity {
     }
 
     @Deprecated
-    public void setFromStatus(String fromStatus) {
-    }
+    public void setFromStatus(String fromStatus) {}
 
     @Deprecated
     public String getToStatus() {
@@ -206,8 +200,7 @@ public class WorkflowDefinition extends BaseEntity {
     }
 
     @Deprecated
-    public void setToStatus(String toStatus) {
-    }
+    public void setToStatus(String toStatus) {}
 
     @Deprecated
     public Map<String, Object> getConditionsJson() {

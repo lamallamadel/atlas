@@ -2,16 +2,15 @@ package com.example.backend.service;
 
 import com.example.backend.entity.TenantUsageEntity;
 import com.example.backend.repository.TenantUsageRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TenantUsageTrackingService {
@@ -40,10 +39,9 @@ public class TenantUsageTrackingService {
         }
 
         usage.setTotalMessagesSent(
-            usage.getEmailMessagesSent() + 
-            usage.getSmsMessagesSent() + 
-            usage.getWhatsappMessagesSent()
-        );
+                usage.getEmailMessagesSent()
+                        + usage.getSmsMessagesSent()
+                        + usage.getWhatsappMessagesSent());
 
         usageRepository.save(usage);
     }
@@ -51,10 +49,11 @@ public class TenantUsageTrackingService {
     @Transactional
     public void trackStorageUsage(String orgId, long documentBytes, long attachmentBytes) {
         TenantUsageEntity usage = getCurrentOrCreateUsage(orgId);
-        
+
         usage.setDocumentsStorageBytes(usage.getDocumentsStorageBytes() + documentBytes);
         usage.setAttachmentsStorageBytes(usage.getAttachmentsStorageBytes() + attachmentBytes);
-        usage.setTotalStorageBytes(usage.getDocumentsStorageBytes() + usage.getAttachmentsStorageBytes());
+        usage.setTotalStorageBytes(
+                usage.getDocumentsStorageBytes() + usage.getAttachmentsStorageBytes());
 
         usageRepository.save(usage);
     }
@@ -74,23 +73,42 @@ public class TenantUsageTrackingService {
     }
 
     private TenantUsageEntity getCurrentOrCreateUsage(String orgId) {
-        LocalDateTime periodStart = LocalDateTime.now().with(TemporalAdjusters.firstDayOfMonth()).withHour(0).withMinute(0).withSecond(0);
-        
-        return usageRepository.findByOrgIdAndPeriodStart(orgId, periodStart)
-                .orElseGet(() -> {
-                    TenantUsageEntity newUsage = new TenantUsageEntity();
-                    newUsage.setOrgId(orgId);
-                    newUsage.setPeriodStart(periodStart);
-                    newUsage.setPeriodEnd(periodStart.with(TemporalAdjusters.lastDayOfMonth()).withHour(23).withMinute(59).withSecond(59));
-                    return newUsage;
-                });
+        LocalDateTime periodStart =
+                LocalDateTime.now()
+                        .with(TemporalAdjusters.firstDayOfMonth())
+                        .withHour(0)
+                        .withMinute(0)
+                        .withSecond(0);
+
+        return usageRepository
+                .findByOrgIdAndPeriodStart(orgId, periodStart)
+                .orElseGet(
+                        () -> {
+                            TenantUsageEntity newUsage = new TenantUsageEntity();
+                            newUsage.setOrgId(orgId);
+                            newUsage.setPeriodStart(periodStart);
+                            newUsage.setPeriodEnd(
+                                    periodStart
+                                            .with(TemporalAdjusters.lastDayOfMonth())
+                                            .withHour(23)
+                                            .withMinute(59)
+                                            .withSecond(59));
+                            return newUsage;
+                        });
     }
 
     public Map<String, Object> getCurrentPeriodUsage(String orgId) {
-        LocalDateTime periodStart = LocalDateTime.now().with(TemporalAdjusters.firstDayOfMonth()).withHour(0).withMinute(0).withSecond(0);
-        
-        TenantUsageEntity usage = usageRepository.findByOrgIdAndPeriodStart(orgId, periodStart)
-                .orElse(new TenantUsageEntity());
+        LocalDateTime periodStart =
+                LocalDateTime.now()
+                        .with(TemporalAdjusters.firstDayOfMonth())
+                        .withHour(0)
+                        .withMinute(0)
+                        .withSecond(0);
+
+        TenantUsageEntity usage =
+                usageRepository
+                        .findByOrgIdAndPeriodStart(orgId, periodStart)
+                        .orElse(new TenantUsageEntity());
 
         Map<String, Object> usageMap = new HashMap<>();
         usageMap.put("periodStart", usage.getPeriodStart());

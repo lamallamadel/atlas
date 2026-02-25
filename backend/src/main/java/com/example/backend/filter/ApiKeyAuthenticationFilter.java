@@ -7,11 +7,10 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import java.io.IOException;
 
 @Component
 public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
@@ -19,16 +18,18 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
     private final ApiKeyService apiKeyService;
     private final ApiUsageTrackingService usageTrackingService;
 
-    public ApiKeyAuthenticationFilter(ApiKeyService apiKeyService, 
-                                     ApiUsageTrackingService usageTrackingService) {
+    public ApiKeyAuthenticationFilter(
+            ApiKeyService apiKeyService, ApiUsageTrackingService usageTrackingService) {
         this.apiKeyService = apiKeyService;
         this.usageTrackingService = usageTrackingService;
     }
 
     @Override
-    protected void doFilterInternal(@NonNull HttpServletRequest request, 
-                                   @NonNull HttpServletResponse response, 
-                                   @NonNull FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain)
+            throws ServletException, IOException {
         String requestUri = request.getRequestURI();
 
         if (!requestUri.startsWith("/api/public/v1")) {
@@ -37,7 +38,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         }
 
         String apiKey = extractApiKey(request);
-        
+
         if (apiKey == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("{\"error\":\"Missing API key\"}");
@@ -45,7 +46,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         }
 
         ApiKeyEntity keyEntity = apiKeyService.validateApiKey(apiKey).orElse(null);
-        
+
         if (keyEntity == null) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("{\"error\":\"Invalid API key\"}");
@@ -57,7 +58,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
         request.setAttribute("apiTier", keyEntity.getTier());
 
         long startTime = System.currentTimeMillis();
-        
+
         filterChain.doFilter(request, response);
 
         long duration = System.currentTimeMillis() - startTime;
@@ -65,12 +66,7 @@ public class ApiKeyAuthenticationFilter extends OncePerRequestFilter {
 
         apiKeyService.updateLastUsed(keyEntity.getId());
         usageTrackingService.trackApiUsage(
-            keyEntity.getId(), 
-            keyEntity.getOrgId(), 
-            requestUri, 
-            success, 
-            duration
-        );
+                keyEntity.getId(), keyEntity.getOrgId(), requestUri, success, duration);
     }
 
     private String extractApiKey(HttpServletRequest request) {

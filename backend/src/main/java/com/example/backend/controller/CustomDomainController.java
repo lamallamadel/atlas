@@ -5,12 +5,11 @@ import com.example.backend.service.CustomDomainService;
 import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/custom-domains")
@@ -34,7 +33,8 @@ public class CustomDomainController {
 
     @PostMapping
     @Operation(summary = "Add custom domain")
-    public ResponseEntity<CustomDomainMappingEntity> addDomain(@RequestBody Map<String, Object> request) {
+    public ResponseEntity<CustomDomainMappingEntity> addDomain(
+            @RequestBody Map<String, Object> request) {
         String orgId = TenantContext.getOrgId();
         String domain = (String) request.get("domain");
         Boolean isPrimary = (Boolean) request.getOrDefault("isPrimary", false);
@@ -47,12 +47,15 @@ public class CustomDomainController {
     @Operation(summary = "Verify DNS configuration and provision SSL")
     public ResponseEntity<Map<String, Object>> verifyDomain(@PathVariable String domain) {
         boolean verified = domainService.verifyDnsConfiguration(domain);
-        
-        return ResponseEntity.ok(Map.of(
-            "domain", domain,
-            "verified", verified,
-            "message", verified ? "DNS verified, SSL provisioning started" : "DNS verification pending"
-        ));
+
+        return ResponseEntity.ok(
+                Map.of(
+                        "domain", domain,
+                        "verified", verified,
+                        "message",
+                                verified
+                                        ? "DNS verified, SSL provisioning started"
+                                        : "DNS verification pending"));
     }
 
     @DeleteMapping("/{domain}")
@@ -65,7 +68,8 @@ public class CustomDomainController {
     @GetMapping("/{domain}")
     @Operation(summary = "Get domain mapping details")
     public ResponseEntity<CustomDomainMappingEntity> getDomain(@PathVariable String domain) {
-        return domainService.getDomainMapping(domain)
+        return domainService
+                .getDomainMapping(domain)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }

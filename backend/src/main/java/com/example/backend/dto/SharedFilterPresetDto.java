@@ -13,10 +13,15 @@ public class SharedFilterPresetDto {
     private Instant sharedAt;
     private String[] sharedWithUserIds;
 
-    public SharedFilterPresetDto() {
-    }
+    public SharedFilterPresetDto() {}
 
-    public SharedFilterPresetDto(Long id, String name, String description, Map<String, Object> filters, String sharedBy, String sharedByUsername) {
+    public SharedFilterPresetDto(
+            Long id,
+            String name,
+            String description,
+            Map<String, Object> filters,
+            String sharedBy,
+            String sharedByUsername) {
         this.id = id;
         this.name = name;
         this.description = description;

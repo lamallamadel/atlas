@@ -3,17 +3,15 @@ package com.example.backend.service;
 import com.example.backend.entity.*;
 import com.example.backend.entity.enums.MessageDirection;
 import com.example.backend.repository.*;
-import com.example.backend.util.TenantContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class LeadScoringEngine {
@@ -27,12 +25,13 @@ public class LeadScoringEngine {
     private final AnnonceRepository annonceRepository;
     private final DossierRepository dossierRepository;
 
-    public LeadScoringEngine(LeadScoringConfigRepository configRepository,
-                            LeadScoreRepository leadScoreRepository,
-                            MessageRepository messageRepository,
-                            AppointmentRepository appointmentRepository,
-                            AnnonceRepository annonceRepository,
-                            DossierRepository dossierRepository) {
+    public LeadScoringEngine(
+            LeadScoringConfigRepository configRepository,
+            LeadScoreRepository leadScoreRepository,
+            MessageRepository messageRepository,
+            AppointmentRepository appointmentRepository,
+            AnnonceRepository annonceRepository,
+            DossierRepository dossierRepository) {
         this.configRepository = configRepository;
         this.leadScoreRepository = leadScoreRepository;
         this.messageRepository = messageRepository;
@@ -44,12 +43,14 @@ public class LeadScoringEngine {
     @Transactional
     public LeadScore calculateScore(Dossier dossier) {
         String orgId = dossier.getOrgId();
-        LeadScoringConfig config = configRepository.findActiveConfig(orgId)
-                .orElseGet(() -> createDefaultConfig(orgId));
+        LeadScoringConfig config =
+                configRepository
+                        .findActiveConfig(orgId)
+                        .orElseGet(() -> createDefaultConfig(orgId));
 
-        LeadScore leadScore = leadScoreRepository.findByDossierId(dossier.getId())
-                .orElse(new LeadScore());
-        
+        LeadScore leadScore =
+                leadScoreRepository.findByDossierId(dossier.getId()).orElse(new LeadScore());
+
         leadScore.setDossierId(dossier.getId());
         leadScore.setOrgId(orgId);
 
@@ -62,7 +63,8 @@ public class LeadScoringEngine {
         leadScore.setResponseTimeScore(responseTimeScore);
         leadScore.setEngagementScore(engagementScore);
         leadScore.setPropertyMatchScore(propertyMatchScore);
-        leadScore.setTotalScore(sourceScore + responseTimeScore + engagementScore + propertyMatchScore);
+        leadScore.setTotalScore(
+                sourceScore + responseTimeScore + engagementScore + propertyMatchScore);
 
         Map<String, Object> breakdown = new HashMap<>();
         breakdown.put("sourceScore", sourceScore);
@@ -81,8 +83,14 @@ public class LeadScoringEngine {
         dossier.setScore(saved.getTotalScore());
         dossierRepository.save(dossier);
 
-        log.info("Calculated lead score for dossier {}: total={}, source={}, responseTime={}, engagement={}, propertyMatch={}",
-                dossier.getId(), saved.getTotalScore(), sourceScore, responseTimeScore, engagementScore, propertyMatchScore);
+        log.info(
+                "Calculated lead score for dossier {}: total={}, source={}, responseTime={}, engagement={}, propertyMatch={}",
+                dossier.getId(),
+                saved.getTotalScore(),
+                sourceScore,
+                responseTimeScore,
+                engagementScore,
+                propertyMatchScore);
 
         return saved;
     }
@@ -91,29 +99,32 @@ public class LeadScoringEngine {
         if (dossier.getSource() == null) {
             return 0;
         }
-        
+
         String sourceKey = dossier.getSource().getValue();
         return config.getSourceWeights().getOrDefault(sourceKey, 10);
     }
 
     private int calculateResponseTimeScore(Dossier dossier, LeadScoringConfig config) {
-        List<MessageEntity> messages = messageRepository.findByDossierIdWithFiltersUnpaged(
-                dossier.getId(), null, MessageDirection.OUTBOUND, null, null);
+        List<MessageEntity> messages =
+                messageRepository.findByDossierIdWithFiltersUnpaged(
+                        dossier.getId(), null, MessageDirection.OUTBOUND, null, null);
 
         if (messages.isEmpty()) {
             return 0;
         }
 
-        LocalDateTime firstOutboundMessage = messages.stream()
-                .map(MessageEntity::getTimestamp)
-                .min(LocalDateTime::compareTo)
-                .orElse(null);
+        LocalDateTime firstOutboundMessage =
+                messages.stream()
+                        .map(MessageEntity::getTimestamp)
+                        .min(LocalDateTime::compareTo)
+                        .orElse(null);
 
         if (firstOutboundMessage == null) {
             return 0;
         }
 
-        long minutesElapsed = Duration.between(dossier.getCreatedAt(), firstOutboundMessage).toMinutes();
+        long minutesElapsed =
+                Duration.between(dossier.getCreatedAt(), firstOutboundMessage).toMinutes();
 
         if (minutesElapsed <= config.getFastResponseMinutes()) {
             return config.getResponseTimeWeight();
@@ -126,18 +137,27 @@ public class LeadScoringEngine {
 
     private int calculateEngagementScore(Dossier dossier, LeadScoringConfig config) {
         int score = 0;
-        
-        List<MessageEntity> inboundMessages = messageRepository.findByDossierIdWithFiltersUnpaged(
-                dossier.getId(), null, MessageDirection.INBOUND, null, null);
-        score += config.getEngagementWeights().getOrDefault("inboundMessage", 5) * Math.min(inboundMessages.size(), 5);
 
-        List<MessageEntity> outboundMessages = messageRepository.findByDossierIdWithFiltersUnpaged(
-                dossier.getId(), null, MessageDirection.OUTBOUND, null, null);
-        score += config.getEngagementWeights().getOrDefault("outboundMessage", 2) * Math.min(outboundMessages.size(), 10);
+        List<MessageEntity> inboundMessages =
+                messageRepository.findByDossierIdWithFiltersUnpaged(
+                        dossier.getId(), null, MessageDirection.INBOUND, null, null);
+        score +=
+                config.getEngagementWeights().getOrDefault("inboundMessage", 5)
+                        * Math.min(inboundMessages.size(), 5);
 
-        List<AppointmentEntity> appointments = appointmentRepository.findAll(
-                (root, query, cb) -> cb.equal(root.get("dossier").get("id"), dossier.getId()));
-        score += config.getEngagementWeights().getOrDefault("appointment", 15) * appointments.size();
+        List<MessageEntity> outboundMessages =
+                messageRepository.findByDossierIdWithFiltersUnpaged(
+                        dossier.getId(), null, MessageDirection.OUTBOUND, null, null);
+        score +=
+                config.getEngagementWeights().getOrDefault("outboundMessage", 2)
+                        * Math.min(outboundMessages.size(), 10);
+
+        List<AppointmentEntity> appointments =
+                appointmentRepository.findAll(
+                        (root, query, cb) ->
+                                cb.equal(root.get("dossier").get("id"), dossier.getId()));
+        score +=
+                config.getEngagementWeights().getOrDefault("appointment", 15) * appointments.size();
 
         return Math.min(score, 50);
     }

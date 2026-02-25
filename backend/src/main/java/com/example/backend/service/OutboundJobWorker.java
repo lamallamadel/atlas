@@ -9,6 +9,8 @@ import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
+import io.micrometer.observation.annotation.Observed;
+import io.micrometer.tracing.Tracer;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -18,6 +20,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -28,7 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class OutboundJobWorker {
 
     private static final Logger logger = LoggerFactory.getLogger(OutboundJobWorker.class);
-    private static final int[] BACKOFF_MINUTES = { 1, 5, 15, 60, 360 };
+    private static final int[] BACKOFF_MINUTES = {1, 5, 15, 60, 360};
 
     private final OutboundMessageRepository outboundMessageRepository;
     private final OutboundAttemptRepository outboundAttemptRepository;
@@ -37,6 +40,7 @@ public class OutboundJobWorker {
     private final AuditEventService auditEventService;
     private final ActivityService activityService;
     private final MetricsService metricsService;
+    private final Tracer tracer;
 
     @Value("${outbound.worker.batch-size:10}")
     private int batchSize;
@@ -51,7 +55,8 @@ public class OutboundJobWorker {
             WhatsAppRateLimitService whatsAppRateLimitService,
             AuditEventService auditEventService,
             ActivityService activityService,
-            MetricsService metricsService) {
+            MetricsService metricsService,
+            @Autowired(required = false) Tracer tracer) {
         this.outboundMessageRepository = outboundMessageRepository;
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.providers = providers;
@@ -59,6 +64,7 @@ public class OutboundJobWorker {
         this.auditEventService = auditEventService;
         this.activityService = activityService;
         this.metricsService = metricsService;
+        this.tracer = tracer;
     }
 
     @Scheduled(fixedDelayString = "${outbound.worker.poll-interval-ms:5000}")
@@ -75,8 +81,9 @@ public class OutboundJobWorker {
         try {
             recoverStaleMessages();
 
-            List<OutboundMessageEntity> messages = outboundMessageRepository.findPendingMessages(
-                    OutboundMessageStatus.QUEUED, PageRequest.of(0, batchSize));
+            List<OutboundMessageEntity> messages =
+                    outboundMessageRepository.findPendingMessages(
+                            OutboundMessageStatus.QUEUED, PageRequest.of(0, batchSize));
 
             if (messages.isEmpty()) {
                 return;
@@ -85,7 +92,8 @@ public class OutboundJobWorker {
             logger.info("Processing {} pending outbound messages", messages.size());
 
             for (OutboundMessageEntity message : messages) {
-                String messageCorrelationId = "msg-" + message.getId() + "-" + UUID.randomUUID().toString();
+                String messageCorrelationId =
+                        "msg-" + message.getId() + "-" + UUID.randomUUID().toString();
                 MDC.put("correlationId", messageCorrelationId);
                 MDC.put("messageId", String.valueOf(message.getId()));
                 MDC.put("channel", message.getChannel().name());
@@ -110,7 +118,8 @@ public class OutboundJobWorker {
                                 message.getId());
                     }
                 } catch (Exception e) {
-                    logger.error("Error processing message {}: {}", message.getId(), e.getMessage(), e);
+                    logger.error(
+                            "Error processing message {}: {}", message.getId(), e.getMessage(), e);
                 } finally {
                     MDC.remove("messageId");
                     MDC.remove("channel");
@@ -130,10 +139,11 @@ public class OutboundJobWorker {
 
     private void recoverStaleMessages() {
         LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(10);
-        List<OutboundMessageEntity> staleMessages = outboundMessageRepository.findStaleMessages(
-                OutboundMessageStatus.SENDING,
-                staleThreshold,
-                PageRequest.of(0, batchSize));
+        List<OutboundMessageEntity> staleMessages =
+                outboundMessageRepository.findStaleMessages(
+                        OutboundMessageStatus.SENDING,
+                        staleThreshold,
+                        PageRequest.of(0, batchSize));
 
         if (!staleMessages.isEmpty()) {
             logger.warn(
@@ -152,8 +162,9 @@ public class OutboundJobWorker {
             return true;
         }
 
-        List<OutboundAttemptEntity> attempts = outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(
-                message.getId());
+        List<OutboundAttemptEntity> attempts =
+                outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(
+                        message.getId());
         if (attempts.isEmpty()) {
             return true;
         }
@@ -168,12 +179,34 @@ public class OutboundJobWorker {
     }
 
     @Transactional
+    @Observed(name = "outbound.message.process", contextualName = "outbound-message-process")
     public void processMessage(OutboundMessageEntity message) {
         logger.debug(
                 "Processing outbound message: id={}, attempt={}/{}",
                 message.getId(),
                 message.getAttemptCount() + 1,
                 message.getMaxAttempts());
+
+        if (tracer != null && tracer.currentSpan() != null) {
+            tracer.currentSpan().tag("message.id", String.valueOf(message.getId()));
+            tracer.currentSpan().tag("message.channel", message.getChannel().name());
+            tracer.currentSpan()
+                    .tag("message.attempt", String.valueOf(message.getAttemptCount() + 1));
+            tracer.currentSpan().tag("org.id", message.getOrgId());
+
+            if (message.getSessionId() != null) {
+                tracer.currentSpan().tag("session.id", message.getSessionId());
+                tracer.getBaggage("sessionId").set(message.getSessionId());
+            }
+            if (message.getRunId() != null) {
+                tracer.currentSpan().tag("run.id", message.getRunId());
+                tracer.getBaggage("runId").set(message.getRunId());
+            }
+            if (message.getHypothesisId() != null) {
+                tracer.currentSpan().tag("hypothesis.id", message.getHypothesisId());
+                tracer.getBaggage("hypothesisId").set(message.getHypothesisId());
+            }
+        }
 
         message.setStatus(OutboundMessageStatus.SENDING);
         message.setAttemptCount(message.getAttemptCount() + 1);
@@ -372,9 +405,10 @@ public class OutboundJobWorker {
     private void logMessageSentActivity(OutboundMessageEntity message, ProviderSendResult result) {
         if (activityService != null && message.getDossierId() != null) {
             try {
-                String description = String.format(
-                        "Outbound %s message sent to %s",
-                        message.getChannel(), message.getTo());
+                String description =
+                        String.format(
+                                "Outbound %s message sent to %s",
+                                message.getChannel(), message.getTo());
 
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("outboundMessageId", message.getId());
@@ -400,9 +434,10 @@ public class OutboundJobWorker {
             OutboundMessageEntity message, String errorCode, String errorMessage, String reason) {
         if (activityService != null && message.getDossierId() != null) {
             try {
-                String description = String.format(
-                        "Outbound %s message failed: %s",
-                        message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
+                String description =
+                        String.format(
+                                "Outbound %s message failed: %s",
+                                message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
 
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("outboundMessageId", message.getId());

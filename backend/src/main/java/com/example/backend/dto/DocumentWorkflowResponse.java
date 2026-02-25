@@ -2,7 +2,6 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DocumentWorkflowType;
 import com.example.backend.entity.enums.WorkflowStatus;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 

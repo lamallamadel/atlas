@@ -16,7 +16,8 @@ public class HibernateStatisticsConfig {
     private static final Logger logger = LoggerFactory.getLogger(HibernateStatisticsConfig.class);
 
     @Bean
-    public HibernateStatisticsLogger hibernateStatisticsLogger(EntityManagerFactory entityManagerFactory) {
+    public HibernateStatisticsLogger hibernateStatisticsLogger(
+            EntityManagerFactory entityManagerFactory) {
         SessionFactory sessionFactory = entityManagerFactory.unwrap(SessionFactory.class);
         Statistics statistics = sessionFactory.getStatistics();
         statistics.setStatisticsEnabled(true);

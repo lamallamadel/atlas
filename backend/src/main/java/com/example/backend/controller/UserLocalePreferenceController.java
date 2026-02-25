@@ -2,10 +2,9 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.UserLocalePreferenceDto;
 import com.example.backend.service.UserPreferencesService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/user-preferences/locale")
@@ -26,7 +25,8 @@ public class UserLocalePreferenceController {
     @PostMapping
     public ResponseEntity<UserLocalePreferenceDto> saveUserLocalePreference(
             @Valid @RequestBody UserLocalePreferenceDto preferenceDto) {
-        UserLocalePreferenceDto saved = userPreferencesService.saveUserLocalePreference(preferenceDto);
+        UserLocalePreferenceDto saved =
+                userPreferencesService.saveUserLocalePreference(preferenceDto);
         return ResponseEntity.ok(saved);
     }
 }

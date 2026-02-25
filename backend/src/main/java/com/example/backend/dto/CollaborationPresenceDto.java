@@ -9,8 +9,7 @@ public class CollaborationPresenceDto {
     private String action;
     private Instant timestamp;
 
-    public CollaborationPresenceDto() {
-    }
+    public CollaborationPresenceDto() {}
 
     public CollaborationPresenceDto(String userId, String username, Long dossierId, String action) {
         this.userId = userId;

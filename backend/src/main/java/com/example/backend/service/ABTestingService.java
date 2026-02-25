@@ -5,16 +5,15 @@ import com.example.backend.entity.Dossier;
 import com.example.backend.entity.MLPrediction;
 import com.example.backend.repository.ABTestExperimentRepository;
 import com.example.backend.repository.MLPredictionRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ABTestingService {
@@ -27,10 +26,11 @@ public class ABTestingService {
     private final LeadScoringEngine ruleBasedScoringEngine;
     private final Random random = new Random();
 
-    public ABTestingService(ABTestExperimentRepository experimentRepository,
-                           MLPredictionRepository predictionRepository,
-                           PredictiveLeadScoringService mlScoringService,
-                           LeadScoringEngine ruleBasedScoringEngine) {
+    public ABTestingService(
+            ABTestExperimentRepository experimentRepository,
+            MLPredictionRepository predictionRepository,
+            PredictiveLeadScoringService mlScoringService,
+            LeadScoringEngine ruleBasedScoringEngine) {
         this.experimentRepository = experimentRepository;
         this.predictionRepository = predictionRepository;
         this.mlScoringService = mlScoringService;
@@ -38,8 +38,13 @@ public class ABTestingService {
     }
 
     @Transactional
-    public ABTestExperiment createExperiment(String orgId, String experimentName, String description, 
-                                            String controlMethod, String treatmentMethod, Double trafficSplit) {
+    public ABTestExperiment createExperiment(
+            String orgId,
+            String experimentName,
+            String description,
+            String controlMethod,
+            String treatmentMethod,
+            Double trafficSplit) {
         ABTestExperiment experiment = new ABTestExperiment();
         experiment.setOrgId(orgId);
         experiment.setExperimentName(experimentName);
@@ -58,14 +63,15 @@ public class ABTestingService {
     @Transactional
     public String assignToVariant(Dossier dossier) {
         String orgId = dossier.getOrgId();
-        List<ABTestExperiment> runningExperiments = experimentRepository.findRunningExperiments(orgId);
+        List<ABTestExperiment> runningExperiments =
+                experimentRepository.findRunningExperiments(orgId);
 
         if (runningExperiments.isEmpty()) {
             return "ML";
         }
 
         ABTestExperiment experiment = runningExperiments.get(0);
-        
+
         double randomValue = random.nextDouble();
         if (randomValue < experiment.getTrafficSplit()) {
             return experiment.getControlMethod();
@@ -87,16 +93,21 @@ public class ABTestingService {
 
     @Transactional
     public Map<String, Object> calculateExperimentMetrics(Long experimentId) {
-        ABTestExperiment experiment = experimentRepository.findById(experimentId)
-            .orElseThrow(() -> new RuntimeException("Experiment not found"));
+        ABTestExperiment experiment =
+                experimentRepository
+                        .findById(experimentId)
+                        .orElseThrow(() -> new RuntimeException("Experiment not found"));
 
         LocalDateTime startDate = experiment.getStartedAt();
-        LocalDateTime endDate = experiment.getEndedAt() != null ? experiment.getEndedAt() : LocalDateTime.now();
+        LocalDateTime endDate =
+                experiment.getEndedAt() != null ? experiment.getEndedAt() : LocalDateTime.now();
 
-        Map<String, Object> controlMetrics = calculateMethodMetrics(
-            experiment.getOrgId(), experiment.getControlMethod(), startDate, endDate);
-        Map<String, Object> treatmentMetrics = calculateMethodMetrics(
-            experiment.getOrgId(), experiment.getTreatmentMethod(), startDate, endDate);
+        Map<String, Object> controlMetrics =
+                calculateMethodMetrics(
+                        experiment.getOrgId(), experiment.getControlMethod(), startDate, endDate);
+        Map<String, Object> treatmentMetrics =
+                calculateMethodMetrics(
+                        experiment.getOrgId(), experiment.getTreatmentMethod(), startDate, endDate);
 
         experiment.setControlMetrics(controlMetrics);
         experiment.setTreatmentMetrics(treatmentMetrics);
@@ -124,20 +135,22 @@ public class ABTestingService {
         return result;
     }
 
-    private Map<String, Object> calculateMethodMetrics(String orgId, String method, 
-                                                       LocalDateTime startDate, LocalDateTime endDate) {
+    private Map<String, Object> calculateMethodMetrics(
+            String orgId, String method, LocalDateTime startDate, LocalDateTime endDate) {
         Map<String, Object> metrics = new HashMap<>();
 
         if ("ML".equals(method)) {
-            List<MLPrediction> predictions = predictionRepository.findByOrgIdAndDateRange(
-                orgId, startDate, endDate);
+            List<MLPrediction> predictions =
+                    predictionRepository.findByOrgIdAndDateRange(orgId, startDate, endDate);
 
             long totalPredictions = predictions.size();
-            long conversions = predictions.stream()
-                .filter(p -> p.getActualOutcome() != null && p.getActualOutcome() == 1)
-                .count();
+            long conversions =
+                    predictions.stream()
+                            .filter(p -> p.getActualOutcome() != null && p.getActualOutcome() == 1)
+                            .count();
 
-            double conversionRate = totalPredictions > 0 ? (double) conversions / totalPredictions : 0.0;
+            double conversionRate =
+                    totalPredictions > 0 ? (double) conversions / totalPredictions : 0.0;
 
             metrics.put("total_predictions", totalPredictions);
             metrics.put("conversions", conversions);
@@ -153,8 +166,10 @@ public class ABTestingService {
 
     @Transactional
     public ABTestExperiment stopExperiment(Long experimentId) {
-        ABTestExperiment experiment = experimentRepository.findById(experimentId)
-            .orElseThrow(() -> new RuntimeException("Experiment not found"));
+        ABTestExperiment experiment =
+                experimentRepository
+                        .findById(experimentId)
+                        .orElseThrow(() -> new RuntimeException("Experiment not found"));
 
         experiment.setStatus("STOPPED");
         experiment.setEndedAt(LocalDateTime.now());

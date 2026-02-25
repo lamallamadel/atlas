@@ -1,12 +1,11 @@
 package com.example.backend.dto;
 
 public class ICalFeedUrlResponse {
-    
+
     private String feedUrl;
     private String token;
 
-    public ICalFeedUrlResponse() {
-    }
+    public ICalFeedUrlResponse() {}
 
     public ICalFeedUrlResponse(String feedUrl, String token) {
         this.feedUrl = feedUrl;

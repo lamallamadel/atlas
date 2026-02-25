@@ -1,7 +1,6 @@
 package com.example.backend.dto;
 
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 public class SignatureRequestRequest {

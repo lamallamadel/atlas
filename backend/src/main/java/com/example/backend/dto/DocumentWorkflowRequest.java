@@ -2,23 +2,19 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DocumentWorkflowType;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.Map;
 
 public class DocumentWorkflowRequest {
 
-    @NotNull
-    private Long documentId;
+    @NotNull private Long documentId;
 
     private Long dossierId;
 
     private Long templateId;
 
-    @NotNull
-    private String workflowName;
+    @NotNull private String workflowName;
 
-    @NotNull
-    private DocumentWorkflowType workflowType;
+    @NotNull private DocumentWorkflowType workflowType;
 
     private Map<String, Object> workflowConfig;
 

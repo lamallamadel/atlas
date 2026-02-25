@@ -48,18 +48,16 @@ class AppointmentControllerTest {
     @Autowired private DossierRepository dossierRepository;
 
     private <T extends MockHttpServletRequestBuilder> T withHeaders(T builder) {
-        return (T) builder
-            .header(ORG_ID_HEADER, ORG_ID)
-            .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+        return (T)
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
 
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
             T withHeaders(T builder, String orgId) {
-        return (T)  builder
-                .header(ORG_ID_HEADER, orgId)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
-    };
-
+        return (T)
+                builder.header(ORG_ID_HEADER, orgId).header(CORRELATION_ID_HEADER, CORRELATION_ID);
+    }
+    ;
 
     @BeforeEach
     void setUp() {
@@ -350,7 +348,9 @@ class AppointmentControllerTest {
                         LocalDateTime.of(2024, 6, 1, 10, 0),
                         LocalDateTime.of(2024, 6, 1, 11, 0));
 
-        mockMvc.perform(withHeaders(delete("/api/v1/appointments/" + appointment.getId()).with(csrf())))
+        mockMvc.perform(
+                        withHeaders(
+                                delete("/api/v1/appointments/" + appointment.getId()).with(csrf())))
                 .andExpect(status().isNoContent());
     }
 

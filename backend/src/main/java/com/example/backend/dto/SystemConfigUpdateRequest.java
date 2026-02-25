@@ -10,20 +10,18 @@ public class SystemConfigUpdateRequest {
 
     private String value;
 
-    @Valid
-    private NetworkSettingsDto networkSettings;
+    @Valid private NetworkSettingsDto networkSettings;
 
-    @Valid
-    private SecuritySettingsDto securitySettings;
+    @Valid private SecuritySettingsDto securitySettings;
 
-    @Valid
-    private PerformanceSettingsDto performanceSettings;
+    @Valid private PerformanceSettingsDto performanceSettings;
 
-    public SystemConfigUpdateRequest() {
-    }
+    public SystemConfigUpdateRequest() {}
 
-    public SystemConfigUpdateRequest(NetworkSettingsDto networkSettings, SecuritySettingsDto securitySettings, 
-                                    PerformanceSettingsDto performanceSettings) {
+    public SystemConfigUpdateRequest(
+            NetworkSettingsDto networkSettings,
+            SecuritySettingsDto securitySettings,
+            PerformanceSettingsDto performanceSettings) {
         this.networkSettings = networkSettings;
         this.securitySettings = securitySettings;
         this.performanceSettings = performanceSettings;

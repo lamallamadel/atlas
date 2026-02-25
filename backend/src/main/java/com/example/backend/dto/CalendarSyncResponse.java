@@ -1,13 +1,12 @@
 package com.example.backend.dto;
 
 public class CalendarSyncResponse {
-    
+
     private Boolean success;
     private Integer syncedCount;
     private String message;
 
-    public CalendarSyncResponse() {
-    }
+    public CalendarSyncResponse() {}
 
     public Boolean getSuccess() {
         return success;

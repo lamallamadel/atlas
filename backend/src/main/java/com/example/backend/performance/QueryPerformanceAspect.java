@@ -20,17 +20,17 @@ public class QueryPerformanceAspect {
     public Object profileRepositoryMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         String methodName = joinPoint.getSignature().toShortString();
-        
+
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
-            
+
             if (executionTime > SLOW_QUERY_THRESHOLD_MS) {
                 logger.warn("🐌 SLOW QUERY DETECTED: {} took {}ms", methodName, executionTime);
             } else if (executionTime > 500) {
                 logger.info("⚡ Query performance: {} took {}ms", methodName, executionTime);
             }
-            
+
             return result;
         } catch (Exception e) {
             long executionTime = System.currentTimeMillis() - startTime;
@@ -43,15 +43,15 @@ public class QueryPerformanceAspect {
     public Object profileServiceMethod(ProceedingJoinPoint joinPoint) throws Throwable {
         long startTime = System.currentTimeMillis();
         String methodName = joinPoint.getSignature().toShortString();
-        
+
         try {
             Object result = joinPoint.proceed();
             long executionTime = System.currentTimeMillis() - startTime;
-            
+
             if (executionTime > 2000) {
                 logger.warn("🐌 SLOW SERVICE METHOD: {} took {}ms", methodName, executionTime);
             }
-            
+
             return result;
         } catch (Exception e) {
             long executionTime = System.currentTimeMillis() - startTime;

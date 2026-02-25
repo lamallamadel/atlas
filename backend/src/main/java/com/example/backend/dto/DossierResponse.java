@@ -2,11 +2,7 @@ package com.example.backend.dto;
 
 import com.example.backend.entity.enums.DossierSource;
 import com.example.backend.entity.enums.DossierStatus;
-
-
-
 import io.swagger.v3.oas.annotations.media.Schema;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -16,27 +12,23 @@ public class DossierResponse {
     private String orgId;
     private Long annonceId;
 
-
-
     @Schema(
             description = "Associated annonce title",
             example = "Beautiful Apartment",
             nullable = true)
-
     private String annonceTitle;
+
     private String leadPhone;
     private String leadEmail;
     private String leadName;
     private String leadSource;
 
-
-
     @Schema(
             description = "Dossier notes",
             example = "Customer interested in property X",
             nullable = true)
-
     private String notes;
+
     private DossierStatus status;
     private String caseType;
     private String statusCode;
@@ -46,22 +38,17 @@ public class DossierResponse {
     private DossierSource source;
     private LocalDateTime createdAt;
 
-
-
     @Schema(
             description = "Timestamp when the dossier was last updated",
             example = "2024-01-01T12:00:00")
-
     private LocalDateTime updatedAt;
+
     private String createdBy;
     private String updatedBy;
     private List<PartiePrenanteResponse> parties;
     private Long existingOpenDossierId;
 
-
-
     public DossierResponse() {}
-
 
     public Long getId() {
         return id;

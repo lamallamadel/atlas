@@ -8,8 +8,7 @@ public class IntegrationTestResponse {
     private String message;
     private Map<String, Object> details;
 
-    public IntegrationTestResponse() {
-    }
+    public IntegrationTestResponse() {}
 
     public IntegrationTestResponse(Boolean success, String message, Map<String, Object> details) {
         this.success = success;

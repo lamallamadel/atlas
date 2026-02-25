@@ -3,18 +3,15 @@ package com.example.backend.dto;
 import com.example.backend.entity.ApiKeyEntity;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDateTime;
 
 public class CreateApiKeyRequest {
 
-    @NotBlank
-    private String name;
+    @NotBlank private String name;
 
     private String description;
 
-    @NotNull
-    private ApiKeyEntity.ApiTier tier = ApiKeyEntity.ApiTier.FREE;
+    @NotNull private ApiKeyEntity.ApiTier tier = ApiKeyEntity.ApiTier.FREE;
 
     private String scopes;
 

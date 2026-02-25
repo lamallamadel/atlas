@@ -10,7 +10,6 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
 import jakarta.persistence.EntityNotFoundException;
 import java.util.Optional;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,8 +40,10 @@ public class ContractController {
             return ResponseEntity.status(401).build();
         }
 
-        Dossier dossier = dossierRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Dossier not found"));
+        Dossier dossier =
+                dossierRepository
+                        .findById(id)
+                        .orElseThrow(() -> new EntityNotFoundException("Dossier not found"));
 
         if (!orgId.equals(dossier.getOrgId())) {
             return ResponseEntity.status(403).build();
@@ -62,7 +63,8 @@ public class ContractController {
             request.setAgreedPrice(annonce.getPrice());
         }
 
-        Optional<ContractGenerateResponse> responseOpt = brainClientService.generateContract(request);
+        Optional<ContractGenerateResponse> responseOpt =
+                brainClientService.generateContract(request);
 
         return responseOpt
                 .map(ResponseEntity::ok)

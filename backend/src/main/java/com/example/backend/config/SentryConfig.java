@@ -29,11 +29,12 @@ public class SentryConfig {
             options.setRelease(applicationName + "@1.0.0");
             options.setTracesSampleRate(0.1);
             options.setEnableUncaughtExceptionHandler(true);
-            
-            options.setBeforeSend((event, hint) -> {
-                enrichEventWithContext(event);
-                return event;
-            });
+
+            options.setBeforeSend(
+                    (event, hint) -> {
+                        enrichEventWithContext(event);
+                        return event;
+                    });
         };
     }
 

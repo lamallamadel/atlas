@@ -5,8 +5,7 @@ import jakarta.validation.constraints.NotNull;
 
 public class WorkflowApprovalRequest {
 
-    @NotNull
-    private WorkflowStepStatus decision;
+    @NotNull private WorkflowStepStatus decision;
 
     private String comments;
 

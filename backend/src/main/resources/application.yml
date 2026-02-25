@@ -97,6 +97,30 @@ management:
     export:
       prometheus:
         enabled: true
+  
+  tracing:
+    sampling:
+      probability: ${TRACING_SAMPLING_PROBABILITY:1.0}
+    baggage:
+      enabled: true
+      remote-fields:
+        - sessionId
+        - runId
+        - hypothesisId
+      correlation:
+        enabled: true
+        fields:
+          - sessionId
+          - runId
+          - hypothesisId
+  
+  otlp:
+    tracing:
+      endpoint: ${OTLP_ENDPOINT:http://localhost:4318/v1/traces}
+      headers:
+        Authorization: ${OTLP_AUTH_HEADER:}
+      timeout: ${OTLP_TIMEOUT:10s}
+      compression: ${OTLP_COMPRESSION:gzip}
 
 ml:
   service:
@@ -112,3 +136,5 @@ logging:
     org.springframework.web: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    level: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

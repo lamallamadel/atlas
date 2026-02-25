@@ -7,13 +7,12 @@ import com.example.backend.service.TenantUsageTrackingService;
 import com.example.backend.util.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/billing")
@@ -24,8 +23,7 @@ public class BillingController {
     private final TenantUsageTrackingService usageService;
 
     public BillingController(
-            StripeIntegrationService stripeService,
-            TenantUsageTrackingService usageService) {
+            StripeIntegrationService stripeService, TenantUsageTrackingService usageService) {
         this.stripeService = stripeService;
         this.usageService = usageService;
     }
@@ -34,9 +32,9 @@ public class BillingController {
     @Operation(summary = "Get current subscription details")
     public ResponseEntity<StripeSubscriptionEntity> getSubscription() {
         String orgId = TenantContext.getOrgId();
-        Optional<StripeSubscriptionEntity> subscription = stripeService.getSubscriptionByOrgId(orgId);
-        return subscription.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        Optional<StripeSubscriptionEntity> subscription =
+                stripeService.getSubscriptionByOrgId(orgId);
+        return subscription.map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/subscription/create")
@@ -44,15 +42,14 @@ public class BillingController {
     @Operation(summary = "Create new subscription")
     public ResponseEntity<StripeSubscriptionEntity> createSubscription(
             @RequestBody Map<String, String> request) {
-        
+
         String orgId = TenantContext.getOrgId();
         String planTier = request.get("planTier");
         String billingPeriod = request.getOrDefault("billingPeriod", "monthly");
         String customerEmail = request.get("customerEmail");
 
-        StripeSubscriptionEntity subscription = stripeService.createSubscription(
-            orgId, planTier, billingPeriod, customerEmail
-        );
+        StripeSubscriptionEntity subscription =
+                stripeService.createSubscription(orgId, planTier, billingPeriod, customerEmail);
 
         return ResponseEntity.ok(subscription);
     }
@@ -87,7 +84,7 @@ public class BillingController {
         String eventType = (String) payload.get("type");
         @SuppressWarnings("unchecked")
         Map<String, Object> data = (Map<String, Object>) payload.get("data");
-        
+
         stripeService.handleWebhook(eventType, data);
         return ResponseEntity.ok().build();
     }

@@ -5,13 +5,11 @@ import jakarta.validation.constraints.NotNull;
 
 public class LeadActivityLogRequest {
 
-    @NotBlank
-    private String activityType;
+    @NotBlank private String activityType;
 
     private String description;
 
-    @NotNull
-    private Integer scoreImpact;
+    @NotNull private Integer scoreImpact;
 
     public String getActivityType() {
         return activityType;

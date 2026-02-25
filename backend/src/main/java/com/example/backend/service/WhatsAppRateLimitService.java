@@ -2,6 +2,8 @@ package com.example.backend.service;
 
 import com.example.backend.entity.WhatsAppRateLimit;
 import com.example.backend.repository.WhatsAppRateLimitRepository;
+import io.micrometer.observation.annotation.Observed;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +45,8 @@ public class WhatsAppRateLimitService {
     }
 
     @Transactional
-    public boolean checkAndConsumeQuota(String orgId) {
+    @Observed(name = "whatsapp.ratelimit.check", contextualName = "whatsapp-rate-limit-check")
+    public boolean checkAndConsumeQuota(@SpanTag("org.id") String orgId) {
         if (!redisEnabled) {
             return checkAndConsumeQuotaWithDatabase(orgId);
         }

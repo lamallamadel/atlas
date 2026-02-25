@@ -4,6 +4,11 @@ import com.example.backend.entity.CustomQueryEntity;
 import com.example.backend.repository.CustomQueryRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Query;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -11,28 +16,21 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
 @Service
 public class CustomQueryService {
 
     private static final Logger logger = LoggerFactory.getLogger(CustomQueryService.class);
 
-    private static final Pattern DANGEROUS_PATTERNS = Pattern.compile(
-        "(DROP|DELETE|TRUNCATE|INSERT|UPDATE|ALTER|CREATE|GRANT|REVOKE)\\s+",
-        Pattern.CASE_INSENSITIVE
-    );
+    private static final Pattern DANGEROUS_PATTERNS =
+            Pattern.compile(
+                    "(DROP|DELETE|TRUNCATE|INSERT|UPDATE|ALTER|CREATE|GRANT|REVOKE)\\s+",
+                    Pattern.CASE_INSENSITIVE);
 
     private final CustomQueryRepository customQueryRepository;
     private final EntityManager entityManager;
 
     public CustomQueryService(
-            CustomQueryRepository customQueryRepository,
-            EntityManager entityManager) {
+            CustomQueryRepository customQueryRepository, EntityManager entityManager) {
         this.customQueryRepository = customQueryRepository;
         this.entityManager = entityManager;
     }
@@ -45,7 +43,7 @@ public class CustomQueryService {
 
         query.setOrgId(orgId);
         query.setIsApproved(false);
-        
+
         return customQueryRepository.save(query);
     }
 
@@ -56,18 +54,21 @@ public class CustomQueryService {
 
     @Transactional(readOnly = true)
     public CustomQueryEntity getCustomQuery(Long id, String orgId) {
-        CustomQueryEntity query = customQueryRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Query not found"));
-        
+        CustomQueryEntity query =
+                customQueryRepository
+                        .findById(id)
+                        .orElseThrow(() -> new RuntimeException("Query not found"));
+
         if (!query.getOrgId().equals(orgId)) {
             throw new RuntimeException("Access denied");
         }
-        
+
         return query;
     }
 
     @Transactional
-    public CustomQueryEntity updateCustomQuery(Long id, String orgId, CustomQueryEntity updatedQuery) {
+    public CustomQueryEntity updateCustomQuery(
+            Long id, String orgId, CustomQueryEntity updatedQuery) {
         CustomQueryEntity query = getCustomQuery(id, orgId);
 
         validateQuery(updatedQuery.getSqlQuery());
@@ -79,7 +80,7 @@ public class CustomQueryService {
         query.setIsPublic(updatedQuery.getIsPublic());
         query.setCategory(updatedQuery.getCategory());
         query.setIsApproved(false);
-        
+
         return customQueryRepository.save(query);
     }
 
@@ -90,7 +91,8 @@ public class CustomQueryService {
     }
 
     @Transactional(readOnly = true)
-    public List<Map<String, Object>> executeCustomQuery(Long id, String orgId, Map<String, Object> params) {
+    public List<Map<String, Object>> executeCustomQuery(
+            Long id, String orgId, Map<String, Object> params) {
         CustomQueryEntity query = getCustomQuery(id, orgId);
 
         if (!query.getIsApproved()) {
@@ -105,20 +107,20 @@ public class CustomQueryService {
             validateQuery(query.getSqlQuery());
 
             String sql = query.getSqlQuery();
-            
+
             for (Map.Entry<String, Object> entry : params.entrySet()) {
                 sql = sql.replace(":" + entry.getKey(), "'" + entry.getValue().toString() + "'");
             }
 
             Query nativeQuery = entityManager.createNativeQuery(sql);
-            
+
             nativeQuery.setMaxResults(1000);
 
             @SuppressWarnings("unchecked")
             List<Object[]> results = nativeQuery.getResultList();
 
             List<Map<String, Object>> formattedResults = new ArrayList<>();
-            
+
             for (Object[] row : results) {
                 Map<String, Object> rowMap = new HashMap<>();
                 for (int i = 0; i < row.length; i++) {
@@ -140,12 +142,14 @@ public class CustomQueryService {
 
     @Transactional
     public CustomQueryEntity approveQuery(Long id, String approverUserId) {
-        CustomQueryEntity query = customQueryRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Query not found"));
+        CustomQueryEntity query =
+                customQueryRepository
+                        .findById(id)
+                        .orElseThrow(() -> new RuntimeException("Query not found"));
 
         query.setIsApproved(true);
         query.setApprovedBy(approverUserId);
-        
+
         return customQueryRepository.save(query);
     }
 
@@ -165,7 +169,8 @@ public class CustomQueryService {
         }
 
         if (DANGEROUS_PATTERNS.matcher(sql).find()) {
-            throw new IllegalArgumentException("Query contains forbidden SQL operations. Only SELECT queries are allowed.");
+            throw new IllegalArgumentException(
+                    "Query contains forbidden SQL operations. Only SELECT queries are allowed.");
         }
 
         if (!sql.trim().toUpperCase().startsWith("SELECT")) {
@@ -180,15 +185,16 @@ public class CustomQueryService {
     private void updateQueryStats(CustomQueryEntity query, long executionTime) {
         Long currentCount = query.getExecutionCount();
         Long currentAvg = query.getAvgExecutionTimeMs();
-        
+
         Long newCount = currentCount + 1;
-        Long newAvg = currentAvg != null 
-            ? (currentAvg * currentCount + executionTime) / newCount
-            : executionTime;
-        
+        Long newAvg =
+                currentAvg != null
+                        ? (currentAvg * currentCount + executionTime) / newCount
+                        : executionTime;
+
         query.setExecutionCount(newCount);
         query.setAvgExecutionTimeMs(newAvg);
-        
+
         customQueryRepository.save(query);
     }
 }

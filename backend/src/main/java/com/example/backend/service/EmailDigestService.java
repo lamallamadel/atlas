@@ -8,19 +8,16 @@ import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.LeadScoreRepository;
 import com.example.backend.repository.LeadScoringConfigRepository;
 import com.example.backend.util.TenantContext;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class EmailDigestService {
@@ -31,9 +28,10 @@ public class EmailDigestService {
     private final DossierRepository dossierRepository;
     private final LeadScoringConfigRepository configRepository;
 
-    public EmailDigestService(LeadScoreRepository leadScoreRepository,
-                            DossierRepository dossierRepository,
-                            LeadScoringConfigRepository configRepository) {
+    public EmailDigestService(
+            LeadScoreRepository leadScoreRepository,
+            DossierRepository dossierRepository,
+            LeadScoringConfigRepository configRepository) {
         this.leadScoreRepository = leadScoreRepository;
         this.dossierRepository = dossierRepository;
         this.configRepository = configRepository;
@@ -54,7 +52,7 @@ public class EmailDigestService {
                 try {
                     String originalOrgId = TenantContext.getOrgId();
                     TenantContext.setOrgId(orgId);
-                    
+
                     try {
                         sendDigestForOrganization(orgId, dossiers);
                     } finally {
@@ -72,17 +70,19 @@ public class EmailDigestService {
     }
 
     private Map<String, List<Dossier>> groupDossiersByOrganization() {
-        Specification<Dossier> spec = (root, query, criteriaBuilder) -> 
-            criteriaBuilder.in(root.get("status")).value(List.of(
-                DossierStatus.NEW, 
-                DossierStatus.QUALIFYING, 
-                DossierStatus.QUALIFIED
-            ));
+        Specification<Dossier> spec =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder
+                                .in(root.get("status"))
+                                .value(
+                                        List.of(
+                                                DossierStatus.NEW,
+                                                DossierStatus.QUALIFYING,
+                                                DossierStatus.QUALIFIED));
 
         List<Dossier> allDossiers = dossierRepository.findAll(spec);
 
-        return allDossiers.stream()
-                .collect(Collectors.groupingBy(Dossier::getOrgId));
+        return allDossiers.stream().collect(Collectors.groupingBy(Dossier::getOrgId));
     }
 
     private void sendDigestForOrganization(String orgId, List<Dossier> dossiers) {
@@ -92,21 +92,26 @@ public class EmailDigestService {
             return;
         }
 
-        List<Long> dossierIds = dossiers.stream()
-                .map(Dossier::getId)
-                .toList();
+        List<Long> dossierIds = dossiers.stream().map(Dossier::getId).toList();
 
         List<LeadScore> scores = leadScoreRepository.findByDossierIdIn(dossierIds);
-        Map<Long, LeadScore> scoreMap = scores.stream()
-                .collect(Collectors.toMap(LeadScore::getDossierId, s -> s));
+        Map<Long, LeadScore> scoreMap =
+                scores.stream().collect(Collectors.toMap(LeadScore::getDossierId, s -> s));
 
-        List<DossierWithScore> highPriorityLeads = dossiers.stream()
-                .filter(d -> scoreMap.containsKey(d.getId()))
-                .filter(d -> scoreMap.get(d.getId()).getTotalScore() >= config.getAutoQualificationThreshold())
-                .map(d -> new DossierWithScore(d, scoreMap.get(d.getId())))
-                .sorted((a, b) -> Integer.compare(b.score.getTotalScore(), a.score.getTotalScore()))
-                .limit(20)
-                .toList();
+        List<DossierWithScore> highPriorityLeads =
+                dossiers.stream()
+                        .filter(d -> scoreMap.containsKey(d.getId()))
+                        .filter(
+                                d ->
+                                        scoreMap.get(d.getId()).getTotalScore()
+                                                >= config.getAutoQualificationThreshold())
+                        .map(d -> new DossierWithScore(d, scoreMap.get(d.getId())))
+                        .sorted(
+                                (a, b) ->
+                                        Integer.compare(
+                                                b.score.getTotalScore(), a.score.getTotalScore()))
+                        .limit(20)
+                        .toList();
 
         if (highPriorityLeads.isEmpty()) {
             log.debug("No high-priority leads for org {}, skipping digest", orgId);
@@ -123,7 +128,10 @@ public class EmailDigestService {
         }
 
         try {
-            log.info("Daily digest generated for {} high-priority leads for org {}", highPriorityLeads.size(), orgId);
+            log.info(
+                    "Daily digest generated for {} high-priority leads for org {}",
+                    highPriorityLeads.size(),
+                    orgId);
             log.debug("Digest would be sent to: {}", agentEmail);
         } catch (Exception e) {
             log.error("Error generating digest for org {}: {}", orgId, e.getMessage(), e);
@@ -135,35 +143,61 @@ public class EmailDigestService {
         html.append("<!DOCTYPE html><html><head><style>");
         html.append("body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }");
         html.append("h1 { color: #2c3e50; }");
-        html.append(".lead { border: 1px solid #e0e0e0; padding: 15px; margin: 10px 0; border-radius: 5px; }");
+        html.append(
+                ".lead { border: 1px solid #e0e0e0; padding: 15px; margin: 10px 0; border-radius: 5px; }");
         html.append(".urgent { border-left: 4px solid #e74c3c; background-color: #fee; }");
         html.append(".high { border-left: 4px solid #f39c12; background-color: #fff3cd; }");
         html.append(".medium { border-left: 4px solid #3498db; background-color: #e8f4f8; }");
         html.append(".score { font-size: 24px; font-weight: bold; color: #2c3e50; }");
         html.append(".detail { color: #7f8c8d; font-size: 14px; }");
         html.append("</style></head><body>");
-        
+
         html.append("<h1>Daily High-Priority Leads Digest</h1>");
-        html.append("<p>Date: ").append(LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"))).append("</p>");
-        html.append("<p>You have <strong>").append(leads.size()).append("</strong> high-priority leads requiring attention.</p>");
+        html.append("<p>Date: ")
+                .append(LocalDate.now().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy")))
+                .append("</p>");
+        html.append("<p>You have <strong>")
+                .append(leads.size())
+                .append("</strong> high-priority leads requiring attention.</p>");
 
         for (DossierWithScore dws : leads) {
-            String urgencyClass = getUrgencyClass(dws.score.getTotalScore(), config.getAutoQualificationThreshold());
+            String urgencyClass =
+                    getUrgencyClass(
+                            dws.score.getTotalScore(), config.getAutoQualificationThreshold());
             html.append("<div class='lead ").append(urgencyClass).append("'>");
-            html.append("<div class='score'>").append(dws.score.getTotalScore()).append(" pts</div>");
-            html.append("<h3>").append(escapeHtml(dws.dossier.getLeadName() != null ? dws.dossier.getLeadName() : "Unknown Lead")).append("</h3>");
+            html.append("<div class='score'>")
+                    .append(dws.score.getTotalScore())
+                    .append(" pts</div>");
+            html.append("<h3>")
+                    .append(
+                            escapeHtml(
+                                    dws.dossier.getLeadName() != null
+                                            ? dws.dossier.getLeadName()
+                                            : "Unknown Lead"))
+                    .append("</h3>");
             html.append("<div class='detail'>");
             html.append("<strong>Status:</strong> ").append(dws.dossier.getStatus()).append("<br>");
             if (dws.dossier.getLeadPhone() != null) {
-                html.append("<strong>Phone:</strong> ").append(escapeHtml(dws.dossier.getLeadPhone())).append("<br>");
+                html.append("<strong>Phone:</strong> ")
+                        .append(escapeHtml(dws.dossier.getLeadPhone()))
+                        .append("<br>");
             }
             if (dws.dossier.getLeadEmail() != null) {
-                html.append("<strong>Email:</strong> ").append(escapeHtml(dws.dossier.getLeadEmail())).append("<br>");
+                html.append("<strong>Email:</strong> ")
+                        .append(escapeHtml(dws.dossier.getLeadEmail()))
+                        .append("<br>");
             }
             if (dws.dossier.getSource() != null) {
-                html.append("<strong>Source:</strong> ").append(dws.dossier.getSource().getValue()).append("<br>");
+                html.append("<strong>Source:</strong> ")
+                        .append(dws.dossier.getSource().getValue())
+                        .append("<br>");
             }
-            html.append("<strong>Created:</strong> ").append(dws.dossier.getCreatedAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"))).append("<br>");
+            html.append("<strong>Created:</strong> ")
+                    .append(
+                            dws.dossier
+                                    .getCreatedAt()
+                                    .format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")))
+                    .append("<br>");
             html.append("</div>");
             html.append("</div>");
         }
@@ -175,12 +209,21 @@ public class EmailDigestService {
     private String buildDigestText(List<DossierWithScore> leads, LeadScoringConfig config) {
         StringBuilder text = new StringBuilder();
         text.append("Daily High-Priority Leads Digest\n");
-        text.append("Date: ").append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)).append("\n\n");
-        text.append("You have ").append(leads.size()).append(" high-priority leads requiring attention.\n\n");
+        text.append("Date: ")
+                .append(LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE))
+                .append("\n\n");
+        text.append("You have ")
+                .append(leads.size())
+                .append(" high-priority leads requiring attention.\n\n");
 
         for (DossierWithScore dws : leads) {
             text.append("Score: ").append(dws.score.getTotalScore()).append(" pts\n");
-            text.append("Lead: ").append(dws.dossier.getLeadName() != null ? dws.dossier.getLeadName() : "Unknown").append("\n");
+            text.append("Lead: ")
+                    .append(
+                            dws.dossier.getLeadName() != null
+                                    ? dws.dossier.getLeadName()
+                                    : "Unknown")
+                    .append("\n");
             text.append("Status: ").append(dws.dossier.getStatus()).append("\n");
             if (dws.dossier.getLeadPhone() != null) {
                 text.append("Phone: ").append(dws.dossier.getLeadPhone()).append("\n");
@@ -191,7 +234,12 @@ public class EmailDigestService {
             if (dws.dossier.getSource() != null) {
                 text.append("Source: ").append(dws.dossier.getSource().getValue()).append("\n");
             }
-            text.append("Created: ").append(dws.dossier.getCreatedAt().format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm"))).append("\n");
+            text.append("Created: ")
+                    .append(
+                            dws.dossier
+                                    .getCreatedAt()
+                                    .format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")))
+                    .append("\n");
             text.append("\n---\n\n");
         }
 
@@ -211,10 +259,10 @@ public class EmailDigestService {
     private String escapeHtml(String text) {
         if (text == null) return "";
         return text.replace("&", "&amp;")
-                   .replace("<", "&lt;")
-                   .replace(">", "&gt;")
-                   .replace("\"", "&quot;")
-                   .replace("'", "&#39;");
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 
     private String getAgentEmailForOrg(String orgId) {

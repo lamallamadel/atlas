@@ -208,34 +208,45 @@ public class WhatsAppTemplateController {
     @PostMapping("/{id}/pause")
     @PreAuthorize("hasRole('ADMIN')")
     @Auditable(action = "PAUSE", entityType = "WHATSAPP_TEMPLATE")
-    @Operation(summary = "Pause template", description = "Pauses an approved or active WhatsApp template")
+    @Operation(
+            summary = "Pause template",
+            description = "Pauses an approved or active WhatsApp template")
     public ResponseEntity<WhatsAppTemplateResponse> pauseTemplate(
             @Parameter(description = "Template ID") @PathVariable Long id) {
-        
+
         WhatsAppTemplate template = templateService.pauseTemplate(id);
         return ResponseEntity.ok(WhatsAppTemplateMapper.toResponse(template));
     }
 
     @PostMapping("/{id}/poll-status")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Poll approval status", description = "Polls Meta Business API for template approval status")
+    @Operation(
+            summary = "Poll approval status",
+            description = "Polls Meta Business API for template approval status")
     public ResponseEntity<WhatsAppTemplateResponse> pollApprovalStatus(
             @Parameter(description = "Template ID") @PathVariable Long id) {
-        
+
         WhatsAppTemplate template = templateService.pollApprovalStatus(id);
         return ResponseEntity.ok(WhatsAppTemplateMapper.toResponse(template));
     }
 
     @GetMapping("/search")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Search templates", description = "Search and filter templates by various criteria")
+    @Operation(
+            summary = "Search templates",
+            description = "Search and filter templates by various criteria")
     public ResponseEntity<List<WhatsAppTemplateResponse>> searchTemplates(
-            @Parameter(description = "Filter by category") @RequestParam(required = false) TemplateCategory category,
-            @Parameter(description = "Filter by status") @RequestParam(required = false) TemplateStatus status,
-            @Parameter(description = "Filter by language") @RequestParam(required = false) String language,
-            @Parameter(description = "Search term") @RequestParam(required = false) String searchTerm) {
-        
-        List<WhatsAppTemplate> templates = templateService.searchTemplates(category, status, language, searchTerm);
+            @Parameter(description = "Filter by category") @RequestParam(required = false)
+                    TemplateCategory category,
+            @Parameter(description = "Filter by status") @RequestParam(required = false)
+                    TemplateStatus status,
+            @Parameter(description = "Filter by language") @RequestParam(required = false)
+                    String language,
+            @Parameter(description = "Search term") @RequestParam(required = false)
+                    String searchTerm) {
+
+        List<WhatsAppTemplate> templates =
+                templateService.searchTemplates(category, status, language, searchTerm);
         List<WhatsAppTemplateResponse> responses = WhatsAppTemplateMapper.toResponseList(templates);
         return ResponseEntity.ok(responses);
     }
@@ -243,37 +254,44 @@ public class WhatsAppTemplateController {
     @PostMapping("/{id}/versions")
     @PreAuthorize("hasRole('ADMIN')")
     @Auditable(action = "CREATE_VERSION", entityType = "WHATSAPP_TEMPLATE")
-    @Operation(summary = "Create new version", description = "Creates a new version of the template")
+    @Operation(
+            summary = "Create new version",
+            description = "Creates a new version of the template")
     public ResponseEntity<WhatsAppTemplateResponse> createNewVersion(
             @Parameter(description = "Template ID") @PathVariable Long id,
-            @Parameter(description = "Version details") @Valid @RequestBody TemplateVersionRequest request) {
-        
-        WhatsAppTemplate template = templateService.createNewVersion(id, request.getChangeSummary());
+            @Parameter(description = "Version details") @Valid @RequestBody
+                    TemplateVersionRequest request) {
+
+        WhatsAppTemplate template =
+                templateService.createNewVersion(id, request.getChangeSummary());
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(WhatsAppTemplateMapper.toResponse(template));
     }
 
     @GetMapping("/{id}/versions")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get template versions", description = "Returns all versions of a template")
+    @Operation(
+            summary = "Get template versions",
+            description = "Returns all versions of a template")
     public ResponseEntity<List<TemplateVersionResponse>> getTemplateVersions(
             @Parameter(description = "Template ID") @PathVariable Long id) {
-        
+
         List<WhatsAppTemplateVersion> versions = templateService.getTemplateVersions(id);
-        List<TemplateVersionResponse> responses = versions.stream()
-                .map(WhatsAppTemplateMapper::toVersionResponse)
-                .toList();
-        
+        List<TemplateVersionResponse> responses =
+                versions.stream().map(WhatsAppTemplateMapper::toVersionResponse).toList();
+
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/{id}/versions/{versionNumber}")
     @PreAuthorize("hasRole('ADMIN')")
-    @Operation(summary = "Get specific version", description = "Returns a specific version of a template")
+    @Operation(
+            summary = "Get specific version",
+            description = "Returns a specific version of a template")
     public ResponseEntity<TemplateVersionResponse> getTemplateVersion(
             @Parameter(description = "Template ID") @PathVariable Long id,
             @Parameter(description = "Version number") @PathVariable Integer versionNumber) {
-        
+
         WhatsAppTemplateVersion version = templateService.getTemplateVersion(id, versionNumber);
         return ResponseEntity.ok(WhatsAppTemplateMapper.toVersionResponse(version));
     }
@@ -281,11 +299,13 @@ public class WhatsAppTemplateController {
     @PostMapping("/{id}/versions/{versionNumber}/activate")
     @PreAuthorize("hasRole('ADMIN')")
     @Auditable(action = "ACTIVATE_VERSION", entityType = "WHATSAPP_TEMPLATE")
-    @Operation(summary = "Activate version", description = "Activates a specific version of the template")
+    @Operation(
+            summary = "Activate version",
+            description = "Activates a specific version of the template")
     public ResponseEntity<WhatsAppTemplateResponse> activateVersion(
             @Parameter(description = "Template ID") @PathVariable Long id,
             @Parameter(description = "Version number") @PathVariable Integer versionNumber) {
-        
+
         WhatsAppTemplate template = templateService.activateVersion(id, versionNumber);
         return ResponseEntity.ok(WhatsAppTemplateMapper.toResponse(template));
     }

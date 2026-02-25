@@ -1,7 +1,6 @@
 package com.example.backend.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -15,6 +14,10 @@ import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,11 +27,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
@@ -36,17 +34,13 @@ class DossierServiceOffMarketTest {
 
     private static final String DEFAULT_ORG = "org123";
 
-    @Autowired
-    private DossierService dossierService;
+    @Autowired private DossierService dossierService;
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private AnnonceRepository annonceRepository;
+    @Autowired private AnnonceRepository annonceRepository;
 
-    @MockBean
-    private BrainClientService brainClientService;
+    @MockBean private BrainClientService brainClientService;
 
     @BeforeEach
     void setUp() {
@@ -90,16 +84,21 @@ class DossierServiceOffMarketTest {
         annonceRepository.save(publishedAnnonce);
 
         MatchResponse expectedResponse = new MatchResponse();
-        expectedResponse.setMatches(List.of(Map.of("annonce_id", draftAnnonce.getId(), "score", 0.95)));
+        expectedResponse.setMatches(
+                List.of(Map.of("annonce_id", draftAnnonce.getId(), "score", 0.95)));
 
-        when(brainClientService.calculateMatch(any(MatchRequest.class))).thenAnswer(invocation -> {
-            MatchRequest req = invocation.getArgument(0);
-            assertThat(req.getClientId()).isEqualTo(dossierId);
-            assertThat(req.getPreferences()).containsEntry("notes", "Looking for a quiet place");
-            assertThat(req.getBiens()).hasSize(1);
-            assertThat(req.getBiens().get(0)).containsEntry("title", "Draft Off Market");
-            return Optional.of(expectedResponse);
-        });
+        when(brainClientService.calculateMatch(any(MatchRequest.class)))
+                .thenAnswer(
+                        invocation -> {
+                            MatchRequest req = invocation.getArgument(0);
+                            assertThat(req.getClientId()).isEqualTo(dossierId);
+                            assertThat(req.getPreferences())
+                                    .containsEntry("notes", "Looking for a quiet place");
+                            assertThat(req.getBiens()).hasSize(1);
+                            assertThat(req.getBiens().get(0))
+                                    .containsEntry("title", "Draft Off Market");
+                            return Optional.of(expectedResponse);
+                        });
 
         // Act
         MatchResponse response = dossierService.matchOffMarket(dossierId);

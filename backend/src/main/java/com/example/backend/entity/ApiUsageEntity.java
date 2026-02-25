@@ -3,14 +3,15 @@ package com.example.backend.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "api_usage", indexes = {
-    @Index(name = "idx_api_usage_api_key_date", columnList = "api_key_id, usage_date"),
-    @Index(name = "idx_api_usage_org_date", columnList = "org_id, usage_date")
-})
+@Table(
+        name = "api_usage",
+        indexes = {
+            @Index(name = "idx_api_usage_api_key_date", columnList = "api_key_id, usage_date"),
+            @Index(name = "idx_api_usage_org_date", columnList = "org_id, usage_date")
+        })
 public class ApiUsageEntity extends BaseEntity {
 
     @Id

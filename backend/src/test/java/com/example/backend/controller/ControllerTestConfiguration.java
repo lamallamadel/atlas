@@ -63,8 +63,7 @@ import org.springframework.security.web.SecurityFilterChain;
         prePostEnabled = true)
 public class ControllerTestConfiguration {
 
-    private static final Logger log =
-            LoggerFactory.getLogger(ControllerTestConfiguration.class);
+    private static final Logger log = LoggerFactory.getLogger(ControllerTestConfiguration.class);
 
     @Bean
     public ApiKeyService apiKeyService() {

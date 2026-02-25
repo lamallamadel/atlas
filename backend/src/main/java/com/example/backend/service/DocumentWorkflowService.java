@@ -5,14 +5,13 @@ import com.example.backend.entity.*;
 import com.example.backend.entity.enums.*;
 import com.example.backend.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class DocumentWorkflowService {
@@ -51,9 +50,12 @@ public class DocumentWorkflowService {
     }
 
     @Transactional
-    public DocumentWorkflowResponse createWorkflow(DocumentWorkflowRequest request, String orgId, String userId) {
-        DocumentEntity document = documentRepository.findByIdAndOrgId(request.getDocumentId(), orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Document not found"));
+    public DocumentWorkflowResponse createWorkflow(
+            DocumentWorkflowRequest request, String orgId, String userId) {
+        DocumentEntity document =
+                documentRepository
+                        .findByIdAndOrgId(request.getDocumentId(), orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Document not found"));
 
         DocumentWorkflowEntity workflow = new DocumentWorkflowEntity();
         workflow.setOrgId(orgId);
@@ -79,22 +81,31 @@ public class DocumentWorkflowService {
             createStepsFromTemplate(workflow, request.getTemplateId(), orgId);
         }
 
-        logAudit(workflow.getDocumentId(), workflow.getId(), null, DocumentActionType.WORKFLOW_STARTED,
-                userId, "Workflow created: " + workflow.getWorkflowName(), orgId);
+        logAudit(
+                workflow.getDocumentId(),
+                workflow.getId(),
+                null,
+                DocumentActionType.WORKFLOW_STARTED,
+                userId,
+                "Workflow created: " + workflow.getWorkflowName(),
+                orgId);
 
         return mapToResponse(workflow);
     }
 
     @Transactional
     public DocumentWorkflowResponse startWorkflow(Long workflowId, String orgId, String userId) {
-        DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(workflowId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Workflow not found"));
+        DocumentWorkflowEntity workflow =
+                workflowRepository
+                        .findByIdAndOrgId(workflowId, orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Workflow not found"));
 
         if (workflow.getStatus() != WorkflowStatus.DRAFT) {
             throw new IllegalStateException("Workflow is not in DRAFT status");
         }
 
-        List<WorkflowStepEntity> steps = stepRepository.findByWorkflowIdAndOrgIdOrderByStepOrder(workflowId, orgId);
+        List<WorkflowStepEntity> steps =
+                stepRepository.findByWorkflowIdAndOrgIdOrderByStepOrder(workflowId, orgId);
         if (steps.isEmpty()) {
             throw new IllegalStateException("Workflow has no steps defined");
         }
@@ -111,9 +122,13 @@ public class DocumentWorkflowService {
     }
 
     @Transactional
-    public void submitApproval(Long approvalId, WorkflowApprovalRequest request, String orgId, String userId) {
-        WorkflowApprovalEntity approval = approvalRepository.findByIdAndOrgId(approvalId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Approval request not found"));
+    public void submitApproval(
+            Long approvalId, WorkflowApprovalRequest request, String orgId, String userId) {
+        WorkflowApprovalEntity approval =
+                approvalRepository
+                        .findByIdAndOrgId(approvalId, orgId)
+                        .orElseThrow(
+                                () -> new IllegalArgumentException("Approval request not found"));
 
         if (!approval.getApproverId().equals(userId)) {
             throw new IllegalArgumentException("User is not authorized to approve this request");
@@ -129,8 +144,10 @@ public class DocumentWorkflowService {
         approval.setDecidedAt(LocalDateTime.now());
         approvalRepository.save(approval);
 
-        WorkflowStepEntity step = stepRepository.findByIdAndOrgId(approval.getStepId(), orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Workflow step not found"));
+        WorkflowStepEntity step =
+                stepRepository
+                        .findByIdAndOrgId(approval.getStepId(), orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Workflow step not found"));
 
         if (request.getDecision() == WorkflowStepStatus.APPROVED) {
             step.setApprovalsReceived(step.getApprovalsReceived() + 1);
@@ -139,15 +156,21 @@ public class DocumentWorkflowService {
             step.setCompletedAt(LocalDateTime.now());
             stepRepository.save(step);
 
-            DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId)
-                    .orElseThrow();
+            DocumentWorkflowEntity workflow =
+                    workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId).orElseThrow();
             workflow.setStatus(WorkflowStatus.CANCELLED);
             workflow.setCancelledAt(LocalDateTime.now());
             workflow.setCancellationReason("Step rejected by " + userId);
             workflowRepository.save(workflow);
 
-            logAudit(workflow.getDocumentId(), workflow.getId(), null, DocumentActionType.WORKFLOW_CANCELLED,
-                    userId, "Workflow cancelled due to rejection", orgId);
+            logAudit(
+                    workflow.getDocumentId(),
+                    workflow.getId(),
+                    null,
+                    DocumentActionType.WORKFLOW_CANCELLED,
+                    userId,
+                    "Workflow cancelled due to rejection",
+                    orgId);
             return;
         }
 
@@ -178,7 +201,8 @@ public class DocumentWorkflowService {
         step.setStartedAt(LocalDateTime.now());
         stepRepository.save(step);
 
-        if (step.getStepType() == WorkflowStepType.APPROVAL || step.getStepType() == WorkflowStepType.REVIEW) {
+        if (step.getStepType() == WorkflowStepType.APPROVAL
+                || step.getStepType() == WorkflowStepType.REVIEW) {
             createApprovalRequests(step, orgId);
         } else if (step.getStepType() == WorkflowStepType.SIGNATURE) {
             initiateSignature(step, orgId, userId);
@@ -202,7 +226,8 @@ public class DocumentWorkflowService {
         }
     }
 
-    private void sendApprovalNotification(WorkflowApprovalEntity approval, WorkflowStepEntity step) {
+    private void sendApprovalNotification(
+            WorkflowApprovalEntity approval, WorkflowStepEntity step) {
         try {
             String message = "You have been requested to review and approve: " + step.getStepName();
             String actionUrl = "/workflows/approvals/" + approval.getId();
@@ -232,15 +257,16 @@ public class DocumentWorkflowService {
         step.setCompletedAt(LocalDateTime.now());
         stepRepository.save(step);
 
-        DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId)
-                .orElseThrow();
+        DocumentWorkflowEntity workflow =
+                workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId).orElseThrow();
 
-        List<WorkflowStepEntity> allSteps = stepRepository.findByWorkflowIdAndOrgIdOrderByStepOrder(workflow.getId(),
-                orgId);
-        Optional<WorkflowStepEntity> nextStep = allSteps.stream()
-                .filter(s -> s.getStepOrder() > step.getStepOrder())
-                .filter(s -> s.getStatus() == WorkflowStepStatus.PENDING)
-                .findFirst();
+        List<WorkflowStepEntity> allSteps =
+                stepRepository.findByWorkflowIdAndOrgIdOrderByStepOrder(workflow.getId(), orgId);
+        Optional<WorkflowStepEntity> nextStep =
+                allSteps.stream()
+                        .filter(s -> s.getStepOrder() > step.getStepOrder())
+                        .filter(s -> s.getStatus() == WorkflowStepStatus.PENDING)
+                        .findFirst();
 
         if (nextStep.isPresent()) {
             workflow.setCurrentStepOrder(nextStep.get().getStepOrder());
@@ -251,15 +277,21 @@ public class DocumentWorkflowService {
             workflow.setCompletedAt(LocalDateTime.now());
             workflowRepository.save(workflow);
 
-            logAudit(workflow.getDocumentId(), workflow.getId(), null, DocumentActionType.WORKFLOW_COMPLETED,
-                    userId, "Workflow completed successfully", orgId);
+            logAudit(
+                    workflow.getDocumentId(),
+                    workflow.getId(),
+                    null,
+                    DocumentActionType.WORKFLOW_COMPLETED,
+                    userId,
+                    "Workflow completed successfully",
+                    orgId);
         }
     }
 
     private void initiateSignature(WorkflowStepEntity step, String orgId, String userId) {
         try {
-            DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId)
-                    .orElseThrow();
+            DocumentWorkflowEntity workflow =
+                    workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId).orElseThrow();
 
             logger.info("Signature step initiated for workflow {}", workflow.getId());
             step.setStatus(WorkflowStepStatus.COMPLETED);
@@ -273,8 +305,8 @@ public class DocumentWorkflowService {
     }
 
     private void evaluateConditionalBranch(WorkflowStepEntity step, String orgId, String userId) {
-        DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId)
-                .orElseThrow();
+        DocumentWorkflowEntity workflow =
+                workflowRepository.findByIdAndOrgId(step.getWorkflowId(), orgId).orElseThrow();
 
         Map<String, Object> conditionRules = step.getConditionRules();
         if (conditionRules != null && conditionRules.containsKey("propertyValueThreshold")) {
@@ -292,9 +324,12 @@ public class DocumentWorkflowService {
         completeStep(step, orgId, userId);
     }
 
-    private void createStepsFromTemplate(DocumentWorkflowEntity workflow, Long templateId, String orgId) {
-        WorkflowTemplateEntity template = templateRepository.findByIdAndOrgId(templateId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Template not found"));
+    private void createStepsFromTemplate(
+            DocumentWorkflowEntity workflow, Long templateId, String orgId) {
+        WorkflowTemplateEntity template =
+                templateRepository
+                        .findByIdAndOrgId(templateId, orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Template not found"));
 
         int order = 1;
         for (Map<String, Object> stepDef : template.getStepsDefinition()) {
@@ -315,7 +350,8 @@ public class DocumentWorkflowService {
                 step.setApprovalsRequired(((Number) stepDef.get("approvalsRequired")).intValue());
             }
 
-            step.setRequiresAllApprovers((Boolean) stepDef.getOrDefault("requiresAllApprovers", true));
+            step.setRequiresAllApprovers(
+                    (Boolean) stepDef.getOrDefault("requiresAllApprovers", true));
             step.setIsParallel((Boolean) stepDef.getOrDefault("isParallel", false));
             step.setStepConfig((Map<String, Object>) stepDef.get("stepConfig"));
             step.setConditionRules((Map<String, Object>) stepDef.get("conditionRules"));
@@ -328,8 +364,14 @@ public class DocumentWorkflowService {
         templateRepository.save(template);
     }
 
-    private void logAudit(Long documentId, Long workflowId, Long versionId, DocumentActionType actionType,
-            String userId, String description, String orgId) {
+    private void logAudit(
+            Long documentId,
+            Long workflowId,
+            Long versionId,
+            DocumentActionType actionType,
+            String userId,
+            String description,
+            String orgId) {
         DocumentAuditEntity audit = new DocumentAuditEntity();
         audit.setOrgId(orgId);
         audit.setDocumentId(documentId);
@@ -354,8 +396,10 @@ public class DocumentWorkflowService {
     }
 
     public DocumentWorkflowResponse getWorkflow(Long workflowId, String orgId) {
-        DocumentWorkflowEntity workflow = workflowRepository.findByIdAndOrgId(workflowId, orgId)
-                .orElseThrow(() -> new IllegalArgumentException("Workflow not found"));
+        DocumentWorkflowEntity workflow =
+                workflowRepository
+                        .findByIdAndOrgId(workflowId, orgId)
+                        .orElseThrow(() -> new IllegalArgumentException("Workflow not found"));
         return mapToResponse(workflow);
     }
 

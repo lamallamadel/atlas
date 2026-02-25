@@ -1,13 +1,16 @@
 package com.example.backend.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "system_config", uniqueConstraints = {
-    @UniqueConstraint(name = "uk_system_config_key", columnNames = {"config_key"})
-})
+@Table(
+        name = "system_config",
+        uniqueConstraints = {
+            @UniqueConstraint(
+                    name = "uk_system_config_key",
+                    columnNames = {"config_key"})
+        })
 public class SystemConfig {
 
     @Id

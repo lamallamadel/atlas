@@ -4,11 +4,16 @@ import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.WhatsAppProviderConfig;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.observation.annotation.Observed;
+import io.micrometer.tracing.Span;
+import io.micrometer.tracing.Tracer;
+import io.micrometer.tracing.annotation.SpanTag;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -30,6 +35,7 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
     private final WhatsAppErrorMapper errorMapper;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final Tracer tracer;
 
     @Value("${whatsapp.cloud.api.base-url:https://graph.facebook.com/v18.0}")
     private String baseUrl;
@@ -40,17 +46,30 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
             WhatsAppRateLimitService rateLimitService,
             WhatsAppErrorMapper errorMapper,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            @Autowired(required = false) Tracer tracer) {
         this.providerConfigRepository = providerConfigRepository;
         this.sessionWindowService = sessionWindowService;
         this.rateLimitService = rateLimitService;
         this.errorMapper = errorMapper;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.tracer = tracer;
     }
 
     @Override
-    public ProviderSendResult send(OutboundMessageEntity message) {
+    @Observed(name = "whatsapp.send", contextualName = "whatsapp-cloud-api-send")
+    public ProviderSendResult send(@SpanTag("message.id") OutboundMessageEntity message) {
+        if (tracer != null && tracer.currentSpan() != null) {
+            Span span = tracer.currentSpan();
+            span.tag("org.id", message.getOrgId());
+            span.tag("message.channel", message.getChannel().name());
+            span.tag("message.to", message.getTo());
+            if (message.getTemplateCode() != null) {
+                span.tag("template.code", message.getTemplateCode());
+            }
+        }
+
         try {
             WhatsAppProviderConfig config =
                     providerConfigRepository
@@ -79,7 +98,16 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
             boolean hasTemplate =
                     message.getTemplateCode() != null && !message.getTemplateCode().isEmpty();
 
+            if (tracer != null && tracer.currentSpan() != null) {
+                tracer.currentSpan()
+                        .tag("within.session.window", String.valueOf(withinSessionWindow));
+                tracer.currentSpan().tag("has.template", String.valueOf(hasTemplate));
+            }
+
             if (!withinSessionWindow && !hasTemplate) {
+                if (tracer != null && tracer.currentSpan() != null) {
+                    tracer.currentSpan().tag("error", "session_expired");
+                }
                 logger.warn(
                         "Message outside 24h window without template: messageId={}, to={}",
                         message.getId(),
@@ -267,15 +295,13 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
                 String safeMessage =
                         sanitizeErrorMessage(
                                 errorMessage != null ? errorMessage : errorInfo.getMessage());
-                boolean retryable =
-                        e.getStatusCode().is5xxServerError() || errorInfo.isRetryable();
+                boolean retryable = e.getStatusCode().is5xxServerError() || errorInfo.isRetryable();
                 return ProviderSendResult.failure(errorCode, safeMessage, retryable, null);
             }
 
             return ProviderSendResult.failure(
                     "HTTP_" + e.getStatusCode().value(),
-                    sanitizeErrorMessage(
-                            errorMessage != null ? errorMessage : e.getMessage()),
+                    sanitizeErrorMessage(errorMessage != null ? errorMessage : e.getMessage()),
                     e.getStatusCode().is5xxServerError(),
                     null);
 

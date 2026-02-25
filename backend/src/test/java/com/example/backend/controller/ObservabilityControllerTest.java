@@ -14,9 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 @ActiveProfiles("test")
@@ -29,19 +29,15 @@ class ObservabilityControllerTest {
     private static final String ORG_ID = "org123";
     private static final String CORRELATION_ID = "test-correlation-id";
 
-
     @Autowired private MockMvc mockMvc;
 
     @Autowired private ObjectMapper objectMapper;
 
-
     private <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-    T withOrgHeaders(T builder) {
+            T withOrgHeaders(T builder) {
         return (T)
-            builder.header(ORG_ID_HEADER, ORG_ID)
-                .header(CORRELATION_ID_HEADER, CORRELATION_ID);
+                builder.header(ORG_ID_HEADER, ORG_ID).header(CORRELATION_ID_HEADER, CORRELATION_ID);
     }
-
 
     @Test
     @WithMockUser
@@ -60,11 +56,12 @@ class ObservabilityControllerTest {
                         "Error: Network timeout at line 42",
                         context);
 
-        mockMvc.perform(withOrgHeaders(
-                        post("/api/v1/observability/client-errors")
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post("/api/v1/observability/client-errors")
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.logged").value(true))
                 .andExpect(jsonPath("$.level").value("error"))
@@ -84,11 +81,12 @@ class ObservabilityControllerTest {
                         null,
                         null);
 
-        mockMvc.perform(withOrgHeaders(
-                        post("/api/v1/observability/client-errors")
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post("/api/v1/observability/client-errors")
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.logged").value(true))
                 .andExpect(jsonPath("$.level").value("warning"));
@@ -106,11 +104,12 @@ class ObservabilityControllerTest {
                         null,
                         null);
 
-        mockMvc.perform(withOrgHeaders(
-                        post("/api/v1/observability/client-errors")
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post("/api/v1/observability/client-errors")
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -127,11 +126,12 @@ class ObservabilityControllerTest {
                         null,
                         null);
 
-        mockMvc.perform(withOrgHeaders(
-                        post("/api/v1/observability/client-errors")
-                                .with(csrf())
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))))
+        mockMvc.perform(
+                        withOrgHeaders(
+                                post("/api/v1/observability/client-errors")
+                                        .with(csrf())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(request))))
                 .andExpect(status().isBadRequest());
     }
 

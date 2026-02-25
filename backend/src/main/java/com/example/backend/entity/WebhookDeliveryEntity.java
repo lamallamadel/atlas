@@ -4,17 +4,18 @@ import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import org.hibernate.annotations.Type;
-
 import java.time.LocalDateTime;
 import java.util.Map;
+import org.hibernate.annotations.Type;
 
 @Entity
-@Table(name = "webhook_delivery", indexes = {
-    @Index(name = "idx_webhook_delivery_subscription", columnList = "subscription_id"),
-    @Index(name = "idx_webhook_delivery_status", columnList = "status"),
-    @Index(name = "idx_webhook_delivery_next_retry", columnList = "next_retry_at")
-})
+@Table(
+        name = "webhook_delivery",
+        indexes = {
+            @Index(name = "idx_webhook_delivery_subscription", columnList = "subscription_id"),
+            @Index(name = "idx_webhook_delivery_status", columnList = "status"),
+            @Index(name = "idx_webhook_delivery_next_retry", columnList = "next_retry_at")
+        })
 public class WebhookDeliveryEntity extends BaseEntity {
 
     @Id
@@ -57,7 +58,10 @@ public class WebhookDeliveryEntity extends BaseEntity {
     private String errorMessage;
 
     public enum DeliveryStatus {
-        PENDING, SUCCESS, FAILED, RETRY
+        PENDING,
+        SUCCESS,
+        FAILED,
+        RETRY
     }
 
     public Long getId() {

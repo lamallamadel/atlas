@@ -7,6 +7,7 @@ public class AiAgentRequest {
     @NotBlank
     @Size(max = 500)
     private String query;
+
     private String conversationId;
     private String context;
 

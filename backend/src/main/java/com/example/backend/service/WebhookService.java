@@ -5,6 +5,14 @@ import com.example.backend.entity.WebhookSubscriptionEntity;
 import com.example.backend.repository.WebhookDeliveryRepository;
 import com.example.backend.repository.WebhookSubscriptionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.LocalDateTime;
+import java.util.*;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
@@ -18,15 +26,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.time.LocalDateTime;
-import java.util.*;
-
 @Service
 public class WebhookService {
 
@@ -39,10 +38,11 @@ public class WebhookService {
     private final ObjectMapper objectMapper;
     private final SecureRandom secureRandom = new SecureRandom();
 
-    public WebhookService(WebhookSubscriptionRepository subscriptionRepository,
-                         WebhookDeliveryRepository deliveryRepository,
-                         RestTemplate restTemplate,
-                         ObjectMapper objectMapper) {
+    public WebhookService(
+            WebhookSubscriptionRepository subscriptionRepository,
+            WebhookDeliveryRepository deliveryRepository,
+            RestTemplate restTemplate,
+            ObjectMapper objectMapper) {
         this.subscriptionRepository = subscriptionRepository;
         this.deliveryRepository = deliveryRepository;
         this.restTemplate = restTemplate;
@@ -50,9 +50,13 @@ public class WebhookService {
     }
 
     @Transactional
-    public WebhookSubscriptionEntity createSubscription(String orgId, String name, String url, 
-                                                        String eventType, String description,
-                                                        WebhookSubscriptionEntity.RetryPolicy retryPolicy) {
+    public WebhookSubscriptionEntity createSubscription(
+            String orgId,
+            String name,
+            String url,
+            String eventType,
+            String description,
+            WebhookSubscriptionEntity.RetryPolicy retryPolicy) {
         WebhookSubscriptionEntity subscription = new WebhookSubscriptionEntity();
         subscription.setOrgId(orgId);
         subscription.setName(name);
@@ -71,31 +75,35 @@ public class WebhookService {
     }
 
     public Optional<WebhookSubscriptionEntity> getSubscription(Long id, String orgId) {
-        return subscriptionRepository.findById(id)
-            .filter(sub -> sub.getOrgId().equals(orgId));
+        return subscriptionRepository.findById(id).filter(sub -> sub.getOrgId().equals(orgId));
     }
 
     @Transactional
-    public void updateSubscriptionStatus(Long id, String orgId, WebhookSubscriptionEntity.WebhookStatus status) {
-        subscriptionRepository.findById(id)
-            .filter(sub -> sub.getOrgId().equals(orgId))
-            .ifPresent(sub -> {
-                sub.setStatus(status);
-                subscriptionRepository.save(sub);
-            });
+    public void updateSubscriptionStatus(
+            Long id, String orgId, WebhookSubscriptionEntity.WebhookStatus status) {
+        subscriptionRepository
+                .findById(id)
+                .filter(sub -> sub.getOrgId().equals(orgId))
+                .ifPresent(
+                        sub -> {
+                            sub.setStatus(status);
+                            subscriptionRepository.save(sub);
+                        });
     }
 
     @Transactional
     public void deleteSubscription(Long id, String orgId) {
-        subscriptionRepository.findById(id)
-            .filter(sub -> sub.getOrgId().equals(orgId))
-            .ifPresent(subscriptionRepository::delete);
+        subscriptionRepository
+                .findById(id)
+                .filter(sub -> sub.getOrgId().equals(orgId))
+                .ifPresent(subscriptionRepository::delete);
     }
 
     @Async
     public void triggerWebhook(String eventType, Map<String, Object> payload) {
-        List<WebhookSubscriptionEntity> subscriptions = 
-            subscriptionRepository.findByEventTypeAndStatus(eventType, WebhookSubscriptionEntity.WebhookStatus.ACTIVE);
+        List<WebhookSubscriptionEntity> subscriptions =
+                subscriptionRepository.findByEventTypeAndStatus(
+                        eventType, WebhookSubscriptionEntity.WebhookStatus.ACTIVE);
 
         for (WebhookSubscriptionEntity subscription : subscriptions) {
             WebhookDeliveryEntity delivery = new WebhookDeliveryEntity();
@@ -112,7 +120,8 @@ public class WebhookService {
     }
 
     @Transactional
-    protected void deliverWebhook(WebhookDeliveryEntity delivery, WebhookSubscriptionEntity subscription) {
+    protected void deliverWebhook(
+            WebhookDeliveryEntity delivery, WebhookSubscriptionEntity subscription) {
         try {
             String payloadJson = objectMapper.writeValueAsString(delivery.getPayload());
             String signature = generateSignature(payloadJson, subscription.getSecret());
@@ -132,12 +141,9 @@ public class WebhookService {
             delivery.setAttemptCount(delivery.getAttemptCount() + 1);
             delivery.setLastAttemptAt(LocalDateTime.now());
 
-            ResponseEntity<String> response = restTemplate.exchange(
-                subscription.getUrl(),
-                HttpMethod.POST,
-                request,
-                String.class
-            );
+            ResponseEntity<String> response =
+                    restTemplate.exchange(
+                            subscription.getUrl(), HttpMethod.POST, request, String.class);
 
             delivery.setResponseStatusCode(response.getStatusCode().value());
             delivery.setResponseBody(response.getBody());
@@ -152,7 +158,10 @@ public class WebhookService {
             }
 
         } catch (Exception e) {
-            logger.error("Failed to deliver webhook for subscription {}: {}", subscription.getId(), e.getMessage());
+            logger.error(
+                    "Failed to deliver webhook for subscription {}: {}",
+                    subscription.getId(),
+                    e.getMessage());
             handleFailure(delivery, subscription, e.getMessage());
         }
 
@@ -161,7 +170,8 @@ public class WebhookService {
         subscriptionRepository.save(subscription);
     }
 
-    private void handleFailure(WebhookDeliveryEntity delivery, WebhookSubscriptionEntity subscription, String error) {
+    private void handleFailure(
+            WebhookDeliveryEntity delivery, WebhookSubscriptionEntity subscription, String error) {
         delivery.setErrorMessage(error);
         subscription.setLastFailureAt(LocalDateTime.now());
         subscription.setFailureCount(subscription.getFailureCount() + 1);
@@ -176,7 +186,8 @@ public class WebhookService {
         }
     }
 
-    private int calculateRetryDelay(int attemptCount, WebhookSubscriptionEntity.RetryPolicy retryPolicy) {
+    private int calculateRetryDelay(
+            int attemptCount, WebhookSubscriptionEntity.RetryPolicy retryPolicy) {
         int baseDelay = retryPolicy.getRetryDelaySeconds();
         if ("exponential".equals(retryPolicy.getBackoffStrategy())) {
             return baseDelay * (int) Math.pow(2, attemptCount - 1);
@@ -187,7 +198,8 @@ public class WebhookService {
     public String generateSignature(String payload, String secret) {
         try {
             Mac mac = Mac.getInstance(HMAC_ALGORITHM);
-            SecretKeySpec secretKeySpec = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM);
+            SecretKeySpec secretKeySpec =
+                    new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), HMAC_ALGORITHM);
             mac.init(secretKeySpec);
             byte[] hash = mac.doFinal(payload.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
@@ -201,11 +213,13 @@ public class WebhookService {
         return expectedSignature.equals(signature);
     }
 
-    public Page<WebhookDeliveryEntity> getDeliveries(Long subscriptionId, String orgId, Pageable pageable) {
-        return subscriptionRepository.findById(subscriptionId)
-            .filter(sub -> sub.getOrgId().equals(orgId))
-            .map(sub -> deliveryRepository.findBySubscriptionId(subscriptionId, pageable))
-            .orElse(Page.empty());
+    public Page<WebhookDeliveryEntity> getDeliveries(
+            Long subscriptionId, String orgId, Pageable pageable) {
+        return subscriptionRepository
+                .findById(subscriptionId)
+                .filter(sub -> sub.getOrgId().equals(orgId))
+                .map(sub -> deliveryRepository.findBySubscriptionId(subscriptionId, pageable))
+                .orElse(Page.empty());
     }
 
     private String generateSecret() {

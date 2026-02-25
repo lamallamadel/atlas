@@ -2,16 +2,14 @@ package com.example.backend.service;
 
 import com.example.backend.entity.WhatsAppTemplate;
 import com.example.backend.entity.enums.TemplateStatus;
+import java.util.HashMap;
+import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @Service
 public class MetaBusinessApiService {
@@ -35,7 +33,8 @@ public class MetaBusinessApiService {
 
     public String submitTemplateForApproval(WhatsAppTemplate template) {
         if (accessToken.isEmpty() || wabaId.isEmpty()) {
-            logger.warn("Meta Business API credentials not configured. Skipping actual submission.");
+            logger.warn(
+                    "Meta Business API credentials not configured. Skipping actual submission.");
             return "MOCK_SUBMISSION_" + System.currentTimeMillis();
         }
 
@@ -54,12 +53,8 @@ public class MetaBusinessApiService {
 
             HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
-                entity,
-                Map.class
-            );
+            ResponseEntity<Map> response =
+                    restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 String submissionId = (String) response.getBody().get("id");
@@ -70,7 +65,8 @@ public class MetaBusinessApiService {
             }
         } catch (Exception e) {
             logger.error("Error submitting template to Meta Business API", e);
-            throw new RuntimeException("Failed to submit template to Meta Business API: " + e.getMessage(), e);
+            throw new RuntimeException(
+                    "Failed to submit template to Meta Business API: " + e.getMessage(), e);
         }
     }
 
@@ -88,12 +84,8 @@ public class MetaBusinessApiService {
 
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            ResponseEntity<Map> response = restTemplate.exchange(
-                url,
-                HttpMethod.GET,
-                entity,
-                Map.class
-            );
+            ResponseEntity<Map> response =
+                    restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 Map<String, Object> body = response.getBody();
@@ -101,11 +93,13 @@ public class MetaBusinessApiService {
                 String whatsappTemplateId = (String) body.get("id");
 
                 TemplateStatus templateStatus = mapMetaStatusToTemplateStatus(status);
-                String rejectionReason = templateStatus == TemplateStatus.REJECTED
-                    ? (String) body.get("rejected_reason")
-                    : null;
+                String rejectionReason =
+                        templateStatus == TemplateStatus.REJECTED
+                                ? (String) body.get("rejected_reason")
+                                : null;
 
-                return new TemplateApprovalStatus(templateStatus, rejectionReason, whatsappTemplateId);
+                return new TemplateApprovalStatus(
+                        templateStatus, rejectionReason, whatsappTemplateId);
             } else {
                 throw new RuntimeException("Failed to poll approval status from Meta Business API");
             }
@@ -130,7 +124,8 @@ public class MetaBusinessApiService {
         private final String rejectionReason;
         private final String whatsappTemplateId;
 
-        public TemplateApprovalStatus(TemplateStatus status, String rejectionReason, String whatsappTemplateId) {
+        public TemplateApprovalStatus(
+                TemplateStatus status, String rejectionReason, String whatsappTemplateId) {
             this.status = status;
             this.rejectionReason = rejectionReason;
             this.whatsappTemplateId = whatsappTemplateId;

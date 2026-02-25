@@ -7,38 +7,32 @@ import com.example.backend.entity.*;
 import com.example.backend.entity.enums.ActivityVisibility;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CustomerPortalService {
 
-    @Autowired
-    private DossierRepository dossierRepository;
+    @Autowired private DossierRepository dossierRepository;
 
-    @Autowired
-    private ActivityRepository activityRepository;
+    @Autowired private ActivityRepository activityRepository;
 
-    @Autowired
-    private DocumentRepository documentRepository;
+    @Autowired private DocumentRepository documentRepository;
 
-    @Autowired
-    private ClientSecureMessageRepository messageRepository;
+    @Autowired private ClientSecureMessageRepository messageRepository;
 
-    @Autowired
-    private ClientAuthTokenRepository tokenRepository;
+    @Autowired private ClientAuthTokenRepository tokenRepository;
 
     @Transactional(readOnly = true)
     public CustomerPortalDossierDTO getDossierForClient(Long dossierId, String orgId) {
-        Dossier dossier = dossierRepository.findById(dossierId)
-            .orElseThrow(() -> new RuntimeException("Dossier not found"));
+        Dossier dossier =
+                dossierRepository
+                        .findById(dossierId)
+                        .orElseThrow(() -> new RuntimeException("Dossier not found"));
 
         if (!dossier.getOrgId().equals(orgId)) {
             throw new RuntimeException("Access denied");
@@ -54,22 +48,24 @@ public class CustomerPortalService {
         dto.setCreatedAt(dossier.getCreatedAt());
         dto.setUpdatedAt(dossier.getUpdatedAt());
 
-        List<CustomerPortalActivityDTO> activities = activityRepository
-            .findByDossierIdAndVisibilityOrderByCreatedAtDesc(dossierId, ActivityVisibility.CLIENT_VISIBLE)
-            .stream()
-            .map(this::mapToCustomerPortalActivityDTO)
-            .collect(Collectors.toList());
+        List<CustomerPortalActivityDTO> activities =
+                activityRepository
+                        .findByDossierIdAndVisibilityOrderByCreatedAtDesc(
+                                dossierId, ActivityVisibility.CLIENT_VISIBLE)
+                        .stream()
+                        .map(this::mapToCustomerPortalActivityDTO)
+                        .collect(Collectors.toList());
         dto.setActivities(activities);
 
-        List<CustomerPortalDocumentDTO> documents = documentRepository
-            .findByDossierId(dossierId)
-            .stream()
-            .filter(doc -> isDocumentClientVisible(doc))
-            .map(this::mapToCustomerPortalDocumentDTO)
-            .collect(Collectors.toList());
+        List<CustomerPortalDocumentDTO> documents =
+                documentRepository.findByDossierId(dossierId).stream()
+                        .filter(doc -> isDocumentClientVisible(doc))
+                        .map(this::mapToCustomerPortalDocumentDTO)
+                        .collect(Collectors.toList());
         dto.setDocuments(documents);
 
-        long unreadCount = messageRepository.countByDossierIdAndFromClientAndReadAtIsNull(dossierId, false);
+        long unreadCount =
+                messageRepository.countByDossierIdAndFromClientAndReadAtIsNull(dossierId, false);
         dto.setUnreadMessagesCount(unreadCount);
 
         return dto;
@@ -77,7 +73,7 @@ public class CustomerPortalService {
 
     private String mapDossierStatusToClientFriendly(DossierStatus status) {
         if (status == null) return "En cours";
-        
+
         switch (status) {
             case NEW:
                 return "Nouveau dossier";
@@ -98,7 +94,7 @@ public class CustomerPortalService {
 
     private String calculateProgressPercentage(DossierStatus status) {
         if (status == null) return "0";
-        
+
         switch (status) {
             case NEW:
                 return "10";
@@ -153,14 +149,14 @@ public class CustomerPortalService {
             return false;
         }
         String category = doc.getCategory().toLowerCase();
-        return category.contains("contract") 
-            || category.contains("contrat")
-            || category.contains("photo")
-            || category.contains("inspection")
-            || category.contains("rapport")
-            || category.contains("report")
-            || category.equals("shared")
-            || category.equals("client");
+        return category.contains("contract")
+                || category.contains("contrat")
+                || category.contains("photo")
+                || category.contains("inspection")
+                || category.contains("rapport")
+                || category.contains("report")
+                || category.equals("shared")
+                || category.equals("client");
     }
 
     private CustomerPortalDocumentDTO mapToCustomerPortalDocumentDTO(DocumentEntity doc) {
@@ -178,7 +174,7 @@ public class CustomerPortalService {
 
     private String mapDocumentCategoryToClientFriendly(String category) {
         if (category == null) return "Document";
-        
+
         String lowerCategory = category.toLowerCase();
         if (lowerCategory.contains("contract") || lowerCategory.contains("contrat")) {
             return "Contrat";
@@ -196,8 +192,10 @@ public class CustomerPortalService {
     @Transactional
     public void validateClientAccess(Long dossierId, String token) {
         LocalDateTime now = LocalDateTime.now();
-        ClientAuthToken authToken = tokenRepository.findByTokenAndExpiresAtAfter(token, now)
-            .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
+        ClientAuthToken authToken =
+                tokenRepository
+                        .findByTokenAndExpiresAtAfter(token, now)
+                        .orElseThrow(() -> new RuntimeException("Invalid or expired token"));
 
         if (!authToken.getDossierId().equals(dossierId)) {
             throw new RuntimeException("Token does not grant access to this dossier");
