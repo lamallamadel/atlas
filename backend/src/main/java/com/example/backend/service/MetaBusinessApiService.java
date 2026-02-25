@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.entity.WhatsAppTemplate;
 import com.example.backend.entity.enums.TemplateStatus;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,15 @@ public class MetaBusinessApiService {
     }
 
     public String submitTemplateForApproval(WhatsAppTemplate template) {
+        return submitTemplate(
+                template.getName(),
+                template.getLanguage(),
+                template.getCategory().getValue(),
+                template.getComponents());
+    }
+
+    public String submitTemplate(
+            String name, String language, String category, List<Map<String, Object>> components) {
         if (accessToken.isEmpty() || wabaId.isEmpty()) {
             logger.warn(
                     "Meta Business API credentials not configured. Skipping actual submission.");
@@ -42,10 +52,10 @@ public class MetaBusinessApiService {
             String url = String.format("%s/%s/message_templates", apiUrl, wabaId);
 
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("name", template.getName());
-            requestBody.put("language", template.getLanguage());
-            requestBody.put("category", template.getCategory().getValue());
-            requestBody.put("components", template.getComponents());
+            requestBody.put("name", name);
+            requestBody.put("language", language);
+            requestBody.put("category", category);
+            requestBody.put("components", components);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);

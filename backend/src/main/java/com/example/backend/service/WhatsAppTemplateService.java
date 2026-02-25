@@ -10,6 +10,7 @@ import com.example.backend.repository.TemplateVariableRepository;
 import com.example.backend.repository.WhatsAppTemplateRepository;
 import com.example.backend.repository.WhatsAppTemplateVersionRepository;
 import com.example.backend.util.TenantContext;
+import com.example.backend.util.TemplateVariableValidator;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -351,5 +352,154 @@ public class WhatsAppTemplateService {
         versionRepository.save(version);
 
         return templateRepository.save(template);
+    }
+
+    @Transactional
+    public WhatsAppTemplate submitTemplateToMeta(Long id) {
+        WhatsAppTemplate template = getTemplateById(id);
+
+        validationService.validateTemplateFormat(template);
+
+        TemplateVariableValidator.ValidationResult validationResult =
+                TemplateVariableValidator.validateMetaNaming(template.getComponents());
+
+        if (!validationResult.isValid()) {
+            throw new IllegalArgumentException(
+                    "Template validation failed: " + String.join(", ", validationResult.getErrors()));
+        }
+
+        String submissionId =
+                metaBusinessApiService.submitTemplate(
+                        template.getName(),
+                        template.getLanguage(),
+                        template.getCategory().getValue(),
+                        template.getComponents());
+
+        template.setMetaSubmissionId(submissionId);
+        template.setStatus(TemplateStatus.PENDING);
+
+        return templateRepository.save(template);
+    }
+
+    @Transactional
+    public WhatsAppTemplate updateTemplateStatus(String messageTemplateId, TemplateStatus status, String rejectionReason) {
+        WhatsAppTemplate template = templateRepository
+                .findByWhatsAppTemplateId(messageTemplateId)
+                .or(() -> templateRepository.findByMetaSubmissionId(messageTemplateId))
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                "Template not found with ID: " + messageTemplateId));
+
+        template.setStatus(status);
+        
+        if (status == TemplateStatus.APPROVED) {
+            template.setWhatsAppTemplateId(messageTemplateId);
+            template.setRejectionReason(null);
+        } else if (status == TemplateStatus.REJECTED) {
+            template.setRejectionReason(rejectionReason);
+        }
+
+        return templateRepository.save(template);
+    }
+
+    @Transactional
+    public WhatsAppTemplate updateTemplateStatusByNameAndLanguage(
+            String name, String language, TemplateStatus status, String messageTemplateId, String rejectionReason) {
+        WhatsAppTemplate template = templateRepository
+                .findByNameAndLanguage(name, language)
+                .orElseThrow(
+                        () -> new ResourceNotFoundException(
+                                String.format("Template not found with name: %s and language: %s", name, language)));
+
+        template.setStatus(status);
+        
+        if (status == TemplateStatus.APPROVED) {
+            template.setWhatsAppTemplateId(messageTemplateId);
+            template.setRejectionReason(null);
+        } else if (status == TemplateStatus.REJECTED) {
+            template.setRejectionReason(rejectionReason);
+        }
+
+        return templateRepository.save(template);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> previewTemplate(Long id, Map<String, String> variables) {
+        WhatsAppTemplate template = getTemplateById(id);
+        return renderTemplateWithVariables(template.getComponents(), variables);
+    }
+
+    private List<Map<String, Object>> renderTemplateWithVariables(
+            List<Map<String, Object>> components, Map<String, String> variables) {
+        if (components == null) {
+            return null;
+        }
+
+        List<Map<String, Object>> renderedComponents = new ArrayList<>();
+
+        for (Map<String, Object> component : components) {
+            Map<String, Object> renderedComponent = new HashMap<>(component);
+            String type = (String) component.get("type");
+
+            if (type != null) {
+                switch (type.toUpperCase()) {
+                    case "HEADER":
+                        String format = (String) component.get("format");
+                        if ("TEXT".equalsIgnoreCase(format)) {
+                            String text = (String) component.get("text");
+                            if (text != null) {
+                                renderedComponent.put("text", replaceVariables(text, variables));
+                            }
+                        }
+                        break;
+
+                    case "BODY":
+                        String bodyText = (String) component.get("text");
+                        if (bodyText != null) {
+                            renderedComponent.put("text", replaceVariables(bodyText, variables));
+                        }
+                        break;
+
+                    case "BUTTONS":
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> buttons = (List<Map<String, Object>>) component.get("buttons");
+                        if (buttons != null) {
+                            List<Map<String, Object>> renderedButtons = new ArrayList<>();
+                            for (Map<String, Object> button : buttons) {
+                                Map<String, Object> renderedButton = new HashMap<>(button);
+                                String buttonType = (String) button.get("type");
+                                if ("URL".equalsIgnoreCase(buttonType)) {
+                                    String url = (String) button.get("url");
+                                    if (url != null) {
+                                        renderedButton.put("url", replaceVariables(url, variables));
+                                    }
+                                }
+                                renderedButtons.add(renderedButton);
+                            }
+                            renderedComponent.put("buttons", renderedButtons);
+                        }
+                        break;
+                }
+            }
+
+            renderedComponents.add(renderedComponent);
+        }
+
+        return renderedComponents;
+    }
+
+    private String replaceVariables(String text, Map<String, String> variables) {
+        if (text == null || variables == null || variables.isEmpty()) {
+            return text;
+        }
+
+        String result = text;
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            String placeholder = "{{" + entry.getKey() + "}}";
+            String value = entry.getValue() != null ? entry.getValue() : "";
+            result = result.replace(placeholder, value);
+        }
+
+        return result;
     }
 }

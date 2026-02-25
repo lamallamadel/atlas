@@ -309,4 +309,46 @@ public class WhatsAppTemplateController {
         WhatsAppTemplate template = templateService.activateVersion(id, versionNumber);
         return ResponseEntity.ok(WhatsAppTemplateMapper.toResponse(template));
     }
+
+    @PostMapping("/{id}/submit")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Auditable(action = "SUBMIT_TO_META", entityType = "WHATSAPP_TEMPLATE")
+    @Operation(
+            summary = "Submit template to Meta",
+            description = "Submits the template to Meta Business API for approval")
+    public ResponseEntity<WhatsAppTemplateResponse> submitTemplateToMeta(
+            @Parameter(description = "Template ID") @PathVariable Long id) {
+
+        WhatsAppTemplate template = templateService.submitTemplateToMeta(id);
+        return ResponseEntity.ok(WhatsAppTemplateMapper.toResponse(template));
+    }
+
+    @GetMapping("/{id}/preview")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(
+            summary = "Preview template with sample data",
+            description = "Returns a preview of the template with variables replaced by sample data")
+    public ResponseEntity<TemplatePreviewResponse> previewTemplate(
+            @Parameter(description = "Template ID") @PathVariable Long id,
+            @Parameter(description = "Sample variable values (format: 1=value1&2=value2)") 
+                    @RequestParam(required = false) java.util.Map<String, String> variables) {
+
+        WhatsAppTemplate template = templateService.getTemplateById(id);
+        
+        if (variables == null) {
+            variables = new java.util.HashMap<>();
+        }
+
+        java.util.List<java.util.Map<String, Object>> renderedComponents =
+                templateService.previewTemplate(id, variables);
+
+        TemplatePreviewResponse response = new TemplatePreviewResponse();
+        response.setTemplateId(template.getId());
+        response.setName(template.getName());
+        response.setLanguage(template.getLanguage());
+        response.setRenderedComponents(renderedComponents);
+        response.setOriginalComponents(template.getComponents());
+
+        return ResponseEntity.ok(response);
+    }
 }
