@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -53,7 +54,7 @@ public class OutboundResilienceConfig {
     }
 
     @Bean
-    public Map<String, Retry> outboundRetryByChannel(RetryRegistry retryRegistry) {
+    public Map<String, Retry> outboundRetryByChannel(@Qualifier("outboundRetryRegistry") RetryRegistry retryRegistry) {
         Map<String, Retry> retryMap = new HashMap<>();
         for (MessageChannel channel : MessageChannel.values()) {
             String channelName = channel.name().toLowerCase();
@@ -89,7 +90,7 @@ public class OutboundResilienceConfig {
 
     @Bean
     public Map<String, CircuitBreaker> outboundCircuitBreakerByChannel(
-            CircuitBreakerRegistry circuitBreakerRegistry) {
+            @Qualifier("outboundCircuitBreakerRegistry") CircuitBreakerRegistry circuitBreakerRegistry) {
         Map<String, CircuitBreaker> circuitBreakerMap = new HashMap<>();
         for (MessageChannel channel : MessageChannel.values()) {
             String channelName = channel.name().toLowerCase();
@@ -120,7 +121,7 @@ public class OutboundResilienceConfig {
 
     @Bean
     public Map<String, TimeLimiter> outboundTimeLimiterByChannel(
-            TimeLimiterRegistry timeLimiterRegistry) {
+            @Qualifier("outboundTimeLimiterRegistry") TimeLimiterRegistry timeLimiterRegistry) {
         Map<String, TimeLimiter> timeLimiterMap = new HashMap<>();
         for (MessageChannel channel : MessageChannel.values()) {
             String channelName = channel.name().toLowerCase();

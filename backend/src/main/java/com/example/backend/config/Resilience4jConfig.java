@@ -4,6 +4,7 @@ import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
 import java.time.Duration;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -27,7 +28,7 @@ public class Resilience4jConfig {
     }
 
     @Bean
-    public CircuitBreaker keycloakCircuitBreaker(CircuitBreakerRegistry registry) {
+    public CircuitBreaker keycloakCircuitBreaker(@Qualifier("circuitBreakerRegistry") CircuitBreakerRegistry registry) {
         return registry.circuitBreaker("keycloak");
     }
 }

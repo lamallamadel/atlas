@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
 
 @TestConfiguration
 public class TestSecurityConfig {
@@ -17,12 +16,12 @@ public class TestSecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(TestSecurityConfig.class);
 
     /**
-     * ObjectMapper pour les tests qui ne chargent pas le contexte complet (sans JacksonConfig). Ne
+     * ObjectMapper pour les tests qui ne chargent pas le contexte complet (sans
+     * JacksonConfig). Ne
      * crée le bean que s'il n'existe pas déjà (évite le conflit avec JacksonConfig
      * en @SpringBootTest).
      */
-    @Bean(name = "objectMapper")
-    @Primary
+    @Bean(name = "testObjectMapper")
     @ConditionalOnMissingBean(ObjectMapper.class)
     public ObjectMapper objectMapper() {
         log.debug("Configuring test ObjectMapper with JavaTimeModule and custom settings");

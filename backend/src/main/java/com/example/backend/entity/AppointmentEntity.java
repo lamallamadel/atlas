@@ -42,6 +42,9 @@ public class AppointmentEntity extends BaseEntity {
     @Column(name = "notes", columnDefinition = "text")
     private String notes;
 
+    @Column(name = "reminder_sent", nullable = false)
+    private Boolean reminderSent = false;
+
     @CreatedBy
     @Column(name = "created_by", length = 255)
     private String createdBy;
@@ -128,5 +131,13 @@ public class AppointmentEntity extends BaseEntity {
 
     public void setUpdatedBy(String updatedBy) {
         this.updatedBy = updatedBy;
+    }
+
+    public Boolean getReminderSent() {
+        return reminderSent;
+    }
+
+    public void setReminderSent(Boolean reminderSent) {
+        this.reminderSent = reminderSent;
     }
 }

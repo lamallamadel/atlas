@@ -25,36 +25,33 @@ Atlas Immobilier est un CRM immobilier centré sur la gestion de **dossiers** (c
 - Dossiers : création + déduplication (logique existant ouvert), mise à jour + transitions de statuts, historique de statuts
 - Parties prenantes : CRUD v1
 - Messages : enregistrement / lecture (timeline conversation), rattachement dossier
-- Rendez-vous : CRUD v1, affichage dans le dossier
+- Rendez-vous : CRUD v1, affichage dans le dossier, Drag&Drop FullCalendar avec gestion conflits
 - Timeline (activities) : notes + chronologie
-- Consentements : CRUD v1 (stockage/consultation)
+- Consentements : CRUD bloquant (Bloque l'envoi WhatsApp si statut != GRANTED)
 - Audit : AOP + lecture via API
 - Search & reporting : endpoints + dashboard de base
-- WhatsApp : webhook inbound (validation HMAC, idempotence, association dossier)
+- WhatsApp Inbound : webhook inbound (validation HMAC, idempotence, association dossier)
+- WhatsApp Outbound : Provider Officiel Cloud API WhatsApp, Outbox pattern, Exponential backoff retry, Rate Limiting redis, Session windows de 24h.
 
 ### Tech / Ops
 - Monorepo (backend Spring Boot + frontend Angular + infra Docker)
 - Sécurité : JWT + multi-tenancy via header `X-Org-Id` (voir doc sécurité)
-- Tests : couverture BE solide, FE unit tests, Playwright E2E (présents mais à stabiliser)
+- Tests : couverture BE solide (100+ tests d'intégration WhatsApp), FE unit tests, Playwright E2E.
 
 ## TO-BE (MVP market-ready — cible)
 
-### Axes produit (sans réduire le scope)
+### Axes produit (S8-S13)
 1) **CRM modulable multi-métiers** : statuts/types/règles gérés comme **référentiels tenant-scopés** + workflows par type de dossier  
    → Voir : `docs/atlas-immobilier/02_fonctionnel/03_referentiels_workflows_modulables.md`
 
-2) **Choix B : WhatsApp Outbound réel** (market-ready)  
-   - envoi provider + templates + retries/outbox + observabilité  
-   → Voir : `docs/atlas-immobilier/03_technique/09_notifications.md`
+2) **Qualification & Extraction IA (S8)** : Utilisation de l'Agent IA Dual (Mistral/OpenAI) pour extraire de la discussion des paramètres structurés (budget, zone...).
 
-3) **Consentement strict** (bloquant) pour tout outbound WhatsApp/SMS/Email
+3) **Rendez-vous et Rappels (S9)** : Cron Job automatisé de "Scheduling" / Relances WhatsApp pour les visites prévues.
 
 4) **Stabilisation QA** (anti-flaky E2E, critères release)
 
 ## Risques actuels (à traiter avant “marché”)
 - E2E Playwright : fragilité de login/sélecteurs (timeouts) → fiabilisation P0
-- Consentement : stocké mais pas encore systématiquement “bloquant” sur l’outbound
-- Outbound provider : architecture à finaliser (outbox, retry, idempotence, monitoring)
 
 ## Références
 - Contrats API : `docs/atlas-immobilier/03_technique/03_api_contracts.md`

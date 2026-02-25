@@ -50,29 +50,23 @@ Ce document décrit la roadmap MVP par semaines (S1 → S13). Il distingue :
 - Tasks v1 (OPEN/DONE + dueAt) intégrées à timeline
 - UAT/E2E : 5 parcours stables (zéro flaky)
 
-### Semaine 5 — Consentements & conformité (PARTIEL → À RENDRE BLOQUANT)
-**AS-IS**
-- CRUD consentements + affichage
-
-**TO-BE**
+### Semaine 5 — Consentements & conformité (TERMINÉE)
+L'implémentation du consentement est terminée et agit désormais comme garde-fou strict bloquant tout trafic outbound.
 - Preuve de consentement (meta standardisée)
-- Politique strict : pas d’outbound sans GRANTED
+- Politique stricte (bloquante) : pas d'outbound sans statut `GRANTED`
 - Audit + activity log sur changement consentement
 
-### Semaine 6 — WhatsApp Inbound (PARTIEL → CONSOLIDER)
-**AS-IS**
+### Semaine 6 — WhatsApp Inbound (TERMINÉE)
 - Webhook inbound avec validation HMAC, idempotence, rattachement dossier
-
-**TO-BE**
-- Observabilité (latence, erreurs, retries inbound si applicable)
+- Réception et traitement de tous les types de messages entrants
 - Règles d’association (téléphone, org, stratégie de fallback)
 
-### Semaine 7 — WhatsApp Outbound (CHOIX B — À IMPLÉMENTER MARKET-READY)
-- Providers (Cloud API / Business API selon choix)
-- Templates + session rules
-- Outbox pattern + retry/backoff + DLQ
-- Idempotence et traçabilité (audit/activity)
-- Monitoring + métriques
+### Semaine 7 — WhatsApp Outbound (CHOIX B - TERMINÉE)
+L'architecture Cloud API complète est en production :
+- Provider officiel WhatsApp Cloud API Intégré
+- Architecture Outbox + Exponential Backoff Retry Handling + DLQ
+- Rate Limiting via Redis (et Quota tracking par Organisation)
+- Session Windows de 24h vérifiées pour les messages free-form (et templates autorisés hors-fenêtre)
 
 ### Semaine 8 — Qualification (rules + extraction MVP) (PLANIFIÉE)
 - Règles de scoring / qualification (simple et explicable)
