@@ -4,6 +4,9 @@ import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.WhatsAppProviderConfig;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Span;
 import io.micrometer.tracing.Tracer;
@@ -11,6 +14,10 @@ import io.micrometer.tracing.annotation.SpanTag;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +43,9 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     private final Tracer tracer;
+    private final Map<String, Retry> retryByChannel;
+    private final Map<String, CircuitBreaker> circuitBreakerByChannel;
+    private final Map<String, TimeLimiter> timeLimiterByChannel;
 
     @Value("${whatsapp.cloud.api.base-url:https://graph.facebook.com/v18.0}")
     private String baseUrl;
@@ -47,7 +57,10 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
             WhatsAppErrorMapper errorMapper,
             RestTemplate restTemplate,
             ObjectMapper objectMapper,
-            @Autowired(required = false) Tracer tracer) {
+            @Autowired(required = false) Tracer tracer,
+            Map<String, Retry> outboundRetryByChannel,
+            Map<String, CircuitBreaker> outboundCircuitBreakerByChannel,
+            Map<String, TimeLimiter> outboundTimeLimiterByChannel) {
         this.providerConfigRepository = providerConfigRepository;
         this.sessionWindowService = sessionWindowService;
         this.rateLimitService = rateLimitService;
@@ -55,11 +68,50 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
         this.tracer = tracer;
+        this.retryByChannel = outboundRetryByChannel;
+        this.circuitBreakerByChannel = outboundCircuitBreakerByChannel;
+        this.timeLimiterByChannel = outboundTimeLimiterByChannel;
     }
 
     @Override
     @Observed(name = "whatsapp.send", contextualName = "whatsapp-cloud-api-send")
     public ProviderSendResult send(@SpanTag("message.id") OutboundMessageEntity message) {
+        String channelName = message.getChannel().name().toLowerCase();
+        Retry retry = retryByChannel.get(channelName);
+        CircuitBreaker circuitBreaker = circuitBreakerByChannel.get(channelName);
+        TimeLimiter timeLimiter = timeLimiterByChannel.get(channelName);
+
+        Supplier<ProviderSendResult> supplier = () -> sendInternal(message);
+
+        Supplier<ProviderSendResult> decoratedSupplier =
+                Retry.decorateSupplier(
+                        retry, CircuitBreaker.decorateSupplier(circuitBreaker, supplier));
+
+        try {
+            Callable<ProviderSendResult> callable = decoratedSupplier::get;
+            Callable<ProviderSendResult> timeLimitedCallable =
+                    TimeLimiter.decorateFutureSupplier(
+                            timeLimiter, () -> CompletableFuture.supplyAsync(decoratedSupplier));
+
+            return timeLimitedCallable.call();
+        } catch (TimeoutException e) {
+            logger.error("Timeout sending WhatsApp message: messageId={}", message.getId(), e);
+            return ProviderSendResult.failure(
+                    "TIMEOUT", "Request timed out after 30 seconds", true, null);
+        } catch (Exception e) {
+            logger.error(
+                    "Error sending WhatsApp message after retries: messageId={}",
+                    message.getId(),
+                    e);
+            if (e.getCause() instanceof RestClientException) {
+                return handleGenericException((Exception) e.getCause(), message);
+            }
+            return ProviderSendResult.failure(
+                    "UNEXPECTED_ERROR", sanitizeErrorMessage(e.getMessage()), true, null);
+        }
+    }
+
+    private ProviderSendResult sendInternal(OutboundMessageEntity message) {
         if (tracer != null && tracer.currentSpan() != null) {
             Span span = tracer.currentSpan();
             span.tag("org.id", message.getOrgId());
@@ -457,5 +509,20 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
                         "$1=***");
 
         return message;
+    }
+
+    private ProviderSendResult handleGenericException(Exception e, OutboundMessageEntity message) {
+        logger.error(
+                "Error calling WhatsApp Cloud API for messageId={}: {}",
+                message.getId(),
+                e.getMessage(),
+                e);
+
+        String errorCode = extractErrorCodeFromException(e);
+        String errorMessage = sanitizeErrorMessage(e.getMessage());
+        boolean retryable = errorMapper.isRetryable(errorCode);
+
+        return ProviderSendResult.failure(
+                errorCode != null ? errorCode : "PROVIDER_ERROR", errorMessage, retryable, null);
     }
 }

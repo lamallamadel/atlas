@@ -4,7 +4,14 @@ import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.SmsProviderConfig;
 import com.example.backend.repository.SmsProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,6 +37,9 @@ public class TwilioSmsProvider implements OutboundMessageProvider {
     private final SmsErrorMapper errorMapper;
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final Map<String, Retry> retryByChannel;
+    private final Map<String, CircuitBreaker> circuitBreakerByChannel;
+    private final Map<String, TimeLimiter> timeLimiterByChannel;
 
     @Value("${twilio.api.base-url:https://api.twilio.com/2010-04-01}")
     private String baseUrl;
@@ -39,16 +49,56 @@ public class TwilioSmsProvider implements OutboundMessageProvider {
             SmsRateLimitService rateLimitService,
             SmsErrorMapper errorMapper,
             RestTemplate restTemplate,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            Map<String, Retry> outboundRetryByChannel,
+            Map<String, CircuitBreaker> outboundCircuitBreakerByChannel,
+            Map<String, TimeLimiter> outboundTimeLimiterByChannel) {
         this.providerConfigRepository = providerConfigRepository;
         this.rateLimitService = rateLimitService;
         this.errorMapper = errorMapper;
         this.restTemplate = restTemplate;
         this.objectMapper = objectMapper;
+        this.retryByChannel = outboundRetryByChannel;
+        this.circuitBreakerByChannel = outboundCircuitBreakerByChannel;
+        this.timeLimiterByChannel = outboundTimeLimiterByChannel;
     }
 
     @Override
     public ProviderSendResult send(OutboundMessageEntity message) {
+        String channelName = SMS_CHANNEL.toLowerCase();
+        Retry retry = retryByChannel.get(channelName);
+        CircuitBreaker circuitBreaker = circuitBreakerByChannel.get(channelName);
+        TimeLimiter timeLimiter = timeLimiterByChannel.get(channelName);
+
+        Supplier<ProviderSendResult> supplier = () -> sendInternal(message);
+
+        Supplier<ProviderSendResult> decoratedSupplier =
+                Retry.decorateSupplier(
+                        retry, CircuitBreaker.decorateSupplier(circuitBreaker, supplier));
+
+        try {
+            Callable<ProviderSendResult> callable = decoratedSupplier::get;
+            Callable<ProviderSendResult> timeLimitedCallable =
+                    TimeLimiter.decorateFutureSupplier(
+                            timeLimiter, () -> CompletableFuture.supplyAsync(decoratedSupplier));
+
+            return timeLimitedCallable.call();
+        } catch (TimeoutException e) {
+            logger.error("Timeout sending SMS message: messageId={}", message.getId(), e);
+            return ProviderSendResult.failure(
+                    "TIMEOUT", "Request timed out after 30 seconds", true, null);
+        } catch (Exception e) {
+            logger.error(
+                    "Error sending SMS message after retries: messageId={}", message.getId(), e);
+            if (e.getCause() instanceof RestClientException) {
+                return handleGenericException((Exception) e.getCause(), message);
+            }
+            return ProviderSendResult.failure(
+                    "UNEXPECTED_ERROR", sanitizeErrorMessage(e.getMessage()), true, null);
+        }
+    }
+
+    private ProviderSendResult sendInternal(OutboundMessageEntity message) {
         try {
             SmsProviderConfig config =
                     providerConfigRepository
@@ -313,5 +363,20 @@ public class TwilioSmsProvider implements OutboundMessageProvider {
                         "(?i)(token|secret|password|auth)\\s*[:=]\\s*[^\\s,}]+", "$1=***");
 
         return message;
+    }
+
+    private ProviderSendResult handleGenericException(Exception e, OutboundMessageEntity message) {
+        logger.error(
+                "Error calling Twilio API for messageId={}: {}",
+                message.getId(),
+                e.getMessage(),
+                e);
+
+        String errorCode = extractErrorCodeFromException(e);
+        String errorMessage = sanitizeErrorMessage(e.getMessage());
+        boolean retryable = errorMapper.isRetryable(errorCode);
+
+        return ProviderSendResult.failure(
+                errorCode != null ? errorCode : "PROVIDER_ERROR", errorMessage, retryable, null);
     }
 }

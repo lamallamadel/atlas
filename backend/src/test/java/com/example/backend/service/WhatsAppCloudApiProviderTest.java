@@ -10,12 +10,21 @@ import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.retry.RetryConfig;
+import io.github.resilience4j.retry.RetryRegistry;
+import io.github.resilience4j.timelimiter.TimeLimiter;
+import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import io.github.resilience4j.timelimiter.TimeLimiterRegistry;
+import java.time.Duration;
 import java.util.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.*;
@@ -37,13 +46,55 @@ class WhatsAppCloudApiProviderTest {
 
     @Mock private ObjectMapper objectMapper;
 
-    @InjectMocks private WhatsAppCloudApiProvider provider;
+    private WhatsAppCloudApiProvider provider;
+    private Map<String, Retry> retryByChannel;
+    private Map<String, CircuitBreaker> circuitBreakerByChannel;
+    private Map<String, TimeLimiter> timeLimiterByChannel;
 
     private WhatsAppProviderConfig config;
     private OutboundMessageEntity message;
 
     @BeforeEach
     void setUp() {
+        RetryConfig retryConfig =
+                RetryConfig.custom().maxAttempts(1).waitDuration(Duration.ofMillis(1)).build();
+        RetryRegistry retryRegistry = RetryRegistry.of(retryConfig);
+
+        CircuitBreakerConfig circuitBreakerConfig =
+                CircuitBreakerConfig.custom()
+                        .failureRateThreshold(50)
+                        .minimumNumberOfCalls(10)
+                        .slidingWindowSize(10)
+                        .waitDurationInOpenState(Duration.ofSeconds(60))
+                        .build();
+        CircuitBreakerRegistry circuitBreakerRegistry =
+                CircuitBreakerRegistry.of(circuitBreakerConfig);
+
+        TimeLimiterConfig timeLimiterConfig =
+                TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(30)).build();
+        TimeLimiterRegistry timeLimiterRegistry = TimeLimiterRegistry.of(timeLimiterConfig);
+
+        retryByChannel = new HashMap<>();
+        circuitBreakerByChannel = new HashMap<>();
+        timeLimiterByChannel = new HashMap<>();
+
+        retryByChannel.put("whatsapp", retryRegistry.retry("whatsapp"));
+        circuitBreakerByChannel.put("whatsapp", circuitBreakerRegistry.circuitBreaker("whatsapp"));
+        timeLimiterByChannel.put("whatsapp", timeLimiterRegistry.timeLimiter("whatsapp"));
+
+        provider =
+                new WhatsAppCloudApiProvider(
+                        providerConfigRepository,
+                        sessionWindowService,
+                        rateLimitService,
+                        errorMapper,
+                        restTemplate,
+                        objectMapper,
+                        null,
+                        retryByChannel,
+                        circuitBreakerByChannel,
+                        timeLimiterByChannel);
+
         config = new WhatsAppProviderConfig();
         config.setOrgId("test-org");
         config.setPhoneNumberId("123456789");

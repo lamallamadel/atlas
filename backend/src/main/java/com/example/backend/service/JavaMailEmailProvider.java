@@ -4,6 +4,9 @@ import com.example.backend.entity.EmailProviderConfig;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.repository.EmailProviderConfigRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.retry.Retry;
+import io.github.resilience4j.timelimiter.TimeLimiter;
 import jakarta.mail.AuthenticationFailedException;
 import jakarta.mail.Message;
 import jakarta.mail.MessagingException;
@@ -22,6 +25,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,6 +44,9 @@ public class JavaMailEmailProvider implements OutboundMessageProvider {
     private final EmailProviderConfigRepository providerConfigRepository;
     private final EmailErrorMapper errorMapper;
     private final ObjectMapper objectMapper;
+    private final Map<String, Retry> retryByChannel;
+    private final Map<String, CircuitBreaker> circuitBreakerByChannel;
+    private final Map<String, TimeLimiter> timeLimiterByChannel;
 
     @Value("${email.default.timeout:30000}")
     private int defaultTimeout;
@@ -47,14 +57,54 @@ public class JavaMailEmailProvider implements OutboundMessageProvider {
     public JavaMailEmailProvider(
             EmailProviderConfigRepository providerConfigRepository,
             EmailErrorMapper errorMapper,
-            ObjectMapper objectMapper) {
+            ObjectMapper objectMapper,
+            Map<String, Retry> outboundRetryByChannel,
+            Map<String, CircuitBreaker> outboundCircuitBreakerByChannel,
+            Map<String, TimeLimiter> outboundTimeLimiterByChannel) {
         this.providerConfigRepository = providerConfigRepository;
         this.errorMapper = errorMapper;
         this.objectMapper = objectMapper;
+        this.retryByChannel = outboundRetryByChannel;
+        this.circuitBreakerByChannel = outboundCircuitBreakerByChannel;
+        this.timeLimiterByChannel = outboundTimeLimiterByChannel;
     }
 
     @Override
     public ProviderSendResult send(OutboundMessageEntity message) {
+        String channelName = EMAIL_CHANNEL.toLowerCase();
+        Retry retry = retryByChannel.get(channelName);
+        CircuitBreaker circuitBreaker = circuitBreakerByChannel.get(channelName);
+        TimeLimiter timeLimiter = timeLimiterByChannel.get(channelName);
+
+        Supplier<ProviderSendResult> supplier = () -> sendInternal(message);
+
+        Supplier<ProviderSendResult> decoratedSupplier =
+                Retry.decorateSupplier(
+                        retry, CircuitBreaker.decorateSupplier(circuitBreaker, supplier));
+
+        try {
+            Callable<ProviderSendResult> callable = decoratedSupplier::get;
+            Callable<ProviderSendResult> timeLimitedCallable =
+                    TimeLimiter.decorateFutureSupplier(
+                            timeLimiter, () -> CompletableFuture.supplyAsync(decoratedSupplier));
+
+            return timeLimitedCallable.call();
+        } catch (TimeoutException e) {
+            logger.error("Timeout sending email message: messageId={}", message.getId(), e);
+            return ProviderSendResult.failure(
+                    "TIMEOUT", "Request timed out after 30 seconds", true, null);
+        } catch (Exception e) {
+            logger.error(
+                    "Error sending email message after retries: messageId={}", message.getId(), e);
+            if (e.getCause() instanceof MessagingException) {
+                return handleGenericMessagingException((MessagingException) e.getCause(), message);
+            }
+            return ProviderSendResult.failure(
+                    "UNEXPECTED_ERROR", sanitizeErrorMessage(e.getMessage()), true, null);
+        }
+    }
+
+    private ProviderSendResult sendInternal(OutboundMessageEntity message) {
         try {
             EmailProviderConfig config =
                     providerConfigRepository
@@ -377,5 +427,16 @@ public class JavaMailEmailProvider implements OutboundMessageProvider {
                         "(?i)(password|secret|token|key)\\s*[:=]\\s*[^\\s,}]+", "$1=***");
 
         return message;
+    }
+
+    private ProviderSendResult handleGenericMessagingException(
+            MessagingException e, OutboundMessageEntity message) {
+        logger.error("Messaging exception for messageId={}: {}", message.getId(), e.getMessage());
+
+        if (e instanceof SendFailedException) {
+            return handleSendFailedException((SendFailedException) e, message);
+        }
+
+        return handleMessagingException(e, message);
     }
 }

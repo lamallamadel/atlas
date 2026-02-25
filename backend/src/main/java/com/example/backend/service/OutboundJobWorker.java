@@ -9,6 +9,9 @@ import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.retry.Retry;
 import io.micrometer.observation.annotation.Observed;
 import io.micrometer.tracing.Tracer;
 import java.time.Duration;
@@ -17,6 +20,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -41,6 +45,8 @@ public class OutboundJobWorker {
     private final ActivityService activityService;
     private final MetricsService metricsService;
     private final Tracer tracer;
+    private final Map<String, Retry> retryByChannel;
+    private final Map<String, CircuitBreaker> circuitBreakerByChannel;
 
     @Value("${outbound.worker.batch-size:10}")
     private int batchSize;
@@ -56,7 +62,9 @@ public class OutboundJobWorker {
             AuditEventService auditEventService,
             ActivityService activityService,
             MetricsService metricsService,
-            @Autowired(required = false) Tracer tracer) {
+            @Autowired(required = false) Tracer tracer,
+            Map<String, Retry> outboundRetryByChannel,
+            Map<String, CircuitBreaker> outboundCircuitBreakerByChannel) {
         this.outboundMessageRepository = outboundMessageRepository;
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.providers = providers;
@@ -65,6 +73,8 @@ public class OutboundJobWorker {
         this.activityService = activityService;
         this.metricsService = metricsService;
         this.tracer = tracer;
+        this.retryByChannel = outboundRetryByChannel;
+        this.circuitBreakerByChannel = outboundCircuitBreakerByChannel;
     }
 
     @Scheduled(fixedDelayString = "${outbound.worker.poll-interval-ms:5000}")
@@ -181,6 +191,29 @@ public class OutboundJobWorker {
     @Transactional
     @Observed(name = "outbound.message.process", contextualName = "outbound-message-process")
     public void processMessage(OutboundMessageEntity message) {
+        String channelName = message.getChannel().name().toLowerCase();
+        Retry retry = retryByChannel.get(channelName);
+        CircuitBreaker circuitBreaker = circuitBreakerByChannel.get(channelName);
+
+        AtomicInteger attemptCounter = new AtomicInteger(message.getAttemptCount());
+
+        retry.getEventPublisher()
+                .onRetry(
+                        event -> {
+                            int currentAttempt = attemptCounter.incrementAndGet();
+                            logger.warn(
+                                    "Retry attempt {} for message {} on channel {}: {}",
+                                    currentAttempt,
+                                    message.getId(),
+                                    channelName,
+                                    event.getLastThrowable().getMessage());
+
+                            message.setAttemptCount(currentAttempt);
+                            outboundMessageRepository.save(message);
+
+                            metricsService.incrementOutboundMessageRetry(channelName);
+                        });
+
         logger.debug(
                 "Processing outbound message: id={}, attempt={}/{}",
                 message.getId(),
@@ -251,6 +284,18 @@ public class OutboundJobWorker {
                         result.isRetryable());
             }
 
+        } catch (CallNotPermittedException e) {
+            logger.error(
+                    "Circuit breaker open for channel {} - message {}: {}",
+                    channelName,
+                    message.getId(),
+                    e.getMessage());
+            handleFailure(
+                    message,
+                    attempt,
+                    "CIRCUIT_BREAKER_OPEN",
+                    "Circuit breaker is open for channel " + channelName,
+                    true);
         } catch (Exception e) {
             logger.error(
                     "Unexpected error processing message {}: {}",
@@ -317,19 +362,13 @@ public class OutboundJobWorker {
         boolean canRetry = retryable && message.getAttemptCount() < message.getMaxAttempts();
 
         if (canRetry) {
-            LocalDateTime nextRetryAt = calculateNextRetry(message.getAttemptCount());
-            attempt.setNextRetryAt(nextRetryAt);
-
             message.setStatus(OutboundMessageStatus.QUEUED);
             message.setErrorCode(errorCode);
             message.setErrorMessage(errorMessage);
 
-            metricsService.incrementOutboundMessageRetry(channelName);
-
             logger.info(
-                    "Scheduling retry for message {}: nextRetryAt={}, attempt={}/{}",
+                    "Message {} will be retried by Resilience4j: attempt={}/{}",
                     message.getId(),
-                    nextRetryAt,
                     message.getAttemptCount(),
                     message.getMaxAttempts());
         } else {
