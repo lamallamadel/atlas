@@ -21,6 +21,11 @@ import org.springframework.web.client.RestTemplate;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import org.hibernate.Session;
+
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -73,18 +78,38 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         TenantContext.clear();
         TenantContext.setOrgId(TENANT_1);
 
+        // #region agent log
+        debugNdjson(
+                "run1",
+                "H4",
+                "WhatsAppProviderIntegrationTest.setUp:before-clean",
+                "Session window count before cleanup",
+                Map.of(
+                        "tenant", TENANT_1,
+                        "sessionWindowCount", sessionWindowRepository.count()));
+        // #endregion
         outboundAttemptRepository.deleteAll();
         outboundMessageRepository.deleteAll();
-        entityManager.createNativeQuery("DELETE FROM whatsapp_session_window WHERE org_id = :orgId")
-                .setParameter("orgId", TENANT_1)
-                .executeUpdate();
+        Session session = entityManager.unwrap(Session.class);
+        session.enableFilter("orgIdFilter").setParameter("orgId", TENANT_1);
+        sessionWindowRepository.deleteAll();
+        session.disableFilter("orgIdFilter");
         entityManager.flush();
         entityManager.clear();
-        sessionWindowRepository.deleteAll();
         whatsAppRateLimitRepository.deleteAll();
         dossierRepository.deleteAll();
         whatsAppProviderConfigRepository.deleteAll();
 
+        // #region agent log
+        debugNdjson(
+                "run1",
+                "H4",
+                "WhatsAppProviderIntegrationTest.setUp:after-clean",
+                "Session window count after cleanup",
+                Map.of(
+                        "tenant", TENANT_1,
+                        "sessionWindowCount", sessionWindowRepository.count()));
+        // #endregion
         createWhatsAppProviderConfig();
     }
 
@@ -251,8 +276,9 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @DisplayName("Provider - session window enforced for freeform messages")
     void testProvider_SessionWindowEnforced() {
         TenantContext.setOrgId(TENANT_1);
-        
-        OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
+
+        OutboundMessageEntity message =
+                createOutboundMessageWithoutSessionWindow(OutboundMessageStatus.QUEUED);
         message.setTemplateCode(null);
         outboundMessageRepository.save(message);
 
@@ -355,16 +381,6 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         message.setTo("336 12 34 56 78");
         outboundMessageRepository.save(message);
         
-        WhatsAppSessionWindow window = new WhatsAppSessionWindow();
-        window.setOrgId(TENANT_1);
-        window.setPhoneNumber("+33612345678");
-        window.setLastInboundMessageAt(LocalDateTime.now());
-        window.setWindowOpensAt(LocalDateTime.now());
-        window.setWindowExpiresAt(LocalDateTime.now().plusHours(24));
-        window.setCreatedAt(LocalDateTime.now());
-        window.setUpdatedAt(LocalDateTime.now());
-        sessionWindowRepository.save(window);
-        
         Map<String, Object> apiResponse = new HashMap<>();
         List<Map<String, Object>> messages = new ArrayList<>();
         Map<String, Object> messageInfo = new HashMap<>();
@@ -448,7 +464,8 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         window.setUpdatedAt(LocalDateTime.now().minusHours(1));
         window = sessionWindowRepository.save(window);
         
-        OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
+        OutboundMessageEntity message =
+                createOutboundMessageWithoutSessionWindow(OutboundMessageStatus.QUEUED);
         
         Map<String, Object> apiResponse = new HashMap<>();
         List<Map<String, Object>> messages = new ArrayList<>();
@@ -524,6 +541,17 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         dossier.setUpdatedAt(LocalDateTime.now());
         dossier = dossierRepository.save(dossier);
 
+        // #region agent log
+        debugNdjson(
+                "run1",
+                "H4",
+                "WhatsAppProviderIntegrationTest.createOutboundMessage:before-window-insert",
+                "Checking existing session window before insert",
+                Map.of(
+                        "tenant", TENANT_1,
+                        "phone", TEST_PHONE,
+                        "existingSessionWindowCount", sessionWindowRepository.count()));
+        // #endregion
         WhatsAppSessionWindow window = new WhatsAppSessionWindow();
         window.setOrgId(TENANT_1);
         window.setPhoneNumber(TEST_PHONE);
@@ -551,5 +579,56 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         message.setPayloadJson(payload);
         
         return outboundMessageRepository.save(message);
+    }
+
+    private OutboundMessageEntity createOutboundMessageWithoutSessionWindow(
+            OutboundMessageStatus status) {
+        Dossier dossier = new Dossier();
+        dossier.setOrgId(TENANT_1);
+        dossier.setLeadPhone(TEST_PHONE);
+        dossier.setStatus(DossierStatus.NEW);
+        dossier.setCreatedAt(LocalDateTime.now());
+        dossier.setUpdatedAt(LocalDateTime.now());
+        dossier = dossierRepository.save(dossier);
+
+        OutboundMessageEntity message = new OutboundMessageEntity();
+        message.setOrgId(TENANT_1);
+        message.setDossierId(dossier.getId());
+        message.setChannel(MessageChannel.WHATSAPP);
+        message.setTo(TEST_PHONE);
+        message.setStatus(status);
+        message.setIdempotencyKey(UUID.randomUUID().toString());
+        message.setAttemptCount(0);
+        message.setMaxAttempts(5);
+        message.setCreatedAt(LocalDateTime.now());
+        message.setUpdatedAt(LocalDateTime.now());
+
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("body", "Test message");
+        message.setPayloadJson(payload);
+
+        return outboundMessageRepository.save(message);
+    }
+
+    private void debugNdjson(
+            String runId, String hypothesisId, String location, String message, Map<String, Object> data) {
+        try {
+            String payload =
+                    objectMapper.writeValueAsString(
+                            Map.of(
+                                    "sessionId", "12ec52",
+                                    "runId", runId,
+                                    "hypothesisId", hypothesisId,
+                                    "location", location,
+                                    "message", message,
+                                    "data", data,
+                                    "timestamp", System.currentTimeMillis()));
+            Files.writeString(
+                    Path.of("c:\\Users\\PRO\\work\\immo\\debug-12ec52.log"),
+                    payload + System.lineSeparator(),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.APPEND);
+        } catch (Exception ignore) {
+        }
     }
 }
