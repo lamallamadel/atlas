@@ -88,5 +88,13 @@ logging:
 rate-limit:
   enabled: false
 
+keycloak:
+  admin:
+    server-url: http://localhost:8081
+    realm: test-realm
+    client-id: admin-cli
+    username: test-admin
+    password: test-password
+
 referential:
   seed-on-missing: true

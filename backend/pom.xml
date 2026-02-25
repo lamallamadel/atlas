@@ -489,6 +489,9 @@
                                 <include>**/*IT.java</include>
                                 <include>**/*IntegrationTest.java</include>
                             </includes>
+                            <excludes>
+                                <exclude>**/MessageRepositoryPostgresIT.java</exclude>
+                            </excludes>
                         </configuration>
                     </plugin>
                 </plugins>

@@ -77,22 +77,23 @@ class RateLimitIntegrationTest {
 
     @Test
     void shouldClearBucketWhenRequested() {
+        String clearTestOrgId = "clear-bucket-test-org";
         RateLimitTier tier = new RateLimitTier();
-        tier.setOrgId(testOrgId);
+        tier.setOrgId(clearTestOrgId);
         tier.setTierName("TEST");
         tier.setRequestsPerMinute(1);
         tier.setDescription("Test tier");
         rateLimitTierRepository.save(tier);
 
-        boolean firstRequest = rateLimitService.tryConsumeForOrg(testOrgId);
-        boolean secondRequest = rateLimitService.tryConsumeForOrg(testOrgId);
+        boolean firstRequest = rateLimitService.tryConsumeForOrg(clearTestOrgId);
+        boolean secondRequest = rateLimitService.tryConsumeForOrg(clearTestOrgId);
 
         assertThat(firstRequest).isTrue();
         assertThat(secondRequest).isFalse();
 
-        rateLimitService.clearBucket(testOrgId);
+        rateLimitService.clearBucket(clearTestOrgId);
 
-        boolean thirdRequest = rateLimitService.tryConsumeForOrg(testOrgId);
+        boolean thirdRequest = rateLimitService.tryConsumeForOrg(clearTestOrgId);
         assertThat(thirdRequest).isTrue();
     }
 

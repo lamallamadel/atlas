@@ -13,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -26,6 +29,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @BackendE2ETest
+@ActiveProfiles({"backend-e2e", "backend-e2e-h2"})
 @TestPropertySource(properties = {
     "outbound.worker.enabled=false"
 })
@@ -58,15 +62,24 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @MockBean
+    @MockBean(name = "restTemplate")
     private RestTemplate restTemplate;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
         TenantContext.clear();
-        
+        TenantContext.setOrgId(TENANT_1);
+
         outboundAttemptRepository.deleteAll();
         outboundMessageRepository.deleteAll();
+        entityManager.createNativeQuery("DELETE FROM whatsapp_session_window WHERE org_id = :orgId")
+                .setParameter("orgId", TENANT_1)
+                .executeUpdate();
+        entityManager.flush();
+        entityManager.clear();
         sessionWindowRepository.deleteAll();
         whatsAppRateLimitRepository.deleteAll();
         dossierRepository.deleteAll();
@@ -85,6 +98,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         config.setOrgId(TENANT_1);
         config.setPhoneNumberId("123456789");
         config.setApiKeyEncrypted("test-api-key");
+        config.setApiSecretEncrypted("test-api-secret");
         config.setWebhookSecretEncrypted("test-secret");
         config.setEnabled(true);
         config.setCreatedAt(LocalDateTime.now());

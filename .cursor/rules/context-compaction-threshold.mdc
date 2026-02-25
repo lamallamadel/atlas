@@ -1,0 +1,20 @@
+---
+description: Compacter le contexte quand il devient trop grand
+alwaysApply: true
+---
+
+# Compactage du contexte agent
+
+Quand l'utilisation du contexte atteint 75% ou plus, compacter immediatement le contexte a environ 25%.
+
+Prioriser uniquement les informations les plus pertinentes pour les prochaines etapes:
+- objectif courant et resultat attendu
+- decisions prises et contraintes actives
+- etat d'avancement et blocages restants
+- fichiers, commandes et tests importants deja executes
+- prochaines actions concretes a enchainer
+
+Pendant le compactage:
+- eliminer repetitions, details obsoletes et bruit conversationnel
+- conserver les choix techniques justifies et les hypotheses encore valides
+- garder un resume actionnable, court et structure
