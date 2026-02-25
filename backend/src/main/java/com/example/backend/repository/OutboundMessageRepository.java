@@ -92,4 +92,14 @@ public interface OutboundMessageRepository extends JpaRepository<OutboundMessage
     List<Object[]> countFailuresTrendByDate(@Param("afterTime") LocalDateTime afterTime);
 
     long countByStatusAndCreatedAtAfter(OutboundMessageStatus status, LocalDateTime afterTime);
+
+    @Query(
+            "SELECT om FROM OutboundMessageEntity om WHERE om.channel = :channel AND om.createdAt >= :afterTime ORDER BY om.createdAt DESC")
+    List<OutboundMessageEntity> findByChannelAndCreatedAtAfter(
+            @Param("channel") MessageChannel channel,
+            @Param("afterTime") LocalDateTime afterTime,
+            Pageable pageable);
+
+    long countByStatusAndUpdatedAtBefore(
+            OutboundMessageStatus status, LocalDateTime beforeTime);
 }

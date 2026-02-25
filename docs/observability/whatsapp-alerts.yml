@@ -1,0 +1,222 @@
+groups:
+  - name: whatsapp_sla_alerts
+    interval: 30s
+    rules:
+      # High latency alerts based on p95 percentiles
+      - alert: WhatsAppHighSendLatency
+        expr: outbound_message_send_latency_seconds{channel="whatsapp",quantile="0.95"} > 30
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          sla: latency
+        annotations:
+          summary: "WhatsApp message send latency is high"
+          description: "P95 send latency for WhatsApp messages is {{ $value }}s (threshold: 30s)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-high-latency"
+
+      - alert: WhatsAppHighDeliveredLatency
+        expr: outbound_message_delivered_latency_seconds{channel="whatsapp",quantile="0.95"} > 60
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          sla: latency
+        annotations:
+          summary: "WhatsApp message delivery latency is high"
+          description: "P95 delivery latency for WhatsApp messages is {{ $value }}s (threshold: 60s)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-high-latency"
+
+      - alert: WhatsAppCriticalSendLatency
+        expr: outbound_message_send_latency_seconds{channel="whatsapp",quantile="0.99"} > 120
+        for: 3m
+        labels:
+          severity: critical
+          component: whatsapp
+          sla: latency
+        annotations:
+          summary: "WhatsApp message send latency is critically high"
+          description: "P99 send latency for WhatsApp messages is {{ $value }}s (threshold: 120s)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-critical-latency"
+
+  - name: whatsapp_stuck_messages_alerts
+    interval: 60s
+    rules:
+      - alert: WhatsAppMessagesStuckInSending
+        expr: whatsapp_message_stuck_alert > 0
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          issue: stuck_messages
+        annotations:
+          summary: "WhatsApp messages stuck in SENDING status"
+          description: "{{ $value }} WhatsApp messages have been stuck in SENDING status for more than 5 minutes"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-stuck-messages"
+
+      - alert: WhatsAppMessagesStuckInSendingCritical
+        expr: whatsapp_message_stuck_alert > 10
+        for: 3m
+        labels:
+          severity: critical
+          component: whatsapp
+          issue: stuck_messages
+        annotations:
+          summary: "Many WhatsApp messages stuck in SENDING status"
+          description: "{{ $value }} WhatsApp messages have been stuck in SENDING status for more than 5 minutes"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-stuck-messages"
+
+  - name: whatsapp_session_window_alerts
+    interval: 60s
+    rules:
+      - alert: WhatsAppSessionWindowExpiringSoon
+        expr: whatsapp_session_window_expiration_seconds{channel="whatsapp"} > 0 and whatsapp_session_window_expiration_seconds{channel="whatsapp"} < 3600
+        for: 2m
+        labels:
+          severity: info
+          component: whatsapp
+          issue: session_expiry
+        annotations:
+          summary: "WhatsApp session window expiring soon"
+          description: "WhatsApp session window will expire in {{ $value }}s (less than 1 hour)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-session-window"
+
+      - alert: WhatsAppNoActiveSessionWindow
+        expr: whatsapp_session_window_expiration_seconds{channel="whatsapp"} == 0
+        for: 10m
+        labels:
+          severity: info
+          component: whatsapp
+          issue: session_expiry
+        annotations:
+          summary: "No active WhatsApp session windows"
+          description: "No active WhatsApp session windows detected for 10 minutes. Template messages required."
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-session-window"
+
+  - name: whatsapp_quota_alerts
+    interval: 30s
+    rules:
+      - alert: WhatsAppQuotaHighUsage
+        expr: (whatsapp_quota_used / whatsapp_quota_limit) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          issue: quota
+        annotations:
+          summary: "WhatsApp API quota usage is high"
+          description: "WhatsApp quota usage is at {{ $value | humanizePercentage }} (threshold: 80%)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-quota"
+
+      - alert: WhatsAppQuotaCriticalUsage
+        expr: (whatsapp_quota_used / whatsapp_quota_limit) > 0.95
+        for: 2m
+        labels:
+          severity: critical
+          component: whatsapp
+          issue: quota
+        annotations:
+          summary: "WhatsApp API quota usage is critically high"
+          description: "WhatsApp quota usage is at {{ $value | humanizePercentage }} (threshold: 95%)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-quota"
+
+      - alert: WhatsAppQuotaExhausted
+        expr: whatsapp_quota_remaining == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: whatsapp
+          issue: quota
+        annotations:
+          summary: "WhatsApp API quota exhausted"
+          description: "WhatsApp quota is exhausted. No more messages can be sent until quota resets."
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-quota"
+
+  - name: whatsapp_queue_alerts
+    interval: 30s
+    rules:
+      - alert: WhatsAppHighQueueDepth
+        expr: outbound_message_queue_depth_by_channel{channel="whatsapp",status="queued"} > 100
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          issue: queue_depth
+        annotations:
+          summary: "WhatsApp message queue depth is high"
+          description: "WhatsApp message queue has {{ $value }} queued messages (threshold: 100)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-queue-depth"
+
+      - alert: WhatsAppCriticalQueueDepth
+        expr: outbound_message_queue_depth_by_channel{channel="whatsapp",status="queued"} > 500
+        for: 3m
+        labels:
+          severity: critical
+          component: whatsapp
+          issue: queue_depth
+        annotations:
+          summary: "WhatsApp message queue depth is critically high"
+          description: "WhatsApp message queue has {{ $value }} queued messages (threshold: 500)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-queue-depth"
+
+      - alert: WhatsAppHighFailureRate
+        expr: rate(outbound_message_queue_depth{status="failed"}[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          issue: failure_rate
+        annotations:
+          summary: "WhatsApp message failure rate is high"
+          description: "WhatsApp messages are failing at {{ $value }} per second"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-failures"
+
+  - name: whatsapp_health_alerts
+    interval: 30s
+    rules:
+      - alert: WhatsAppHealthCheckFailing
+        expr: up{job="whatsapp_health"} == 0
+        for: 3m
+        labels:
+          severity: critical
+          component: whatsapp
+          issue: health_check
+        annotations:
+          summary: "WhatsApp health check is failing"
+          description: "WhatsApp provider health check has been failing for 3 minutes"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-health"
+
+      - alert: WhatsAppLowSuccessRate
+        expr: |
+          (
+            sum(rate(outbound_message_queue_depth{channel="whatsapp",status="sent"}[10m])) +
+            sum(rate(outbound_message_queue_depth{channel="whatsapp",status="delivered"}[10m]))
+          ) / (
+            sum(rate(outbound_message_queue_depth{channel="whatsapp",status="sent"}[10m])) +
+            sum(rate(outbound_message_queue_depth{channel="whatsapp",status="delivered"}[10m])) +
+            sum(rate(outbound_message_queue_depth{channel="whatsapp",status="failed"}[10m]))
+          ) < 0.9
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          issue: success_rate
+        annotations:
+          summary: "WhatsApp message success rate is low"
+          description: "WhatsApp success rate is {{ $value | humanizePercentage }} (threshold: 90%)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-low-success-rate"
+
+  - name: whatsapp_retry_alerts
+    interval: 30s
+    rules:
+      - alert: WhatsAppHighRetryCount
+        expr: outbound_message_retry_count{channel="whatsapp"} > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: whatsapp
+          issue: retries
+        annotations:
+          summary: "High number of WhatsApp messages requiring retries"
+          description: "{{ $value }} WhatsApp messages have required retry attempts (threshold: 50)"
+          runbook_url: "https://docs.example.com/runbooks/whatsapp-retries"

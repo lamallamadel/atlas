@@ -317,6 +317,7 @@ public class OutboundJobWorker {
 
         LocalDateTime now = LocalDateTime.now();
         message.setStatus(OutboundMessageStatus.SENT);
+        message.setSentAt(now);
         message.setProviderMessageId(result.getProviderMessageId());
         message.setErrorCode(null);
         message.setErrorMessage(null);

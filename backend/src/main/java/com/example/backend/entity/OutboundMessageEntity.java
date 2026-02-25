@@ -78,6 +78,15 @@ public class OutboundMessageEntity extends BaseEntity {
     @Column(name = "hypothesis_id", length = 255)
     private String hypothesisId;
 
+    @Column(name = "sent_at")
+    private java.time.LocalDateTime sentAt;
+
+    @Column(name = "delivered_at")
+    private java.time.LocalDateTime deliveredAt;
+
+    @Column(name = "read_at")
+    private java.time.LocalDateTime readAt;
+
     public Long getId() {
         return id;
     }
@@ -220,5 +229,29 @@ public class OutboundMessageEntity extends BaseEntity {
 
     public void setHypothesisId(String hypothesisId) {
         this.hypothesisId = hypothesisId;
+    }
+
+    public java.time.LocalDateTime getSentAt() {
+        return sentAt;
+    }
+
+    public void setSentAt(java.time.LocalDateTime sentAt) {
+        this.sentAt = sentAt;
+    }
+
+    public java.time.LocalDateTime getDeliveredAt() {
+        return deliveredAt;
+    }
+
+    public void setDeliveredAt(java.time.LocalDateTime deliveredAt) {
+        this.deliveredAt = deliveredAt;
+    }
+
+    public java.time.LocalDateTime getReadAt() {
+        return readAt;
+    }
+
+    public void setReadAt(java.time.LocalDateTime readAt) {
+        this.readAt = readAt;
     }
 }

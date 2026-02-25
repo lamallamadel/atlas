@@ -21,4 +21,9 @@ public interface WhatsAppSessionWindowRepository
     @Modifying
     @Query("DELETE FROM WhatsAppSessionWindow s WHERE s.windowExpiresAt < :expiryTime")
     void deleteExpiredSessions(@Param("expiryTime") LocalDateTime expiryTime);
+
+    @Query(
+            "SELECT s FROM WhatsAppSessionWindow s WHERE s.windowExpiresAt > :currentTime ORDER BY s.windowExpiresAt ASC")
+    java.util.List<WhatsAppSessionWindow> findActiveWindows(
+            @Param("currentTime") LocalDateTime currentTime);
 }

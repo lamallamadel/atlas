@@ -240,6 +240,14 @@ public class WhatsAppMessageProcessingService {
             message.setStatus(newStatus);
             message.setUpdatedAt(now);
 
+            if (newStatus == OutboundMessageStatus.DELIVERED) {
+                message.setDeliveredAt(now);
+                message.setErrorCode(null);
+                message.setErrorMessage(null);
+            } else if ("read".equalsIgnoreCase(deliveryStatus)) {
+                message.setReadAt(now);
+            }
+
             if (newStatus == OutboundMessageStatus.FAILED
                     && status.getErrors() != null
                     && !status.getErrors().isEmpty()) {
@@ -255,9 +263,6 @@ public class WhatsAppMessageProcessingService {
                         message.getId(),
                         errorCode,
                         message.getErrorMessage());
-            } else if (newStatus == OutboundMessageStatus.DELIVERED) {
-                message.setErrorCode(null);
-                message.setErrorMessage(null);
             }
 
             outboundMessageRepository.save(message);
