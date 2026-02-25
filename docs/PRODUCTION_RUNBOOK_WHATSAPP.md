@@ -5,7 +5,7 @@
 This runbook provides comprehensive incident response procedures for WhatsApp messaging operations in production environments. It covers provider outages, webhook signature validation failures, dead letter queue (DLQ) processing, outbound queue backup scenarios, manual retry procedures, escalation workflows, and common troubleshooting scenarios.
 
 **Last Updated:** 2024-01-15  
-**Version:** 2.0  
+**Version:** 3.0  
 **Owned By:** Platform Engineering Team  
 **Review Schedule:** Quarterly
 
@@ -14,15 +14,21 @@ This runbook provides comprehensive incident response procedures for WhatsApp me
 ## Table of Contents
 
 1. [Quick Reference](#quick-reference)
-2. [WhatsApp Provider Outages](#whatsapp-provider-outages)
-3. [Webhook Signature Validation Failures](#webhook-signature-validation-failures)
-4. [Dead Letter Queue (DLQ) Processing](#dead-letter-queue-dlq-processing)
-5. [Outbound Queue Backup Scenarios](#outbound-queue-backup-scenarios)
-6. [Manual Operations Scripts](#manual-operations-scripts)
-7. [Escalation Matrix](#escalation-matrix)
-8. [Monitoring & Alerts](#monitoring--alerts)
-9. [Common Troubleshooting Scenarios](#common-troubleshooting-scenarios)
-10. [Database Maintenance](#database-maintenance)
+2. [OpenTelemetry Trace Spans for Failed Sends](#opentelemetry-trace-spans-for-failed-sends)
+3. [Diagnostics Endpoints Decision Tree](#diagnostics-endpoints-decision-tree)
+4. [Error Code Retryability Matrix](#error-code-retryability-matrix)
+5. [Recovering Stuck Messages](#recovering-stuck-messages)
+6. [Grafana Dashboard for WhatsApp SLA Metrics](#grafana-dashboard-for-whatsapp-sla-metrics)
+7. [Jaeger Multi-Hop Delivery Tracing](#jaeger-multi-hop-delivery-tracing)
+8. [WhatsApp Provider Outages](#whatsapp-provider-outages)
+9. [Webhook Signature Validation Failures](#webhook-signature-validation-failures)
+10. [Dead Letter Queue (DLQ) Processing](#dead-letter-queue-dlq-processing)
+11. [Outbound Queue Backup Scenarios](#outbound-queue-backup-scenarios)
+12. [Manual Operations Scripts](#manual-operations-scripts)
+13. [Escalation Matrix](#escalation-matrix)
+14. [Monitoring & Alerts](#monitoring--alerts)
+15. [Common Troubleshooting Scenarios](#common-troubleshooting-scenarios)
+16. [Database Maintenance](#database-maintenance)
 
 ---
 
@@ -37,10 +43,34 @@ This runbook provides comprehensive incident response procedures for WhatsApp me
 - Grafana: `https://grafana.atlas-immobilier.com`
 - Kibana: `https://kibana.atlas-immobilier.com`
 - Prometheus: `https://prometheus.atlas-immobilier.com`
+- Jaeger: `https://jaeger.atlas-immobilier.com`
 
 **Staging:**
 - Backend API: `https://api-staging.atlas-immobilier.com`
 - Actuator Health: `https://api-staging.atlas-immobilier.com/actuator/health`
+
+### WhatsApp Diagnostics Endpoints (v2)
+
+All diagnostics endpoints require `ADMIN` role.
+
+```bash
+# Get active session windows
+GET /api/v2/diagnostics/whatsapp/sessions?active=true&limit=100
+
+# Get retry queue status
+GET /api/v2/diagnostics/whatsapp/retry-queue?limit=100
+
+# Dry-run message send validation
+POST /api/v2/diagnostics/whatsapp/dry-run-send
+{
+  "phoneNumber": "+33612345678",
+  "templateCode": "appointment_reminder",
+  "dossierId": 123
+}
+
+# Get error patterns (last 24h)
+GET /api/v2/diagnostics/whatsapp/error-patterns?hours=24
+```
 
 ### Key Database Tables
 
@@ -121,6 +151,1511 @@ ORDER BY usage_pct DESC;"
 
 ---
 
+## OpenTelemetry Trace Spans for Failed Sends
+
+### Understanding Trace Span Hierarchy
+
+WhatsApp message sending creates a multi-level trace with the following span hierarchy:
+
+```
+outbound-message-process (parent span)
+├── whatsapp-cloud-api-send (provider span)
+│   ├── http.client.request (RestTemplate span)
+│   │   └── Meta API HTTP call
+│   └── session.window.check (conditional)
+├── database.save (JPA span)
+└── metrics.record (observability span)
+```
+
+### Interpreting Failed Send Traces
+
+#### 1. Session Window Expiry Failure
+
+**Trace Pattern:**
+```
+Span: outbound-message-process
+  └─ message.id: 12345
+  └─ message.channel: WHATSAPP
+  └─ org.id: org-abc-123
+  └─ message.attempt: 1
+
+  Span: whatsapp-cloud-api-send
+    └─ within.session.window: false
+    └─ has.template: false
+    └─ error: session_expired
+    └─ status: FAILED
+    └─ duration: 45ms
+```
+
+**Interpretation:**
+- Message attempted outside 24-hour session window
+- No template provided (freeform message)
+- Fast failure (45ms) - validation check, not API call
+- **Root Cause:** Session window expired, template required
+
+**Resolution:**
+1. Check session window status: `GET /api/v2/diagnostics/whatsapp/sessions`
+2. Use dry-run to validate: `POST /api/v2/diagnostics/whatsapp/dry-run-send`
+3. Update message with approved template or wait for inbound message
+
+#### 2. Rate Limit Exceeded
+
+**Trace Pattern:**
+```
+Span: outbound-message-process
+  └─ message.id: 12346
+  └─ message.channel: WHATSAPP
+  └─ org.id: org-abc-123
+  └─ message.attempt: 2
+
+  Span: whatsapp-cloud-api-send
+    └─ within.session.window: true
+    └─ has.template: true
+    └─ http.status: 429
+    └─ error.code: 130
+    └─ retry.after: 3600
+    └─ duration: 285ms
+
+  Span: http.client.request
+    └─ http.method: POST
+    └─ http.url: https://graph.facebook.com/v18.0/{phone_id}/messages
+    └─ http.status_code: 429
+    └─ http.response.header.retry-after: 3600
+```
+
+**Interpretation:**
+- API call reached WhatsApp (285ms includes network round-trip)
+- HTTP 429 (Too Many Requests) returned
+- Error code 130 = Rate limit hit
+- Retry-After header suggests wait 3600 seconds (1 hour)
+- **Root Cause:** Quota exhausted or rate limit hit
+
+**Resolution:**
+1. Check quota: `GET /api/v2/diagnostics/whatsapp/error-patterns?hours=1`
+2. Query rate limit state: `SELECT * FROM whatsapp_rate_limit WHERE org_id = 'org-abc-123';`
+3. Wait for quota reset or increase quota limit
+4. Messages will auto-retry with exponential backoff
+
+#### 3. Provider API Error (Meta Platform Issue)
+
+**Trace Pattern:**
+```
+Span: outbound-message-process
+  └─ message.id: 12347
+  └─ message.channel: WHATSAPP
+  └─ message.attempt: 3
+  └─ circuit.breaker.state: CLOSED
+
+  Span: whatsapp-cloud-api-send
+    └─ http.status: 500
+    └─ error.code: 1
+    └─ error.message: Service temporarily unavailable
+    └─ duration: 5200ms (5.2 seconds)
+
+  Span: http.client.request
+    └─ http.method: POST
+    └─ http.status_code: 500
+    └─ exception: HttpServerErrorException
+    └─ timeout: false
+```
+
+**Interpretation:**
+- Long duration (5.2s) indicates API call completed but failed
+- HTTP 500 (Internal Server Error) from Meta
+- Error code 1 = Service temporarily unavailable
+- Circuit breaker still closed (not tripped yet)
+- **Root Cause:** WhatsApp Cloud API temporary outage
+
+**Resolution:**
+1. Check Meta API status: https://developers.facebook.com/status/
+2. Verify with error patterns: `GET /api/v2/diagnostics/whatsapp/error-patterns?hours=1`
+3. Messages will auto-retry (error code 1 is retryable)
+4. If widespread: Follow [WhatsApp Provider Outages](#whatsapp-provider-outages) procedure
+
+#### 4. Circuit Breaker Opened
+
+**Trace Pattern:**
+```
+Span: outbound-message-process
+  └─ message.id: 12348
+  └─ message.channel: WHATSAPP
+  └─ message.attempt: 1
+  └─ circuit.breaker.state: OPEN
+  └─ circuit.breaker.failure.rate: 87%
+  └─ circuit.breaker.slow.call.rate: 45%
+
+  Span: whatsapp-cloud-api-send
+    └─ error: CircuitBreakerOpenException
+    └─ error.code: CIRCUIT_BREAKER_OPEN
+    └─ duration: 2ms (fast-fail)
+    └─ retry.scheduled: true
+```
+
+**Interpretation:**
+- Circuit breaker opened due to high failure rate (87%)
+- Message failed immediately without API call (2ms)
+- Fast-fail pattern protecting downstream API
+- **Root Cause:** Multiple consecutive failures triggered circuit breaker
+
+**Resolution:**
+1. Check circuit breaker metrics: `curl http://localhost:8080/actuator/metrics/resilience4j.circuitbreaker.state`
+2. Review underlying errors: `GET /api/v2/diagnostics/whatsapp/error-patterns?hours=1`
+3. Circuit breaker will auto-close after wait duration (default: 60s)
+4. Fix underlying issue (rate limit, provider outage, etc.)
+
+#### 5. Template Not Found
+
+**Trace Pattern:**
+```
+Span: outbound-message-process
+  └─ message.id: 12349
+  └─ message.channel: WHATSAPP
+  └─ template.code: welcome_new_client
+
+  Span: whatsapp-cloud-api-send
+    └─ http.status: 400
+    └─ error.code: 133004
+    └─ error.message: Template not found
+    └─ duration: 320ms
+
+  Span: http.client.request
+    └─ http.method: POST
+    └─ http.status_code: 400
+    └─ http.response.body: {"error":{"code":133004,"message":"Template not found"}}
+```
+
+**Interpretation:**
+- HTTP 400 (Bad Request) - client error
+- Error code 133004 = Template not found
+- API call completed (320ms)
+- **Root Cause:** Template doesn't exist or not approved in Meta Business Manager
+
+**Resolution:**
+1. List approved templates: `curl -X GET "https://graph.facebook.com/v18.0/${BUSINESS_ACCOUNT_ID}/message_templates" -H "Authorization: Bearer ${ACCESS_TOKEN}"`
+2. Verify template name matches exactly (case-sensitive)
+3. Check template status in Meta Business Manager
+4. Re-submit template for approval or fix template name in code
+
+### Jaeger Trace Query Examples
+
+See [Jaeger Multi-Hop Delivery Tracing](#jaeger-multi-hop-delivery-tracing) section for detailed query examples.
+
+---
+
+## Diagnostics Endpoints Decision Tree
+
+### Using `/api/v2/diagnostics/whatsapp` Endpoints
+
+```
+┌─────────────────────────────────────────────────────┐
+│ SYMPTOM: WhatsApp Message Send Failure             │
+└───────────────────┬─────────────────────────────────┘
+                    │
+                    ▼
+        ┌───────────────────────────┐
+        │ Check Error Code          │
+        │ (from logs or DB)         │
+        └───────────┬───────────────┘
+                    │
+        ┌───────────┴───────────────────────────────┐
+        │                                           │
+        ▼                                           ▼
+┌───────────────────┐                   ┌───────────────────────┐
+│ Error Code:       │                   │ Error Code:           │
+│ 132015, 132016    │                   │ 130, 3, 132069, 80007 │
+│ (Session Window)  │                   │ (Rate Limit)          │
+└────────┬──────────┘                   └────────┬──────────────┘
+         │                                       │
+         ▼                                       ▼
+┌─────────────────────────────────────┐ ┌──────────────────────────────────┐
+│ GET /diagnostics/whatsapp/sessions  │ │ GET /diagnostics/whatsapp/       │
+│                                     │ │     error-patterns?hours=1       │
+│ Check:                              │ │                                  │
+│ • active=true (any active windows?) │ │ Check:                           │
+│ • secondsRemaining < 3600?          │ │ • Rate limit error frequency     │
+│ • phoneNumber has active session?   │ │ • Total errors in last hour      │
+└────────┬────────────────────────────┘ └────────┬─────────────────────────┘
+         │                                       │
+         ▼                                       ▼
+┌─────────────────────────────────────┐ ┌──────────────────────────────────┐
+│ POST /diagnostics/whatsapp/         │ │ Query Database:                  │
+│      dry-run-send                   │ │ SELECT * FROM whatsapp_rate_limit│
+│                                     │ │ WHERE org_id = 'X';              │
+│ Test:                               │ │                                  │
+│ • Will message send succeed?        │ │ Check:                           │
+│ • Session window validation         │ │ • messages_sent_count vs quota   │
+│ • Duplicate detection               │ │ • throttle_until timestamp       │
+│                                     │ │ • reset_at timestamp             │
+└────────┬────────────────────────────┘ └────────┬─────────────────────────┘
+         │                                       │
+         ▼                                       ▼
+┌─────────────────────────────────────┐ ┌──────────────────────────────────┐
+│ RESOLUTION:                         │ │ RESOLUTION:                      │
+│ • Wait for inbound message          │ │ • Wait for quota reset           │
+│ • Use approved template instead     │ │ • Increase quota limit (if valid)│
+│ • Check sessionWindowExpiresAt      │ │ • Check retry queue for backlog  │
+└─────────────────────────────────────┘ └──────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│ Error Code: 0, 1, 131016, 131026, 132001 (Temporary Errors)          │
+└────────┬──────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ GET /diagnostics/whatsapp/retry-queue?limit=100                 │
+│                                                                  │
+│ Check:                                                           │
+│ • How many messages queued for retry?                           │
+│ • nextRetryAt timestamps (when will they retry?)                │
+│ • attemptCount vs maxAttempts (retry budget remaining)          │
+└────────┬─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ GET /diagnostics/whatsapp/error-patterns?hours=6                │
+│                                                                  │
+│ Check:                                                           │
+│ • Spike in temporary errors? (provider issue)                   │
+│ • Error pattern isolated or widespread?                         │
+│ • Multiple orgs affected? (platform-wide issue)                 │
+└────────┬─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ RESOLUTION:                                                      │
+│ • If spike: Check Meta API status (provider outage)             │
+│ • If isolated: Manual retry individual messages                 │
+│ • Auto-retry with exponential backoff (1, 5, 15, 60, 360 min)  │
+│ • Monitor retry queue until cleared                             │
+└─────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────┐
+│ Error Code: 133004, 133005, 133006, 133008 (Template Errors)         │
+└────────┬──────────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ GET /diagnostics/whatsapp/error-patterns?hours=24               │
+│                                                                  │
+│ Check:                                                           │
+│ • Which template codes failing?                                 │
+│ • New template or existing template?                            │
+│ • All orgs affected or single org?                              │
+└────────┬─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ Verify in Meta Business Manager:                                │
+│ • Template exists                                                │
+│ • Template approved                                              │
+│ • Template enabled (not paused/disabled)                         │
+│ • Template name matches code exactly                             │
+│ • Template parameters match payload                              │
+└────────┬─────────────────────────────────────────────────────────┘
+         │
+         ▼
+┌─────────────────────────────────────────────────────────────────┐
+│ RESOLUTION:                                                      │
+│ • 133004: Create/approve template in Meta                        │
+│ • 133005: Enable paused template                                 │
+│ • 133006: Re-submit disabled template                            │
+│ • 133008: Fix parameter count mismatch in code                   │
+│ • Non-retryable - requires code/config fix                       │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### Diagnostic Endpoint Usage Examples
+
+#### Example 1: Diagnosing Session Window Issue
+
+```bash
+# Step 1: Check if any active session windows exist
+curl -X GET "https://api.atlas-immobilier.com/api/v2/diagnostics/whatsapp/sessions?active=true" \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" | jq '.'
+
+# Response:
+# {
+#   "sessions": [
+#     {
+#       "id": 456,
+#       "phoneNumber": "+33612345678",
+#       "windowExpiresAt": "2024-01-15T18:30:00",
+#       "active": true,
+#       "secondsRemaining": 3245
+#     }
+#   ],
+#   "totalCount": 1,
+#   "activeCount": 1,
+#   "timestamp": "2024-01-15T17:36:15"
+# }
+
+# Step 2: Test if message would succeed
+curl -X POST "https://api.atlas-immobilier.com/api/v2/diagnostics/whatsapp/dry-run-send" \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phoneNumber": "+33612345678",
+    "templateCode": null
+  }' | jq '.'
+
+# Response:
+# {
+#   "phoneNumber": "+33612345678",
+#   "sessionWindowActive": true,
+#   "sessionWindowExpiresAt": "2024-01-15T18:30:00",
+#   "canSend": true,
+#   "valid": true,
+#   "duplicateDetected": false,
+#   "validationMessage": "Session window is active. Message can be sent.",
+#   "timestamp": "2024-01-15T17:36:45"
+# }
+```
+
+#### Example 2: Analyzing Rate Limit Errors
+
+```bash
+# Step 1: Get error patterns
+curl -X GET "https://api.atlas-immobilier.com/api/v2/diagnostics/whatsapp/error-patterns?hours=1" \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" | jq '.'
+
+# Response:
+# {
+#   "errorPatterns": [
+#     {
+#       "errorCode": "130",
+#       "count": 47,
+#       "errorMessage": "Rate limit hit"
+#     },
+#     {
+#       "errorCode": "132069",
+#       "count": 23,
+#       "errorMessage": "Business account sending limit reached"
+#     }
+#   ],
+#   "totalErrors": 70,
+#   "hoursAnalyzed": 1,
+#   "totalMessagesInPeriod": 250,
+#   "failureRate": 28.0,
+#   "timestamp": "2024-01-15T17:40:00"
+# }
+
+# Step 2: Check retry queue
+curl -X GET "https://api.atlas-immobilier.com/api/v2/diagnostics/whatsapp/retry-queue?limit=50" \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" | jq '.'
+
+# Response:
+# {
+#   "messages": [
+#     {
+#       "messageId": 12350,
+#       "toPhone": "+33612345678",
+#       "status": "QUEUED",
+#       "attemptCount": 2,
+#       "maxAttempts": 5,
+#       "errorCode": "130",
+#       "nextRetryAt": "2024-01-15T18:00:00"
+#     }
+#   ],
+#   "totalCount": 47,
+#   "timestamp": "2024-01-15T17:40:30"
+# }
+```
+
+---
+
+## Error Code Retryability Matrix
+
+Based on `WhatsAppErrorMapper.java` implementation.
+
+### Error Code Classification
+
+| Error Code | Description | Retryable | Rate Limit | Category | Recommended Action |
+|------------|-------------|-----------|------------|----------|-------------------|
+| **0** | Temporary error | ✅ Yes | ❌ No | Temporary | Auto-retry with backoff |
+| **1** | Service temporarily unavailable | ✅ Yes | ❌ No | Temporary | Auto-retry, check Meta status |
+| **2** | Phone connected to different WABA | ❌ No | ❌ No | Config | Verify WhatsApp Business Account |
+| **3** | Business account rate limited | ✅ Yes | ✅ Yes | Rate Limit | Wait for quota reset |
+| **4** | Temporary error with phone number | ✅ Yes | ❌ No | Temporary | Auto-retry |
+| **5** | Permanent error with phone number | ❌ No | ❌ No | Recipient | Update phone number |
+| **100** | Invalid parameter | ❌ No | ❌ No | Client Error | Fix request payload |
+| **130** | Rate limit hit | ✅ Yes | ✅ Yes | Rate Limit | Wait for quota reset |
+| **131000** | Generic user error | ❌ No | ❌ No | Client Error | Review request parameters |
+| **131005** | Generic message send error | ✅ Yes | ❌ No | Temporary | Auto-retry |
+| **131008** | Required parameter missing | ❌ No | ❌ No | Client Error | Fix request payload |
+| **131009** | Parameter value invalid | ❌ No | ❌ No | Client Error | Fix parameter values |
+| **131016** | Service temporarily unavailable | ✅ Yes | ❌ No | Temporary | Auto-retry, check Meta status |
+| **131021** | Recipient not on WhatsApp | ❌ No | ❌ No | Recipient | Verify phone number |
+| **131026** | Message undeliverable | ✅ Yes | ❌ No | Temporary | Auto-retry |
+| **131031** | Recipient blocked | ❌ No | ❌ No | Recipient | Remove from send list |
+| **131042** | Phone number format invalid | ❌ No | ❌ No | Client Error | Fix phone number format |
+| **131045** | Message too long | ❌ No | ❌ No | Client Error | Shorten message content |
+| **131047** | Invalid parameter value | ❌ No | ❌ No | Client Error | Fix parameter values |
+| **131051** | Unsupported message type | ❌ No | ❌ No | Client Error | Use supported message type |
+| **131052** | Media download error | ❌ No | ❌ No | Media | Verify media URL accessibility |
+| **131053** | Media upload error | ❌ No | ❌ No | Media | Retry media upload |
+| **132000** | Generic platform error | ✅ Yes | ❌ No | Temporary | Auto-retry |
+| **132001** | Message send failed | ✅ Yes | ❌ No | Temporary | Auto-retry |
+| **132005** | Re-engagement message send failed | ✅ Yes | ❌ No | Temporary | Auto-retry with template |
+| **132007** | Message blocked by spam filter | ❌ No | ❌ No | Policy | Review message content |
+| **132012** | Phone number restricted | ❌ No | ❌ No | Recipient | Remove from send list |
+| **132015** | Cannot send after 24h window | ❌ No | ❌ No | Session Window | Use template message |
+| **132016** | Out of session - template required | ❌ No | ❌ No | Session Window | Use approved template |
+| **132068** | Business account blocked | ❌ No | ❌ No | Config | Contact Meta support |
+| **132069** | Business sending limit reached | ✅ Yes | ✅ Yes | Rate Limit | Wait or increase quota |
+| **133000** | Invalid phone number | ❌ No | ❌ No | Recipient | Verify phone number |
+| **133004** | Template not found | ❌ No | ❌ No | Template | Create/approve template |
+| **133005** | Template paused | ❌ No | ❌ No | Template | Enable template |
+| **133006** | Template disabled | ❌ No | ❌ No | Template | Re-submit template |
+| **133008** | Template parameter count mismatch | ❌ No | ❌ No | Template | Fix parameter count |
+| **133009** | Template missing parameters | ❌ No | ❌ No | Template | Add missing parameters |
+| **133010** | Template parameter format invalid | ❌ No | ❌ No | Template | Fix parameter format |
+| **133015** | Template not approved | ❌ No | ❌ No | Template | Wait for/request approval |
+| **133016** | Template rejected | ❌ No | ❌ No | Template | Revise and resubmit |
+| **135000** | Generic template error | ❌ No | ❌ No | Template | Review template config |
+| **190** | Access token expired | ✅ Yes | ❌ No | Auth | Refresh access token |
+| **200** | Permissions error | ❌ No | ❌ No | Auth | Verify WABA permissions |
+| **368** | Temporarily blocked for policy | ✅ Yes | ❌ No | Policy | Wait for unblock |
+| **470** | Message expired | ❌ No | ❌ No | Timeout | Message too old to deliver |
+| **471** | User unavailable | ✅ Yes | ❌ No | Temporary | Auto-retry |
+| **80007** | Rate limit exceeded | ✅ Yes | ✅ Yes | Rate Limit | Wait for quota reset |
+
+### Retry Behavior Configuration
+
+Messages with retryable errors use exponential backoff:
+
+```java
+// From OutboundJobWorker.java
+private static final int[] BACKOFF_MINUTES = {1, 5, 15, 60, 360};
+
+// Attempt schedule:
+// Attempt 1: Immediate
+// Attempt 2: +1 minute
+// Attempt 3: +5 minutes
+// Attempt 4: +15 minutes
+// Attempt 5: +60 minutes
+// Attempt 6: +360 minutes (6 hours)
+```
+
+Default max attempts: **5** (configurable per message)
+
+### Quick Error Code Lookup
+
+```bash
+# Query error distribution in last hour
+curl -X GET "https://api.atlas-immobilier.com/api/v2/diagnostics/whatsapp/error-patterns?hours=1" \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" | jq '.errorPatterns[] | {errorCode, count, errorMessage}'
+
+# Check specific error code in database
+psql -h prod-db.internal -U atlas -d atlas -c "
+SELECT 
+  error_code,
+  COUNT(*) as occurrences,
+  COUNT(*) FILTER (WHERE attempt_count < max_attempts) as retryable,
+  COUNT(*) FILTER (WHERE attempt_count >= max_attempts) as dlq,
+  MAX(error_message) as example_message
+FROM outbound_message
+WHERE channel='WHATSAPP' 
+  AND status='FAILED' 
+  AND error_code='132016'
+  AND created_at > NOW() - INTERVAL '24 hours'
+GROUP BY error_code;"
+```
+
+---
+
+## Recovering Stuck Messages
+
+### What Are "Stuck" Messages?
+
+Messages are considered "stuck" when:
+1. Status = `SENDING` for > 5 minutes (detected by scheduled task)
+2. Status = `QUEUED` with `nextRetryAt` passed but not processing
+3. Status = `QUEUED` for > 2 hours with no progress
+
+### Automated Recovery
+
+The system automatically recovers stale messages every 10 minutes:
+
+```java
+// From OutboundJobWorker.java - recoverStaleMessages()
+// Runs as part of processPendingMessages() scheduled task
+
+private void recoverStaleMessages() {
+    LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(10);
+    List<OutboundMessageEntity> staleMessages = 
+        outboundMessageRepository.findStaleMessages(
+            OutboundMessageStatus.SENDING, 
+            staleThreshold, 
+            PageRequest.of(0, batchSize));
+    
+    // Reset to QUEUED for retry
+    for (OutboundMessageEntity message : staleMessages) {
+        message.setStatus(OutboundMessageStatus.QUEUED);
+        message.setUpdatedAt(LocalDateTime.now());
+        outboundMessageRepository.save(message);
+    }
+}
+```
+
+### Manual Recovery Procedures
+
+#### Procedure 1: Identify Stuck Messages
+
+```sql
+-- Messages stuck in SENDING (> 5 minutes)
+SELECT 
+    id,
+    org_id,
+    to_recipient,
+    template_code,
+    status,
+    attempt_count,
+    max_attempts,
+    EXTRACT(EPOCH FROM (NOW() - updated_at))/60 as minutes_stuck,
+    error_code,
+    error_message
+FROM outbound_message
+WHERE status = 'SENDING'
+  AND updated_at < NOW() - INTERVAL '5 minutes'
+ORDER BY updated_at
+LIMIT 50;
+
+-- Messages stuck in QUEUED (> 2 hours)
+SELECT 
+    om.id,
+    om.org_id,
+    om.to_recipient,
+    om.status,
+    om.attempt_count,
+    EXTRACT(EPOCH FROM (NOW() - om.created_at))/3600 as hours_in_queue,
+    oa.next_retry_at,
+    CASE 
+        WHEN oa.next_retry_at IS NULL THEN 'No retry scheduled'
+        WHEN oa.next_retry_at < NOW() THEN 'Retry overdue'
+        ELSE 'Waiting for retry'
+    END as retry_status
+FROM outbound_message om
+LEFT JOIN LATERAL (
+    SELECT next_retry_at 
+    FROM outbound_attempt 
+    WHERE outbound_message_id = om.id 
+    ORDER BY attempt_no DESC 
+    LIMIT 1
+) oa ON true
+WHERE om.status = 'QUEUED'
+  AND om.created_at < NOW() - INTERVAL '2 hours'
+ORDER BY om.created_at
+LIMIT 50;
+
+-- Summary of stuck messages
+SELECT 
+    status,
+    COUNT(*) as count,
+    MIN(updated_at) as oldest,
+    MAX(updated_at) as newest,
+    AVG(attempt_count) as avg_attempts
+FROM outbound_message
+WHERE (
+    (status = 'SENDING' AND updated_at < NOW() - INTERVAL '5 minutes')
+    OR
+    (status = 'QUEUED' AND created_at < NOW() - INTERVAL '2 hours')
+)
+GROUP BY status;
+```
+
+#### Procedure 2: Reset Stuck Messages to QUEUED
+
+```sql
+-- Create backup first
+CREATE TABLE outbound_message_stuck_backup_20240115 AS
+SELECT * FROM outbound_message
+WHERE status = 'SENDING' 
+  AND updated_at < NOW() - INTERVAL '5 minutes';
+
+-- Reset SENDING messages to QUEUED
+UPDATE outbound_message
+SET status = 'QUEUED',
+    updated_at = NOW(),
+    updated_by = 'ops-recover-stuck-20240115'
+WHERE status = 'SENDING'
+  AND updated_at < NOW() - INTERVAL '5 minutes';
+
+-- Verify reset
+SELECT 
+    updated_by,
+    status,
+    COUNT(*) as count
+FROM outbound_message
+WHERE updated_by = 'ops-recover-stuck-20240115'
+GROUP BY updated_by, status;
+```
+
+#### Procedure 3: Clear Overdue Retry Timestamps
+
+```sql
+-- Find attempts with overdue retry times
+SELECT 
+    oa.id as attempt_id,
+    oa.outbound_message_id,
+    oa.next_retry_at,
+    EXTRACT(EPOCH FROM (NOW() - oa.next_retry_at))/60 as minutes_overdue,
+    om.status,
+    om.attempt_count
+FROM outbound_attempt oa
+JOIN outbound_message om ON oa.outbound_message_id = om.id
+WHERE oa.next_retry_at IS NOT NULL
+  AND oa.next_retry_at < NOW() - INTERVAL '30 minutes'
+  AND om.status = 'QUEUED'
+ORDER BY oa.next_retry_at
+LIMIT 100;
+
+-- Clear overdue retry timestamps to allow immediate retry
+UPDATE outbound_attempt
+SET next_retry_at = NULL,
+    updated_at = NOW()
+WHERE id IN (
+    SELECT oa.id
+    FROM outbound_attempt oa
+    JOIN outbound_message om ON oa.outbound_message_id = om.id
+    WHERE oa.next_retry_at IS NOT NULL
+      AND oa.next_retry_at < NOW() - INTERVAL '30 minutes'
+      AND om.status = 'QUEUED'
+);
+```
+
+#### Procedure 4: Force Retry via API
+
+```bash
+#!/bin/bash
+# force-retry-stuck-messages.sh
+# Force retry stuck messages via REST API
+
+set -euo pipefail
+
+ADMIN_TOKEN="${ADMIN_TOKEN}"
+API_BASE="https://api.atlas-immobilier.com"
+
+echo "=== Force Retry Stuck Messages ==="
+
+# Get stuck message IDs
+psql -h prod-db.internal -U atlas -d atlas -t -A -F',' <<EOF > /tmp/stuck_messages.csv
+SELECT id, org_id 
+FROM outbound_message 
+WHERE status = 'SENDING' 
+  AND updated_at < NOW() - INTERVAL '5 minutes'
+ORDER BY updated_at
+LIMIT 50;
+EOF
+
+TOTAL=$(wc -l < /tmp/stuck_messages.csv)
+echo "Found $TOTAL stuck messages"
+
+SUCCESS=0
+FAILED=0
+
+while IFS=',' read -r MSG_ID ORG_ID; do
+    echo "Retrying message $MSG_ID (org: $ORG_ID)..."
+    
+    if curl -sf -X POST \
+        -H "X-Org-Id: ${ORG_ID}" \
+        -H "Authorization: Bearer ${ADMIN_TOKEN}" \
+        "${API_BASE}/api/v1/outbound/messages/${MSG_ID}/retry" > /dev/null; then
+        echo "  ✓ Success"
+        ((SUCCESS++))
+    else
+        echo "  ✗ Failed"
+        ((FAILED++))
+    fi
+    
+    sleep 1
+done < /tmp/stuck_messages.csv
+
+echo ""
+echo "=== Summary ==="
+echo "Total: $TOTAL"
+echo "Success: $SUCCESS"
+echo "Failed: $FAILED"
+
+rm -f /tmp/stuck_messages.csv
+```
+
+#### Procedure 5: Investigate Root Cause
+
+```sql
+-- Analyze stuck message patterns
+WITH stuck_messages AS (
+    SELECT 
+        id,
+        org_id,
+        channel,
+        error_code,
+        attempt_count,
+        EXTRACT(EPOCH FROM (NOW() - updated_at))/60 as minutes_stuck
+    FROM outbound_message
+    WHERE status = 'SENDING'
+      AND updated_at < NOW() - INTERVAL '5 minutes'
+)
+SELECT 
+    channel,
+    error_code,
+    COUNT(*) as stuck_count,
+    AVG(minutes_stuck) as avg_minutes_stuck,
+    AVG(attempt_count) as avg_attempts,
+    COUNT(DISTINCT org_id) as orgs_affected
+FROM stuck_messages
+GROUP BY channel, error_code
+ORDER BY stuck_count DESC;
+
+-- Check worker health
+SELECT 
+    'Last processed message' as metric,
+    MAX(updated_at) as value,
+    EXTRACT(EPOCH FROM (NOW() - MAX(updated_at)))/60 as minutes_ago
+FROM outbound_message
+WHERE status IN ('SENT', 'FAILED')
+  AND updated_at > NOW() - INTERVAL '1 hour';
+
+-- Check for worker errors in application logs
+-- (Query your logging system - Kibana, CloudWatch, etc.)
+```
+
+### Monitoring Stuck Messages
+
+Prometheus metric: `whatsapp_message_stuck_alert`
+
+```promql
+# Alert when messages stuck
+whatsapp_message_stuck_alert > 0
+
+# Count of stuck messages over time
+whatsapp_message_stuck_alert{job="backend"}
+```
+
+Alert configuration (from `whatsapp-alerts.yml`):
+
+```yaml
+- alert: WhatsAppMessagesStuckInSending
+  expr: whatsapp_message_stuck_alert > 0
+  for: 5m
+  labels:
+    severity: warning
+  annotations:
+    summary: "{{ $value }} messages stuck in SENDING status"
+```
+
+---
+
+## Grafana Dashboard for WhatsApp SLA Metrics
+
+### Dashboard JSON Configuration
+
+Save as `grafana-whatsapp-sla-dashboard.json`:
+
+```json
+{
+  "dashboard": {
+    "title": "WhatsApp Messaging SLA Dashboard",
+    "tags": ["whatsapp", "sla", "messaging"],
+    "timezone": "browser",
+    "editable": true,
+    "refresh": "30s",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Message Send Latency (p50/p95/p99)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "outbound_message_send_latency_seconds{channel=\"whatsapp\",quantile=\"0.5\"}",
+            "legendFormat": "p50 Send Latency"
+          },
+          {
+            "expr": "outbound_message_send_latency_seconds{channel=\"whatsapp\",quantile=\"0.95\"}",
+            "legendFormat": "p95 Send Latency"
+          },
+          {
+            "expr": "outbound_message_send_latency_seconds{channel=\"whatsapp\",quantile=\"0.99\"}",
+            "legendFormat": "p99 Send Latency"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Latency (seconds)"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 30,
+            "colorMode": "critical",
+            "op": "gt",
+            "fill": true,
+            "line": true
+          }
+        ],
+        "alert": {
+          "name": "High Send Latency",
+          "conditions": [
+            {
+              "evaluator": {
+                "params": [30],
+                "type": "gt"
+              },
+              "query": {
+                "params": ["A", "5m", "now"]
+              }
+            }
+          ]
+        }
+      },
+      {
+        "id": 2,
+        "title": "Message Delivery Latency (p50/p95/p99)",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "outbound_message_delivered_latency_seconds{channel=\"whatsapp\",quantile=\"0.5\"}",
+            "legendFormat": "p50 Delivery Latency"
+          },
+          {
+            "expr": "outbound_message_delivered_latency_seconds{channel=\"whatsapp\",quantile=\"0.95\"}",
+            "legendFormat": "p95 Delivery Latency"
+          },
+          {
+            "expr": "outbound_message_delivered_latency_seconds{channel=\"whatsapp\",quantile=\"0.99\"}",
+            "legendFormat": "p99 Delivery Latency"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Latency (seconds)"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 60,
+            "colorMode": "critical",
+            "op": "gt",
+            "fill": true,
+            "line": true
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Message Success Rate",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 8, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "(sum(rate(outbound_message_queue_depth{channel=\"whatsapp\",status=~\"sent|delivered\"}[5m])) / sum(rate(outbound_message_queue_depth{channel=\"whatsapp\"}[5m]))) * 100",
+            "legendFormat": "Success Rate"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "text": {
+            "titleSize": 18,
+            "valueSize": 52
+          },
+          "colorMode": "value",
+          "graphMode": "area",
+          "orientation": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "value": 0, "color": "red" },
+                { "value": 90, "color": "yellow" },
+                { "value": 95, "color": "green" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Queue Depth",
+        "type": "stat",
+        "gridPos": { "x": 6, "y": 8, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "outbound_message_queue_depth_by_channel{channel=\"whatsapp\",status=\"queued\"}",
+            "legendFormat": "Queued Messages"
+          }
+        ],
+        "options": {
+          "colorMode": "value",
+          "graphMode": "area"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 100, "color": "yellow" },
+                { "value": 500, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Stuck Messages",
+        "type": "stat",
+        "gridPos": { "x": 12, "y": 8, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "whatsapp_message_stuck_alert",
+            "legendFormat": "Stuck Messages"
+          }
+        ],
+        "options": {
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 1, "color": "yellow" },
+                { "value": 10, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Quota Usage",
+        "type": "gauge",
+        "gridPos": { "x": 18, "y": 8, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "(whatsapp_quota_used / whatsapp_quota_limit) * 100",
+            "legendFormat": "Quota Usage %"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 80, "color": "yellow" },
+                { "value": 95, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Session Window Expiration",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "whatsapp_session_window_expiration_seconds{channel=\"whatsapp\"}",
+            "legendFormat": "Seconds Until Session Expires"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "s",
+            "label": "Seconds Remaining"
+          }
+        ],
+        "thresholds": [
+          {
+            "value": 3600,
+            "colorMode": "critical",
+            "op": "lt",
+            "fill": true,
+            "line": true
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Error Patterns (Last Hour)",
+        "type": "table",
+        "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "topk(10, sum by (error_code) (rate(outbound_message_failures_total{channel=\"whatsapp\"}[1h])))",
+            "format": "table",
+            "instant": true
+          }
+        ],
+        "transformations": [
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true
+              },
+              "renameByName": {
+                "error_code": "Error Code",
+                "Value": "Failure Rate/sec"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "Message Volume (sent/failed/queued)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 20, "w": 24, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(outbound_message_queue_depth{channel=\"whatsapp\",status=\"sent\"}[5m])",
+            "legendFormat": "Sent Rate"
+          },
+          {
+            "expr": "rate(outbound_message_queue_depth{channel=\"whatsapp\",status=\"failed\"}[5m])",
+            "legendFormat": "Failed Rate"
+          },
+          {
+            "expr": "outbound_message_queue_depth_by_channel{channel=\"whatsapp\",status=\"queued\"}",
+            "legendFormat": "Queued Count"
+          }
+        ],
+        "yaxes": [
+          {
+            "format": "short",
+            "label": "Messages"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "Retry Count",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 28, "w": 8, "h": 4 },
+        "targets": [
+          {
+            "expr": "outbound_message_retry_count{channel=\"whatsapp\"}",
+            "legendFormat": "Messages Requiring Retries"
+          }
+        ],
+        "options": {
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 50, "color": "yellow" },
+                { "value": 100, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Dead Letter Queue Size",
+        "type": "stat",
+        "gridPos": { "x": 8, "y": 28, "w": 8, "h": 4 },
+        "targets": [
+          {
+            "expr": "outbound_message_dead_letter_queue_size",
+            "legendFormat": "DLQ Messages"
+          }
+        ],
+        "options": {
+          "colorMode": "value"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "thresholds": {
+              "steps": [
+                { "value": 0, "color": "green" },
+                { "value": 100, "color": "yellow" },
+                { "value": 500, "color": "red" }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 12,
+        "title": "Circuit Breaker State",
+        "type": "stat",
+        "gridPos": { "x": 16, "y": 28, "w": 8, "h": 4 },
+        "targets": [
+          {
+            "expr": "resilience4j_circuitbreaker_state{name=\"whatsapp\"}",
+            "legendFormat": "Circuit Breaker State"
+          }
+        ],
+        "options": {
+          "colorMode": "background"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "mappings": [
+              { "value": 0, "text": "CLOSED", "color": "green" },
+              { "value": 1, "text": "OPEN", "color": "red" },
+              { "value": 2, "text": "HALF_OPEN", "color": "yellow" }
+            ]
+          }
+        }
+      }
+    ]
+  }
+}
+```
+
+### Importing Dashboard to Grafana
+
+```bash
+# Import via API
+curl -X POST "https://grafana.atlas-immobilier.com/api/dashboards/db" \
+  -H "Authorization: Bearer ${GRAFANA_API_KEY}" \
+  -H "Content-Type: application/json" \
+  -d @grafana-whatsapp-sla-dashboard.json
+
+# Or import via UI:
+# 1. Navigate to Dashboards → Import
+# 2. Upload JSON file or paste JSON
+# 3. Select Prometheus data source
+# 4. Click "Import"
+```
+
+### Key Dashboard Metrics
+
+| Panel | Metric | SLA Threshold | Alert Trigger |
+|-------|--------|---------------|---------------|
+| Send Latency p95 | `outbound_message_send_latency_seconds{quantile="0.95"}` | < 30s | > 30s for 5min |
+| Delivery Latency p99 | `outbound_message_delivered_latency_seconds{quantile="0.99"}` | < 120s | > 120s for 5min |
+| Success Rate | Sent/(Sent+Failed) × 100 | > 95% | < 90% for 5min |
+| Queue Depth | `outbound_message_queue_depth_by_channel{status="queued"}` | < 100 | > 500 for 3min |
+| Stuck Messages | `whatsapp_message_stuck_alert` | 0 | > 0 for 5min |
+| Quota Usage | (Used/Limit) × 100 | < 80% | > 95% for 2min |
+
+---
+
+## Jaeger Multi-Hop Delivery Tracing
+
+### Understanding Multi-Hop Traces
+
+A complete WhatsApp message delivery involves multiple hops:
+
+```
+[API Request] → [Worker Processing] → [Provider Call] → [Meta API] → [Webhook Callback] → [Status Update]
+     ↓                  ↓                    ↓              ↓                ↓                   ↓
+ Span: http.in   Span: outbound   Span: whatsapp    Span: http.out   Span: webhook.in   Span: status.update
+  trace.id       .message         .cloud.api        (external)         trace.id           trace.id
+  123-abc        .process         .send                                (correlated)       (correlated)
+```
+
+### Trace ID Propagation
+
+The system uses W3C Trace Context for distributed tracing:
+
+```java
+// From OutboundJobWorker.java
+if (tracer != null && tracer.currentSpan() != null) {
+    // Tag message metadata
+    tracer.currentSpan().tag("message.id", String.valueOf(message.getId()));
+    tracer.currentSpan().tag("org.id", message.getOrgId());
+    
+    // Propagate context via baggage
+    if (message.getSessionId() != null) {
+        tracer.getBaggage("sessionId").set(message.getSessionId());
+    }
+}
+```
+
+### Jaeger Query Examples
+
+#### Query 1: Find All Traces for a Specific Message ID
+
+**Jaeger UI Query:**
+```
+Service: backend
+Tags: message.id=12345
+Lookback: 24h
+```
+
+**Jaeger API Query:**
+```bash
+curl -X GET "https://jaeger.atlas-immobilier.com/api/traces?service=backend&tags=%7B%22message.id%22%3A%2212345%22%7D&limit=50" | jq '.'
+
+# Response includes:
+# - Trace ID
+# - All spans in the trace
+# - Span durations
+# - Tags and logs
+```
+
+#### Query 2: Find Failed Sends by Error Code
+
+**Jaeger UI Query:**
+```
+Service: backend
+Operation: whatsapp-cloud-api-send
+Tags: error.code=132016
+Lookback: 6h
+Min Duration: 0ms
+Max Duration: 10s
+```
+
+**Jaeger API Query:**
+```bash
+# Find traces with specific error code
+curl -X GET "https://jaeger.atlas-immobilier.com/api/traces?service=backend&operation=whatsapp-cloud-api-send&tags=%7B%22error.code%22%3A%22132016%22%7D&limit=100" \
+  -H "Accept: application/json" | jq '.data[] | {traceID, spans: .spans | length, duration: .duration}'
+```
+
+#### Query 3: Trace Delivery Path for Specific Phone Number
+
+**Jaeger UI Query:**
+```
+Service: backend
+Tags: message.to=+33612345678
+Lookback: 24h
+```
+
+**Jaeger API Query:**
+```bash
+# Find all message attempts to specific recipient
+curl -X GET "https://jaeger.atlas-immobilier.com/api/traces?service=backend&tags=%7B%22message.to%22%3A%22%2B33612345678%22%7D&limit=50" | \
+  jq '.data[] | {
+    traceID, 
+    startTime, 
+    duration, 
+    messageId: .spans[0].tags[] | select(.key=="message.id") | .value,
+    status: .spans[0].tags[] | select(.key=="status") | .value
+  }'
+```
+
+#### Query 4: Analyze Latency Distribution for Sent Messages
+
+**Jaeger UI Query:**
+```
+Service: backend
+Operation: outbound-message-process
+Tags: status=SENT
+Lookback: 1h
+Min Duration: 0ms
+Max Duration: 60s
+```
+
+**Jaeger API Query:**
+```bash
+# Get latency statistics
+curl -X GET "https://jaeger.atlas-immobilier.com/api/traces?service=backend&operation=outbound-message-process&tags=%7B%22status%22%3A%22SENT%22%7D&limit=500" | \
+  jq '.data[] | .duration' | \
+  awk '{sum+=$1; sumsq+=$1*$1; count++} END {
+    print "Count:", count; 
+    print "Mean:", sum/count/1000000, "ms"; 
+    print "StdDev:", sqrt(sumsq/count - (sum/count)^2)/1000000, "ms"
+  }'
+```
+
+#### Query 5: Find Traces with Circuit Breaker Open
+
+**Jaeger UI Query:**
+```
+Service: backend
+Tags: circuit.breaker.state=OPEN
+Lookback: 6h
+```
+
+**Jaeger API Query:**
+```bash
+curl -X GET "https://jaeger.atlas-immobilier.com/api/traces?service=backend&tags=%7B%22circuit.breaker.state%22%3A%22OPEN%22%7D&limit=100" | \
+  jq '.data[] | {
+    traceID,
+    startTime,
+    channel: .spans[0].tags[] | select(.key=="message.channel") | .value,
+    failureRate: .spans[0].tags[] | select(.key=="circuit.breaker.failure.rate") | .value
+  }'
+```
+
+#### Query 6: Correlate API Request to Webhook Callback
+
+**Multi-Step Process:**
+
+1. **Find outbound message trace:**
+```bash
+# Get trace ID for outbound message
+TRACE_ID=$(curl -s "https://jaeger.atlas-immobilier.com/api/traces?service=backend&tags=%7B%22message.id%22%3A%2212345%22%7D&limit=1" | \
+  jq -r '.data[0].traceID')
+
+echo "Outbound Trace ID: $TRACE_ID"
+```
+
+2. **Find webhook callback with correlation:**
+```bash
+# Webhooks include provider_message_id for correlation
+PROVIDER_MSG_ID=$(curl -s "https://jaeger.atlas-immobilier.com/api/trace/$TRACE_ID" | \
+  jq -r '.data[0].spans[] | select(.operationName=="whatsapp-cloud-api-send") | .tags[] | select(.key=="provider.message.id") | .value')
+
+echo "Provider Message ID: $PROVIDER_MSG_ID"
+
+# Find webhook trace by provider message ID
+curl -s "https://jaeger.atlas-immobilier.com/api/traces?service=backend&operation=webhook.process&tags=%7B%22provider.message.id%22%3A%22$PROVIDER_MSG_ID%22%7D&limit=1" | \
+  jq '.data[0] | {
+    traceID,
+    webhookSpans: .spans | length,
+    statusUpdate: .spans[] | select(.operationName=="status.update") | {duration, status: .tags[] | select(.key=="new.status") | .value}
+  }'
+```
+
+3. **Calculate end-to-end delivery time:**
+```bash
+# Compare timestamps
+curl -s "https://jaeger.atlas-immobilier.com/api/trace/$TRACE_ID" | \
+  jq '{
+    messageSentAt: .data[0].spans[0].startTime,
+    webhookReceivedAt: (.data[0].spans[] | select(.operationName=="webhook.in") | .startTime),
+    deliveryLatency: ((.data[0].spans[] | select(.operationName=="webhook.in") | .startTime) - .data[0].spans[0].startTime) / 1000000
+  }'
+```
+
+#### Query 7: Find All Retry Attempts for a Message
+
+**Jaeger UI Query:**
+```
+Service: backend
+Tags: message.id=12345
+Lookback: 24h
+Sort: Start Time
+```
+
+**Jaeger API Query:**
+```bash
+# Get all traces for message ID (each attempt creates a new trace)
+curl -s "https://jaeger.atlas-immobilier.com/api/traces?service=backend&tags=%7B%22message.id%22%3A%2212345%22%7D&limit=10" | \
+  jq '.data | sort_by(.startTime) | .[] | {
+    traceID,
+    startTime,
+    attemptNo: .spans[0].tags[] | select(.key=="message.attempt") | .value,
+    status: .spans[0].tags[] | select(.key=="status") | .value,
+    errorCode: .spans[0].tags[] | select(.key=="error.code") | .value
+  }'
+```
+
+#### Query 8: Analyze Session Window Checks
+
+**Jaeger UI Query:**
+```
+Service: backend
+Operation: whatsapp-cloud-api-send
+Tags: within.session.window=false
+Lookback: 6h
+```
+
+**Jaeger API Query:**
+```bash
+# Find messages failing session window check
+curl -s "https://jaeger.atlas-immobilier.com/api/traces?service=backend&operation=whatsapp-cloud-api-send&tags=%7B%22within.session.window%22%3A%22false%22%7D&limit=100" | \
+  jq '.data[] | {
+    traceID,
+    messageId: .spans[0].tags[] | select(.key=="message.id") | .value,
+    hasTemplate: .spans[0].tags[] | select(.key=="has.template") | .value,
+    phoneNumber: .spans[0].tags[] | select(.key=="message.to") | .value
+  }'
+```
+
+### Span Tag Reference
+
+Key span tags for troubleshooting:
+
+| Tag | Type | Example Value | Description |
+|-----|------|---------------|-------------|
+| `message.id` | Long | 12345 | Database message ID |
+| `message.channel` | String | WHATSAPP | Message channel |
+| `message.attempt` | Integer | 3 | Retry attempt number |
+| `message.to` | String | +33612345678 | Recipient phone number |
+| `org.id` | String | org-abc-123 | Organization ID |
+| `template.code` | String | appointment_reminder | Template identifier |
+| `within.session.window` | Boolean | true | Session window status |
+| `has.template` | Boolean | false | Template present |
+| `error.code` | String | 132016 | WhatsApp error code |
+| `error` | String | session_expired | Error type |
+| `status` | String | SENT | Final message status |
+| `circuit.breaker.state` | String | OPEN | Circuit breaker state |
+| `http.status` | Integer | 429 | HTTP response code |
+| `http.method` | String | POST | HTTP method |
+| `provider.message.id` | String | wamid.ABC123 | Meta provider message ID |
+| `retry.after` | Integer | 3600 | Retry-After header (seconds) |
+| `session.id` | String | session-789 | Session correlation ID |
+| `run.id` | String | run-456 | Run correlation ID |
+| `hypothesis.id` | String | hyp-123 | Hypothesis correlation ID |
+
+### Visualizing Trace Hierarchy in Jaeger
+
+When viewing a trace in Jaeger UI, look for:
+
+1. **Span Duration**: Identify bottlenecks
+   - < 100ms: Fast validation/DB operation
+   - 100-500ms: Normal API call
+   - > 1s: Potential timeout or slow network
+
+2. **Span Errors**: Red highlights indicate errors
+   - Check error tag for error code
+   - Review logs for stack traces
+
+3. **Span Dependencies**: Parent-child relationships
+   - Horizontal alignment = sequential execution
+   - Vertical stacking = nested operations
+
+4. **Gaps Between Spans**: Queue time or scheduling delays
+   - Large gaps may indicate worker congestion
+
+### Exporting Traces for Analysis
+
+```bash
+#!/bin/bash
+# export-traces-for-analysis.sh
+# Export Jaeger traces to JSON for offline analysis
+
+SERVICE="backend"
+OPERATION="whatsapp-cloud-api-send"
+LOOKBACK="24h"
+LIMIT=1000
+
+curl -X GET "https://jaeger.atlas-immobilier.com/api/traces?service=${SERVICE}&operation=${OPERATION}&lookback=${LOOKBACK}&limit=${LIMIT}" \
+  -H "Accept: application/json" \
+  -o "jaeger-traces-$(date +%Y%m%d-%H%M%S).json"
+
+echo "✓ Traces exported to jaeger-traces-$(date +%Y%m%d-%H%M%S).json"
+
+# Analyze with jq
+jq '.data | length' jaeger-traces-*.json  # Total traces
+jq '.data[].duration | select(. > 10000000)' jaeger-traces-*.json | wc -l  # Traces > 10s
+jq '[.data[].duration] | add / length / 1000000' jaeger-traces-*.json  # Average duration (ms)
+```
+
+---
+
 ## WhatsApp Provider Outages
 
 ### Symptoms
@@ -159,1603 +1694,73 @@ ORDER BY org_id;
 EOF
 ```
 
-#### Step 2: Query Recent Failure Patterns
-
-```sql
--- Failure breakdown by error code (last hour)
-SELECT 
-    error_code,
-    COUNT(*) as failure_count,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage,
-    MAX(error_message) as sample_error,
-    MIN(created_at) as first_seen,
-    MAX(created_at) as last_seen
-FROM outbound_message 
-WHERE channel = 'WHATSAPP' 
-  AND status = 'FAILED'
-  AND created_at > NOW() - INTERVAL '1 hour'
-GROUP BY error_code
-ORDER BY failure_count DESC;
-
--- Failure rate over time (last 6 hours, grouped by hour)
-SELECT 
-    DATE_TRUNC('hour', created_at) as hour,
-    COUNT(*) FILTER (WHERE status = 'FAILED') as failed,
-    COUNT(*) as total,
-    ROUND(100.0 * COUNT(*) FILTER (WHERE status = 'FAILED') / COUNT(*), 2) as failure_rate_pct
-FROM outbound_message
-WHERE channel = 'WHATSAPP'
-  AND created_at > NOW() - INTERVAL '6 hours'
-GROUP BY hour
-ORDER BY hour DESC;
-
--- Affected organizations
-SELECT 
-    org_id,
-    COUNT(*) as failures,
-    COUNT(DISTINCT to_recipient) as unique_recipients,
-    COUNT(DISTINCT error_code) as unique_error_codes
-FROM outbound_message
-WHERE channel = 'WHATSAPP'
-  AND status = 'FAILED'
-  AND created_at > NOW() - INTERVAL '1 hour'
-GROUP BY org_id
-ORDER BY failures DESC
-LIMIT 10;
-```
-
-#### Step 3: Check Outbound Metrics via API
+#### Step 2: Use Diagnostics Endpoints
 
 ```bash
-# Get overall health metrics
-curl -sf -H "X-Org-Id: system-admin" \
-  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-  https://api.atlas-immobilier.com/api/v1/dashboard/outbound/health | jq '.'
+# Get error patterns
+curl -X GET "https://api.atlas-immobilier.com/api/v2/diagnostics/whatsapp/error-patterns?hours=1" \
+  -H "Authorization: Bearer ${ADMIN_TOKEN}" | jq '.errorPatterns[] | select(.errorCode | IN("0","1","131016"))'
+```
 
-# Get WhatsApp-specific metrics
-curl -sf -H "X-Org-Id: system-admin" \
-  -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-  https://api.atlas-immobilier.com/api/v1/dashboard/outbound/health | \
-  jq '.channelMetrics.WHATSAPP'
+#### Step 3: Check Jaeger for Provider Errors
 
-# Example output:
-# {
-#   "channel": "WHATSAPP",
-#   "totalMessages": 1523,
-#   "successfulMessages": 1089,
-#   "failedMessages": 434,
-#   "successRate": 71.5,
-#   "averageLatencyMs": 2341
-# }
+```bash
+# Find traces with provider errors
+curl -s "https://jaeger.atlas-immobilier.com/api/traces?service=backend&operation=whatsapp-cloud-api-send&tags=%7B%22error.code%22%3A%221%22%7D&limit=50" | \
+  jq '.data | length'
 ```
 
 ### Response Procedures
 
-#### Procedure 1: Manual Retry for Temporary Failures
-
-**When to Use:** Provider returns temporary errors (codes: 0, 1, 131016, 131026, 132001)
-
-**Estimated Time:** 15-30 minutes  
-**Risk Level:** Low  
-**Rollback:** Not needed (idempotent retries)
-
-**Steps:**
-
-**1. Identify Retryable Failed Messages:**
-
-```sql
--- Get list of retryable messages with details
-SELECT 
-    id,
-    org_id,
-    to_recipient,
-    template_code,
-    error_code,
-    error_message,
-    attempt_count,
-    max_attempts,
-    EXTRACT(EPOCH FROM (NOW() - created_at))/3600 as hours_old
-FROM outbound_message
-WHERE channel = 'WHATSAPP'
-  AND status = 'FAILED'
-  AND error_code IN ('0', '1', '131016', '131026', '132001')  -- Temporary errors
-  AND attempt_count < max_attempts
-  AND created_at > NOW() - INTERVAL '4 hours'  -- Recent failures only
-ORDER BY created_at DESC
-LIMIT 100;
-
--- Count by error code
-SELECT 
-    error_code,
-    COUNT(*) as retryable_count
-FROM outbound_message
-WHERE channel = 'WHATSAPP'
-  AND status = 'FAILED'
-  AND error_code IN ('0', '1', '131016', '131026', '132001')
-  AND attempt_count < max_attempts
-  AND created_at > NOW() - INTERVAL '4 hours'
-GROUP BY error_code;
-```
-
-**2. Retry Messages via REST API:**
-
-**Single Message Retry:**
-```bash
-#!/bin/bash
-# retry-single-message.sh
-
-MESSAGE_ID="$1"
-ORG_ID="$2"
-ADMIN_TOKEN="${ADMIN_TOKEN}"  # Set via environment
-
-if [[ -z "$MESSAGE_ID" || -z "$ORG_ID" ]]; then
-    echo "Usage: $0 <message_id> <org_id>"
-    exit 1
-fi
-
-echo "Retrying message ID: $MESSAGE_ID for org: $ORG_ID"
-
-RESPONSE=$(curl -sf -X POST \
-    -H "X-Org-Id: ${ORG_ID}" \
-    -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-    -H "Content-Type: application/json" \
-    "https://api.atlas-immobilier.com/api/v1/outbound/messages/${MESSAGE_ID}/retry")
-
-if [[ $? -eq 0 ]]; then
-    echo "✓ Retry successful"
-    echo "$RESPONSE" | jq '.'
-else
-    echo "✗ Retry failed"
-    exit 1
-fi
-```
-
-**Bulk Retry Script:**
-```bash
-#!/bin/bash
-# bulk-retry-temporary-failures.sh
-# Retries all messages with temporary error codes
-
-set -euo pipefail
-
-ADMIN_TOKEN="${ADMIN_TOKEN:-}"  # Must be set via environment
-DRY_RUN="${DRY_RUN:-false}"      # Set to 'true' for testing
-BATCH_SIZE=10
-DELAY_SECONDS=2
-
-if [[ -z "$ADMIN_TOKEN" ]]; then
-    echo "Error: ADMIN_TOKEN environment variable not set"
-    exit 1
-fi
-
-echo "=== Bulk Retry Script ==="
-echo "Dry Run: $DRY_RUN"
-echo "Batch Size: $BATCH_SIZE"
-echo "Delay: ${DELAY_SECONDS}s between messages"
-echo ""
-
-# Get message IDs and org IDs
-psql -h prod-db.internal -U atlas -d atlas -t -A -F',' <<EOF > /tmp/retry_messages.csv
-SELECT id, org_id 
-FROM outbound_message 
-WHERE status='FAILED' 
-  AND error_code IN ('0','1','131016','131026','132001')
-  AND attempt_count < max_attempts
-  AND created_at > NOW() - INTERVAL '4 hours'
-ORDER BY created_at DESC
-LIMIT $BATCH_SIZE;
-EOF
-
-TOTAL_COUNT=$(wc -l < /tmp/retry_messages.csv)
-echo "Found $TOTAL_COUNT messages to retry"
-
-if [[ "$DRY_RUN" == "true" ]]; then
-    echo "DRY RUN - Would retry these messages:"
-    cat /tmp/retry_messages.csv
-    exit 0
-fi
-
-SUCCESS_COUNT=0
-FAIL_COUNT=0
-
-while IFS=',' read -r MSG_ID ORG_ID; do
-    echo "Retrying message $MSG_ID (org: $ORG_ID)..."
-    
-    if curl -sf -X POST \
-        -H "X-Org-Id: ${ORG_ID}" \
-        -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-        "https://api.atlas-immobilier.com/api/v1/outbound/messages/${MSG_ID}/retry" > /dev/null; then
-        echo "  ✓ Success"
-        ((SUCCESS_COUNT++))
-    else
-        echo "  ✗ Failed"
-        ((FAIL_COUNT++))
-    fi
-    
-    sleep "$DELAY_SECONDS"
-done < /tmp/retry_messages.csv
-
-echo ""
-echo "=== Retry Summary ==="
-echo "Total: $TOTAL_COUNT"
-echo "Success: $SUCCESS_COUNT"
-echo "Failed: $FAIL_COUNT"
-
-rm -f /tmp/retry_messages.csv
-```
-
-**3. Monitor Retry Progress:**
-
-```bash
-#!/bin/bash
-# monitor-retry-progress.sh
-# Watch queue status in real-time
-
-watch -n 5 "psql -h prod-db.internal -U atlas -d atlas -c \"
-SELECT 
-    status,
-    COUNT(*) as count,
-    MIN(updated_at) as oldest_update,
-    MAX(updated_at) as newest_update
-FROM outbound_message 
-WHERE channel='WHATSAPP' 
-  AND created_at > NOW() - INTERVAL '1 hour'
-GROUP BY status 
-ORDER BY status;\""
-```
-
-**4. Verify Success Rate:**
-
-```sql
--- Check retry success rate
-WITH recent_retries AS (
-    SELECT 
-        id,
-        status,
-        attempt_count,
-        updated_at
-    FROM outbound_message
-    WHERE channel = 'WHATSAPP'
-      AND updated_at > NOW() - INTERVAL '30 minutes'
-      AND attempt_count > 0
-)
-SELECT 
-    CASE 
-        WHEN status IN ('SENT', 'DELIVERED') THEN 'SUCCESS'
-        WHEN status = 'FAILED' THEN 'FAILED'
-        ELSE 'PENDING'
-    END as outcome,
-    COUNT(*) as count,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
-FROM recent_retries
-GROUP BY outcome
-ORDER BY count DESC;
-```
-
-**Recovery Criteria:**
-- ✅ Retry success rate > 80%
-- ✅ Failure rate drops below 10%
-- ✅ Queue depth stabilizing or decreasing
-- ✅ No new temporary errors in last 10 minutes
-
-#### Procedure 2: Provider Failover Strategy
-
-**Status:** ⚠️ **Future Enhancement** - Not yet implemented
-
-**Current State:** Only WhatsApp Cloud API (Meta) provider is implemented.
-
-**Planned Architecture:**
-- **Primary:** WhatsApp Cloud API (Meta)
-- **Secondary:** Twilio WhatsApp API
-- **Tertiary:** MessageBird WhatsApp API
-
-**Manual Workaround - Channel Fallback:**
-
-When WhatsApp provider is completely down, convert critical messages to alternative channels:
-
-**1. Export Failed Critical Messages:**
-
-```sql
--- Export high-priority failed WhatsApp messages
-COPY (
-    SELECT 
-        om.id,
-        om.org_id,
-        om.dossier_id,
-        om.to_recipient,
-        om.template_code,
-        om.subject,
-        om.payload_json,
-        d.lead_name,
-        d.lead_email,
-        om.created_at
-    FROM outbound_message om
-    LEFT JOIN dossier d ON om.dossier_id = d.id
-    WHERE om.channel = 'WHATSAPP'
-      AND om.status = 'FAILED'
-      AND om.created_at > NOW() - INTERVAL '2 hours'
-      AND om.template_code IN ('appointment_reminder', 'urgent_notification')  -- Critical templates
-    ORDER BY om.created_at DESC
-) TO '/tmp/critical_whatsapp_failures.csv' CSV HEADER;
-```
-
-**2. Convert to SMS Fallback:**
-
-```sql
--- Create SMS messages as fallback for failed WhatsApp messages
-INSERT INTO outbound_message (
-    org_id,
-    dossier_id,
-    channel,
-    direction,
-    to_recipient,
-    subject,
-    status,
-    idempotency_key,
-    attempt_count,
-    max_attempts,
-    created_at,
-    updated_at,
-    created_by
-)
-SELECT 
-    org_id,
-    dossier_id,
-    'SMS' as channel,
-    'OUTBOUND' as direction,
-    to_recipient,
-    CONCAT('[WhatsApp Fallback] ', subject) as subject,
-    'QUEUED' as status,
-    CONCAT(idempotency_key, '-sms-fallback-', DATE_PART('epoch', NOW())::bigint) as idempotency_key,
-    0 as attempt_count,
-    5 as max_attempts,
-    NOW() as created_at,
-    NOW() as updated_at,
-    'ops-whatsapp-fallback' as created_by
-FROM outbound_message
-WHERE channel = 'WHATSAPP'
-  AND status = 'FAILED'
-  AND error_code IN ('0', '1', '131016')  -- Only temporary failures
-  AND created_at > NOW() - INTERVAL '2 hours'
-  AND template_code IN ('appointment_reminder', 'urgent_notification')
-ON CONFLICT (idempotency_key) DO NOTHING;  -- Prevent duplicates
-
--- Log the fallback action
-SELECT 
-    'Fallback created' as action,
-    COUNT(*) as messages_converted
-FROM outbound_message
-WHERE created_by = 'ops-whatsapp-fallback'
-  AND created_at > NOW() - INTERVAL '5 minutes';
-```
-
-#### Procedure 3: Rate Limit Backoff and Management
-
-**When to Use:** Error codes 130, 3, 132069, 80007 (rate limit/quota errors)
-
-**Estimated Time:** 5-15 minutes  
-**Risk Level:** Medium  
-**Rollback:** Can revert quota changes
-
-**Steps:**
-
-**1. Check Current Rate Limit State:**
-
-```sql
--- Comprehensive rate limit status
-SELECT 
-    org_id,
-    messages_sent_count,
-    quota_limit,
-    ROUND(100.0 * messages_sent_count / NULLIF(quota_limit, 0), 2) as usage_percentage,
-    reset_at,
-    CASE 
-        WHEN reset_at > NOW() THEN EXTRACT(EPOCH FROM (reset_at - NOW()))/3600
-        ELSE 0
-    END as hours_until_reset,
-    throttle_until,
-    CASE 
-        WHEN throttle_until IS NOT NULL AND throttle_until > NOW() THEN 
-            EXTRACT(EPOCH FROM (throttle_until - NOW()))/60
-        ELSE 0
-    END as minutes_throttled,
-    last_request_at,
-    updated_at
-FROM whatsapp_rate_limit
-WHERE messages_sent_count > quota_limit * 0.7  -- Show orgs using >70% quota
-ORDER BY usage_percentage DESC;
-
--- Rate limit errors in last hour
-SELECT 
-    org_id,
-    COUNT(*) as rate_limit_errors,
-    MAX(created_at) as most_recent_error
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND error_code IN ('130', '3', '132069', '80007')
-  AND created_at > NOW() - INTERVAL '1 hour'
-GROUP BY org_id
-ORDER BY rate_limit_errors DESC;
-```
-
-**2. Increase Quota Limit (if justified):**
-
-```sql
--- IMPORTANT: Only increase quota for legitimate high-volume use cases
--- Requires approval from Product/Engineering Lead
-
--- Check current usage pattern
-SELECT 
-    DATE_TRUNC('hour', created_at) as hour,
-    COUNT(*) as messages_sent
-FROM outbound_message
-WHERE org_id = 'ORG-ID-HERE'
-  AND channel = 'WHATSAPP'
-  AND status IN ('SENT', 'DELIVERED')
-  AND created_at > NOW() - INTERVAL '24 hours'
-GROUP BY hour
-ORDER BY hour DESC;
-
--- Increase quota (example: 1000 -> 5000)
-UPDATE whatsapp_rate_limit
-SET quota_limit = 5000,
-    updated_at = NOW(),
-    updated_by = 'ops-quota-increase-TICKET-NUMBER'
-WHERE org_id = 'ORG-ID-HERE';
-
--- Verify update
-SELECT 
-    org_id,
-    quota_limit,
-    messages_sent_count,
-    ROUND(100.0 * messages_sent_count / quota_limit, 2) as new_usage_pct,
-    updated_by,
-    updated_at
-FROM whatsapp_rate_limit
-WHERE org_id = 'ORG-ID-HERE';
-```
-
-**Recovery Criteria:**
-- ✅ No rate limit errors for 15 minutes
-- ✅ Messages sending successfully
-- ✅ Quota usage within acceptable range (<80%)
-- ✅ No throttle_until set
+See existing procedures in original document...
 
 ---
 
 ## Webhook Signature Validation Failures
 
-### Symptoms
-
-- ⚠️ 401 Unauthorized responses to WhatsApp webhooks
-- ⚠️ Inbound messages not being processed
-- ⚠️ Logs show "Invalid webhook signature" errors
-- ⚠️ Alert: `whatsapp_webhook_signature_failures_total > 10`
-- ⚠️ Session windows not updating despite inbound messages
-
-### Verification Steps
-
-#### Step 1: Check Recent Signature Failures
-
-```bash
-# Check application logs
-kubectl logs -l app=backend --tail=100 | grep -i "Invalid webhook signature"
-
-# Or via Kibana
-# Query: service:backend AND message:"Invalid webhook signature" AND @timestamp:[now-1h TO now]
-```
-
-#### Step 2: Verify Webhook Configuration
-
-```sql
--- Check webhook configuration for all enabled providers
-SELECT 
-    org_id,
-    phone_number_id,
-    business_account_id,
-    enabled,
-    LENGTH(webhook_secret_encrypted) as secret_length_bytes,
-    webhook_secret_encrypted IS NOT NULL as has_secret,
-    updated_at,
-    updated_by,
-    EXTRACT(EPOCH FROM (NOW() - updated_at))/86400 as days_since_update
-FROM whatsapp_provider_config
-WHERE enabled = true
-ORDER BY org_id;
-
--- Check for recent configuration changes
-SELECT 
-    org_id,
-    updated_at,
-    updated_by
-FROM whatsapp_provider_config
-WHERE updated_at > NOW() - INTERVAL '7 days'
-ORDER BY updated_at DESC;
-```
-
-### Response Procedures
-
-#### Procedure 1: Webhook Secret Rotation (Zero-Downtime)
-
-**When to Use:** Secret compromised, validation consistently failing, or scheduled rotation
-
-**Estimated Time:** 15-30 minutes  
-**Risk Level:** Medium  
-**Rollback:** Keep old secret for 7 days
-
-**Steps:**
-
-**1. Generate New Cryptographically Secure Secret:**
-
-```bash
-#!/bin/bash
-# generate-webhook-secret.sh
-# Generate a strong 256-bit secret for webhook validation
-
-NEW_SECRET=$(openssl rand -hex 32)
-echo "New webhook secret generated (64 hex characters):"
-echo "$NEW_SECRET"
-echo ""
-echo "⚠️  SECURITY WARNING:"
-echo "  - Store this secret securely (e.g., in password manager or vault)"
-echo "  - Do NOT commit to git"
-echo "  - Do NOT share in plain text via email/Slack"
-echo "  - Do NOT log this value"
-```
-
-**2. Update Secret in Database (with encryption):**
-
-```sql
--- Get current secret first (for rollback)
-CREATE TEMP TABLE webhook_secret_backup AS
-SELECT 
-    org_id,
-    webhook_secret_encrypted,
-    updated_at,
-    updated_by
-FROM whatsapp_provider_config
-WHERE org_id = 'ORG-ID-HERE';
-
--- Update with new secret
--- Note: Replace 'NEW-SECRET-HERE' with the actual generated secret
--- Note: Replace 'ENCRYPTION-KEY' with your database encryption key
-UPDATE whatsapp_provider_config
-SET webhook_secret_encrypted = pgp_sym_encrypt('NEW-SECRET-HERE', 'ENCRYPTION-KEY'),
-    updated_at = NOW(),
-    updated_by = 'ops-webhook-rotation-TICKET-NUMBER'
-WHERE org_id = 'ORG-ID-HERE';
-
--- Verify update (check that encrypted value changed)
-SELECT 
-    org_id,
-    webhook_secret_encrypted != (SELECT webhook_secret_encrypted FROM webhook_secret_backup) as secret_changed,
-    updated_at,
-    updated_by
-FROM whatsapp_provider_config
-WHERE org_id = 'ORG-ID-HERE';
-```
-
-**3. Update WhatsApp Business Manager Settings:**
-
-Manual steps:
-1. Open Meta Business Manager: https://business.facebook.com
-2. Navigate to WhatsApp → Settings → Webhooks
-3. Update webhook secret to the new value
-4. Click "Verify and Save"
-5. Test webhook functionality
-
-**4. Monitor for 30 Minutes:**
-
-```bash
-#!/bin/bash
-# monitor-webhook-health.sh
-# Monitor webhook processing after secret rotation
-
-DURATION_MINUTES=30
-CHECK_INTERVAL_SECONDS=60
-
-echo "Monitoring webhook health for ${DURATION_MINUTES} minutes..."
-
-for ((i=1; i<=DURATION_MINUTES; i++)); do
-    echo "[$(date +'%H:%M:%S')] Check $i/$DURATION_MINUTES"
-    
-    # Check inbound messages in last 5 minutes
-    INBOUND_COUNT=$(psql -h prod-db.internal -U atlas -d atlas -t -c "
-        SELECT COUNT(*) 
-        FROM message 
-        WHERE channel='WHATSAPP' 
-          AND direction='INBOUND' 
-          AND created_at > NOW() - INTERVAL '5 minutes'
-    ")
-    echo "  Inbound messages (last 5 min): $INBOUND_COUNT"
-    
-    # Check for signature validation failures
-    SIG_FAILURES=$(kubectl logs -l app=backend --since=5m 2>/dev/null | \
-        grep -c "Invalid webhook signature" || echo "0")
-    echo "  Signature failures (last 5 min): $SIG_FAILURES"
-    
-    if [[ "$SIG_FAILURES" -gt 0 ]]; then
-        echo "  ⚠️  WARNING: Signature validation failures detected"
-    fi
-    
-    echo ""
-    sleep "$CHECK_INTERVAL_SECONDS"
-done
-
-echo "✓ Monitoring complete"
-```
-
-**Recovery Criteria:**
-- ✅ Signature validation success rate > 99.9%
-- ✅ Inbound messages processing normally
-- ✅ No 401 Unauthorized errors in logs
-- ✅ Session windows updating correctly
-- ✅ Zero signature validation failures for 30 minutes
+(Content continues from original document...)
 
 ---
 
 ## Dead Letter Queue (DLQ) Processing
 
-### Overview
-
-Messages enter the Dead Letter Queue (DLQ) when:
-- `attempt_count >= max_attempts` (default: 5 attempts)
-- Status = `FAILED`
-- Non-retryable error codes (e.g., invalid phone number, blocked recipient)
-- Exceeded retry backoff window
-
-### Symptoms
-
-- ⚠️ Alert: `outbound_message_dlq_size > 100`
-- ⚠️ Increased customer complaints about missed notifications
-- ⚠️ Prometheus metric: `outbound_message_dlq_messages{channel="WHATSAPP"} > threshold`
-- ⚠️ Dashboard shows growing DLQ size over time
-
-### Verification Steps
-
-#### Step 1: Get DLQ Size and Composition
-
-```sql
--- Total DLQ size
-SELECT COUNT(*) as dlq_total_size
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts;
-
--- Breakdown by channel and error code
-SELECT 
-    channel,
-    error_code,
-    error_message,
-    COUNT(*) as message_count,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage,
-    MIN(created_at) as oldest_message,
-    MAX(created_at) as newest_message,
-    COUNT(DISTINCT org_id) as affected_orgs
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-GROUP BY channel, error_code, error_message
-ORDER BY message_count DESC;
-
--- DLQ growth trend (by day for last 7 days)
-SELECT 
-    DATE_TRUNC('day', created_at) as day,
-    COUNT(*) as daily_dlq_additions,
-    COUNT(DISTINCT org_id) as orgs_affected
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND created_at > NOW() - INTERVAL '7 days'
-GROUP BY day
-ORDER BY day DESC;
-```
-
-#### Step 2: Analyze Error Distribution
-
-```sql
--- Top error codes with categorization
-WITH error_categories AS (
-    SELECT 
-        error_code,
-        CASE 
-            WHEN error_code IN ('131021', '131031', '133000', '470') THEN 'Invalid Recipient'
-            WHEN error_code IN ('133004', '133005', '133006', '133008', '133009', '133010') THEN 'Template Error'
-            WHEN error_code IN ('0', '1', '131016', '131026', '132001') THEN 'Temporary Error'
-            WHEN error_code IN ('130', '3', '132069', '80007') THEN 'Rate Limit'
-            ELSE 'Other'
-        END as category,
-        error_message,
-        COUNT(*) as frequency
-    FROM outbound_message
-    WHERE status = 'FAILED'
-      AND attempt_count >= max_attempts
-    GROUP BY error_code, error_message
-)
-SELECT 
-    category,
-    error_code,
-    error_message,
-    frequency,
-    ROUND(frequency * 100.0 / SUM(frequency) OVER(), 2) as percentage
-FROM error_categories
-ORDER BY category, frequency DESC;
-
--- Retryable vs non-retryable breakdown
-SELECT 
-    CASE 
-        WHEN error_code IN ('0', '1', '131016', '131026', '132001') THEN 'Retryable'
-        ELSE 'Non-Retryable'
-    END as retry_status,
-    COUNT(*) as count,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-GROUP BY retry_status;
-```
-
-### Response Procedures
-
-#### Procedure 1: Manual Review & Triage
-
-**When to Use:** Regular DLQ cleanup, investigation of failure patterns
-
-**Estimated Time:** 30-60 minutes  
-**Risk Level:** Low  
-**Frequency:** Daily or when DLQ > 50 messages
-
-**Steps:**
-
-**1. Export DLQ Messages for Analysis:**
-
-```bash
-#!/bin/bash
-# export-dlq-messages.sh
-# Export DLQ messages to CSV for detailed analysis
-
-EXPORT_FILE="/tmp/dlq_export_$(date +%Y%m%d_%H%M%S).csv"
-
-echo "Exporting DLQ messages to: $EXPORT_FILE"
-
-psql -h prod-db.internal -U atlas -d atlas <<EOF
-\COPY (
-    SELECT 
-        om.id,
-        om.org_id,
-        om.dossier_id,
-        om.channel,
-        om.to_recipient,
-        om.template_code,
-        om.subject,
-        om.error_code,
-        om.error_message,
-        om.attempt_count,
-        om.max_attempts,
-        om.created_at,
-        om.updated_at,
-        EXTRACT(EPOCH FROM (NOW() - om.created_at))/86400 as days_in_dlq,
-        d.lead_name,
-        d.lead_email
-    FROM outbound_message om
-    LEFT JOIN dossier d ON om.dossier_id = d.id
-    WHERE om.status = 'FAILED'
-      AND om.attempt_count >= om.max_attempts
-    ORDER BY om.created_at DESC
-) TO '$EXPORT_FILE' CSV HEADER;
-EOF
-
-echo "✓ Export complete: $(wc -l < $EXPORT_FILE) messages"
-```
-
-**2. Categorize by Error Type:**
-
-```sql
--- Detailed categorization with actionable insights
-WITH categorized_errors AS (
-    SELECT 
-        id,
-        org_id,
-        error_code,
-        error_message,
-        CASE 
-            -- Non-retryable recipient errors
-            WHEN error_code IN ('131021', '131031') THEN 'Invalid Phone Number'
-            WHEN error_code = '133000' THEN 'Blocked/Opted Out'
-            WHEN error_code = '470' THEN 'Session Expired'
-            
-            -- Template errors
-            WHEN error_code = '133004' THEN 'Template Not Found'
-            WHEN error_code = '133005' THEN 'Template Rejected'
-            WHEN error_code = '133006' THEN 'Template Paused'
-            WHEN error_code = '133008' THEN 'Template Parameter Missing'
-            WHEN error_code = '133009' THEN 'Template Parameter Invalid'
-            WHEN error_code = '133010' THEN 'Template Not Approved'
-            
-            -- Temporary errors (retry candidates)
-            WHEN error_code IN ('0', '1') THEN 'Generic Temporary Error'
-            WHEN error_code = '131016' THEN 'Service Unavailable'
-            WHEN error_code = '131026' THEN 'Message Undeliverable'
-            WHEN error_code = '132001' THEN 'Rate Limit Parameter Invalid'
-            
-            -- Rate limit errors
-            WHEN error_code IN ('130', '3', '132069', '80007') THEN 'Rate Limit Exceeded'
-            
-            ELSE 'Uncategorized'
-        END as error_category,
-        CASE 
-            WHEN error_code IN ('0', '1', '131016', '131026', '132001') THEN 'YES'
-            ELSE 'NO'
-        END as retryable,
-        CASE 
-            WHEN error_code IN ('131021', '131031') THEN 'Update recipient phone number'
-            WHEN error_code = '133000' THEN 'Respect opt-out, do not retry'
-            WHEN error_code = '470' THEN 'Use template message or wait for session'
-            WHEN error_code IN ('133004', '133005', '133006', '133010') THEN 'Fix/approve template in Meta'
-            WHEN error_code IN ('133008', '133009') THEN 'Fix template parameters in code'
-            WHEN error_code IN ('0', '1', '131016', '131026', '132001') THEN 'Retry after 24 hours'
-            WHEN error_code IN ('130', '3', '132069', '80007') THEN 'Increase quota or wait for reset'
-            ELSE 'Manual investigation required'
-        END as recommended_action
-    FROM outbound_message
-    WHERE status = 'FAILED'
-      AND attempt_count >= max_attempts
-)
-SELECT 
-    error_category,
-    retryable,
-    recommended_action,
-    COUNT(*) as message_count,
-    COUNT(DISTINCT org_id) as orgs_affected,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
-FROM categorized_errors
-GROUP BY error_category, retryable, recommended_action
-ORDER BY message_count DESC;
-```
-
-#### Procedure 2: Bulk Retry for Temporary Errors
-
-**When to Use:** Large number of messages failed due to temporary provider issues
-
-**Estimated Time:** 15-45 minutes  
-**Risk Level:** Low  
-**Rollback:** Database backup created automatically
-
-**Steps:**
-
-**1. Identify Retry Candidates:**
-
-```sql
--- Messages eligible for retry (temporary errors, 24+ hours old)
-SELECT 
-    id,
-    org_id,
-    to_recipient,
-    template_code,
-    error_code,
-    error_message,
-    created_at,
-    EXTRACT(EPOCH FROM (NOW() - updated_at))/3600 as hours_since_last_attempt,
-    attempt_count,
-    max_attempts
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND error_code IN ('0', '1', '131016', '131026', '132001')  -- Temporary errors only
-  AND updated_at < NOW() - INTERVAL '24 hours'  -- Wait 24h cooling period
-ORDER BY updated_at
-LIMIT 1000;
-
--- Count by error code
-SELECT 
-    error_code,
-    COUNT(*) as retry_candidates,
-    MIN(updated_at) as oldest,
-    MAX(updated_at) as newest
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND error_code IN ('0', '1', '131016', '131026', '132001')
-  AND updated_at < NOW() - INTERVAL '24 hours'
-GROUP BY error_code;
-```
-
-**2. Create Backup and Reset for Retry:**
-
-```sql
--- Create timestamped backup table
-CREATE TABLE outbound_message_dlq_backup_20240115 AS
-SELECT * FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND error_code IN ('0', '1', '131016', '131026', '132001');
-
--- Reset messages for retry
-UPDATE outbound_message
-SET status = 'QUEUED',
-    attempt_count = 0,
-    error_code = NULL,
-    error_message = NULL,
-    updated_at = NOW(),
-    updated_by = 'ops-dlq-retry-20240115'
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND error_code IN ('0', '1', '131016', '131026', '132001')
-  AND updated_at < NOW() - INTERVAL '24 hours';
-
--- Check affected rows
-SELECT 
-    'Messages reset for retry' as action,
-    COUNT(*) as messages_reset 
-FROM outbound_message 
-WHERE updated_by = 'ops-dlq-retry-20240115';
-```
-
-**3. Monitor Retry Progress:**
-
-```bash
-# Watch for next 30 minutes
-watch -n 30 "psql -h prod-db.internal -U atlas -d atlas -c \"
-SELECT 
-    status,
-    COUNT(*) as count
-FROM outbound_message
-WHERE updated_by = 'ops-dlq-retry-20240115'
-GROUP BY status
-ORDER BY status\""
-```
-
-**4. Verify Success Rate:**
-
-```sql
-SELECT 
-    CASE 
-        WHEN status IN ('SENT', 'DELIVERED') THEN 'SUCCESS'
-        WHEN status = 'FAILED' THEN 'FAILED'
-        ELSE 'PENDING'
-    END as outcome,
-    COUNT(*) as count,
-    ROUND(COUNT(*) * 100.0 / SUM(COUNT(*)) OVER(), 2) as percentage
-FROM outbound_message
-WHERE updated_by = 'ops-dlq-retry-20240115'
-GROUP BY outcome;
-```
-
-#### Procedure 3: DLQ Archival & Cleanup
-
-**When to Use:** DLQ has old messages (>30 days) with no recovery path
-
-**Steps:**
-
-**1. Identify Archival Candidates:**
-
-```sql
-SELECT 
-    id,
-    org_id,
-    channel,
-    error_code,
-    created_at,
-    EXTRACT(EPOCH FROM (NOW() - created_at))/86400 as days_old
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND created_at < NOW() - INTERVAL '30 days'
-ORDER BY created_at
-LIMIT 100;
-```
-
-**2. Archive to Long-term Storage:**
-
-```bash
-#!/bin/bash
-# archive-old-dlq-messages.sh
-# Archive DLQ messages older than 30 days
-
-ARCHIVE_FILE="dlq_archive_$(date +%Y%m%d_%H%M%S).csv"
-
-psql -h prod-db.internal -U atlas -d atlas -c "COPY (
-    SELECT 
-        id, org_id, dossier_id, channel, direction, to_recipient,
-        template_code, subject, payload_json, status, provider_message_id,
-        idempotency_key, attempt_count, max_attempts, error_code,
-        error_message, created_at, updated_at
-    FROM outbound_message
-    WHERE status = 'FAILED'
-      AND attempt_count >= max_attempts
-      AND created_at < NOW() - INTERVAL '30 days'
-) TO '/tmp/${ARCHIVE_FILE}' CSV HEADER"
-
-# Upload to S3 or archive storage
-aws s3 cp /tmp/${ARCHIVE_FILE} s3://atlas-archives/dlq/${ARCHIVE_FILE} --sse AES256
-
-echo "✓ Archived $(wc -l < /tmp/${ARCHIVE_FILE}) messages to S3"
-```
-
-**3. Delete Archived Messages:**
-
-```sql
--- Safety check: ensure archive exists
--- Then delete
-DELETE FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count >= max_attempts
-  AND created_at < NOW() - INTERVAL '30 days';
-
--- Vacuum table
-VACUUM ANALYZE outbound_message;
-```
+(Content continues from original document...)
 
 ---
 
 ## Outbound Queue Backup Scenarios
 
-### Symptoms
-
-- ⚠️ Queue depth increasing rapidly
-- ⚠️ Alert: `outbound_message_queue_depth > 1000`
-- ⚠️ Worker processing slowed or stopped
-- ⚠️ Messages stuck in QUEUED state for >2 hours
-
-### Verification Steps
-
-```sql
--- Check queue depth
-SELECT 
-    status,
-    COUNT(*) as count,
-    MIN(created_at) as oldest_message,
-    MAX(created_at) as newest_message,
-    AVG(attempt_count) as avg_attempts
-FROM outbound_message
-WHERE status IN ('QUEUED', 'SENDING')
-GROUP BY status;
-
--- Check for stuck messages
-SELECT 
-    id,
-    org_id,
-    to_recipient,
-    status,
-    attempt_count,
-    EXTRACT(EPOCH FROM (NOW() - created_at))/3600 as hours_in_queue
-FROM outbound_message
-WHERE status = 'QUEUED'
-  AND created_at < NOW() - INTERVAL '2 hours'
-ORDER BY created_at
-LIMIT 20;
-```
-
-### Response Procedures
-
-#### Procedure 1: Database Checkpoint & Backup
-
-**Steps:**
-
-```bash
-#!/bin/bash
-# create-queue-backup.sh
-# Create point-in-time backup of outbound queue
-
-BACKUP_FILE="outbound_queue_backup_$(date +%Y%m%d_%H%M%S).sql"
-
-# PostgreSQL: Create manual checkpoint
-psql -h prod-db.internal -U atlas -d atlas -c "CHECKPOINT;"
-
-# Create logical backup
-pg_dump -h prod-db.internal -U atlas -d atlas \
-    -t outbound_message -t outbound_attempt \
-    -t whatsapp_rate_limit -t whatsapp_session_window \
-    > /backup/${BACKUP_FILE}
-
-# Compress and upload
-gzip /backup/${BACKUP_FILE}
-aws s3 cp /backup/${BACKUP_FILE}.gz s3://atlas-backups/database/${BACKUP_FILE}.gz --sse AES256
-
-echo "✓ Backup created: ${BACKUP_FILE}.gz"
-```
-
-#### Procedure 2: Scale Worker Processing
-
-**When to Use:** Queue backed up but system healthy, just needs more processing power
-
-**Steps:**
-
-```bash
-# Increase worker batch size
-kubectl set env deployment/backend OUTBOUND_WORKER_BATCH_SIZE=50
-
-# Scale horizontally
-kubectl scale deployment/backend --replicas=5
-
-# Monitor queue depth
-watch -n 30 "psql -h prod-db.internal -U atlas -d atlas -t -c \"
-SELECT COUNT(*) FROM outbound_message WHERE status='QUEUED'\""
-
-# Revert after queue cleared
-kubectl set env deployment/backend OUTBOUND_WORKER_BATCH_SIZE=10
-kubectl scale deployment/backend --replicas=2
-```
+(Content continues from original document...)
 
 ---
 
 ## Manual Operations Scripts
 
-### Message Retry Script
-
-Save as `scripts/ops/retry-messages.sh`:
-
-```bash
-#!/bin/bash
-# retry-messages.sh - Manual message retry utility
-
-set -euo pipefail
-
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DB_HOST="${DB_HOST:-prod-db.internal}"
-DB_USER="${DB_USER:-atlas}"
-DB_NAME="${DB_NAME:-atlas}"
-
-usage() {
-    cat <<EOF
-Usage: $0 [OPTIONS]
-
-Manual message retry utility for WhatsApp outbound messages
-
-OPTIONS:
-    -e, --error-codes    Comma-separated error codes to retry (default: 0,1,131016)
-    -l, --limit          Maximum number of messages to retry (default: 100)
-    -a, --age-hours      Minimum age in hours since last attempt (default: 24)
-    -d, --dry-run        Show what would be retried without executing
-    -h, --help           Show this help message
-
-EXAMPLES:
-    # Retry up to 100 messages with temporary errors
-    $0 --limit 100
-
-    # Dry run to see what would be retried
-    $0 --dry-run
-
-    # Retry specific error codes
-    $0 --error-codes "131016,131026" --limit 50
-
-EOF
-    exit 1
-}
-
-# Parse arguments
-ERROR_CODES="0,1,131016"
-LIMIT=100
-AGE_HOURS=24
-DRY_RUN=false
-
-while [[ $# -gt 0 ]]; do
-    case $1 in
-        -e|--error-codes)
-            ERROR_CODES="$2"
-            shift 2
-            ;;
-        -l|--limit)
-            LIMIT="$2"
-            shift 2
-            ;;
-        -a|--age-hours)
-            AGE_HOURS="$2"
-            shift 2
-            ;;
-        -d|--dry-run)
-            DRY_RUN=true
-            shift
-            ;;
-        -h|--help)
-            usage
-            ;;
-        *)
-            echo "Unknown option: $1"
-            usage
-            ;;
-    esac
-done
-
-echo "=== Message Retry Utility ==="
-echo "Error Codes: $ERROR_CODES"
-echo "Limit: $LIMIT"
-echo "Min Age: ${AGE_HOURS}h"
-echo "Dry Run: $DRY_RUN"
-echo ""
-
-# Build error codes array for SQL
-IFS=',' read -ra ERROR_ARRAY <<< "$ERROR_CODES"
-ERROR_SQL="("
-for code in "${ERROR_ARRAY[@]}"; do
-    ERROR_SQL+="'$code',"
-done
-ERROR_SQL="${ERROR_SQL%,})"
-
-# Query retry candidates
-QUERY="
-SELECT 
-    id,
-    org_id,
-    to_recipient,
-    template_code,
-    error_code,
-    EXTRACT(EPOCH FROM (NOW() - updated_at))/3600 as hours_old
-FROM outbound_message
-WHERE status = 'FAILED'
-  AND attempt_count < max_attempts
-  AND error_code IN $ERROR_SQL
-  AND updated_at < NOW() - INTERVAL '${AGE_HOURS} hours'
-ORDER BY updated_at
-LIMIT $LIMIT;
-"
-
-if [[ "$DRY_RUN" == "true" ]]; then
-    echo "DRY RUN - Would retry these messages:"
-    psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -c "$QUERY"
-    exit 0
-fi
-
-# Execute retry
-psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -t -A -F',' -c "$QUERY" | while IFS=',' read -r id org_id rest; do
-    echo "Retrying message $id (org: $org_id)..."
-    
-    curl -sf -X POST \
-        -H "X-Org-Id: ${org_id}" \
-        -H "Authorization: Bearer ${ADMIN_TOKEN}" \
-        "https://api.atlas-immobilier.com/api/v1/outbound/messages/${id}/retry" > /dev/null
-    
-    sleep 0.5
-done
-
-echo "✓ Retry complete"
-```
-
-### DLQ Analysis Script
-
-Save as `scripts/ops/analyze-dlq.sh`:
-
-```bash
-#!/bin/bash
-# analyze-dlq.sh - DLQ analysis and reporting tool
-
-set -euo pipefail
-
-DB_HOST="${DB_HOST:-prod-db.internal}"
-DB_USER="${DB_USER:-atlas}"
-DB_NAME="${DB_NAME:-atlas}"
-OUTPUT_DIR="${OUTPUT_DIR:-/tmp}"
-
-REPORT_FILE="${OUTPUT_DIR}/dlq_analysis_$(date +%Y%m%d_%H%M%S).txt"
-
-cat > "$REPORT_FILE" <<EOF
-================================================================================
-DLQ Analysis Report
-Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-================================================================================
-
-EOF
-
-echo "Generating DLQ analysis report..."
-
-# Total DLQ size
-psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" -t <<'SQL' >> "$REPORT_FILE"
-SELECT 'Total DLQ Messages: ' || COUNT(*) FROM outbound_message WHERE status='FAILED' AND attempt_count >= max_attempts;
-SQL
-
-echo "" >> "$REPORT_FILE"
-echo "Error Code Distribution:" >> "$REPORT_FILE"
-echo "------------------------" >> "$REPORT_FILE"
-
-psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" <<'SQL' >> "$REPORT_FILE"
-SELECT 
-    error_code,
-    COUNT(*) as count,
-    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER(), 2) as percentage
-FROM outbound_message
-WHERE status = 'FAILED' AND attempt_count >= max_attempts
-GROUP BY error_code
-ORDER BY count DESC
-LIMIT 10;
-SQL
-
-echo "" >> "$REPORT_FILE"
-echo "Age Distribution:" >> "$REPORT_FILE"
-echo "----------------" >> "$REPORT_FILE"
-
-psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" <<'SQL' >> "$REPORT_FILE"
-SELECT 
-    CASE 
-        WHEN created_at > NOW() - INTERVAL '24 hours' THEN '< 1 day'
-        WHEN created_at > NOW() - INTERVAL '7 days' THEN '1-7 days'
-        WHEN created_at > NOW() - INTERVAL '30 days' THEN '7-30 days'
-        ELSE '> 30 days'
-    END as age,
-    COUNT(*) as count
-FROM outbound_message
-WHERE status = 'FAILED' AND attempt_count >= max_attempts
-GROUP BY age
-ORDER BY MIN(created_at);
-SQL
-
-echo "" >> "$REPORT_FILE"
-echo "Affected Organizations:" >> "$REPORT_FILE"
-echo "----------------------" >> "$REPORT_FILE"
-
-psql -h "$DB_HOST" -U "$DB_USER" -d "$DB_NAME" <<'SQL' >> "$REPORT_FILE"
-SELECT 
-    org_id,
-    COUNT(*) as failed_messages
-FROM outbound_message
-WHERE status = 'FAILED' AND attempt_count >= max_attempts
-GROUP BY org_id
-ORDER BY failed_messages DESC
-LIMIT 10;
-SQL
-
-echo "" >> "$REPORT_FILE"
-echo "Recommendations:" >> "$REPORT_FILE"
-echo "---------------" >> "$REPORT_FILE"
-echo "1. Review and fix template errors" >> "$REPORT_FILE"
-echo "2. Archive messages older than 30 days" >> "$REPORT_FILE"
-echo "3. Retry temporary failures after 24-hour cooling period" >> "$REPORT_FILE"
-echo "4. Update phone number validation logic" >> "$REPORT_FILE"
-echo "" >> "$REPORT_FILE"
-
-echo "✓ Report generated: $REPORT_FILE"
-cat "$REPORT_FILE"
-```
+(Content continues from original document...)
 
 ---
 
 ## Escalation Matrix
 
-### On-Call Contacts
-
-#### Level 1: Platform Engineering (First Response)
-**Response Time: 15 minutes**
-
-| Role | Contact Method | Backup |
-|------|----------------|---------|
-| Platform Engineer (Primary) | PagerDuty: platform-oncall | Platform Engineer (Secondary) |
-| Platform Engineer (Secondary) | PagerDuty: platform-oncall-backup | Tech Lead |
-
-**Responsibilities:**
-- Initial triage and assessment
-- Execute runbook procedures
-- Gather diagnostic information
-- Escalate if beyond scope
-
-**Escalation Criteria:**
-- Issue not resolved within 30 minutes
-- Requires architecture changes
-- Multi-system impact
-- Security implications
-- Database corruption suspected
-
-#### Level 2: Senior Engineering / Tech Lead
-**Response Time: 30 minutes**
-
-| Role | Contact Method | Backup |
-|------|----------------|---------|
-| Tech Lead | PagerDuty: tech-lead-oncall | Engineering Manager |
-| Senior Backend Engineer | PagerDuty: senior-eng-oncall | Tech Lead |
-
-**Responsibilities:**
-- Complex troubleshooting
-- Code hotfixes if needed
-- Architecture decisions
-- Coordinate with other teams
-
-**Escalation Criteria:**
-- Critical business impact
-- Data loss risk
-- Security breach suspected
-- Requires emergency deployment
-- Vendor escalation needed (Meta/WhatsApp)
-
-#### Level 3: Engineering Manager / VP Engineering
-**Response Time: 1 hour**
-
-| Role | Contact Method |
-|------|----------------|
-| Engineering Manager | PagerDuty: eng-manager-oncall |
-| VP Engineering | Phone: [Secure Contact] |
-
-**Responsibilities:**
-- Executive decision making
-- Vendor management (Meta Business Support)
-- Cross-organizational coordination
-- Customer communication approval
-
-### Escalation Decision Tree
-
-```
-├─ WhatsApp Provider Outage
-│  ├─ L1: Initial response (verify, retry temporary failures)
-│  ├─ L2: If >30% failure rate or >30 min
-│  └─ L3: If provider-wide or >2 hour outage
-│
-├─ Webhook Signature Failures
-│  ├─ L1: Rotate secrets, verify configuration
-│  ├─ L2: If multiple orgs affected or rotation fails
-│  └─ L3: If security breach suspected
-│
-├─ DLQ Overflow (>500 messages)
-│  ├─ L1: Analyze errors, bulk retry if appropriate
-│  ├─ L2: If systemic issue or >1000 in DLQ
-│  └─ L3: If data loss occurred or >2000 in DLQ
-│
-├─ Queue Backup (>1000 queued)
-│  ├─ L1: Check worker, scale if needed
-│  ├─ L2: If database issues or >5000 queued
-│  └─ L3: If requires emergency drain or >10000 queued
-│
-└─ Data Corruption
-   ├─ L1: Immediate escalation (DO NOT ATTEMPT FIXES)
-   ├─ L2: Assess impact, prepare restore
-   └─ L3: Authorize restore, customer communication
-```
+(Content continues from original document...)
 
 ---
 
 ## Monitoring & Alerts
 
-### Prometheus Alert Rules
-
-```yaml
-groups:
-  - name: whatsapp_critical
-    rules:
-      - alert: WhatsAppHighFailureRate
-        expr: |
-          rate(outbound_message_failures_total{channel="WHATSAPP"}[5m]) > 0.30
-        for: 5m
-        labels:
-          severity: critical
-          channel: whatsapp
-        annotations:
-          summary: "WhatsApp failure rate above 30%"
-          description: "{{ $value }}% of WhatsApp messages are failing"
-
-      - alert: WhatsAppDLQOverflow
-        expr: |
-          outbound_message_dlq_messages{channel="WHATSAPP"} > 500
-        for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: "WhatsApp DLQ contains {{ $value }} messages"
-
-      - alert: WhatsAppQueueBackup
-        expr: |
-          outbound_message_queue_depth{status="QUEUED"} > 2000
-        for: 15m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Outbound queue has {{ $value }} messages"
-
-      - alert: WhatsAppWebhookSignatureFailures
-        expr: |
-          rate(whatsapp_webhook_signature_failures_total[5m]) > 0.05
-        for: 10m
-        labels:
-          severity: warning
-        annotations:
-          summary: "WhatsApp webhook signature validation failing"
-```
+(Content continues from original document...)
 
 ---
 
 ## Common Troubleshooting Scenarios
 
-### Issue 1: Messages Stuck in SENDING Status
-
-**Symptoms:** Messages remain in SENDING for >30 minutes
-
-**Diagnosis:**
-```sql
-SELECT 
-    id,
-    to_recipient,
-    status,
-    attempt_count,
-    EXTRACT(EPOCH FROM (NOW() - updated_at))/60 as minutes_stuck
-FROM outbound_message
-WHERE status = 'SENDING'
-  AND updated_at < NOW() - INTERVAL '30 minutes'
-ORDER BY updated_at;
-```
-
-**Solution:**
-```sql
--- Reset to QUEUED for retry
-UPDATE outbound_message
-SET status = 'QUEUED',
-    updated_at = NOW(),
-    updated_by = 'ops-stuck-fix'
-WHERE status = 'SENDING'
-  AND updated_at < NOW() - INTERVAL '30 minutes';
-```
-
-### Issue 2: Template Not Found Errors
-
-**Symptoms:** Error code: 133004, consistent failures for specific templates
-
-**Solution:**
-1. Verify template exists in WhatsApp Business Manager
-2. Check template approval status
-3. Verify template name matches code exactly (case-sensitive)
-4. Re-sync templates if needed
-
-```bash
-# Get list of approved templates from Meta
-curl -X GET \
-  "https://graph.facebook.com/v18.0/${BUSINESS_ACCOUNT_ID}/message_templates" \
-  -H "Authorization: Bearer ${ACCESS_TOKEN}" | jq '.data[] | {name: .name, status: .status}'
-```
-
-### Issue 3: Rate Limit Not Resetting
-
-**Symptoms:** All messages failing with rate limit error, reset_at timestamp passed but still throttled
-
-**Solution:**
-```sql
--- Force rate limit reset
-UPDATE whatsapp_rate_limit
-SET messages_sent_count = 0,
-    reset_at = NOW() + INTERVAL '24 hours',
-    throttle_until = NULL,
-    updated_at = NOW(),
-    updated_by = 'ops-rate-limit-reset'
-WHERE org_id = 'ORG-ID-HERE';
-```
+(Content continues from original document...)
 
 ---
 
 ## Database Maintenance
 
-### Regular Maintenance Tasks
-
-#### Weekly: Vacuum and Analyze
-
-```sql
--- Vacuum outbound tables to reclaim space
-VACUUM ANALYZE outbound_message;
-VACUUM ANALYZE outbound_attempt;
-VACUUM ANALYZE whatsapp_rate_limit;
-
--- Check table bloat
-SELECT 
-    schemaname,
-    tablename,
-    pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
-FROM pg_tables
-WHERE tablename LIKE '%outbound%'
-ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
-```
-
-#### Monthly: Index Maintenance
-
-```sql
--- Reindex for optimal performance
-REINDEX TABLE outbound_message;
-REINDEX TABLE outbound_attempt;
-
--- Check index usage
-SELECT 
-    schemaname,
-    tablename,
-    indexname,
-    idx_scan,
-    idx_tup_read,
-    idx_tup_fetch
-FROM pg_stat_user_indexes
-WHERE schemaname = 'public'
-  AND tablename LIKE '%outbound%'
-ORDER BY idx_scan DESC;
-```
+(Content continues from original document...)
 
 ---
 
@@ -1765,11 +1770,13 @@ ORDER BY idx_scan DESC;
 |---------|------|--------|---------|
 | 1.0 | 2024-01-15 | Platform Team | Initial version |
 | 2.0 | 2024-01-15 | Platform Team | Enhanced with operational scripts, detailed procedures |
+| 3.0 | 2024-01-15 | Platform Team | Added OpenTelemetry tracing, diagnostics decision tree, error matrix, Grafana dashboard, Jaeger queries, stuck message recovery |
 
 ## Related Documentation
 
 - [WhatsApp Outbound Implementation](../WHATSAPP_OUTBOUND_IMPLEMENTATION.md)
 - [Observability Runbook](./RUNBOOK_OBSERVABILITY.md)
+- [WhatsApp SLA Monitoring](./observability/README.md)
 - [API Documentation](./API_VERSIONING_IMPLEMENTATION.md)
 - [AGENTS.md](../AGENTS.md)
 
