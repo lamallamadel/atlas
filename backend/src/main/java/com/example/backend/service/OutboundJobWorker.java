@@ -41,6 +41,7 @@ public class OutboundJobWorker {
     private final OutboundAttemptRepository outboundAttemptRepository;
     private final List<OutboundMessageProvider> providers;
     private final WhatsAppRateLimitService whatsAppRateLimitService;
+    private final QuotaExceededHandler quotaExceededHandler;
     private final AuditEventService auditEventService;
     private final ActivityService activityService;
     private final MetricsService metricsService;
@@ -59,6 +60,7 @@ public class OutboundJobWorker {
             OutboundAttemptRepository outboundAttemptRepository,
             List<OutboundMessageProvider> providers,
             WhatsAppRateLimitService whatsAppRateLimitService,
+            QuotaExceededHandler quotaExceededHandler,
             AuditEventService auditEventService,
             ActivityService activityService,
             MetricsService metricsService,
@@ -69,6 +71,7 @@ public class OutboundJobWorker {
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.providers = providers;
         this.whatsAppRateLimitService = whatsAppRateLimitService;
+        this.quotaExceededHandler = quotaExceededHandler;
         this.auditEventService = auditEventService;
         this.activityService = activityService;
         this.metricsService = metricsService;
@@ -257,12 +260,19 @@ public class OutboundJobWorker {
             if (MessageChannel.WHATSAPP.equals(message.getChannel())
                     && shouldEnforceWhatsAppRateLimit(provider)) {
                 if (!whatsAppRateLimitService.checkAndConsumeQuota(message.getOrgId())) {
-                    handleFailure(
-                            message,
-                            attempt,
-                            "QUOTA_EXCEEDED",
-                            "WhatsApp quota exceeded or rate limited",
-                            true);
+                    WhatsAppRateLimitService.QuotaStatus status = 
+                            whatsAppRateLimitService.getQuotaStatus(message.getOrgId());
+                    quotaExceededHandler.handleQuotaExceeded(message, status.getResetAt());
+                    attempt.setStatus(OutboundAttemptStatus.FAILED);
+                    attempt.setErrorCode("QUOTA_EXCEEDED");
+                    attempt.setErrorMessage("WhatsApp quota exceeded");
+                    attempt.setNextRetryAt(status.getResetAt());
+                    outboundAttemptRepository.save(attempt);
+                    logger.warn(
+                            "WhatsApp quota exceeded for message {} (orgId={}). Message throttled until {}",
+                            message.getId(),
+                            message.getOrgId(),
+                            status.getResetAt());
                     return;
                 }
             }

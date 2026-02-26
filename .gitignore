@@ -461,6 +461,7 @@ backend/run-maven-install.js
 
 # Agent-created setup script (current session)
 setup-repo-packages.ps1
+SETUP_COMPLETE.md
 
 
 # ML Service
@@ -476,6 +477,7 @@ ml-service/*.log
 ml-service/.pytest_cache/
 ml-service/**/*.pkl
 ml-service/**/*.joblib
+ml-service/install-deps.ps1
 
 # Analytics and BI
 metabase-data/

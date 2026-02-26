@@ -1,14 +1,18 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.v2.*;
+import com.example.backend.entity.OrganizationSettings;
 import com.example.backend.entity.OutboundAttemptEntity;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.WhatsAppSessionWindow;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
+import com.example.backend.repository.OrganizationSettingsRepository;
 import com.example.backend.repository.OutboundAttemptRepository;
 import com.example.backend.repository.OutboundMessageRepository;
 import com.example.backend.repository.WhatsAppSessionWindowRepository;
+import com.example.backend.service.WhatsAppCostTrackingService;
+import com.example.backend.service.WhatsAppRateLimitService;
 import com.example.backend.service.WhatsAppSessionWindowService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +24,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,11 +36,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v2/diagnostics/whatsapp")
+@RequestMapping("/api/v1/admin/whatsapp")
 @PreAuthorize("hasRole('ADMIN')")
 @Tag(
-        name = "WhatsApp Diagnostics",
-        description = "Production diagnostics and monitoring endpoints for WhatsApp messaging (Admin only)")
+        name = "WhatsApp Admin",
+        description = "Administrative endpoints for WhatsApp quota management and diagnostics (Admin only)")
 public class WhatsAppDiagnosticsController {
 
     private static final Logger logger = LoggerFactory.getLogger(WhatsAppDiagnosticsController.class);
@@ -44,16 +49,25 @@ public class WhatsAppDiagnosticsController {
     private final OutboundMessageRepository outboundMessageRepository;
     private final OutboundAttemptRepository outboundAttemptRepository;
     private final WhatsAppSessionWindowService sessionWindowService;
+    private final WhatsAppRateLimitService rateLimitService;
+    private final WhatsAppCostTrackingService costTrackingService;
+    private final OrganizationSettingsRepository organizationSettingsRepository;
 
     public WhatsAppDiagnosticsController(
             WhatsAppSessionWindowRepository sessionWindowRepository,
             OutboundMessageRepository outboundMessageRepository,
             OutboundAttemptRepository outboundAttemptRepository,
-            WhatsAppSessionWindowService sessionWindowService) {
+            WhatsAppSessionWindowService sessionWindowService,
+            WhatsAppRateLimitService rateLimitService,
+            WhatsAppCostTrackingService costTrackingService,
+            OrganizationSettingsRepository organizationSettingsRepository) {
         this.sessionWindowRepository = sessionWindowRepository;
         this.outboundMessageRepository = outboundMessageRepository;
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.sessionWindowService = sessionWindowService;
+        this.rateLimitService = rateLimitService;
+        this.costTrackingService = costTrackingService;
+        this.organizationSettingsRepository = organizationSettingsRepository;
     }
 
     @GetMapping("/sessions")
@@ -298,6 +312,139 @@ public class WhatsAppDiagnosticsController {
                 patterns.size(), hours, totalFailures, failureRate);
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/quota-usage")
+    @Operation(
+            summary = "Get WhatsApp quota usage and cost projections",
+            description = "Returns real-time quota usage, utilization, and projected costs per organization")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Quota usage retrieved successfully",
+                        content = @Content(schema = @Schema(implementation = WhatsAppQuotaUsageResponse.class))),
+                @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+                @ApiResponse(responseCode = "401", description = "User is not authenticated")
+            })
+    public ResponseEntity<WhatsAppQuotaUsageResponse> getQuotaUsage(
+            @Parameter(description = "Filter by specific organization ID (optional)")
+            @RequestParam(required = false) String orgId) {
+
+        logger.debug("GET /api/v2/diagnostics/whatsapp/quota-usage - orgId={}", orgId);
+
+        List<WhatsAppQuotaUsageResponse.OrganizationQuotaUsage> usageList = new java.util.ArrayList<>();
+
+        List<OrganizationSettings> organizations;
+        if (orgId != null) {
+            organizations = organizationSettingsRepository.findByOrgId(orgId)
+                    .map(java.util.List::of)
+                    .orElse(java.util.Collections.emptyList());
+        } else {
+            organizations = organizationSettingsRepository.findAll();
+        }
+
+        LocalDateTime startOfDay = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        LocalDateTime startOfMonth = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+
+        for (OrganizationSettings org : organizations) {
+            WhatsAppRateLimitService.QuotaStatus quotaStatus = rateLimitService.getQuotaStatus(org.getOrgId());
+
+            WhatsAppQuotaUsageResponse.OrganizationQuotaUsage usage = new WhatsAppQuotaUsageResponse.OrganizationQuotaUsage();
+            usage.setOrgId(org.getOrgId());
+            usage.setQuotaTier(org.getWhatsappQuotaTier());
+            usage.setQuotaLimit(quotaStatus.getQuotaLimit());
+            usage.setMessagesSent(quotaStatus.getMessagesSent());
+            usage.setRemainingQuota(quotaStatus.getRemainingQuota());
+            usage.setThrottled(quotaStatus.isThrottled());
+            usage.setResetAt(quotaStatus.getResetAt());
+
+            if (quotaStatus.getQuotaLimit() > 0) {
+                usage.setUtilizationPercentage(
+                        (double) quotaStatus.getMessagesSent() / quotaStatus.getQuotaLimit() * 100.0);
+            } else {
+                usage.setUtilizationPercentage(0.0);
+            }
+
+            WhatsAppQuotaUsageResponse.CostProjection costProjection = new WhatsAppQuotaUsageResponse.CostProjection();
+            
+            java.math.BigDecimal costToday = costTrackingService.calculateProjectedCostForPeriod(org.getOrgId(), startOfDay);
+            java.math.BigDecimal costThisMonth = costTrackingService.calculateProjectedCostForPeriod(org.getOrgId(), startOfMonth);
+            Long conversationsToday = costTrackingService.countConversationsForPeriod(org.getOrgId(), startOfDay);
+            Long conversationsThisMonth = costTrackingService.countConversationsForPeriod(org.getOrgId(), startOfMonth);
+
+            costProjection.setTotalCostToday(costToday);
+            costProjection.setTotalCostThisMonth(costThisMonth);
+            costProjection.setConversationCountToday(conversationsToday);
+            costProjection.setConversationCountThisMonth(conversationsThisMonth);
+
+            int dayOfMonth = LocalDateTime.now().getDayOfMonth();
+            if (dayOfMonth > 0 && conversationsThisMonth > 0) {
+                double avgCostPerDay = costThisMonth.doubleValue() / dayOfMonth;
+                int daysInMonth = LocalDateTime.now().toLocalDate().lengthOfMonth();
+                java.math.BigDecimal projectedCost = java.math.BigDecimal.valueOf(avgCostPerDay * daysInMonth);
+                costProjection.setProjectedMonthlyCost(projectedCost);
+            } else {
+                costProjection.setProjectedMonthlyCost(costThisMonth);
+            }
+
+            java.util.Map<String, WhatsAppCostTrackingService.CostBreakdown> breakdown = 
+                    costTrackingService.getCostBreakdownByType(org.getOrgId(), startOfMonth);
+            
+            java.util.Map<String, WhatsAppQuotaUsageResponse.CostByType> costByTypeMap = new java.util.HashMap<>();
+            breakdown.forEach((type, bd) -> {
+                costByTypeMap.put(type, new WhatsAppQuotaUsageResponse.CostByType(
+                        bd.getConversationType(), bd.getConversationCount(), bd.getTotalCost()));
+            });
+            costProjection.setCostBreakdown(costByTypeMap);
+
+            usage.setCostProjection(costProjection);
+            usageList.add(usage);
+        }
+
+        WhatsAppQuotaUsageResponse response = new WhatsAppQuotaUsageResponse();
+        response.setOrganizations(usageList);
+        response.setTimestamp(LocalDateTime.now());
+
+        logger.info("Retrieved quota usage for {} organizations", usageList.size());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/quota-tier")
+    @Operation(
+            summary = "Update WhatsApp quota tier for an organization",
+            description = "Updates the tier for an organization (1: 1000/day, 2: 10000/day, 3: 100000/day, 4: unlimited)")
+    @ApiResponses(
+            value = {
+                @ApiResponse(responseCode = "200", description = "Quota tier updated successfully"),
+                @ApiResponse(responseCode = "400", description = "Invalid tier value"),
+                @ApiResponse(responseCode = "403", description = "Access denied - Admin role required"),
+                @ApiResponse(responseCode = "401", description = "User is not authenticated")
+            })
+    public ResponseEntity<Map<String, Object>> updateQuotaTier(
+            @Parameter(description = "Organization ID", required = true) @RequestParam String orgId,
+            @Parameter(description = "Quota tier (1-4)", required = true) @RequestParam Integer tier) {
+
+        logger.debug("POST /api/v1/admin/whatsapp/quota-tier - orgId={}, tier={}", orgId, tier);
+
+        try {
+            rateLimitService.updateOrganizationTier(orgId, tier);
+
+            Map<String, Object> response = new java.util.HashMap<>();
+            response.put("success", true);
+            response.put("orgId", orgId);
+            response.put("tier", tier);
+            response.put("quotaLimit", rateLimitService.getTierQuotaLimit(tier));
+            response.put("message", String.format("Quota tier updated to %d for organization %s", tier, orgId));
+
+            logger.info("Updated quota tier for orgId={} to tier {}", orgId, tier);
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> errorResponse = new java.util.HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
     }
 
     private String mapErrorCodeToMessage(String errorCode) {

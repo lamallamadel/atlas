@@ -6,7 +6,8 @@ public enum OutboundMessageStatus {
     SENT("sent"),
     DELIVERED("delivered"),
     FAILED("failed"),
-    CANCELLED("cancelled");
+    CANCELLED("cancelled"),
+    THROTTLED("throttled");
 
     private final String value;
 
