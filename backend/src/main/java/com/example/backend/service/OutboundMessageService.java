@@ -5,6 +5,7 @@ import com.example.backend.entity.Dossier;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.OutboundMessageStatus;
 import com.example.backend.observability.MetricsService;
@@ -60,6 +61,27 @@ public class OutboundMessageService {
             String subject,
             java.util.Map<String, Object> payloadJson,
             String idempotencyKey) {
+        return createOutboundMessage(
+                dossierId,
+                channel,
+                to,
+                templateCode,
+                subject,
+                payloadJson,
+                idempotencyKey,
+                ConsentementType.MARKETING);
+    }
+
+    @Transactional
+    public OutboundMessageEntity createOutboundMessage(
+            Long dossierId,
+            MessageChannel channel,
+            String to,
+            String templateCode,
+            String subject,
+            java.util.Map<String, Object> payloadJson,
+            String idempotencyKey,
+            ConsentementType consentType) {
 
         String orgId = TenantContext.getOrgId();
         if (orgId == null) {
@@ -92,7 +114,7 @@ public class OutboundMessageService {
                 throw new EntityNotFoundException("Dossier not found with id: " + dossierId);
             }
 
-            validateConsent(dossierId, channel);
+            validateConsent(dossierId, channel, consentType);
         }
 
         OutboundMessageEntity message = new OutboundMessageEntity();
@@ -137,8 +159,8 @@ public class OutboundMessageService {
                         saved.getId(),
                         "CREATED",
                         String.format(
-                                "Outbound message created: channel=%s, to=%s, template=%s",
-                                channel, to, templateCode));
+                                "Outbound message created: channel=%s, to=%s, template=%s, consentType=%s",
+                                channel, to, templateCode, consentType));
             } catch (Exception e) {
                 logger.warn("Failed to log audit event for outbound message creation", e);
             }
@@ -147,15 +169,20 @@ public class OutboundMessageService {
         return saved;
     }
 
-    private void validateConsent(Long dossierId, MessageChannel channel) {
+    private void validateConsent(
+            Long dossierId, MessageChannel channel, ConsentementType consentType) {
         ConsentementChannel consentChannel = mapMessageChannelToConsentChannel(channel);
 
         List<ConsentementEntity> consents =
-                consentementRepository.findByDossierIdAndChannelOrderByUpdatedAtDesc(
-                        dossierId, consentChannel);
+                consentementRepository.findByDossierIdAndChannelAndConsentTypeOrderByUpdatedAtDesc(
+                        dossierId, consentChannel, consentType);
 
         if (consents.isEmpty()) {
-            logger.warn("No consent found for dossier {} and channel {}", dossierId, channel);
+            logger.warn(
+                    "No consent found for dossier {}, channel {}, type {}",
+                    dossierId,
+                    channel,
+                    consentType);
 
             if (auditEventService != null) {
                 try {
@@ -164,8 +191,8 @@ public class OutboundMessageService {
                             dossierId,
                             "BLOCKED_BY_POLICY",
                             String.format(
-                                    "Outbound message blocked: no consent for channel %s",
-                                    channel));
+                                    "Outbound message blocked: no consent for channel %s, type %s",
+                                    channel, consentType));
                 } catch (Exception e) {
                     logger.warn("Failed to log audit event for blocked message", e);
                 }
@@ -174,17 +201,18 @@ public class OutboundMessageService {
             throw new ResponseStatusException(
                     HttpStatus.UNPROCESSABLE_ENTITY,
                     String.format(
-                            "Consent required: No consent found for channel %s. Message blocked by policy.",
-                            channel));
+                            "Consent required: No consent found for channel %s and type %s. Message blocked by policy.",
+                            channel, consentType));
         }
 
         ConsentementEntity latestConsent = consents.get(0);
 
         if (latestConsent.getStatus() != ConsentementStatus.GRANTED) {
             logger.warn(
-                    "Consent not granted for dossier {} and channel {}. Status: {}",
+                    "Consent not granted for dossier {}, channel {}, type {}. Status: {}",
                     dossierId,
                     channel,
+                    consentType,
                     latestConsent.getStatus());
 
             if (auditEventService != null) {
@@ -194,8 +222,8 @@ public class OutboundMessageService {
                             dossierId,
                             "BLOCKED_BY_POLICY",
                             String.format(
-                                    "Outbound message blocked: consent status is %s for channel %s",
-                                    latestConsent.getStatus(), channel));
+                                    "Outbound message blocked: consent status is %s for channel %s, type %s",
+                                    latestConsent.getStatus(), channel, consentType));
                 } catch (Exception e) {
                     logger.warn("Failed to log audit event for blocked message", e);
                 }
@@ -204,11 +232,119 @@ public class OutboundMessageService {
             throw new ResponseStatusException(
                     HttpStatus.UNPROCESSABLE_ENTITY,
                     String.format(
-                            "Consent required: Consent status is %s for channel %s. Message blocked by policy.",
-                            latestConsent.getStatus(), channel));
+                            "Consent required: Consent status is %s for channel %s and type %s. Message blocked by policy.",
+                            latestConsent.getStatus(), channel, consentType));
         }
 
-        logger.debug("Consent validation passed for dossier {} and channel {}", dossierId, channel);
+        if (latestConsent.getExpiresAt() != null
+                && latestConsent.getExpiresAt().isBefore(LocalDateTime.now())) {
+            logger.warn(
+                    "Consent expired for dossier {}, channel {}, type {}. Expired at: {}",
+                    dossierId,
+                    channel,
+                    consentType,
+                    latestConsent.getExpiresAt());
+
+            if (auditEventService != null) {
+                try {
+                    auditEventService.logEvent(
+                            "DOSSIER",
+                            dossierId,
+                            "BLOCKED_BY_POLICY",
+                            String.format(
+                                    "Outbound message blocked: consent expired on %s for channel %s, type %s",
+                                    latestConsent.getExpiresAt(), channel, consentType));
+                } catch (Exception e) {
+                    logger.warn("Failed to log audit event for blocked message", e);
+                }
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    String.format(
+                            "Consent required: Consent expired on %s for channel %s and type %s. Message blocked by policy.",
+                            latestConsent.getExpiresAt(), channel, consentType));
+        }
+
+        if (consentType == ConsentementType.MARKETING) {
+            validateMarketingConsentMetadata(latestConsent, dossierId, channel);
+        }
+
+        logger.debug(
+                "Consent validation passed for dossier {}, channel {}, type {}",
+                dossierId,
+                channel,
+                consentType);
+    }
+
+    private void validateMarketingConsentMetadata(
+            ConsentementEntity consent, Long dossierId, MessageChannel channel) {
+        java.util.Map<String, Object> meta = consent.getMeta();
+
+        if (meta == null) {
+            logger.warn(
+                    "MARKETING consent missing metadata for dossier {}, channel {}",
+                    dossierId,
+                    channel);
+
+            if (auditEventService != null) {
+                try {
+                    auditEventService.logEvent(
+                            "DOSSIER",
+                            dossierId,
+                            "BLOCKED_BY_POLICY",
+                            String.format(
+                                    "Outbound message blocked: MARKETING consent missing metadata for channel %s",
+                                    channel));
+                } catch (Exception e) {
+                    logger.warn("Failed to log audit event for blocked message", e);
+                }
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "GDPR compliance violation: MARKETING consent requires metadata (optInTimestamp, ipAddress, doubleOptInConfirmed)");
+        }
+
+        Object optInTimestamp = meta.get("optInTimestamp");
+        Object ipAddress = meta.get("ipAddress");
+        Object doubleOptInConfirmed = meta.get("doubleOptInConfirmed");
+
+        if (optInTimestamp == null || ipAddress == null || doubleOptInConfirmed == null) {
+            logger.warn(
+                    "MARKETING consent metadata incomplete for dossier {}, channel {}. optInTimestamp={}, ipAddress={}, doubleOptInConfirmed={}",
+                    dossierId,
+                    channel,
+                    optInTimestamp,
+                    ipAddress,
+                    doubleOptInConfirmed);
+
+            if (auditEventService != null) {
+                try {
+                    auditEventService.logEvent(
+                            "DOSSIER",
+                            dossierId,
+                            "BLOCKED_BY_POLICY",
+                            String.format(
+                                    "Outbound message blocked: MARKETING consent incomplete metadata for channel %s (optInTimestamp=%s, ipAddress=%s, doubleOptInConfirmed=%s)",
+                                    channel,
+                                    optInTimestamp != null,
+                                    ipAddress != null,
+                                    doubleOptInConfirmed != null));
+                } catch (Exception e) {
+                    logger.warn("Failed to log audit event for blocked message", e);
+                }
+            }
+
+            throw new ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "GDPR compliance violation: MARKETING consent requires complete metadata (optInTimestamp, ipAddress, doubleOptInConfirmed)");
+        }
+
+        logger.debug(
+                "MARKETING consent metadata validation passed for dossier {}, channel {}",
+                dossierId,
+                channel);
     }
 
     private ConsentementChannel mapMessageChannelToConsentChannel(MessageChannel channel) {

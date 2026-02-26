@@ -39,16 +39,19 @@ public class OutboundMessageMetricsService {
     private final Map<String, AtomicLong> queueDepthByChannel = new ConcurrentHashMap<>();
     private final Map<String, AtomicLong> retryCountsByChannel = new ConcurrentHashMap<>();
     private final Map<String, DistributionSummary> latencySummaries = new ConcurrentHashMap<>();
-    private final Map<String, DistributionSummary> sendLatencyHistograms = new ConcurrentHashMap<>();
+    private final Map<String, DistributionSummary> sendLatencyHistograms =
+            new ConcurrentHashMap<>();
     private final Map<String, DistributionSummary> deliveredLatencyHistograms =
             new ConcurrentHashMap<>();
-    private final Map<String, DistributionSummary> readLatencyHistograms = new ConcurrentHashMap<>();
+    private final Map<String, DistributionSummary> readLatencyHistograms =
+            new ConcurrentHashMap<>();
     private final AtomicLong deadLetterQueueSize = new AtomicLong(0);
     private final AtomicLong totalQueuedMessages = new AtomicLong(0);
     private final AtomicLong whatsappQuotaUsed = new AtomicLong(0);
     private final AtomicLong whatsappQuotaLimit = new AtomicLong(1000);
     private final AtomicLong whatsappQuotaRemaining = new AtomicLong(1000);
-    private final Map<String, AtomicLong> sessionWindowExpirationSeconds = new ConcurrentHashMap<>();
+    private final Map<String, AtomicLong> sessionWindowExpirationSeconds =
+            new ConcurrentHashMap<>();
     private final AtomicLong stuckSendingMessagesCount = new AtomicLong(0);
 
     public OutboundMessageMetricsService(

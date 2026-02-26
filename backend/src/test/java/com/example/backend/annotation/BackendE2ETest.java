@@ -23,9 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 @ActiveProfiles("test")
 @Tag("backend-e2e")
-@Import({
-        TestSecurityConfig.class
-})
+@Import({TestSecurityConfig.class})
 @TestExecutionListeners(listeners = TestExecutionLogger.class, mergeMode = MERGE_WITH_DEFAULTS)
-public @interface BackendE2ETest {
-}
+public @interface BackendE2ETest {}

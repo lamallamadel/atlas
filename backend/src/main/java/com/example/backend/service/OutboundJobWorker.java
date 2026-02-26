@@ -35,12 +35,13 @@ import org.springframework.transaction.annotation.Transactional;
 public class OutboundJobWorker {
 
     private static final Logger logger = LoggerFactory.getLogger(OutboundJobWorker.class);
-    private static final int[] BACKOFF_MINUTES = { 1, 5, 15, 60, 360 };
+    private static final int[] BACKOFF_MINUTES = {1, 5, 15, 60, 360};
 
     private final OutboundMessageRepository outboundMessageRepository;
     private final OutboundAttemptRepository outboundAttemptRepository;
     private final List<OutboundMessageProvider> providers;
     private final WhatsAppRateLimitService whatsAppRateLimitService;
+    private final QuotaExceededHandler quotaExceededHandler;
     private final AuditEventService auditEventService;
     private final ActivityService activityService;
     private final MetricsService metricsService;
@@ -59,6 +60,7 @@ public class OutboundJobWorker {
             OutboundAttemptRepository outboundAttemptRepository,
             List<OutboundMessageProvider> providers,
             WhatsAppRateLimitService whatsAppRateLimitService,
+            QuotaExceededHandler quotaExceededHandler,
             AuditEventService auditEventService,
             ActivityService activityService,
             MetricsService metricsService,
@@ -69,6 +71,7 @@ public class OutboundJobWorker {
         this.outboundAttemptRepository = outboundAttemptRepository;
         this.providers = providers;
         this.whatsAppRateLimitService = whatsAppRateLimitService;
+        this.quotaExceededHandler = quotaExceededHandler;
         this.auditEventService = auditEventService;
         this.activityService = activityService;
         this.metricsService = metricsService;
@@ -91,8 +94,9 @@ public class OutboundJobWorker {
         try {
             recoverStaleMessages();
 
-            List<OutboundMessageEntity> messages = outboundMessageRepository.findPendingMessages(
-                    OutboundMessageStatus.QUEUED, PageRequest.of(0, batchSize));
+            List<OutboundMessageEntity> messages =
+                    outboundMessageRepository.findPendingMessages(
+                            OutboundMessageStatus.QUEUED, PageRequest.of(0, batchSize));
 
             if (messages.isEmpty()) {
                 return;
@@ -101,7 +105,8 @@ public class OutboundJobWorker {
             logger.info("Processing {} pending outbound messages", messages.size());
 
             for (OutboundMessageEntity message : messages) {
-                String messageCorrelationId = "msg-" + message.getId() + "-" + UUID.randomUUID().toString();
+                String messageCorrelationId =
+                        "msg-" + message.getId() + "-" + UUID.randomUUID().toString();
                 MDC.put("correlationId", messageCorrelationId);
                 MDC.put("messageId", String.valueOf(message.getId()));
                 MDC.put("channel", message.getChannel().name());
@@ -147,10 +152,11 @@ public class OutboundJobWorker {
 
     private void recoverStaleMessages() {
         LocalDateTime staleThreshold = LocalDateTime.now().minusMinutes(10);
-        List<OutboundMessageEntity> staleMessages = outboundMessageRepository.findStaleMessages(
-                OutboundMessageStatus.SENDING,
-                staleThreshold,
-                PageRequest.of(0, batchSize));
+        List<OutboundMessageEntity> staleMessages =
+                outboundMessageRepository.findStaleMessages(
+                        OutboundMessageStatus.SENDING,
+                        staleThreshold,
+                        PageRequest.of(0, batchSize));
 
         if (!staleMessages.isEmpty()) {
             logger.warn(
@@ -169,8 +175,9 @@ public class OutboundJobWorker {
             return true;
         }
 
-        List<OutboundAttemptEntity> attempts = outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(
-                message.getId());
+        List<OutboundAttemptEntity> attempts =
+                outboundAttemptRepository.findByOutboundMessageIdOrderByAttemptNoAsc(
+                        message.getId());
         if (attempts.isEmpty()) {
             return true;
         }
@@ -257,12 +264,19 @@ public class OutboundJobWorker {
             if (MessageChannel.WHATSAPP.equals(message.getChannel())
                     && shouldEnforceWhatsAppRateLimit(provider)) {
                 if (!whatsAppRateLimitService.checkAndConsumeQuota(message.getOrgId())) {
-                    handleFailure(
-                            message,
-                            attempt,
-                            "QUOTA_EXCEEDED",
-                            "WhatsApp quota exceeded or rate limited",
-                            true);
+                    WhatsAppRateLimitService.QuotaStatus status =
+                            whatsAppRateLimitService.getQuotaStatus(message.getOrgId());
+                    quotaExceededHandler.handleQuotaExceeded(message, status.getResetAt());
+                    attempt.setStatus(OutboundAttemptStatus.FAILED);
+                    attempt.setErrorCode("QUOTA_EXCEEDED");
+                    attempt.setErrorMessage("WhatsApp quota exceeded");
+                    attempt.setNextRetryAt(status.getResetAt());
+                    outboundAttemptRepository.save(attempt);
+                    logger.warn(
+                            "WhatsApp quota exceeded for message {} (orgId={}). Message throttled until {}",
+                            message.getId(),
+                            message.getOrgId(),
+                            status.getResetAt());
                     return;
                 }
             }
@@ -443,9 +457,10 @@ public class OutboundJobWorker {
     private void logMessageSentActivity(OutboundMessageEntity message, ProviderSendResult result) {
         if (activityService != null && message.getDossierId() != null) {
             try {
-                String description = String.format(
-                        "Outbound %s message sent to %s",
-                        message.getChannel(), message.getTo());
+                String description =
+                        String.format(
+                                "Outbound %s message sent to %s",
+                                message.getChannel(), message.getTo());
 
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("outboundMessageId", message.getId());
@@ -471,9 +486,10 @@ public class OutboundJobWorker {
             OutboundMessageEntity message, String errorCode, String errorMessage, String reason) {
         if (activityService != null && message.getDossierId() != null) {
             try {
-                String description = String.format(
-                        "Outbound %s message failed: %s",
-                        message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
+                String description =
+                        String.format(
+                                "Outbound %s message failed: %s",
+                                message.getChannel(), errorCode != null ? errorCode : "UNKNOWN");
 
                 Map<String, Object> metadata = new HashMap<>();
                 metadata.put("outboundMessageId", message.getId());

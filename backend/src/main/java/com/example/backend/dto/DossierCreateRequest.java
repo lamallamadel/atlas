@@ -63,6 +63,10 @@ public class DossierCreateRequest {
     @Valid
     private PartiePrenanteRequest initialParty;
 
+    @Schema(description = "Preferred locale for communications", example = "fr_FR", nullable = true)
+    @Size(max = 10, message = "Locale must not exceed 10 characters")
+    private String locale;
+
     public DossierCreateRequest() {}
 
     public Long getAnnonceId() {
@@ -159,5 +163,13 @@ public class DossierCreateRequest {
 
     public void setWonReason(String wonReason) {
         this.wonReason = wonReason;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

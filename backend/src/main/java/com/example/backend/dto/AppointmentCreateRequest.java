@@ -1,10 +1,12 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class AppointmentCreateRequest {
 
@@ -27,6 +29,16 @@ public class AppointmentCreateRequest {
     private String notes;
 
     private AppointmentStatus status;
+
+    private List<String> reminderChannels;
+
+    @Size(max = 255, message = "Template code must not exceed 255 characters")
+    private String templateCode;
+
+    private ReminderStrategy reminderStrategy;
+
+    @Size(max = 10, message = "Locale must not exceed 10 characters")
+    private String locale;
 
     public AppointmentCreateRequest() {}
 
@@ -92,5 +104,37 @@ public class AppointmentCreateRequest {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public List<String> getReminderChannels() {
+        return reminderChannels;
+    }
+
+    public void setReminderChannels(List<String> reminderChannels) {
+        this.reminderChannels = reminderChannels;
+    }
+
+    public String getTemplateCode() {
+        return templateCode;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public ReminderStrategy getReminderStrategy() {
+        return reminderStrategy;
+    }
+
+    public void setReminderStrategy(ReminderStrategy reminderStrategy) {
+        this.reminderStrategy = reminderStrategy;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

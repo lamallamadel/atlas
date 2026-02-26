@@ -4,6 +4,7 @@ import com.example.backend.entity.enums.ConsentementChannel;
 import com.example.backend.entity.enums.ConsentementStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import jakarta.validation.constraints.NotNull;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 public class ConsentementCreateRequest {
@@ -19,6 +20,8 @@ public class ConsentementCreateRequest {
 
     @NotNull(message = "Status is required")
     private ConsentementStatus status;
+
+    private LocalDateTime expiresAt;
 
     private Map<String, Object> meta;
 
@@ -54,6 +57,14 @@ public class ConsentementCreateRequest {
 
     public void setStatus(ConsentementStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     public Map<String, Object> getMeta() {

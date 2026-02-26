@@ -1,9 +1,11 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class AppointmentUpdateRequest {
 
@@ -21,6 +23,13 @@ public class AppointmentUpdateRequest {
     private String notes;
 
     private AppointmentStatus status;
+
+    private List<String> reminderChannels;
+
+    @Size(max = 255, message = "Template code must not exceed 255 characters")
+    private String templateCode;
+
+    private ReminderStrategy reminderStrategy;
 
     public AppointmentUpdateRequest() {}
 
@@ -78,5 +87,29 @@ public class AppointmentUpdateRequest {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public List<String> getReminderChannels() {
+        return reminderChannels;
+    }
+
+    public void setReminderChannels(List<String> reminderChannels) {
+        this.reminderChannels = reminderChannels;
+    }
+
+    public String getTemplateCode() {
+        return templateCode;
+    }
+
+    public void setTemplateCode(String templateCode) {
+        this.templateCode = templateCode;
+    }
+
+    public ReminderStrategy getReminderStrategy() {
+        return reminderStrategy;
+    }
+
+    public void setReminderStrategy(ReminderStrategy reminderStrategy) {
+        this.reminderStrategy = reminderStrategy;
     }
 }

@@ -100,6 +100,10 @@ public interface OutboundMessageRepository extends JpaRepository<OutboundMessage
             @Param("afterTime") LocalDateTime afterTime,
             Pageable pageable);
 
-    long countByStatusAndUpdatedAtBefore(
-            OutboundMessageStatus status, LocalDateTime beforeTime);
+    long countByStatusAndUpdatedAtBefore(OutboundMessageStatus status, LocalDateTime beforeTime);
+
+    @Query(
+            "SELECT om FROM OutboundMessageEntity om WHERE om.orgId = :orgId AND om.status = :status")
+    List<OutboundMessageEntity> findByOrgIdAndStatus(
+            @Param("orgId") String orgId, @Param("status") OutboundMessageStatus status);
 }

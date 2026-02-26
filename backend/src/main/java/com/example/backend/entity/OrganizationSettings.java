@@ -27,6 +27,9 @@ public class OrganizationSettings {
     @Column(name = "settings", columnDefinition = "jsonb")
     private Map<String, Object> settings;
 
+    @Column(name = "whatsapp_quota_tier", nullable = false)
+    private Integer whatsappQuotaTier = 1;
+
     @Version
     @Column(name = "version", nullable = false)
     private Integer version = 1;
@@ -96,5 +99,13 @@ public class OrganizationSettings {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Integer getWhatsappQuotaTier() {
+        return whatsappQuotaTier;
+    }
+
+    public void setWhatsappQuotaTier(Integer whatsappQuotaTier) {
+        this.whatsappQuotaTier = whatsappQuotaTier;
     }
 }

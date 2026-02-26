@@ -16,6 +16,7 @@ export interface AppointmentCreateRequest {
   assignedTo?: string;
   notes?: string;
   status?: AppointmentStatus;
+  locale?: string;
 }
 
 export interface AppointmentUpdateRequest {

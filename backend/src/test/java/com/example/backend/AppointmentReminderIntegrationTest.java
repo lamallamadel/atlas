@@ -3,17 +3,24 @@ package com.example.backend;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.backend.entity.AppointmentEntity;
+import com.example.backend.entity.ConsentementEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.OutboundMessageEntity;
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ConsentementChannel;
+import com.example.backend.entity.enums.ConsentementStatus;
+import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.AppointmentRepository;
+import com.example.backend.repository.ConsentementRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.repository.OutboundMessageRepository;
 import com.example.backend.service.AppointmentReminderScheduler;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class AppointmentReminderIntegrationTest {
 
-    @Autowired
-    private AppointmentReminderScheduler scheduler;
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-    @Autowired
-    private DossierRepository dossierRepository;
-    @Autowired
-    private OutboundMessageRepository outboundMessageRepository;
-    @Autowired
-    private com.example.backend.repository.ConsentementRepository consentRepository;
+    @Autowired private AppointmentReminderScheduler scheduler;
+    @Autowired private AppointmentRepository appointmentRepository;
+    @Autowired private DossierRepository dossierRepository;
+    @Autowired private OutboundMessageRepository outboundMessageRepository;
+    @Autowired private ConsentementRepository consentementRepository;
 
     private Dossier testDossier;
 
@@ -52,13 +54,18 @@ class AppointmentReminderIntegrationTest {
         testDossier.setStatus(DossierStatus.NEW);
         testDossier = dossierRepository.save(testDossier);
 
-        com.example.backend.entity.ConsentementEntity consent = new com.example.backend.entity.ConsentementEntity();
+        ConsentementEntity consent = new ConsentementEntity();
         consent.setOrgId("org-test");
         consent.setDossier(testDossier);
-        consent.setChannel(com.example.backend.entity.enums.ConsentementChannel.WHATSAPP);
-        consent.setConsentType(com.example.backend.entity.enums.ConsentementType.TRANSACTIONNEL);
-        consent.setStatus(com.example.backend.entity.enums.ConsentementStatus.GRANTED);
-        consentRepository.save(consent);
+        consent.setChannel(ConsentementChannel.WHATSAPP);
+        consent.setConsentType(ConsentementType.TRANSACTIONNEL);
+        consent.setStatus(ConsentementStatus.GRANTED);
+
+        Map<String, Object> meta = new HashMap<>();
+        meta.put("ipAddress", "127.0.0.1");
+        consent.setMeta(meta);
+
+        consentementRepository.save(consent);
     }
 
     @Test
@@ -83,7 +90,8 @@ class AppointmentReminderIntegrationTest {
 
         // Assert
         // 1. Check reminder flag is updated
-        AppointmentEntity updatedAppointment = appointmentRepository.findById(appointment.getId()).orElseThrow();
+        AppointmentEntity updatedAppointment =
+                appointmentRepository.findById(appointment.getId()).orElseThrow();
         assertThat(updatedAppointment.getReminderSent()).isTrue();
 
         // 2. Check outbound message is queued

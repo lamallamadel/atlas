@@ -11,6 +11,7 @@ public class ConsentementMapper {
         consentement.setChannel(request.getChannel());
         consentement.setConsentType(request.getConsentType());
         consentement.setStatus(request.getStatus());
+        consentement.setExpiresAt(request.getExpiresAt());
         consentement.setMeta(request.getMeta());
         return consentement;
     }
@@ -24,6 +25,7 @@ public class ConsentementMapper {
         response.setChannel(consentement.getChannel());
         response.setConsentType(consentement.getConsentType());
         response.setStatus(consentement.getStatus());
+        response.setExpiresAt(consentement.getExpiresAt());
         response.setMeta(consentement.getMeta());
         response.setCreatedAt(consentement.getCreatedAt());
         response.setUpdatedAt(consentement.getUpdatedAt());

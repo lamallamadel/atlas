@@ -2,7 +2,9 @@ package com.example.backend.service;
 
 import com.example.backend.entity.WhatsAppTemplate;
 import com.example.backend.entity.enums.TemplateStatus;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +34,15 @@ public class MetaBusinessApiService {
     }
 
     public String submitTemplateForApproval(WhatsAppTemplate template) {
+        return submitTemplate(
+                template.getName(),
+                template.getLanguage(),
+                template.getCategory().getValue(),
+                template.getComponents());
+    }
+
+    public String submitTemplate(
+            String name, String language, String category, List<Map<String, Object>> components) {
         if (accessToken.isEmpty() || wabaId.isEmpty()) {
             logger.warn(
                     "Meta Business API credentials not configured. Skipping actual submission.");
@@ -42,10 +53,10 @@ public class MetaBusinessApiService {
             String url = String.format("%s/%s/message_templates", apiUrl, wabaId);
 
             Map<String, Object> requestBody = new HashMap<>();
-            requestBody.put("name", template.getName());
-            requestBody.put("language", template.getLanguage());
-            requestBody.put("category", template.getCategory().getValue());
-            requestBody.put("components", template.getComponents());
+            requestBody.put("name", name);
+            requestBody.put("language", language);
+            requestBody.put("category", category);
+            requestBody.put("components", components);
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
@@ -68,6 +79,81 @@ public class MetaBusinessApiService {
             throw new RuntimeException(
                     "Failed to submit template to Meta Business API: " + e.getMessage(), e);
         }
+    }
+
+    public String submitTemplateTranslation(
+            String templateName,
+            String languageCode,
+            String category,
+            List<Map<String, Object>> components,
+            boolean setRtlDirection) {
+        if (accessToken.isEmpty() || wabaId.isEmpty()) {
+            logger.warn(
+                    "Meta Business API credentials not configured. Skipping actual submission.");
+            return "MOCK_TRANSLATION_" + System.currentTimeMillis();
+        }
+
+        try {
+            String url = String.format("%s/%s/message_templates", apiUrl, wabaId);
+
+            List<Map<String, Object>> processedComponents = components;
+            if (setRtlDirection) {
+                processedComponents = addRtlDirectionMetadata(components);
+            }
+
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("name", templateName);
+            requestBody.put("language", languageCode);
+            requestBody.put("category", category);
+            requestBody.put("components", processedComponents);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(accessToken);
+
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<Map> response =
+                    restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+
+            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+                String submissionId = (String) response.getBody().get("id");
+                logger.info(
+                        "Template translation submitted to Meta Business API with ID: {} for language: {}",
+                        submissionId,
+                        languageCode);
+                return submissionId;
+            } else {
+                throw new RuntimeException(
+                        "Failed to submit template translation to Meta Business API");
+            }
+        } catch (Exception e) {
+            logger.error("Error submitting template translation to Meta Business API", e);
+            throw new RuntimeException(
+                    "Failed to submit template translation to Meta Business API: " + e.getMessage(),
+                    e);
+        }
+    }
+
+    private List<Map<String, Object>> addRtlDirectionMetadata(
+            List<Map<String, Object>> components) {
+        if (components == null) {
+            return components;
+        }
+
+        List<Map<String, Object>> processedComponents = new ArrayList<>();
+        for (Map<String, Object> component : components) {
+            Map<String, Object> processedComponent = new HashMap<>(component);
+            String type = (String) component.get("type");
+
+            if ("BODY".equalsIgnoreCase(type) || "HEADER".equalsIgnoreCase(type)) {
+                processedComponent.put("text_direction", "RTL");
+            }
+
+            processedComponents.add(processedComponent);
+        }
+
+        return processedComponents;
     }
 
     public TemplateApprovalStatus pollApprovalStatus(String submissionId) {

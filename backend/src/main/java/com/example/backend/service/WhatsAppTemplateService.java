@@ -9,16 +9,21 @@ import com.example.backend.exception.ResourceNotFoundException;
 import com.example.backend.repository.TemplateVariableRepository;
 import com.example.backend.repository.WhatsAppTemplateRepository;
 import com.example.backend.repository.WhatsAppTemplateVersionRepository;
+import com.example.backend.util.TemplateVariableValidator;
 import com.example.backend.util.TenantContext;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class WhatsAppTemplateService {
+
+    private static final Logger logger = LoggerFactory.getLogger(WhatsAppTemplateService.class);
 
     private final WhatsAppTemplateRepository templateRepository;
     private final TemplateVariableRepository variableRepository;
@@ -67,6 +72,55 @@ public class WhatsAppTemplateService {
                                         String.format(
                                                 "Template not found with name: %s and language: %s",
                                                 name, language)));
+    }
+
+    @Transactional(readOnly = true)
+    public WhatsAppTemplate getLocalizedTemplate(String templateName, String locale) {
+        if (templateName == null || templateName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Template name cannot be null or empty");
+        }
+
+        final String effectiveLocale =
+                (locale == null || locale.trim().isEmpty()) ? "fr_FR" : locale;
+        String language = localeToLanguageCode(effectiveLocale);
+
+        return templateRepository
+                .findByNameAndLanguage(templateName, language)
+                .or(
+                        () -> {
+                            logger.debug(
+                                    "Template '{}' not found for locale '{}', falling back to French",
+                                    templateName,
+                                    effectiveLocale);
+                            return templateRepository.findByNameAndLanguage(templateName, "fr_FR");
+                        })
+                .or(
+                        () -> {
+                            logger.debug(
+                                    "Template '{}' not found for French, falling back to English",
+                                    templateName);
+                            return templateRepository.findByNameAndLanguage(templateName, "en_US");
+                        })
+                .orElseThrow(
+                        () ->
+                                new ResourceNotFoundException(
+                                        String.format(
+                                                "Template not found with name: %s for locale: %s or fallback languages",
+                                                templateName, effectiveLocale)));
+    }
+
+    private String localeToLanguageCode(String locale) {
+        if (locale == null) {
+            return "fr_FR";
+        }
+        return switch (locale.toLowerCase()) {
+            case "fr_fr", "fr_be", "fr_ch", "fr_ca" -> "fr_FR";
+            case "en_us", "en_gb", "en_ca", "en_au" -> "en_US";
+            case "ar_ma", "ar_sa", "ar_ae", "ar_eg" -> "ar_MA";
+            case "es_es", "es_mx" -> "es_ES";
+            case "de_de", "de_at", "de_ch" -> "de_DE";
+            default -> locale;
+        };
     }
 
     @Transactional
@@ -351,5 +405,243 @@ public class WhatsAppTemplateService {
         versionRepository.save(version);
 
         return templateRepository.save(template);
+    }
+
+    @Transactional
+    public WhatsAppTemplate submitTemplateToMeta(Long id) {
+        WhatsAppTemplate template = getTemplateById(id);
+
+        validationService.validateTemplateFormat(template);
+
+        TemplateVariableValidator.ValidationResult validationResult =
+                TemplateVariableValidator.validateMetaNaming(template.getComponents());
+
+        if (!validationResult.isValid()) {
+            throw new IllegalArgumentException(
+                    "Template validation failed: "
+                            + String.join(", ", validationResult.getErrors()));
+        }
+
+        String submissionId =
+                metaBusinessApiService.submitTemplate(
+                        template.getName(),
+                        template.getLanguage(),
+                        template.getCategory().getValue(),
+                        template.getComponents());
+
+        template.setMetaSubmissionId(submissionId);
+        template.setStatus(TemplateStatus.PENDING);
+
+        return templateRepository.save(template);
+    }
+
+    @Transactional
+    public WhatsAppTemplate updateTemplateStatus(
+            String messageTemplateId, TemplateStatus status, String rejectionReason) {
+        WhatsAppTemplate template =
+                templateRepository
+                        .findByWhatsAppTemplateId(messageTemplateId)
+                        .or(() -> templateRepository.findByMetaSubmissionId(messageTemplateId))
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                "Template not found with ID: "
+                                                        + messageTemplateId));
+
+        template.setStatus(status);
+
+        if (status == TemplateStatus.APPROVED) {
+            template.setWhatsAppTemplateId(messageTemplateId);
+            template.setRejectionReason(null);
+        } else if (status == TemplateStatus.REJECTED) {
+            template.setRejectionReason(rejectionReason);
+        }
+
+        return templateRepository.save(template);
+    }
+
+    @Transactional
+    public WhatsAppTemplate updateTemplateStatusByNameAndLanguage(
+            String name,
+            String language,
+            TemplateStatus status,
+            String messageTemplateId,
+            String rejectionReason) {
+        WhatsAppTemplate template =
+                templateRepository
+                        .findByNameAndLanguage(name, language)
+                        .orElseThrow(
+                                () ->
+                                        new ResourceNotFoundException(
+                                                String.format(
+                                                        "Template not found with name: %s and language: %s",
+                                                        name, language)));
+
+        template.setStatus(status);
+
+        if (status == TemplateStatus.APPROVED) {
+            template.setWhatsAppTemplateId(messageTemplateId);
+            template.setRejectionReason(null);
+        } else if (status == TemplateStatus.REJECTED) {
+            template.setRejectionReason(rejectionReason);
+        }
+
+        return templateRepository.save(template);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> previewTemplate(Long id, Map<String, String> variables) {
+        WhatsAppTemplate template = getTemplateById(id);
+        return renderTemplateWithVariables(template.getComponents(), variables);
+    }
+
+    private List<Map<String, Object>> renderTemplateWithVariables(
+            List<Map<String, Object>> components, Map<String, String> variables) {
+        if (components == null) {
+            return null;
+        }
+
+        List<Map<String, Object>> renderedComponents = new ArrayList<>();
+
+        for (Map<String, Object> component : components) {
+            Map<String, Object> renderedComponent = new HashMap<>(component);
+            String type = (String) component.get("type");
+
+            if (type != null) {
+                switch (type.toUpperCase()) {
+                    case "HEADER":
+                        String format = (String) component.get("format");
+                        if ("TEXT".equalsIgnoreCase(format)) {
+                            String text = (String) component.get("text");
+                            if (text != null) {
+                                renderedComponent.put("text", replaceVariables(text, variables));
+                            }
+                        }
+                        break;
+
+                    case "BODY":
+                        String bodyText = (String) component.get("text");
+                        if (bodyText != null) {
+                            renderedComponent.put("text", replaceVariables(bodyText, variables));
+                        }
+                        break;
+
+                    case "BUTTONS":
+                        @SuppressWarnings("unchecked")
+                        List<Map<String, Object>> buttons =
+                                (List<Map<String, Object>>) component.get("buttons");
+                        if (buttons != null) {
+                            List<Map<String, Object>> renderedButtons = new ArrayList<>();
+                            for (Map<String, Object> button : buttons) {
+                                Map<String, Object> renderedButton = new HashMap<>(button);
+                                String buttonType = (String) button.get("type");
+                                if ("URL".equalsIgnoreCase(buttonType)) {
+                                    String url = (String) button.get("url");
+                                    if (url != null) {
+                                        renderedButton.put("url", replaceVariables(url, variables));
+                                    }
+                                }
+                                renderedButtons.add(renderedButton);
+                            }
+                            renderedComponent.put("buttons", renderedButtons);
+                        }
+                        break;
+                }
+            }
+
+            renderedComponents.add(renderedComponent);
+        }
+
+        return renderedComponents;
+    }
+
+    private String replaceVariables(String text, Map<String, String> variables) {
+        if (text == null || variables == null || variables.isEmpty()) {
+            return text;
+        }
+
+        String result = text;
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            String placeholder = "{{" + entry.getKey() + "}}";
+            String value = entry.getValue() != null ? entry.getValue() : "";
+            result = result.replace(placeholder, value);
+        }
+
+        return result;
+    }
+
+    @Transactional
+    public WhatsAppTemplate submitTemplateTranslation(
+            Long templateId,
+            String languageCode,
+            List<Map<String, Object>> components,
+            String description,
+            Boolean setRtlDirection) {
+
+        WhatsAppTemplate originalTemplate = getTemplateById(templateId);
+        String orgId = TenantContext.getOrgId();
+
+        if (templateRepository.existsByNameAndLanguage(originalTemplate.getName(), languageCode)) {
+            throw new IllegalArgumentException(
+                    String.format(
+                            "Translation already exists for template '%s' with language: %s",
+                            originalTemplate.getName(), languageCode));
+        }
+
+        if (components == null || components.isEmpty()) {
+            throw new IllegalArgumentException("Template components cannot be null or empty");
+        }
+
+        boolean shouldSetRtl =
+                (setRtlDirection != null && setRtlDirection) || isRtlLanguage(languageCode);
+
+        String submissionId =
+                metaBusinessApiService.submitTemplateTranslation(
+                        originalTemplate.getName(),
+                        languageCode,
+                        originalTemplate.getCategory().getValue(),
+                        components,
+                        shouldSetRtl);
+
+        WhatsAppTemplate translationTemplate = new WhatsAppTemplate();
+        translationTemplate.setOrgId(orgId);
+        translationTemplate.setName(originalTemplate.getName());
+        translationTemplate.setLanguage(languageCode);
+        translationTemplate.setCategory(originalTemplate.getCategory());
+        translationTemplate.setComponents(components);
+        translationTemplate.setDescription(
+                description != null ? description : originalTemplate.getDescription());
+        translationTemplate.setStatus(TemplateStatus.PENDING);
+        translationTemplate.setMetaSubmissionId(submissionId);
+
+        WhatsAppTemplate savedTemplate = templateRepository.save(translationTemplate);
+
+        if (originalTemplate.getVariables() != null && !originalTemplate.getVariables().isEmpty()) {
+            for (TemplateVariable variable : originalTemplate.getVariables()) {
+                TemplateVariable translatedVar = new TemplateVariable();
+                translatedVar.setOrgId(orgId);
+                translatedVar.setTemplate(savedTemplate);
+                translatedVar.setVariableName(variable.getVariableName());
+                translatedVar.setComponentType(variable.getComponentType());
+                translatedVar.setPosition(variable.getPosition());
+                translatedVar.setExampleValue(variable.getExampleValue());
+                translatedVar.setDescription(variable.getDescription());
+                translatedVar.setIsRequired(variable.getIsRequired());
+                variableRepository.save(translatedVar);
+            }
+        }
+
+        return savedTemplate;
+    }
+
+    private boolean isRtlLanguage(String languageCode) {
+        if (languageCode == null) {
+            return false;
+        }
+        String lowerCode = languageCode.toLowerCase();
+        return lowerCode.startsWith("ar_")
+                || lowerCode.startsWith("he_")
+                || lowerCode.startsWith("fa_")
+                || lowerCode.startsWith("ur_");
     }
 }

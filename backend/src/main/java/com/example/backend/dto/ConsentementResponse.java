@@ -14,6 +14,7 @@ public class ConsentementResponse {
     private ConsentementChannel channel;
     private ConsentementType consentType;
     private ConsentementStatus status;
+    private LocalDateTime expiresAt;
     private Map<String, Object> meta;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -66,6 +67,14 @@ public class ConsentementResponse {
 
     public void setStatus(ConsentementStatus status) {
         this.status = status;
+    }
+
+    public LocalDateTime getExpiresAt() {
+        return expiresAt;
+    }
+
+    public void setExpiresAt(LocalDateTime expiresAt) {
+        this.expiresAt = expiresAt;
     }
 
     public Map<String, Object> getMeta() {

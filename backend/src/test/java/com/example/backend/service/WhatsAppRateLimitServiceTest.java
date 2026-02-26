@@ -5,7 +5,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.example.backend.entity.WhatsAppRateLimit;
+import com.example.backend.repository.OrganizationSettingsRepository;
 import com.example.backend.repository.WhatsAppRateLimitRepository;
+import io.micrometer.core.instrument.MeterRegistry;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class WhatsAppRateLimitServiceTest {
 
     @Mock private WhatsAppRateLimitRepository rateLimitRepository;
+
+    @Mock private OrganizationSettingsRepository organizationSettingsRepository;
+
+    @Mock private MeterRegistry meterRegistry;
 
     @InjectMocks private WhatsAppRateLimitService service;
 

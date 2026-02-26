@@ -4,6 +4,7 @@ import com.example.backend.dto.AppointmentCreateRequest;
 import com.example.backend.dto.AppointmentResponse;
 import com.example.backend.dto.AppointmentUpdateRequest;
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import com.example.backend.exception.ErrorResponse;
 import com.example.backend.service.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -209,6 +210,39 @@ public class AppointmentController {
         Page<AppointmentResponse> response =
                 appointmentService.listByDossier(dossierId, from, to, assignedTo, status, pageable);
         return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id:\\d+}/reminder-strategy")
+    @PreAuthorize("hasAnyRole('ADMIN', 'PRO')")
+    @Operation(
+            summary = "Update appointment reminder strategy",
+            description = "Updates the reminder strategy for an appointment (STANDARD, AGGRESSIVE, or MINIMAL)")
+    @ApiResponses(
+            value = {
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Reminder strategy updated successfully",
+                        content =
+                                @Content(
+                                        schema =
+                                                @Schema(
+                                                        implementation =
+                                                                AppointmentResponse.class))),
+                @ApiResponse(
+                        responseCode = "404",
+                        description = "Appointment not found",
+                        content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+            })
+    public ResponseEntity<AppointmentResponse> updateReminderStrategy(
+            @Parameter(description = "ID of the appointment", required = true) @PathVariable Long id,
+            @Parameter(description = "New reminder strategy", required = true) @RequestParam
+                    ReminderStrategy strategy) {
+        try {
+            AppointmentResponse response = appointmentService.updateReminderStrategy(id, strategy);
+            return ResponseEntity.ok(response);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     private Pageable createPageable(int page, int size, String sort) {

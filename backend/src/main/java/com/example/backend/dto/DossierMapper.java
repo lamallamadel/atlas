@@ -38,6 +38,7 @@ public class DossierMapper {
                         : dossier.getStatus().name());
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
+        dossier.setLocale(request.getLocale());
 
         if (request.getInitialParty() != null) {
             PartiePrenanteEntity party = partiePrenanteMapper.toEntity(request.getInitialParty());
@@ -70,6 +71,7 @@ public class DossierMapper {
                         : dossier.getStatus().name());
         dossier.setLossReason(request.getLossReason());
         dossier.setWonReason(request.getWonReason());
+        dossier.setLocale(request.getLocale());
 
         return dossier;
     }
@@ -101,6 +103,7 @@ public class DossierMapper {
         response.setWonReason(dossier.getWonReason());
         response.setScore(dossier.getScore());
         response.setSource(dossier.getSource());
+        response.setLocale(dossier.getLocale());
         response.setCreatedAt(dossier.getCreatedAt());
         response.setUpdatedAt(dossier.getUpdatedAt());
         response.setCreatedBy(dossier.getCreatedBy());

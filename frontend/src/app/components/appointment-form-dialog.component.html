@@ -128,6 +128,25 @@
 
           <div class="elegant-form-field"
                [ngClass]="{
+                 'has-value': appointmentForm.get('locale')?.value
+               }">
+            <select 
+              id="locale" 
+              formControlName="locale"
+              aria-label="Langue du client pour les rappels">
+              <option *ngFor="let option of localeOptions" [value]="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <label for="locale">Langue du client</label>
+            <div class="field-helper">
+              <mat-icon>language</mat-icon>
+              <span>Sélectionnez la langue pour les rappels de rendez-vous</span>
+            </div>
+          </div>
+
+          <div class="elegant-form-field"
+               [ngClass]="{
                  'has-value': appointmentForm.get('notes')?.value
                }">
             <textarea 

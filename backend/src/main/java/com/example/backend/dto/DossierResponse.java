@@ -36,6 +36,10 @@ public class DossierResponse {
     private String wonReason;
     private Integer score;
     private DossierSource source;
+
+    @Schema(description = "Preferred locale for communications", example = "fr_FR", nullable = true)
+    private String locale;
+
     private LocalDateTime createdAt;
 
     @Schema(
@@ -224,5 +228,13 @@ public class DossierResponse {
 
     public void setExistingOpenDossierId(Long existingOpenDossierId) {
         this.existingOpenDossierId = existingOpenDossierId;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

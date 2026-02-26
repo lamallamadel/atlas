@@ -18,6 +18,10 @@ public interface WhatsAppTemplateRepository extends JpaRepository<WhatsAppTempla
 
     Optional<WhatsAppTemplate> findByNameAndLanguage(String name, String language);
 
+    Optional<WhatsAppTemplate> findByWhatsAppTemplateId(String whatsAppTemplateId);
+
+    Optional<WhatsAppTemplate> findByMetaSubmissionId(String metaSubmissionId);
+
     boolean existsByNameAndLanguage(String name, String language);
 
     @Query("SELECT t FROM WhatsAppTemplate t WHERE t.orgId = :orgId ORDER BY t.createdAt DESC")

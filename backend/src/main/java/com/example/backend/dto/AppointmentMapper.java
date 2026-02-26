@@ -48,6 +48,14 @@ public class AppointmentMapper {
         appointment.setNotes(request.getNotes());
         appointment.setStatus(
                 request.getStatus() != null ? request.getStatus() : AppointmentStatus.SCHEDULED);
+        appointment.setReminderChannels(request.getReminderChannels());
+        appointment.setTemplateCode(request.getTemplateCode());
+        appointment.setReminderStrategy(request.getReminderStrategy());
+
+        if (request.getLocale() != null && !request.getLocale().trim().isEmpty()) {
+            dossier.setLocale(request.getLocale());
+            dossierRepository.save(dossier);
+        }
 
         return appointment;
     }
@@ -71,6 +79,15 @@ public class AppointmentMapper {
         if (request.getStatus() != null) {
             appointment.setStatus(request.getStatus());
         }
+        if (request.getReminderChannels() != null) {
+            appointment.setReminderChannels(request.getReminderChannels());
+        }
+        if (request.getTemplateCode() != null) {
+            appointment.setTemplateCode(request.getTemplateCode());
+        }
+        if (request.getReminderStrategy() != null) {
+            appointment.setReminderStrategy(request.getReminderStrategy());
+        }
     }
 
     public AppointmentResponse toResponse(AppointmentEntity appointment) {
@@ -89,6 +106,9 @@ public class AppointmentMapper {
         response.setUpdatedAt(appointment.getUpdatedAt());
         response.setCreatedBy(appointment.getCreatedBy());
         response.setUpdatedBy(appointment.getUpdatedBy());
+        response.setReminderChannels(appointment.getReminderChannels());
+        response.setTemplateCode(appointment.getTemplateCode());
+        response.setReminderStrategy(appointment.getReminderStrategy());
         return response;
     }
 }

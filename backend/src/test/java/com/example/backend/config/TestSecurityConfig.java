@@ -16,8 +16,7 @@ public class TestSecurityConfig {
     private static final Logger log = LoggerFactory.getLogger(TestSecurityConfig.class);
 
     /**
-     * ObjectMapper pour les tests qui ne chargent pas le contexte complet (sans
-     * JacksonConfig). Ne
+     * ObjectMapper pour les tests qui ne chargent pas le contexte complet (sans JacksonConfig). Ne
      * crée le bean que s'il n'existe pas déjà (évite le conflit avec JacksonConfig
      * en @SpringBootTest).
      */

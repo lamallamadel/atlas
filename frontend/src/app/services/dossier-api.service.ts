@@ -68,6 +68,7 @@ export interface DossierResponse {
   status: DossierStatus;
   score?: number;
   source?: DossierSource;
+  locale?: string;
   parties?: PartiePrenanteResponse[];
   recentActivities?: LeadActivityResponse[];
   existingOpenDossierId?: number;
@@ -82,6 +83,7 @@ export interface DossierCreateRequest {
   leadPhone?: string;
   leadName?: string;
   leadSource?: string;
+  locale?: string;
 }
 
 export interface DossierStatusPatchRequest {
