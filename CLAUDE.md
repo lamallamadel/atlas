@@ -58,7 +58,7 @@ docker-compose down
 
 ### Backend Package Structure (`backend/src/main/java/com/example/backend/`)
 - **controller/** — REST controllers at `/api/v1/...` and `/api/v2/...` (versioned via `v2/` subdirectory)
-- **service/** — Business logic layer (~70 services)
+- **service/** — Business logic layer (~130 services)
 - **entity/** — JPA entities, all extend `BaseEntity` which provides `orgId`, `createdAt`, `updatedAt`, `createdBy`, `updatedBy`
 - **dto/** — Request/Response DTOs with separate Mapper classes; `v2/` subdirectory for v2 API
 - **repository/** — Spring Data JPA repositories; `search/` for Elasticsearch repositories
@@ -81,7 +81,7 @@ docker-compose down
 
 ### Database
 - **PostgreSQL 16** in Docker/staging/prod; **H2** for local dev and unit tests
-- **Flyway** migrations in `backend/src/main/resources/db/migration/` (V1–V37)
+- **Flyway** migrations in `backend/src/main/resources/db/migration/` (V1–V141+). There is a **duplicate V139** conflict (`V139__Add_reminder_strategy_to_appointment.sql` and `V139__Add_whatsapp_quota_tier_and_cost_tracking.sql`) — new migrations must use V142+. In production the DB may have additional migrations (V100–V107 applied outside this repo); always check before picking a version number: `SELECT version FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5`.
 - Multi-tenant `org_id` on all tables
 
 ### Spring Profiles
