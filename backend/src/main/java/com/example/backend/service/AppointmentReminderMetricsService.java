@@ -49,6 +49,32 @@ public class AppointmentReminderMetricsService {
         return metricsRepository.save(metrics);
     }
 
+    @Transactional
+    public AppointmentReminderMetricsEntity recordReminderSentWithStrategy(
+            AppointmentEntity appointment,
+            String channel,
+            String templateCode,
+            String agentId,
+            String status,
+            LocalDateTime sentAt,
+            String reminderStrategy,
+            Double noShowProbability) {
+
+        AppointmentReminderMetricsEntity metrics = new AppointmentReminderMetricsEntity();
+        metrics.setOrgId(TenantContext.getTenantId());
+        metrics.setAppointment(appointment);
+        metrics.setChannel(channel);
+        metrics.setTemplateCode(templateCode);
+        metrics.setAgentId(agentId);
+        metrics.setStatus(status);
+        metrics.setSentAt(sentAt);
+        metrics.setNoShowOccurred(false);
+        metrics.setReminderStrategy(reminderStrategy);
+        metrics.setNoShowProbability(noShowProbability);
+
+        return metricsRepository.save(metrics);
+    }
+
     @Transactional(readOnly = true)
     public Double computeDeliveryRate(
             String orgId, String channel, LocalDateTime startDate, LocalDateTime endDate) {

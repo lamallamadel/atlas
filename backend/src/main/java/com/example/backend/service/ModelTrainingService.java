@@ -202,4 +202,49 @@ public class ModelTrainingService {
     public MLModelVersion getActiveModel(String orgId) {
         return modelVersionRepository.findActiveModel(orgId).orElse(null);
     }
+
+    public double predictNoShowProbability(String orgId, Long appointmentId, Map<String, Object> features) {
+        log.debug("Predicting no-show probability for appointment {} in org {}", appointmentId, orgId);
+
+        MLModelVersion activeModel = getActiveModel(orgId);
+        if (activeModel == null) {
+            log.warn("No active model found for org {}. Returning default probability.", orgId);
+            return 0.3;
+        }
+
+        try {
+            Map<String, Object> requestBody = new HashMap<>();
+            requestBody.put("org_id", orgId);
+            requestBody.put("appointment_id", appointmentId);
+            requestBody.put("features", features);
+
+            Map<String, Object> predictionResult = webClient
+                    .post()
+                    .uri("/api/v1/model/predict/no-show")
+                    .bodyValue(requestBody)
+                    .retrieve()
+                    .bodyToMono(Map.class)
+                    .timeout(Duration.ofSeconds(5))
+                    .block();
+
+            if (predictionResult == null) {
+                log.warn("Null response from ML prediction service for appointment {}", appointmentId);
+                return 0.3;
+            }
+
+            Object probabilityObj = predictionResult.get("probability");
+            if (probabilityObj instanceof Number) {
+                double probability = ((Number) probabilityObj).doubleValue();
+                log.debug("Predicted no-show probability for appointment {}: {}", appointmentId, probability);
+                return probability;
+            }
+
+            log.warn("Invalid probability format in prediction response for appointment {}", appointmentId);
+            return 0.3;
+
+        } catch (Exception e) {
+            log.error("Error predicting no-show probability for appointment {}: {}", appointmentId, e.getMessage(), e);
+            return 0.3;
+        }
+    }
 }

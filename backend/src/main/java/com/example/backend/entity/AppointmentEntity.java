@@ -1,6 +1,7 @@
 package com.example.backend.entity;
 
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -54,6 +55,10 @@ public class AppointmentEntity extends BaseEntity {
 
     @Column(name = "template_code", length = 255)
     private String templateCode;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reminder_strategy", length = 50)
+    private ReminderStrategy reminderStrategy = ReminderStrategy.STANDARD;
 
     @CreatedBy
     @Column(name = "created_by", length = 255)
@@ -165,5 +170,13 @@ public class AppointmentEntity extends BaseEntity {
 
     public void setTemplateCode(String templateCode) {
         this.templateCode = templateCode;
+    }
+
+    public ReminderStrategy getReminderStrategy() {
+        return reminderStrategy;
+    }
+
+    public void setReminderStrategy(ReminderStrategy reminderStrategy) {
+        this.reminderStrategy = reminderStrategy;
     }
 }

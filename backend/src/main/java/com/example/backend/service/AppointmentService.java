@@ -7,6 +7,7 @@ import com.example.backend.dto.AppointmentUpdateRequest;
 import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import com.example.backend.observability.MetricsService;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.util.TenantContext;
@@ -325,5 +326,61 @@ public class AppointmentService {
                         e);
             }
         }
+    }
+
+    @Transactional
+    public AppointmentResponse updateReminderStrategy(Long id, ReminderStrategy strategy) {
+        String orgId = TenantContext.getOrgId();
+        if (orgId == null) {
+            throw new IllegalStateException("Organization ID not found in context");
+        }
+
+        AppointmentEntity appointment =
+                appointmentRepository
+                        .findById(id)
+                        .orElseThrow(
+                                () ->
+                                        new EntityNotFoundException(
+                                                "Appointment not found with id: " + id));
+
+        if (!orgId.equals(appointment.getOrgId())) {
+            throw new EntityNotFoundException("Appointment not found with id: " + id);
+        }
+
+        appointment.setReminderStrategy(strategy);
+        appointment.setUpdatedAt(LocalDateTime.now());
+
+        AppointmentEntity updated = appointmentRepository.save(appointment);
+
+        logger.info(
+                "Reminder strategy updated for appointment {} to {}",
+                appointment.getId(),
+                strategy);
+
+        if (activityService != null && appointment.getDossier() != null) {
+            try {
+                String description =
+                        String.format("Reminder strategy changed to %s", strategy.name());
+
+                Map<String, Object> metadata = new HashMap<>();
+                metadata.put("appointmentId", appointment.getId());
+                metadata.put("reminderStrategy", strategy.name());
+                metadata.put("timestamp", LocalDateTime.now().toString());
+
+                activityService.logActivity(
+                        appointment.getDossier().getId(),
+                        ActivityType.STATUS_CHANGE,
+                        description,
+                        metadata);
+            } catch (Exception e) {
+                logger.warn(
+                        "Failed to log reminder strategy change activity for appointment {}: {}",
+                        appointment.getId(),
+                        e.getMessage(),
+                        e);
+            }
+        }
+
+        return appointmentMapper.toResponse(updated);
     }
 }

@@ -77,6 +77,12 @@ public class AppointmentReminderMetricsEntity extends BaseEntity {
     @Column(name = "no_show_occurred", nullable = false)
     private Boolean noShowOccurred = false;
 
+    @Column(name = "reminder_strategy", length = 50)
+    private String reminderStrategy;
+
+    @Column(name = "no_show_probability")
+    private Double noShowProbability;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -187,5 +193,21 @@ public class AppointmentReminderMetricsEntity extends BaseEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getReminderStrategy() {
+        return reminderStrategy;
+    }
+
+    public void setReminderStrategy(String reminderStrategy) {
+        this.reminderStrategy = reminderStrategy;
+    }
+
+    public Double getNoShowProbability() {
+        return noShowProbability;
+    }
+
+    public void setNoShowProbability(Double noShowProbability) {
+        this.noShowProbability = noShowProbability;
     }
 }

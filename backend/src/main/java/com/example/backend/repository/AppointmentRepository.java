@@ -30,4 +30,20 @@ public interface AppointmentRepository
                         @Param("status") com.example.backend.entity.enums.AppointmentStatus status,
                         @Param("windowStart") LocalDateTime windowStart,
                         @Param("windowEnd") LocalDateTime windowEnd);
+
+        @Query("SELECT COUNT(a) FROM AppointmentEntity a WHERE a.dossier.id = :dossierId "
+                        + "AND a.status = :status "
+                        + "AND a.startTime < :beforeDate")
+        Long countByDossierIdAndStatusAndStartTimeBefore(
+                        @Param("dossierId") Long dossierId,
+                        @Param("status") com.example.backend.entity.enums.AppointmentStatus status,
+                        @Param("beforeDate") LocalDateTime beforeDate);
+
+        @Query("SELECT a FROM AppointmentEntity a WHERE a.status = :status "
+                        + "AND a.startTime BETWEEN :windowStart AND :windowEnd "
+                        + "AND a.reminderSent = true")
+        List<AppointmentEntity> findAppointmentsForAdditionalReminder(
+                        @Param("status") com.example.backend.entity.enums.AppointmentStatus status,
+                        @Param("windowStart") LocalDateTime windowStart,
+                        @Param("windowEnd") LocalDateTime windowEnd);
 }

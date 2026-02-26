@@ -122,4 +122,13 @@ public interface AppointmentReminderMetricsRepository
             @Param("channel") String channel,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate);
+
+    @Query(
+            "SELECT CAST(SUM(CASE WHEN m.readAt IS NOT NULL THEN 1 ELSE 0 END) AS double) / "
+                    + "CAST(COUNT(m) AS double) "
+                    + "FROM AppointmentReminderMetricsEntity m "
+                    + "WHERE m.appointment.dossier.id = :dossierId "
+                    + "AND m.sentAt < :beforeDate")
+    Double calculateAverageResponseRateForDossier(
+            @Param("dossierId") Long dossierId, @Param("beforeDate") LocalDateTime beforeDate);
 }

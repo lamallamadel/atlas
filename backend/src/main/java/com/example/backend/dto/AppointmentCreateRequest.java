@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,6 +34,8 @@ public class AppointmentCreateRequest {
 
     @Size(max = 255, message = "Template code must not exceed 255 characters")
     private String templateCode;
+
+    private ReminderStrategy reminderStrategy;
 
     public AppointmentCreateRequest() {}
 
@@ -114,5 +117,13 @@ public class AppointmentCreateRequest {
 
     public void setTemplateCode(String templateCode) {
         this.templateCode = templateCode;
+    }
+
+    public ReminderStrategy getReminderStrategy() {
+        return reminderStrategy;
+    }
+
+    public void setReminderStrategy(ReminderStrategy reminderStrategy) {
+        this.reminderStrategy = reminderStrategy;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 import com.example.backend.entity.enums.AppointmentStatus;
+import com.example.backend.entity.enums.ReminderStrategy;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -22,6 +23,7 @@ public class AppointmentResponse {
     private List<String> warnings;
     private List<String> reminderChannels;
     private String templateCode;
+    private ReminderStrategy reminderStrategy;
 
     public AppointmentResponse() {}
 
@@ -151,5 +153,13 @@ public class AppointmentResponse {
 
     public void setTemplateCode(String templateCode) {
         this.templateCode = templateCode;
+    }
+
+    public ReminderStrategy getReminderStrategy() {
+        return reminderStrategy;
+    }
+
+    public void setReminderStrategy(ReminderStrategy reminderStrategy) {
+        this.reminderStrategy = reminderStrategy;
     }
 }

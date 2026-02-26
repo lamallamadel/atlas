@@ -5,7 +5,9 @@ import com.example.backend.entity.enums.ActivityType;
 import com.example.backend.entity.enums.AppointmentStatus;
 import com.example.backend.entity.enums.ConsentementType;
 import com.example.backend.entity.enums.MessageChannel;
+import com.example.backend.entity.enums.ReminderStrategy;
 import com.example.backend.repository.AppointmentRepository;
+import com.example.backend.repository.AppointmentReminderMetricsRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -36,6 +38,9 @@ public class AppointmentReminderScheduler {
     private final ActivityService activityService;
     private final TemplateInterpolationService templateInterpolationService;
     private final ConversationStateManager conversationStateManager;
+    private final ModelTrainingService modelTrainingService;
+    private final AppointmentReminderMetricsService metricsService;
+    private final AppointmentReminderMetricsRepository metricsRepository;
 
     @Value("${appointment.reminder.enabled:true}")
     private boolean remindersEnabled;
@@ -43,17 +48,26 @@ public class AppointmentReminderScheduler {
     @Value("${appointment.reminder.hours-ahead:24}")
     private int hoursAhead;
 
+    @Value("${appointment.reminder.aggressive-threshold:0.7}")
+    private double aggressiveThreshold;
+
     public AppointmentReminderScheduler(
             AppointmentRepository appointmentRepository,
             OutboundMessageService outboundMessageService,
             ActivityService activityService,
             TemplateInterpolationService templateInterpolationService,
-            ConversationStateManager conversationStateManager) {
+            ConversationStateManager conversationStateManager,
+            ModelTrainingService modelTrainingService,
+            AppointmentReminderMetricsService metricsService,
+            AppointmentReminderMetricsRepository metricsRepository) {
         this.appointmentRepository = appointmentRepository;
         this.outboundMessageService = outboundMessageService;
         this.activityService = activityService;
         this.templateInterpolationService = templateInterpolationService;
         this.conversationStateManager = conversationStateManager;
+        this.modelTrainingService = modelTrainingService;
+        this.metricsService = metricsService;
+        this.metricsRepository = metricsRepository;
     }
 
     @Scheduled(cron = "${appointment.reminder.cron:0 0/15 * * * ?}")
@@ -85,6 +99,62 @@ public class AppointmentReminderScheduler {
                 sendReminderWithFallback(appointment);
             } catch (Exception e) {
                 logger.error("Failed to send reminder for appointment {}: {}", appointment.getId(), e.getMessage());
+            }
+        }
+    }
+
+    @Scheduled(cron = "${appointment.reminder.aggressive-cron:0 0/10 * * * ?}")
+    @Transactional
+    public void processAggressiveReminders() {
+        if (!remindersEnabled) {
+            logger.debug("Appointment reminder scheduler is disabled");
+            return;
+        }
+
+        logger.info("Running aggressive appointment reminder scheduler...");
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime windowStart = now.plusHours(2).minusMinutes(5);
+        LocalDateTime windowEnd = now.plusHours(2).plusMinutes(10);
+
+        List<AppointmentEntity> upcomingAppointments = appointmentRepository.findAppointmentsForAdditionalReminder(
+                AppointmentStatus.SCHEDULED, windowStart, windowEnd);
+
+        if (upcomingAppointments.isEmpty()) {
+            logger.debug("No appointments found for aggressive reminders in this window");
+            return;
+        }
+
+        logger.info("Found {} appointments to evaluate for aggressive reminders", upcomingAppointments.size());
+
+        for (AppointmentEntity appointment : upcomingAppointments) {
+            try {
+                ReminderStrategy strategy = appointment.getReminderStrategy();
+                if (strategy == null) {
+                    strategy = ReminderStrategy.STANDARD;
+                }
+
+                if (strategy == ReminderStrategy.MINIMAL) {
+                    logger.debug("Skipping aggressive reminder for appointment {} with MINIMAL strategy", 
+                            appointment.getId());
+                    continue;
+                }
+
+                double noShowProbability = predictNoShowProbability(appointment);
+                
+                logger.info("Appointment {} has no-show probability: {}", appointment.getId(), noShowProbability);
+
+                if (noShowProbability > aggressiveThreshold || strategy == ReminderStrategy.AGGRESSIVE) {
+                    logger.info("Sending aggressive reminder for appointment {} (probability: {}, strategy: {})", 
+                            appointment.getId(), noShowProbability, strategy);
+                    sendAggressiveReminder(appointment, noShowProbability);
+                } else {
+                    logger.debug("No-show probability {} below threshold {} for appointment {}", 
+                            noShowProbability, aggressiveThreshold, appointment.getId());
+                }
+            } catch (Exception e) {
+                logger.error("Failed to process aggressive reminder for appointment {}: {}", 
+                        appointment.getId(), e.getMessage(), e);
             }
         }
     }
@@ -148,6 +218,20 @@ public class AppointmentReminderScheduler {
 
                 logger.info("Successfully queued reminder for appointment {} via {} to {}", 
                         appointment.getId(), channel, recipientContact);
+                
+                double noShowProbability = predictNoShowProbability(appointment);
+                ReminderStrategy strategy = appointment.getReminderStrategy();
+                
+                metricsService.recordReminderSentWithStrategy(
+                        appointment,
+                        channel.name(),
+                        templateCode,
+                        appointment.getAssignedTo(),
+                        "SENT",
+                        LocalDateTime.now(),
+                        strategy != null ? strategy.name() : ReminderStrategy.STANDARD.name(),
+                        noShowProbability
+                );
                 
                 if (channel == MessageChannel.WHATSAPP) {
                     initializeConversationForReminder(appointment, recipientContact);
@@ -374,6 +458,167 @@ public class AppointmentReminderScheduler {
         } catch (Exception e) {
             logger.error("Failed to initialize conversation for appointment {}: {}", 
                     appointment.getId(), e.getMessage(), e);
+        }
+    }
+
+    private double predictNoShowProbability(AppointmentEntity appointment) {
+        try {
+            Map<String, Object> features = buildPredictionFeatures(appointment);
+            String orgId = appointment.getOrgId();
+            
+            return modelTrainingService.predictNoShowProbability(orgId, appointment.getId(), features);
+        } catch (Exception e) {
+            logger.error("Error predicting no-show probability for appointment {}: {}", 
+                    appointment.getId(), e.getMessage(), e);
+            return 0.3;
+        }
+    }
+
+    private Map<String, Object> buildPredictionFeatures(AppointmentEntity appointment) {
+        Map<String, Object> features = new HashMap<>();
+        
+        if (appointment.getDossier() == null) {
+            return features;
+        }
+
+        Long dossierId = appointment.getDossier().getId();
+        LocalDateTime now = LocalDateTime.now();
+
+        Long cancelledCount = appointmentRepository.countByDossierIdAndStatusAndStartTimeBefore(
+                dossierId, AppointmentStatus.CANCELLED, now);
+        features.put("previous_cancelled_count", cancelledCount != null ? cancelledCount : 0L);
+
+        Integer dossierScore = appointment.getDossier().getScore();
+        features.put("dossier_score", dossierScore != null ? dossierScore : 0);
+
+        Double averageResponseRate = metricsRepository.calculateAverageResponseRateForDossier(dossierId, now);
+        features.put("average_response_rate", averageResponseRate != null ? averageResponseRate : 0.0);
+
+        ReminderStrategy strategy = appointment.getReminderStrategy();
+        features.put("reminder_strategy", strategy != null ? strategy.name() : ReminderStrategy.STANDARD.name());
+
+        features.put("hours_until_appointment", 
+                java.time.Duration.between(now, appointment.getStartTime()).toHours());
+
+        return features;
+    }
+
+    private void sendAggressiveReminder(AppointmentEntity appointment, double noShowProbability) {
+        if (appointment.getDossier() == null) {
+            logger.warn("Appointment {} has no dossier. Skipping aggressive reminder.", appointment.getId());
+            return;
+        }
+
+        Long dossierId = appointment.getDossier().getId();
+        List<String> channels = getReminderChannels(appointment);
+        String templateCode = getTemplateCode(appointment);
+        
+        Map<String, String> templateVariables = buildTemplateVariables(appointment);
+        templateVariables.put("urgency", "urgent");
+
+        boolean reminderSent = false;
+        List<String> attemptedChannels = new ArrayList<>();
+        List<String> failureReasons = new ArrayList<>();
+
+        for (String channelStr : channels) {
+            MessageChannel channel;
+            try {
+                channel = MessageChannel.valueOf(channelStr);
+            } catch (IllegalArgumentException e) {
+                logger.warn("Invalid channel '{}' for appointment {}. Skipping.", channelStr, appointment.getId());
+                attemptedChannels.add(channelStr);
+                failureReasons.add("Invalid channel: " + channelStr);
+                continue;
+            }
+
+            attemptedChannels.add(channelStr);
+
+            String recipientContact = getRecipientContact(appointment, channel);
+            if (recipientContact == null || recipientContact.trim().isEmpty()) {
+                String reason = String.format("No contact info for channel %s", channel);
+                logger.warn("Dossier {} has no contact for channel {}. Trying next channel.", 
+                        dossierId, channel);
+                failureReasons.add(reason);
+                continue;
+            }
+
+            try {
+                String messageContent = interpolateTemplate(templateCode, templateVariables);
+                
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("body", messageContent);
+
+                outboundMessageService.createOutboundMessage(
+                        dossierId,
+                        channel,
+                        recipientContact,
+                        templateCode,
+                        "Rappel urgent de rendez-vous",
+                        payload,
+                        "appointment_aggressive_reminder_" + appointment.getId() + "_" + channel,
+                        ConsentementType.TRANSACTIONNEL
+                );
+
+                logger.info("Successfully queued aggressive reminder for appointment {} via {} to {}", 
+                        appointment.getId(), channel, recipientContact);
+                
+                metricsService.recordReminderSentWithStrategy(
+                        appointment,
+                        channel.name(),
+                        templateCode,
+                        appointment.getAssignedTo(),
+                        "SENT",
+                        LocalDateTime.now(),
+                        "AGGRESSIVE",
+                        noShowProbability
+                );
+                
+                reminderSent = true;
+                logAggressiveReminderActivity(appointment, channel, noShowProbability);
+                break;
+
+            } catch (Exception e) {
+                String reason = String.format("Error: %s", e.getMessage());
+                logger.error("Failed to send aggressive reminder for appointment {} on channel {}: {}",
+                        appointment.getId(), channel, e.getMessage(), e);
+                failureReasons.add(reason);
+            }
+        }
+
+        if (!reminderSent) {
+            logger.error("Failed to send aggressive reminder for appointment {} on all channels: {}", 
+                    appointment.getId(), channels);
+        }
+    }
+
+    private void logAggressiveReminderActivity(AppointmentEntity appointment, MessageChannel channel, 
+            double noShowProbability) {
+        if (activityService == null || appointment.getDossier() == null) {
+            return;
+        }
+
+        try {
+            String description = String.format(
+                    "Aggressive appointment reminder sent via %s (no-show probability: %.2f)",
+                    channel, noShowProbability
+            );
+
+            Map<String, Object> metadata = new HashMap<>();
+            metadata.put("appointmentId", appointment.getId());
+            metadata.put("channel", channel.name());
+            metadata.put("noShowProbability", noShowProbability);
+            metadata.put("reminderType", "AGGRESSIVE");
+            metadata.put("timestamp", LocalDateTime.now().toString());
+
+            activityService.logActivity(
+                    appointment.getDossier().getId(),
+                    ActivityType.MESSAGE_SENT,
+                    description,
+                    metadata
+            );
+        } catch (Exception e) {
+            logger.warn("Failed to log aggressive reminder activity for appointment {}: {}", 
+                    appointment.getId(), e.getMessage());
         }
     }
 }
