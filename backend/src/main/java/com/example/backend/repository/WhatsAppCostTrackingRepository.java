@@ -12,19 +12,23 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface WhatsAppCostTrackingRepository extends JpaRepository<WhatsAppCostTracking, Long> {
 
-    @Query("SELECT c FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate")
+    @Query(
+            "SELECT c FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate")
     List<WhatsAppCostTracking> findByOrgIdAndCreatedAtAfter(
             @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate);
 
-    @Query("SELECT COALESCE(SUM(c.totalCost), 0) FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate")
+    @Query(
+            "SELECT COALESCE(SUM(c.totalCost), 0) FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate")
     BigDecimal sumTotalCostByOrgIdAndCreatedAtAfter(
             @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate);
 
-    @Query("SELECT COUNT(c) FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate")
+    @Query(
+            "SELECT COUNT(c) FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate")
     Long countByOrgIdAndCreatedAtAfter(
             @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate);
 
-    @Query("SELECT c.conversationType, COUNT(c), SUM(c.totalCost) FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate GROUP BY c.conversationType")
+    @Query(
+            "SELECT c.conversationType, COUNT(c), SUM(c.totalCost) FROM WhatsAppCostTracking c WHERE c.orgId = :orgId AND c.createdAt >= :startDate GROUP BY c.conversationType")
     List<Object[]> findCostBreakdownByOrgIdAndCreatedAtAfter(
             @Param("orgId") String orgId, @Param("startDate") LocalDateTime startDate);
 }

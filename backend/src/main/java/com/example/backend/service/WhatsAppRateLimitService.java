@@ -31,11 +31,12 @@ public class WhatsAppRateLimitService {
     private static final String REDIS_KEY_PREFIX = "whatsapp:ratelimit:";
     private static final String REDIS_COUNTER_KEY = "whatsapp:ratelimit:counter:";
 
-    private static final Map<Integer, Integer> TIER_QUOTA_LIMITS = Map.of(
-            1, 1000,
-            2, 10000,
-            3, 100000,
-            4, Integer.MAX_VALUE);
+    private static final Map<Integer, Integer> TIER_QUOTA_LIMITS =
+            Map.of(
+                    1, 1000,
+                    2, 10000,
+                    3, 100000,
+                    4, Integer.MAX_VALUE);
 
     private final WhatsAppRateLimitRepository rateLimitRepository;
     private final OrganizationSettingsRepository organizationSettingsRepository;
@@ -312,16 +313,19 @@ public class WhatsAppRateLimitService {
     @Transactional
     public void updateOrganizationTier(String orgId, int tier) {
         if (!TIER_QUOTA_LIMITS.containsKey(tier)) {
-            throw new IllegalArgumentException("Invalid tier: " + tier + ". Valid tiers are 1, 2, 3, 4");
+            throw new IllegalArgumentException(
+                    "Invalid tier: " + tier + ". Valid tiers are 1, 2, 3, 4");
         }
 
-        OrganizationSettings settings = organizationSettingsRepository
-                .findByOrgId(orgId)
-                .orElseGet(() -> {
-                    OrganizationSettings newSettings = new OrganizationSettings();
-                    newSettings.setOrgId(orgId);
-                    return newSettings;
-                });
+        OrganizationSettings settings =
+                organizationSettingsRepository
+                        .findByOrgId(orgId)
+                        .orElseGet(
+                                () -> {
+                                    OrganizationSettings newSettings = new OrganizationSettings();
+                                    newSettings.setOrgId(orgId);
+                                    return newSettings;
+                                });
 
         settings.setWhatsappQuotaTier(tier);
         organizationSettingsRepository.save(settings);
@@ -329,39 +333,55 @@ public class WhatsAppRateLimitService {
         int newLimit = TIER_QUOTA_LIMITS.get(tier);
         updateQuotaLimit(orgId, newLimit);
 
-        logger.info("Updated WhatsApp quota tier for orgId={} to tier {} (limit: {})", orgId, tier, newLimit);
+        logger.info(
+                "Updated WhatsApp quota tier for orgId={} to tier {} (limit: {})",
+                orgId,
+                tier,
+                newLimit);
     }
 
     public void registerQuotaUtilizationMetrics(String orgId) {
-        quotaUtilizationGauges.computeIfAbsent(orgId, id -> {
-            return Gauge.builder("whatsapp.quota.utilization", () -> {
-                        try {
-                            QuotaStatus status = getQuotaStatus(id);
-                            if (status.getQuotaLimit() == 0) {
-                                return 0.0;
-                            }
-                            return (double) status.getMessagesSent() / status.getQuotaLimit() * 100.0;
-                        } catch (Exception e) {
-                            logger.warn("Error calculating quota utilization for orgId={}: {}", id, e.getMessage());
-                            return 0.0;
-                        }
-                    })
-                    .tag("org_id", id)
-                    .description("WhatsApp quota utilization percentage")
-                    .baseUnit("percent")
-                    .register(meterRegistry);
-        });
+        quotaUtilizationGauges.computeIfAbsent(
+                orgId,
+                id -> {
+                    return Gauge.builder(
+                                    "whatsapp.quota.utilization",
+                                    () -> {
+                                        try {
+                                            QuotaStatus status = getQuotaStatus(id);
+                                            if (status.getQuotaLimit() == 0) {
+                                                return 0.0;
+                                            }
+                                            return (double) status.getMessagesSent()
+                                                    / status.getQuotaLimit()
+                                                    * 100.0;
+                                        } catch (Exception e) {
+                                            logger.warn(
+                                                    "Error calculating quota utilization for orgId={}: {}",
+                                                    id,
+                                                    e.getMessage());
+                                            return 0.0;
+                                        }
+                                    })
+                            .tag("org_id", id)
+                            .description("WhatsApp quota utilization percentage")
+                            .baseUnit("percent")
+                            .register(meterRegistry);
+                });
     }
 
     public void recordQuotaMetrics(String orgId, int messagesSent, int quotaLimit) {
-        meterRegistry.gauge("whatsapp.quota.used", 
-                java.util.List.of(io.micrometer.core.instrument.Tag.of("org_id", orgId)), 
+        meterRegistry.gauge(
+                "whatsapp.quota.used",
+                java.util.List.of(io.micrometer.core.instrument.Tag.of("org_id", orgId)),
                 messagesSent);
-        meterRegistry.gauge("whatsapp.quota.limit", 
-                java.util.List.of(io.micrometer.core.instrument.Tag.of("org_id", orgId)), 
+        meterRegistry.gauge(
+                "whatsapp.quota.limit",
+                java.util.List.of(io.micrometer.core.instrument.Tag.of("org_id", orgId)),
                 quotaLimit);
-        meterRegistry.gauge("whatsapp.quota.remaining", 
-                java.util.List.of(io.micrometer.core.instrument.Tag.of("org_id", orgId)), 
+        meterRegistry.gauge(
+                "whatsapp.quota.remaining",
+                java.util.List.of(io.micrometer.core.instrument.Tag.of("org_id", orgId)),
                 quotaLimit - messagesSent);
     }
 
@@ -369,18 +389,24 @@ public class WhatsAppRateLimitService {
     public void resetQuotaIfNeeded(String orgId) {
         WhatsAppRateLimit rateLimit = getOrCreateRateLimit(orgId);
         LocalDateTime now = LocalDateTime.now();
-        
+
         if (now.isAfter(rateLimit.getResetAt())) {
-            logger.info("Resetting quota for orgId={}, previous count={}", orgId, rateLimit.getMessagesSentCount());
+            logger.info(
+                    "Resetting quota for orgId={}, previous count={}",
+                    orgId,
+                    rateLimit.getMessagesSentCount());
             rateLimit.resetQuota();
             rateLimitRepository.save(rateLimit);
-            
+
             if (redisEnabled) {
                 try {
                     String counterKey = REDIS_COUNTER_KEY + orgId;
                     redisTemplate.delete(counterKey);
                 } catch (RedisConnectionFailureException | RedisSystemException ex) {
-                    logger.warn("Redis unavailable while resetting quota counter for orgId={}", orgId, ex);
+                    logger.warn(
+                            "Redis unavailable while resetting quota counter for orgId={}",
+                            orgId,
+                            ex);
                 }
             }
         }

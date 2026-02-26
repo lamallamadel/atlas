@@ -49,7 +49,9 @@ public class ConsentEventService {
         if (additionalMetadata != null) {
             metadata.putAll(additionalMetadata);
         }
-        metadata.put("expiresAt", consent.getExpiresAt() != null ? consent.getExpiresAt().toString() : null);
+        metadata.put(
+                "expiresAt",
+                consent.getExpiresAt() != null ? consent.getExpiresAt().toString() : null);
         if (consent.getMeta() != null) {
             metadata.put("consentMeta", consent.getMeta());
         }
@@ -100,7 +102,8 @@ public class ConsentEventService {
             eventSnapshot.put("eventId", event.getId());
             eventSnapshot.put("eventType", event.getEventType());
             eventSnapshot.put("timestamp", event.getCreatedAt().toString());
-            eventSnapshot.put("oldStatus", event.getOldStatus() != null ? event.getOldStatus().name() : null);
+            eventSnapshot.put(
+                    "oldStatus", event.getOldStatus() != null ? event.getOldStatus().name() : null);
             eventSnapshot.put("newStatus", event.getNewStatus().name());
             eventSnapshot.put("createdBy", event.getCreatedBy());
             if (event.getMetadata() != null) {
@@ -115,8 +118,10 @@ public class ConsentEventService {
             totalTransitions++;
         }
 
-        reconstructedState.put("currentStatus", currentStatus != null ? currentStatus.name() : null);
-        reconstructedState.put("lastEventTime", lastEventTime != null ? lastEventTime.toString() : null);
+        reconstructedState.put(
+                "currentStatus", currentStatus != null ? currentStatus.name() : null);
+        reconstructedState.put(
+                "lastEventTime", lastEventTime != null ? lastEventTime.toString() : null);
         reconstructedState.put("lastEventType", lastEventType);
         reconstructedState.put("totalTransitions", totalTransitions);
         reconstructedState.put("timeline", timeline);
@@ -126,7 +131,10 @@ public class ConsentEventService {
             reconstructedState.put("expiresAt", lastEvent.getMetadata().get("expiresAt"));
         }
 
-        logger.debug("Reconstructed consent state for consentementId={}: {} transitions", consentementId, totalTransitions);
+        logger.debug(
+                "Reconstructed consent state for consentementId={}: {} transitions",
+                consentementId,
+                totalTransitions);
 
         return reconstructedState;
     }

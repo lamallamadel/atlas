@@ -396,9 +396,7 @@ class WhatsAppSessionWindowServiceTest {
                         () -> {
                             try {
                                 service.updateSessionWindow(
-                                        ORG_001,
-                                        phoneNumber,
-                                        baseTime.plusMinutes(threadNum));
+                                        ORG_001, phoneNumber, baseTime.plusMinutes(threadNum));
                                 successCount.incrementAndGet();
                             } finally {
                                 latch.countDown();
@@ -591,9 +589,7 @@ class WhatsAppSessionWindowServiceTest {
                     .extracting(WhatsAppSessionWindow::getPhoneNumber)
                     .containsExactlyInAnyOrder("+33633333333", "+33644444444");
             assertThat(afterCleanup)
-                    .allMatch(
-                            window ->
-                                    window.getWindowExpiresAt().isAfter(LocalDateTime.now()));
+                    .allMatch(window -> window.getWindowExpiresAt().isAfter(LocalDateTime.now()));
         }
 
         @Test

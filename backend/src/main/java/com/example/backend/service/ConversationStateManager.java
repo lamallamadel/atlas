@@ -47,7 +47,8 @@ public class ConversationStateManager {
     }
 
     @Transactional
-    public void processInboundMessage(String orgId, String phoneNumber, String messageBody, String providerMessageId) {
+    public void processInboundMessage(
+            String orgId, String phoneNumber, String messageBody, String providerMessageId) {
         log.info("Processing inbound message from {} for org {}", phoneNumber, orgId);
 
         InboundMessageEntity inboundMessage = new InboundMessageEntity();
@@ -59,7 +60,8 @@ public class ConversationStateManager {
         inboundMessageRepository.save(inboundMessage);
 
         Optional<ConversationStateEntity> activeConversation =
-                conversationStateRepository.findActiveConversation(orgId, phoneNumber, LocalDateTime.now());
+                conversationStateRepository.findActiveConversation(
+                        orgId, phoneNumber, LocalDateTime.now());
 
         if (activeConversation.isPresent()) {
             handleConversationReply(activeConversation.get(), messageBody, inboundMessage.getId());
@@ -183,9 +185,7 @@ public class ConversationStateManager {
 
         if (conversation.getAppointmentId() != null) {
             AppointmentEntity appointment =
-                    appointmentRepository
-                            .findById(conversation.getAppointmentId())
-                            .orElse(null);
+                    appointmentRepository.findById(conversation.getAppointmentId()).orElse(null);
             if (appointment != null) {
                 appointment.setStatus(AppointmentStatus.CONFIRMED);
                 appointmentRepository.save(appointment);
@@ -213,9 +213,7 @@ public class ConversationStateManager {
 
         if (conversation.getAppointmentId() != null) {
             AppointmentEntity appointment =
-                    appointmentRepository
-                            .findById(conversation.getAppointmentId())
-                            .orElse(null);
+                    appointmentRepository.findById(conversation.getAppointmentId()).orElse(null);
             if (appointment != null) {
                 appointment.setStatus(AppointmentStatus.CANCELLED);
                 appointmentRepository.save(appointment);
@@ -239,14 +237,16 @@ public class ConversationStateManager {
 
         conversation.setState(ConversationState.RESCHEDULED);
         updateContextData(
-                conversation, "reschedule_requested_at", LocalDateTime.now().toString(), null, null);
+                conversation,
+                "reschedule_requested_at",
+                LocalDateTime.now().toString(),
+                null,
+                null);
         conversationStateRepository.save(conversation);
 
         if (conversation.getAppointmentId() != null) {
             AppointmentEntity appointment =
-                    appointmentRepository
-                            .findById(conversation.getAppointmentId())
-                            .orElse(null);
+                    appointmentRepository.findById(conversation.getAppointmentId()).orElse(null);
             if (appointment != null) {
                 appointment.setStatus(AppointmentStatus.RESCHEDULED);
                 appointmentRepository.save(appointment);
@@ -284,11 +284,15 @@ public class ConversationStateManager {
 
     private ConversationIntent classifyIntentUsingNLP(String message) {
         try {
-            double confirmConfidence = calculateSemanticSimilarity(message, "je confirme le rendez-vous");
-            double cancelConfidence = calculateSemanticSimilarity(message, "je veux annuler le rendez-vous");
-            double rescheduleConfidence = calculateSemanticSimilarity(message, "je veux changer la date");
+            double confirmConfidence =
+                    calculateSemanticSimilarity(message, "je confirme le rendez-vous");
+            double cancelConfidence =
+                    calculateSemanticSimilarity(message, "je veux annuler le rendez-vous");
+            double rescheduleConfidence =
+                    calculateSemanticSimilarity(message, "je veux changer la date");
 
-            double maxConfidence = Math.max(confirmConfidence, Math.max(cancelConfidence, rescheduleConfidence));
+            double maxConfidence =
+                    Math.max(confirmConfidence, Math.max(cancelConfidence, rescheduleConfidence));
 
             if (maxConfidence > 0.7) {
                 if (maxConfidence == confirmConfidence) {

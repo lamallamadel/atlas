@@ -54,7 +54,8 @@ public class OutboundResilienceConfig {
     }
 
     @Bean
-    public Map<String, Retry> outboundRetryByChannel(@Qualifier("outboundRetryRegistry") RetryRegistry retryRegistry) {
+    public Map<String, Retry> outboundRetryByChannel(
+            @Qualifier("outboundRetryRegistry") RetryRegistry retryRegistry) {
         Map<String, Retry> retryMap = new HashMap<>();
         for (MessageChannel channel : MessageChannel.values()) {
             String channelName = channel.name().toLowerCase();
@@ -90,7 +91,8 @@ public class OutboundResilienceConfig {
 
     @Bean
     public Map<String, CircuitBreaker> outboundCircuitBreakerByChannel(
-            @Qualifier("outboundCircuitBreakerRegistry") CircuitBreakerRegistry circuitBreakerRegistry) {
+            @Qualifier("outboundCircuitBreakerRegistry")
+                    CircuitBreakerRegistry circuitBreakerRegistry) {
         Map<String, CircuitBreaker> circuitBreakerMap = new HashMap<>();
         for (MessageChannel channel : MessageChannel.values()) {
             String channelName = channel.name().toLowerCase();

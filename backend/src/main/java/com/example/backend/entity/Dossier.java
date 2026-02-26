@@ -66,6 +66,9 @@ public class Dossier extends BaseEntity {
     @Column(name = "source", length = 50)
     private DossierSource source;
 
+    @Column(name = "locale", length = 10)
+    private String locale;
+
     @OneToMany(mappedBy = "dossier", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PartiePrenanteEntity> parties = new ArrayList<>();
 
@@ -255,5 +258,13 @@ public class Dossier extends BaseEntity {
     public void removeActivity(LeadActivity activity) {
         activities.remove(activity);
         activity.setDossier(null);
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

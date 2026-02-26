@@ -37,6 +37,9 @@ public class AppointmentCreateRequest {
 
     private ReminderStrategy reminderStrategy;
 
+    @Size(max = 10, message = "Locale must not exceed 10 characters")
+    private String locale;
+
     public AppointmentCreateRequest() {}
 
     @AssertTrue(message = "Start time must be before end time")
@@ -125,5 +128,13 @@ public class AppointmentCreateRequest {
 
     public void setReminderStrategy(ReminderStrategy reminderStrategy) {
         this.reminderStrategy = reminderStrategy;
+    }
+
+    public String getLocale() {
+        return locale;
+    }
+
+    public void setLocale(String locale) {
+        this.locale = locale;
     }
 }

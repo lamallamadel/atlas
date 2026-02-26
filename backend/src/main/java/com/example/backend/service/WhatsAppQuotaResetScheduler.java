@@ -37,7 +37,9 @@ public class WhatsAppQuotaResetScheduler {
         for (WhatsAppRateLimit rateLimit : allRateLimits) {
             if (now.isAfter(rateLimit.getResetAt())) {
                 String orgId = rateLimit.getOrgId();
-                logger.info("Quota reset window reached for orgId={}, requeuing throttled messages", orgId);
+                logger.info(
+                        "Quota reset window reached for orgId={}, requeuing throttled messages",
+                        orgId);
 
                 rateLimitService.resetQuotaIfNeeded(orgId);
                 quotaExceededHandler.requeueThrottledMessages(orgId);

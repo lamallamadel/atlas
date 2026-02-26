@@ -58,9 +58,7 @@ public class ConsentAuditReportController {
                                                 @Schema(
                                                         implementation =
                                                                 ConsentEventResponse.class))),
-                @ApiResponse(
-                        responseCode = "400",
-                        description = "Invalid request parameters"),
+                @ApiResponse(responseCode = "400", description = "Invalid request parameters"),
                 @ApiResponse(responseCode = "401", description = "Unauthorized"),
                 @ApiResponse(responseCode = "403", description = "Forbidden"),
                 @ApiResponse(responseCode = "404", description = "Dossier not found")
@@ -133,9 +131,7 @@ public class ConsentAuditReportController {
                                                 @Schema(
                                                         implementation =
                                                                 ConsentAuditReportResponse.class))),
-                @ApiResponse(
-                        responseCode = "400",
-                        description = "Invalid dossier ID"),
+                @ApiResponse(responseCode = "400", description = "Invalid dossier ID"),
                 @ApiResponse(responseCode = "401", description = "Unauthorized"),
                 @ApiResponse(responseCode = "403", description = "Forbidden"),
                 @ApiResponse(responseCode = "404", description = "Dossier not found")

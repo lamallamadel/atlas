@@ -15,7 +15,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class TemplateInterpolationService {
 
-    private static final Logger logger = LoggerFactory.getLogger(TemplateInterpolationService.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(TemplateInterpolationService.class);
     private static final Pattern VARIABLE_PATTERN = Pattern.compile("\\{\\{([^}]+)\\}\\}");
 
     private final WhatsAppTemplateRepository templateRepository;
@@ -29,15 +30,17 @@ public class TemplateInterpolationService {
             throw new IllegalArgumentException("Template code cannot be null or empty");
         }
 
-        WhatsAppTemplate template = templateRepository
-                .findByNameAndLanguage(templateCode, "fr")
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Template not found: " + templateCode));
+        WhatsAppTemplate template =
+                templateRepository
+                        .findByNameAndLanguage(templateCode, "fr")
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Template not found: " + templateCode));
 
         String content = extractTemplateContent(template);
         if (content == null) {
-            throw new IllegalStateException(
-                    "Template " + templateCode + " has no body content");
+            throw new IllegalStateException("Template " + templateCode + " has no body content");
         }
 
         return interpolateString(content, variables);
@@ -58,12 +61,14 @@ public class TemplateInterpolationService {
         while (matcher.find()) {
             String variableName = matcher.group(1).trim();
             String replacement = variables.get(variableName);
-            
+
             if (replacement == null) {
-                logger.warn("Variable '{}' not found in provided values, keeping placeholder", variableName);
+                logger.warn(
+                        "Variable '{}' not found in provided values, keeping placeholder",
+                        variableName);
                 replacement = "{{" + variableName + "}}";
             }
-            
+
             matcher.appendReplacement(result, Matcher.quoteReplacement(replacement));
         }
         matcher.appendTail(result);
@@ -73,14 +78,18 @@ public class TemplateInterpolationService {
 
     public Map<String, String> validateRequiredVariables(
             String templateCode, Map<String, String> providedVariables) {
-        WhatsAppTemplate template = templateRepository
-                .findByNameAndLanguage(templateCode, "fr")
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Template not found: " + templateCode));
+        WhatsAppTemplate template =
+                templateRepository
+                        .findByNameAndLanguage(templateCode, "fr")
+                        .orElseThrow(
+                                () ->
+                                        new IllegalArgumentException(
+                                                "Template not found: " + templateCode));
 
-        List<TemplateVariable> requiredVars = template.getVariables().stream()
-                .filter(v -> v.getIsRequired() != null && v.getIsRequired())
-                .toList();
+        List<TemplateVariable> requiredVars =
+                template.getVariables().stream()
+                        .filter(v -> v.getIsRequired() != null && v.getIsRequired())
+                        .toList();
 
         Map<String, String> missing = new HashMap<>();
         for (TemplateVariable var : requiredVars) {

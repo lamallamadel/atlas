@@ -163,8 +163,7 @@ public class AppointmentReminderMetricsService {
 
         List<Object[]> channelData =
                 metricsRepository.aggregateMetricsByChannel(orgId, startDate, endDate);
-        List<AppointmentReminderMetricsResponse.ChannelMetrics> channelMetrics =
-                new ArrayList<>();
+        List<AppointmentReminderMetricsResponse.ChannelMetrics> channelMetrics = new ArrayList<>();
         for (Object[] row : channelData) {
             String channel = (String) row[0];
             Long totalSent = ((Number) row[1]).longValue();
@@ -213,16 +212,13 @@ public class AppointmentReminderMetricsService {
 
         List<Object[]> timeSeriesData =
                 metricsRepository.getTimeSeriesMetrics(orgId, startDate, endDate);
-        List<AppointmentReminderMetricsResponse.TimeSeriesDataPoint> timeSeries =
-                new ArrayList<>();
+        List<AppointmentReminderMetricsResponse.TimeSeriesDataPoint> timeSeries = new ArrayList<>();
         for (Object[] row : timeSeriesData) {
             LocalDate date = null;
             if (row[0] instanceof Date) {
                 date = ((Date) row[0]).toLocalDate();
             } else if (row[0] instanceof java.util.Date) {
-                date =
-                        new java.sql.Date(((java.util.Date) row[0]).getTime())
-                                .toLocalDate();
+                date = new java.sql.Date(((java.util.Date) row[0]).getTime()).toLocalDate();
             } else if (row[0] instanceof LocalDate) {
                 date = (LocalDate) row[0];
             }

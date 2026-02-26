@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "WhatsApp Webhooks", description = "Webhook handlers for WhatsApp Business API")
 public class WhatsAppTemplateWebhookController {
 
-    private static final Logger logger = LoggerFactory.getLogger(WhatsAppTemplateWebhookController.class);
+    private static final Logger logger =
+            LoggerFactory.getLogger(WhatsAppTemplateWebhookController.class);
 
     private final WhatsAppTemplateService templateService;
 
@@ -109,13 +110,11 @@ public class WhatsAppTemplateWebhookController {
                         status,
                         reason);
             } else {
-                logger.warn("Received webhook with insufficient template identification information");
+                logger.warn(
+                        "Received webhook with insufficient template identification information");
             }
         } catch (Exception e) {
-            logger.error(
-                    "Failed to update template status to {}: {}",
-                    status,
-                    e.getMessage());
+            logger.error("Failed to update template status to {}: {}", status, e.getMessage());
         }
     }
 
@@ -137,7 +136,8 @@ public class WhatsAppTemplateWebhookController {
     public ResponseEntity<String> verifyWebhook(
             @Parameter(description = "Hub mode") @RequestParam("hub.mode") String mode,
             @Parameter(description = "Verify token") @RequestParam("hub.verify_token") String token,
-            @Parameter(description = "Challenge string") @RequestParam("hub.challenge") String challenge) {
+            @Parameter(description = "Challenge string") @RequestParam("hub.challenge")
+                    String challenge) {
 
         logger.info("Template status webhook verification request received");
 

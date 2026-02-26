@@ -67,9 +67,9 @@ public class ConsentExpirationScheduler {
                 consent.setStatus(ConsentementStatus.EXPIRED);
                 consent.setUpdatedAt(now);
                 consentementRepository.save(consent);
-                
+
                 consentEventService.emitEvent(consent, "EXPIRED", previousStatus, null);
-                
+
                 successCount++;
                 logger.info(
                         "Expired consent: id={}, dossierId={}, channel={}, type={}",
@@ -79,11 +79,7 @@ public class ConsentExpirationScheduler {
                         consent.getConsentType());
             } catch (Exception e) {
                 failCount++;
-                logger.error(
-                        "Failed to expire consent {}: {}",
-                        consent.getId(),
-                        e.getMessage(),
-                        e);
+                logger.error("Failed to expire consent {}: {}", consent.getId(), e.getMessage(), e);
             }
         }
 

@@ -18,7 +18,8 @@ public class ConsentEventMapper {
         response.setConsentementId(entity.getConsentementId());
         response.setEventType(entity.getEventType());
         response.setChannel(entity.getChannel() != null ? entity.getChannel().name() : null);
-        response.setConsentType(entity.getConsentType() != null ? entity.getConsentType().name() : null);
+        response.setConsentType(
+                entity.getConsentType() != null ? entity.getConsentType().name() : null);
         response.setOldStatus(entity.getOldStatus() != null ? entity.getOldStatus().name() : null);
         response.setNewStatus(entity.getNewStatus() != null ? entity.getNewStatus().name() : null);
         response.setMetadata(entity.getMetadata());

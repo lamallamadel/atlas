@@ -4,7 +4,6 @@ import com.example.backend.entity.AppointmentEntity;
 import com.example.backend.entity.ConversationStateEntity;
 import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.ConsentementType;
-import com.example.backend.entity.enums.ConversationState;
 import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.DossierRepository;
@@ -20,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ConversationResponseService {
 
     private static final Logger log = LoggerFactory.getLogger(ConversationResponseService.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     private final OutboundMessageService outboundMessageService;
@@ -87,8 +87,10 @@ public class ConversationResponseService {
                     idempotencyKey + "_" + conversation.getId(),
                     ConsentementType.TRANSACTIONNEL);
 
-            log.info("Sent conversation response to {} for conversation {}", 
-                    conversation.getPhoneNumber(), conversation.getId());
+            log.info(
+                    "Sent conversation response to {} for conversation {}",
+                    conversation.getPhoneNumber(),
+                    conversation.getId());
         } catch (Exception e) {
             log.error("Failed to send conversation response", e);
         }
@@ -102,7 +104,8 @@ public class ConversationResponseService {
 
         String dateStr = appointment.getStartTime().format(DATE_FORMATTER);
         String timeStr = appointment.getStartTime().format(TIME_FORMATTER);
-        String location = appointment.getLocation() != null ? appointment.getLocation() : "notre agence";
+        String location =
+                appointment.getLocation() != null ? appointment.getLocation() : "notre agence";
 
         return String.format(
                 "✅ Parfait ! Votre rendez-vous du %s à %s à %s est confirmé. Nous vous attendons !",

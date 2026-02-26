@@ -110,8 +110,7 @@ public class AppointmentReminderReportController {
             @Parameter(description = "Filter by channel (e.g., WHATSAPP, SMS, EMAIL)")
                     @RequestParam(required = false)
                     String channel,
-            @Parameter(description = "Filter by template code")
-                    @RequestParam(required = false)
+            @Parameter(description = "Filter by template code") @RequestParam(required = false)
                     String templateCode,
             @Parameter(description = "Filter by agent ID") @RequestParam(required = false)
                     String agentId,
@@ -215,7 +214,9 @@ public class AppointmentReminderReportController {
                             + "within the specified date range. Read rate = (read messages / sent messages) * 100")
     @ApiResponses(
             value = {
-                @ApiResponse(responseCode = "200", description = "Read rate calculated successfully"),
+                @ApiResponse(
+                        responseCode = "200",
+                        description = "Read rate calculated successfully"),
                 @ApiResponse(responseCode = "400", description = "Invalid channel or date range"),
                 @ApiResponse(responseCode = "401", description = "Unauthorized"),
                 @ApiResponse(responseCode = "403", description = "Forbidden")

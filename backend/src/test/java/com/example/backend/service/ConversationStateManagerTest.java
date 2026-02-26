@@ -65,14 +65,13 @@ class ConversationStateManagerTest {
         when(conversationStateRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
         when(appointmentRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        conversationStateManager.processInboundMessage("test-org", "+33612345678", "Oui", "msg-123");
+        conversationStateManager.processInboundMessage(
+                "test-org", "+33612345678", "Oui", "msg-123");
 
-        verify(conversationStateRepository).save(argThat(conv -> 
-            conv.getState() == ConversationState.CONFIRMED
-        ));
-        verify(appointmentRepository).save(argThat(apt -> 
-            apt.getStatus() == AppointmentStatus.CONFIRMED
-        ));
+        verify(conversationStateRepository)
+                .save(argThat(conv -> conv.getState() == ConversationState.CONFIRMED));
+        verify(appointmentRepository)
+                .save(argThat(apt -> apt.getStatus() == AppointmentStatus.CONFIRMED));
         verify(conversationResponseService).sendConfirmationResponse(any());
     }
 
@@ -86,14 +85,13 @@ class ConversationStateManagerTest {
         when(conversationStateRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
         when(appointmentRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        conversationStateManager.processInboundMessage("test-org", "+33612345678", "Annuler", "msg-124");
+        conversationStateManager.processInboundMessage(
+                "test-org", "+33612345678", "Annuler", "msg-124");
 
-        verify(conversationStateRepository).save(argThat(conv -> 
-            conv.getState() == ConversationState.CANCELLED
-        ));
-        verify(appointmentRepository).save(argThat(apt -> 
-            apt.getStatus() == AppointmentStatus.CANCELLED
-        ));
+        verify(conversationStateRepository)
+                .save(argThat(conv -> conv.getState() == ConversationState.CANCELLED));
+        verify(appointmentRepository)
+                .save(argThat(apt -> apt.getStatus() == AppointmentStatus.CANCELLED));
         verify(conversationResponseService).sendCancellationResponse(any());
     }
 
@@ -107,14 +105,13 @@ class ConversationStateManagerTest {
         when(conversationStateRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
         when(appointmentRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        conversationStateManager.processInboundMessage("test-org", "+33612345678", "Reporter", "msg-125");
+        conversationStateManager.processInboundMessage(
+                "test-org", "+33612345678", "Reporter", "msg-125");
 
-        verify(conversationStateRepository).save(argThat(conv -> 
-            conv.getState() == ConversationState.RESCHEDULED
-        ));
-        verify(appointmentRepository).save(argThat(apt -> 
-            apt.getStatus() == AppointmentStatus.RESCHEDULED
-        ));
+        verify(conversationStateRepository)
+                .save(argThat(conv -> conv.getState() == ConversationState.RESCHEDULED));
+        verify(appointmentRepository)
+                .save(argThat(apt -> apt.getStatus() == AppointmentStatus.RESCHEDULED));
         verify(conversationResponseService).sendRescheduleResponse(any());
     }
 
@@ -124,7 +121,8 @@ class ConversationStateManagerTest {
                 .thenReturn(Optional.empty());
         when(inboundMessageRepository.save(any())).thenAnswer(i -> i.getArguments()[0]);
 
-        conversationStateManager.processInboundMessage("test-org", "+33612345678", "Hello", "msg-126");
+        conversationStateManager.processInboundMessage(
+                "test-org", "+33612345678", "Hello", "msg-126");
 
         verify(conversationStateRepository, never()).save(any());
         verify(appointmentRepository, never()).save(any());
@@ -139,27 +137,29 @@ class ConversationStateManagerTest {
 
         conversationStateManager.initializeConversation("test-org", "+33612345678", 100L, 200L);
 
-        verify(conversationStateRepository).save(argThat(conv -> 
-            conv.getState() == ConversationState.AWAITING_CONFIRMATION
-            && conv.getAppointmentId().equals(100L)
-            && conv.getDossierId().equals(200L)
-        ));
+        verify(conversationStateRepository)
+                .save(
+                        argThat(
+                                conv ->
+                                        conv.getState() == ConversationState.AWAITING_CONFIRMATION
+                                                && conv.getAppointmentId().equals(100L)
+                                                && conv.getDossierId().equals(200L)));
     }
 
     @Test
     void testExpireOldConversations() {
         when(conversationStateRepository.expireOldConversations(
-            eq(ConversationState.AWAITING_CONFIRMATION),
-            eq(ConversationState.EXPIRED),
-            any()
-        )).thenReturn(5);
+                        eq(ConversationState.AWAITING_CONFIRMATION),
+                        eq(ConversationState.EXPIRED),
+                        any()))
+                .thenReturn(5);
 
         conversationStateManager.expireOldConversations();
 
-        verify(conversationStateRepository).expireOldConversations(
-            eq(ConversationState.AWAITING_CONFIRMATION),
-            eq(ConversationState.EXPIRED),
-            any()
-        );
+        verify(conversationStateRepository)
+                .expireOldConversations(
+                        eq(ConversationState.AWAITING_CONFIRMATION),
+                        eq(ConversationState.EXPIRED),
+                        any());
     }
 }

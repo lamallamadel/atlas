@@ -47,9 +47,7 @@ public class WhatsAppHealthIndicator implements HealthIndicator {
                         .build();
             }
 
-            return builder.up()
-                    .withDetail("message", "WhatsApp provider is healthy")
-                    .build();
+            return builder.up().withDetail("message", "WhatsApp provider is healthy").build();
 
         } catch (Exception e) {
             return builder.down()
@@ -106,7 +104,9 @@ public class WhatsAppHealthIndicator implements HealthIndicator {
 
             long delivered =
                     outboundMessageRepository.countByChannelAndStatusAndCreatedAtAfter(
-                            MessageChannel.WHATSAPP, OutboundMessageStatus.DELIVERED, last10Minutes);
+                            MessageChannel.WHATSAPP,
+                            OutboundMessageStatus.DELIVERED,
+                            last10Minutes);
 
             long failed =
                     outboundMessageRepository.countByChannelAndStatusAndCreatedAtAfter(

@@ -10,27 +10,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @Table(
         name = "appointment_reminder_metrics",
         indexes = {
-            @Index(
-                    name = "idx_appointment_reminder_metrics_org_id",
-                    columnList = "org_id"),
+            @Index(name = "idx_appointment_reminder_metrics_org_id", columnList = "org_id"),
             @Index(
                     name = "idx_appointment_reminder_metrics_appointment_id",
                     columnList = "appointment_id"),
-            @Index(
-                    name = "idx_appointment_reminder_metrics_channel",
-                    columnList = "channel"),
-            @Index(
-                    name = "idx_appointment_reminder_metrics_status",
-                    columnList = "status"),
+            @Index(name = "idx_appointment_reminder_metrics_channel", columnList = "channel"),
+            @Index(name = "idx_appointment_reminder_metrics_status", columnList = "status"),
             @Index(
                     name = "idx_appointment_reminder_metrics_template_code",
                     columnList = "template_code"),
-            @Index(
-                    name = "idx_appointment_reminder_metrics_agent_id",
-                    columnList = "agent_id"),
-            @Index(
-                    name = "idx_appointment_reminder_metrics_sent_at",
-                    columnList = "sent_at"),
+            @Index(name = "idx_appointment_reminder_metrics_agent_id", columnList = "agent_id"),
+            @Index(name = "idx_appointment_reminder_metrics_sent_at", columnList = "sent_at"),
             @Index(
                     name = "idx_appointment_reminder_metrics_org_sent_at",
                     columnList = "org_id, sent_at"),

@@ -21,7 +21,8 @@ public class QuotaExceededHandler {
     }
 
     @Transactional
-    public void handleQuotaExceeded(OutboundMessageEntity message, LocalDateTime nextWindowResetAt) {
+    public void handleQuotaExceeded(
+            OutboundMessageEntity message, LocalDateTime nextWindowResetAt) {
         message.setStatus(OutboundMessageStatus.THROTTLED);
         message.setErrorCode("QUOTA_EXCEEDED");
         message.setErrorMessage(
@@ -49,7 +50,8 @@ public class QuotaExceededHandler {
                             message.setErrorCode(null);
                             message.setErrorMessage(null);
                             outboundMessageRepository.save(message);
-                            logger.debug("Requeued message {} for orgId={}", message.getId(), orgId);
+                            logger.debug(
+                                    "Requeued message {} for orgId={}", message.getId(), orgId);
                         });
     }
 }

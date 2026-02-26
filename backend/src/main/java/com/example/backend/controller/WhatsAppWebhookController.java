@@ -25,7 +25,7 @@ public class WhatsAppWebhookController {
             @RequestParam("hub.mode") String mode,
             @RequestParam("hub.verify_token") String token,
             @RequestParam("hub.challenge") String challenge) {
-        
+
         log.info("WhatsApp webhook verification request received");
 
         if ("subscribe".equals(mode) && "your_verify_token".equals(token)) {
@@ -65,7 +65,8 @@ public class WhatsAppWebhookController {
         if (entry.get("changes") instanceof java.util.List<?> changes) {
             for (Object changeObj : changes) {
                 if (changeObj instanceof Map<?, ?> change) {
-                    Map<String, Object> value = (Map<String, Object>) ((Map<?, ?>) change).get("value");
+                    Map<String, Object> value =
+                            (Map<String, Object>) ((Map<?, ?>) change).get("value");
                     if (value != null) {
                         processValue(value);
                     }
@@ -101,7 +102,8 @@ public class WhatsAppWebhookController {
                     conversationStateManager.processInboundMessage(orgId, from, body, messageId);
                 } else {
                     log.warn("Could not extract orgId from webhook, using default");
-                    conversationStateManager.processInboundMessage("default", from, body, messageId);
+                    conversationStateManager.processInboundMessage(
+                            "default", from, body, messageId);
                 }
             }
         }

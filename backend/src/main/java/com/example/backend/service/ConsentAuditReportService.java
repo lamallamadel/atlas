@@ -152,20 +152,16 @@ public class ConsentAuditReportService {
         String newStatus = event.getNewStatus() != null ? event.getNewStatus().name() : "UNKNOWN";
 
         return switch (eventType) {
-            case "GRANTED" -> String.format(
-                    "Consent granted for %s via %s", consentType, channel);
-            case "REVOKED" -> String.format(
-                    "Consent revoked for %s via %s", consentType, channel);
-            case "EXPIRED" -> String.format(
-                    "Consent expired for %s via %s", consentType, channel);
-            case "RENEWED" -> String.format(
-                    "Consent renewed for %s via %s", consentType, channel);
-            case "DENIED" -> String.format(
-                    "Consent denied for %s via %s", consentType, channel);
-            case "PENDING" -> String.format(
-                    "Consent pending for %s via %s", consentType, channel);
-            default -> String.format(
-                    "Consent status changed to %s for %s via %s", newStatus, consentType, channel);
+            case "GRANTED" -> String.format("Consent granted for %s via %s", consentType, channel);
+            case "REVOKED" -> String.format("Consent revoked for %s via %s", consentType, channel);
+            case "EXPIRED" -> String.format("Consent expired for %s via %s", consentType, channel);
+            case "RENEWED" -> String.format("Consent renewed for %s via %s", consentType, channel);
+            case "DENIED" -> String.format("Consent denied for %s via %s", consentType, channel);
+            case "PENDING" -> String.format("Consent pending for %s via %s", consentType, channel);
+            default ->
+                    String.format(
+                            "Consent status changed to %s for %s via %s",
+                            newStatus, consentType, channel);
         };
     }
 }

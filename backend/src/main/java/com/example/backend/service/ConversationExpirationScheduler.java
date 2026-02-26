@@ -9,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ConversationExpirationScheduler {
 
-    private static final Logger log = LoggerFactory.getLogger(ConversationExpirationScheduler.class);
+    private static final Logger log =
+            LoggerFactory.getLogger(ConversationExpirationScheduler.class);
 
     private final ConversationStateManager conversationStateManager;
 

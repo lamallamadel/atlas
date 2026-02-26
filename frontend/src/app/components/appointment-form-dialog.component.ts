@@ -13,6 +13,7 @@ export interface AppointmentFormData {
   assignedTo?: string;
   notes?: string;
   status?: AppointmentStatus;
+  locale?: string;
 }
 
 @Component({
@@ -40,6 +41,14 @@ export class AppointmentFormDialogComponent implements OnInit {
     { value: AppointmentStatus.CANCELLED, label: 'Annulé' }
   ];
 
+  localeOptions = [
+    { value: 'fr_FR', label: 'Français (France)' },
+    { value: 'en_US', label: 'English (US)' },
+    { value: 'ar_MA', label: 'العربية (المغرب)' },
+    { value: 'es_ES', label: 'Español (España)' },
+    { value: 'de_DE', label: 'Deutsch (Deutschland)' }
+  ];
+
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<AppointmentFormDialogComponent>,
@@ -55,7 +64,8 @@ export class AppointmentFormDialogComponent implements OnInit {
       location: [this.data?.location || ''],
       assignedTo: [this.data?.assignedTo || ''],
       notes: [this.data?.notes || ''],
-      status: [this.data?.status || AppointmentStatus.SCHEDULED, Validators.required]
+      status: [this.data?.status || AppointmentStatus.SCHEDULED, Validators.required],
+      locale: [this.data?.locale || 'fr_FR']
     }, { validators: this.timeRangeValidator });
   }
 

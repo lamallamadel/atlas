@@ -14,13 +14,15 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ConversationStateRepository extends JpaRepository<ConversationStateEntity, Long> {
 
-    @Query("SELECT c FROM ConversationStateEntity c WHERE c.orgId = :orgId AND c.phoneNumber = :phoneNumber AND c.expiresAt > :now ORDER BY c.createdAt DESC")
+    @Query(
+            "SELECT c FROM ConversationStateEntity c WHERE c.orgId = :orgId AND c.phoneNumber = :phoneNumber AND c.expiresAt > :now ORDER BY c.createdAt DESC")
     Optional<ConversationStateEntity> findActiveConversation(
             @Param("orgId") String orgId,
             @Param("phoneNumber") String phoneNumber,
             @Param("now") LocalDateTime now);
 
-    @Query("SELECT c FROM ConversationStateEntity c WHERE c.orgId = :orgId AND c.appointmentId = :appointmentId AND c.expiresAt > :now")
+    @Query(
+            "SELECT c FROM ConversationStateEntity c WHERE c.orgId = :orgId AND c.appointmentId = :appointmentId AND c.expiresAt > :now")
     Optional<ConversationStateEntity> findActiveConversationByAppointment(
             @Param("orgId") String orgId,
             @Param("appointmentId") Long appointmentId,
@@ -31,13 +33,15 @@ public interface ConversationStateRepository extends JpaRepository<ConversationS
             @Param("now") LocalDateTime now, @Param("state") ConversationState state);
 
     @Modifying
-    @Query("UPDATE ConversationStateEntity c SET c.state = :newState, c.expiresAt = :now WHERE c.expiresAt <= :now AND c.state = :currentState")
+    @Query(
+            "UPDATE ConversationStateEntity c SET c.state = :newState, c.expiresAt = :now WHERE c.expiresAt <= :now AND c.state = :currentState")
     int expireOldConversations(
             @Param("currentState") ConversationState currentState,
             @Param("newState") ConversationState newState,
             @Param("now") LocalDateTime now);
 
-    @Query("SELECT c FROM ConversationStateEntity c WHERE c.orgId = :orgId AND c.dossierId = :dossierId ORDER BY c.createdAt DESC")
+    @Query(
+            "SELECT c FROM ConversationStateEntity c WHERE c.orgId = :orgId AND c.dossierId = :dossierId ORDER BY c.createdAt DESC")
     List<ConversationStateEntity> findByDossierId(
             @Param("orgId") String orgId, @Param("dossierId") Long dossierId);
 }

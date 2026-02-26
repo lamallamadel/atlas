@@ -6,7 +6,9 @@ import java.util.Map;
 @Schema(description = "Request body for template preview with sample data")
 public class TemplatePreviewRequest {
 
-    @Schema(description = "Sample variable values for preview", example = "{\"1\": \"John Doe\", \"2\": \"$99.99\"}")
+    @Schema(
+            description = "Sample variable values for preview",
+            example = "{\"1\": \"John Doe\", \"2\": \"$99.99\"}")
     private Map<String, String> variables;
 
     public Map<String, String> getVariables() {

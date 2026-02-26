@@ -33,16 +33,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 class AppointmentReminderIntegrationTest {
 
-    @Autowired
-    private AppointmentReminderScheduler scheduler;
-    @Autowired
-    private AppointmentRepository appointmentRepository;
-    @Autowired
-    private DossierRepository dossierRepository;
-    @Autowired
-    private OutboundMessageRepository outboundMessageRepository;
-    @Autowired
-    private ConsentementRepository consentementRepository;
+    @Autowired private AppointmentReminderScheduler scheduler;
+    @Autowired private AppointmentRepository appointmentRepository;
+    @Autowired private DossierRepository dossierRepository;
+    @Autowired private OutboundMessageRepository outboundMessageRepository;
+    @Autowired private ConsentementRepository consentementRepository;
 
     private Dossier testDossier;
 
@@ -65,11 +60,11 @@ class AppointmentReminderIntegrationTest {
         consent.setChannel(ConsentementChannel.WHATSAPP);
         consent.setConsentType(ConsentementType.TRANSACTIONNEL);
         consent.setStatus(ConsentementStatus.GRANTED);
-        
+
         Map<String, Object> meta = new HashMap<>();
         meta.put("ipAddress", "127.0.0.1");
         consent.setMeta(meta);
-        
+
         consentementRepository.save(consent);
     }
 
@@ -95,7 +90,8 @@ class AppointmentReminderIntegrationTest {
 
         // Assert
         // 1. Check reminder flag is updated
-        AppointmentEntity updatedAppointment = appointmentRepository.findById(appointment.getId()).orElseThrow();
+        AppointmentEntity updatedAppointment =
+                appointmentRepository.findById(appointment.getId()).orElseThrow();
         assertThat(updatedAppointment.getReminderSent()).isTrue();
 
         // 2. Check outbound message is queued

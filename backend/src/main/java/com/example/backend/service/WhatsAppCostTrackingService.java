@@ -64,7 +64,8 @@ public class WhatsAppCostTrackingService {
     }
 
     @Transactional(readOnly = true)
-    public Map<String, CostBreakdown> getCostBreakdownByType(String orgId, LocalDateTime startDate) {
+    public Map<String, CostBreakdown> getCostBreakdownByType(
+            String orgId, LocalDateTime startDate) {
         List<Object[]> results =
                 costTrackingRepository.findCostBreakdownByOrgIdAndCreatedAtAfter(orgId, startDate);
 
@@ -74,9 +75,7 @@ public class WhatsAppCostTrackingService {
             Long count = ((Number) row[1]).longValue();
             BigDecimal totalCost = (BigDecimal) row[2];
 
-            breakdown.put(
-                    type.getValue(),
-                    new CostBreakdown(type.getValue(), count, totalCost));
+            breakdown.put(type.getValue(), new CostBreakdown(type.getValue(), count, totalCost));
         }
 
         return breakdown;
@@ -87,7 +86,8 @@ public class WhatsAppCostTrackingService {
         private final Long conversationCount;
         private final BigDecimal totalCost;
 
-        public CostBreakdown(String conversationType, Long conversationCount, BigDecimal totalCost) {
+        public CostBreakdown(
+                String conversationType, Long conversationCount, BigDecimal totalCost) {
             this.conversationType = conversationType;
             this.conversationCount = conversationCount;
             this.totalCost = totalCost;

@@ -390,9 +390,10 @@ public class ConsentementService {
         ConsentementEntity updated = consentementRepository.save(consentement);
 
         logConsentRenewedActivity(updated, oldExpiresAt);
-        
+
         Map<String, Object> renewalMetadata = new HashMap<>();
-        renewalMetadata.put("previousExpiresAt", oldExpiresAt != null ? oldExpiresAt.toString() : null);
+        renewalMetadata.put(
+                "previousExpiresAt", oldExpiresAt != null ? oldExpiresAt.toString() : null);
         renewalMetadata.put("newExpiresAt", newExpiresAt.toString());
         consentEventService.emitEvent(updated, "RENEWED", updated.getStatus(), renewalMetadata);
 
@@ -418,8 +419,7 @@ public class ConsentementService {
                 metadata.put("consentType", consentement.getConsentType().name());
                 metadata.put("status", consentement.getStatus().name());
                 metadata.put(
-                        "previousExpiresAt",
-                        oldExpiresAt != null ? oldExpiresAt.toString() : null);
+                        "previousExpiresAt", oldExpiresAt != null ? oldExpiresAt.toString() : null);
                 metadata.put(
                         "newExpiresAt",
                         consentement.getExpiresAt() != null
@@ -452,8 +452,7 @@ public class ConsentementService {
         }
 
         if (consent.getExpiresAt() == null) {
-            logger.warn(
-                    "Consent {} has no expiration date. Skipping reminder.", consent.getId());
+            logger.warn("Consent {} has no expiration date. Skipping reminder.", consent.getId());
             return;
         }
 
@@ -524,8 +523,7 @@ public class ConsentementService {
         };
     }
 
-    private String getChannelLabel(
-            com.example.backend.entity.enums.ConsentementChannel channel) {
+    private String getChannelLabel(com.example.backend.entity.enums.ConsentementChannel channel) {
         return switch (channel) {
             case EMAIL -> "email";
             case SMS -> "SMS";
@@ -536,8 +534,7 @@ public class ConsentementService {
         };
     }
 
-    private String getRecipientContact(
-            Dossier dossier, ConsentementEntity consent) {
+    private String getRecipientContact(Dossier dossier, ConsentementEntity consent) {
         return switch (consent.getChannel()) {
             case EMAIL -> dossier.getLeadEmail();
             case SMS, WHATSAPP, PHONE -> dossier.getLeadPhone();

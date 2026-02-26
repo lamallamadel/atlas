@@ -46,6 +46,7 @@ public class DossierService {
     private final jakarta.persistence.EntityManager entityManager;
     private final DossierStatusCodeValidationService statusCodeValidationService;
     private final com.example.backend.brain.BrainClientService brainClientService;
+    private final LocaleDetectionService localeDetectionService;
 
     public DossierService(
             DossierRepository dossierRepository,
@@ -59,7 +60,8 @@ public class DossierService {
             jakarta.persistence.EntityManager entityManager,
             DossierStatusCodeValidationService statusCodeValidationService,
             @Autowired(required = false) @Nullable
-                    com.example.backend.brain.BrainClientService brainClientService) {
+                    com.example.backend.brain.BrainClientService brainClientService,
+            LocaleDetectionService localeDetectionService) {
         this.dossierRepository = dossierRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
@@ -71,6 +73,7 @@ public class DossierService {
         this.entityManager = entityManager;
         this.statusCodeValidationService = statusCodeValidationService;
         this.brainClientService = brainClientService;
+        this.localeDetectionService = localeDetectionService;
     }
 
     @Transactional
@@ -110,6 +113,12 @@ public class DossierService {
             statusCodeValidationService.validateCaseType(dossier.getCaseType());
             statusCodeValidationService.validateStatusCodeForCaseType(
                     dossier.getCaseType(), dossier.getStatusCode());
+        }
+
+        if (dossier.getLocale() == null || dossier.getLocale().trim().isEmpty()) {
+            String detectedLocale =
+                    localeDetectionService.detectLocaleFromPhone(dossier.getLeadPhone());
+            dossier.setLocale(detectedLocale);
         }
 
         LocalDateTime now = LocalDateTime.now();

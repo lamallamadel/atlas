@@ -52,6 +52,11 @@ public class AppointmentMapper {
         appointment.setTemplateCode(request.getTemplateCode());
         appointment.setReminderStrategy(request.getReminderStrategy());
 
+        if (request.getLocale() != null && !request.getLocale().trim().isEmpty()) {
+            dossier.setLocale(request.getLocale());
+            dossierRepository.save(dossier);
+        }
+
         return appointment;
     }
 

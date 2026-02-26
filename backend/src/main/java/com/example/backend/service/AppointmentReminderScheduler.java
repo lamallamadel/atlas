@@ -10,10 +10,12 @@ import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.AppointmentReminderMetricsRepository;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +28,12 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class AppointmentReminderScheduler {
 
-    private static final Logger logger = LoggerFactory.getLogger(AppointmentReminderScheduler.class);
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private static final Logger logger =
+            LoggerFactory.getLogger(AppointmentReminderScheduler.class);
+    private static final DateTimeFormatter DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
-    
+
     private static final String DEFAULT_TEMPLATE_CODE = "appointment_reminder";
     private static final List<String> DEFAULT_CHANNELS = Arrays.asList("WHATSAPP", "SMS", "EMAIL");
 
@@ -41,6 +45,7 @@ public class AppointmentReminderScheduler {
     private final ModelTrainingService modelTrainingService;
     private final AppointmentReminderMetricsService metricsService;
     private final AppointmentReminderMetricsRepository metricsRepository;
+    private final WhatsAppTemplateService whatsAppTemplateService;
 
     @Value("${appointment.reminder.enabled:true}")
     private boolean remindersEnabled;
@@ -59,7 +64,8 @@ public class AppointmentReminderScheduler {
             ConversationStateManager conversationStateManager,
             ModelTrainingService modelTrainingService,
             AppointmentReminderMetricsService metricsService,
-            AppointmentReminderMetricsRepository metricsRepository) {
+            AppointmentReminderMetricsRepository metricsRepository,
+            WhatsAppTemplateService whatsAppTemplateService) {
         this.appointmentRepository = appointmentRepository;
         this.outboundMessageService = outboundMessageService;
         this.activityService = activityService;
@@ -68,6 +74,7 @@ public class AppointmentReminderScheduler {
         this.modelTrainingService = modelTrainingService;
         this.metricsService = metricsService;
         this.metricsRepository = metricsRepository;
+        this.whatsAppTemplateService = whatsAppTemplateService;
     }
 
     @Scheduled(cron = "${appointment.reminder.cron:0 0/15 * * * ?}")
@@ -84,8 +91,9 @@ public class AppointmentReminderScheduler {
         LocalDateTime windowStart = now.plusHours(hoursAhead).minusMinutes(5);
         LocalDateTime windowEnd = now.plusHours(hoursAhead).plusMinutes(15);
 
-        List<AppointmentEntity> upcomingAppointments = appointmentRepository.findAppointmentsForReminder(
-                AppointmentStatus.SCHEDULED, windowStart, windowEnd);
+        List<AppointmentEntity> upcomingAppointments =
+                appointmentRepository.findAppointmentsForReminder(
+                        AppointmentStatus.SCHEDULED, windowStart, windowEnd);
 
         if (upcomingAppointments.isEmpty()) {
             logger.debug("No upcoming appointments found for reminders in this window");
@@ -98,7 +106,10 @@ public class AppointmentReminderScheduler {
             try {
                 sendReminderWithFallback(appointment);
             } catch (Exception e) {
-                logger.error("Failed to send reminder for appointment {}: {}", appointment.getId(), e.getMessage());
+                logger.error(
+                        "Failed to send reminder for appointment {}: {}",
+                        appointment.getId(),
+                        e.getMessage());
             }
         }
     }
@@ -169,7 +180,7 @@ public class AppointmentReminderScheduler {
         Long dossierId = appointment.getDossier().getId();
         List<String> channels = getReminderChannels(appointment);
         String templateCode = getTemplateCode(appointment);
-        
+
         Map<String, String> templateVariables = buildTemplateVariables(appointment);
 
         boolean reminderSent = false;
@@ -181,7 +192,10 @@ public class AppointmentReminderScheduler {
             try {
                 channel = MessageChannel.valueOf(channelStr);
             } catch (IllegalArgumentException e) {
-                logger.warn("Invalid channel '{}' for appointment {}. Skipping.", channelStr, appointment.getId());
+                logger.warn(
+                        "Invalid channel '{}' for appointment {}. Skipping.",
+                        channelStr,
+                        appointment.getId());
                 attemptedChannels.add(channelStr);
                 failureReasons.add("Invalid channel: " + channelStr);
                 continue;
@@ -192,16 +206,30 @@ public class AppointmentReminderScheduler {
             String recipientContact = getRecipientContact(appointment, channel);
             if (recipientContact == null || recipientContact.trim().isEmpty()) {
                 String reason = String.format("No contact info for channel %s", channel);
-                logger.warn("Dossier {} has no contact for channel {}. Trying next channel.", 
-                        dossierId, channel);
+                logger.warn(
+                        "Dossier {} has no contact for channel {}. Trying next channel.",
+                        dossierId,
+                        channel);
                 failureReasons.add(reason);
                 logFallbackEvent(appointment, channel, reason);
                 continue;
             }
 
             try {
-                String messageContent = interpolateTemplate(templateCode, templateVariables);
-                
+                String dossierLocale = appointment.getDossier().getLocale();
+                if (dossierLocale == null || dossierLocale.trim().isEmpty()) {
+                    dossierLocale = "fr_FR";
+                }
+
+                String messageContent;
+                if (channel == MessageChannel.WHATSAPP) {
+                    messageContent =
+                            getLocalizedTemplateContent(
+                                    templateCode, dossierLocale, templateVariables);
+                } else {
+                    messageContent = interpolateTemplate(templateCode, templateVariables);
+                }
+
                 Map<String, Object> payload = new HashMap<>();
                 payload.put("body", messageContent);
 
@@ -210,18 +238,20 @@ public class AppointmentReminderScheduler {
                         channel,
                         recipientContact,
                         templateCode,
-                        "Rappel de rendez-vous",
+                        getLocalizedSubject(dossierLocale),
                         payload,
                         "appointment_reminder_" + appointment.getId() + "_" + channel,
-                        ConsentementType.TRANSACTIONNEL
-                );
+                        ConsentementType.TRANSACTIONNEL);
 
-                logger.info("Successfully queued reminder for appointment {} via {} to {}", 
-                        appointment.getId(), channel, recipientContact);
-                
+                logger.info(
+                        "Successfully queued reminder for appointment {} via {} to {}",
+                        appointment.getId(),
+                        channel,
+                        recipientContact);
+
                 double noShowProbability = predictNoShowProbability(appointment);
                 ReminderStrategy strategy = appointment.getReminderStrategy();
-                
+
                 metricsService.recordReminderSentWithStrategy(
                         appointment,
                         channel.name(),
@@ -230,28 +260,34 @@ public class AppointmentReminderScheduler {
                         "SENT",
                         LocalDateTime.now(),
                         strategy != null ? strategy.name() : ReminderStrategy.STANDARD.name(),
-                        noShowProbability
-                );
-                
+                        noShowProbability);
+
                 if (channel == MessageChannel.WHATSAPP) {
                     initializeConversationForReminder(appointment, recipientContact);
                 }
-                
+
                 reminderSent = true;
                 logSuccessfulReminder(appointment, channel, attemptedChannels, failureReasons);
                 break;
 
             } catch (ResponseStatusException e) {
                 String reason = String.format("Consent validation failed: %s", e.getReason());
-                logger.warn("Consent validation failed for appointment {} on channel {}: {}. Trying next channel.",
-                        appointment.getId(), channel, e.getReason());
+                logger.warn(
+                        "Consent validation failed for appointment {} on channel {}: {}. Trying next channel.",
+                        appointment.getId(),
+                        channel,
+                        e.getReason());
                 failureReasons.add(reason);
                 logFallbackEvent(appointment, channel, reason);
-                
+
             } catch (Exception e) {
                 String reason = String.format("Error: %s", e.getMessage());
-                logger.error("Failed to send reminder for appointment {} on channel {}: {}. Trying next channel.",
-                        appointment.getId(), channel, e.getMessage(), e);
+                logger.error(
+                        "Failed to send reminder for appointment {} on channel {}: {}. Trying next channel.",
+                        appointment.getId(),
+                        channel,
+                        e.getMessage(),
+                        e);
                 failureReasons.add(reason);
                 logFallbackEvent(appointment, channel, reason);
             }
@@ -262,8 +298,12 @@ public class AppointmentReminderScheduler {
             appointmentRepository.save(appointment);
             logger.info("Reminder flagged as sent for appointment {}", appointment.getId());
         } else {
-            logger.error("Failed to send reminder for appointment {} on all channels: {}. Attempted: {}, Failures: {}",
-                    appointment.getId(), channels, attemptedChannels, failureReasons);
+            logger.error(
+                    "Failed to send reminder for appointment {} on all channels: {}. Attempted: {}, Failures: {}",
+                    appointment.getId(),
+                    channels,
+                    attemptedChannels,
+                    failureReasons);
             logAllChannelsFailedEvent(appointment, attemptedChannels, failureReasons);
         }
     }
@@ -286,16 +326,30 @@ public class AppointmentReminderScheduler {
 
     private Map<String, String> buildTemplateVariables(AppointmentEntity appointment) {
         Map<String, String> variables = new HashMap<>();
-        
+
+        String dossierLocale = appointment.getDossier().getLocale();
+        if (dossierLocale == null || dossierLocale.trim().isEmpty()) {
+            dossierLocale = "fr_FR";
+        }
+
+        Locale locale = parseLocale(dossierLocale);
+
         String clientName = appointment.getDossier().getLeadName();
         if (clientName == null || clientName.trim().isEmpty()) {
-            clientName = "Client";
+            clientName = getLocalizedDefaultName(dossierLocale);
         }
-        
-        String agentName = appointment.getAssignedTo() != null ? appointment.getAssignedTo() : "votre conseiller";
-        String location = appointment.getLocation() != null ? appointment.getLocation() : "notre agence";
-        String dateStr = appointment.getStartTime().format(DATE_FORMATTER);
-        String timeStr = appointment.getStartTime().format(TIME_FORMATTER);
+
+        String agentName =
+                appointment.getAssignedTo() != null
+                        ? appointment.getAssignedTo()
+                        : getLocalizedAgentName(dossierLocale);
+        String location =
+                appointment.getLocation() != null
+                        ? appointment.getLocation()
+                        : getLocalizedLocation(dossierLocale);
+
+        String dateStr = formatDateForLocale(appointment.getStartTime(), locale);
+        String timeStr = formatTimeForLocale(appointment.getStartTime(), locale);
 
         variables.put("clientName", clientName);
         variables.put("dateStr", dateStr);
@@ -306,12 +360,154 @@ public class AppointmentReminderScheduler {
         return variables;
     }
 
+    private Locale parseLocale(String localeString) {
+        if (localeString == null || localeString.trim().isEmpty()) {
+            return Locale.FRANCE;
+        }
+
+        String[] parts = localeString.split("_");
+        if (parts.length == 2) {
+            return new Locale(parts[0], parts[1]);
+        }
+        return Locale.FRANCE;
+    }
+
+    private String formatDateForLocale(LocalDateTime dateTime, Locale locale) {
+        try {
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale);
+            return dateTime.format(formatter);
+        } catch (Exception e) {
+            logger.warn("Failed to format date with locale {}, using default", locale);
+            return dateTime.format(DATE_FORMATTER);
+        }
+    }
+
+    private String formatTimeForLocale(LocalDateTime dateTime, Locale locale) {
+        try {
+            DateTimeFormatter formatter =
+                    DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(locale);
+            return dateTime.format(formatter);
+        } catch (Exception e) {
+            logger.warn("Failed to format time with locale {}, using default", locale);
+            return dateTime.format(TIME_FORMATTER);
+        }
+    }
+
+    private String getLocalizedDefaultName(String locale) {
+        if (locale == null) {
+            return "Client";
+        }
+        return switch (locale.toLowerCase()) {
+            case "en_us", "en_gb" -> "Client";
+            case "ar_ma", "ar_sa" -> "العميل";
+            case "es_es" -> "Cliente";
+            case "de_de" -> "Kunde";
+            default -> "Client";
+        };
+    }
+
+    private String getLocalizedAgentName(String locale) {
+        if (locale == null) {
+            return "votre conseiller";
+        }
+        return switch (locale.toLowerCase()) {
+            case "en_us", "en_gb" -> "your advisor";
+            case "ar_ma", "ar_sa" -> "مستشارك";
+            case "es_es" -> "su asesor";
+            case "de_de" -> "Ihr Berater";
+            default -> "votre conseiller";
+        };
+    }
+
+    private String getLocalizedLocation(String locale) {
+        if (locale == null) {
+            return "notre agence";
+        }
+        return switch (locale.toLowerCase()) {
+            case "en_us", "en_gb" -> "our office";
+            case "ar_ma", "ar_sa" -> "مكتبنا";
+            case "es_es" -> "nuestra oficina";
+            case "de_de" -> "unser Büro";
+            default -> "notre agence";
+        };
+    }
+
+    private String getLocalizedSubject(String locale) {
+        if (locale == null) {
+            return "Rappel de rendez-vous";
+        }
+        return switch (locale.toLowerCase()) {
+            case "en_us", "en_gb" -> "Appointment Reminder";
+            case "ar_ma", "ar_sa" -> "تذكير بالموعد";
+            case "es_es" -> "Recordatorio de cita";
+            case "de_de" -> "Terminerinnerung";
+            default -> "Rappel de rendez-vous";
+        };
+    }
+
+    private String getLocalizedTemplateContent(
+            String templateCode, String locale, Map<String, String> variables) {
+        try {
+            com.example.backend.entity.WhatsAppTemplate template =
+                    whatsAppTemplateService.getLocalizedTemplate(templateCode, locale);
+
+            if (template != null && template.getComponents() != null) {
+                return extractBodyFromTemplate(template, variables);
+            }
+        } catch (Exception e) {
+            logger.warn(
+                    "Failed to get localized template '{}' for locale '{}': {}. Using interpolation.",
+                    templateCode,
+                    locale,
+                    e.getMessage());
+        }
+
+        return interpolateTemplate(templateCode, variables);
+    }
+
+    private String extractBodyFromTemplate(
+            com.example.backend.entity.WhatsAppTemplate template, Map<String, String> variables) {
+        if (template.getComponents() == null) {
+            return buildFallbackMessage(variables);
+        }
+
+        for (Map<String, Object> component : template.getComponents()) {
+            String type = (String) component.get("type");
+            if ("BODY".equalsIgnoreCase(type)) {
+                String bodyText = (String) component.get("text");
+                if (bodyText != null) {
+                    return replaceTemplateVariables(bodyText, variables);
+                }
+            }
+        }
+
+        return buildFallbackMessage(variables);
+    }
+
+    private String replaceTemplateVariables(String text, Map<String, String> variables) {
+        if (text == null || variables == null) {
+            return text;
+        }
+
+        String result = text;
+        for (Map.Entry<String, String> entry : variables.entrySet()) {
+            String placeholder = "{{" + entry.getKey() + "}}";
+            String value = entry.getValue() != null ? entry.getValue() : "";
+            result = result.replace(placeholder, value);
+        }
+
+        return result;
+    }
+
     private String interpolateTemplate(String templateCode, Map<String, String> variables) {
         try {
             return templateInterpolationService.interpolateTemplate(templateCode, variables);
         } catch (Exception e) {
-            logger.warn("Failed to interpolate template '{}': {}. Using fallback message.", 
-                    templateCode, e.getMessage());
+            logger.warn(
+                    "Failed to interpolate template '{}': {}. Using fallback message.",
+                    templateCode,
+                    e.getMessage());
             return buildFallbackMessage(variables);
         }
     }
@@ -323,8 +519,7 @@ public class AppointmentReminderScheduler {
                 variables.get("dateStr"),
                 variables.get("timeStr"),
                 variables.get("location"),
-                variables.get("agentName")
-        );
+                variables.get("agentName"));
     }
 
     private String getRecipientContact(AppointmentEntity appointment, MessageChannel channel) {
@@ -335,16 +530,17 @@ public class AppointmentReminderScheduler {
         };
     }
 
-    private void logFallbackEvent(AppointmentEntity appointment, MessageChannel channel, String reason) {
+    private void logFallbackEvent(
+            AppointmentEntity appointment, MessageChannel channel, String reason) {
         if (activityService == null || appointment.getDossier() == null) {
             return;
         }
 
         try {
-            String description = String.format(
-                    "Appointment reminder fallback: Failed to send via %s, trying next channel. Reason: %s",
-                    channel, reason
-            );
+            String description =
+                    String.format(
+                            "Appointment reminder fallback: Failed to send via %s, trying next channel. Reason: %s",
+                            channel, reason);
 
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("appointmentId", appointment.getId());
@@ -356,11 +552,12 @@ public class AppointmentReminderScheduler {
                     appointment.getDossier().getId(),
                     ActivityType.MESSAGE_FAILED,
                     description,
-                    metadata
-            );
+                    metadata);
         } catch (Exception e) {
-            logger.warn("Failed to log fallback event for appointment {}: {}", 
-                    appointment.getId(), e.getMessage());
+            logger.warn(
+                    "Failed to log fallback event for appointment {}: {}",
+                    appointment.getId(),
+                    e.getMessage());
         }
     }
 
@@ -376,16 +573,14 @@ public class AppointmentReminderScheduler {
         try {
             String description;
             if (attemptedChannels.size() == 1) {
-                description = String.format(
-                        "Appointment reminder sent successfully via %s",
-                        successChannel
-                );
+                description =
+                        String.format(
+                                "Appointment reminder sent successfully via %s", successChannel);
             } else {
-                description = String.format(
-                        "Appointment reminder sent successfully via %s after %d failed attempt(s)",
-                        successChannel,
-                        attemptedChannels.size() - 1
-                );
+                description =
+                        String.format(
+                                "Appointment reminder sent successfully via %s after %d failed attempt(s)",
+                                successChannel, attemptedChannels.size() - 1);
             }
 
             Map<String, Object> metadata = new HashMap<>();
@@ -401,11 +596,12 @@ public class AppointmentReminderScheduler {
                     appointment.getDossier().getId(),
                     ActivityType.MESSAGE_SENT,
                     description,
-                    metadata
-            );
+                    metadata);
         } catch (Exception e) {
-            logger.warn("Failed to log successful reminder for appointment {}: {}", 
-                    appointment.getId(), e.getMessage());
+            logger.warn(
+                    "Failed to log successful reminder for appointment {}: {}",
+                    appointment.getId(),
+                    e.getMessage());
         }
     }
 
@@ -418,10 +614,10 @@ public class AppointmentReminderScheduler {
         }
 
         try {
-            String description = String.format(
-                    "Appointment reminder failed on all channels. Attempted: %s",
-                    String.join(", ", attemptedChannels)
-            );
+            String description =
+                    String.format(
+                            "Appointment reminder failed on all channels. Attempted: %s",
+                            String.join(", ", attemptedChannels));
 
             Map<String, Object> metadata = new HashMap<>();
             metadata.put("appointmentId", appointment.getId());
@@ -433,31 +629,35 @@ public class AppointmentReminderScheduler {
                     appointment.getDossier().getId(),
                     ActivityType.MESSAGE_FAILED,
                     description,
-                    metadata
-            );
+                    metadata);
         } catch (Exception e) {
-            logger.warn("Failed to log all-channels-failed event for appointment {}: {}", 
-                    appointment.getId(), e.getMessage());
+            logger.warn(
+                    "Failed to log all-channels-failed event for appointment {}: {}",
+                    appointment.getId(),
+                    e.getMessage());
         }
     }
 
-    private void initializeConversationForReminder(AppointmentEntity appointment, String phoneNumber) {
+    private void initializeConversationForReminder(
+            AppointmentEntity appointment, String phoneNumber) {
         try {
             String orgId = appointment.getOrgId();
-            Long dossierId = appointment.getDossier() != null ? appointment.getDossier().getId() : null;
-            
+            Long dossierId =
+                    appointment.getDossier() != null ? appointment.getDossier().getId() : null;
+
             conversationStateManager.initializeConversation(
-                    orgId, 
-                    phoneNumber, 
-                    appointment.getId(), 
-                    dossierId
-            );
-            
-            logger.info("Initialized conversation flow for appointment {} with phone {}", 
-                    appointment.getId(), phoneNumber);
+                    orgId, phoneNumber, appointment.getId(), dossierId);
+
+            logger.info(
+                    "Initialized conversation flow for appointment {} with phone {}",
+                    appointment.getId(),
+                    phoneNumber);
         } catch (Exception e) {
-            logger.error("Failed to initialize conversation for appointment {}: {}", 
-                    appointment.getId(), e.getMessage(), e);
+            logger.error(
+                    "Failed to initialize conversation for appointment {}: {}",
+                    appointment.getId(),
+                    e.getMessage(),
+                    e);
         }
     }
 

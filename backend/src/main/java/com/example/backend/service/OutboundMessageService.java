@@ -169,7 +169,8 @@ public class OutboundMessageService {
         return saved;
     }
 
-    private void validateConsent(Long dossierId, MessageChannel channel, ConsentementType consentType) {
+    private void validateConsent(
+            Long dossierId, MessageChannel channel, ConsentementType consentType) {
         ConsentementChannel consentChannel = mapMessageChannelToConsentChannel(channel);
 
         List<ConsentementEntity> consents =
@@ -177,7 +178,11 @@ public class OutboundMessageService {
                         dossierId, consentChannel, consentType);
 
         if (consents.isEmpty()) {
-            logger.warn("No consent found for dossier {}, channel {}, type {}", dossierId, channel, consentType);
+            logger.warn(
+                    "No consent found for dossier {}, channel {}, type {}",
+                    dossierId,
+                    channel,
+                    consentType);
 
             if (auditEventService != null) {
                 try {
@@ -231,7 +236,8 @@ public class OutboundMessageService {
                             latestConsent.getStatus(), channel, consentType));
         }
 
-        if (latestConsent.getExpiresAt() != null && latestConsent.getExpiresAt().isBefore(LocalDateTime.now())) {
+        if (latestConsent.getExpiresAt() != null
+                && latestConsent.getExpiresAt().isBefore(LocalDateTime.now())) {
             logger.warn(
                     "Consent expired for dossier {}, channel {}, type {}. Expired at: {}",
                     dossierId,
@@ -264,14 +270,22 @@ public class OutboundMessageService {
             validateMarketingConsentMetadata(latestConsent, dossierId, channel);
         }
 
-        logger.debug("Consent validation passed for dossier {}, channel {}, type {}", dossierId, channel, consentType);
+        logger.debug(
+                "Consent validation passed for dossier {}, channel {}, type {}",
+                dossierId,
+                channel,
+                consentType);
     }
 
-    private void validateMarketingConsentMetadata(ConsentementEntity consent, Long dossierId, MessageChannel channel) {
+    private void validateMarketingConsentMetadata(
+            ConsentementEntity consent, Long dossierId, MessageChannel channel) {
         java.util.Map<String, Object> meta = consent.getMeta();
 
         if (meta == null) {
-            logger.warn("MARKETING consent missing metadata for dossier {}, channel {}", dossierId, channel);
+            logger.warn(
+                    "MARKETING consent missing metadata for dossier {}, channel {}",
+                    dossierId,
+                    channel);
 
             if (auditEventService != null) {
                 try {

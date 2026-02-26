@@ -327,14 +327,16 @@ public class WhatsAppTemplateController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(
             summary = "Preview template with sample data",
-            description = "Returns a preview of the template with variables replaced by sample data")
+            description =
+                    "Returns a preview of the template with variables replaced by sample data")
     public ResponseEntity<TemplatePreviewResponse> previewTemplate(
             @Parameter(description = "Template ID") @PathVariable Long id,
-            @Parameter(description = "Sample variable values (format: 1=value1&2=value2)") 
-                    @RequestParam(required = false) java.util.Map<String, String> variables) {
+            @Parameter(description = "Sample variable values (format: 1=value1&2=value2)")
+                    @RequestParam(required = false)
+                    java.util.Map<String, String> variables) {
 
         WhatsAppTemplate template = templateService.getTemplateById(id);
-        
+
         if (variables == null) {
             variables = new java.util.HashMap<>();
         }
@@ -350,5 +352,36 @@ public class WhatsAppTemplateController {
         response.setOriginalComponents(template.getComponents());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/translations")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Auditable(action = "SUBMIT_TRANSLATION", entityType = "WHATSAPP_TEMPLATE")
+    @Operation(
+            summary = "Submit template translation",
+            description =
+                    "Submits a locale variant of the template to Meta API with language_code parameter")
+    public ResponseEntity<TemplateTranslationResponse> submitTemplateTranslation(
+            @Parameter(description = "Template ID") @PathVariable Long id,
+            @Parameter(description = "Translation data") @Valid @RequestBody
+                    TemplateTranslationRequest request) {
+
+        WhatsAppTemplate translatedTemplate =
+                templateService.submitTemplateTranslation(
+                        id,
+                        request.getLanguageCode(),
+                        request.getComponents(),
+                        request.getDescription(),
+                        request.getSetRtlDirection());
+
+        TemplateTranslationResponse response = new TemplateTranslationResponse();
+        response.setTemplateId(translatedTemplate.getId());
+        response.setName(translatedTemplate.getName());
+        response.setLanguageCode(translatedTemplate.getLanguage());
+        response.setStatus(translatedTemplate.getStatus().name());
+        response.setMetaSubmissionId(translatedTemplate.getMetaSubmissionId());
+        response.setWhatsAppTemplateId(translatedTemplate.getWhatsAppTemplateId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

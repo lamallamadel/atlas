@@ -28,7 +28,8 @@ public class Resilience4jConfig {
     }
 
     @Bean
-    public CircuitBreaker keycloakCircuitBreaker(@Qualifier("circuitBreakerRegistry") CircuitBreakerRegistry registry) {
+    public CircuitBreaker keycloakCircuitBreaker(
+            @Qualifier("circuitBreakerRegistry") CircuitBreakerRegistry registry) {
         return registry.circuitBreaker("keycloak");
     }
 }

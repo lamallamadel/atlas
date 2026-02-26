@@ -13,7 +13,9 @@ import org.hibernate.annotations.Filter;
             @Index(name = "idx_cost_tracking_org_id", columnList = "org_id"),
             @Index(name = "idx_cost_tracking_org_created", columnList = "org_id, created_at"),
             @Index(name = "idx_cost_tracking_message_id", columnList = "message_id"),
-            @Index(name = "idx_cost_tracking_conversation_opened", columnList = "conversation_opened_at")
+            @Index(
+                    name = "idx_cost_tracking_conversation_opened",
+                    columnList = "conversation_opened_at")
         })
 @Filter(name = "orgIdFilter", condition = "org_id = :orgId")
 public class WhatsAppCostTracking extends BaseEntity {

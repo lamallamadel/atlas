@@ -54,7 +54,8 @@ public class TemplateVariableValidator {
 
                 case "BUTTONS":
                     @SuppressWarnings("unchecked")
-                    List<Map<String, Object>> buttons = (List<Map<String, Object>>) component.get("buttons");
+                    List<Map<String, Object>> buttons =
+                            (List<Map<String, Object>>) component.get("buttons");
                     if (buttons != null) {
                         ValidationResult buttonsResult = validateButtonsVariables(buttons);
                         if (!buttonsResult.isValid()) {
