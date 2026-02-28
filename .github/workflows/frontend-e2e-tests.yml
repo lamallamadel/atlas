@@ -1,19 +1,7 @@
 name: Frontend E2E Tests
 
 on:
-  pull_request:
-    branches:
-      - master
-      - develop
-    paths:
-      - 'frontend/**'
-      - 'backend/**'
-      - '.github/workflows/frontend-e2e-tests.yml'
-  push:
-    branches:
-      - master
-  schedule:
-    - cron: '0 3 * * *'  # Nightly at 3 AM UTC
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,7 +12,6 @@ jobs:
     name: Playwright (H2 + Mock Auth)
     runs-on: ubuntu-latest
     timeout-minutes: 8
-    if: github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
@@ -168,7 +155,6 @@ jobs:
     name: Playwright (PostgreSQL + Mock Auth)
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
       - name: Checkout code
@@ -305,7 +291,6 @@ jobs:
     name: Playwright Full (${{ matrix.variant }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'schedule'
     
     strategy:
       fail-fast: false

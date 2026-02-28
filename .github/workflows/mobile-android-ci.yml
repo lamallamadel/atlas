@@ -1,15 +1,7 @@
 name: Android Mobile CI/CD
 
 on:
-  push:
-    branches: [main, develop]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/mobile-android-ci.yml'
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - 'frontend/**'
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '18'

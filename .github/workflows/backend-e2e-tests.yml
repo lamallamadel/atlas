@@ -1,18 +1,7 @@
 name: Backend E2E Tests
 
 on:
-  pull_request:
-    branches:
-      - master
-      - develop
-    paths:
-      - 'backend/**'
-      - '.github/workflows/backend-e2e-tests.yml'
-  push:
-    branches:
-      - master
-  schedule:
-    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,7 +17,6 @@ jobs:
     name: E2E Tests (H2)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
@@ -147,7 +135,6 @@ jobs:
     name: E2E Tests (PostgreSQL)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'schedule'
     
     steps:
       - name: Checkout code

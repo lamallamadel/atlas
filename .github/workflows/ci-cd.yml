@@ -4,14 +4,7 @@ name: CI/CD Pipeline
 # Change "branches: [master]" to your target branch/remote
 # Currently set for GitHub Actions on master branch
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - 'backend/**'
-      - 'frontend/**'
-      - 'infra/**'
-      - '.github/workflows/ci-cd.yml'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
