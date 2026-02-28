@@ -142,20 +142,26 @@ for CONCLUSION in "${CONCLUSION_LIST[@]}"; do
     # gh run list does not support --conclusion; pipe JSON output through jq.
     # Use --arg to safely pass the conclusion value (avoids jq injection).
     # Outputs tab-separated: id \t workflowName \t title \t createdAt
-    JQ_FILTER='[.[] | select(.conclusion == $c) | [(.databaseId|tostring), .workflowName, .displayTitle, .createdAt]] | .[] | @tsv'
+    # Use null coalescing (//"") so @tsv never receives a raw null value.
+    JQ_FILTER='[.[] | select(.conclusion == $c) | [(.databaseId|tostring), (.workflowName//""), (.displayTitle//""), (.createdAt//"")]] | .[] | @tsv'
 
     # Capture raw gh output first so we can validate it before passing to jq.
     # gh may return null, an error object, or empty output on API/auth failures.
+    # --status completed ensures only runs with definitive conclusions are
+    # returned, preventing in-progress runs (conclusion=null) from consuming
+    # the --limit and masking actually-failed runs.
     if [[ -n "$WORKFLOW" ]]; then
         GH_RAW=$(gh run list \
             --repo "$REPO_SLUG" \
             --workflow "$WORKFLOW" \
+            --status completed \
             --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
             --limit "$LIMIT" \
             2>/dev/null || true)
     else
         GH_RAW=$(gh run list \
             --repo "$REPO_SLUG" \
+            --status completed \
             --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
             --limit "$LIMIT" \
             2>/dev/null || true)
