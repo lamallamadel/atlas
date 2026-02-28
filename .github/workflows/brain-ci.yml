@@ -1,6 +1,18 @@
 name: Brain CI
 
 on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'brain/**'
+      - '.github/workflows/brain-ci.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'brain/**'
   workflow_dispatch:
 
 jobs:
