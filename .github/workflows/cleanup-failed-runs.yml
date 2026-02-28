@@ -1,4 +1,4 @@
-name: Cleanup Failed Workflow Runs
+name: Cleanup Old Workflow Runs
 
 on:
   push:
@@ -13,7 +13,11 @@ on:
       status:
         description: 'Comma-separated conclusions to delete'
         required: false
-        default: 'failure,cancelled,timed_out,action_required,startup_failure'
+        default: 'success,failure,cancelled,timed_out,action_required,startup_failure'
+      min_age_hours:
+        description: 'Only delete runs older than this many hours'
+        required: false
+        default: '1'
       limit:
         description: 'Maximum runs to fetch per conclusion'
         required: false
@@ -33,7 +37,7 @@ concurrency:
 
 jobs:
   cleanup:
-    name: Delete Failed Runs
+    name: Delete Old Runs (passed or failed)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -49,19 +53,28 @@ jobs:
       - name: Make script executable
         run: chmod +x scripts/delete-failing-runs.sh
 
-      - name: Delete failed workflow runs
+      - name: Delete old workflow runs
         env:
           OWNER: ${{ github.repository_owner }}
           REPO: ${{ github.event.repository.name }}
           INPUT_WORKFLOW: ${{ inputs.workflow }}
-          INPUT_STATUS: ${{ inputs.status || 'failure,cancelled,timed_out,action_required,startup_failure' }}
+          INPUT_STATUS: ${{ inputs.status || 'success,failure,cancelled,timed_out,action_required,startup_failure' }}
+          INPUT_MIN_AGE_HOURS: ${{ inputs.min_age_hours || '1' }}
           INPUT_LIMIT: ${{ inputs.limit || '100' }}
           INPUT_DRY_RUN: ${{ inputs.dry_run || 'false' }}
         run: |
+          # Validate and convert hours to minutes for the script
+          if [[ ! "$INPUT_MIN_AGE_HOURS" =~ ^[0-9]+$ ]] || [[ "$INPUT_MIN_AGE_HOURS" -lt 1 ]]; then
+            echo "Error: min_age_hours must be a positive integer (got: '$INPUT_MIN_AGE_HOURS')"
+            exit 1
+          fi
+          MIN_AGE_MINUTES=$(( INPUT_MIN_AGE_HOURS * 60 ))
+
           ARGS=(
             --owner "$OWNER"
             --repo  "$REPO"
             --status "$INPUT_STATUS"
+            --min-age-minutes "$MIN_AGE_MINUTES"
             --limit  "$INPUT_LIMIT"
           )
 

@@ -1,34 +1,36 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Deletes failing GitHub Actions workflow runs for a repository.
+# Deletes completed GitHub Actions workflow runs (passed or failed) older than a
+# minimum age for a repository.
 #
 # Usage:
 #   ./delete-failing-runs.sh [OPTIONS]
 #
 # Options:
-#   -o, --owner OWNER       GitHub repository owner (default: inferred from git remote)
-#   -r, --repo  REPO        GitHub repository name  (default: inferred from git remote)
-#   -w, --workflow WORKFLOW Filter by workflow name or filename (optional)
-#   -s, --status STATUS     Comma-separated conclusions to delete
-#                           (default: failure,cancelled,timed_out,action_required,startup_failure)
-#   -l, --limit  N          Maximum runs to fetch per conclusion (default: 100)
-#   -n, --dry-run           Print what would be deleted without actually deleting
-#   -h, --help              Show this help message
+#   -o, --owner OWNER            GitHub repository owner (default: inferred from git remote)
+#   -r, --repo  REPO             GitHub repository name  (default: inferred from git remote)
+#   -w, --workflow WORKFLOW      Filter by workflow name or filename (optional)
+#   -s, --status STATUS          Comma-separated conclusions to delete
+#                                (default: success,failure,cancelled,timed_out,action_required,startup_failure)
+#   -a, --min-age-minutes MINS   Only delete runs older than this many minutes (default: 60)
+#   -l, --limit  N               Maximum runs to fetch per conclusion (default: 100)
+#   -n, --dry-run                Print what would be deleted without actually deleting
+#   -h, --help                   Show this help message
 #
 # Prerequisites:
 #   - GitHub CLI (gh) must be installed and authenticated: https://cli.github.com
 #   - jq must be installed: https://jqlang.github.io/jq/
 #
 # Examples:
-#   # Delete all failing runs in the current repo
+#   # Delete all passed or failed runs older than 1 hour in the current repo
 #   ./delete-failing-runs.sh
 #
 #   # Dry run – see what would be deleted without deleting anything
 #   ./delete-failing-runs.sh --dry-run
 #
-#   # Delete only failed and cancelled runs for a specific workflow
-#   ./delete-failing-runs.sh --workflow ci-cd.yml --status failure,cancelled
+#   # Delete only failed and cancelled runs older than 2 hours for a specific workflow
+#   ./delete-failing-runs.sh --workflow ci-cd.yml --status failure,cancelled --min-age-minutes 120
 #
 #   # Target a different repository
 #   ./delete-failing-runs.sh --owner myorg --repo myrepo
@@ -53,9 +55,10 @@ log_error()   { echo -e "${RED}[ERROR]${NC} $*" >&2; }
 OWNER=""
 REPO=""
 WORKFLOW=""
-STATUSES="failure,cancelled,timed_out,action_required,startup_failure"
+STATUSES="success,failure,cancelled,timed_out,action_required,startup_failure"
 DRY_RUN=false
 LIMIT=100
+MIN_AGE_MINUTES=60
 
 # ---------------------------------------------------------------------------
 # Argument parsing
@@ -67,13 +70,14 @@ usage() {
 
 while [[ $# -gt 0 ]]; do
     case $1 in
-        -o|--owner)    OWNER="$2";    shift 2 ;;
-        -r|--repo)     REPO="$2";     shift 2 ;;
-        -w|--workflow) WORKFLOW="$2"; shift 2 ;;
-        -s|--status)   STATUSES="$2"; shift 2 ;;
-        -l|--limit)    LIMIT="$2";    shift 2 ;;
-        -n|--dry-run)  DRY_RUN=true;  shift   ;;
-        -h|--help)     usage ;;
+        -o|--owner)             OWNER="$2";            shift 2 ;;
+        -r|--repo)              REPO="$2";             shift 2 ;;
+        -w|--workflow)          WORKFLOW="$2";         shift 2 ;;
+        -s|--status)            STATUSES="$2";         shift 2 ;;
+        -a|--min-age-minutes)   MIN_AGE_MINUTES="$2";  shift 2 ;;
+        -l|--limit)             LIMIT="$2";            shift 2 ;;
+        -n|--dry-run)           DRY_RUN=true;          shift   ;;
+        -h|--help)              usage ;;
         *) log_error "Unknown option: $1"; usage ;;
     esac
 done
@@ -117,9 +121,10 @@ if [[ -z "$OWNER" || -z "$REPO" ]]; then
 fi
 
 REPO_SLUG="$OWNER/$REPO"
-log_info "Repository : $REPO_SLUG"
-[[ -n "$WORKFLOW" ]] && log_info "Workflow   : $WORKFLOW"
-log_info "Conclusions: $STATUSES"
+log_info "Repository    : $REPO_SLUG"
+[[ -n "$WORKFLOW" ]] && log_info "Workflow      : $WORKFLOW"
+log_info "Conclusions   : $STATUSES"
+log_info "Min age (mins): $MIN_AGE_MINUTES"
 [[ "$DRY_RUN" == true ]] && log_warn "DRY RUN – no runs will be deleted."
 
 # ---------------------------------------------------------------------------
@@ -141,9 +146,12 @@ for CONCLUSION in "${CONCLUSION_LIST[@]}"; do
 
     # gh run list does not support --conclusion; pipe JSON output through jq.
     # Use --arg to safely pass the conclusion value (avoids jq injection).
-    # Outputs tab-separated: id \t workflowName \t title \t createdAt
+    # The filter performs three steps:
+    #   1. Select runs matching the desired conclusion
+    #   2. Select only runs older than MIN_AGE_MINUTES (age filter)
+    #   3. Format as tab-separated: id, workflowName, title, createdAt
     # Use null coalescing (//"") so @tsv never receives a raw null value.
-    JQ_FILTER='[.[] | select(.conclusion == $c) | [(.databaseId|tostring), (.workflowName//""), (.displayTitle//""), (.createdAt//"")]] | .[] | @tsv'
+    JQ_FILTER='[.[] | select(.conclusion == $c) | select((.createdAt | fromdateiso8601) < (now - ($min_age | tonumber) * 60)) | [(.databaseId|tostring), (.workflowName//""), (.displayTitle//""), (.createdAt//"")]] | .[] | @tsv'
 
     # Capture raw gh output first so we can validate it before passing to jq.
     # gh may return null, an error object, or empty output on API/auth failures.
@@ -175,7 +183,7 @@ for CONCLUSION in "${CONCLUSION_LIST[@]}"; do
         continue
     fi
 
-    RUN_LINES=$(echo "$GH_RAW" | jq -r --arg c "$CONCLUSION" "$JQ_FILTER" || true)
+    RUN_LINES=$(echo "$GH_RAW" | jq -r --arg c "$CONCLUSION" --arg min_age "$MIN_AGE_MINUTES" "$JQ_FILTER" || true)
 
     if [[ -z "$RUN_LINES" ]]; then
         log_info "  No runs found with conclusion='$CONCLUSION'."
