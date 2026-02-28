@@ -142,22 +142,34 @@ for CONCLUSION in "${CONCLUSION_LIST[@]}"; do
     # gh run list does not support --conclusion; pipe JSON output through jq.
     # Use --arg to safely pass the conclusion value (avoids jq injection).
     # Outputs tab-separated: id \t workflowName \t title \t createdAt
-    JQ_FILTER='[.[] | select(.conclusion == $c) | [.databaseId|tostring, .workflowName, .displayTitle, .createdAt]] | .[] | @tsv'
+    JQ_FILTER='[.[] | select(.conclusion == $c) | [(.databaseId|tostring), .workflowName, .displayTitle, .createdAt]] | .[] | @tsv'
 
+    # Capture raw gh output first so we can validate it before passing to jq.
+    # gh may return null, an error object, or empty output on API/auth failures.
     if [[ -n "$WORKFLOW" ]]; then
-        RUN_LINES=$(gh run list \
+        GH_RAW=$(gh run list \
             --repo "$REPO_SLUG" \
             --workflow "$WORKFLOW" \
             --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
             --limit "$LIMIT" \
-            2>/dev/null | jq -r --arg c "$CONCLUSION" "$JQ_FILTER" || true)
+            2>/dev/null || true)
     else
-        RUN_LINES=$(gh run list \
+        GH_RAW=$(gh run list \
             --repo "$REPO_SLUG" \
             --json "databaseId,displayTitle,workflowName,createdAt,conclusion" \
             --limit "$LIMIT" \
-            2>/dev/null | jq -r --arg c "$CONCLUSION" "$JQ_FILTER" || true)
+            2>/dev/null || true)
     fi
+
+    # Validate the response is a JSON array before processing with jq.
+    # Non-array responses (e.g. {"message":"..."} error objects or null) would
+    # cause jq to error.  Treat them as "no runs found" and skip.
+    if [[ -z "$GH_RAW" ]] || ! echo "$GH_RAW" | jq -e 'type == "array"' > /dev/null 2>&1; then
+        log_warn "  Could not retrieve runs for conclusion='$CONCLUSION' (unexpected API response). Skipping."
+        continue
+    fi
+
+    RUN_LINES=$(echo "$GH_RAW" | jq -r --arg c "$CONCLUSION" "$JQ_FILTER" || true)
 
     if [[ -z "$RUN_LINES" ]]; then
         log_info "  No runs found with conclusion='$CONCLUSION'."
