@@ -1,6 +1,9 @@
 name: Cleanup Failed Workflow Runs
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       workflow:
