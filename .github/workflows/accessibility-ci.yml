@@ -1,6 +1,14 @@
 name: Accessibility & Performance CI
 
 on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/accessibility-ci.yml'
   workflow_dispatch:
 
 concurrency:

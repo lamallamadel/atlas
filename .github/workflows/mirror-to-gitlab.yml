@@ -2,6 +2,9 @@ name: Mirror to GitLab
 
 # Pushes every master commit to GitLab, which then triggers .gitlab-ci.yml
 on:
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 concurrency:

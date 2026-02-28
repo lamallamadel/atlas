@@ -1,6 +1,18 @@
 name: Backend E2E Tests
 
 on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-e2e-tests.yml'
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 permissions:

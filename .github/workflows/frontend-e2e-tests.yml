@@ -1,6 +1,19 @@
 name: Frontend E2E Tests
 
 on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'frontend/**'
+      - 'backend/**'
+      - '.github/workflows/frontend-e2e-tests.yml'
+  push:
+    branches:
+      - master
+  schedule:
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 concurrency:

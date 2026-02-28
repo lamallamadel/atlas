@@ -1,6 +1,12 @@
 name: Security Vulnerability Scan
 
 on:
+  pull_request:
+    branches:
+      - master
+      - develop
+  schedule:
+    - cron: '0 4 * * 1'
   workflow_dispatch:
 
 concurrency:

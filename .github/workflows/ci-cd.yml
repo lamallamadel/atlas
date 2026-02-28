@@ -4,6 +4,17 @@ name: CI/CD Pipeline
 # Change "branches: [master]" to your target branch/remote
 # Currently set for GitHub Actions on master branch
 on:
+  pull_request:
+    branches:
+      - master
+      - develop
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - '.github/workflows/ci-cd.yml'
+  push:
+    branches:
+      - master
   workflow_dispatch:
 
 concurrency:
