@@ -1,0 +1,73 @@
+name: Cleanup Failed Workflow Runs
+
+on:
+  workflow_dispatch:
+    inputs:
+      workflow:
+        description: 'Filter by workflow name or filename (leave blank for all workflows)'
+        required: false
+        default: ''
+      status:
+        description: 'Comma-separated conclusions to delete'
+        required: false
+        default: 'failure,cancelled,timed_out,action_required,startup_failure'
+      limit:
+        description: 'Maximum runs to fetch per conclusion'
+        required: false
+        default: '100'
+      dry_run:
+        description: 'Dry run – print what would be deleted without actually deleting'
+        required: false
+        type: boolean
+        default: false
+  schedule:
+    # Runs every Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+
+concurrency:
+  group: cleanup-failed-runs
+  cancel-in-progress: true
+
+jobs:
+  cleanup:
+    name: Delete Failed Runs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      actions: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
+      - name: Make script executable
+        run: chmod +x scripts/delete-failing-runs.sh
+
+      - name: Delete failed workflow runs
+        env:
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          INPUT_WORKFLOW: ${{ inputs.workflow }}
+          INPUT_STATUS: ${{ inputs.status || 'failure,cancelled,timed_out,action_required,startup_failure' }}
+          INPUT_LIMIT: ${{ inputs.limit || '100' }}
+          INPUT_DRY_RUN: ${{ inputs.dry_run || 'false' }}
+        run: |
+          ARGS=(
+            --owner "$OWNER"
+            --repo  "$REPO"
+            --status "$INPUT_STATUS"
+            --limit  "$INPUT_LIMIT"
+          )
+
+          if [[ -n "$INPUT_WORKFLOW" ]]; then
+            ARGS+=(--workflow "$INPUT_WORKFLOW")
+          fi
+
+          if [[ "$INPUT_DRY_RUN" == "true" ]]; then
+            ARGS+=(--dry-run)
+          fi
+
+          ./scripts/delete-failing-runs.sh "${ARGS[@]}"
