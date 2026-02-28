@@ -73,7 +73,7 @@
     "@angular/service-worker": "^16.2.12",
     "@capacitor/android": "^5.5.1",
     "@capacitor/app": "^5.0.6",
-    "@capacitor/browser": "^5.1.0",
+    "@capacitor/browser": "^8.0.1",
     "@capacitor/core": "^8.1.0",
     "@capacitor/device": "^5.0.6",
     "@capacitor/filesystem": "^5.1.4",
