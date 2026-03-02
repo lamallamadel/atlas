@@ -100,7 +100,7 @@
     "jspdf": "^4.2.0",
     "jspdf-autotable": "^3.8.2",
     "lottie-web": "^5.12.2",
-    "ng2-charts": "^5.0.3",
+    "ng2-charts": "^9.0.0",
     "papaparse": "^5.4.1",
     "rxjs": "~7.8.0",
     "shepherd.js": "^15.2.1",
