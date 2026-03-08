@@ -13,7 +13,8 @@ on:
     branches:
       - master
   schedule:
-    - cron: '0 3 * * *'  # Nightly at 3 AM UTC
+    - cron: '0 3 * * *'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -24,7 +25,6 @@ jobs:
     name: Playwright (H2 + Mock Auth)
     runs-on: ubuntu-latest
     timeout-minutes: 8
-    if: github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
@@ -38,7 +38,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
@@ -46,7 +46,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Cache Angular build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: frontend/.angular/cache
           key: ${{ runner.os }}-angular-cache-${{ hashFiles('frontend/package-lock.json') }}
@@ -123,7 +123,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report-h2-mock
@@ -131,7 +131,7 @@ jobs:
           retention-days: 7
       
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-results-h2-mock
@@ -139,7 +139,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Playwright logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-logs-h2-mock
@@ -168,7 +168,6 @@ jobs:
     name: Playwright (PostgreSQL + Mock Auth)
     runs-on: ubuntu-latest
     timeout-minutes: 12
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
     steps:
       - name: Checkout code
@@ -182,7 +181,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
@@ -190,7 +189,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Cache Angular build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: frontend/.angular/cache
           key: ${{ runner.os }}-angular-cache-${{ hashFiles('frontend/package-lock.json') }}
@@ -258,7 +257,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Upload Playwright report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report-postgres-mock
@@ -266,7 +265,7 @@ jobs:
           retention-days: 7
       
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-results-postgres-mock
@@ -274,7 +273,7 @@ jobs:
           retention-days: 7
 
       - name: Upload Playwright logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-logs-postgres-mock
@@ -305,7 +304,6 @@ jobs:
     name: Playwright Full (${{ matrix.variant }})
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'schedule'
     
     strategy:
       fail-fast: false
@@ -328,7 +326,7 @@ jobs:
           cache-dependency-path: 'frontend/package-lock.json'
 
       - name: Cache Playwright browsers
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.cache/ms-playwright
           key: ${{ runner.os }}-playwright-${{ hashFiles('frontend/package-lock.json') }}
@@ -336,7 +334,7 @@ jobs:
             ${{ runner.os }}-playwright-
 
       - name: Cache Angular build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: frontend/.angular/cache
           key: ${{ runner.os }}-angular-cache-${{ hashFiles('frontend/package-lock.json') }}
@@ -445,7 +443,7 @@ jobs:
           PLAYWRIGHT_BROWSERS_PATH: ~/.cache/ms-playwright
       
       - name: Upload Playwright HTML report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-report-${{ matrix.variant }}
@@ -453,7 +451,7 @@ jobs:
           retention-days: 14
       
       - name: Upload videos
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-videos-${{ matrix.variant }}
@@ -461,7 +459,7 @@ jobs:
           retention-days: 14
       
       - name: Upload test results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-results-${{ matrix.variant }}
@@ -469,7 +467,7 @@ jobs:
           retention-days: 14
 
       - name: Upload Playwright logs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         if: always()
         with:
           name: playwright-logs-${{ matrix.variant }}

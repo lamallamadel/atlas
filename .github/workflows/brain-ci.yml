@@ -2,14 +2,18 @@ name: Brain CI
 
 on:
   pull_request:
-    paths:
-      - 'brain/**'
-  push:
     branches:
       - master
       - develop
     paths:
       - 'brain/**'
+      - '.github/workflows/brain-ci.yml'
+  push:
+    branches:
+      - master
+    paths:
+      - 'brain/**'
+  workflow_dispatch:
 
 jobs:
   scoring-service:

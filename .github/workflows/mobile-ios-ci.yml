@@ -1,15 +1,19 @@
 name: iOS Mobile CI/CD
 
 on:
-  push:
-    branches: [main, develop]
+  pull_request:
+    branches:
+      - master
+      - develop
     paths:
       - 'frontend/**'
       - '.github/workflows/mobile-ios-ci.yml'
-  pull_request:
-    branches: [main, develop]
+  push:
+    branches:
+      - master
     paths:
       - 'frontend/**'
+  workflow_dispatch:
 
 env:
   NODE_VERSION: '18'
@@ -61,7 +65,7 @@ jobs:
           xcode-version: ${{ env.XCODE_VERSION }}
 
       - name: Cache Pods
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: frontend/ios/Pods
           key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
@@ -116,7 +120,7 @@ jobs:
 
       - name: Upload IPA artifact
         if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v6
         with:
           name: ios-app
           path: ${{ runner.temp }}/export/*.ipa
@@ -164,7 +168,7 @@ jobs:
 
       - name: Notify Slack
         if: success()
-        uses: slackapi/slack-github-action@v1
+        uses: slackapi/slack-github-action@v2
         with:
           payload: |
             {

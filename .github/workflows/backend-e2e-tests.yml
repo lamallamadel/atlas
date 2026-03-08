@@ -13,6 +13,7 @@ on:
       - master
   schedule:
     - cron: '0 2 * * *'
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,7 +29,6 @@ jobs:
     name: E2E Tests (H2)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    if: github.event_name == 'pull_request'
     
     steps:
       - name: Checkout code
@@ -49,7 +49,7 @@ jobs:
       
       - name: Generate test report
         if: always() && github.event.pull_request.head.repo.fork == false
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: E2E Test Results (H2)
           path: |
@@ -61,7 +61,7 @@ jobs:
       
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-test-results-h2
           path: |
@@ -76,7 +76,7 @@ jobs:
       
       - name: Upload coverage report
         if: always() && github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report-h2
           path: backend/target/site/jacoco/
@@ -147,7 +147,6 @@ jobs:
     name: E2E Tests (PostgreSQL)
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master' || github.event_name == 'schedule'
     
     steps:
       - name: Checkout code
@@ -171,7 +170,7 @@ jobs:
       
       - name: Generate test report
         if: always()
-        uses: dorny/test-reporter@v1
+        uses: dorny/test-reporter@v2
         with:
           name: E2E Test Results (PostgreSQL)
           path: |
@@ -183,7 +182,7 @@ jobs:
       
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: e2e-test-results-postgres
           path: |
@@ -198,7 +197,7 @@ jobs:
       
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report-postgres
           path: backend/target/site/jacoco/
