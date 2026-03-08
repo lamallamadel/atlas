@@ -1,5 +1,6 @@
 -- Seed default appointment reminder template for WhatsApp
 -- This template uses variable interpolation: {{clientName}}, {{dateStr}}, {{timeStr}}, {{location}}, {{agentName}}
+-- Idempotent: INSERT only if row does not exist (H2-compatible; no ON CONFLICT)
 
 INSERT INTO whatsapp_template (
     org_id,
@@ -12,7 +13,8 @@ INSERT INTO whatsapp_template (
     current_version,
     created_at,
     updated_at
-) VALUES (
+)
+SELECT
     'default',
     'appointment_reminder',
     'fr',
@@ -28,9 +30,12 @@ INSERT INTO whatsapp_template (
     1,
     CURRENT_TIMESTAMP,
     CURRENT_TIMESTAMP
-) ON CONFLICT (org_id, name, language) DO NOTHING;
+WHERE NOT EXISTS (
+    SELECT 1 FROM whatsapp_template
+    WHERE org_id = 'default' AND name = 'appointment_reminder' AND language = 'fr'
+);
 
--- Seed template variables for appointment_reminder template
+-- Seed template variables for appointment_reminder template (idempotent via WHERE NOT EXISTS)
 INSERT INTO template_variable (
     org_id,
     template_id,
@@ -43,7 +48,7 @@ INSERT INTO template_variable (
     created_at,
     updated_at
 )
-SELECT 
+SELECT
     'default',
     t.id,
     'clientName',
@@ -56,7 +61,7 @@ SELECT
     CURRENT_TIMESTAMP
 FROM whatsapp_template t
 WHERE t.org_id = 'default' AND t.name = 'appointment_reminder' AND t.language = 'fr'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM template_variable tv WHERE tv.template_id = t.id AND tv.variable_name = 'clientName');
 
 INSERT INTO template_variable (
     org_id,
@@ -70,7 +75,7 @@ INSERT INTO template_variable (
     created_at,
     updated_at
 )
-SELECT 
+SELECT
     'default',
     t.id,
     'dateStr',
@@ -83,7 +88,7 @@ SELECT
     CURRENT_TIMESTAMP
 FROM whatsapp_template t
 WHERE t.org_id = 'default' AND t.name = 'appointment_reminder' AND t.language = 'fr'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM template_variable tv WHERE tv.template_id = t.id AND tv.variable_name = 'dateStr');
 
 INSERT INTO template_variable (
     org_id,
@@ -97,7 +102,7 @@ INSERT INTO template_variable (
     created_at,
     updated_at
 )
-SELECT 
+SELECT
     'default',
     t.id,
     'timeStr',
@@ -110,7 +115,7 @@ SELECT
     CURRENT_TIMESTAMP
 FROM whatsapp_template t
 WHERE t.org_id = 'default' AND t.name = 'appointment_reminder' AND t.language = 'fr'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM template_variable tv WHERE tv.template_id = t.id AND tv.variable_name = 'timeStr');
 
 INSERT INTO template_variable (
     org_id,
@@ -124,7 +129,7 @@ INSERT INTO template_variable (
     created_at,
     updated_at
 )
-SELECT 
+SELECT
     'default',
     t.id,
     'location',
@@ -137,7 +142,7 @@ SELECT
     CURRENT_TIMESTAMP
 FROM whatsapp_template t
 WHERE t.org_id = 'default' AND t.name = 'appointment_reminder' AND t.language = 'fr'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM template_variable tv WHERE tv.template_id = t.id AND tv.variable_name = 'location');
 
 INSERT INTO template_variable (
     org_id,
@@ -151,7 +156,7 @@ INSERT INTO template_variable (
     created_at,
     updated_at
 )
-SELECT 
+SELECT
     'default',
     t.id,
     'agentName',
@@ -164,4 +169,4 @@ SELECT
     CURRENT_TIMESTAMP
 FROM whatsapp_template t
 WHERE t.org_id = 'default' AND t.name = 'appointment_reminder' AND t.language = 'fr'
-ON CONFLICT DO NOTHING;
+AND NOT EXISTS (SELECT 1 FROM template_variable tv WHERE tv.template_id = t.id AND tv.variable_name = 'agentName');

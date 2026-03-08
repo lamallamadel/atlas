@@ -43,5 +43,4 @@ CREATE INDEX idx_conversation_state_dossier_id ON conversation_state(dossier_id)
 CREATE INDEX idx_conversation_state_expires_at ON conversation_state(expires_at);
 CREATE INDEX idx_conversation_state_org_phone ON conversation_state(org_id, phone_number);
 
--- Create unique constraint for active conversation per phone number
-CREATE UNIQUE INDEX idx_conversation_state_active_phone ON conversation_state(org_id, phone_number) WHERE expires_at > CURRENT_TIMESTAMP;
+-- Partial unique index (one active conversation per org+phone) is PostgreSQL-only: see migration-postgres/V144
