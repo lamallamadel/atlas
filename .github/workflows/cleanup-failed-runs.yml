@@ -19,17 +19,17 @@ on:
         required: false
         default: '1'
       limit:
-        description: 'Maximum runs to fetch per conclusion'
+        description: 'Total runs to fetch across all conclusions combined (gh run list supports up to 1000)'
         required: false
-        default: '100'
+        default: '1000'
       dry_run:
         description: 'Dry run – print what would be deleted without actually deleting'
         required: false
         type: boolean
         default: false
   schedule:
-    # Runs every Sunday at 02:00 UTC
-    - cron: '0 2 * * 0'
+    # Runs every day at 02:00 UTC
+    - cron: '0 2 * * *'
 
 concurrency:
   group: cleanup-failed-runs
@@ -60,7 +60,7 @@ jobs:
           INPUT_WORKFLOW: ${{ inputs.workflow }}
           INPUT_STATUS: ${{ inputs.status || 'success,failure,cancelled,timed_out,action_required,startup_failure' }}
           INPUT_MIN_AGE_HOURS: ${{ inputs.min_age_hours || '1' }}
-          INPUT_LIMIT: ${{ inputs.limit || '100' }}
+          INPUT_LIMIT: ${{ inputs.limit || '1000' }}
           INPUT_DRY_RUN: ${{ inputs.dry_run || 'false' }}
         run: |
           # Validate and convert hours to minutes for the script
