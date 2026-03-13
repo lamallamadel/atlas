@@ -1,14 +1,15 @@
 # ─────────────────────────────────────────────────────────────
-# Atlas Immobilier — GitLab CI/CD Pipeline
+# Atlas Immobilier — GitLab CI/CD Pipeline with Docker Build Cloud
 #
 # Déploie sur master branch uniquement
 # Change detection automatique :
-#   - backend/ modifié → test backend → deploy backend
-#   - frontend/ modifié → build + test → deploy frontend
-#   - les deux → tous les jobs en parallèle
+#   - backend/ modifié → test backend → build multiplatform → deploy
+#   - frontend/ modifié → test frontend → build multiplatform → deploy
 #
 # Required CI/CD variables (Settings → CI/CD → Variables):
-#   DEPLOY_SSH_KEY   — private ed25519 key for lamal@46.225.187.158
+#   DEPLOY_SSH_KEY   — private ed25519 key for deployment
+#   DOCKER_USER      — Docker Hub username
+#   DOCKER_PAT       — Docker Hub personal access token
 # ─────────────────────────────────────────────────────────────
 
 stages:
@@ -20,8 +21,29 @@ variables:
   DEPLOY_HOST: "46.225.187.158"
   DEPLOY_USER: "lamal"
   DEPLOY_DIR: "/opt/atlas"
+  DOCKER_REGISTRY: "docker.io"
+  DOCKER_REGISTRY_IMAGE: "afroware/atlas"
+  DOCKER_BUILDX_DRIVER: "cloud"
+  DOCKER_BUILDX_BUILDER: "afroware/immo"
 
-# ── Reusable SSH setup ────────────────────────────────────────
+# ── Reusable Docker + buildx setup ────────────────────────────────────
+.docker_buildx_setup:
+  image: docker:24-dind
+  services:
+    - docker:24-dind
+  before_script:
+    - docker info
+    - echo "$DOCKER_PAT" | docker login --username "$DOCKER_USER" --password-stdin
+    - |
+      apk add --no-cache curl jq
+      ARCH=${CI_RUNNER_EXECUTABLE_ARCH#*/}
+      BUILDX_URL=$(curl -s https://raw.githubusercontent.com/docker/actions-toolkit/main/.github/buildx-lab-releases.json | jq -r ".latest.assets[] | select(endswith(\"linux-$ARCH\"))")
+      mkdir -vp ~/.docker/cli-plugins/
+      curl --silent -L --output ~/.docker/cli-plugins/docker-buildx "$BUILDX_URL"
+      chmod a+x ~/.docker/cli-plugins/docker-buildx
+    - docker buildx create --use --driver cloud $DOCKER_BUILDX_BUILDER 2>/dev/null || docker buildx use $DOCKER_BUILDX_BUILDER
+
+# ── Reusable SSH setup ────────────────────────────────────────────────────────
 .ssh_setup:
   before_script:
     - apt-get update -qq && apt-get install -y -qq rsync openssh-client 2>/dev/null
@@ -31,9 +53,9 @@ variables:
     - ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts 2>/dev/null
     - chmod 644 ~/.ssh/known_hosts
 
-# ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────────
 # BACKEND
-# ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────────
 
 test-backend:
   stage: test
@@ -55,6 +77,29 @@ test-backend:
       junit: backend/target/surefire-reports/TEST-*.xml
     expire_in: 1 week
   allow_failure: false
+  needs: []
+
+build-backend-multiplatform:
+  stage: build
+  extends: .docker_buildx_setup
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - backend/**/*
+        - infra/Dockerfile.backend
+        - .gitlab-ci.yml
+  script:
+    - |
+      docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        --tag "${DOCKER_REGISTRY_IMAGE}:backend-${CI_COMMIT_SHORT_SHA}" \
+        --tag "${DOCKER_REGISTRY_IMAGE}:backend-latest" \
+        --push \
+        --file infra/Dockerfile.backend \
+        .
+  allow_failure: false
+  needs:
+    - job: test-backend
 
 deploy-backend:
   stage: deploy
@@ -67,6 +112,7 @@ deploy-backend:
         - .gitlab-ci.yml
   needs:
     - job: test-backend
+    - job: build-backend-multiplatform
   extends: .ssh_setup
   script:
     - echo "→ Pulling code and rebuilding backend on $DEPLOY_HOST…"
@@ -93,12 +139,6 @@ deploy-backend:
           sleep 5
         done
         echo '✗ Backend did not become healthy within 2 minutes'
-        echo '--- Elasticsearch logs (last 100 lines) ---'
-        docker logs elasticsearch --tail=100 2>/dev/null || true
-        echo '--- Elasticsearch health state ---'
-        docker inspect elasticsearch --format='{{json .State.Health}}' 2>/dev/null || true
-        echo '--- All containers ---'
-        docker ps -a 2>/dev/null || true
         echo '--- Backend logs (last 40 lines) ---'
         docker logs backend_app --tail=40
         exit 1
@@ -108,9 +148,9 @@ deploy-backend:
     url: https://api.afroware.app
   allow_failure: false
 
-# ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────────
 # FRONTEND
-# ─────────────────────────────────────────────────────────────
+# ─────────────────────────────────────────────────────────────────────────────────
 
 test-frontend:
   stage: test
@@ -132,13 +172,14 @@ test-frontend:
     - cd frontend
     - npm ci --prefer-offline
     - npm run lint
-    - npm run test:ci
+    - npm test -- --watch=false --browsers ChromeHeadlessCI
   artifacts:
     when: always
     reports:
       junit: frontend/junit.xml
     expire_in: 1 week
   allow_failure: false
+  needs: []
 
 build-frontend:
   stage: build
@@ -166,6 +207,28 @@ build-frontend:
     expire_in: 1 hour
   allow_failure: false
 
+build-frontend-multiplatform:
+  stage: build
+  extends: .docker_buildx_setup
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      changes:
+        - frontend/**/*
+        - infra/Dockerfile.frontend
+        - .gitlab-ci.yml
+  script:
+    - |
+      docker buildx build \
+        --platform linux/amd64,linux/arm64 \
+        --tag "${DOCKER_REGISTRY_IMAGE}:frontend-${CI_COMMIT_SHORT_SHA}" \
+        --tag "${DOCKER_REGISTRY_IMAGE}:frontend-latest" \
+        --push \
+        --file infra/Dockerfile.frontend \
+        .
+  allow_failure: false
+  needs:
+    - job: test-frontend
+
 deploy-frontend:
   stage: deploy
   image: debian:bookworm-slim
@@ -178,6 +241,7 @@ deploy-frontend:
   needs:
     - job: build-frontend
       artifacts: true
+    - job: build-frontend-multiplatform
   extends: .ssh_setup
   script:
     - echo "→ Syncing dist to $DEPLOY_HOST…"
