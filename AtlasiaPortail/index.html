@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="page-title">Atlasia — Immobilier au Maroc : vente, location, annonces</title>
+  <meta name="description" id="page-desc" content="Trouvez votre bien immobilier au Maroc : appartements, villas, terrains à vendre ou à louer à Casablanca, Rabat, Tanger, Marrakech et plus." />
+  <meta property="og:title" content="Atlasia — Immobilier au Maroc" />
+  <meta property="og:type" content="website" />
+  <link rel="canonical" id="canonical" href="https://atlasia.ma/" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./base.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+<!-- ═══ HEADER ═══ -->
+<header class="site-header" id="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a href="#" class="header-logo" onclick="navigate('home');return false;" aria-label="Atlasia — Accueil">
+        <svg width="30" height="30" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#0d2c4a"/>
+          <path d="M16 6 L26 16 L16 26 L6 16 Z" fill="none" stroke="#b5622e" stroke-width="1.5"/>
+          <path d="M16 10 L22 16 L16 22 L10 16 Z" fill="#b5622e" opacity="0.35"/>
+          <circle cx="16" cy="16" r="2.5" fill="#b5622e"/>
+        </svg>
+        atlasia
+      </a>
+
+      <nav class="header-nav" aria-label="Navigation principale">
+        <ul class="nav-links" role="list">
+          <li><a href="#" onclick="navigate('search','vente');return false;" data-nav="vente">Vente</a></li>
+          <li><a href="#" onclick="navigate('search','location');return false;" data-nav="location">Location</a></li>
+          <li><a href="#" onclick="navigate('search');return false;" data-nav="annonces">Toutes les annonces</a></li>
+        </ul>
+        <div class="header-actions">
+          <a href="https://biz.atlasia.ma" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">Espace Pro</a>
+          <button class="theme-toggle" data-theme-toggle aria-label="Changer le thème">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button class="mobile-menu-btn btn-ghost" id="mobile-menu-btn" aria-label="Menu">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+  <nav class="mobile-nav" id="mobile-nav">
+    <a href="#" onclick="navigate('search','vente');closeMobileMenu();return false;">Vente</a>
+    <a href="#" onclick="navigate('search','location');closeMobileMenu();return false;">Location</a>
+    <a href="#" onclick="navigate('search');closeMobileMenu();return false;">Toutes les annonces</a>
+    <a href="https://biz.atlasia.ma" target="_blank" rel="noopener noreferrer">Espace Pro →</a>
+  </nav>
+</header>
+
+<!-- ═══ APP ═══ -->
+<main id="app">
+
+<!-- ───────────────────────────────────────────────
+     PAGE : HOME
+─────────────────────────────────────────────── -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-grid-overlay"></div>
+    <div class="container hero-content">
+      <span class="hero-eyebrow">Portail immobilier — Maroc</span>
+      <h1 class="hero-title">Trouvez votre bien<br><em>au Maroc</em></h1>
+      <p class="hero-subtitle">Plus de 1 200 annonces vérifiées. Agences et particuliers. Vente et location dans toutes les villes.</p>
+
+      <!-- SEARCH BOX -->
+      <div class="search-box">
+        <div class="search-tabs">
+          <button class="search-tab active" id="hero-tab-vente" onclick="setHeroTab('vente')">Acheter</button>
+          <button class="search-tab" id="hero-tab-location" onclick="setHeroTab('location')">Louer</button>
+        </div>
+        <div class="search-fields">
+          <div class="search-field">
+            <label class="search-label" for="hero-ville">Ville ou zone</label>
+            <select class="search-select" id="hero-ville">
+              <option value="">Toutes les villes</option>
+              <option>Casablanca</option><option>Rabat</option>
+              <option>Tanger</option><option>Marrakech</option>
+              <option>Fès</option><option>Agadir</option>
+              <option>Meknès</option><option>Oujda</option>
+              <option>Tétouan</option><option>Salé</option>
+            </select>
+          </div>
+          <div class="search-field">
+            <label class="search-label" for="hero-budget">Budget max</label>
+            <select class="search-select" id="hero-budget">
+              <option value="">Pas de limite</option>
+              <option value="500000">500 000 MAD</option>
+              <option value="1000000">1 000 000 MAD</option>
+              <option value="2000000">2 000 000 MAD</option>
+              <option value="3000000">3 000 000 MAD</option>
+              <option value="5000000">5 000 000 MAD</option>
+            </select>
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="submitHeroSearch()" style="align-self:flex-end;" aria-label="Rechercher">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            Rechercher
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VILLES POPULAIRES -->
+  <section class="section" style="background:var(--color-surface-2);">
+    <div class="container">
+      <div class="section-header--flex reveal">
+        <div>
+          <p class="section-eyebrow">Explorer par ville</p>
+          <h2 class="section-title">Villes populaires</h2>
+        </div>
+        <a href="#" class="btn btn-ghost btn-sm" onclick="navigate('search');return false;">Toutes les villes →</a>
+      </div>
+      <div class="cities-grid reveal" id="cities-grid"></div>
+    </div>
+  </section>
+
+  <!-- ANNONCES RÉCENTES -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header--flex reveal">
+        <div>
+          <p class="section-eyebrow">Nouvelles annonces</p>
+          <h2 class="section-title">Annonces récentes</h2>
+        </div>
+        <a href="#" class="btn btn-ghost btn-sm" onclick="navigate('search');return false;">Voir tout →</a>
+      </div>
+      <div class="listings-grid listings-grid--4 reveal" id="home-listings"></div>
+    </div>
+  </section>
+
+  <!-- SECTION CONFIANCE -->
+  <section class="section" style="background:var(--color-surface-2);">
+    <div class="container">
+      <div class="section-header--flex reveal">
+        <div>
+          <p class="section-eyebrow">Pourquoi Atlasia</p>
+          <h2 class="section-title">Annonces fiables, pros vérifiés</h2>
+        </div>
+      </div>
+      <div class="trust-grid reveal">
+        <div class="trust-card">
+          <div class="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><div class="trust-title">Annonces vérifiées</div><div class="trust-desc">Chaque annonce est contrôlée par notre équipe. Les duplicatas et fraudes sont supprimés.</div></div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <div><div class="trust-title">Pros certifiés</div><div class="trust-desc">Les agences et promoteurs partenaires sont vérifiés et portent un badge de confiance visible.</div></div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+          <div><div class="trust-title">Localisation précise</div><div class="trust-desc">Ville, quartier, coordonnées. Vous savez exactement où se trouve chaque bien avant de vous déplacer.</div></div>
+        </div>
+        <div class="trust-card">
+          <div class="trust-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.75-1.75a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+          <div><div class="trust-title">Contact direct</div><div class="trust-desc">WhatsApp et formulaire de contact intégrés. Aucun intermédiaire inutile, juste vous et le vendeur.</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA PRO -->
+  <section class="section" style="background:#0d2c4a;color:white;">
+    <div class="container" style="text-align:center;">
+      <div class="reveal" style="max-width:540px;margin-inline:auto;">
+        <p style="font-size:var(--text-xs);font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--color-primary);margin-bottom:var(--space-3);">Vous êtes professionnel ?</p>
+        <h2 style="font-family:var(--font-display);font-size:var(--text-2xl);color:white;margin-bottom:var(--space-4);">Publiez vos annonces sur Atlasia</h2>
+        <p style="color:oklch(1 0 0 / 0.6);font-size:var(--text-base);margin-bottom:var(--space-8);">Rejoignez 150+ professionnels qui font confiance à Atlasia pour diffuser et gérer leurs annonces immobilières.</p>
+        <a href="https://biz.atlasia.ma" target="_blank" rel="noopener noreferrer" class="btn btn-primary btn-lg">Découvrir Atlasia Biz →</a>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-home -->
+
+<!-- ───────────────────────────────────────────────
+     PAGE : SEARCH
+─────────────────────────────────────────────── -->
+<div class="page" id="page-search">
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+      <a href="#" onclick="navigate('home');return false;">Accueil</a>
+      <span class="breadcrumb-sep">›</span>
+      <span id="search-breadcrumb-current">Annonces</span>
+    </nav>
+
+    <div class="search-layout">
+      <!-- FILTRES -->
+      <aside class="filters-panel" aria-label="Filtres de recherche">
+        <div class="filters-title">
+          Filtres
+          <button class="btn btn-ghost btn-sm" onclick="resetFilters()" style="font-size:var(--text-xs);">Réinitialiser</button>
+        </div>
+
+        <div class="filter-group">
+          <div class="filter-label">Transaction</div>
+          <div class="filter-chips">
+            <span class="filter-chip active" id="chip-all" onclick="setTxFilter('')">Tout</span>
+            <span class="filter-chip" id="chip-vente" onclick="setTxFilter('vente')">Vente</span>
+            <span class="filter-chip" id="chip-location" onclick="setTxFilter('location')">Location</span>
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <div class="filter-label">Ville</div>
+          <select class="filter-select" id="filter-ville" onchange="applyFilters()">
+            <option value="">Toutes les villes</option>
+            <option>Casablanca</option><option>Rabat</option>
+            <option>Tanger</option><option>Marrakech</option>
+            <option>Fès</option><option>Agadir</option>
+            <option>Meknès</option><option>Oujda</option>
+            <option>Tétouan</option><option>Salé</option>
+          </select>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <div class="filter-label">Prix (MAD)</div>
+          <div class="filter-range">
+            <input class="filter-input" type="number" id="filter-prix-min" placeholder="Min" onchange="applyFilters()" />
+            <input class="filter-input" type="number" id="filter-prix-max" placeholder="Max" onchange="applyFilters()" />
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <div class="filter-label">Surface (m²)</div>
+          <div class="filter-range">
+            <input class="filter-input" type="number" id="filter-surf-min" placeholder="Min" onchange="applyFilters()" />
+            <input class="filter-input" type="number" id="filter-surf-max" placeholder="Max" onchange="applyFilters()" />
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <div class="filter-group">
+          <div class="filter-label">Pièces</div>
+          <div class="filter-chips" id="pieces-chips">
+            <span class="filter-chip active" onclick="setPiecesFilter(0,this)">Tout</span>
+            <span class="filter-chip" onclick="setPiecesFilter(1,this)">1</span>
+            <span class="filter-chip" onclick="setPiecesFilter(2,this)">2</span>
+            <span class="filter-chip" onclick="setPiecesFilter(3,this)">3</span>
+            <span class="filter-chip" onclick="setPiecesFilter(4,this)">4+</span>
+          </div>
+        </div>
+
+        <div class="filter-divider"></div>
+
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="applyFilters()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          Appliquer les filtres
+        </button>
+      </aside>
+
+      <!-- RÉSULTATS -->
+      <div>
+        <!-- Active filters bar -->
+        <div class="active-filters" id="active-filters"></div>
+
+        <div class="results-header">
+          <div class="results-count"><strong id="results-count">0</strong> annonces trouvées</div>
+          <select class="sort-select" id="sort-select" onchange="applySort()">
+            <option value="recent">Plus récentes</option>
+            <option value="prix-asc">Prix croissant</option>
+            <option value="prix-desc">Prix décroissant</option>
+            <option value="surface-desc">Surface décroissante</option>
+          </select>
+        </div>
+
+        <!-- Carte (placeholder MVP) -->
+        <div class="map-placeholder" style="margin-bottom:var(--space-5);display:none;" id="map-container">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Carte interactive — intégration Leaflet.js planifiée</span>
+        </div>
+
+        <div class="listings-grid" id="search-listings"></div>
+
+        <div class="empty-state" id="search-empty" style="display:none;">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <div class="empty-state-title">Aucune annonce trouvée</div>
+          <div class="empty-state-desc">Essayez de modifier vos critères de recherche.</div>
+          <button class="btn btn-primary" style="margin:var(--space-5) auto 0;display:flex;" onclick="resetFilters()">Réinitialiser les filtres</button>
+        </div>
+
+        <div class="pagination" id="search-pagination"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /page-search -->
+
+<!-- ───────────────────────────────────────────────
+     PAGE : DETAIL
+─────────────────────────────────────────────── -->
+<div class="page" id="page-detail">
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb" aria-label="Fil d'Ariane">
+      <a href="#" onclick="navigate('home');return false;">Accueil</a>
+      <span class="breadcrumb-sep">›</span>
+      <a href="#" id="detail-bread-search" onclick="navigate('search');return false;">Annonces</a>
+      <span class="breadcrumb-sep">›</span>
+      <span id="detail-bread-title">Annonce</span>
+    </nav>
+
+    <div class="detail-layout">
+      <!-- COLONNE PRINCIPALE -->
+      <div>
+        <!-- Galerie -->
+        <div class="gallery" id="gallery">
+          <img class="gallery-main" id="gallery-main-img" src="" alt="Photo principale" loading="lazy" />
+          <button class="gallery-btn gallery-prev" onclick="galleryPrev()" aria-label="Image précédente">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 18l-6-6 6-6"/></svg>
+          </button>
+          <button class="gallery-btn gallery-next" onclick="galleryNext()" aria-label="Image suivante">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 18l6-6-6-6"/></svg>
+          </button>
+        </div>
+        <!-- Thumbnails -->
+        <div class="gallery-thumbs" id="gallery-thumbs"></div>
+
+        <!-- Infos principales -->
+        <div id="detail-main-info">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:var(--space-4);margin-top:var(--space-6);">
+            <div>
+              <div class="detail-price" id="detail-price">—</div>
+              <div class="detail-title" id="detail-title">—</div>
+              <div class="detail-location" id="detail-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                <span id="detail-location-text">—</span>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:var(--space-2);align-items:flex-end;">
+              <span id="detail-tx-badge" class="listing-card-tx tx-vente" style="position:static;">Vente</span>
+              <span id="detail-trust-badge" class="badge-trust" style="position:static;font-size:var(--text-xs);">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                Annonce vérifiée
+              </span>
+            </div>
+          </div>
+
+          <!-- Meta row -->
+          <div class="detail-meta-row" id="detail-meta-row">
+            <!-- Peuplé dynamiquement -->
+          </div>
+
+          <!-- Description -->
+          <h2 class="detail-section-title">Description</h2>
+          <p class="detail-description" id="detail-description">—</p>
+
+          <!-- Caractéristiques -->
+          <h2 class="detail-section-title">Caractéristiques</h2>
+          <div class="characteristics-grid" id="detail-characteristics"></div>
+
+          <!-- Localisation -->
+          <h2 class="detail-section-title">Localisation</h2>
+          <div class="map-placeholder" id="detail-map">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span id="detail-map-label">Carte interactive</span>
+          </div>
+
+          <!-- Signalement -->
+          <div style="margin-top:var(--space-8);">
+            <button class="report-link" onclick="openReportModal()" aria-label="Signaler cette annonce">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              Signaler cette annonce
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR CONTACT -->
+      <aside class="contact-sidebar" aria-label="Contact vendeur">
+        <div class="agent-card" id="detail-agent-card">
+          <div class="agent-avatar" id="detail-agent-avatar">—</div>
+          <div>
+            <div class="agent-name" id="detail-agent-name">—</div>
+            <div class="agent-agency" id="detail-agent-agency">—</div>
+            <div class="agent-badge">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Pro Vérifié
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:var(--space-3);">
+          <button class="btn btn-whatsapp btn-lg" id="whatsapp-btn" onclick="openWhatsApp()" style="width:100%;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.05.02C5.495.02.03 5.488.03 12.045c0 2.123.556 4.213 1.612 6.054L.03 24l6.063-1.59a11.97 11.97 0 0 0 5.956 1.574h.005C18.607 24.02 24.07 18.552 24.07 12c0-3.205-1.246-6.215-3.511-8.478A11.926 11.926 0 0 0 12.055.02h-.005z"/></svg>
+            Contacter via WhatsApp
+          </button>
+
+          <button class="btn btn-primary btn-lg" onclick="openLeadModal('visite')" style="width:100%;justify-content:center;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Demander une visite
+          </button>
+
+          <button class="btn btn-secondary" onclick="openLeadModal('message')" style="width:100%;justify-content:center;font-size:var(--text-xs);">
+            Envoyer un message
+          </button>
+        </div>
+
+        <div style="margin-top:var(--space-5);padding-top:var(--space-5);border-top:1px solid var(--color-divider);">
+          <div style="font-size:var(--text-xs);color:var(--color-text-faint);line-height:1.6;">
+            <div style="display:flex;align-items:center;gap:var(--space-2);margin-bottom:var(--space-2);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              <span>Annonce vérifiée par Atlasia</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:var(--space-2);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              <span id="detail-date-pub">Publiée le —</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    <!-- ANNONCES SIMILAIRES -->
+    <div class="similar-section">
+      <h2 class="section-title">Annonces similaires</h2>
+      <div class="listings-grid listings-grid--4" id="similar-listings"></div>
+    </div>
+
+  </div>
+</div><!-- /page-detail -->
+
+<!-- ───────────────────────────────────────────────
+     PAGE : MENTIONS LÉGALES
+─────────────────────────────────────────────── -->
+<div class="page" id="page-mentions">
+  <div class="container--narrow container" style="padding-block:var(--space-12);">
+    <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-8);">Mentions légales</h1>
+    <div style="display:flex;flex-direction:column;gap:var(--space-6);font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Éditeur</h2>Atlasia Technologies SARL — Casablanca, Maroc.<br>Email : <a href="mailto:contact@atlasia.ma" style="color:var(--color-primary);">contact@atlasia.ma</a></div>
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Hébergement</h2>Serveurs hébergés au Maroc. Données conformes à la législation marocaine en vigueur.</div>
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Propriété intellectuelle</h2>Tous les contenus (textes, images, logo, interface) sont la propriété d'Atlasia Technologies SARL. Toute reproduction non autorisée est interdite.</div>
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Responsabilité des annonces</h2>Atlasia agit comme intermédiaire et ne peut être tenu responsable des informations fournies par les annonceurs. Toute annonce frauduleuse doit être signalée via le bouton dédié sur la fiche annonce.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ───────────────────────────────────────────────
+     PAGE : CONFIDENTIALITÉ
+─────────────────────────────────────────────── -->
+<div class="page" id="page-confidentialite">
+  <div class="container--narrow container" style="padding-block:var(--space-12);">
+    <h1 style="font-family:var(--font-display);font-size:var(--text-2xl);margin-bottom:var(--space-8);">Politique de confidentialité</h1>
+    <div style="display:flex;flex-direction:column;gap:var(--space-6);font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Données collectées via le formulaire de contact</h2>Nous collectons : nom, téléphone (normalisé E.164), email (optionnel) et message. Ces données servent exclusivement à vous mettre en relation avec l'annonceur concerné.</div>
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Base légale</h2>Traitement fondé sur votre consentement explicite recueilli lors de la soumission du formulaire, conformément à la loi 09-08 (CNDP).</div>
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Conservation et droits</h2>Données conservées 3 ans. Droit d'accès, rectification, effacement et opposition : <a href="mailto:privacy@atlasia.ma" style="color:var(--color-primary);">privacy@atlasia.ma</a>.</div>
+      <div><h2 style="font-family:var(--font-display);font-size:var(--text-lg);color:var(--color-text);margin-bottom:var(--space-2);">Cookies</h2>Cookies de mesure d'audience anonymisés uniquement. Aucun cookie publicitaire tiers.</div>
+    </div>
+  </div>
+</div>
+
+</main><!-- /#app -->
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- MODAL LEAD / CONTACT -->
+<div class="modal-overlay" id="modal-lead" role="dialog" aria-modal="true" aria-labelledby="modal-lead-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-lead-title">Demander une visite</h2>
+      <button class="modal-close" onclick="closeModal('modal-lead')" aria-label="Fermer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Résumé annonce dans le modal -->
+    <div style="background:var(--color-surface-2);border-radius:var(--radius-lg);padding:var(--space-4);margin-bottom:var(--space-5);display:flex;align-items:center;gap:var(--space-3);">
+      <div style="width:56px;height:42px;border-radius:var(--radius-md);overflow:hidden;flex-shrink:0;">
+        <img id="modal-lead-thumb" src="" alt="" style="width:100%;height:100%;object-fit:cover;" />
+      </div>
+      <div>
+        <div id="modal-lead-annonce-title" style="font-size:var(--text-xs);font-weight:700;color:var(--color-text);"></div>
+        <div id="modal-lead-annonce-price" style="font-size:var(--text-xs);color:var(--color-primary);font-weight:600;"></div>
+      </div>
+    </div>
+
+    <div class="form-success" id="lead-success">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Message envoyé ! L'annonceur vous contactera sous 24h.
+    </div>
+
+    <form id="lead-form" onsubmit="submitLead(event)" novalidate>
+      <div class="form-stack">
+        <div class="form-grid-2">
+          <div class="form-group">
+            <label class="form-label" for="lead-nom">Nom <span class="req">*</span></label>
+            <input class="form-input" type="text" id="lead-nom" required autocomplete="name" placeholder="Votre nom" />
+            <span class="form-error">Requis</span>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lead-tel">Téléphone <span class="req">*</span></label>
+            <input class="form-input" type="tel" id="lead-tel" required autocomplete="tel" placeholder="+212 6 XX XX XX XX" />
+            <span class="form-error">Requis</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="lead-email">Email <span style="font-weight:400;color:var(--color-text-faint);">(optionnel)</span></label>
+          <input class="form-input" type="email" id="lead-email" autocomplete="email" placeholder="vous@exemple.ma" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="lead-message">Message <span style="font-weight:400;color:var(--color-text-faint);">(optionnel)</span></label>
+          <textarea class="form-textarea" id="lead-message" placeholder="Je suis intéressé(e) par ce bien et souhaiterais organiser une visite..."></textarea>
+        </div>
+        <label class="consent-label">
+          <input type="checkbox" id="lead-consent" required />
+          J'accepte d'être contacté(e) par l'annonceur. Données traitées conformément à notre <a href="#" onclick="navigate('confidentialite');closeModal('modal-lead');return false;" style="color:var(--color-primary);">politique de confidentialité</a>. <span class="req">*</span>
+        </label>
+        <button type="submit" class="btn btn-primary btn-lg" style="width:100%;justify-content:center;">
+          Envoyer ma demande
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL SIGNALEMENT -->
+<div class="modal-overlay" id="modal-report" role="dialog" aria-modal="true" aria-labelledby="modal-report-title">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modal-report-title">Signaler cette annonce</h2>
+      <button class="modal-close" onclick="closeModal('modal-report')" aria-label="Fermer">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="form-success" id="report-success">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      Signalement envoyé. Merci de contribuer à la qualité du portail.
+    </div>
+    <form id="report-form" onsubmit="submitReport(event)" novalidate>
+      <div class="form-stack">
+        <div class="form-group">
+          <label class="form-label" for="report-motif">Motif <span class="req">*</span></label>
+          <select class="form-select" id="report-motif" required>
+            <option value="">Sélectionnez un motif</option>
+            <option value="doublon">Annonce en doublon</option>
+            <option value="fraude">Tentative de fraude</option>
+            <option value="info_incorrecte">Information incorrecte</option>
+            <option value="autre">Autre</option>
+          </select>
+          <span class="form-error">Veuillez choisir un motif</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="report-comment">Commentaire <span style="font-weight:400;color:var(--color-text-faint);">(optionnel)</span></label>
+          <textarea class="form-textarea" id="report-comment" placeholder="Décrivez le problème constaté..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Envoyer le signalement</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="#" class="header-logo" onclick="navigate('home');return false;" style="color:white;">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.1)"/>
+            <path d="M16 6 L26 16 L16 26 L6 16 Z" fill="none" stroke="#b5622e" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="2.5" fill="#b5622e"/>
+          </svg>
+          atlasia
+        </a>
+        <p class="footer-brand-desc">Portail immobilier au Maroc. Annonces vente et location dans toutes les grandes villes.</p>
+      </div>
+      <div>
+        <p class="footer-col-title">Rechercher</p>
+        <ul class="footer-links">
+          <li><a href="#" onclick="navigate('search','vente');return false;">Vente</a></li>
+          <li><a href="#" onclick="navigate('search','location');return false;">Location</a></li>
+          <li><a href="#" onclick="navigate('search');return false;">Toutes les annonces</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Professionnels</p>
+        <ul class="footer-links">
+          <li><a href="https://biz.atlasia.ma" target="_blank" rel="noopener noreferrer">Espace Pro</a></li>
+          <li><a href="https://biz.atlasia.ma/demo" target="_blank" rel="noopener noreferrer">Demander une démo</a></li>
+        </ul>
+      </div>
+      <div>
+        <p class="footer-col-title">Légal</p>
+        <ul class="footer-links">
+          <li><a href="#" onclick="navigate('mentions');return false;">Mentions légales</a></li>
+          <li><a href="#" onclick="navigate('confidentialite');return false;">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 Atlasia Technologies SARL — Maroc</span>
+      <span>Tous droits réservés</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══ JAVASCRIPT ═══ -->
+<script>
+/* ============================================================
+   ATLASIA PORTAIL — Data & App Logic
+============================================================ */
+
+// ─── THEME TOGGLE ───
+(function () {
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  r.setAttribute('data-theme', d);
+  function setIcon(btn, theme) {
+    if (!btn) return;
+    btn.innerHTML = theme === 'dark'
+      ? '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+  setIcon(t, d);
+  t && t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d); setIcon(t, d);
+  });
+})();
+
+// ─── MOBILE MENU ───
+const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+const mobileNav = document.getElementById('mobile-nav');
+mobileMenuBtn && mobileMenuBtn.addEventListener('click', () => mobileNav.classList.toggle('open'));
+function closeMobileMenu() { mobileNav && mobileNav.classList.remove('open'); }
+
+// ─── SCROLL HEADER ───
+window.addEventListener('scroll', () => {
+  document.getElementById('site-header').classList.toggle('site-header--scrolled', window.scrollY > 30);
+}, { passive: true });
+
+// ─── MOCK DATA ───
+var IMAGES = [
+  'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80',
+  'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=800&q=80',
+  'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=800&q=80',
+  'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?w=800&q=80',
+  'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=800&q=80',
+  'https://images.unsplash.com/photo-1599427303058-f04cbcf4756f?w=800&q=80',
+  'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80',
+  'https://images.unsplash.com/photo-1576941089067-2de3c901e126?w=800&q=80',
+];
+
+var CITIES = [
+  { name: 'Casablanca', count: 342, icon: '🏙️' },
+  { name: 'Rabat',      count: 187, icon: '🏛️' },
+  { name: 'Tanger',     count: 156, icon: '🌊' },
+  { name: 'Marrakech',  count: 203, icon: '🌴' },
+  { name: 'Fès',        count: 98,  icon: '🕌' },
+  { name: 'Agadir',     count: 112, icon: '☀️' },
+  { name: 'Meknès',     count: 67,  icon: '🏰' },
+  { name: 'Tétouan',    count: 54,  icon: '🏔️' },
+];
+
+var LISTINGS = [
+  { id:'1', slug:'villa-moderne-ain-diab', title:'Villa moderne avec piscine', tx:'vente', price:4200000, city:'Casablanca', zone:'Aïn Diab', surface:320, pieces:5, desc:'Magnifique villa de standing avec piscine privée, jardin paysager et finitions haut de gamme. Située dans un quartier résidentiel calme à 5 minutes de la plage.', agent:{name:'Karim A.', agency:'Prestige Immo', initials:'KA'}, verified:true, date:'2026-04-08', imgs:[0,2,6,3] },
+  { id:'2', slug:'appartement-maarif', title:'Appartement 3 pièces vue mer', tx:'vente', price:1150000, city:'Casablanca', zone:'Maârif', surface:95, pieces:3, desc:'Bel appartement lumineux avec grande terrasse et vue dégagée. Cuisine équipée, parking inclus. Copropriété sécurisée avec gardien.', agent:{name:'Sara F.', agency:'ImmoPlus', initials:'SF'}, verified:true, date:'2026-04-07', imgs:[1,4,5,7] },
+  { id:'3', slug:'villa-palmeraie-marrakech', title:'Villa en palmeraie — Marrakech', tx:'vente', price:6800000, city:'Marrakech', zone:'Palmeraie', surface:480, pieces:6, desc:'Villa d\'exception nichée dans la Palmeraie de Marrakech. Riad intérieur, piscine à débordement, espace détente. Un vrai havre de paix à quelques minutes du centre.', agent:{name:'Ahmed B.', agency:'Maroc Luxury', initials:'AB'}, verified:true, date:'2026-04-06', imgs:[3,0,6,2] },
+  { id:'4', slug:'appartement-tanger-malabata', title:'Appt 2 pièces face mer — Tanger', tx:'location', price:7500, city:'Tanger', zone:'Malabata', surface:68, pieces:2, desc:'Appartement meublé avec vue imprenable sur le détroit de Gibraltar. Idéal pour un professionnel ou expatrié. Disponible immédiatement.', agent:{name:'Mehdi O.', agency:'ImmoTanger', initials:'MO'}, verified:true, date:'2026-04-05', imgs:[4,1,7,5] },
+  { id:'5', slug:'villa-hay-riad-rabat', title:'Villa 4ch avec jardin — Rabat', tx:'vente', price:2900000, city:'Rabat', zone:'Hay Riad', surface:240, pieces:5, desc:'Villa familiale dans un quartier résidentiel prisé. Grande cuisine américaine, 4 chambres dont une suite parentale, jardin arborisé, 2 parkings couverts.', agent:{name:'Nadia E.', agency:'Capital Immo', initials:'NE'}, verified:false, date:'2026-04-04', imgs:[6,2,0,4] },
+  { id:'6', slug:'studio-agadir-centre', title:'Studio meublé — centre Agadir', tx:'location', price:4200, city:'Agadir', zone:'Centre Ville', surface:38, pieces:1, desc:'Studio entièrement rénové et meublé. Proche commerces, plage à 10 min à pied. Convient pour un séjour longue durée ou résidence principale.', agent:{name:'Youssef K.', agency:'Immo Sud', initials:'YK'}, verified:true, date:'2026-04-03', imgs:[5,7,3,1] },
+  { id:'7', slug:'duplex-hay-hassani-casa', title:'Duplex 4 pièces — Hay Hassani', tx:'vente', price:1780000, city:'Casablanca', zone:'Hay Hassani', surface:142, pieces:4, desc:'Duplex en très bon état avec terrasse de 40m². Chambre parentale en suite, 2 chambres enfants, salon double. À deux pas du tramway.', agent:{name:'Leila M.', agency:'Immobilière Atlas', initials:'LM'}, verified:true, date:'2026-04-02', imgs:[7,5,4,2] },
+  { id:'8', slug:'appartement-fes-ville-nouvelle', title:'Appartement F3 — Fès Ville Nouvelle', tx:'location', price:6000, city:'Fès', zone:'Ville Nouvelle', surface:85, pieces:3, desc:'Grand appartement dans un immeuble récent. Balcon, parking, gardien. Ideal pour famille ou colocation.', agent:{name:'Omar S.', agency:'Fès Immo', initials:'OS'}, verified:false, date:'2026-04-01', imgs:[2,6,0,3] },
+  { id:'9', slug:'villa-tetouan-mdiq', title:'Villa de vacances — M\'Diq Tétouan', tx:'location', price:18000, city:'Tétouan', zone:"M'Diq", surface:190, pieces:5, desc:'Belle villa de vacances en bord de mer. Piscine chauffée, jardin clos, 4 suites. Location saisonnière. Disponible juillet-août.', agent:{name:'Hassan R.', agency:'TangerMed Immo', initials:'HR'}, verified:true, date:'2026-03-30', imgs:[0,3,5,7] },
+  { id:'10', slug:'appartement-meknes-hamria', title:'Appartement F4 — Hamria Meknès', tx:'vente', price:920000, city:'Meknès', zone:'Hamria', surface:110, pieces:4, desc:'Appartement spacieux dans immeuble sécurisé. Cuisine équipée, 3 chambres, salon-salle à manger séparés. Proche mosquée et commerces.', agent:{name:'Amina T.', agency:'Meknès Immo', initials:'AT'}, verified:true, date:'2026-03-28', imgs:[4,6,1,2] },
+  { id:'11', slug:'villa-casablanca-anfa', title:'Villa standing — Anfa Casablanca', tx:'vente', price:8500000, city:'Casablanca', zone:'Anfa', surface:520, pieces:7, desc:'Propriété d\'exception dans le quartier le plus prisé de Casablanca. Architecture contemporaine, domotique, cave à vins, hammam privé.', agent:{name:'Karim A.', agency:'Prestige Immo', initials:'KA'}, verified:true, date:'2026-03-27', imgs:[6,0,3,5] },
+  { id:'12', slug:'appartement-rabat-agdal', title:'Appartement 2ch — Agdal Rabat', tx:'location', price:8500, city:'Rabat', zone:'Agdal', surface:75, pieces:2, desc:'Appartement refait à neuf, meubles neufs. Proche ambassades et administrations. Connexion fibre, parking sécurisé.', agent:{name:'Nadia E.', agency:'Capital Immo', initials:'NE'}, verified:true, date:'2026-03-25', imgs:[1,7,4,6] },
+];
+
+var currentListing = null;
+var galleryIndex   = 0;
+var filterState = { tx: '', ville: '', prixMin: 0, prixMax: 0, surfMin: 0, surfMax: 0, pieces: 0, sort: 'recent', page: 1 };
+var heroTab = 'vente';
+var PAGE_SIZE = 9;
+
+function fmtPrice(p, tx) {
+  if (tx === 'location') return p.toLocaleString('fr-MA') + ' MAD/mois';
+  if (p >= 1000000) return (p/1000000).toLocaleString('fr-MA',{maximumFractionDigits:2}) + ' M MAD';
+  return p.toLocaleString('fr-MA') + ' MAD';
+}
+
+// ─── SPA ROUTER ───
+function navigate(page, param) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById('page-' + page);
+  if (el) { el.classList.add('active'); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+  // Update nav active
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.remove('active'));
+
+  if (page === 'home') {
+    document.title = 'Atlasia — Immobilier au Maroc : vente, location, annonces';
+    renderHome();
+  }
+  if (page === 'search') {
+    if (param) { filterState.tx = param; applyTxChips(); }
+    renderSearch();
+    document.title = 'Annonces immobilières au Maroc — Atlasia';
+  }
+  if (page === 'detail') {
+    // param = listing id
+    var l = LISTINGS.find(x => x.id === String(param));
+    if (!l) { navigate('home'); return; }
+    renderDetail(l);
+    document.title = l.title + ' — Atlasia';
+  }
+  trackEvent(page === 'home' ? 'home_viewed' : page === 'search' ? 'search_viewed' : page === 'detail' ? 'listing_viewed' : page + '_viewed', { page });
+  setTimeout(initReveals, 80);
+}
+
+// ─── RENDERS ───
+
+function renderHome() {
+  // Cities
+  var cg = document.getElementById('cities-grid');
+  if (cg) cg.innerHTML = CITIES.map(c =>
+    `<a class="city-card" href="#" onclick="navigate('search');document.getElementById('filter-ville').value='${c.name}';applyFilters();return false;">
+      <div class="city-card-icon">${c.icon}</div>
+      <div class="city-card-name">${c.name}</div>
+      <div class="city-card-count">${c.count} annonces</div>
+    </a>`
+  ).join('');
+
+  // Recent listings (last 8, all tx)
+  var hl = document.getElementById('home-listings');
+  if (hl) hl.innerHTML = LISTINGS.slice(0,8).map(l => listingCardHTML(l)).join('');
+}
+
+function listingCardHTML(l) {
+  var img = IMAGES[l.imgs[0]];
+  return `<article class="listing-card" onclick="navigate('detail','${l.id}')" role="button" tabindex="0" aria-label="${l.title}" onkeydown="if(event.key==='Enter')navigate('detail','${l.id}')">
+    <div class="listing-card-img">
+      <img src="${img}" alt="${l.title}" loading="lazy" width="400" height="250" />
+      <span class="listing-card-tx ${l.tx==='vente'?'tx-vente':'tx-location'}">${l.tx==='vente'?'Vente':'Location'}</span>
+      <div class="listing-card-badges">
+        ${l.verified ? `<span class="badge-trust"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Vérifié</span>` : ''}
+      </div>
+    </div>
+    <div class="listing-card-body">
+      <div class="listing-price">${fmtPrice(l.price, l.tx)}</div>
+      <div class="listing-title">${l.title}</div>
+      <div class="listing-location">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        ${l.zone}, ${l.city}
+      </div>
+      <div class="listing-meta">
+        <span class="listing-meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          ${l.surface} m²
+        </span>
+        <span class="listing-meta-item">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          ${l.pieces} pièces
+        </span>
+        <span class="listing-meta-item" style="margin-left:auto;font-size:10px;color:var(--color-text-faint);">${l.date}</span>
+      </div>
+    </div>
+  </article>`;
+}
+
+// ─── SEARCH ───
+var filteredListings = [...LISTINGS];
+
+function applyTxChips() {
+  ['all','vente','location'].forEach(v => {
+    var c = document.getElementById('chip-' + v);
+    if (c) c.classList.toggle('active', filterState.tx === (v==='all'?'':v));
+  });
+}
+
+function setTxFilter(tx) {
+  filterState.tx = tx; filterState.page = 1;
+  applyTxChips(); renderSearch();
+}
+function setPiecesFilter(n, el) {
+  filterState.pieces = n; filterState.page = 1;
+  document.querySelectorAll('#pieces-chips .filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active'); renderSearch();
+}
+
+function resetFilters() {
+  filterState = { tx:'', ville:'', prixMin:0, prixMax:0, surfMin:0, surfMax:0, pieces:0, sort:'recent', page:1 };
+  ['filter-ville','sort-select'].forEach(id => { var el = document.getElementById(id); if(el) el.value = ''; });
+  ['filter-prix-min','filter-prix-max','filter-surf-min','filter-surf-max'].forEach(id => { var el = document.getElementById(id); if(el) el.value = ''; });
+  applyTxChips();
+  document.querySelectorAll('#pieces-chips .filter-chip').forEach((c,i) => c.classList.toggle('active', i===0));
+  renderSearch();
+}
+
+function applyFilters() {
+  filterState.ville    = document.getElementById('filter-ville')?.value || '';
+  filterState.prixMin  = parseInt(document.getElementById('filter-prix-min')?.value) || 0;
+  filterState.prixMax  = parseInt(document.getElementById('filter-prix-max')?.value) || 0;
+  filterState.surfMin  = parseInt(document.getElementById('filter-surf-min')?.value) || 0;
+  filterState.surfMax  = parseInt(document.getElementById('filter-surf-max')?.value) || 0;
+  filterState.page     = 1;
+  renderSearch();
+  trackEvent('search_performed', { ...filterState });
+}
+
+function applySort() {
+  filterState.sort = document.getElementById('sort-select')?.value || 'recent';
+  renderSearch();
+}
+
+function renderSearch() {
+  var f = filterState;
+  filteredListings = LISTINGS.filter(l => {
+    if (f.tx && l.tx !== f.tx) return false;
+    if (f.ville && l.city !== f.ville) return false;
+    if (f.prixMin && l.price < f.prixMin) return false;
+    if (f.prixMax && l.price > f.prixMax) return false;
+    if (f.surfMin && l.surface < f.surfMin) return false;
+    if (f.surfMax && l.surface > f.surfMax) return false;
+    if (f.pieces && f.pieces < 4 && l.pieces !== f.pieces) return false;
+    if (f.pieces >= 4 && l.pieces < 4) return false;
+    return true;
+  });
+
+  // Sort
+  filteredListings.sort((a,b) => {
+    if (f.sort === 'prix-asc') return a.price - b.price;
+    if (f.sort === 'prix-desc') return b.price - a.price;
+    if (f.sort === 'surface-desc') return b.surface - a.surface;
+    return b.date.localeCompare(a.date); // recent
+  });
+
+  // Pagination
+  var total = filteredListings.length;
+  var pages = Math.ceil(total / PAGE_SIZE);
+  var start = (f.page - 1) * PAGE_SIZE;
+  var pageListings = filteredListings.slice(start, start + PAGE_SIZE);
+
+  // Update count
+  document.getElementById('results-count').textContent = total;
+
+  // Breadcrumb
+  var bc = f.tx ? (f.tx === 'vente' ? 'Vente' : 'Location') : 'Annonces';
+  if (f.ville) bc += ' · ' + f.ville;
+  document.getElementById('search-breadcrumb-current').textContent = bc;
+
+  // Active filter chips bar
+  var af = document.getElementById('active-filters');
+  var chips = [];
+  if (f.tx) chips.push(`<button class="active-filter-chip" onclick="setTxFilter('')">${f.tx==='vente'?'Vente':'Location'} ×</button>`);
+  if (f.ville) chips.push(`<button class="active-filter-chip" onclick="filterState.ville='';document.getElementById('filter-ville').value='';renderSearch()">${f.ville} ×</button>`);
+  if (f.prixMax) chips.push(`<button class="active-filter-chip" onclick="filterState.prixMax=0;document.getElementById('filter-prix-max').value='';renderSearch()">Max ${(f.prixMax/1000).toFixed(0)}k MAD ×</button>`);
+  if (f.pieces) chips.push(`<button class="active-filter-chip" onclick="filterState.pieces=0;document.querySelectorAll('#pieces-chips .filter-chip').forEach((c,i)=>c.classList.toggle('active',i===0));renderSearch()">${f.pieces}${f.pieces>=4?'+':{}} pièces ×</button>`);
+  if (af) af.innerHTML = chips.join('');
+
+  // Listings
+  var container = document.getElementById('search-listings');
+  var empty = document.getElementById('search-empty');
+  if (pageListings.length === 0) {
+    container.innerHTML = ''; empty.style.display = 'block';
+  } else {
+    container.innerHTML = pageListings.map(l => listingCardHTML(l)).join('');
+    empty.style.display = 'none';
+  }
+
+  // Pagination
+  renderPagination(pages, f.page);
+}
+
+function renderPagination(total, current) {
+  var pg = document.getElementById('search-pagination');
+  if (!pg || total <= 1) { if(pg) pg.innerHTML=''; return; }
+  var html = '';
+  if (current > 1) html += `<button class="page-btn" onclick="filterState.page=${current-1};renderSearch()">‹</button>`;
+  for (var i=1; i<=total; i++) {
+    html += `<button class="page-btn ${i===current?'active':''}" onclick="filterState.page=${i};renderSearch()">${i}</button>`;
+  }
+  if (current < total) html += `<button class="page-btn" onclick="filterState.page=${current+1};renderSearch()">›</button>`;
+  pg.innerHTML = html;
+}
+
+// ─── DETAIL ───
+function renderDetail(l) {
+  currentListing = l;
+  galleryIndex = 0;
+
+  // Gallery
+  var imgs = l.imgs.map(i => IMAGES[i]);
+  var mainImg = document.getElementById('gallery-main-img');
+  if (mainImg) { mainImg.src = imgs[0]; mainImg.alt = l.title; }
+
+  var thumbs = document.getElementById('gallery-thumbs');
+  if (thumbs) {
+    thumbs.innerHTML = imgs.map((src,i) =>
+      `<div class="gallery-thumb ${i===0?'active':''}" onclick="setGalleryIndex(${i})" style="cursor:pointer;">
+        <img src="${src}" alt="Photo ${i+1}" loading="lazy"/>
+      </div>`
+    ).join('');
+  }
+
+  // Price / title / location
+  setText('detail-price', fmtPrice(l.price, l.tx));
+  setText('detail-title', l.title);
+  setText('detail-location-text', l.zone + ', ' + l.city);
+
+  // TX badge
+  var txBadge = document.getElementById('detail-tx-badge');
+  if (txBadge) { txBadge.textContent = l.tx === 'vente' ? 'Vente' : 'Location'; txBadge.className = 'listing-card-tx ' + (l.tx==='vente'?'tx-vente':'tx-location'); }
+
+  // Meta row
+  var meta = document.getElementById('detail-meta-row');
+  if (meta) {
+    meta.innerHTML = [
+      { label: 'Surface', value: l.surface + ' m²' },
+      { label: 'Pièces', value: l.pieces + ' pièces' },
+      { label: 'Ville', value: l.city },
+      { label: 'Zone', value: l.zone },
+      { label: 'Type', value: l.tx === 'vente' ? 'À vendre' : 'À louer' },
+    ].map(m => `<div class="detail-meta-item"><span class="detail-meta-label">${m.label}</span><span class="detail-meta-value">${m.value}</span></div>`).join('');
+  }
+
+  // Description
+  setText('detail-description', l.desc);
+
+  // Characteristics
+  var chars = document.getElementById('detail-characteristics');
+  if (chars) {
+    var items = [
+      { icon: '🏠', label: 'Surface : ' + l.surface + ' m²' },
+      { icon: '🛏️', label: l.pieces + ' pièces' },
+      { icon: '📍', label: l.city + ' · ' + l.zone },
+      { icon: l.tx === 'vente' ? '💰' : '💵', label: fmtPrice(l.price, l.tx) },
+      { icon: '✅', label: l.verified ? 'Annonce vérifiée' : 'Non vérifiée' },
+      { icon: '📅', label: 'Publiée le ' + l.date },
+    ];
+    chars.innerHTML = items.map(item =>
+      `<div class="characteristic-item">
+        <span class="characteristic-icon">${item.icon}</span>
+        <span>${item.label}</span>
+      </div>`
+    ).join('');
+  }
+
+  // Map
+  setText('detail-map-label', l.zone + ', ' + l.city + ' — Carte interactive');
+
+  // Agent
+  setText('detail-agent-avatar', l.agent.initials);
+  setText('detail-agent-name', l.agent.name);
+  setText('detail-agent-agency', l.agent.agency);
+  setText('detail-date-pub', 'Publiée le ' + l.date);
+
+  // Breadcrumb
+  setText('detail-bread-title', l.title.substring(0,40) + (l.title.length>40?'…':''));
+
+  // WhatsApp
+  var wpBtn = document.getElementById('whatsapp-btn');
+  if (wpBtn) wpBtn.onclick = function() { openWhatsApp(); };
+
+  // Similar listings
+  var similar = LISTINGS.filter(x => x.id !== l.id && x.city === l.city && x.tx === l.tx).slice(0,4);
+  var sl = document.getElementById('similar-listings');
+  if (sl) sl.innerHTML = similar.map(s => listingCardHTML(s)).join('');
+
+  // Modal thumbnail
+  var mThumb = document.getElementById('modal-lead-thumb');
+  if (mThumb) mThumb.src = imgs[0];
+  setText('modal-lead-annonce-title', l.title);
+  setText('modal-lead-annonce-price', fmtPrice(l.price, l.tx));
+}
+
+function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+
+function setGalleryIndex(i) {
+  if (!currentListing) return;
+  galleryIndex = i;
+  var imgs = currentListing.imgs.map(idx => IMAGES[idx]);
+  var main = document.getElementById('gallery-main-img');
+  if (main) main.src = imgs[i];
+  document.querySelectorAll('.gallery-thumb').forEach((t,idx) => t.classList.toggle('active', idx === i));
+}
+function galleryPrev() { if (!currentListing) return; var max = currentListing.imgs.length - 1; setGalleryIndex(galleryIndex > 0 ? galleryIndex-1 : max); }
+function galleryNext() { if (!currentListing) return; var max = currentListing.imgs.length - 1; setGalleryIndex(galleryIndex < max ? galleryIndex+1 : 0); }
+
+// ─── HERO SEARCH ───
+function setHeroTab(tab) {
+  heroTab = tab;
+  ['vente','location'].forEach(t => {
+    document.getElementById('hero-tab-'+t).classList.toggle('active', t === tab);
+  });
+}
+
+function submitHeroSearch() {
+  var ville = document.getElementById('hero-ville').value;
+  var budget = document.getElementById('hero-budget').value;
+  filterState = { tx: heroTab, ville, prixMin:0, prixMax: parseInt(budget)||0, surfMin:0, surfMax:0, pieces:0, sort:'recent', page:1 };
+  navigate('search');
+  if (ville && document.getElementById('filter-ville')) document.getElementById('filter-ville').value = ville;
+  if (budget && document.getElementById('filter-prix-max')) document.getElementById('filter-prix-max').value = budget;
+  applyTxChips();
+  trackEvent('home_search_submitted', { heroTab, ville, budget });
+}
+
+// ─── MODALS ───
+function openModal(id) {
+  // Fermer tous les autres modals avant d'ouvrir
+  document.querySelectorAll('.modal-overlay.open').forEach(function(m) {
+    if (m.id !== id) m.classList.remove('open');
+  });
+  var m = document.getElementById(id);
+  if (m) { m.classList.add('open'); document.body.style.overflow = 'hidden'; }
+}
+function closeModal(id) {
+  var m = document.getElementById(id);
+  if (m) {
+    m.classList.remove('open');
+    // Restaurer le scroll seulement si aucun autre modal n'est ouvert
+    if (!document.querySelector('.modal-overlay.open')) {
+      document.body.style.overflow = '';
+    }
+  }
+}
+
+document.querySelectorAll('.modal-overlay').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') ['modal-lead','modal-report'].forEach(id => closeModal(id));
+});
+
+function openLeadModal(type) {
+  var form = document.getElementById('lead-form');
+  var success = document.getElementById('lead-success');
+  if (form) form.style.display = '';
+  if (success) success.classList.remove('visible');
+  // Adapter le titre selon le type
+  var titleEl = document.getElementById('modal-lead-title');
+  if (titleEl) {
+    titleEl.textContent = (type === 'message') ? 'Envoyer un message' : 'Demander une visite';
+  }
+  // Pré-remplir le message selon le type
+  var msgField = document.getElementById('lead-message');
+  if (msgField && !msgField.value) {
+    msgField.value = (type === 'message')
+      ? 'Bonjour, je suis intéressé(e) par ce bien et souhaite obtenir plus d\'informations.'
+      : 'Bonjour, je suis intéressé(e) par ce bien et souhaiterais organiser une visite...';
+  }
+  openModal('modal-lead');
+  trackEvent('lead_form_opened', { listingId: currentListing?.id, type: type || 'visite' });
+}
+
+function openReportModal() { openModal('modal-report'); }
+
+function openWhatsApp() {
+  if (!currentListing) return;
+  var msg = encodeURIComponent('Bonjour, je suis intéressé(e) par votre annonce : ' + currentListing.title + ' — ' + fmtPrice(currentListing.price, currentListing.tx) + ' (atlasia.ma)');
+  window.open('https://wa.me/212600000000?text=' + msg, '_blank');
+  trackEvent('whatsapp_clicked', { listingId: currentListing.id });
+}
+
+// ─── FORMS ───
+function validateField(input) {
+  var ok = true;
+  if (input.hasAttribute('required') && !input.value.trim()) ok = false;
+  if (input.type==='email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) ok = false;
+  input.classList.toggle('error', !ok);
+  return ok;
+}
+
+function submitLead(e) {
+  e.preventDefault();
+  var consent = document.getElementById('lead-consent');
+  var nom = document.getElementById('lead-nom');
+  var tel = document.getElementById('lead-tel');
+  var valid = validateField(nom) & validateField(tel) & consent.checked;
+  if (!valid) return;
+
+  var payload = {
+    listingId: currentListing?.id,
+    nom: nom.value,
+    telephone: document.getElementById('lead-tel').value,
+    email: document.getElementById('lead-email').value,
+    message: document.getElementById('lead-message').value,
+    consent: true
+  };
+  // → POST /api/public/v1/listings/{id}/leads
+  console.log('[ATLASIA] Lead payload:', payload);
+  trackEvent('lead_submitted', payload);
+
+  document.getElementById('lead-form').style.display = 'none';
+  document.getElementById('lead-success').classList.add('visible');
+  e.target.reset();
+}
+
+function submitReport(e) {
+  e.preventDefault();
+  var motif = document.getElementById('report-motif');
+  if (!validateField(motif)) return;
+
+  var payload = {
+    listingId: currentListing?.id,
+    motif: motif.value,
+    comment: document.getElementById('report-comment').value
+  };
+  // → POST /api/public/v1/listings/{id}/reports
+  console.log('[ATLASIA] Report payload:', payload);
+
+  document.getElementById('report-form').style.display = 'none';
+  document.getElementById('report-success').classList.add('visible');
+  setTimeout(() => closeModal('modal-report'), 2000);
+}
+
+// ─── TRACKING ───
+function trackEvent(name, data) {
+  console.log('[ATLASIA TRACK]', name, data);
+  if (typeof window.atlasiaTrack === 'function') window.atlasiaTrack(name, data);
+}
+
+// ─── REVEAL ───
+function initReveals() {
+  var els = document.querySelectorAll('.page.active .reveal:not(.visible)');
+  var obs = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 60);
+        obs.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+  els.forEach(el => obs.observe(el));
+}
+
+// ─── INIT ───
+renderHome();
+initReveals();
+</script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>

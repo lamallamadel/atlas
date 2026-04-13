@@ -2,14 +2,14 @@ package com.example.backend.entity;
 
 import com.example.backend.entity.enums.ReportFormat;
 import com.example.backend.entity.enums.ReportFrequency;
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -40,11 +40,11 @@ public class ScheduledReportEntity extends BaseEntity {
     @Column(name = "format", nullable = false, length = 50)
     private ReportFormat format;
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "recipients", columnDefinition = "jsonb")
     private List<String> recipients;
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameters", columnDefinition = "jsonb")
     private Map<String, Object> parameters;
 

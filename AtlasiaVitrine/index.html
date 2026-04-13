@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlasia Biz — La plateforme immobilière B2B au Maroc</title>
+  <meta name="description" content="Atlasia Biz accompagne les agences, promoteurs et bailleurs professionnels avec une plateforme intégrée : portail d'annonces, CRM, gestion des rendez-vous et outils de confiance digitale." />
+  <meta property="og:title" content="Atlasia Biz — La plateforme immobilière B2B au Maroc" />
+  <meta property="og:description" content="Solutions digitales pour les professionnels de l'immobilier marocain." />
+  <meta property="og:type" content="website" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="./base.css" />
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════
+     HEADER
+═══════════════════════════════════════════════════ -->
+<header class="site-header" id="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <!-- Logo -->
+      <a href="#" class="header-logo" data-page="home" onclick="navigate('home');return false;">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-label="Atlasia logo" role="img">
+          <!-- Forme géométrique : losange stylisé évoquant un terrain / une carte -->
+          <rect width="32" height="32" rx="8" fill="#0d2c4a"/>
+          <!-- Losange principal -->
+          <path d="M16 6 L26 16 L16 26 L6 16 Z" fill="none" stroke="#b5622e" stroke-width="1.5"/>
+          <!-- Losange intérieur -->
+          <path d="M16 10 L22 16 L16 22 L10 16 Z" fill="#b5622e" opacity="0.3"/>
+          <!-- Point central -->
+          <circle cx="16" cy="16" r="2.5" fill="#b5622e"/>
+          <!-- Ligne horizontale — horizon -->
+          <line x1="6" y1="16" x2="26" y2="16" stroke="white" stroke-width="0.75" opacity="0.2"/>
+        </svg>
+        <span>atlasia<em style="color:var(--color-primary);font-style:italic;"> biz</em></span>
+      </a>
+
+      <!-- Navigation desktop -->
+      <nav class="header-nav" aria-label="Navigation principale">
+        <ul class="nav-links" role="list">
+          <li><a href="#" data-page="agences" onclick="navigate('agences');return false;">Agences</a></li>
+          <li><a href="#" data-page="promoteurs" onclick="navigate('promoteurs');return false;">Promoteurs</a></li>
+          <li><a href="#" data-page="tarifs" onclick="navigate('tarifs');return false;">Tarifs</a></li>
+          <li><a href="#" data-page="contact" onclick="navigate('contact');return false;">Contact</a></li>
+        </ul>
+
+        <div class="header-ctas">
+          <a href="https://pro.atlasia.ma" target="_blank" rel="noopener noreferrer" class="btn btn-secondary btn-sm">Espace Pro</a>
+          <a href="#" class="btn btn-primary btn-sm" onclick="navigate('demo');return false;">Demander une démo</a>
+          <button class="theme-toggle" data-theme-toggle aria-label="Basculer le thème">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          </button>
+          <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu mobile">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <nav class="mobile-nav" id="mobile-nav" aria-label="Navigation mobile">
+    <a href="#" onclick="navigate('home');closeMobileMenu();return false;">Accueil</a>
+    <a href="#" onclick="navigate('agences');closeMobileMenu();return false;">Agences</a>
+    <a href="#" onclick="navigate('promoteurs');closeMobileMenu();return false;">Promoteurs</a>
+    <a href="#" onclick="navigate('tarifs');closeMobileMenu();return false;">Tarifs</a>
+    <a href="#" onclick="navigate('contact');closeMobileMenu();return false;">Contact</a>
+    <a href="https://atlasia.ma" target="_blank" rel="noopener noreferrer">Portail annonces →</a>
+    <a href="#" onclick="navigate('demo');closeMobileMenu();return false;" style="color:var(--color-primary);font-weight:700;">Demander une démo</a>
+  </nav>
+</header>
+
+<!-- ═══════════════════════════════════════════════════
+     PAGES CONTAINER
+═══════════════════════════════════════════════════ -->
+<main id="app">
+
+<!-- ─── PAGE : HOME ─── -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-pattern"></div>
+    <div class="hero-grid-overlay"></div>
+    <div class="container hero-content">
+      <span class="hero-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor"><circle cx="6" cy="6" r="4"/></svg>
+        Plateforme B2B — Maroc
+      </span>
+      <h1 class="hero-heading">L'infrastructure digitale de <em>l'immobilier pro</em></h1>
+      <p class="hero-lead">Atlasia Biz connecte agences, promoteurs et bailleurs professionnels à des outils intégrés : portail d'annonces, CRM métier, gestion de rendez-vous et confiance digitale.</p>
+      <div class="hero-ctas">
+        <a href="#" class="btn btn-primary btn-lg" onclick="navigate('demo');return false;">Demander une démo gratuite</a>
+        <a href="#" class="btn btn-lg" style="background:rgba(255,255,255,0.08);color:white;border:1.5px solid rgba(255,255,255,0.2);" onclick="navigate('tarifs');return false;">Voir les tarifs</a>
+      </div>
+      <p class="hero-cta-note">Pas d'engagement · Réponse sous 24h</p>
+      <div class="hero-stats">
+        <div>
+          <div class="hero-stat-value">1 200+</div>
+          <div class="hero-stat-label">Annonces actives</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">150+</div>
+          <div class="hero-stat-label">Professionnels partenaires</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">12</div>
+          <div class="hero-stat-label">Villes couvertes</div>
+        </div>
+        <div>
+          <div class="hero-stat-value">98%</div>
+          <div class="hero-stat-label">Taux de satisfaction</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILS CIBLÉS -->
+  <section class="section">
+    <div class="container">
+      <div class="section-header section-header--centered reveal">
+        <p class="section-eyebrow">À qui s'adresse Atlasia Biz</p>
+        <h2 class="section-title">Conçu pour les pros de l'immobilier marocain</h2>
+        <p class="section-lead">Qu'il s'agisse d'une agence locale, d'un promoteur national ou d'un bailleur institutionnel, Atlasia Biz s'adapte à vos processus et à vos volumes.</p>
+      </div>
+      <div class="features-grid">
+        <div class="card reveal">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <h3 class="card-title">Agences immobilières</h3>
+          <p class="card-body">Gérez votre portefeuille, publiez vos annonces, suivez vos leads et vos rendez-vous depuis un espace unifié. Fini les tableurs et les outils disparates.</p>
+          <a href="#" class="btn btn-outline-primary btn-sm" style="margin-top:var(--space-5);" onclick="navigate('agences');return false;">En savoir plus →</a>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+          </div>
+          <h3 class="card-title">Promoteurs immobiliers</h3>
+          <p class="card-body">Diffusez vos programmes neufs, pilotez les réservations et générez des rapports de vente en temps réel. Un tableau de bord dédié à chaque projet.</p>
+          <a href="#" class="btn btn-outline-primary btn-sm" style="margin-top:var(--space-5);" onclick="navigate('promoteurs');return false;">En savoir plus →</a>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          </div>
+          <h3 class="card-title">Bailleurs professionnels</h3>
+          <p class="card-body">Gérez vos actifs locatifs, automatisez les communications avec les locataires et assurez la conformité de vos contrats en un seul endroit.</p>
+          <a href="#" class="btn btn-outline-primary btn-sm" style="margin-top:var(--space-5);" onclick="navigate('contact');return false;">Nous contacter →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- VALEUR PRINCIPALE -->
+  <section class="section" style="background:var(--color-surface-offset);">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-16);align-items:center;">
+        <div class="reveal">
+          <p class="section-eyebrow">Pourquoi Atlasia Biz</p>
+          <h2 class="section-title">Une seule plateforme, tous vos outils</h2>
+          <p class="section-lead">Plus besoin de jongler entre un portail d'annonces, un CRM externe et un calendrier de rendez-vous. Atlasia Biz intègre tout dans une interface pensée pour le marché marocain.</p>
+          <div style="display:flex;flex-direction:column;gap:var(--space-4);margin-top:var(--space-8);">
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">Portail d'annonces intégré</div>
+                <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Publiez directement sur atlasia.ma depuis votre espace pro.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">CRM leads & contacts</div>
+                <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Suivez chaque prospect du premier contact jusqu'à la signature.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">Gestion des rendez-vous</div>
+                <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Calendrier partagé et rappels automatiques pour vos équipes.</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:36px;height:36px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">Confiance & vérification</div>
+                <div style="font-size:var(--text-sm);color:var(--color-text-muted);">Badge « Pro vérifié » pour renforcer la crédibilité de vos annonces.</div>
+              </div>
+            </div>
+          </div>
+          <a href="#" class="btn btn-primary" style="margin-top:var(--space-8);" onclick="navigate('demo');return false;">Demander une démo</a>
+        </div>
+        <!-- Illustration abstract -->
+        <div class="reveal" style="position:relative;">
+          <div style="aspect-ratio:4/3;background:var(--color-marine);border-radius:var(--radius-xl);overflow:hidden;box-shadow:var(--shadow-lg);position:relative;">
+            <!-- Mock dashboard preview -->
+            <div style="position:absolute;inset:0;background:linear-gradient(135deg,#0d2c4a 0%,#1a4870 100%);">
+              <div style="padding:var(--space-5);display:flex;flex-direction:column;gap:var(--space-4);height:100%;">
+                <!-- Header bar mock -->
+                <div style="display:flex;align-items:center;gap:var(--space-3);">
+                  <div style="width:8px;height:8px;border-radius:50%;background:#ef5350;"></div>
+                  <div style="width:8px;height:8px;border-radius:50%;background:#ffc107;"></div>
+                  <div style="width:8px;height:8px;border-radius:50%;background:#4caf50;"></div>
+                  <div style="flex:1;height:20px;background:rgba(255,255,255,0.06);border-radius:4px;margin-left:var(--space-2);"></div>
+                </div>
+                <!-- KPI row -->
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:var(--space-3);">
+                  <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:var(--space-3);">
+                    <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:4px;">ANNONCES</div>
+                    <div style="font-size:20px;font-family:'Playfair Display',serif;font-weight:700;color:white;">48</div>
+                    <div style="font-size:9px;color:#b5622e;">↑ +12%</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:var(--space-3);">
+                    <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:4px;">LEADS</div>
+                    <div style="font-size:20px;font-family:'Playfair Display',serif;font-weight:700;color:white;">127</div>
+                    <div style="font-size:9px;color:#4caf50;">↑ +28%</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:var(--space-3);">
+                    <div style="font-size:10px;color:rgba(255,255,255,0.45);margin-bottom:4px;">RDV</div>
+                    <div style="font-size:20px;font-family:'Playfair Display',serif;font-weight:700;color:white;">23</div>
+                    <div style="font-size:9px;color:rgba(255,255,255,0.4);">ce mois</div>
+                  </div>
+                </div>
+                <!-- List mock -->
+                <div style="flex:1;display:flex;flex-direction:column;gap:var(--space-2);">
+                  <div style="font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;">Derniers leads</div>
+                  <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:var(--space-3);display:flex;align-items:center;gap:var(--space-3);">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#b5622e;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700;flex-shrink:0;">YB</div>
+                    <div style="flex:1;">
+                      <div style="font-size:11px;color:rgba(255,255,255,0.8);font-weight:600;">Youssef B.</div>
+                      <div style="font-size:9px;color:rgba(255,255,255,0.4);">Villa · Tanger · 2,8M MAD</div>
+                    </div>
+                    <div style="font-size:9px;padding:2px 8px;background:rgba(76,175,80,0.2);color:#81c784;border-radius:4px;">Nouveau</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:var(--space-3);display:flex;align-items:center;gap:var(--space-3);">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#3a7bb5;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700;flex-shrink:0;">SF</div>
+                    <div style="flex:1;">
+                      <div style="font-size:11px;color:rgba(255,255,255,0.8);font-weight:600;">Sara F.</div>
+                      <div style="font-size:9px;color:rgba(255,255,255,0.4);">Appt · Casablanca · 1,1M MAD</div>
+                    </div>
+                    <div style="font-size:9px;padding:2px 8px;background:rgba(255,193,7,0.2);color:#ffcc02;border-radius:4px;">RDV</div>
+                  </div>
+                  <div style="background:rgba(255,255,255,0.05);border-radius:6px;padding:var(--space-3);display:flex;align-items:center;gap:var(--space-3);">
+                    <div style="width:28px;height:28px;border-radius:50%;background:#7a4b9e;display:flex;align-items:center;justify-content:center;font-size:10px;color:white;font-weight:700;flex-shrink:0;">AO</div>
+                    <div style="flex:1;">
+                      <div style="font-size:11px;color:rgba(255,255,255,0.8);font-weight:600;">Amine O.</div>
+                      <div style="font-size:9px;color:rgba(255,255,255,0.4);">Local pro · Rabat · 850K MAD</div>
+                    </div>
+                    <div style="font-size:9px;padding:2px 8px;background:rgba(181,98,46,0.25);color:#d4804c;border-radius:4px;">Qualifié</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Floating badge -->
+          <div style="position:absolute;bottom:-16px;right:16px;background:var(--color-primary);color:white;border-radius:var(--radius-lg);padding:var(--space-3) var(--space-5);box-shadow:var(--shadow-lg);font-size:var(--text-xs);font-weight:700;">
+            ✓ Votre espace pro unifié
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS -->
+  <section class="section section-dark">
+    <div class="container">
+      <div class="section-header reveal">
+        <p class="section-eyebrow">Témoignages</p>
+        <h2 class="section-title">Ce que disent nos partenaires</h2>
+      </div>
+      <div class="testimonial-grid">
+        <div class="testimonial-card reveal">
+          <p class="testimonial-quote">« Depuis que nous utilisons Atlasia Biz, notre temps de traitement des leads a diminué de 60%. Tout est centralisé, l'équipe ne se perd plus entre différents outils. »</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">KA</div>
+            <div>
+              <div class="testimonial-name">Karim Aïttouhou</div>
+              <div class="testimonial-role">Directeur — Agence Prestige Immo, Casablanca</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal">
+          <p class="testimonial-quote">« En tant que promoteur, la visibilité sur nos réservations en temps réel est un game-changer. On peut piloter plusieurs programmes simultanément sans se perdre. »</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">NE</div>
+            <div>
+              <div class="testimonial-name">Nadia El Fassi</div>
+              <div class="testimonial-role">DG — Groupe El Fassi Promotion, Rabat</div>
+            </div>
+          </div>
+        </div>
+        <div class="testimonial-card reveal">
+          <p class="testimonial-quote">« La vérification Pro nous a vraiment différenciés sur le portail. Les prospects font plus confiance à nos annonces et le taux de contact a nettement augmenté. »</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">MB</div>
+            <div>
+              <div class="testimonial-name">Mehdi Benhaddou</div>
+              <div class="testimonial-role">Co-fondateur — ImmoTanger, Tanger</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA FINAL -->
+  <section class="section">
+    <div class="container" style="text-align:center;">
+      <div class="reveal" style="max-width:600px;margin-inline:auto;">
+        <p class="section-eyebrow">Prêt à commencer ?</p>
+        <h2 class="section-title">Rejoignez les professionnels qui font confiance à Atlasia</h2>
+        <p class="section-lead" style="margin-inline:auto;">Demandez une démo personnalisée et découvrez comment Atlasia Biz peut transformer votre activité immobilière.</p>
+        <div style="display:flex;flex-wrap:wrap;gap:var(--space-4);justify-content:center;margin-top:var(--space-8);">
+          <a href="#" class="btn btn-primary btn-lg" onclick="navigate('demo');return false;">Demander une démo gratuite</a>
+          <a href="#" class="btn btn-secondary btn-lg" onclick="navigate('tarifs');return false;">Voir les tarifs</a>
+        </div>
+        <p style="font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-4);">Pas d'engagement. Pas de carte bancaire requise.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : AGENCES ─── -->
+<div class="page" id="page-agences">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Solution Agences</p>
+      <h1 class="page-hero-title">La plateforme qui fait croître votre agence</h1>
+      <p class="page-hero-lead">Centralisez vos annonces, vos leads et vos rendez-vous. Passez plus de temps sur le terrain, moins sur les outils.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <p class="section-eyebrow">Fonctionnalités agences</p>
+        <h2 class="section-title">Tout ce dont votre agence a besoin</h2>
+        <p class="section-lead">D'une agence solo à une équipe de 20 négociateurs, Atlasia Biz s'adapte à votre structure.</p>
+      </div>
+      <div class="features-grid">
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg></div>
+          <h3 class="card-title">Gestion du portefeuille</h3>
+          <p class="card-body">Créez et gérez vos annonces (vente, location, résidentiel, commercial) avec photos HD, visite virtuelle et plan interactif. Publication directe sur atlasia.ma.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+          <h3 class="card-title">CRM Leads & Pipeline</h3>
+          <p class="card-body">Capturez les leads entrants, qualifiez-les en un clic et suivez chaque dossier de la prise de contact à la signature. Historique complet par prospect.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+          <h3 class="card-title">Rendez-vous & agenda partagé</h3>
+          <p class="card-body">Planifiez les visites, synchronisez les agendas de toute l'équipe et envoyez des rappels automatiques par SMS / email à vos prospects.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <h3 class="card-title">Badge Pro Vérifié</h3>
+          <p class="card-body">Démarquez-vous sur le portail avec le badge de confiance Atlasia. Vos annonces bénéficient d'une meilleure visibilité et d'un taux de contact supérieur.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+          <h3 class="card-title">Analytics & rapports</h3>
+          <p class="card-body">Suivez les performances de vos annonces, mesurez le ROI de vos canaux d'acquisition et exportez vos données pour votre direction.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></div>
+          <h3 class="card-title">Intégrations</h3>
+          <p class="card-body">Connectez vos outils existants (WhatsApp Business, email, CRM tiers) via notre API. Zapier et webhooks disponibles sur le plan Growth.</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:var(--space-12);">
+        <a href="#" class="btn btn-primary btn-lg" onclick="navigate('demo');return false;">Demander une démo Agences</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : PROMOTEURS ─── -->
+<div class="page" id="page-promoteurs">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Solution Promoteurs</p>
+      <h1 class="page-hero-title">Pilotez vos programmes neufs de A à Z</h1>
+      <p class="page-hero-lead">De la publication des lots à la gestion des réservations, Atlasia Biz offre aux promoteurs un tableau de bord complet pour chaque programme.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="section-header reveal">
+        <p class="section-eyebrow">Fonctionnalités promoteurs</p>
+        <h2 class="section-title">Tout le nécessaire pour vendre le neuf</h2>
+        <p class="section-lead">Gérez plusieurs programmes simultanément, suivez les réservations et collaborez avec vos équipes commerciales en temps réel.</p>
+      </div>
+      <div class="features-grid">
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+          <h3 class="card-title">Gestion des programmes</h3>
+          <p class="card-body">Créez une page dédiée pour chaque programme neuf : plans, photos, descriptif, lots disponibles, avancement du chantier et date de livraison.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+          <h3 class="card-title">Réservations & contrats</h3>
+          <p class="card-body">Gérez les réservations de lots, les avances sur prix et les étapes contractuelles. Tableaux de bord par programme et par lot.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+          <h3 class="card-title">Confiance acheteurs</h3>
+          <p class="card-body">Documentation du promoteur vérifiée, suivi d'avancement de chantier publié et badge de confiance Atlasia pour rassurer les acquéreurs.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></div>
+          <h3 class="card-title">Financement intégré</h3>
+          <p class="card-body">Orientez vos acheteurs vers les offres de financement partenaires directement depuis votre espace. Simulations de crédit en un clic.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+          <h3 class="card-title">Communication prospects</h3>
+          <p class="card-body">Newsletters ciblées, alertes de disponibilité et relances automatisées pour maintenir l'engagement tout au long du cycle de vente neuf.</p>
+        </div>
+        <div class="card reveal">
+          <div class="card-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M3 3h18v18H3z"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></div>
+          <h3 class="card-title">Reporting multi-programmes</h3>
+          <p class="card-body">Vue consolidée sur tous vos programmes : taux de commercialisation, revenus prévisionnels, volume de contacts et rendez-vous réalisés.</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:var(--space-12);">
+        <a href="#" class="btn btn-primary btn-lg" onclick="navigate('demo');return false;">Demander une démo Promoteurs</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : TARIFS ─── -->
+<div class="page" id="page-tarifs">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Tarification transparente</p>
+      <h1 class="page-hero-title">Des plans adaptés à chaque professionnel</h1>
+      <p class="page-hero-lead">Commencez gratuitement, montez en puissance selon votre croissance. Pas de frais cachés, pas d'engagement annuel obligatoire.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div class="pricing-grid reveal" id="pricing-grid">
+        <!-- STARTER -->
+        <div class="pricing-card">
+          <div class="pricing-plan-name">Pro Starter</div>
+          <div class="pricing-price">990 <span style="font-size:var(--text-base);font-weight:400;">MAD</span></div>
+          <div class="pricing-price-note">/ mois · HT · Engagement mensuel</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Jusqu'à 30 annonces actives</li>
+            <li>CRM jusqu'à 300 contacts</li>
+            <li>Calendrier rendez-vous (1 utilisateur)</li>
+            <li>Badge Pro de base</li>
+            <li>Publication sur atlasia.ma</li>
+            <li>Support email</li>
+          </ul>
+          <a href="#" class="btn btn-outline-primary" style="width:100%;justify-content:center;" onclick="navigate('demo', 'PLAN_PRO_STARTER');return false;">Démarrer avec Starter</a>
+        </div>
+
+        <!-- GROWTH — FEATURED -->
+        <div class="pricing-card pricing-card--featured">
+          <div class="pricing-badge">Le plus populaire</div>
+          <div class="pricing-plan-name">Pro Growth</div>
+          <div class="pricing-price">2 490 <span style="font-size:var(--text-base);font-weight:400;">MAD</span></div>
+          <div class="pricing-price-note">/ mois · HT · Engagement mensuel</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Annonces illimitées</li>
+            <li>CRM illimité (jusqu'à 5 utilisateurs)</li>
+            <li>Agenda partagé multi-utilisateurs</li>
+            <li>Badge Pro Vérifié Premium</li>
+            <li>Boost annonces (×3 visibilité)</li>
+            <li>Analytics & export données</li>
+            <li>Intégrations WhatsApp & email</li>
+            <li>Support prioritaire (réponse &lt; 4h)</li>
+          </ul>
+          <a href="#" class="btn btn-primary" style="width:100%;justify-content:center;" onclick="navigate('demo', 'PLAN_PRO_GROWTH');return false;">Démarrer avec Growth</a>
+        </div>
+
+        <!-- PROMOTEUR -->
+        <div class="pricing-card">
+          <div class="pricing-plan-name">Promoteur</div>
+          <div class="pricing-price">Sur devis</div>
+          <div class="pricing-price-note">Adapté à vos programmes</div>
+          <div class="pricing-divider"></div>
+          <ul class="pricing-features">
+            <li>Programmes neufs illimités</li>
+            <li>Gestion lots & réservations</li>
+            <li>Espace acheteur dédié</li>
+            <li>Reporting multi-programmes</li>
+            <li>Module financement partenaire</li>
+            <li>Intégrations API complètes</li>
+            <li>Account manager dédié</li>
+            <li>SLA garanti 99,9%</li>
+          </ul>
+          <a href="#" class="btn btn-marine" style="width:100%;justify-content:center;" onclick="navigate('demo', 'PLAN_PROMOTER');return false;">Demander un devis</a>
+        </div>
+      </div>
+
+      <!-- ADD-ONS -->
+      <div class="section-header" style="margin-top:var(--space-20);">
+        <p class="section-eyebrow">Extensions disponibles</p>
+        <h2 class="section-title" style="font-size:var(--text-xl);">Boostez votre plan avec des add-ons</h2>
+        <p class="section-lead">Disponibles sur tous les plans, facturés séparément.</p>
+      </div>
+      <div class="addons-grid reveal">
+        <div class="addon-item">
+          <span class="addon-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg></span>
+          Boost visibilité annonces
+          <span class="addon-badge">+290 MAD/mois</span>
+        </div>
+        <div class="addon-item">
+          <span class="addon-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span>
+          Vérification Pro avancée
+          <span class="addon-badge">+190 MAD/mois</span>
+        </div>
+        <div class="addon-item">
+          <span class="addon-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></span>
+          Reporting & export avancé
+          <span class="addon-badge">+390 MAD/mois</span>
+        </div>
+        <div class="addon-item">
+          <span class="addon-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg></span>
+          Intégrations API tierces
+          <span class="addon-badge">+490 MAD/mois</span>
+        </div>
+        <div class="addon-item">
+          <span class="addon-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg></span>
+          Module financement
+          <span class="addon-badge">Bientôt</span>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div class="section-header" style="margin-top:var(--space-20);">
+        <p class="section-eyebrow">FAQ Tarification</p>
+        <h2 class="section-title" style="font-size:var(--text-xl);">Questions fréquentes</h2>
+      </div>
+      <div style="max-width:720px;" class="reveal">
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Puis-je changer de plan à tout moment ?
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <div class="faq-answer">Oui, vous pouvez passer à un plan supérieur ou inférieur à tout moment depuis votre espace Pro. Les changements prennent effet au prochain cycle de facturation.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Y a-t-il un engagement minimum ?
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <div class="faq-answer">Non. Nos plans Pro Starter et Pro Growth sont sans engagement, facturés mensuellement. Le plan Promoteur peut inclure un engagement annuel selon le devis.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            La TVA est-elle incluse dans les prix affichés ?
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <div class="faq-answer">Les prix affichés sont hors taxes (HT). La TVA marocaine applicable s'ajoutera à la facturation selon votre statut.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Comment fonctionne la démo gratuite ?
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <div class="faq-answer">Après soumission de votre demande, notre équipe vous contacte dans les 24h pour organiser une démonstration personnalisée d'environ 30 minutes. Aucune carte bancaire n'est requise.</div>
+        </div>
+        <div class="faq-item">
+          <button class="faq-question" onclick="toggleFaq(this)">
+            Mes données sont-elles sécurisées ?
+            <svg class="faq-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+          <div class="faq-answer">Toutes les données sont hébergées au Maroc, chiffrées en transit et au repos. Nous sommes conformes aux exigences de la CNDP. Vous restez propriétaire de vos données.</div>
+        </div>
+      </div>
+
+      <div style="text-align:center;margin-top:var(--space-12);">
+        <a href="#" class="btn btn-primary btn-lg" onclick="navigate('demo');return false;">Démarrer avec une démo gratuite</a>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : DEMO ─── -->
+<div class="page" id="page-demo">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Demande de démo</p>
+      <h1 class="page-hero-title">Voyez Atlasia Biz en action</h1>
+      <p class="page-hero-lead">Remplissez ce formulaire et notre équipe vous contactera sous 24h pour une démonstration personnalisée.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container--default container">
+      <div class="success-banner" id="demo-success">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        Votre demande a bien été envoyée ! Nous vous contacterons sous 24h.
+      </div>
+      <div class="error-banner" id="demo-error">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Une erreur est survenue. Veuillez réessayer ou nous contacter directement.
+      </div>
+
+      <form id="demo-form" onsubmit="submitDemo(event)" novalidate>
+        <!-- Section : Coordonnées -->
+        <div style="margin-bottom:var(--space-10);">
+          <p class="form-section-title">Vos coordonnées</p>
+          <div class="form-grid form-grid--2">
+            <div class="form-group">
+              <label class="form-label" for="demo-nom">Nom complet <span class="required">*</span></label>
+              <input class="form-input" type="text" id="demo-nom" name="nom" placeholder="Prénom Nom" required autocomplete="name" />
+              <span class="form-error">Champ requis</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="demo-email">Email professionnel <span class="required">*</span></label>
+              <input class="form-input" type="email" id="demo-email" name="email" placeholder="vous@agence.ma" required autocomplete="email" />
+              <span class="form-error">Email invalide</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="demo-tel">Téléphone <span class="required">*</span></label>
+              <input class="form-input" type="tel" id="demo-tel" name="telephone" placeholder="+212 6 XX XX XX XX" required autocomplete="tel" />
+              <span class="form-error">Champ requis</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="demo-ville">Ville principale <span class="required">*</span></label>
+              <select class="form-select" id="demo-ville" name="city" required>
+                <option value="">Sélectionnez une ville</option>
+                <option value="casablanca">Casablanca</option>
+                <option value="rabat">Rabat</option>
+                <option value="tanger">Tanger</option>
+                <option value="marrakech">Marrakech</option>
+                <option value="fes">Fès</option>
+                <option value="agadir">Agadir</option>
+                <option value="meknes">Meknès</option>
+                <option value="oujda">Oujda</option>
+                <option value="tetouan">Tétouan</option>
+                <option value="sale">Salé</option>
+                <option value="autre">Autre</option>
+              </select>
+              <span class="form-error">Champ requis</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section : Profil -->
+        <div style="margin-bottom:var(--space-10);">
+          <p class="form-section-title">Votre profil</p>
+          <div class="form-grid form-grid--2">
+            <div class="form-group">
+              <label class="form-label" for="demo-type">Type d'acteur <span class="required">*</span></label>
+              <select class="form-select" id="demo-type" name="actorType" required>
+                <option value="">Sélectionnez</option>
+                <option value="agence">Agence immobilière</option>
+                <option value="promoteur">Promoteur immobilier</option>
+                <option value="bailleur">Bailleur professionnel</option>
+                <option value="autre">Autre</option>
+              </select>
+              <span class="form-error">Champ requis</span>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="demo-equipe">Taille de l'équipe</label>
+              <select class="form-select" id="demo-equipe" name="teamSize">
+                <option value="">Sélectionnez</option>
+                <option value="solo">Solo (1 personne)</option>
+                <option value="small">Petite (2–5)</option>
+                <option value="medium">Moyenne (6–20)</option>
+                <option value="large">Grande (20+)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="demo-volume">Volume d'annonces / an</label>
+              <select class="form-select" id="demo-volume" name="listingVolume">
+                <option value="">Sélectionnez</option>
+                <option value="lt50">Moins de 50</option>
+                <option value="50_200">50 à 200</option>
+                <option value="200_500">200 à 500</option>
+                <option value="gt500">Plus de 500</option>
+              </select>
+            </div>
+            <div class="form-group" id="plan-souhaite-group" style="display:none;">
+              <label class="form-label" for="demo-plan">Plan souhaité</label>
+              <select class="form-select" id="demo-plan" name="desiredPlanKey">
+                <option value="">Aucune préférence</option>
+                <option value="PLAN_PRO_STARTER">Pro Starter</option>
+                <option value="PLAN_PRO_GROWTH">Pro Growth</option>
+                <option value="PLAN_PROMOTER">Promoteur</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section : Besoins -->
+        <div style="margin-bottom:var(--space-10);">
+          <p class="form-section-title">Vos besoins</p>
+          <div class="form-group">
+            <label class="form-label">Quels sont vos besoins principaux ?</label>
+            <div class="form-checkbox-group" style="margin-top:var(--space-3);">
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="portail" /><span>Portail d'annonces</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="crm" /><span>CRM & Leads</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="rdv" /><span>Gestion RDV</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="trust" /><span>Confiance digitale</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="neuf" /><span>Immobilier neuf</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="location" /><span>Location</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="financement" /><span>Financement</span></label>
+              <label class="form-checkbox-item"><input type="checkbox" name="needs" value="reporting" /><span>Reporting</span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section : Message -->
+        <div style="margin-bottom:var(--space-10);">
+          <p class="form-section-title">Message (optionnel)</p>
+          <div class="form-group">
+            <label class="form-label" for="demo-message">Précisez vos attentes</label>
+            <textarea class="form-textarea" id="demo-message" name="message" placeholder="Décrivez votre situation actuelle, vos enjeux ou vos questions..."></textarea>
+          </div>
+        </div>
+
+        <!-- Consentement -->
+        <div class="highlight-box" style="margin-bottom:var(--space-8);">
+          <label class="form-checkbox-item" style="align-items:flex-start;gap:var(--space-3);">
+            <input type="checkbox" id="demo-consent" name="consent" required style="margin-top:3px;width:16px;height:16px;flex-shrink:0;accent-color:var(--color-primary);" />
+            <span style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.6;">
+              J'accepte d'être contacté par Atlasia dans le cadre de ma demande de démonstration. Mes données sont traitées conformément à la 
+              <a href="#" onclick="navigate('confidentialite');return false;" style="color:var(--color-primary);text-decoration:underline;">politique de confidentialité</a>. <span class="required">*</span>
+            </span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-lg" id="demo-submit" style="width:100%;justify-content:center;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          Envoyer ma demande de démo
+        </button>
+        <p style="text-align:center;font-size:var(--text-xs);color:var(--color-text-faint);margin-top:var(--space-3);">Réponse garantie sous 24h · Aucun engagement</p>
+      </form>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : CONTACT ─── -->
+<div class="page" id="page-contact">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Contact</p>
+      <h1 class="page-hero-title">Parlons de votre projet</h1>
+      <p class="page-hero-lead">Une question, un partenariat ou un besoin spécifique ? Notre équipe est disponible pour vous répondre.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:var(--space-16);align-items:start;">
+        <div class="reveal">
+          <h2 class="section-title" style="font-size:var(--text-xl);">Nous joindre</h2>
+          <div style="display:flex;flex-direction:column;gap:var(--space-6);margin-top:var(--space-8);">
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">Email</div>
+                <a href="mailto:biz@atlasia.ma" style="color:var(--color-primary);font-size:var(--text-sm);text-decoration:none;">biz@atlasia.ma</a>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.6 2.24h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.06 6.06l1.75-1.75a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">Téléphone</div>
+                <a href="tel:+212522000000" style="color:var(--color-primary);font-size:var(--text-sm);text-decoration:none;">+212 5 22 00 00 00</a>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:var(--space-4);">
+              <div style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--color-primary-highlight);display:flex;align-items:center;justify-content:center;color:var(--color-primary);flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div>
+                <div style="font-weight:600;font-size:var(--text-sm);margin-bottom:var(--space-1);">Siège social</div>
+                <span style="color:var(--color-text-muted);font-size:var(--text-sm);">Casablanca, Maroc</span>
+              </div>
+            </div>
+          </div>
+          <div class="highlight-box" style="margin-top:var(--space-8);">
+            <p style="font-size:var(--text-sm);color:var(--color-text-muted);max-width:none;">Vous souhaitez une démonstration personnalisée ? <a href="#" onclick="navigate('demo');return false;" style="color:var(--color-primary);font-weight:600;">Remplissez le formulaire de démo →</a></p>
+          </div>
+        </div>
+
+        <div class="reveal">
+          <form id="contact-form" onsubmit="submitContact(event)" novalidate>
+            <div class="success-banner" id="contact-success">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Message envoyé ! Nous vous répondrons rapidement.
+            </div>
+            <div class="form-grid" style="gap:var(--space-5);">
+              <div class="form-group">
+                <label class="form-label" for="contact-nom">Nom <span class="required">*</span></label>
+                <input class="form-input" type="text" id="contact-nom" required autocomplete="name" placeholder="Prénom Nom" />
+                <span class="form-error">Champ requis</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-email">Email <span class="required">*</span></label>
+                <input class="form-input" type="email" id="contact-email" required autocomplete="email" placeholder="vous@exemple.ma" />
+                <span class="form-error">Email invalide</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-sujet">Sujet <span class="required">*</span></label>
+                <select class="form-select" id="contact-sujet" required>
+                  <option value="">Sélectionnez</option>
+                  <option value="demo">Demande de démo</option>
+                  <option value="tarifs">Question tarification</option>
+                  <option value="partenariat">Partenariat</option>
+                  <option value="support">Support technique</option>
+                  <option value="autre">Autre</option>
+                </select>
+                <span class="form-error">Champ requis</span>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="contact-message">Message <span class="required">*</span></label>
+                <textarea class="form-textarea" id="contact-message" required placeholder="Votre message..." style="min-height:130px;"></textarea>
+                <span class="form-error">Champ requis</span>
+              </div>
+              <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Envoyer le message</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : MENTIONS LÉGALES ─── -->
+<div class="page" id="page-mentions">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Informations légales</p>
+      <h1 class="page-hero-title">Mentions légales</h1>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container--narrow container">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8);">
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">Éditeur du site</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">
+            Atlasia Technologies SARL<br/>
+            Siège social : Casablanca, Maroc<br/>
+            Numéro RC : [à compléter]<br/>
+            ICE : [à compléter]<br/>
+            Email : <a href="mailto:biz@atlasia.ma" style="color:var(--color-primary);">biz@atlasia.ma</a>
+          </p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">Hébergement</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Ce site est hébergé sur des serveurs situés au Maroc. Les données sont traitées conformément à la législation marocaine en vigueur.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">Propriété intellectuelle</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">L'ensemble du contenu de ce site (textes, images, logo, architecture) est la propriété exclusive d'Atlasia Technologies SARL. Toute reproduction non autorisée est interdite.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">Limitation de responsabilité</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Atlasia s'efforce de maintenir les informations publiées à jour mais ne saurait être tenue responsable des inexactitudes ou omissions. Les informations tarifaires sont susceptibles d'évoluer.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- ─── PAGE : CONFIDENTIALITÉ ─── -->
+<div class="page" id="page-confidentialite">
+  <section class="page-hero">
+    <div class="container page-hero-content">
+      <p class="page-hero-eyebrow">Données personnelles</p>
+      <h1 class="page-hero-title">Politique de confidentialité</h1>
+      <p class="page-hero-lead">Dernière mise à jour : Avril 2026</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container--narrow container">
+      <div style="display:flex;flex-direction:column;gap:var(--space-8);">
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">1. Données collectées</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Dans le cadre de la demande de démo et du formulaire de contact, nous collectons : nom, email professionnel, numéro de téléphone, ville, type d'activité, taille d'équipe et besoins fonctionnels.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">2. Finalités du traitement</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Vos données sont utilisées exclusivement pour : (a) vous recontacter suite à votre demande de démo B2B, (b) vous qualifier en tant que prospect professionnel, (c) alimenter notre CRM interne avec le statut <code style="background:var(--color-surface-offset);padding:1px 6px;border-radius:4px;font-size:11px;">B2B_NEW</code>.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">3. Base légale</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Le traitement repose sur votre consentement explicite recueilli lors de la soumission du formulaire, conformément à la loi marocaine 09-08 relative à la protection des personnes physiques à l'égard du traitement des données à caractère personnel.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">4. Conservation</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Vos données sont conservées pendant 3 ans à compter du dernier contact. Passé ce délai, elles sont supprimées automatiquement sauf obligation légale contraire.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">5. Vos droits</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Vous disposez des droits d'accès, de rectification, d'effacement et d'opposition. Pour exercer ces droits, contactez : <a href="mailto:privacy@atlasia.ma" style="color:var(--color-primary);">privacy@atlasia.ma</a>. Vous pouvez également introduire une réclamation auprès de la CNDP.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">6. Sécurité</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Toutes les transmissions sont chiffrées (TLS 1.3). Les données au repos sont chiffrées avec AES-256. Accès aux données restreint par rôle et journalisé.</p>
+        </div>
+        <div>
+          <h2 style="font-family:var(--font-display);font-size:var(--text-lg);margin-bottom:var(--space-3);">7. Cookies</h2>
+          <p style="font-size:var(--text-sm);color:var(--color-text-muted);line-height:1.8;">Ce site utilise des cookies de mesure d'audience anonymisés (tracking events Biz). Aucun cookie publicitaire tiers n'est déposé. Vous pouvez désactiver les cookies depuis les paramètres de votre navigateur.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+</main><!-- /#app -->
+
+<!-- ═══════════════════════════════════════════════════
+     FOOTER
+═══════════════════════════════════════════════════ -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <!-- Brand -->
+      <div>
+        <a href="#" class="header-logo" onclick="navigate('home');return false;" style="color:white;">
+          <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#0d2c4a"/>
+            <path d="M16 6 L26 16 L16 26 L6 16 Z" fill="none" stroke="#b5622e" stroke-width="1.5"/>
+            <path d="M16 10 L22 16 L16 22 L10 16 Z" fill="#b5622e" opacity="0.3"/>
+            <circle cx="16" cy="16" r="2.5" fill="#b5622e"/>
+          </svg>
+          <span>atlasia<em style="color:var(--color-primary);font-style:italic;"> biz</em></span>
+        </a>
+        <p class="footer-brand-desc">La plateforme digitale des professionnels de l'immobilier marocain.</p>
+        <div style="margin-top:var(--space-5);">
+          <a href="https://atlasia.ma" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:var(--space-2);font-size:var(--text-xs);color:rgba(255,255,255,0.5);text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Portail annonces atlasia.ma →
+          </a>
+        </div>
+      </div>
+
+      <!-- Solutions -->
+      <div>
+        <p class="footer-col-title">Solutions</p>
+        <ul class="footer-links">
+          <li><a href="#" onclick="navigate('agences');return false;">Agences immobilières</a></li>
+          <li><a href="#" onclick="navigate('promoteurs');return false;">Promoteurs</a></li>
+          <li><a href="#" onclick="navigate('tarifs');return false;">Tarifs</a></li>
+          <li><a href="https://pro.atlasia.ma" target="_blank" rel="noopener noreferrer">Espace Pro</a></li>
+        </ul>
+      </div>
+
+      <!-- Entreprise -->
+      <div>
+        <p class="footer-col-title">Entreprise</p>
+        <ul class="footer-links">
+          <li><a href="#" onclick="navigate('contact');return false;">Contact</a></li>
+          <li><a href="#" onclick="navigate('demo');return false;">Demander une démo</a></li>
+        </ul>
+      </div>
+
+      <!-- Légal -->
+      <div>
+        <p class="footer-col-title">Légal</p>
+        <ul class="footer-links">
+          <li><a href="#" onclick="navigate('mentions');return false;">Mentions légales</a></li>
+          <li><a href="#" onclick="navigate('confidentialite');return false;">Confidentialité</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 Atlasia Technologies SARL — Maroc</span>
+      <span>Tous droits réservés</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ═══════════════════════════════════════════════════
+     JS — Router + Interactions
+═══════════════════════════════════════════════════ -->
+<script>
+// ─── THEME TOGGLE ───
+(function () {
+  const t = document.querySelector('[data-theme-toggle]');
+  const r = document.documentElement;
+  let d = matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light';
+  r.setAttribute('data-theme', d);
+  updateToggleIcon(t, d);
+  t && t.addEventListener('click', () => {
+    d = d === 'dark' ? 'light' : 'dark';
+    r.setAttribute('data-theme', d);
+    t.setAttribute('aria-label', 'Switch to ' + (d === 'dark' ? 'light' : 'dark') + ' mode');
+    updateToggleIcon(t, d);
+  });
+  function updateToggleIcon(btn, theme) {
+    if (!btn) return;
+    btn.innerHTML = theme === 'dark'
+      ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>'
+      : '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+  }
+})();
+
+// ─── MOBILE MENU ───
+const mobileBtn = document.getElementById('mobile-menu-btn');
+const mobileNav = document.getElementById('mobile-nav');
+mobileBtn && mobileBtn.addEventListener('click', () => {
+  mobileNav.classList.toggle('open');
+});
+function closeMobileMenu() { mobileNav && mobileNav.classList.remove('open'); }
+
+// ─── SPA ROUTER ───
+function navigate(page, plan) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show target
+  const target = document.getElementById('page-' + page);
+  if (target) {
+    target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  // Update nav active state
+  document.querySelectorAll('.nav-links a, .mobile-nav a').forEach(a => {
+    a.classList.remove('active');
+    if (a.dataset.page === page) a.classList.add('active');
+  });
+  // Plan presélection
+  if (page === 'demo' && plan) {
+    const planSelect = document.getElementById('demo-plan');
+    const planGroup = document.getElementById('plan-souhaite-group');
+    if (planSelect) planSelect.value = plan;
+    if (planGroup) planGroup.style.display = 'block';
+  }
+  // Trigger reveals
+  setTimeout(initReveals, 100);
+}
+
+// ─── SCROLL HEADER ───
+const header = document.getElementById('site-header');
+window.addEventListener('scroll', () => {
+  if (window.scrollY > 30) header.classList.add('site-header--scrolled');
+  else header.classList.remove('site-header--scrolled');
+}, { passive: true });
+
+// ─── REVEAL ON SCROLL ───
+function initReveals() {
+  const els = document.querySelectorAll('.page.active .reveal:not(.visible)');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  els.forEach(el => observer.observe(el));
+}
+initReveals();
+
+// ─── FAQ ───
+function toggleFaq(btn) {
+  const item = btn.closest('.faq-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.faq-item.open').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// ─── FORM VALIDATION HELPERS ───
+function validateField(input) {
+  if (input.hasAttribute('required') && !input.value.trim()) {
+    input.classList.add('error');
+    return false;
+  }
+  if (input.type === 'email' && input.value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
+    input.classList.add('error');
+    return false;
+  }
+  input.classList.remove('error');
+  return true;
+}
+
+// ─── DEMO FORM ───
+function submitDemo(e) {
+  e.preventDefault();
+  const form = document.getElementById('demo-form');
+  const fields = form.querySelectorAll('input[required], select[required], textarea[required]');
+  let valid = true;
+  fields.forEach(f => { if (!validateField(f)) valid = false; });
+  const consent = document.getElementById('demo-consent');
+  if (!consent.checked) { valid = false; }
+
+  if (!valid) return;
+
+  // Collect data
+  const needs = Array.from(form.querySelectorAll('input[name="needs"]:checked')).map(c => c.value);
+  const payload = {
+    case_type_code: 'CRM_LEAD_B2B_DEMO',
+    status: 'B2B_NEW',
+    source: 'LEAD_SOURCE_BIZ_DEMO_FORM',
+    data: {
+      nom: document.getElementById('demo-nom').value,
+      email: document.getElementById('demo-email').value,
+      telephone: document.getElementById('demo-tel').value,
+      actorType: document.getElementById('demo-type').value,
+      city: document.getElementById('demo-ville').value,
+      teamSize: document.getElementById('demo-equipe').value,
+      listingVolume: document.getElementById('demo-volume').value,
+      desiredPlanKey: document.getElementById('demo-plan').value || null,
+      needs: needs,
+      message: document.getElementById('demo-message').value,
+      consent: true
+    }
+  };
+
+  // Simulate submission (tracking events)
+  trackEvent('biz_demo_submitted', payload.data);
+
+  // Show success
+  form.style.display = 'none';
+  document.getElementById('demo-success').classList.add('visible');
+
+  console.log('[ATLASIA BIZ] Demo form payload:', JSON.stringify(payload, null, 2));
+}
+
+// ─── CONTACT FORM ───
+function submitContact(e) {
+  e.preventDefault();
+  const form = document.getElementById('contact-form');
+  const fields = form.querySelectorAll('input[required], select[required], textarea[required]');
+  let valid = true;
+  fields.forEach(f => { if (!validateField(f)) valid = false; });
+  if (!valid) return;
+  form.style.display = 'none';
+  document.getElementById('contact-success').classList.add('visible');
+}
+
+// ─── TRACKING ───
+function trackEvent(name, data) {
+  console.log('[ATLASIA BIZ TRACK]', name, data);
+  // Replace with real analytics SDK call
+  if (typeof window.atlasiaTrack === 'function') {
+    window.atlasiaTrack(name, data);
+  }
+}
+
+// Track page views
+const origNavigate = navigate;
+window.navigate = function(page, plan) {
+  origNavigate(page, plan);
+  if (page === 'tarifs') trackEvent('biz_pricing_viewed', {});
+  if (page === 'demo') trackEvent('biz_demo_viewed', {});
+};
+
+// Track pricing CTA clicks
+document.querySelectorAll('[onclick*="navigate(\'demo\'"]').forEach(btn => {
+  const match = btn.getAttribute('onclick').match(/navigate\('demo',\s*'([^']+)'\)/);
+  if (match) {
+    btn.addEventListener('click', () => {
+      trackEvent('biz_pricing_plan_selected', { plan: match[1] });
+      trackEvent('biz_pricing_cta_clicked', { plan: match[1] });
+    });
+  }
+});
+
+// Init
+window.navigate = window.navigate || navigate;
+</script>
+<script data-pplx-inline-edit>
+(function(){
+  if(window===window.top)return;
+  function inlineAll(orig,clone){
+    if(orig.nodeType!==1)return;
+    try{
+      var cs=getComputedStyle(orig);
+      var t='';
+      for(var i=0;i<cs.length;i++){t+=cs[i]+':'+cs.getPropertyValue(cs[i])+';';}
+      clone.style.cssText=t;
+    }catch(e){}
+    var oc=orig.children,cc=clone.children;
+    for(var j=0;j<oc.length&&j<cc.length;j++){inlineAll(oc[j],cc[j]);}
+  }
+  function stripExternal(clone){
+    var imgs=clone.querySelectorAll('img');
+    for(var i=0;i<imgs.length;i++){
+      var s=imgs[i].getAttribute('src');
+      if(s&&!s.startsWith('data:'))imgs[i].removeAttribute('src');
+    }
+    var all=clone.querySelectorAll('*');
+    for(var i=0;i<all.length;i++){
+      var st=all[i].style.cssText;
+      if(st&&st.indexOf('url(')>=0){
+        all[i].style.cssText=st.replace(/url\(["']?(?!data:)[^)"']*["']?\)/gi,'none');
+      }
+    }
+  }
+  window.addEventListener('message',function(e){
+    if(!e.data||e.data.type!=='INLINE_EDIT_CAPTURE_REQUEST')return;
+    var scrollX=window.scrollX||window.pageXOffset||0;
+    var scrollY=window.scrollY||window.pageYOffset||0;
+    var w=window.innerWidth,h=window.innerHeight;
+    try{
+      var clone=document.documentElement.cloneNode(true);
+      var rm=clone.querySelectorAll('script,link[rel="stylesheet"],style');
+      for(var i=0;i<rm.length;i++){rm[i].remove();}
+      inlineAll(document.documentElement,clone);
+      stripExternal(clone);
+      var html=new XMLSerializer().serializeToString(clone);
+      var svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+w+'" height="'+h+'">'
+        +'<foreignObject width="100%" height="100%">'
+        +'<div xmlns="http://www.w3.org/1999/xhtml" style="width:'+w+'px;height:'+h+'px;overflow:hidden">'
+        +'<div style="transform:translate(-'+scrollX+'px,-'+scrollY+'px);transform-origin:top left">'
+        +html+'</div></div></foreignObject></svg>';
+      var svgUrl='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+      var img=new Image();
+      img.onload=function(){
+        var c=document.createElement('canvas');c.width=w;c.height=h;
+        c.getContext('2d').drawImage(img,0,0);
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:c.toDataURL('image/png'),scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.onerror=function(){
+        window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+      };
+      img.src=svgUrl;
+    }catch(err){
+      window.parent.postMessage({type:'INLINE_EDIT_SCREENSHOT_RESULT',dataUrl:null,scrollX:scrollX,scrollY:scrollY},'*');
+    }
+  });
+})();
+</script></body>
+</html>

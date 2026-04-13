@@ -1,0 +1,17 @@
+/* Toggle */
+.tf-toggle-wrap { display: flex; align-items: center; gap: var(--at-space-3); justify-content: center; font-size: var(--at-text-sm); color: var(--at-color-text-muted); }
+.tf-toggle-wrap span.active { color: var(--at-color-text); font-weight: 600; }
+.tf-toggle {
+  width: 44px; height: 24px; border-radius: var(--at-radius-full);
+  background: var(--at-color-border); border: none; cursor: pointer; position: relative;
+  transition: background var(--at-transition-fast);
+}
+.tf-toggle.on { background: var(--at-color-primary); }
+.tf-toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px; border-radius: var(--at-radius-full);
+  background: white; transition: transform var(--at-transition-fast);
+  box-shadow: var(--at-shadow-xs);
+}
+.tf-toggle.on .tf-toggle-thumb { transform: translateX(20px); }
+.tf-save { background: var(--at-color-success-highlight); color: var(--at-color-success); font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: var(--at-radius-full); margin-left: var(--at-space-1); }

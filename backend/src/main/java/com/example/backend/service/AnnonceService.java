@@ -370,7 +370,7 @@ public class AnnonceService {
     @Transactional(readOnly = true)
     public Page<Annonce> findAll(
             AnnonceStatus status, String q, String city, String type, Pageable pageable) {
-        Specification<Annonce> spec = Specification.where(null);
+        Specification<Annonce> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
             spec =

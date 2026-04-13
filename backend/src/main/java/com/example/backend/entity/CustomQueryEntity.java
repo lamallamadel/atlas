@@ -1,11 +1,11 @@
 package com.example.backend.entity;
 
-import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import java.util.List;
 import java.util.Map;
 import org.hibernate.annotations.Filter;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
@@ -28,7 +28,7 @@ public class CustomQueryEntity extends BaseEntity {
     @Column(name = "sql_query", nullable = false, columnDefinition = "TEXT")
     private String sqlQuery;
 
-    @Type(JsonType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "parameters", columnDefinition = "jsonb")
     private List<Map<String, Object>> parameters;
 

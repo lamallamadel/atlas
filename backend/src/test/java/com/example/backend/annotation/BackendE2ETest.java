@@ -9,7 +9,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import org.junit.jupiter.api.Tag;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -26,3 +26,4 @@ import org.springframework.transaction.annotation.Transactional;
 @Import({TestSecurityConfig.class})
 @TestExecutionListeners(listeners = TestExecutionLogger.class, mergeMode = MERGE_WITH_DEFAULTS)
 public @interface BackendE2ETest {}
+

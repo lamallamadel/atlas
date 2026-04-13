@@ -26,10 +26,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MvcResult;
 
 @BackendE2ETest
@@ -43,7 +43,7 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
 
     @Autowired private NotificationService notificationService;
 
-    @MockBean private JavaMailSender mailSender;
+    @MockitoBean private JavaMailSender mailSender;
 
     @Autowired private BackendE2ETestDataBuilder testDataBuilder;
 

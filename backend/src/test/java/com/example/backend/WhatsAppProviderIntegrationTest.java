@@ -19,11 +19,11 @@ import java.util.*;
 import org.hibernate.Session;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.*;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
@@ -52,7 +52,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean(name = "restTemplate")
+    @MockitoBean(name = "restTemplate")
     private RestTemplate restTemplate;
 
     @PersistenceContext private EntityManager entityManager;

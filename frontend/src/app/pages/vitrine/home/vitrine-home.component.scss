@@ -1,0 +1,161 @@
+/* ─── HERO ─── */
+.vz-hero {
+  background: #0d2c4a;
+  padding-block: clamp(4rem, 10vw, 7rem);
+  position: relative;
+  overflow: hidden;
+  color: white;
+}
+
+.vz-hero-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 65% 35%, oklch(0.5 0.08 220 / 0.3) 0%, transparent 60%),
+    radial-gradient(ellipse at 15% 75%, oklch(0.4 0.06 40 / 0.2) 0%, transparent 50%),
+    linear-gradient(oklch(1 0 0 / 0.025) 1px, transparent 1px)  0 0/48px 48px,
+    linear-gradient(90deg, oklch(1 0 0 / 0.025) 1px, transparent 1px) 0 0/48px 48px;
+}
+
+.vz-hero-content { position: relative; z-index: 2; }
+
+.vz-hero-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--at-space-2);
+  font-size: var(--at-text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--at-color-primary);
+  background: oklch(1 0 0 / 0.06);
+  padding: var(--at-space-2) var(--at-space-4);
+  border-radius: var(--at-radius-full);
+  border: 1px solid oklch(1 0 0 / 0.1);
+  margin-bottom: var(--at-space-6);
+}
+
+.vz-hero-title {
+  font-family: var(--at-font-display);
+  font-size: var(--at-text-3xl);
+  font-weight: 700;
+  color: white;
+  line-height: 1.1;
+  margin-bottom: var(--at-space-6);
+  max-width: 20ch;
+}
+
+.vz-hero-title em {
+  font-style: italic;
+  color: var(--at-color-primary);
+}
+
+.vz-hero-lead {
+  font-size: var(--at-text-lg);
+  color: oklch(1 0 0 / 0.65);
+  max-width: 50ch;
+  line-height: 1.7;
+  margin-bottom: var(--at-space-8);
+}
+
+.vz-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--at-space-4);
+  align-items: center;
+  margin-bottom: var(--at-space-4);
+}
+
+.vz-hero-note {
+  font-size: var(--at-text-xs);
+  color: oklch(1 0 0 / 0.35);
+  margin-bottom: var(--at-space-12);
+}
+
+.vz-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--at-space-8);
+  padding-top: var(--at-space-8);
+  border-top: 1px solid oklch(1 0 0 / 0.1);
+}
+
+.vz-stat-value {
+  font-family: var(--at-font-display);
+  font-size: var(--at-text-2xl);
+  font-weight: 700;
+  color: white;
+  line-height: 1;
+}
+
+.vz-stat-label {
+  font-size: var(--at-text-xs);
+  color: oklch(1 0 0 / 0.5);
+  margin-top: var(--at-space-1);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+/* ─── PROFILES ─── */
+.vz-profiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--at-space-6);
+}
+
+.vz-profile-card {
+  display: block;
+  background: var(--at-color-surface);
+  border: 1.5px solid var(--at-color-border);
+  border-radius: var(--at-radius-xl);
+  padding: var(--at-space-8);
+  text-decoration: none;
+  transition: all var(--at-transition-med);
+  cursor: pointer;
+}
+
+.vz-profile-card:hover {
+  border-color: var(--at-color-primary-highlight);
+  box-shadow: var(--at-shadow-md);
+  transform: translateY(-2px);
+}
+
+.vz-profile-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--at-radius-lg);
+  background: var(--at-color-marine);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin-bottom: var(--at-space-5);
+}
+
+.vz-profile-card h3 {
+  font-family: var(--at-font-display);
+  font-size: var(--at-text-lg);
+  font-weight: 700;
+  color: var(--at-color-text);
+  margin-bottom: var(--at-space-3);
+}
+
+.vz-profile-card p {
+  font-size: var(--at-text-sm);
+  color: var(--at-color-text-muted);
+  line-height: 1.7;
+  margin-bottom: var(--at-space-5);
+  max-width: none;
+}
+
+.vz-profile-link {
+  font-size: var(--at-text-sm);
+  font-weight: 600;
+  color: var(--at-color-primary);
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 600px) {
+  .vz-hero-actions { flex-direction: column; align-items: flex-start; }
+  .vz-stats { gap: var(--at-space-6); }
+}

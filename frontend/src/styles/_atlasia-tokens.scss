@@ -1,0 +1,165 @@
+/* ============================================================
+   ATLASIA — Design Tokens partagés
+   Portail B2C · Vitrine B2B · Espace Pro
+   Palette : Marine profond + Accent cuivré
+   Typo : Playfair Display (display) + Plus Jakarta Sans (body)
+   ============================================================ */
+
+/* ─── GOOGLE FONTS ─── */
+/* Importé depuis index.html pour le préchargement */
+
+:root,
+[data-theme='light'] {
+
+  /* ─── TYPE SCALE (clamp responsive) ─── */
+  --at-text-xs:   clamp(0.75rem,  0.7rem  + 0.2vw,  0.875rem);
+  --at-text-sm:   clamp(0.875rem, 0.82rem + 0.25vw, 1rem);
+  --at-text-base: clamp(1rem,     0.95rem + 0.2vw,  1.0625rem);
+  --at-text-lg:   clamp(1.125rem, 1rem    + 0.5vw,  1.375rem);
+  --at-text-xl:   clamp(1.375rem, 1.1rem  + 1vw,    2rem);
+  --at-text-2xl:  clamp(1.75rem,  1.2rem  + 2vw,    3rem);
+  --at-text-3xl:  clamp(2.25rem,  1rem    + 3.5vw,  4.5rem);
+
+  /* ─── SPACING ─── */
+  --at-space-1:  0.25rem;   /* 4px  */
+  --at-space-2:  0.5rem;    /* 8px  */
+  --at-space-3:  0.75rem;   /* 12px */
+  --at-space-4:  1rem;      /* 16px */
+  --at-space-5:  1.25rem;   /* 20px */
+  --at-space-6:  1.5rem;    /* 24px */
+  --at-space-8:  2rem;      /* 32px */
+  --at-space-10: 2.5rem;    /* 40px */
+  --at-space-12: 3rem;      /* 48px */
+  --at-space-16: 4rem;      /* 64px */
+  --at-space-20: 5rem;      /* 80px */
+  --at-space-24: 6rem;      /* 96px */
+  --at-space-32: 8rem;      /* 128px */
+
+  /* ─── FONTS ─── */
+  --at-font-display: 'Playfair Display', Georgia, serif;
+  --at-font-body:    'Plus Jakarta Sans', 'Helvetica Neue', sans-serif;
+
+  /* ─── PALETTE LIGHT ─── */
+
+  /* Surfaces */
+  --at-color-bg:              #f8f7f4;
+  --at-color-surface:         #ffffff;
+  --at-color-surface-2:       #faf9f7;
+  --at-color-surface-offset:  #f2f0eb;
+  --at-color-surface-dynamic: #e8e5de;
+  --at-color-divider:         #e0ddd6;
+  --at-color-border:          #d4d0c8;
+
+  /* Texte */
+  --at-color-text:         #18160f;
+  --at-color-text-muted:   #605c52;
+  --at-color-text-faint:   #a8a49a;
+  --at-color-text-inverse: #ffffff;
+
+  /* Accent cuivré (primaire) */
+  --at-color-primary:           #b5622e;
+  --at-color-primary-hover:     #944e22;
+  --at-color-primary-active:    #6e3917;
+  --at-color-primary-highlight: #f2e0d5;
+  --at-color-primary-subtle:    #faf3ee;
+
+  /* Marine profond (secondaire fort) */
+  --at-color-marine:            #0d2c4a;
+  --at-color-marine-light:      #1a4472;
+  --at-color-marine-hover:      #07203a;
+  --at-color-marine-highlight:  #dce8f2;
+
+  /* Sémantique */
+  --at-color-success:           #2e7d32;
+  --at-color-success-highlight: #e8f5e9;
+  --at-color-error:             #c62828;
+  --at-color-error-highlight:   #ffebee;
+  --at-color-warning:           #e65100;
+  --at-color-warning-highlight: #fff3e0;
+
+  /* ─── SHADOWS ─── */
+  --at-shadow-xs: 0 1px 2px oklch(0.15 0.02 60 / 0.05);
+  --at-shadow-sm: 0 2px 6px  oklch(0.15 0.02 60 / 0.07);
+  --at-shadow-md: 0 4px 16px oklch(0.15 0.02 60 / 0.10);
+  --at-shadow-lg: 0 12px 36px oklch(0.15 0.02 60 / 0.14);
+  --at-shadow-xl: 0 20px 60px oklch(0.15 0.02 60 / 0.18);
+
+  /* ─── RADIUS ─── */
+  --at-radius-sm:   0.375rem;
+  --at-radius-md:   0.5rem;
+  --at-radius-lg:   0.75rem;
+  --at-radius-xl:   1rem;
+  --at-radius-2xl:  1.5rem;
+  --at-radius-full: 9999px;
+
+  /* ─── TRANSITIONS ─── */
+  --at-transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --at-transition-med:  250ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ─── CONTENT WIDTHS ─── */
+  --at-content-narrow:  640px;
+  --at-content-default: 960px;
+  --at-content-wide:    1200px;
+  --at-content-full:    1400px;
+}
+
+/* ─── DARK MODE ─── */
+[data-theme='dark'] {
+  --at-color-bg:              #100f0d;
+  --at-color-surface:         #161512;
+  --at-color-surface-2:       #1c1b18;
+  --at-color-surface-offset:  #201f1c;
+  --at-color-surface-dynamic: #2a2925;
+  --at-color-divider:         #282622;
+  --at-color-border:          #363330;
+
+  --at-color-text:         #e4e0d8;
+  --at-color-text-muted:   #7a7670;
+  --at-color-text-faint:   #4a4742;
+  --at-color-text-inverse: #1c1b18;
+
+  --at-color-primary:           #d4804c;
+  --at-color-primary-hover:     #c06030;
+  --at-color-primary-active:    #a84820;
+  --at-color-primary-highlight: #3d2618;
+  --at-color-primary-subtle:    #281a10;
+
+  --at-color-marine:            #4a8fc4;
+  --at-color-marine-light:      #6aaad8;
+  --at-color-marine-hover:      #3a7bb5;
+  --at-color-marine-highlight:  #1a2d3e;
+
+  --at-color-success:           #66bb6a;
+  --at-color-success-highlight: #1b3a1e;
+  --at-color-error:             #ef5350;
+  --at-color-error-highlight:   #3a1414;
+  --at-color-warning:           #ff7043;
+  --at-color-warning-highlight: #3a1e0a;
+
+  --at-shadow-xs: 0 1px 2px oklch(0 0 0 / 0.15);
+  --at-shadow-sm: 0 2px 6px  oklch(0 0 0 / 0.22);
+  --at-shadow-md: 0 4px 16px oklch(0 0 0 / 0.30);
+  --at-shadow-lg: 0 12px 36px oklch(0 0 0 / 0.40);
+  --at-shadow-xl: 0 20px 60px oklch(0 0 0 / 0.50);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --at-color-bg: #100f0d;
+    --at-color-surface: #161512;
+    --at-color-surface-2: #1c1b18;
+    --at-color-surface-offset: #201f1c;
+    --at-color-surface-dynamic: #2a2925;
+    --at-color-divider: #282622;
+    --at-color-border: #363330;
+    --at-color-text: #e4e0d8;
+    --at-color-text-muted: #7a7670;
+    --at-color-text-faint: #4a4742;
+    --at-color-primary: #d4804c;
+    --at-color-primary-hover: #c06030;
+    --at-color-primary-highlight: #3d2618;
+    --at-color-primary-subtle: #281a10;
+    --at-color-marine: #4a8fc4;
+    --at-color-marine-highlight: #1a2d3e;
+  }
+}

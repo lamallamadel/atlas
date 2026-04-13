@@ -7,7 +7,7 @@ export interface TourStep {
   text: string;
   attachTo?: {
     element: string;
-    on: Shepherd.Step.PopperPlacement;
+    on: 'auto' | 'auto-start' | 'auto-end' | 'top' | 'top-start' | 'top-end' | 'bottom' | 'bottom-start' | 'bottom-end' | 'right' | 'right-start' | 'right-end' | 'left' | 'left-start' | 'left-end';
   };
   buttons?: any[]; // Use any[] to avoid strict type checking
   when?: {

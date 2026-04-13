@@ -19,10 +19,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @BackendE2ETest
 @ActiveProfiles({"backend-e2e", "backend-e2e-h2"})
@@ -44,7 +44,7 @@ class WhatsAppErrorCodeIntegrationTest extends BaseBackendE2ETest {
 
     @Autowired private WhatsAppErrorMapper errorMapper;
 
-    @MockBean(name = "whatsAppCloudApiProvider")
+    @MockitoBean(name = "whatsAppCloudApiProvider")
     private OutboundMessageProvider mockWhatsAppProvider;
 
     @BeforeEach

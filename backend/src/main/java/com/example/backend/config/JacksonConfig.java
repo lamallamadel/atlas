@@ -21,8 +21,9 @@ public class JacksonConfig {
 
     @Bean
     @Primary
-    public ObjectMapper objectMapper(Jackson2ObjectMapperBuilder builder) {
-        ObjectMapper objectMapper = builder.createXmlMapper(false).build();
+    public ObjectMapper objectMapper() {
+        ObjectMapper objectMapper =
+                Jackson2ObjectMapperBuilder.json().createXmlMapper(false).build();
 
         // Register JavaTimeModule for Java 8 date/time types
         objectMapper.registerModule(new JavaTimeModule());

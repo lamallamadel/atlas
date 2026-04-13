@@ -23,8 +23,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest
@@ -40,7 +40,7 @@ class DossierServiceOffMarketTest {
 
     @Autowired private AnnonceRepository annonceRepository;
 
-    @MockBean private BrainClientService brainClientService;
+    @MockitoBean private BrainClientService brainClientService;
 
     @BeforeEach
     void setUp() {

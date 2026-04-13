@@ -23,8 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -32,18 +31,19 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(
         controllers = AnnonceController.class,
         excludeAutoConfiguration = {
-            org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.data.elasticsearch
-                    .ElasticsearchDataAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration.class,
+            org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration.class,
+            org.springframework.boot.data.elasticsearch.autoconfigure
+                    .DataElasticsearchRepositoriesAutoConfiguration.class,
+            org.springframework.boot.mail.autoconfigure.MailSenderAutoConfiguration.class,
+            org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration.class,
+            org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration.class,
+            org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration.class,
             org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration.class
         },
         excludeFilters = {
@@ -107,9 +107,9 @@ class AnnonceControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private AnnonceService annonceService;
+    @MockitoBean private AnnonceService annonceService;
 
-    @MockBean private CursorPaginationService cursorPaginationService;
+    @MockitoBean private CursorPaginationService cursorPaginationService;
 
     private AnnonceCreateRequest createRequest;
     private AnnonceResponse mockResponse;
@@ -544,3 +544,4 @@ class AnnonceControllerTest {
         return response;
     }
 }
+

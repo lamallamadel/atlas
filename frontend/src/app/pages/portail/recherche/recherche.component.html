@@ -1,0 +1,132 @@
+<div class="sr-layout">
+  <!-- SIDEBAR FILTERS -->
+  <aside class="sr-sidebar">
+    <div class="sr-filters-header">
+      <h2>Filtres</h2>
+      <button class="at-btn at-btn-ghost at-btn-sm" (click)="resetFilters()">Réinitialiser</button>
+    </div>
+
+    <!-- Transaction -->
+    <div class="sr-filter-group">
+      <p class="sr-filter-label">Type de transaction</p>
+      <div class="sr-chip-group">
+        <button class="sr-chip" [class.active]="filters.tx===''" (click)="setTxFilter('')">Tous</button>
+        <button class="sr-chip" [class.active]="filters.tx==='vente'" (click)="setTxFilter('vente')">Vente</button>
+        <button class="sr-chip" [class.active]="filters.tx==='location'" (click)="setTxFilter('location')">Location</button>
+      </div>
+    </div>
+
+    <!-- Ville -->
+    <div class="sr-filter-group">
+      <label class="sr-filter-label" for="f-ville">Ville</label>
+      <select class="at-form-select" id="f-ville" [(ngModel)]="filters.ville" (change)="applyFilters()">
+        <option value="">Toutes les villes</option>
+        <option *ngFor="let v of villes" [value]="v">{{v}}</option>
+      </select>
+    </div>
+
+    <!-- Prix -->
+    <div class="sr-filter-group">
+      <p class="sr-filter-label">Prix</p>
+      <div class="sr-range-row">
+        <input class="at-form-input" type="number" placeholder="Min" [(ngModel)]="filters.prixMin" (change)="applyFilters()"/>
+        <span style="color:var(--at-color-text-faint);font-size:0.8rem;">—</span>
+        <input class="at-form-input" type="number" placeholder="Max" [(ngModel)]="filters.prixMax" (change)="applyFilters()"/>
+      </div>
+    </div>
+
+    <!-- Surface -->
+    <div class="sr-filter-group">
+      <p class="sr-filter-label">Surface (m²)</p>
+      <div class="sr-range-row">
+        <input class="at-form-input" type="number" placeholder="Min" [(ngModel)]="filters.surfMin" (change)="applyFilters()"/>
+        <span style="color:var(--at-color-text-faint);font-size:0.8rem;">—</span>
+        <input class="at-form-input" type="number" placeholder="Max" [(ngModel)]="filters.surfMax" (change)="applyFilters()"/>
+      </div>
+    </div>
+
+    <!-- Pièces -->
+    <div class="sr-filter-group">
+      <p class="sr-filter-label">Nombre de pièces</p>
+      <div class="sr-chip-group">
+        <button *ngFor="let p of [0,1,2,3,4]" class="sr-chip" [class.active]="filters.pieces===p" (click)="setPiecesFilter(p)">
+          {{p === 0 ? 'Tous' : p < 4 ? p : '4+'}}
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RESULTS -->
+  <main class="sr-results">
+    <!-- Header -->
+    <div class="sr-results-header">
+      <p class="sr-count">
+        <strong>{{totalCount}}</strong> {{totalCount <= 1 ? 'annonce trouvée' : 'annonces trouvées'}}
+      </p>
+      <div class="sr-sort">
+        <label class="sr-filter-label" for="sr-sort-sel">Trier par</label>
+        <select class="at-form-select" id="sr-sort-sel" [(ngModel)]="filters.sort" (change)="setSort(filters.sort)">
+          <option value="recent">Plus récent</option>
+          <option value="prix-asc">Prix croissant</option>
+          <option value="prix-desc">Prix décroissant</option>
+          <option value="surface-desc">Plus grande surface</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div *ngIf="displayedListings.length === 0" class="at-empty-state">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <p class="at-empty-state-title">Aucune annonce trouvée</p>
+      <p class="at-empty-state-desc">Essayez de modifier vos critères de recherche.</p>
+      <button class="at-btn at-btn-primary" style="margin-top:1rem;" (click)="resetFilters()">Réinitialiser les filtres</button>
+    </div>
+
+    <!-- Listing grid -->
+    <div class="sr-grid" *ngIf="displayedListings.length > 0">
+      <article *ngFor="let listing of displayedListings"
+               class="sr-listing-card"
+               (click)="navigateToDetail(listing)"
+               role="button" tabindex="0"
+               (keydown.enter)="navigateToDetail(listing)">
+        <div class="sr-listing-img">
+          <img [src]="getImageUrl(listing.imgs[0])" [alt]="listing.title" loading="lazy" width="360" height="220"/>
+          <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
+            {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
+          </span>
+          <div class="ph-badges" *ngIf="listing.verified">
+            <span class="at-badge-trust">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              Vérifié
+            </span>
+          </div>
+        </div>
+        <div class="ph-listing-body">
+          <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
+          <div class="ph-title">{{listing.title}}</div>
+          <div class="ph-location">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            {{listing.zone}}, {{listing.city}}
+          </div>
+          <div class="ph-meta">
+            <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>{{listing.surface}} m²</span>
+            <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg>{{listing.pieces}} pièces</span>
+            <span class="ph-meta-date">{{listing.agent.agency}}</span>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Pagination -->
+    <nav class="at-pagination" aria-label="Pagination des résultats" *ngIf="totalPages > 1">
+      <button class="at-page-btn" (click)="goToPage(filters.page - 1)" [disabled]="filters.page <= 1" aria-label="Page précédente">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button *ngFor="let p of getPageNumbers()" class="at-page-btn" [class.active]="p===filters.page" (click)="goToPage(p)">{{p}}</button>
+      <button class="at-page-btn" (click)="goToPage(filters.page + 1)" [disabled]="filters.page >= totalPages" aria-label="Page suivante">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+    </nav>
+
+  </main>
+</div>

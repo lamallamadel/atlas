@@ -14,23 +14,23 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(
         controllers = UserPreferencesController.class,
         excludeAutoConfiguration = {
-            org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.data.elasticsearch
-                    .ElasticsearchDataAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.mail.MailSenderAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration.class,
-            org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration.class,
+            org.springframework.boot.data.redis.autoconfigure.DataRedisAutoConfiguration.class,
+            org.springframework.boot.data.elasticsearch.autoconfigure
+                    .DataElasticsearchRepositoriesAutoConfiguration.class,
+            org.springframework.boot.mail.autoconfigure.MailSenderAutoConfiguration.class,
+            org.springframework.boot.jdbc.autoconfigure.DataSourceAutoConfiguration.class,
+            org.springframework.boot.hibernate.autoconfigure.HibernateJpaAutoConfiguration.class,
+            org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration.class,
             org.springframework.boot.autoconfigure.task.TaskSchedulingAutoConfiguration.class
         },
         excludeFilters = {
@@ -68,7 +68,7 @@ class UserPreferencesControllerTest {
 
     @Autowired private ObjectMapper objectMapper;
 
-    @MockBean private UserPreferencesService userPreferencesService;
+    @MockitoBean private UserPreferencesService userPreferencesService;
 
     private static final String TEST_USER_ID = "user-123";
 
@@ -221,3 +221,4 @@ class UserPreferencesControllerTest {
         return dto;
     }
 }
+

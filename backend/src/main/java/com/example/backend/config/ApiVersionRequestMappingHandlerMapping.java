@@ -39,6 +39,7 @@ public class ApiVersionRequestMappingHandlerMapping extends RequestMappingHandle
                                 info.getHeadersCondition(),
                                 info.getConsumesCondition(),
                                 info.getProducesCondition(),
+                                info.getVersionCondition(),
                                 info.getCustomCondition());
             }
         }

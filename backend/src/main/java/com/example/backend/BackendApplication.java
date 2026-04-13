@@ -2,11 +2,12 @@ package com.example.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.elasticsearch.ElasticsearchRepositoriesAutoConfiguration;
+import org.springframework.boot.data.elasticsearch.autoconfigure
+        .DataElasticsearchRepositoriesAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(exclude = {ElasticsearchRepositoriesAutoConfiguration.class})
+@SpringBootApplication(exclude = {DataElasticsearchRepositoriesAutoConfiguration.class})
 @EnableScheduling
 @ConfigurationPropertiesScan
 public class BackendApplication {

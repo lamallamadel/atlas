@@ -137,6 +137,7 @@ public class CollaborationService {
                         "resolvedValue", resolvedValue,
                         "resolvedBy", resolvedBy,
                         "version", getCurrentVersion(dossierId));
-        messagingTemplate.convertAndSend("/topic/dossier/" + dossierId + "/conflict", conflictData);
+        messagingTemplate.convertAndSend(
+                "/topic/dossier/" + dossierId + "/conflict", (Object) conflictData);
     }
 }

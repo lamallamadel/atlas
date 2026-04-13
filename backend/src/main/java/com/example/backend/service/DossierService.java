@@ -199,7 +199,7 @@ public class DossierService {
     @Transactional(readOnly = true)
     public Page<DossierResponse> list(
             DossierStatus status, String leadPhone, Long annonceId, Pageable pageable) {
-        Specification<Dossier> spec = Specification.where(null);
+        Specification<Dossier> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
             spec =
@@ -463,7 +463,7 @@ public class DossierService {
     @Transactional(readOnly = true)
     public Page<Dossier> findAll(
             DossierStatus status, String leadPhone, Long annonceId, Pageable pageable) {
-        Specification<Dossier> spec = Specification.where(null);
+        Specification<Dossier> spec = (root, query, criteriaBuilder) -> criteriaBuilder.conjunction();
 
         if (status != null) {
             spec =

@@ -1,4 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Urbanist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+/* ─── Atlasia Fonts (Portail + Vitrine + Espace Pro) ─── */
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap");
+
+/* ─── Atlasia Design System ─── */
+@import './styles/_atlasia-tokens.scss';
+@import './styles/_atlasia-shared.scss';
+
 @import './styles/animations.css';
 @import './styles/pages.css';
 @import './styles/material-overrides.css';

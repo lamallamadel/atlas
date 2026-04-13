@@ -40,7 +40,8 @@ public class WebhookSignatureFilter extends OncePerRequestFilter {
             return;
         }
 
-        ContentCachingRequestWrapper wrappedRequest = new ContentCachingRequestWrapper(request);
+        ContentCachingRequestWrapper wrappedRequest =
+                new ContentCachingRequestWrapper(request, 1024 * 1024);
         filterChain.doFilter(wrappedRequest, response);
     }
 
