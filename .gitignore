@@ -92,6 +92,7 @@ Desktop.ini
 *.sql
 !**/db/migration/*.sql
 !**/db/migration-postgres/*.sql
+!**/db/e2e/*.sql
 *.sqlite
 *.db
 
