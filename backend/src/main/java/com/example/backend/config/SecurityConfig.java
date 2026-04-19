@@ -92,6 +92,7 @@ public class SecurityConfig {
                                             .ignoringRequestMatchers(
                                                     "/api/v1/webhooks/**",
                                                     "/api/public/v1/**",
+                                                    "/api/v1/portal/**",
                                                     "/actuator/**",
                                                     "/swagger-ui/**",
                                                     "/api-docs/**",
@@ -160,7 +161,7 @@ public class SecurityConfig {
                                         .permitAll()
                                         .requestMatchers("/api/v1/observability/health")
                                         .permitAll()
-                                        .requestMatchers("/api/public/v1/**")
+                                        .requestMatchers("/api/public/v1/**", "/api/v1/portal/**")
                                         .permitAll()
                                         .requestMatchers("/api/**")
                                         .authenticated()

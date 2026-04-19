@@ -90,7 +90,7 @@
                role="button" tabindex="0"
                (keydown.enter)="navigateToDetail(listing)">
         <div class="sr-listing-img">
-          <img [src]="getImageUrl(listing.imgs[0])" [alt]="listing.title" loading="lazy" width="360" height="220"/>
+          <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220"/>
           <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
             {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
           </span>

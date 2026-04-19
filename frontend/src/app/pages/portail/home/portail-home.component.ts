@@ -20,7 +20,12 @@ export class PortailHomeComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.cities = this.portailService.CITIES;
-    this.recentListings = this.portailService.LISTINGS.slice(0, 8);
+    this.portailService.searchAnnonces({
+      tx: '', ville: '', prixMin: null, prixMax: null,
+      surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1
+    }).subscribe(res => {
+      this.recentListings = res.content.slice(0, 8);
+    });
   }
 
   ngAfterViewInit(): void {
@@ -55,6 +60,5 @@ export class PortailHomeComponent implements OnInit, AfterViewInit {
     this.router.navigate(['/annonces', listing.id]);
   }
 
-  getImageUrl(idx: number): string { return this.portailService.getImageUrl(idx); }
   formatPrice(p: number, tx: 'vente' | 'location'): string { return this.portailService.formatPrice(p, tx); }
 }

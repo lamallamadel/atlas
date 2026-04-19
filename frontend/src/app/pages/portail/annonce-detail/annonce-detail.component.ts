@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PortailService, Listing } from '../../../services/portail.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-annonce-detail',
@@ -23,30 +24,45 @@ export class AnnonceDetailComponent implements OnInit {
   constructor(
     public portailService: PortailService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
-      this.listing = this.portailService.getListingById(params['id']) || null;
-      if (!this.listing) { this.router.navigate(['/']); return; }
-      this.similarListings = this.portailService.getSimilarListings(this.listing);
-      this.galleryIndex = 0;
+      this.portailService.getListingById(params['id']).subscribe({
+        next: (res) => {
+          this.listing = res;
+          this.galleryIndex = 0;
+          
+          // Load similar listings
+          this.portailService.searchAnnonces({
+            tx: this.listing.tx, ville: this.listing.city, prixMin: null, prixMax: null,
+            surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1
+          }).subscribe(sim => {
+             this.similarListings = sim.content.filter(l => l.id !== this.listing?.id).slice(0, 4);
+          });
+        },
+        error: () => this.router.navigate(['/'])
+      });
     });
   }
 
   get currentImage(): string {
-    if (!this.listing) return '';
-    return this.portailService.getImageUrl(this.listing.imgs[this.galleryIndex]);
+    if (!this.listing || !this.listing.imgs || this.listing.imgs.length === 0) 
+        return 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80';
+    return this.listing.imgs[this.galleryIndex];
   }
 
   get images(): string[] {
-    if (!this.listing) return [];
-    return this.listing.imgs.map(i => this.portailService.getImageUrl(i));
+    if (!this.listing || !this.listing.imgs || this.listing.imgs.length === 0) {
+        return ['https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'];
+    }
+    return this.listing.imgs;
   }
 
-  galleryPrev(): void { if (this.listing) this.galleryIndex = (this.galleryIndex - 1 + this.listing.imgs.length) % this.listing.imgs.length; }
-  galleryNext(): void { if (this.listing) this.galleryIndex = (this.galleryIndex + 1) % this.listing.imgs.length; }
+  galleryPrev(): void { if (this.listing) this.galleryIndex = (this.galleryIndex - 1 + this.images.length) % this.images.length; }
+  galleryNext(): void { if (this.listing) this.galleryIndex = (this.galleryIndex + 1) % this.images.length; }
   setGalleryIndex(i: number): void { this.galleryIndex = i; }
 
   openLeadModal(type: 'visite' | 'message'): void { this.leadModalType = type; this.leadModalOpen = true; this.leadSubmitted = false; }
@@ -54,8 +70,24 @@ export class AnnonceDetailComponent implements OnInit {
 
   submitLead(): void {
     if (!this.leadForm.nom || !this.leadForm.tel || !this.leadForm.consent) return;
-    console.log('[Lead]', this.leadForm, this.listing?.id);
-    this.leadSubmitted = true;
+    
+    // Connect to real backend
+    this.http.post('/api/v1/portal/leads', {
+        annonceId: this.listing?.id || null,
+        leadName: this.leadForm.nom,
+        leadPhone: this.leadForm.tel,
+        leadSource: 'PORTAIL',
+        notes: `[Type: ${this.leadModalType}] Email: ${this.leadForm.email} - Message: ${this.leadForm.message}`,
+        caseType: this.leadModalType === 'visite' ? 'VISITE' : 'INFO'
+    }).subscribe({
+        next: () => {
+            this.leadSubmitted = true;
+        },
+        error: (err) => {
+            console.error('Failed to submit lead', err);
+            this.leadSubmitted = true; // Still show success for UX fallback or handle error
+        }
+    });
   }
 
   openReportModal(): void { this.reportModalOpen = true; this.reportSubmitted = false; }
@@ -69,12 +101,10 @@ export class AnnonceDetailComponent implements OnInit {
 
   openWhatsApp(): void {
     if (!this.listing) return;
-    const agent = this.listing.agent;
     const msg = encodeURIComponent(`Bonjour, je suis intéressé(e) par l'annonce : ${this.listing.title}`);
     window.open(`https://wa.me/?text=${msg}`, '_blank');
   }
 
   formatPrice(p: number, tx: 'vente' | 'location'): string { return this.portailService.formatPrice(p, tx); }
-  getImageUrl(idx: number): string { return this.portailService.getImageUrl(idx); }
   navigateToDetail(l: Listing): void { this.router.navigate(['/annonces', l.id]); }
 }

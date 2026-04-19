@@ -9,7 +9,6 @@ import { PortailService, Listing, FilterState } from '../../../services/portail.
 })
 export class RechercheComponent implements OnInit {
 
-  allListings: Listing[] = [];
   displayedListings: Listing[] = [];
   totalCount = 0;
   totalPages = 0;
@@ -39,16 +38,17 @@ export class RechercheComponent implements OnInit {
   }
 
   applyFilters(): void {
-    this.filters.page = 1;
-    this.allListings = this.portailService.applyFilters(this.filters);
-    this.totalCount  = this.allListings.length;
-    this.totalPages  = Math.ceil(this.totalCount / this.portailService.PAGE_SIZE);
-    this.displayedListings = this.portailService.paginate(this.allListings, 1);
+    this.portailService.searchAnnonces(this.filters).subscribe(res => {
+      this.displayedListings = res.content;
+      this.totalCount = res.totalElements;
+      this.totalPages = Math.ceil(this.totalCount / this.portailService.PAGE_SIZE);
+      if (this.totalPages === 0) this.totalPages = 1;
+    });
   }
 
-  setTxFilter(tx: string): void { this.filters.tx = tx; this.applyFilters(); }
-  setPiecesFilter(n: number): void { this.filters.pieces = n; this.applyFilters(); }
-  setSort(sort: FilterState['sort']): void { this.filters.sort = sort; this.applyFilters(); }
+  setTxFilter(tx: string): void { this.filters.tx = tx; this.filters.page = 1; this.applyFilters(); }
+  setPiecesFilter(n: number): void { this.filters.pieces = n; this.filters.page = 1; this.applyFilters(); }
+  setSort(sort: FilterState['sort']): void { this.filters.sort = sort; this.filters.page = 1; this.applyFilters(); }
 
   resetFilters(): void {
     this.filters = { tx: '', ville: '', prixMin: null, prixMax: null, surfMin: null, surfMax: null, pieces: 0, sort: 'recent', page: 1 };
@@ -58,7 +58,7 @@ export class RechercheComponent implements OnInit {
   goToPage(p: number): void {
     if (p < 1 || p > this.totalPages) return;
     this.filters.page = p;
-    this.displayedListings = this.portailService.paginate(this.allListings, p);
+    this.applyFilters();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -67,6 +67,5 @@ export class RechercheComponent implements OnInit {
   }
 
   navigateToDetail(l: Listing): void { this.router.navigate(['/annonces', l.id]); }
-  getImageUrl(idx: number): string { return this.portailService.getImageUrl(idx); }
   formatPrice(p: number, tx: 'vente' | 'location'): string { return this.portailService.formatPrice(p, tx); }
 }

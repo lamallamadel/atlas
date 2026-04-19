@@ -82,7 +82,7 @@
         <div class="ad-similar-grid">
           <article *ngFor="let sl of similarListings" class="ad-similar-card"
                    (click)="navigateToDetail(sl)" role="button" tabindex="0" (keydown.enter)="navigateToDetail(sl)">
-            <div class="ad-similar-img"><img [src]="getImageUrl(sl.imgs[0])" [alt]="sl.title" loading="lazy" width="300" height="180"/></div>
+            <div class="ad-similar-img"><img [src]="sl.imgs && sl.imgs.length > 0 ? sl.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="sl.title" loading="lazy" width="300" height="180"/></div>
             <div class="ad-similar-body">
               <div class="ph-price" style="font-size:1rem;">{{formatPrice(sl.price, sl.tx)}}</div>
               <div class="ph-title">{{sl.title}}</div>

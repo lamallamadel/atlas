@@ -5,9 +5,9 @@ import com.example.backend.brain.dto.AgentBrainRequest;
 import com.example.backend.brain.dto.AgentBrainResponse;
 import com.example.backend.dto.AiAgentRequest;
 import com.example.backend.dto.AiAgentResponse;
+
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 
@@ -23,13 +23,7 @@ public class AiAgentService {
     public AiAgentResponse process(AiAgentRequest request) {
         String query = request.getQuery();
 
-        // Etape 1 : règles locales très rapides (IntentMapper simplifié)
-        AiAgentResponse localResponse = parseLocalRules(query);
-        if (localResponse.getIntent().getConfidence() >= 0.8) {
-            return localResponse;
-        }
-
-        // Etape 2 : appel au brain/agent-service (LLM)
+        // 1: Direct integration with the Brain python service
         AgentBrainRequest brainReq = new AgentBrainRequest();
         brainReq.setQuery(query);
         brainReq.setContext(request.getContext());
@@ -53,45 +47,21 @@ public class AiAgentService {
             return finalResp;
         }
 
-        // Fallback si le brain est down
-        return localResponse;
+        // 2: Fallback if Brain is unreachable
+        return getFallbackResponse();
     }
 
-    private AiAgentResponse parseLocalRules(String query) {
+    private AiAgentResponse getFallbackResponse() {
         AiAgentResponse res = new AiAgentResponse();
         AiAgentResponse.AgentIntent intent = new AiAgentResponse.AgentIntent();
+        intent.setType("UNKNOWN");
+        intent.setConfidence(0.0);
+        intent.setParams(new HashMap<>());
+        
         res.setIntent(intent);
         res.setActions(new ArrayList<>());
-        res.setEngine("rules-java");
-        intent.setParams(new HashMap<>());
-
-        String lower = query.toLowerCase();
-
-        if (lower.contains("cherche") || lower.contains("trouve") || lower.contains("recherche")) {
-            intent.setType("SEARCH");
-            intent.setConfidence(0.85);
-            res.setAnswer("Je lance la recherche pour vous.");
-            Map<String, Object> params = new HashMap<>();
-            if (lower.contains("casablanca")) params.put("city", "Casablanca");
-            if (lower.contains("t3")) params.put("propertyType", "T3");
-            intent.setParams(params);
-        } else if (lower.contains("créer")
-                || (lower.contains("nouveau") && lower.contains("dossier"))) {
-            intent.setType("CREATE");
-            intent.setConfidence(0.9);
-            res.setAnswer("Je vous ouvre le formulaire de création de dossier.");
-            Map<String, Object> action = new HashMap<>();
-            action.put("label", "Créer Dossier");
-            action.put("icon", "add");
-            action.put("url", "/dossiers?action=create");
-            res.getActions().add(action);
-            intent.setParams(new HashMap<>());
-        } else {
-            intent.setType("UNKNOWN");
-            intent.setConfidence(0.1);
-            res.setAnswer("Je n'ai pas compris votre demande (offline).");
-            intent.setParams(new HashMap<>());
-        }
+        res.setEngine("java-fallback");
+        res.setAnswer("Je suis désolé, mes services cognitifs (AI Brain) sont actuellement inaccessibles.");
 
         return res;
     }

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 
 export interface DemoFormData {
   nom: string;
@@ -25,14 +26,48 @@ export interface ContactFormData {
 @Injectable({ providedIn: 'root' })
 export class VitrineService {
 
+  constructor(private http: HttpClient) {}
+
   submitDemoRequest(data: DemoFormData): Observable<{ success: boolean }> {
-    console.log('[VitrineService] Demo request submitted:', data);
-    // Mock: simulate API call with 800ms delay
-    return of({ success: true }).pipe(delay(800));
+    const notes = [
+      `[Type: DEMO_REQUEST]`,
+      `Email: ${data.email}`,
+      `Ville: ${data.ville}`,
+      `Actor Type: ${data.actorType}`,
+      `Team Size: ${data.teamSize || 'N/A'}`,
+      `Volume: ${data.listingVolume || 'N/A'}`,
+      `Plan: ${data.desiredPlan || 'N/A'}`,
+      `Needs: ${data.needs.join(', ')}`,
+      `Message: ${data.message || ''}`
+    ].join('\n');
+
+    return this.http.post<any>('/api/v1/portal/leads', {
+        leadName: data.nom,
+        leadPhone: data.tel,
+        leadSource: 'VITRINE',
+        notes: notes,
+        caseType: 'DEMO'
+    }).pipe(
+      map(() => ({ success: true }))
+    );
   }
 
   submitContactRequest(data: ContactFormData): Observable<{ success: boolean }> {
-    console.log('[VitrineService] Contact request submitted:', data);
-    return of({ success: true }).pipe(delay(600));
+    const notes = [
+      `[Type: CONTACT_FORM]`,
+      `Email: ${data.email}`,
+      `Sujet: ${data.sujet}`,
+      `Message: ${data.message}`
+    ].join('\n');
+
+    return this.http.post<any>('/api/v1/portal/leads', {
+        leadName: data.nom,
+        leadPhone: data.tel || 'NOT_PROVIDED',
+        leadSource: 'VITRINE',
+        notes: notes,
+        caseType: 'INFO'
+    }).pipe(
+      map(() => ({ success: true }))
+    );
   }
 }
