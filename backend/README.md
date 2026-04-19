@@ -1,25 +1,29 @@
 # Backend Application
 
-Spring Boot application with Java 17, featuring Web, Validation, and Actuator capabilities.
+Spring Boot application with Java 21, featuring Web, Validation, and Actuator capabilities.
 
 ## Requirements
 
-- Java 17
-- Maven 3.6+
+- Java 21
+- Maven 3.8+
 
 ## Quick Setup
 
 ### Option 1: Set JAVA_HOME (Recommended)
 
+**IMPORTANT:** This project requires Java 21. Set JAVA_HOME:
+Or use ../scripts/use-temurin-21.ps1 to set `JAVA_HOME` before Maven commands.
+
+
 **Windows (PowerShell):**
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-21.0.2.13-hotspot'
 mvn clean install
 ```
 
 **Linux/Mac:**
 ```bash
-export JAVA_HOME=/path/to/jdk-17
+export JAVA_HOME=/path/to/jdk-21
 mvn clean install
 ```
 

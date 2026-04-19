@@ -4,9 +4,26 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Atlas Immobilier CRM — a full-stack real estate CRM monorepo with a Spring Boot 3.2.1 backend (Java 17), Angular 16 frontend, and PostgreSQL 16 database. Manages property listings (annonces), leads/deals (dossiers), messaging (WhatsApp/email/SMS), appointments, tasks, documents, workflows, and cooperative housing projects.
+Atlas Immobilier CRM — a full-stack real estate CRM monorepo with a Spring Boot 4.0.3 backend (Java 21), Angular 16 frontend, and PostgreSQL 16 database. Manages property listings (annonces), leads/deals (dossiers), messaging (WhatsApp/email/SMS), appointments, tasks, documents, workflows, and cooperative housing projects.
 
 ## Build & Run Commands
+ 
+**IMPORTANT:** This project requires Java 21. Set JAVA_HOME:
+Or use scripts/use-temurin-21.ps1 to set `JAVA_HOME` before Maven commands.
+
+**Windows (PowerShell):**
+```powershell
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-21.0.2.13-hotspot'
+cd backend
+mvn clean install
+```
+
+**Linux/Mac:**
+```bash
+export JAVA_HOME=/path/to/jdk-21
+cd backend
+mvn clean install
+```
 
 ### Backend (from `backend/`)
 ```bash

@@ -3,24 +3,25 @@
 ## Setup
 
 ### Prerequisites
-- Java 17 (JDK 17.0.5.8 or later)
-- Maven 3.6+
+- Java 21 (JDK 21.0.2.13 or later)
+- Maven 3.8+
 - Docker (for infrastructure)
 
 ### Initial Setup
 
-**IMPORTANT:** This project requires Java 17. Before running any Maven commands, set JAVA_HOME:
+**IMPORTANT:** This project requires Java 21. Set JAVA_HOME:
+Or use scripts/use-temurin-21.ps1 to set `JAVA_HOME` before Maven commands.
 
 **Windows (PowerShell):**
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:JAVA_HOME = 'C:\Environement\Java\jdk-21.0.2.13-hotspot'
 cd backend
 mvn clean install
 ```
 
 **Linux/Mac:**
 ```bash
-export JAVA_HOME=/path/to/jdk-17
+export JAVA_HOME=/path/to/jdk-21
 cd backend
 mvn clean install
 ```
@@ -52,12 +53,12 @@ See `SETUP.md` for detailed setup instructions including toolchains configuratio
 ## Tech Stack
 
 ### Backend
-- Spring Boot 3.2.1
-- Java 17
+- Spring Boot 4.0.3
+- Java 21
 - Spring Web
 - Spring Validation
 - Spring Actuator
-- Maven 3.6+
+- Maven 3.8+
 
 ### Infrastructure
 - Docker & Docker Compose
