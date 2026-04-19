@@ -7,8 +7,8 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy build descriptors first (best cache hit)
-COPY pom.xml /app/pom.xml
-COPY settings.xml /app/settings.xml
+COPY backend/pom.xml /app/pom.xml
+COPY backend/settings.xml /app/settings.xml
 
 # Create toolchains inside the image layer (Linux-safe)
 RUN mkdir -p /root/.m2 && \
@@ -32,7 +32,7 @@ RUN --mount=type=cache,target=/root/.m2/repository \
     mvn -ntp -s /app/settings.xml dependency:go-offline
 
 # Copy sources and build
-COPY src /app/src
+COPY backend/src /app/src
 
 RUN --mount=type=cache,target=/root/.m2/repository \
     mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true

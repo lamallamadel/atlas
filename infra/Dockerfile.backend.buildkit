@@ -1,4 +1,9 @@
 # syntax=docker/dockerfile:1.5
+# NOTE: This Dockerfile requires BuildKit to be enabled for cache mounts
+# Enable BuildKit:
+#   - Docker Desktop: Already enabled by default
+#   - Linux: export DOCKER_BUILDKIT=1
+#   - Docker Compose: DOCKER_BUILDKIT=1 docker compose build
 
 # -------------------------
 # Build stage
@@ -7,8 +12,8 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 WORKDIR /app
 
 # Copy build descriptors first (best cache hit)
-COPY pom.xml /app/pom.xml
-COPY settings.xml /app/settings.xml
+COPY backend/pom.xml /app/pom.xml
+COPY backend/settings.xml /app/settings.xml
 
 # Create toolchains inside the image layer (Linux-safe)
 RUN mkdir -p /root/.m2 && \
@@ -27,13 +32,15 @@ RUN mkdir -p /root/.m2 && \
 </toolchains>
 EOF
 
-# Download dependencies (without cache mount for compatibility)
-RUN mvn -ntp -s /app/settings.xml dependency:go-offline
+# Download deps with cache mounted ONLY on repository (BuildKit only)
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -ntp -s /app/settings.xml dependency:go-offline
 
 # Copy sources and build
-COPY src /app/src
+COPY backend/src /app/src
 
-RUN mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
+RUN --mount=type=cache,target=/root/.m2/repository \
+    mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
 
 
 # -------------------------

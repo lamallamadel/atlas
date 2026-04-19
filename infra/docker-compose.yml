@@ -61,8 +61,8 @@ services:
 
   backend:
     build:
-      context: ../backend
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: infra/Dockerfile.backend
     container_name: backend_app
     restart: unless-stopped
     ports:
