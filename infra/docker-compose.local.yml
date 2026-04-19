@@ -1,18 +1,8 @@
-version: '3.8'
-
-# Local development stack with H2 database and local LLM
+# Local development stack with H2 database
 # Start with: docker compose -f docker-compose.local.yml up
-# 
-# Services:
-#   - backend (built locally)
-#   - H2 database (in-memory, faster than Postgres for dev)
-#   - Redis cache
-#   - llama.cpp (lightweight local LLM)
-#   - nginx (static frontend)
 
 services:
   # H2 Database (embedded, in-memory for speed)
-  # Web console: http://localhost:8083
   h2:
     image: oscarfonts/h2:latest
     container_name: h2_db
@@ -48,132 +38,9 @@ services:
       timeout: 5s
       retries: 5
 
-  # Backend API (built from local Dockerfile)
-  backend:
-    build:
-      context: ..
-      dockerfile: infra/Dockerfile.backend
-    container_name: backend_app
-    restart: unless-stopped
-    ports:
-      - "${BACKEND_PORT:-8080}:8080"
-    depends_on:
-      h2:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      llama-cpp:
-        condition: service_healthy
-    environment:
-      # Use H2 instead of Postgres
-      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2:9092/~/atlas;MODE=PostgreSQL
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
-      SPRING_DATASOURCE_USERNAME: sa
-      SPRING_DATASOURCE_PASSWORD:
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
-      
-      SPRING_PROFILES_ACTIVE: h2,local
-
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      CACHE_REDIS_ENABLED: true
-
-      CORS_ALLOWED_ORIGINS: "https://afroware.app,http://localhost:4200,http://localhost"
-
-      # Local LLM endpoints (llama.cpp)
-      BRAIN_SCORING_URL: http://llama-cpp:8000
-      BRAIN_DUPLI_URL: http://llama-cpp:8000
-      BRAIN_FRAUD_URL: http://llama-cpp:8000
-      BRAIN_API_KEY: local-development
-      
-      # Disable Elasticsearch for local dev
-      ELASTICSEARCH_ENABLED: false
-      
-      # Disable OAuth2 locally (use basic auth or mock)
-      OAUTH2_ENABLED: false
-      
-      APP_ENV: local
-      APP_VERSION: local-dev
-      
-      # JVM options for local dev
-      JAVA_OPTS: "-Xmx1g -Xms512m"
-    volumes:
-      - backend_logs:/var/log/atlas
-    healthcheck:
-      test: [ "CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1" ]
-      interval: 15s
-      timeout: 5s
-      retries: 3
-      start_period: 30s
-
-  # Local LLM: llama.cpp
-  # Supports: Llama 2, Mistral, TinyLlama, Phi, etc.
-  # Download models: https://huggingface.co/TheBloke (GGUF format)
-  llama-cpp:
-    image: ghcr.io/ggerganov/llama.cpp:server-latest
-    container_name: llama_cpp_server
-    restart: unless-stopped
-    ports:
-      - "${LLAMA_CPP_PORT:-8008}:8000"
-    volumes:
-      # Mount local models directory
-      - ./models:/models
-      - llama_cache:/root/.cache
-    environment:
-      # CPU inference (set N_GPU_LAYERS=0 to disable GPU)
-      N_GPU_LAYERS: 0
-      N_THREADS: 4
-      N_PARALLEL: 1
-    command: >
-      -m /models/model.gguf
-      --host 0.0.0.0
-      --port 8000
-      -n 256
-      --ctx-size 1024
-      -t 4
-      -ngl 0
-      -b 512
-      --keep-alive 5m
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    profiles:
-      - llama
-
-  # Alternative: vLLM (faster, supports batch processing)
-  # Uncomment to use vLLM instead of llama.cpp
-  # vllm:
-  #   image: vllm/vllm-openai:latest
-  #   container_name: vllm_server
-  #   restart: unless-stopped
-  #   ports:
-  #     - "${VLLM_PORT:-8009}:8000"
-  #   volumes:
-  #     - ./models:/models
-  #     - vllm_cache:/root/.cache
-  #   environment:
-  #     VLLM_PORT: 8000
-  #     VLLM_SERVED_MODEL_NAME: model
-  #   command: >
-  #     --model /models/model.gguf
-  #     --host 0.0.0.0
-  #     --port 8000
-  #     --max-model-len 1024
-  #     --tensor-parallel-size 1
-  #   healthcheck:
-  #     test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
-  #     interval: 10s
-  #     timeout: 5s
-  #     retries: 5
-  #   profiles:
-  #     - vllm
-
   # Static frontend (serves dist/ if built)
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:alpine
     container_name: nginx_local
     restart: unless-stopped
     ports:
@@ -181,8 +48,6 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ../frontend/dist/frontend:/usr/share/nginx/html:ro
-    depends_on:
-      - backend
     healthcheck:
       test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/" ]
       interval: 10s
@@ -194,7 +59,3 @@ volumes:
     name: h2_data_local
   redis_data:
     name: redis_data_local
-  backend_logs:
-    name: backend_logs_local
-  llama_cache:
-    name: llama_cache_local
