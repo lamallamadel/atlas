@@ -17,7 +17,7 @@ Or use ../scripts/use-temurin-21.ps1 to set `JAVA_HOME` before Maven commands.
 
 **Windows (PowerShell):**
 ```powershell
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-21.0.2.13-hotspot'
+$env:JAVA_HOME = 'C:\Users\PRO\scoop\apps\jabba\0.14.0\jdk\temurin@1.21.0-10'
 mvn clean install
 ```
 
