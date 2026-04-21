@@ -1,28 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
 import logging
 import time
-import httpx
 
+# 1. CORRECTION SÉCURITÉ : La clé API n'a plus de valeur par défaut.
+# FastAPI refusera de démarrer si elle n'est pas définie dans le .env
 class Settings(BaseSettings):
-    api_key: str = "change-me-in-production"
+    api_key: str  
     allowed_origins: list[str] = ["http://localhost:8080", "http://localhost:4200"]
+    
     ollama_url: str = "http://ollama:11434"
     ollama_model: str = "mistral:7b"
     ollama_enabled: bool = False
+    
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
 
 settings = Settings()
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("document-service")
 
 router = APIRouter()
-
-
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -57,6 +58,7 @@ class ContractResponse(BaseModel):
 
 def mock_verify(req: VerifyRequest) -> VerifyResponse:
     category = req.category.upper() if req.category else "UNKNOWN"
+    
     if category == "DPE":
         return VerifyResponse(
             is_valid=True,
@@ -93,11 +95,17 @@ async def verify_document(req: VerifyRequest, _: str = Depends(verify_api_key)):
 async def generate_contract(req: ContractRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     
-    # Simulate Contract generation via LLM
-    price_str = f"{req.agreed_price:,.2f} €" if req.agreed_price else "________ €"
-    buyer = req.buyer_name or "M./Mme _____________________"
-    seller = req.seller_name or "M./Mme _____________________"
-    address = req.property_address or "________________________________"
+    # 2. CORRECTION LOGIQUE : Utilisation de "is not None" pour ne pas ignorer le prix 0
+    # Formatage : 2500000.00 -> 2 500 000,00 €
+    if req.agreed_price is not None:
+        price_str = f"{req.agreed_price:,.2f}".replace(",", " ").replace(".", ",") + " €"
+    else:
+        price_str = "________ €"
+        
+    # 3. CORRECTION LOGIQUE : Garde la valeur si elle est explicite (même vide)
+    buyer = req.buyer_name if req.buyer_name is not None else "M./Mme _____________________"
+    seller = req.seller_name if req.seller_name is not None else "M./Mme _____________________"
+    address = req.property_address if req.property_address is not None else "________________________________"
     
     content = f"""# COMPROMIS DE VENTE
     

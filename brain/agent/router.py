@@ -6,9 +6,11 @@ from pydantic_settings import BaseSettings
 import logging
 import time
 import httpx
+import json
 
+# 1. CORRECTION SÉCURITÉ : Pas de valeur par défaut pour api_key
 class Settings(BaseSettings):
-    api_key: str = "change-me-in-production"
+    api_key: str  # FastAPI plantera au démarrage si ce n'est pas défini dans le .env
     allowed_origins: list[str] = ["http://localhost:8080", "http://localhost:4200"]
     
     ollama_url: str = "http://ollama:11434"
@@ -20,7 +22,7 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
     
     class Config:
-        env_file = ".env"
+        env_file = "../.env"
 
 settings = Settings()
 
@@ -29,9 +31,10 @@ logger = logging.getLogger("agent-service")
 
 router = APIRouter()
 
-
-
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
+
+# 2. OPTIMISATION PERFORMANCES : Client HTTP global pour éviter l'épuisement des sockets
+http_client = httpx.AsyncClient(timeout=10.0)
 
 def verify_api_key(api_key: str = Security(api_key_header)):
     if api_key != settings.api_key:
@@ -66,7 +69,6 @@ def parse_with_rules(query: str) -> AgentResponse:
             actions=[], engine="rules"
         )
     
-    # Nouvelle règle pour l'Agent WhatsApp (Prise de RDV)
     if "rendez-vous" in query_lower or "rdv" in query_lower or "visiter" in query_lower:
         return AgentResponse(
             intent_type="SCHEDULE_APPOINTMENT", confidence=0.9, params={},
@@ -89,31 +91,38 @@ Réponds UNIQUEMENT avec ce JSON valide:
 {{"intent_type": "SEARCH|CREATE|STATUS_CHANGE|SEND_MESSAGE|NAVIGATE|SCHEDULE_APPOINTMENT|UNKNOWN", "confidence": 0.9, "params": {{"city": "...", "propertyType": "..."}}, "answer": "Ta réponse textuelle à l'utilisateur", "actions": []}}
 """
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            resp = await client.post(
-                f"{settings.ollama_url}/api/generate",
-                json={
-                    "model": settings.ollama_model,
-                    "prompt": prompt,
-                    "stream": False,
-                    "format": "json"
-                }
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            import json
+        # Utilisation du client HTTP global
+        resp = await http_client.post(
+            f"{settings.ollama_url}/api/generate",
+            json={
+                "model": settings.ollama_model,
+                "prompt": prompt,
+                "stream": False,
+                "format": "json"
+            }
+        )
+        resp.raise_for_status()
+        data = resp.json()
+        
+        # 3. CORRECTION FIABILITÉ : Gestion robuste du parsing JSON d'Ollama
+        try:
             parsed = json.loads(data["response"])
-            return AgentResponse(
-                intent_type=parsed.get("intent_type", "UNKNOWN"),
-                confidence=parsed.get("confidence", 0.5),
-                params=parsed.get("params", {}),
-                answer=parsed.get("answer", "Voici ma réponse."),
-                actions=parsed.get("actions", []),
-                engine="ollama"
-            )
+        except json.JSONDecodeError as je:
+            logger.error(f"Ollama a généré un JSON invalide : {je} - Contenu: {data['response']}")
+            raise ValueError("Invalid JSON from Ollama")
+
+        return AgentResponse(
+            intent_type=parsed.get("intent_type", "UNKNOWN"),
+            confidence=parsed.get("confidence", 0.5),
+            params=parsed.get("params", {}),
+            answer=parsed.get("answer", "Voici ma réponse."),
+            actions=parsed.get("actions", []),
+            engine="ollama"
+        )
     except Exception as e:
         logger.error(f"Erreur Ollama: {e}")
-        return parse_with_rules(query)
+        # 4a. CORRECTION ROUTAGE : On lève l'erreur pour laisser le routeur gérer le fallback
+        raise e 
 
 async def process_with_openai(query: str, context: str | None = None) -> AgentResponse:
     from openai import AsyncOpenAI
@@ -170,7 +179,6 @@ async def process_with_openai(query: str, context: str | None = None) -> AgentRe
             temperature=0.0
         )
         
-        import json
         data = json.loads(response.choices[0].message.content)
         
         return AgentResponse(
@@ -183,26 +191,41 @@ async def process_with_openai(query: str, context: str | None = None) -> AgentRe
         )
     except Exception as e:
         logger.error(f"Erreur OpenAI: {e}")
-        return parse_with_rules(query)
+        # 4b. CORRECTION ROUTAGE : On lève l'erreur pour laisser le routeur décider
+        raise e
 
 @router.post("/api/agent/process", response_model=AgentResponse)
 async def process(req: AgentRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     
-    rule_result = parse_with_rules(req.query)
+    # 4c. CORRECTION LOGIQUE : Implémentation du "Waterfall" de fallback
     
-    # 1. Règles d'abord (Très rapide, mots-clés stricts)
+    # Étape 1 : On teste les règles locales, ultra-rapide et déterministe
+    rule_result = parse_with_rules(req.query)
     if rule_result.confidence >= 0.8:
-        result = rule_result
-    # 2. OpenAI si activé
-    elif settings.openai_enabled and settings.openai_api_key:
-        result = await process_with_openai(req.query, req.context)
-    # 3. Ollama si configuré et activé
-    elif settings.ollama_enabled:
-        result = await process_with_ollama(req.query, req.context)
-    # 4. Fallback sur rules
-    else:
-        result = rule_result
-        
-    logger.info(f"Agent [{req.query[:20]}...] → {result.intent_type} ({round((time.time()-start)*1000)}ms) via {result.engine}")
-    return result
+        logger.info(f"Agent [{req.query[:20]}...] → {rule_result.intent_type} ({round((time.time()-start)*1000)}ms) via {rule_result.engine}")
+        return rule_result
+
+    # Étape 2 : OpenAI (Si activé et configuré)
+    if settings.openai_enabled and settings.openai_api_key:
+        try:
+            result = await process_with_openai(req.query, req.context)
+            logger.info(f"Agent [{req.query[:20]}...] → {result.intent_type} ({round((time.time()-start)*1000)}ms) via {result.engine}")
+            return result
+        except Exception:
+            logger.warning("OpenAI a échoué. Tentative de Fallback vers Ollama ou Rules...")
+            pass # Si OpenAI échoue, on glisse à l'étape suivante
+
+    # Étape 3 : Ollama (Backup local gratuit)
+    if settings.ollama_enabled:
+        try:
+            result = await process_with_ollama(req.query, req.context)
+            logger.info(f"Agent [{req.query[:20]}...] → {result.intent_type} ({round((time.time()-start)*1000)}ms) via {result.engine}")
+            return result
+        except Exception:
+            logger.warning("Ollama a échoué. Fallback final vers les Rules.")
+            pass # Si Ollama échoue, on glisse à l'étape suivante
+
+    # Étape 4 : Fallback final si tout échoue ou n'est pas confiant
+    logger.info(f"Agent [{req.query[:20]}...] → {rule_result.intent_type} ({round((time.time()-start)*1000)}ms) via {rule_result.engine} (Fallback ultime)")
+    return rule_result
