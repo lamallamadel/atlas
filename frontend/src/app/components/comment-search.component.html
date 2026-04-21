@@ -7,10 +7,12 @@
     <mat-form-field appearance="outline" class="search-input">
       <mat-label>Search in comments</mat-label>
       <input matInput formControlName="query" placeholder="Enter search terms...">
-      <button mat-icon-button matSuffix type="button" (click)="clearSearch()" 
-              *ngIf="searchForm.value.query">
-        <mat-icon>clear</mat-icon>
-      </button>
+      @if (searchForm.value.query) {
+        <button mat-icon-button matSuffix type="button" (click)="clearSearch()"
+          >
+          <mat-icon>clear</mat-icon>
+        </button>
+      }
     </mat-form-field>
     <button mat-raised-button color="primary" type="submit" [disabled]="!searchForm.value.query || searching">
       <mat-icon>search</mat-icon>
@@ -18,43 +20,50 @@
     </button>
   </form>
 
-  <div *ngIf="searching" class="loading-state">
-    <mat-spinner diameter="40"></mat-spinner>
-    <p>Searching...</p>
-  </div>
-
-  <div *ngIf="!searching && searchResults.length === 0 && searchForm.value.query" class="no-results">
-    <mat-icon>search_off</mat-icon>
-    <p>No comments found matching "{{ searchForm.value.query }}"</p>
-  </div>
-
-  <div *ngIf="searchResults.length > 0" class="search-results">
-    <div class="results-header">
-      <h4>Found {{ searchResults.length }} result(s)</h4>
+  @if (searching) {
+    <div class="loading-state">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Searching...</p>
     </div>
+  }
 
-    <div *ngFor="let result of searchResults" class="result-item">
-      <div class="result-header">
-        <div class="result-meta">
-          <mat-chip class="entity-chip">{{ result.entityType }}</mat-chip>
-          <span class="entity-id">#{{ result.entityId }}</span>
-          <span *ngIf="result.threadTitle" class="thread-title">{{ result.threadTitle }}</span>
+  @if (!searching && searchResults.length === 0 && searchForm.value.query) {
+    <div class="no-results">
+      <mat-icon>search_off</mat-icon>
+      <p>No comments found matching "{{ searchForm.value.query }}"</p>
+    </div>
+  }
+
+  @if (searchResults.length > 0) {
+    <div class="search-results">
+      <div class="results-header">
+        <h4>Found {{ searchResults.length }} result(s)</h4>
+      </div>
+      @for (result of searchResults; track result) {
+        <div class="result-item">
+          <div class="result-header">
+            <div class="result-meta">
+              <mat-chip class="entity-chip">{{ result.entityType }}</mat-chip>
+              <span class="entity-id">#{{ result.entityId }}</span>
+              @if (result.threadTitle) {
+                <span class="thread-title">{{ result.threadTitle }}</span>
+              }
+            </div>
+            <span class="result-date">{{ result.createdAt | date:'short' }}</span>
+          </div>
+          <div class="result-content" [innerHTML]="highlightQuery(result.content, searchForm.value.query)"></div>
+          <div class="result-footer">
+            <span class="result-author">
+              <mat-icon>account_circle</mat-icon>
+              {{ result.createdBy }}
+            </span>
+            <a [routerLink]="['/', result.entityType.toLowerCase(), result.entityId]" class="view-link">
+              View Thread
+              <mat-icon>arrow_forward</mat-icon>
+            </a>
+          </div>
         </div>
-        <span class="result-date">{{ result.createdAt | date:'short' }}</span>
-      </div>
-      
-      <div class="result-content" [innerHTML]="highlightQuery(result.content, searchForm.value.query)"></div>
-      
-      <div class="result-footer">
-        <span class="result-author">
-          <mat-icon>account_circle</mat-icon>
-          {{ result.createdBy }}
-        </span>
-        <a [routerLink]="['/', result.entityType.toLowerCase(), result.entityId]" class="view-link">
-          View Thread
-          <mat-icon>arrow_forward</mat-icon>
-        </a>
-      </div>
+      }
     </div>
-  </div>
+  }
 </div>

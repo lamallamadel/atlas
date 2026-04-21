@@ -4,10 +4,12 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
 @Component({
   selector: 'app-progress-bar',
   template: `
-    <div class="progress-bar-container" *ngIf="isNavigating" [@slideDown]>
-      <div class="progress-bar" [style.width.%]="progress"></div>
-    </div>
-  `,
+    @if (isNavigating) {
+      <div class="progress-bar-container" [@slideDown]>
+        <div class="progress-bar" [style.width.%]="progress"></div>
+      </div>
+    }
+    `,
   styles: [`
     .progress-bar-container {
       position: fixed;

@@ -25,7 +25,7 @@ interface DemoCard {
   template: `
     <div class="animations-demo">
       <h1 @fadeIn>Angular Micro-Animations Demo</h1>
-      
+    
       <section class="demo-section">
         <h2>Button Animations</h2>
         <div class="button-group">
@@ -33,39 +33,43 @@ interface DemoCard {
             <mat-icon>save</mat-icon>
             Hover Me (Scale 1.02 + Shadow)
           </button>
-          
-          <app-loading-button 
+    
+          <app-loading-button
             [loading]="isLoading"
             buttonClass="mat-raised-button mat-primary"
             (clicked)="handleLoadingButton()">
             <mat-icon>send</mat-icon>
             {{ isLoading ? 'Loading...' : 'Click to Load' }}
           </app-loading-button>
-          
+    
           <button mat-raised-button color="accent" appAnimatedButton (click)="showSuccess()">
             <mat-icon>check_circle</mat-icon>
             Success Feedback
           </button>
-          
+    
           <button mat-raised-button color="warn" appAnimatedButton (click)="showError()">
             <mat-icon>error</mat-icon>
             Error Feedback
           </button>
         </div>
-        
+    
         <div class="feedback-area">
-          <div *ngIf="successVisible" @bounceIn class="success-message">
-            <mat-icon>check_circle</mat-icon>
-            Success! Action completed.
-          </div>
-          
-          <div *ngIf="errorVisible" [@shakeX]="errorState" class="error-message">
-            <mat-icon>error</mat-icon>
-            Error! Please try again.
-          </div>
+          @if (successVisible) {
+            <div @bounceIn class="success-message">
+              <mat-icon>check_circle</mat-icon>
+              Success! Action completed.
+            </div>
+          }
+    
+          @if (errorVisible) {
+            <div [@shakeX]="errorState" class="error-message">
+              <mat-icon>error</mat-icon>
+              Error! Please try again.
+            </div>
+          }
         </div>
       </section>
-      
+    
       <section class="demo-section">
         <h2>Focus States</h2>
         <div class="focus-demo">
@@ -73,14 +77,14 @@ interface DemoCard {
             <mat-label>Input with Pulse Focus</mat-label>
             <input matInput appAnimatedFocus placeholder="Click to focus">
           </mat-form-field>
-          
+    
           <mat-form-field appearance="outline">
             <mat-label>Textarea with Pulse Focus</mat-label>
             <textarea matInput appAnimatedFocus placeholder="Click to focus" rows="3"></textarea>
           </mat-form-field>
         </div>
       </section>
-      
+    
       <section class="demo-section">
         <h2>Card Animations with Stagger (50ms delay)</h2>
         <div class="controls">
@@ -97,22 +101,24 @@ interface DemoCard {
             Reset
           </button>
         </div>
-        
+    
         <div class="cards-container" [@cardStagger]="cards.length">
-          <mat-card *ngFor="let card of cards" class="demo-card" @scaleIn>
-            <mat-card-header>
-              <mat-card-title>{{ card.title }}</mat-card-title>
-            </mat-card-header>
-            <mat-card-content>
-              <p>{{ card.description }}</p>
-            </mat-card-content>
-            <mat-card-actions>
-              <button mat-button appAnimatedButton>ACTION</button>
-            </mat-card-actions>
-          </mat-card>
+          @for (card of cards; track card) {
+            <mat-card class="demo-card" @scaleIn>
+              <mat-card-header>
+                <mat-card-title>{{ card.title }}</mat-card-title>
+              </mat-card-header>
+              <mat-card-content>
+                <p>{{ card.description }}</p>
+              </mat-card-content>
+              <mat-card-actions>
+                <button mat-button appAnimatedButton>ACTION</button>
+              </mat-card-actions>
+            </mat-card>
+          }
         </div>
       </section>
-      
+    
       <section class="demo-section">
         <h2>Dialog Animations (SlideUp 300ms ease-out)</h2>
         <button mat-raised-button color="primary" appAnimatedButton (click)="openDemoDialog()">
@@ -120,7 +126,7 @@ interface DemoCard {
           Open Dialog with SlideUp
         </button>
       </section>
-      
+    
       <section class="demo-section">
         <h2>List Animations</h2>
         <div class="controls">
@@ -133,15 +139,17 @@ interface DemoCard {
             Remove Item
           </button>
         </div>
-        
+    
         <mat-list [@staggerList]="listItems.length">
-          <mat-list-item *ngFor="let item of listItems" @fadeIn>
-            <mat-icon matListItemIcon>star</mat-icon>
-            <div matListItemTitle>{{ item }}</div>
-          </mat-list-item>
+          @for (item of listItems; track item) {
+            <mat-list-item @fadeIn>
+              <mat-icon matListItemIcon>star</mat-icon>
+              <div matListItemTitle>{{ item }}</div>
+            </mat-list-item>
+          }
         </mat-list>
       </section>
-      
+    
       <section class="demo-section">
         <h2>Custom Spinner</h2>
         <div class="spinner-showcase">
@@ -160,7 +168,7 @@ interface DemoCard {
         </div>
       </section>
     </div>
-  `,
+    `,
   styles: [`
     .animations-demo {
       padding: 24px;

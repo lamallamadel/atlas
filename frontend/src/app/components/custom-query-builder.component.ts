@@ -15,127 +15,122 @@ import { MatSnackBar } from '@angular/material/snack-bar';
             New Query
           </button>
         </mat-card-header>
-        
+    
         <mat-card-content>
-          <div class="query-list" *ngIf="!editingQuery">
-            <mat-form-field appearance="outline" class="filter-field">
-              <mat-label>Filter by Category</mat-label>
-              <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange()">
-                <mat-option value="">All</mat-option>
-                <mat-option value="leads">Leads</mat-option>
-                <mat-option value="sales">Sales</mat-option>
-                <mat-option value="agents">Agents</mat-option>
-                <mat-option value="properties">Properties</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <table mat-table [dataSource]="queries" class="queries-table">
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let query">{{query.name}}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="category">
-                <th mat-header-cell *matHeaderCellDef>Category</th>
-                <td mat-cell *matCellDef="let query">{{query.category}}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="isApproved">
-                <th mat-header-cell *matHeaderCellDef>Status</th>
-                <td mat-cell *matCellDef="let query">
-                  <mat-chip [color]="query.isApproved ? 'primary' : 'warn'" selected>
-                    {{query.isApproved ? 'Approved' : 'Pending'}}
-                  </mat-chip>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="executionCount">
-                <th mat-header-cell *matHeaderCellDef>Executions</th>
-                <td mat-cell *matCellDef="let query">{{query.executionCount || 0}}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let query">
-                  <button mat-icon-button (click)="editQuery(query)" matTooltip="Edit">
-                    <mat-icon>edit</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="executeQuery(query)" 
-                          [disabled]="!query.isApproved" matTooltip="Execute">
-                    <mat-icon>play_arrow</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="deleteQuery(query)" matTooltip="Delete" color="warn">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-          </div>
-
-          <div class="query-editor" *ngIf="editingQuery">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Query Name</mat-label>
-              <input matInput [(ngModel)]="editingQuery.name" required>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput [(ngModel)]="editingQuery.description" rows="2"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Category</mat-label>
-              <mat-select [(ngModel)]="editingQuery.category">
-                <mat-option value="leads">Leads</mat-option>
-                <mat-option value="sales">Sales</mat-option>
-                <mat-option value="agents">Agents</mat-option>
-                <mat-option value="properties">Properties</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>SQL Query</mat-label>
-              <textarea matInput [(ngModel)]="editingQuery.sqlQuery" 
-                        rows="10" 
-                        placeholder="SELECT * FROM dossier WHERE ..."
-                        class="sql-editor"></textarea>
-              <mat-hint>Only SELECT queries are allowed</mat-hint>
-            </mat-form-field>
-
-            <mat-checkbox [(ngModel)]="editingQuery.isPublic">
-              Make this query public
-            </mat-checkbox>
-
-            <div class="editor-actions">
-              <button mat-raised-button (click)="cancelEdit()">Cancel</button>
-              <button mat-raised-button color="primary" (click)="saveQuery()">Save</button>
+          @if (!editingQuery) {
+            <div class="query-list">
+              <mat-form-field appearance="outline" class="filter-field">
+                <mat-label>Filter by Category</mat-label>
+                <mat-select [(ngModel)]="selectedCategory" (selectionChange)="onCategoryChange()">
+                  <mat-option value="">All</mat-option>
+                  <mat-option value="leads">Leads</mat-option>
+                  <mat-option value="sales">Sales</mat-option>
+                  <mat-option value="agents">Agents</mat-option>
+                  <mat-option value="properties">Properties</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <table mat-table [dataSource]="queries" class="queries-table">
+                <ng-container matColumnDef="name">
+                  <th mat-header-cell *matHeaderCellDef>Name</th>
+                  <td mat-cell *matCellDef="let query">{{query.name}}</td>
+                </ng-container>
+                <ng-container matColumnDef="category">
+                  <th mat-header-cell *matHeaderCellDef>Category</th>
+                  <td mat-cell *matCellDef="let query">{{query.category}}</td>
+                </ng-container>
+                <ng-container matColumnDef="isApproved">
+                  <th mat-header-cell *matHeaderCellDef>Status</th>
+                  <td mat-cell *matCellDef="let query">
+                    <mat-chip [color]="query.isApproved ? 'primary' : 'warn'" selected>
+                      {{query.isApproved ? 'Approved' : 'Pending'}}
+                    </mat-chip>
+                  </td>
+                </ng-container>
+                <ng-container matColumnDef="executionCount">
+                  <th mat-header-cell *matHeaderCellDef>Executions</th>
+                  <td mat-cell *matCellDef="let query">{{query.executionCount || 0}}</td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let query">
+                    <button mat-icon-button (click)="editQuery(query)" matTooltip="Edit">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="executeQuery(query)"
+                      [disabled]="!query.isApproved" matTooltip="Execute">
+                      <mat-icon>play_arrow</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="deleteQuery(query)" matTooltip="Delete" color="warn">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
             </div>
-          </div>
-
-          <div class="query-results" *ngIf="queryResults">
-            <h3>Query Results</h3>
-            <table mat-table [dataSource]="queryResults" class="results-table">
-              <ng-container *ngFor="let col of resultColumns" [matColumnDef]="col">
-                <th mat-header-cell *matHeaderCellDef>{{col}}</th>
-                <td mat-cell *matCellDef="let row">{{row[col]}}</td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="resultColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: resultColumns;"></tr>
-            </table>
-
-            <button mat-raised-button (click)="exportResults()" class="export-btn">
-              <mat-icon>download</mat-icon>
-              Export to CSV
-            </button>
-          </div>
+          }
+    
+          @if (editingQuery) {
+            <div class="query-editor">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Query Name</mat-label>
+                <input matInput [(ngModel)]="editingQuery.name" required>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput [(ngModel)]="editingQuery.description" rows="2"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Category</mat-label>
+                <mat-select [(ngModel)]="editingQuery.category">
+                  <mat-option value="leads">Leads</mat-option>
+                  <mat-option value="sales">Sales</mat-option>
+                  <mat-option value="agents">Agents</mat-option>
+                  <mat-option value="properties">Properties</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>SQL Query</mat-label>
+                <textarea matInput [(ngModel)]="editingQuery.sqlQuery"
+                  rows="10"
+                  placeholder="SELECT * FROM dossier WHERE ..."
+                class="sql-editor"></textarea>
+                <mat-hint>Only SELECT queries are allowed</mat-hint>
+              </mat-form-field>
+              <mat-checkbox [(ngModel)]="editingQuery.isPublic">
+                Make this query public
+              </mat-checkbox>
+              <div class="editor-actions">
+                <button mat-raised-button (click)="cancelEdit()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="saveQuery()">Save</button>
+              </div>
+            </div>
+          }
+    
+          @if (queryResults) {
+            <div class="query-results">
+              <h3>Query Results</h3>
+              <table mat-table [dataSource]="queryResults" class="results-table">
+                @for (col of resultColumns; track col) {
+                  <ng-container [matColumnDef]="col">
+                    <th mat-header-cell *matHeaderCellDef>{{col}}</th>
+                    <td mat-cell *matCellDef="let row">{{row[col]}}</td>
+                  </ng-container>
+                }
+                <tr mat-header-row *matHeaderRowDef="resultColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: resultColumns;"></tr>
+              </table>
+              <button mat-raised-button (click)="exportResults()" class="export-btn">
+                <mat-icon>download</mat-icon>
+                Export to CSV
+              </button>
+            </div>
+          }
         </mat-card-content>
       </mat-card>
     </div>
-  `,
+    `,
   styles: [`
     .custom-query-builder {
       padding: 20px;

@@ -25,60 +25,66 @@ interface CachedDossier {
         </h3>
         <p class="subtitle">Ces dossiers sont consultables même sans connexion internet</p>
       </div>
-
-      <div class="dossiers-list" *ngIf="dossiers.length > 0">
-        <app-swipeable-card 
-          *ngFor="let dossier of dossiers"
+    
+      @if (dossiers.length > 0) {
+        <div class="dossiers-list">
+          @for (dossier of dossiers; track dossier) {
+            <app-swipeable-card
           [rightAction]="{
             icon: 'visibility',
             label: 'Voir',
             color: '#2c5aa0',
             action: 'view'
           }"
-          (swipeRight)="viewDossier(dossier.id)"
-          class="dossier-card-wrapper">
-          <div class="dossier-card" role="button" tabindex="0" (click)="viewDossier(dossier.id)" (keydown.enter)="viewDossier(dossier.id)" (keydown.space)="$event.preventDefault(); viewDossier(dossier.id)">
-            <div class="dossier-header">
-              <div class="dossier-avatar">
-                {{ getInitials(dossier.leadName) }}
+              (swipeRight)="viewDossier(dossier.id)"
+              class="dossier-card-wrapper">
+              <div class="dossier-card" role="button" tabindex="0" (click)="viewDossier(dossier.id)" (keydown.enter)="viewDossier(dossier.id)" (keydown.space)="$event.preventDefault(); viewDossier(dossier.id)">
+                <div class="dossier-header">
+                  <div class="dossier-avatar">
+                    {{ getInitials(dossier.leadName) }}
+                  </div>
+                  <div class="dossier-info">
+                    <h4>{{ dossier.leadName }}</h4>
+                    <p class="dossier-contact">
+                      <mat-icon class="small-icon">phone</mat-icon>
+                      {{ dossier.leadPhone }}
+                    </p>
+                    @if (dossier.leadEmail) {
+                      <p class="dossier-contact">
+                        <mat-icon class="small-icon">email</mat-icon>
+                        {{ dossier.leadEmail }}
+                      </p>
+                    }
+                  </div>
+                  <div class="dossier-status">
+                    <span class="status-badge" [class]="'status-' + dossier.status.toLowerCase()">
+                      {{ getStatusLabel(dossier.status) }}
+                    </span>
+                  </div>
+                </div>
+                <div class="dossier-footer">
+                  <span class="cache-badge">
+                    <mat-icon class="tiny-icon">offline_pin</mat-icon>
+                    Disponible hors ligne
+                  </span>
+                  <span class="date-info">
+                    {{ formatDate(dossier.updatedAt) }}
+                  </span>
+                </div>
               </div>
-              <div class="dossier-info">
-                <h4>{{ dossier.leadName }}</h4>
-                <p class="dossier-contact">
-                  <mat-icon class="small-icon">phone</mat-icon>
-                  {{ dossier.leadPhone }}
-                </p>
-                <p class="dossier-contact" *ngIf="dossier.leadEmail">
-                  <mat-icon class="small-icon">email</mat-icon>
-                  {{ dossier.leadEmail }}
-                </p>
-              </div>
-              <div class="dossier-status">
-                <span class="status-badge" [class]="'status-' + dossier.status.toLowerCase()">
-                  {{ getStatusLabel(dossier.status) }}
-                </span>
-              </div>
-            </div>
-
-            <div class="dossier-footer">
-              <span class="cache-badge">
-                <mat-icon class="tiny-icon">offline_pin</mat-icon>
-                Disponible hors ligne
-              </span>
-              <span class="date-info">
-                {{ formatDate(dossier.updatedAt) }}
-              </span>
-            </div>
-          </div>
-        </app-swipeable-card>
-      </div>
-
-      <div class="empty-state" *ngIf="dossiers.length === 0">
-        <mat-icon class="empty-icon">cloud_off</mat-icon>
-        <h4>Aucun dossier hors ligne</h4>
-        <p>Les dossiers consultés récemment seront automatiquement disponibles hors ligne</p>
-      </div>
-
+            </app-swipeable-card>
+          }
+        </div>
+      }
+    
+      @if (dossiers.length === 0) {
+        <div class="empty-state">
+          <mat-icon class="empty-icon">cloud_off</mat-icon>
+          <h4>Aucun dossier hors ligne</h4>
+          <p>Les dossiers consultés récemment seront automatiquement disponibles hors ligne</p>
+        </div>
+      }
+    
       <div class="viewer-actions">
         <button mat-stroked-button (click)="clearCache()" [disabled]="dossiers.length === 0">
           <mat-icon>delete_sweep</mat-icon>
@@ -90,7 +96,7 @@ interface CachedDossier {
         </button>
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .offline-viewer {
       padding: 16px;

@@ -4,30 +4,33 @@ import { I18nService, SupportedLocale } from '../services/i18n.service';
 @Component({
   selector: 'app-locale-switcher',
   template: `
-    <button mat-icon-button [matMenuTriggerFor]="localeMenu" 
-            class="locale-switcher"
-            [attr.aria-label]="'Change language' | localize">
+    <button mat-icon-button [matMenuTriggerFor]="localeMenu"
+      class="locale-switcher"
+      [attr.aria-label]="'Change language' | localize">
       <span class="locale-flag">{{ currentLocaleInfo?.flag }}</span>
       <mat-icon class="locale-icon">language</mat-icon>
     </button>
-
+    
     <mat-menu #localeMenu="matMenu" class="locale-menu">
       <div class="locale-menu-header" i18n="@@localeMenuHeader">
         Choose Language / Choisir la langue
       </div>
       <mat-divider></mat-divider>
-      <button mat-menu-item 
-              *ngFor="let locale of supportedLocales"
-              (click)="changeLocale(locale.code)"
-              [class.active]="locale.code === currentLocale"
-              [attr.aria-label]="'Switch to ' + locale.nativeName">
-        <span class="locale-flag">{{ locale.flag }}</span>
-        <span class="locale-name">{{ locale.nativeName }}</span>
-        <span class="locale-name-secondary">({{ locale.name }})</span>
-        <mat-icon *ngIf="locale.code === currentLocale" class="locale-check">check</mat-icon>
-      </button>
+      @for (locale of supportedLocales; track locale) {
+        <button mat-menu-item
+          (click)="changeLocale(locale.code)"
+          [class.active]="locale.code === currentLocale"
+          [attr.aria-label]="'Switch to ' + locale.nativeName">
+          <span class="locale-flag">{{ locale.flag }}</span>
+          <span class="locale-name">{{ locale.nativeName }}</span>
+          <span class="locale-name-secondary">({{ locale.name }})</span>
+          @if (locale.code === currentLocale) {
+            <mat-icon class="locale-check">check</mat-icon>
+          }
+        </button>
+      }
     </mat-menu>
-  `,
+    `,
   styles: [`
     .locale-switcher {
       display: flex;

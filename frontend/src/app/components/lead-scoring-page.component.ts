@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -13,13 +13,12 @@ import { ToastNotificationService } from '../services/toast-notification.service
   selector: 'app-lead-scoring-page',
   standalone: true,
   imports: [
-    CommonModule,
     MatTabsModule,
     MatButtonModule,
     MatIconModule,
     MatDialogModule,
     LeadPriorityQueueComponent
-  ],
+],
   template: `
     <div class="lead-scoring-page">
       <div class="page-header">

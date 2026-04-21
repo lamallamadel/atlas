@@ -12,25 +12,30 @@ interface NavItem {
 @Component({
   selector: 'app-mobile-bottom-navigation',
   template: `
-    <nav class="mobile-bottom-nav" *ngIf="shouldShowNav" role="navigation" aria-label="Navigation principale mobile">
-      <button
-        *ngFor="let item of navItems"
-        class="nav-item"
-        [class.active]="isActive(item.route)"
-        (click)="navigate(item.route)"
-        [attr.aria-label]="item.label"
-        [attr.aria-current]="isActive(item.route) ? 'page' : null"
-        type="button">
-        <div class="nav-icon-wrapper">
-          <mat-icon [attr.aria-hidden]="true">{{ item.icon }}</mat-icon>
-          <span class="badge" *ngIf="item.badge && item.badge > 0" [attr.aria-label]="item.badge + ' notifications'">
-            {{ item.badge > 99 ? '99+' : item.badge }}
-          </span>
-        </div>
-        <span class="nav-label">{{ item.label }}</span>
-      </button>
-    </nav>
-  `,
+    @if (shouldShowNav) {
+      <nav class="mobile-bottom-nav" role="navigation" aria-label="Navigation principale mobile">
+        @for (item of navItems; track item) {
+          <button
+            class="nav-item"
+            [class.active]="isActive(item.route)"
+            (click)="navigate(item.route)"
+            [attr.aria-label]="item.label"
+            [attr.aria-current]="isActive(item.route) ? 'page' : null"
+            type="button">
+            <div class="nav-icon-wrapper">
+              <mat-icon [attr.aria-hidden]="true">{{ item.icon }}</mat-icon>
+              @if (item.badge && item.badge > 0) {
+                <span class="badge" [attr.aria-label]="item.badge + ' notifications'">
+                  {{ item.badge > 99 ? '99+' : item.badge }}
+                </span>
+              }
+            </div>
+            <span class="nav-label">{{ item.label }}</span>
+          </button>
+        }
+      </nav>
+    }
+    `,
   styles: [`
     .mobile-bottom-nav {
       display: none;

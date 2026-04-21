@@ -21,7 +21,9 @@
       <label class="sr-filter-label" for="f-ville">Ville</label>
       <select class="at-form-select" id="f-ville" [(ngModel)]="filters.ville" (change)="applyFilters()">
         <option value="">Toutes les villes</option>
-        <option *ngFor="let v of villes" [value]="v">{{v}}</option>
+        @for (v of villes; track v) {
+          <option [value]="v">{{v}}</option>
+        }
       </select>
     </div>
 
@@ -49,9 +51,11 @@
     <div class="sr-filter-group">
       <p class="sr-filter-label">Nombre de pièces</p>
       <div class="sr-chip-group">
-        <button *ngFor="let p of [0,1,2,3,4]" class="sr-chip" [class.active]="filters.pieces===p" (click)="setPiecesFilter(p)">
-          {{p === 0 ? 'Tous' : p < 4 ? p : '4+'}}
-        </button>
+        @for (p of [0,1,2,3,4]; track p) {
+          <button class="sr-chip" [class.active]="filters.pieces===p" (click)="setPiecesFilter(p)">
+            {{p === 0 ? 'Tous' : p < 4 ? p : '4+'}}
+          </button>
+        }
       </div>
     </div>
   </aside>
@@ -75,58 +79,70 @@
     </div>
 
     <!-- Empty state -->
-    <div *ngIf="displayedListings.length === 0" class="at-empty-state">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-      <p class="at-empty-state-title">Aucune annonce trouvée</p>
-      <p class="at-empty-state-desc">Essayez de modifier vos critères de recherche.</p>
-      <button class="at-btn at-btn-primary" style="margin-top:1rem;" (click)="resetFilters()">Réinitialiser les filtres</button>
-    </div>
+    @if (displayedListings.length === 0) {
+      <div class="at-empty-state">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <p class="at-empty-state-title">Aucune annonce trouvée</p>
+        <p class="at-empty-state-desc">Essayez de modifier vos critères de recherche.</p>
+        <button class="at-btn at-btn-primary" style="margin-top:1rem;" (click)="resetFilters()">Réinitialiser les filtres</button>
+      </div>
+    }
 
     <!-- Listing grid -->
-    <div class="sr-grid" *ngIf="displayedListings.length > 0">
-      <article *ngFor="let listing of displayedListings"
-               class="sr-listing-card"
-               (click)="navigateToDetail(listing)"
-               role="button" tabindex="0"
-               (keydown.enter)="navigateToDetail(listing)">
-        <div class="sr-listing-img">
-          <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220"/>
-          <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
-            {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
-          </span>
-          <div class="ph-badges" *ngIf="listing.verified">
-            <span class="at-badge-trust">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Vérifié
-            </span>
-          </div>
-        </div>
-        <div class="ph-listing-body">
-          <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
-          <div class="ph-title">{{listing.title}}</div>
-          <div class="ph-location">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {{listing.zone}}, {{listing.city}}
-          </div>
-          <div class="ph-meta">
-            <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>{{listing.surface}} m²</span>
-            <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg>{{listing.pieces}} pièces</span>
-            <span class="ph-meta-date">{{listing.agent.agency}}</span>
-          </div>
-        </div>
-      </article>
-    </div>
+    @if (displayedListings.length > 0) {
+      <div class="sr-grid">
+        @for (listing of displayedListings; track listing) {
+          <article
+            class="sr-listing-card"
+            (click)="navigateToDetail(listing)"
+            role="button" tabindex="0"
+            (keydown.enter)="navigateToDetail(listing)">
+            <div class="sr-listing-img">
+              <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="360" height="220"/>
+              <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
+                {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
+              </span>
+              @if (listing.verified) {
+                <div class="ph-badges">
+                  <span class="at-badge-trust">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    Vérifié
+                  </span>
+                </div>
+              }
+            </div>
+            <div class="ph-listing-body">
+              <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
+              <div class="ph-title">{{listing.title}}</div>
+              <div class="ph-location">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{listing.zone}}, {{listing.city}}
+              </div>
+              <div class="ph-meta">
+                <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>{{listing.surface}} m²</span>
+                <span class="ph-meta-item"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg>{{listing.pieces}} pièces</span>
+                <span class="ph-meta-date">{{listing.agent.agency}}</span>
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    }
 
     <!-- Pagination -->
-    <nav class="at-pagination" aria-label="Pagination des résultats" *ngIf="totalPages > 1">
-      <button class="at-page-btn" (click)="goToPage(filters.page - 1)" [disabled]="filters.page <= 1" aria-label="Page précédente">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-      </button>
-      <button *ngFor="let p of getPageNumbers()" class="at-page-btn" [class.active]="p===filters.page" (click)="goToPage(p)">{{p}}</button>
-      <button class="at-page-btn" (click)="goToPage(filters.page + 1)" [disabled]="filters.page >= totalPages" aria-label="Page suivante">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-      </button>
-    </nav>
+    @if (totalPages > 1) {
+      <nav class="at-pagination" aria-label="Pagination des résultats">
+        <button class="at-page-btn" (click)="goToPage(filters.page - 1)" [disabled]="filters.page <= 1" aria-label="Page précédente">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        </button>
+        @for (p of getPageNumbers(); track p) {
+          <button class="at-page-btn" [class.active]="p===filters.page" (click)="goToPage(p)">{{p}}</button>
+        }
+        <button class="at-page-btn" (click)="goToPage(filters.page + 1)" [disabled]="filters.page >= totalPages" aria-label="Page suivante">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+        </button>
+      </nav>
+    }
 
   </main>
 </div>

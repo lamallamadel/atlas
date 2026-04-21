@@ -8,22 +8,24 @@ import { DocumentAudit, DocumentActionType } from '../models/document-workflow.m
     <div class="audit-trail">
       <h3>Audit Trail</h3>
       <div class="timeline">
-        <div class="audit-entry" *ngFor="let audit of auditTrail">
-          <div class="audit-icon" [ngClass]="getIconClass(audit.actionType)">
-            <i [class]="getIcon(audit.actionType)"></i>
-          </div>
-          <div class="audit-content">
-            <div class="audit-header">
-              <strong>{{getActionLabel(audit.actionType)}}</strong>
-              <span class="audit-time">{{audit.actionAt | date:'short'}}</span>
+        @for (audit of auditTrail; track audit) {
+          <div class="audit-entry">
+            <div class="audit-icon" [ngClass]="getIconClass(audit.actionType)">
+              <i [class]="getIcon(audit.actionType)"></i>
             </div>
-            <p class="audit-description">{{audit.description}}</p>
-            <p class="audit-user">By: {{audit.actionBy}}</p>
+            <div class="audit-content">
+              <div class="audit-header">
+                <strong>{{getActionLabel(audit.actionType)}}</strong>
+                <span class="audit-time">{{audit.actionAt | date:'short'}}</span>
+              </div>
+              <p class="audit-description">{{audit.description}}</p>
+              <p class="audit-user">By: {{audit.actionBy}}</p>
+            </div>
           </div>
-        </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .audit-trail { padding: 20px; }
     .timeline { position: relative; padding-left: 40px; }

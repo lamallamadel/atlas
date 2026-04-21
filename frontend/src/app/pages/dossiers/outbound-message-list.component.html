@@ -1,8 +1,8 @@
 <div class="outbound-message-list">
   <div class="list-header">
     <h3 class="list-title">Messages envoyés</h3>
-    <button 
-      class="btn-refresh" 
+    <button
+      class="btn-refresh"
       (click)="loadMessages()"
       [disabled]="loading"
       aria-label="Actualiser la liste des messages">
@@ -10,77 +10,94 @@
     </button>
   </div>
 
-  <div *ngIf="loading && messages.length === 0" class="loading-state">
-    <div class="spinner"></div>
-    <p>Chargement des messages...</p>
-  </div>
+  @if (loading && messages.length === 0) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Chargement des messages...</p>
+    </div>
+  }
 
-  <div *ngIf="error && messages.length === 0" class="error-state">
-    <p class="error-message">{{ error }}</p>
-    <button class="btn-retry" (click)="loadMessages()">Réessayer</button>
-  </div>
+  @if (error && messages.length === 0) {
+    <div class="error-state">
+      <p class="error-message">{{ error }}</p>
+      <button class="btn-retry" (click)="loadMessages()">Réessayer</button>
+    </div>
+  }
 
-  <app-empty-state 
-    *ngIf="!loading && messages.length === 0 && !error" 
-    [context]="EmptyStateContext.NO_MESSAGES"
-    [isNewUser]="true">
-  </app-empty-state>
+  @if (!loading && messages.length === 0 && !error) {
+    <app-empty-state
+      [context]="EmptyStateContext.NO_MESSAGES"
+      [isNewUser]="true">
+    </app-empty-state>
+  }
 
-  <div *ngIf="messages.length > 0" class="timeline">
-    <div *ngFor="let message of messages" class="timeline-item">
-      <div class="timeline-marker" [class]="'marker-' + message.status.toLowerCase()"></div>
-      <div class="timeline-content">
-        <div class="message-card">
-          <div class="message-header">
-            <div class="message-info">
-              <span class="message-timestamp">{{ formatTimestamp(message.createdAt) }}</span>
-              <span class="message-recipient">{{ message.recipientPhone }}</span>
-            </div>
-            <div class="message-status">
-              <span [class]="getStatusBadgeClass(message.status)">
-                <span class="status-icon">{{ getStatusIcon(message.status) }}</span>
-                <span class="status-label">{{ getStatusLabel(message.status) }}</span>
-              </span>
-            </div>
-          </div>
-
-          <div class="message-body">
-            <p class="message-content">{{ message.content }}</p>
-            
-            <div *ngIf="message.templateId" class="message-template-info">
-              <span class="template-badge">Template: {{ message.templateId }}</span>
-            </div>
-          </div>
-
-          <div class="message-footer">
-            <div class="message-meta">
-              <span *ngIf="message.attemptCount > 0" class="meta-item">
-                Tentatives: {{ message.attemptCount }}
-              </span>
-              <span *ngIf="message.sentAt" class="meta-item">
-                Envoyé: {{ formatTimestamp(message.sentAt) }}
-              </span>
-              <span *ngIf="message.lastAttemptAt" class="meta-item">
-                Dernière tentative: {{ formatTimestamp(message.lastAttemptAt) }}
-              </span>
-            </div>
-
-            <div *ngIf="message.status === OutboundMessageStatus.FAILED" class="failure-info">
-              <div *ngIf="message.failureReason" class="failure-reason">
-                <span class="failure-icon">⚠️</span>
-                <span class="failure-text">{{ message.failureReason }}</span>
+  @if (messages.length > 0) {
+    <div class="timeline">
+      @for (message of messages; track message) {
+        <div class="timeline-item">
+          <div class="timeline-marker" [class]="'marker-' + message.status.toLowerCase()"></div>
+          <div class="timeline-content">
+            <div class="message-card">
+              <div class="message-header">
+                <div class="message-info">
+                  <span class="message-timestamp">{{ formatTimestamp(message.createdAt) }}</span>
+                  <span class="message-recipient">{{ message.recipientPhone }}</span>
+                </div>
+                <div class="message-status">
+                  <span [class]="getStatusBadgeClass(message.status)">
+                    <span class="status-icon">{{ getStatusIcon(message.status) }}</span>
+                    <span class="status-label">{{ getStatusLabel(message.status) }}</span>
+                  </span>
+                </div>
               </div>
-              <button 
-                class="btn-retry-message" 
-                (click)="onRetry(message)"
-                [disabled]="!canRetry(message)"
-                aria-label="Réessayer l'envoi du message">
-                Réessayer
-              </button>
+              <div class="message-body">
+                <p class="message-content">{{ message.content }}</p>
+                @if (message.templateId) {
+                  <div class="message-template-info">
+                    <span class="template-badge">Template: {{ message.templateId }}</span>
+                  </div>
+                }
+              </div>
+              <div class="message-footer">
+                <div class="message-meta">
+                  @if (message.attemptCount > 0) {
+                    <span class="meta-item">
+                      Tentatives: {{ message.attemptCount }}
+                    </span>
+                  }
+                  @if (message.sentAt) {
+                    <span class="meta-item">
+                      Envoyé: {{ formatTimestamp(message.sentAt) }}
+                    </span>
+                  }
+                  @if (message.lastAttemptAt) {
+                    <span class="meta-item">
+                      Dernière tentative: {{ formatTimestamp(message.lastAttemptAt) }}
+                    </span>
+                  }
+                </div>
+                @if (message.status === OutboundMessageStatus.FAILED) {
+                  <div class="failure-info">
+                    @if (message.failureReason) {
+                      <div class="failure-reason">
+                        <span class="failure-icon">⚠️</span>
+                        <span class="failure-text">{{ message.failureReason }}</span>
+                      </div>
+                    }
+                    <button
+                      class="btn-retry-message"
+                      (click)="onRetry(message)"
+                      [disabled]="!canRetry(message)"
+                      aria-label="Réessayer l'envoi du message">
+                      Réessayer
+                    </button>
+                  </div>
+                }
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     </div>
-  </div>
+  }
 </div>

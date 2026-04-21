@@ -1,7 +1,9 @@
 <div class="datetime-wrapper" [formGroup]="form" (blur)="markTouched()">
   <div class="datetime-label">
     <span>{{ label }}</span>
-    <span *ngIf="required" class="required" aria-label="obligatoire">*</span>
+    @if (required) {
+      <span class="required" aria-label="obligatoire">*</span>
+    }
   </div>
 
   <div class="datetime-row">
@@ -13,25 +15,29 @@
         formControlName="date"
         [placeholder]="datePlaceholder"
         (blur)="markTouched()"
-      />
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
+        />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
 
-    <mat-form-field appearance="outline" class="time-part">
-      <mat-label>Heure</mat-label>
-      <input
-        matInput
-        type="time"
-        formControlName="time"
-        [placeholder]="timePlaceholder"
-        (blur)="markTouched()"
-      />
-    </mat-form-field>
-  </div>
+      <mat-form-field appearance="outline" class="time-part">
+        <mat-label>Heure</mat-label>
+        <input
+          matInput
+          type="time"
+          formControlName="time"
+          [placeholder]="timePlaceholder"
+          (blur)="markTouched()"
+          />
+        </mat-form-field>
+      </div>
 
-  <div class="datetime-errors" aria-live="polite">
-    <div *ngIf="showRequiredError" class="datetime-error">Ce champ est requis</div>
-    <div *ngIf="showInvalidTimeError" class="datetime-error">Heure invalide (format HH:mm)</div>
-  </div>
-</div>
+      <div class="datetime-errors" aria-live="polite">
+        @if (showRequiredError) {
+          <div class="datetime-error">Ce champ est requis</div>
+        }
+        @if (showInvalidTimeError) {
+          <div class="datetime-error">Heure invalide (format HH:mm)</div>
+        }
+      </div>
+    </div>

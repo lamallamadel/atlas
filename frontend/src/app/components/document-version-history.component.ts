@@ -8,28 +8,34 @@ import { DocumentVersion } from '../models/document-workflow.model';
     <div class="version-history">
       <h3>Version History</h3>
       <div class="versions-list">
-        <div class="version-item" *ngFor="let version of versions">
-          <div class="version-header">
-            <span class="version-number">v{{version.versionNumber}}</span>
-            <span class="version-badge" *ngIf="version.isCurrent">Current</span>
+        @for (version of versions; track version) {
+          <div class="version-item">
+            <div class="version-header">
+              <span class="version-number">v{{version.versionNumber}}</span>
+              @if (version.isCurrent) {
+                <span class="version-badge">Current</span>
+              }
+            </div>
+            <div class="version-details">
+              <p><strong>File:</strong> {{version.fileName}} ({{formatSize(version.fileSize)}})</p>
+              <p><strong>Uploaded:</strong> {{version.createdAt | date:'short'}} by {{version.uploadedBy}}</p>
+              @if (version.versionNotes) {
+                <p><strong>Notes:</strong> {{version.versionNotes}}</p>
+              }
+            </div>
+            <div class="version-actions">
+              <button (click)="compareWith(version)" [disabled]="!canCompare(version)">
+                Compare
+              </button>
+              <button (click)="restore(version)" [disabled]="version.isCurrent">
+                Restore
+              </button>
+            </div>
           </div>
-          <div class="version-details">
-            <p><strong>File:</strong> {{version.fileName}} ({{formatSize(version.fileSize)}})</p>
-            <p><strong>Uploaded:</strong> {{version.createdAt | date:'short'}} by {{version.uploadedBy}}</p>
-            <p *ngIf="version.versionNotes"><strong>Notes:</strong> {{version.versionNotes}}</p>
-          </div>
-          <div class="version-actions">
-            <button (click)="compareWith(version)" [disabled]="!canCompare(version)">
-              Compare
-            </button>
-            <button (click)="restore(version)" [disabled]="version.isCurrent">
-              Restore
-            </button>
-          </div>
-        </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .version-history { padding: 20px; }
     .versions-list { display: flex; flex-direction: column; gap: 15px; }

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -14,14 +14,13 @@ import { ToastNotificationService } from '../services/toast-notification.service
   selector: 'app-lead-priority-queue',
   standalone: true,
   imports: [
-    CommonModule,
     MatCardModule,
     MatButtonModule,
     MatIconModule,
     MatChipsModule,
     MatProgressSpinnerModule,
     MatTooltipModule
-  ],
+],
   template: `
     <mat-card class="priority-queue-card">
       <mat-card-header>
@@ -38,88 +37,96 @@ import { ToastNotificationService } from '../services/toast-notification.service
           </button>
         </div>
       </mat-card-header>
-
+    
       <mat-card-content>
-        <div *ngIf="loading" class="loading-container">
-          <mat-spinner diameter="40"></mat-spinner>
-        </div>
-
-        <div *ngIf="!loading && leads.length === 0" class="empty-state">
-          <mat-icon class="empty-icon">inbox</mat-icon>
-          <p>No high-priority leads at the moment</p>
-        </div>
-
-        <div *ngIf="!loading && leads.length > 0" class="leads-list">
-          <div *ngFor="let lead of leads" 
-               class="lead-item" 
-               role="button"
-               tabindex="0"
-               [class.urgent]="lead.urgencyLevel === 'urgent'"
-               [class.high]="lead.urgencyLevel === 'high'"
-               [class.medium]="lead.urgencyLevel === 'medium'"
-               (click)="viewDossier(lead.dossier.id)"
-               (keydown.enter)="viewDossier(lead.dossier.id)"
-               (keydown.space)="$event.preventDefault(); viewDossier(lead.dossier.id)">
-            
-            <div class="lead-score">
-              <div class="score-value">{{ lead.score.totalScore }}</div>
-              <div class="score-label">pts</div>
-            </div>
-
-            <div class="lead-info">
-              <div class="lead-name">
-                {{ lead.dossier.leadName || 'Unknown Lead' }}
-              </div>
-              <div class="lead-details">
-                <span *ngIf="lead.dossier.leadPhone" class="detail-item">
-                  <mat-icon class="detail-icon">phone</mat-icon>
-                  {{ lead.dossier.leadPhone }}
-                </span>
-                <span *ngIf="lead.dossier.source" class="detail-item">
-                  <mat-icon class="detail-icon">source</mat-icon>
-                  {{ lead.dossier.source }}
-                </span>
-                <span class="detail-item">
-                  <mat-icon class="detail-icon">schedule</mat-icon>
-                  {{ formatDate(lead.dossier.createdAt) }}
-                </span>
-              </div>
-              <div class="score-breakdown">
-                <span class="breakdown-item" matTooltip="Source Score">
-                  <mat-icon class="breakdown-icon">business</mat-icon>
-                  {{ lead.score.sourceScore }}
-                </span>
-                <span class="breakdown-item" matTooltip="Response Time Score">
-                  <mat-icon class="breakdown-icon">schedule</mat-icon>
-                  {{ lead.score.responseTimeScore }}
-                </span>
-                <span class="breakdown-item" matTooltip="Engagement Score">
-                  <mat-icon class="breakdown-icon">chat</mat-icon>
-                  {{ lead.score.engagementScore }}
-                </span>
-                <span class="breakdown-item" matTooltip="Property Match Score">
-                  <mat-icon class="breakdown-icon">home</mat-icon>
-                  {{ lead.score.propertyMatchScore }}
-                </span>
-              </div>
-            </div>
-
-            <div class="lead-urgency">
-              <mat-chip [class]="'urgency-chip ' + lead.urgencyLevel">
-                {{ getUrgencyLabel(lead.urgencyLevel) }}
-              </mat-chip>
-            </div>
-
-            <div class="lead-actions">
-              <button mat-icon-button (click)="viewDossier(lead.dossier.id); $event.stopPropagation()" matTooltip="View Details">
-                <mat-icon>visibility</mat-icon>
-              </button>
-            </div>
+        @if (loading) {
+          <div class="loading-container">
+            <mat-spinner diameter="40"></mat-spinner>
           </div>
-        </div>
+        }
+    
+        @if (!loading && leads.length === 0) {
+          <div class="empty-state">
+            <mat-icon class="empty-icon">inbox</mat-icon>
+            <p>No high-priority leads at the moment</p>
+          </div>
+        }
+    
+        @if (!loading && leads.length > 0) {
+          <div class="leads-list">
+            @for (lead of leads; track lead) {
+              <div
+                class="lead-item"
+                role="button"
+                tabindex="0"
+                [class.urgent]="lead.urgencyLevel === 'urgent'"
+                [class.high]="lead.urgencyLevel === 'high'"
+                [class.medium]="lead.urgencyLevel === 'medium'"
+                (click)="viewDossier(lead.dossier.id)"
+                (keydown.enter)="viewDossier(lead.dossier.id)"
+                (keydown.space)="$event.preventDefault(); viewDossier(lead.dossier.id)">
+                <div class="lead-score">
+                  <div class="score-value">{{ lead.score.totalScore }}</div>
+                  <div class="score-label">pts</div>
+                </div>
+                <div class="lead-info">
+                  <div class="lead-name">
+                    {{ lead.dossier.leadName || 'Unknown Lead' }}
+                  </div>
+                  <div class="lead-details">
+                    @if (lead.dossier.leadPhone) {
+                      <span class="detail-item">
+                        <mat-icon class="detail-icon">phone</mat-icon>
+                        {{ lead.dossier.leadPhone }}
+                      </span>
+                    }
+                    @if (lead.dossier.source) {
+                      <span class="detail-item">
+                        <mat-icon class="detail-icon">source</mat-icon>
+                        {{ lead.dossier.source }}
+                      </span>
+                    }
+                    <span class="detail-item">
+                      <mat-icon class="detail-icon">schedule</mat-icon>
+                      {{ formatDate(lead.dossier.createdAt) }}
+                    </span>
+                  </div>
+                  <div class="score-breakdown">
+                    <span class="breakdown-item" matTooltip="Source Score">
+                      <mat-icon class="breakdown-icon">business</mat-icon>
+                      {{ lead.score.sourceScore }}
+                    </span>
+                    <span class="breakdown-item" matTooltip="Response Time Score">
+                      <mat-icon class="breakdown-icon">schedule</mat-icon>
+                      {{ lead.score.responseTimeScore }}
+                    </span>
+                    <span class="breakdown-item" matTooltip="Engagement Score">
+                      <mat-icon class="breakdown-icon">chat</mat-icon>
+                      {{ lead.score.engagementScore }}
+                    </span>
+                    <span class="breakdown-item" matTooltip="Property Match Score">
+                      <mat-icon class="breakdown-icon">home</mat-icon>
+                      {{ lead.score.propertyMatchScore }}
+                    </span>
+                  </div>
+                </div>
+                <div class="lead-urgency">
+                  <mat-chip [class]="'urgency-chip ' + lead.urgencyLevel">
+                    {{ getUrgencyLabel(lead.urgencyLevel) }}
+                  </mat-chip>
+                </div>
+                <div class="lead-actions">
+                  <button mat-icon-button (click)="viewDossier(lead.dossier.id); $event.stopPropagation()" matTooltip="View Details">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </mat-card-content>
     </mat-card>
-  `,
+    `,
   styles: [`
     .priority-queue-card {
       margin: 20px;

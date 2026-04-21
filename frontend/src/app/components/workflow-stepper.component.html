@@ -4,15 +4,19 @@
       <mat-icon aria-hidden="true">timeline</mat-icon>
       <span>Pipeline dossier</span>
     </div>
-    <div class="workflow-meta" *ngIf="status">
-      <span class="workflow-chip" [ngClass]="closeVariantClass" *ngIf="isClosed">
-        <mat-icon aria-hidden="true">{{ isWon ? 'check_circle' : 'cancel' }}</mat-icon>
-        <span>{{ isWon ? 'Gagné' : 'Perdu' }}</span>
-      </span>
-      <span class="workflow-progress" aria-label="Progression">
-        {{ progressPercent }}%
-      </span>
-    </div>
+    @if (status) {
+      <div class="workflow-meta">
+        @if (isClosed) {
+          <span class="workflow-chip" [ngClass]="closeVariantClass">
+            <mat-icon aria-hidden="true">{{ isWon ? 'check_circle' : 'cancel' }}</mat-icon>
+            <span>{{ isWon ? 'Gagné' : 'Perdu' }}</span>
+          </span>
+        }
+        <span class="workflow-progress" aria-label="Progression">
+          {{ progressPercent }}%
+        </span>
+      </div>
+    }
   </div>
 
   <div class="workflow-track">
@@ -20,20 +24,23 @@
   </div>
 
   <ol class="workflow-steps">
-    <li
-      *ngFor="let step of steps; let i = index"
-      class="workflow-step"
-      [class.completed]="i < currentIndex"
-      [class.active]="i === currentIndex">
-      <div class="step-dot" aria-hidden="true">
-        <mat-icon>{{ stepIcon(step) }}</mat-icon>
-      </div>
-      <div class="step-label">{{ stepLabel(step) }}</div>
-    </li>
+    @for (step of steps; track step; let i = $index) {
+      <li
+        class="workflow-step"
+        [class.completed]="i < currentIndex"
+        [class.active]="i === currentIndex">
+        <div class="step-dot" aria-hidden="true">
+          <mat-icon>{{ stepIcon(step) }}</mat-icon>
+        </div>
+        <div class="step-label">{{ stepLabel(step) }}</div>
+      </li>
+    }
   </ol>
 
-  <div class="workflow-hint" *ngIf="hint">
-    <mat-icon aria-hidden="true">tips_and_updates</mat-icon>
-    <span>{{ hint }}</span>
-  </div>
+  @if (hint) {
+    <div class="workflow-hint">
+      <mat-icon aria-hidden="true">tips_and_updates</mat-icon>
+      <span>{{ hint }}</span>
+    </div>
+  }
 </div>

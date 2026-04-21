@@ -7,10 +7,12 @@
 
   <mat-dialog-content class="elegant-dialog-content">
     <form [formGroup]="appointmentForm" class="elegant-form appointment-form">
-      <div *ngIf="getFormErrorMessage()" class="form-error-message" role="alert" aria-live="assertive">
-        <mat-icon>error</mat-icon>
-        <span>{{ getFormErrorMessage() }}</span>
-      </div>
+      @if (getFormErrorMessage()) {
+        <div class="form-error-message" role="alert" aria-live="assertive">
+          <mat-icon>error</mat-icon>
+          <span>{{ getFormErrorMessage() }}</span>
+        </div>
+      }
 
       <div class="form-section-card">
         <div class="section-header">
@@ -62,125 +64,145 @@
                [ngClass]="{
                  'has-value': appointmentForm.get('location')?.value
                }">
-            <input 
-              type="text" 
-              id="location" 
+            <input
+              type="text"
+              id="location"
               formControlName="location"
               placeholder=" "
               class="has-prefix"
               aria-label="Lieu du rendez-vous">
-            <label for="location">Lieu</label>
-            <div class="field-prefix">
-              <mat-icon>place</mat-icon>
+              <label for="location">Lieu</label>
+              <div class="field-prefix">
+                <mat-icon>place</mat-icon>
+              </div>
+              <div class="field-helper">
+                <mat-icon>info</mat-icon>
+                <span>Adresse complète ou indication du lieu de rendez-vous</span>
+              </div>
             </div>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>Adresse complète ou indication du lieu de rendez-vous</span>
-            </div>
-          </div>
 
-          <div class="elegant-form-field"
+            <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': appointmentForm.get('assignedTo')?.value
                }">
-            <input 
-              type="text" 
-              id="assignedTo" 
-              formControlName="assignedTo"
-              placeholder=" "
-              class="has-prefix"
-              aria-label="Personne assignée au rendez-vous">
-            <label for="assignedTo">Assigné à</label>
-            <div class="field-prefix">
-              <mat-icon>person</mat-icon>
-            </div>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>Nom de la personne responsable du rendez-vous</span>
-            </div>
-          </div>
+              <input
+                type="text"
+                id="assignedTo"
+                formControlName="assignedTo"
+                placeholder=" "
+                class="has-prefix"
+                aria-label="Personne assignée au rendez-vous">
+                <label for="assignedTo">Assigné à</label>
+                <div class="field-prefix">
+                  <mat-icon>person</mat-icon>
+                </div>
+                <div class="field-helper">
+                  <mat-icon>info</mat-icon>
+                  <span>Nom de la personne responsable du rendez-vous</span>
+                </div>
+              </div>
 
-          <div class="elegant-form-field"
+              <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': appointmentForm.get('status')?.value,
                  'field-error': appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched
                }">
-            <select 
-              id="status" 
-              formControlName="status"
-              aria-required="true"
-              [attr.aria-invalid]="appointmentForm.get('status')?.hasError('required') && appointmentForm.get('status')?.touched">
-              <option value="">Sélectionner un statut</option>
-              <option *ngFor="let option of statusOptions" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-            <label for="status">Statut <span class="required-indicator">*</span></label>
-            <div class="validation-icon" *ngIf="appointmentForm.get('status')?.touched">
-              <mat-icon *ngIf="appointmentForm.get('status')?.valid">check_circle</mat-icon>
-              <mat-icon *ngIf="appointmentForm.get('status')?.invalid">error</mat-icon>
-            </div>
-            <div class="error-message" *ngIf="appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched" role="alert">
-              <mat-icon>error</mat-icon>
-              <span>{{ getErrorMessage('status') }}</span>
-            </div>
-          </div>
+                <select
+                  id="status"
+                  formControlName="status"
+                  aria-required="true"
+                  [attr.aria-invalid]="appointmentForm.get('status')?.hasError('required') && appointmentForm.get('status')?.touched">
+                  <option value="">Sélectionner un statut</option>
+                  @for (option of statusOptions; track option) {
+                    <option [value]="option.value">
+                      {{ option.label }}
+                    </option>
+                  }
+                </select>
+                <label for="status">Statut <span class="required-indicator">*</span></label>
+                @if (appointmentForm.get('status')?.touched) {
+                  <div class="validation-icon">
+                    @if (appointmentForm.get('status')?.valid) {
+                      <mat-icon>check_circle</mat-icon>
+                    }
+                    @if (appointmentForm.get('status')?.invalid) {
+                      <mat-icon>error</mat-icon>
+                    }
+                  </div>
+                }
+                @if (appointmentForm.get('status')?.invalid && appointmentForm.get('status')?.touched) {
+                  <div class="error-message" role="alert">
+                    <mat-icon>error</mat-icon>
+                    <span>{{ getErrorMessage('status') }}</span>
+                  </div>
+                }
+              </div>
 
-          <div class="elegant-form-field"
+              <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': appointmentForm.get('locale')?.value
                }">
-            <select 
-              id="locale" 
-              formControlName="locale"
-              aria-label="Langue du client pour les rappels">
-              <option *ngFor="let option of localeOptions" [value]="option.value">
-                {{ option.label }}
-              </option>
-            </select>
-            <label for="locale">Langue du client</label>
-            <div class="field-helper">
-              <mat-icon>language</mat-icon>
-              <span>Sélectionnez la langue pour les rappels de rendez-vous</span>
-            </div>
-          </div>
+                <select
+                  id="locale"
+                  formControlName="locale"
+                  aria-label="Langue du client pour les rappels">
+                  @for (option of localeOptions; track option) {
+                    <option [value]="option.value">
+                      {{ option.label }}
+                    </option>
+                  }
+                </select>
+                <label for="locale">Langue du client</label>
+                <div class="field-helper">
+                  <mat-icon>language</mat-icon>
+                  <span>Sélectionnez la langue pour les rappels de rendez-vous</span>
+                </div>
+              </div>
 
-          <div class="elegant-form-field"
+              <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': appointmentForm.get('notes')?.value
                }">
-            <textarea 
-              id="notes" 
-              formControlName="notes"
-              placeholder=" "
-              rows="4"
-              aria-label="Notes additionnelles sur le rendez-vous"></textarea>
-            <label for="notes">Notes</label>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>Ajoutez des informations complémentaires si nécessaire</span>
+                <textarea
+                  id="notes"
+                  formControlName="notes"
+                  placeholder=" "
+                  rows="4"
+                aria-label="Notes additionnelles sur le rendez-vous"></textarea>
+                <label for="notes">Notes</label>
+                <div class="field-helper">
+                  <mat-icon>info</mat-icon>
+                  <span>Ajoutez des informations complémentaires si nécessaire</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </form>
-  </mat-dialog-content>
+        </form>
+      </mat-dialog-content>
 
-  <mat-dialog-actions align="end" class="elegant-dialog-actions">
-    <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la planification du rendez-vous">
-      <mat-icon>close</mat-icon>
-      Annuler
-    </button>
-    <button mat-raised-button 
-            color="primary" 
-            (click)="onSubmit()" 
-            [disabled]="!appointmentForm.valid || isSubmitting"
-            [attr.aria-busy]="isSubmitting"
-            [attr.aria-label]="isSubmitting ? (isEditMode ? 'Modification en cours' : 'Planification en cours') : (isEditMode ? 'Modifier le rendez-vous' : 'Planifier le rendez-vous')">
-      <mat-spinner *ngIf="isSubmitting" diameter="20" aria-hidden="true"></mat-spinner>
-      <mat-icon *ngIf="!isSubmitting">{{ isEditMode ? 'save' : 'event_available' }}</mat-icon>
-      <span *ngIf="!isSubmitting">{{ isEditMode ? 'Modifier' : 'Planifier' }}</span>
-      <span *ngIf="isSubmitting" class="sr-only" role="status" aria-live="polite">{{ isEditMode ? 'Modification en cours' : 'Planification en cours' }}</span>
-    </button>
-  </mat-dialog-actions>
-</div>
+      <mat-dialog-actions align="end" class="elegant-dialog-actions">
+        <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la planification du rendez-vous">
+          <mat-icon>close</mat-icon>
+          Annuler
+        </button>
+        <button mat-raised-button
+          color="primary"
+          (click)="onSubmit()"
+          [disabled]="!appointmentForm.valid || isSubmitting"
+          [attr.aria-busy]="isSubmitting"
+          [attr.aria-label]="isSubmitting ? (isEditMode ? 'Modification en cours' : 'Planification en cours') : (isEditMode ? 'Modifier le rendez-vous' : 'Planifier le rendez-vous')">
+          @if (isSubmitting) {
+            <mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+          }
+          @if (!isSubmitting) {
+            <mat-icon>{{ isEditMode ? 'save' : 'event_available' }}</mat-icon>
+          }
+          @if (!isSubmitting) {
+            <span>{{ isEditMode ? 'Modifier' : 'Planifier' }}</span>
+          }
+          @if (isSubmitting) {
+            <span class="sr-only" role="status" aria-live="polite">{{ isEditMode ? 'Modification en cours' : 'Planification en cours' }}</span>
+          }
+        </button>
+      </mat-dialog-actions>
+    </div>

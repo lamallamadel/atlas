@@ -24,163 +24,169 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
 @Component({
   selector: 'app-ai-agent-panel',
   template: `
-    <div
-      class="ai-panel-fab"
-      *ngIf="(panelOpen$ | async) === false"
-      (click)="openPanel()"
-      (keydown.enter)="openPanel()"
-      (keydown.space)="$event.preventDefault(); openPanel()"
-      tabindex="0"
-      role="button"
-      aria-label="Ouvrir l'assistant IA"
-      matTooltip="Assistant IA (Alt+A)"
-      matTooltipPosition="left">
-      <mat-icon>auto_awesome</mat-icon>
-    </div>
-
-    <div
-      class="ai-panel glass-card-elevated"
-      *ngIf="panelOpen$ | async"
-      role="dialog"
-      aria-modal="false"
-      aria-label="Assistant IA Atlas"
-      aria-labelledby="ai-panel-title">
-
-      <!-- Header -->
-      <div class="ai-panel-header">
-        <div class="ai-panel-title-group">
-          <div class="ai-panel-avatar">
-            <mat-icon>auto_awesome</mat-icon>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px;">
-            <div>
-              <div class="ai-panel-title" id="ai-panel-title">Atlas IA</div>
-              <div class="ai-panel-status">
-                <span class="status-dot"></span>
-                En ligne
-              </div>
-            </div>
-            <mat-icon 
-              style="font-size: 16px; height: 16px; width: 16px; color: rgba(255,255,255,0.7); cursor: help;"
-              matTooltip="Modèle de langage (LLM) spécialisé dans l'immobilier, capable d'exécuter des actions métier via le microservice agent-service."
-              matTooltipPosition="right">
-              help_outline
-            </mat-icon>
-          </div>
-        </div>
-        <div class="ai-panel-actions">
-          <button
-            mat-icon-button
-            (click)="clearConversation()"
-            matTooltip="Effacer la conversation"
-            aria-label="Effacer la conversation">
-            <mat-icon>delete_sweep</mat-icon>
-          </button>
-          <button
-            mat-icon-button
-            (click)="closePanel()"
-            matTooltip="Fermer l'assistant (Esc)"
-            aria-label="Fermer l'assistant IA">
-            <mat-icon>close</mat-icon>
-          </button>
-        </div>
-      </div>
-
-      <!-- Welcome message if no messages -->
-      <div class="ai-panel-welcome" *ngIf="(messages$ | async)?.length === 0">
-        <div class="welcome-icon">
-          <mat-icon>auto_awesome</mat-icon>
-        </div>
-        <h3 class="welcome-title">Bonjour ! Je suis Atlas IA</h3>
-        <p class="welcome-text">
-          Dites-moi ce que vous cherchez en langage naturel.<br>
-          Je peux naviguer, rechercher, créer et envoyer des messages pour vous.
-        </p>
-        <div class="welcome-examples">
-          <button
-            *ngFor="let ex of examples"
-            class="example-chip"
-            (click)="submitExample(ex)"
-            type="button">
-            {{ ex }}
-          </button>
-        </div>
-      </div>
-
-      <!-- Conversation -->
+    @if ((panelOpen$ | async) === false) {
       <div
-        class="ai-panel-conversation"
-        #conversationEl
-        *ngIf="(messages$ | async)?.length! > 0"
-        aria-live="polite"
-        aria-label="Conversation avec l'assistant">
-        <div
-          *ngFor="let msg of messages$ | async; trackBy: trackById"
-          class="message-row"
-          [class.user-row]="msg.role === 'user'"
-          [class.agent-row]="msg.role === 'agent'">
-
-          <!-- Agent avatar -->
-          <div class="agent-avatar" *ngIf="msg.role === 'agent' && !msg.isTyping">
-            <mat-icon>auto_awesome</mat-icon>
+        class="ai-panel-fab"
+        (click)="openPanel()"
+        (keydown.enter)="openPanel()"
+        (keydown.space)="$event.preventDefault(); openPanel()"
+        tabindex="0"
+        role="button"
+        aria-label="Ouvrir l'assistant IA"
+        matTooltip="Assistant IA (Alt+A)"
+        matTooltipPosition="left">
+        <mat-icon>auto_awesome</mat-icon>
+      </div>
+    }
+    
+    @if (panelOpen$ | async) {
+      <div
+        class="ai-panel glass-card-elevated"
+        role="dialog"
+        aria-modal="false"
+        aria-label="Assistant IA Atlas"
+        aria-labelledby="ai-panel-title">
+        <!-- Header -->
+        <div class="ai-panel-header">
+          <div class="ai-panel-title-group">
+            <div class="ai-panel-avatar">
+              <mat-icon>auto_awesome</mat-icon>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div>
+                <div class="ai-panel-title" id="ai-panel-title">Atlas IA</div>
+                <div class="ai-panel-status">
+                  <span class="status-dot"></span>
+                  En ligne
+                </div>
+              </div>
+              <mat-icon
+                style="font-size: 16px; height: 16px; width: 16px; color: rgba(255,255,255,0.7); cursor: help;"
+                matTooltip="Modèle de langage (LLM) spécialisé dans l'immobilier, capable d'exécuter des actions métier via le microservice agent-service."
+                matTooltipPosition="right">
+                help_outline
+              </mat-icon>
+            </div>
           </div>
-
-          <!-- Typing indicator -->
-          <div class="typing-bubble" *ngIf="msg.isTyping" aria-label="L'agent analyse votre demande">
-            <span></span><span></span><span></span>
-          </div>
-
-          <!-- Message bubble -->
-          <div
-            class="message-bubble"
-            *ngIf="!msg.isTyping"
-            [class.user-bubble]="msg.role === 'user'"
-            [class.agent-bubble]="msg.role === 'agent'"
-            [innerHTML]="formatMessage(msg.content)">
-          </div>
-
-          <!-- Action chips -->
-          <div class="action-chips" *ngIf="msg.role === 'agent' && msg.actions?.length && !msg.isTyping">
+          <div class="ai-panel-actions">
             <button
-              *ngFor="let action of msg.actions"
-              class="action-chip"
-              (click)="executeAction(action)"
-              type="button">
-              <mat-icon>{{ action.icon }}</mat-icon>
-              {{ action.label }}
+              mat-icon-button
+              (click)="clearConversation()"
+              matTooltip="Effacer la conversation"
+              aria-label="Effacer la conversation">
+              <mat-icon>delete_sweep</mat-icon>
+            </button>
+            <button
+              mat-icon-button
+              (click)="closePanel()"
+              matTooltip="Fermer l'assistant (Esc)"
+              aria-label="Fermer l'assistant IA">
+              <mat-icon>close</mat-icon>
             </button>
           </div>
         </div>
+        <!-- Welcome message if no messages -->
+        @if ((messages$ | async)?.length === 0) {
+          <div class="ai-panel-welcome">
+            <div class="welcome-icon">
+              <mat-icon>auto_awesome</mat-icon>
+            </div>
+            <h3 class="welcome-title">Bonjour ! Je suis Atlas IA</h3>
+            <p class="welcome-text">
+              Dites-moi ce que vous cherchez en langage naturel.<br>
+              Je peux naviguer, rechercher, créer et envoyer des messages pour vous.
+            </p>
+            <div class="welcome-examples">
+              @for (ex of examples; track ex) {
+                <button
+                  class="example-chip"
+                  (click)="submitExample(ex)"
+                  type="button">
+                  {{ ex }}
+                </button>
+              }
+            </div>
+          </div>
+        }
+        <!-- Conversation -->
+        @if ((messages$ | async)?.length! > 0) {
+          <div
+            class="ai-panel-conversation"
+            #conversationEl
+            aria-live="polite"
+            aria-label="Conversation avec l'assistant">
+            @for (msg of messages$ | async; track trackById($index, msg)) {
+              <div
+                class="message-row"
+                [class.user-row]="msg.role === 'user'"
+                [class.agent-row]="msg.role === 'agent'">
+                <!-- Agent avatar -->
+                @if (msg.role === 'agent' && !msg.isTyping) {
+                  <div class="agent-avatar">
+                    <mat-icon>auto_awesome</mat-icon>
+                  </div>
+                }
+                <!-- Typing indicator -->
+                @if (msg.isTyping) {
+                  <div class="typing-bubble" aria-label="L'agent analyse votre demande">
+                    <span></span><span></span><span></span>
+                  </div>
+                }
+                <!-- Message bubble -->
+                @if (!msg.isTyping) {
+                  <div
+                    class="message-bubble"
+                    [class.user-bubble]="msg.role === 'user'"
+                    [class.agent-bubble]="msg.role === 'agent'"
+                    [innerHTML]="formatMessage(msg.content)">
+                  </div>
+                }
+                <!-- Action chips -->
+                @if (msg.role === 'agent' && msg.actions?.length && !msg.isTyping) {
+                  <div class="action-chips">
+                    @for (action of msg.actions; track action) {
+                      <button
+                        class="action-chip"
+                        (click)="executeAction(action)"
+                        type="button">
+                        <mat-icon>{{ action.icon }}</mat-icon>
+                        {{ action.label }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+        <!-- Input -->
+        <div class="ai-panel-input">
+          <textarea
+            #inputEl
+            class="ai-input"
+            [(ngModel)]="inputValue"
+            (keydown)="onKeyDown($event)"
+            (input)="onInput()"
+            placeholder="Ex: Trouve des T3 à Casablanca sous 2M MAD…"
+            rows="1"
+            aria-label="Message pour l'assistant IA"
+            aria-multiline="true">
+          </textarea>
+          <button
+            class="send-btn"
+            [class.active]="inputValue.trim().length > 0"
+            [disabled]="!inputValue.trim()"
+            (click)="submit()"
+            aria-label="Envoyer la demande à l'agent">
+            <mat-icon>send</mat-icon>
+          </button>
+        </div>
+        <div class="ai-panel-hint">
+          <kbd>Enter</kbd> pour envoyer &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> pour nouvelle ligne
+        </div>
       </div>
-
-      <!-- Input -->
-      <div class="ai-panel-input">
-        <textarea
-          #inputEl
-          class="ai-input"
-          [(ngModel)]="inputValue"
-          (keydown)="onKeyDown($event)"
-          (input)="onInput()"
-          placeholder="Ex: Trouve des T3 à Casablanca sous 2M MAD…"
-          rows="1"
-          aria-label="Message pour l'assistant IA"
-          aria-multiline="true">
-        </textarea>
-        <button
-          class="send-btn"
-          [class.active]="inputValue.trim().length > 0"
-          [disabled]="!inputValue.trim()"
-          (click)="submit()"
-          aria-label="Envoyer la demande à l'agent">
-          <mat-icon>send</mat-icon>
-        </button>
-      </div>
-
-      <div class="ai-panel-hint">
-        <kbd>Enter</kbd> pour envoyer &nbsp;·&nbsp; <kbd>Shift+Enter</kbd> pour nouvelle ligne
-      </div>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     /* ── FAB button ───────────────────────────────────────── */
     .ai-panel-fab {

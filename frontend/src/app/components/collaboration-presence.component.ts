@@ -15,28 +15,34 @@ interface ViewerInfo {
     <div class="collaboration-presence">
       <div class="viewers-container">
         <div class="viewer-avatars">
-          <div *ngFor="let viewer of viewers" 
-               class="viewer-avatar"
-               [style.background-color]="viewer.color"
-               [title]="viewer.username">
-            {{ viewer.initials }}
-          </div>
-          <div *ngIf="viewerCount > maxVisibleViewers" 
-               class="viewer-count"
-               [title]="getExtraViewersTooltip()">
-            +{{ viewerCount - maxVisibleViewers }}
-          </div>
+          @for (viewer of viewers; track viewer) {
+            <div
+              class="viewer-avatar"
+              [style.background-color]="viewer.color"
+              [title]="viewer.username">
+              {{ viewer.initials }}
+            </div>
+          }
+          @if (viewerCount > maxVisibleViewers) {
+            <div
+              class="viewer-count"
+              [title]="getExtraViewersTooltip()">
+              +{{ viewerCount - maxVisibleViewers }}
+            </div>
+          }
         </div>
         <span class="viewer-text">
           {{ viewerCount }} {{ viewerCount === 1 ? 'viewer' : 'viewers' }}
         </span>
       </div>
-      <div *ngIf="recentActivity" class="recent-activity">
-        <span class="activity-indicator" [class.pulse]="showActivityPulse"></span>
-        <span class="activity-text">{{ recentActivity }}</span>
-      </div>
+      @if (recentActivity) {
+        <div class="recent-activity">
+          <span class="activity-indicator" [class.pulse]="showActivityPulse"></span>
+          <span class="activity-text">{{ recentActivity }}</span>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .collaboration-presence {
       display: flex;

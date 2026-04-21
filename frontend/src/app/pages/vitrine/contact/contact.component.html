@@ -6,15 +6,16 @@
 
 <section class="at-section"><div class="at-container--default" style="margin-inline:auto;padding-inline:clamp(1rem,4vw,3rem)">
   <div class="ct-layout">
-    <form class="at-card" (ngSubmit)="submit()" *ngIf="!submitted">
-      <h2 style="font-family:var(--at-font-display);font-size:var(--at-text-lg);margin-bottom:var(--at-space-5);">Nous écrire</h2>
-      <div class="at-form-stack">
-        <div class="at-form-grid-2">
-          <div class="at-form-group"><label class="at-form-label" for="ct-nom">Nom <span class="at-req">*</span></label><input id="ct-nom" class="at-form-input" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required/></div>
-          <div class="at-form-group"><label class="at-form-label" for="ct-email">Email <span class="at-req">*</span></label><input id="ct-email" class="at-form-input" type="email" [(ngModel)]="form.email" name="email" placeholder="vous@email.ma" required/></div>
-        </div>
-        <div class="at-form-group"><label class="at-form-label" for="ct-tel">Téléphone</label><input id="ct-tel" class="at-form-input" [(ngModel)]="form.tel" name="tel" placeholder="+212 6xx xxx xxx"/></div>
-        <div class="at-form-group"><label class="at-form-label" for="ct-sujet">Sujet <span class="at-req">*</span></label>
+    @if (!submitted) {
+      <form class="at-card" (ngSubmit)="submit()">
+        <h2 style="font-family:var(--at-font-display);font-size:var(--at-text-lg);margin-bottom:var(--at-space-5);">Nous écrire</h2>
+        <div class="at-form-stack">
+          <div class="at-form-grid-2">
+            <div class="at-form-group"><label class="at-form-label" for="ct-nom">Nom <span class="at-req">*</span></label><input id="ct-nom" class="at-form-input" [(ngModel)]="form.nom" name="nom" placeholder="Votre nom" required/></div>
+            <div class="at-form-group"><label class="at-form-label" for="ct-email">Email <span class="at-req">*</span></label><input id="ct-email" class="at-form-input" type="email" [(ngModel)]="form.email" name="email" placeholder="vous@email.ma" required/></div>
+          </div>
+          <div class="at-form-group"><label class="at-form-label" for="ct-tel">Téléphone</label><input id="ct-tel" class="at-form-input" [(ngModel)]="form.tel" name="tel" placeholder="+212 6xx xxx xxx"/></div>
+          <div class="at-form-group"><label class="at-form-label" for="ct-sujet">Sujet <span class="at-req">*</span></label>
           <select id="ct-sujet" class="at-form-select" [(ngModel)]="form.sujet" name="sujet" required>
             <option value="">Sélectionner…</option>
             <option>Demande commerciale</option><option>Support technique</option><option>Partenariat</option><option>Facturation</option><option>Autre</option>
@@ -24,23 +25,26 @@
         <button type="submit" class="at-btn at-btn-primary" [disabled]="!isValid()||submitting" style="width:100%;justify-content:center;">{{submitting ? 'Envoi…' : 'Envoyer'}}</button>
       </div>
     </form>
+  }
 
-    <div class="at-card" *ngIf="submitted" style="text-align:center;padding:var(--at-space-10)">
+  @if (submitted) {
+    <div class="at-card" style="text-align:center;padding:var(--at-space-10)">
       <div style="width:56px;height:56px;border-radius:50%;background:var(--at-color-success-highlight);display:flex;align-items:center;justify-content:center;margin:0 auto var(--at-space-4);">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--at-color-success)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
       </div>
       <h3 style="font-family:var(--at-font-display);">Message envoyé !</h3>
       <p style="color:var(--at-color-text-muted);font-size:var(--at-text-sm);margin-top:var(--at-space-3);">Notre équipe vous répondra dans les 24h.</p>
     </div>
+  }
 
-    <div class="ct-info">
-      <h3 style="font-family:var(--at-font-display);margin-bottom:var(--at-space-5);">Informations</h3>
-      <div class="ct-info-items">
-        <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><strong>Siège social</strong><br/>Casablanca, Maroc</div></div>
-        <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><strong>Email</strong><br/>contact&#64;atlasia.ma</div></div>
-        <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><strong>Horaires</strong><br/>Lun–Ven, 9h–18h (GMT+1)</div></div>
-      </div>
-      <a routerLink="/biz/demo" class="at-btn at-btn-primary" style="margin-top:var(--at-space-6);width:100%;justify-content:center;">Planifier une démo →</a>
+  <div class="ct-info">
+    <h3 style="font-family:var(--at-font-display);margin-bottom:var(--at-space-5);">Informations</h3>
+    <div class="ct-info-items">
+      <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div><strong>Siège social</strong><br/>Casablanca, Maroc</div></div>
+      <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><strong>Email</strong><br/>contact&#64;atlasia.ma</div></div>
+      <div class="ct-info-item"><div class="ct-info-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><strong>Horaires</strong><br/>Lun–Ven, 9h–18h (GMT+1)</div></div>
     </div>
+    <a routerLink="/biz/demo" class="at-btn at-btn-primary" style="margin-top:var(--at-space-6);width:100%;justify-content:center;">Planifier une démo →</a>
   </div>
+</div>
 </div></section>

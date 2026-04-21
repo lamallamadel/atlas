@@ -14,9 +14,11 @@
         <mat-form-field appearance="outline">
           <mat-label>Starting State</mat-label>
           <mat-select formControlName="currentState">
-            <mat-option *ngFor="let state of workflow?.statesJson" [value]="state.stateCode">
-              {{ state.stateName }}
-            </mat-option>
+            @for (state of workflow?.statesJson; track state) {
+              <mat-option [value]="state.stateCode">
+                {{ state.stateName }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
@@ -32,83 +34,105 @@
         </button>
       </form>
 
-      <mat-divider *ngIf="simulationResult"></mat-divider>
+      @if (simulationResult) {
+        <mat-divider></mat-divider>
+      }
 
-      <div *ngIf="simulationResult" class="results-section">
-        <h3>Simulation Results</h3>
-        
-        <div class="result-summary">
-          <mat-chip-listbox>
-            <mat-chip-option [color]="getStatusColor(simulationResult.status)" selected>
-              Status: {{ simulationResult.status }}
-            </mat-chip-option>
-            <mat-chip-option color="primary">
-              Current State: {{ simulationResult.currentState }}
-            </mat-chip-option>
-            <mat-chip-option *ngIf="simulationResult.resultJson?.validTransitions" color="accent">
-              Valid Transitions: {{ simulationResult.resultJson.validTransitions }}
-            </mat-chip-option>
-          </mat-chip-listbox>
+      @if (simulationResult) {
+        <div class="results-section">
+          <h3>Simulation Results</h3>
+          <div class="result-summary">
+            <mat-chip-listbox>
+              <mat-chip-option [color]="getStatusColor(simulationResult.status)" selected>
+                Status: {{ simulationResult.status }}
+              </mat-chip-option>
+              <mat-chip-option color="primary">
+                Current State: {{ simulationResult.currentState }}
+              </mat-chip-option>
+              @if (simulationResult.resultJson?.validTransitions) {
+                <mat-chip-option color="accent">
+                  Valid Transitions: {{ simulationResult.resultJson.validTransitions }}
+                </mat-chip-option>
+              }
+            </mat-chip-listbox>
+          </div>
+          @if (simulationResult.resultJson?.possibleTransitions?.length > 0) {
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>trending_flat</mat-icon> Possible Transitions
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <mat-list>
+                @for (transition of simulationResult.resultJson.possibleTransitions; track transition) {
+                  <mat-list-item>
+                    <mat-icon matListItemIcon>arrow_forward</mat-icon>
+                    <span matListItemTitle>{{ transition }}</span>
+                  </mat-list-item>
+                }
+              </mat-list>
+            </mat-expansion-panel>
+          }
+          @if (simulationResult.executionLog?.length > 0) {
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>description</mat-icon> Execution Log
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <mat-list>
+                @for (log of simulationResult.executionLog; track log) {
+                  <mat-list-item>
+                    <mat-icon matListItemIcon [color]="getLogEventColor(log.eventType)">
+                      {{ log.success ? 'check_circle' : 'error' }}
+                    </mat-icon>
+                    <span matListItemTitle>{{ log.message }}</span>
+                    @if (log.fromState) {
+                      <span matListItemLine>{{ log.fromState }} → {{ log.toState }}</span>
+                    }
+                    @if (log.error) {
+                      <span matListItemLine class="error-text">Error: {{ log.error }}</span>
+                    }
+                    <span matListItemLine class="timestamp">{{ log.timestamp }}</span>
+                  </mat-list-item>
+                }
+              </mat-list>
+            </mat-expansion-panel>
+          }
+          @if (simulationResult.resultJson) {
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <mat-icon>code</mat-icon> Raw Result JSON
+                </mat-panel-title>
+              </mat-expansion-panel-header>
+              <pre class="json-output">{{ formatJson(simulationResult.resultJson) }}</pre>
+            </mat-expansion-panel>
+          }
         </div>
+      }
 
-        <mat-expansion-panel *ngIf="simulationResult.resultJson?.possibleTransitions?.length > 0">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>trending_flat</mat-icon> Possible Transitions
-            </mat-panel-title>
-          </mat-expansion-panel-header>
+      @if (simulationHistory.length > 0) {
+        <mat-divider></mat-divider>
+      }
+
+      @if (simulationHistory.length > 0) {
+        <div class="history-section">
+          <h3>Simulation History</h3>
           <mat-list>
-            <mat-list-item *ngFor="let transition of simulationResult.resultJson.possibleTransitions">
-              <mat-icon matListItemIcon>arrow_forward</mat-icon>
-              <span matListItemTitle>{{ transition }}</span>
-            </mat-list-item>
+            @for (sim of simulationHistory; track sim) {
+              <mat-list-item (click)="loadSimulation(sim)" class="history-item">
+                <mat-icon matListItemIcon [color]="getStatusColor(sim.status)">
+                  {{ sim.status === 'COMPLETED' ? 'check_circle' : 'error' }}
+                </mat-icon>
+                <span matListItemTitle>{{ sim.simulationName }}</span>
+                <span matListItemLine>{{ sim.createdAt | date:'short' }}</span>
+                <span matListItemLine>Status: {{ sim.status }} | State: {{ sim.currentState }}</span>
+              </mat-list-item>
+            }
           </mat-list>
-        </mat-expansion-panel>
-
-        <mat-expansion-panel *ngIf="simulationResult.executionLog?.length > 0">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>description</mat-icon> Execution Log
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <mat-list>
-            <mat-list-item *ngFor="let log of simulationResult.executionLog">
-              <mat-icon matListItemIcon [color]="getLogEventColor(log.eventType)">
-                {{ log.success ? 'check_circle' : 'error' }}
-              </mat-icon>
-              <span matListItemTitle>{{ log.message }}</span>
-              <span matListItemLine *ngIf="log.fromState">{{ log.fromState }} → {{ log.toState }}</span>
-              <span matListItemLine *ngIf="log.error" class="error-text">Error: {{ log.error }}</span>
-              <span matListItemLine class="timestamp">{{ log.timestamp }}</span>
-            </mat-list-item>
-          </mat-list>
-        </mat-expansion-panel>
-
-        <mat-expansion-panel *ngIf="simulationResult.resultJson">
-          <mat-expansion-panel-header>
-            <mat-panel-title>
-              <mat-icon>code</mat-icon> Raw Result JSON
-            </mat-panel-title>
-          </mat-expansion-panel-header>
-          <pre class="json-output">{{ formatJson(simulationResult.resultJson) }}</pre>
-        </mat-expansion-panel>
-      </div>
-
-      <mat-divider *ngIf="simulationHistory.length > 0"></mat-divider>
-
-      <div *ngIf="simulationHistory.length > 0" class="history-section">
-        <h3>Simulation History</h3>
-        <mat-list>
-          <mat-list-item *ngFor="let sim of simulationHistory" (click)="loadSimulation(sim)" class="history-item">
-            <mat-icon matListItemIcon [color]="getStatusColor(sim.status)">
-              {{ sim.status === 'COMPLETED' ? 'check_circle' : 'error' }}
-            </mat-icon>
-            <span matListItemTitle>{{ sim.simulationName }}</span>
-            <span matListItemLine>{{ sim.createdAt | date:'short' }}</span>
-            <span matListItemLine>Status: {{ sim.status }} | State: {{ sim.currentState }}</span>
-          </mat-list-item>
-        </mat-list>
-      </div>
+        </div>
+      }
     </mat-card-content>
   </mat-card>
 </div>

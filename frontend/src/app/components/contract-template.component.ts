@@ -37,109 +37,112 @@ import { ContractTemplate, ContractTemplateCreate } from '../models/esignature.m
           <mat-card-title>Contract Templates</mat-card-title>
           <mat-card-subtitle>Manage PDF contract templates for electronic signatures</mat-card-subtitle>
         </mat-card-header>
-
+    
         <mat-card-content>
-          <div class="upload-section" *ngIf="!showForm">
-            <button mat-raised-button color="primary" (click)="showForm = true">
-              <mat-icon>add</mat-icon>
-              Upload New Template
-            </button>
-          </div>
-
-          <form [formGroup]="templateForm" *ngIf="showForm" (ngSubmit)="uploadTemplate()" class="template-form">
-            <mat-form-field appearance="outline">
-              <mat-label>Template Name</mat-label>
-              <input matInput formControlName="templateName" required>
-              <mat-error *ngIf="templateForm.get('templateName')?.hasError('required')">
-                Template name is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Template Type</mat-label>
-              <mat-select formControlName="templateType" required>
-                <mat-option value="MANDATE">Mandate Agreement</mat-option>
-                <mat-option value="PURCHASE_AGREEMENT">Purchase Agreement</mat-option>
-                <mat-option value="LISTING_AGREEMENT">Listing Agreement</mat-option>
-                <mat-option value="LEASE_AGREEMENT">Lease Agreement</mat-option>
-                <mat-option value="OTHER">Other</mat-option>
-              </mat-select>
-              <mat-error *ngIf="templateForm.get('templateType')?.hasError('required')">
-                Template type is required
-              </mat-error>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="3"></textarea>
-            </mat-form-field>
-
-            <div class="file-upload">
-              <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden>
-              <button mat-raised-button type="button" (click)="fileInput.click()">
-                <mat-icon>upload_file</mat-icon>
-                Choose PDF File
-              </button>
-              <span class="file-name" *ngIf="selectedFile">{{ selectedFile.name }}</span>
-            </div>
-
-            <div class="form-actions">
-              <button mat-button type="button" (click)="cancelUpload()">Cancel</button>
-              <button mat-raised-button color="primary" type="submit" [disabled]="!templateForm.valid || !selectedFile || uploading">
-                {{ uploading ? 'Uploading...' : 'Upload Template' }}
+          @if (!showForm) {
+            <div class="upload-section">
+              <button mat-raised-button color="primary" (click)="showForm = true">
+                <mat-icon>add</mat-icon>
+                Upload New Template
               </button>
             </div>
-          </form>
-
-          <div class="templates-list" *ngIf="!showForm">
-            <table mat-table [dataSource]="templates" class="templates-table">
-              <ng-container matColumnDef="templateName">
-                <th mat-header-cell *matHeaderCellDef>Name</th>
-                <td mat-cell *matCellDef="let template">{{ template.templateName }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="templateType">
-                <th mat-header-cell *matHeaderCellDef>Type</th>
-                <td mat-cell *matCellDef="let template">{{ template.templateType }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="fileName">
-                <th mat-header-cell *matHeaderCellDef>File</th>
-                <td mat-cell *matCellDef="let template">{{ template.fileName }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="fileSize">
-                <th mat-header-cell *matHeaderCellDef>Size</th>
-                <td mat-cell *matCellDef="let template">{{ formatFileSize(template.fileSize) }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef>Created</th>
-                <td mat-cell *matCellDef="let template">{{ template.createdAt | date:'short' }}</td>
-              </ng-container>
-
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>Actions</th>
-                <td mat-cell *matCellDef="let template">
-                  <button mat-icon-button color="warn" (click)="deleteTemplate(template.id)" matTooltip="Delete">
-                    <mat-icon>delete</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-
-            <div class="empty-state" *ngIf="templates.length === 0">
-              <mat-icon>description</mat-icon>
-              <p>No templates uploaded yet</p>
+          }
+    
+          @if (showForm) {
+            <form [formGroup]="templateForm" (ngSubmit)="uploadTemplate()" class="template-form">
+              <mat-form-field appearance="outline">
+                <mat-label>Template Name</mat-label>
+                <input matInput formControlName="templateName" required>
+                @if (templateForm.get('templateName')?.hasError('required')) {
+                  <mat-error>
+                    Template name is required
+                  </mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Template Type</mat-label>
+                <mat-select formControlName="templateType" required>
+                  <mat-option value="MANDATE">Mandate Agreement</mat-option>
+                  <mat-option value="PURCHASE_AGREEMENT">Purchase Agreement</mat-option>
+                  <mat-option value="LISTING_AGREEMENT">Listing Agreement</mat-option>
+                  <mat-option value="LEASE_AGREEMENT">Lease Agreement</mat-option>
+                  <mat-option value="OTHER">Other</mat-option>
+                </mat-select>
+                @if (templateForm.get('templateType')?.hasError('required')) {
+                  <mat-error>
+                    Template type is required
+                  </mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="3"></textarea>
+              </mat-form-field>
+              <div class="file-upload">
+                <input type="file" #fileInput (change)="onFileSelected($event)" accept=".pdf" hidden>
+                <button mat-raised-button type="button" (click)="fileInput.click()">
+                  <mat-icon>upload_file</mat-icon>
+                  Choose PDF File
+                </button>
+                @if (selectedFile) {
+                  <span class="file-name">{{ selectedFile.name }}</span>
+                }
+              </div>
+              <div class="form-actions">
+                <button mat-button type="button" (click)="cancelUpload()">Cancel</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="!templateForm.valid || !selectedFile || uploading">
+                  {{ uploading ? 'Uploading...' : 'Upload Template' }}
+                </button>
+              </div>
+            </form>
+          }
+    
+          @if (!showForm) {
+            <div class="templates-list">
+              <table mat-table [dataSource]="templates" class="templates-table">
+                <ng-container matColumnDef="templateName">
+                  <th mat-header-cell *matHeaderCellDef>Name</th>
+                  <td mat-cell *matCellDef="let template">{{ template.templateName }}</td>
+                </ng-container>
+                <ng-container matColumnDef="templateType">
+                  <th mat-header-cell *matHeaderCellDef>Type</th>
+                  <td mat-cell *matCellDef="let template">{{ template.templateType }}</td>
+                </ng-container>
+                <ng-container matColumnDef="fileName">
+                  <th mat-header-cell *matHeaderCellDef>File</th>
+                  <td mat-cell *matCellDef="let template">{{ template.fileName }}</td>
+                </ng-container>
+                <ng-container matColumnDef="fileSize">
+                  <th mat-header-cell *matHeaderCellDef>Size</th>
+                  <td mat-cell *matCellDef="let template">{{ formatFileSize(template.fileSize) }}</td>
+                </ng-container>
+                <ng-container matColumnDef="createdAt">
+                  <th mat-header-cell *matHeaderCellDef>Created</th>
+                  <td mat-cell *matCellDef="let template">{{ template.createdAt | date:'short' }}</td>
+                </ng-container>
+                <ng-container matColumnDef="actions">
+                  <th mat-header-cell *matHeaderCellDef>Actions</th>
+                  <td mat-cell *matCellDef="let template">
+                    <button mat-icon-button color="warn" (click)="deleteTemplate(template.id)" matTooltip="Delete">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+              </table>
+              @if (templates.length === 0) {
+                <div class="empty-state">
+                  <mat-icon>description</mat-icon>
+                  <p>No templates uploaded yet</p>
+                </div>
+              }
             </div>
-          </div>
+          }
         </mat-card-content>
       </mat-card>
     </div>
-  `,
+    `,
   styles: [`
     .contract-template-container {
       padding: 24px;

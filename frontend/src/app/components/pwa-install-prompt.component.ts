@@ -4,29 +4,31 @@ import { PwaService } from '../services/pwa.service';
 @Component({
   selector: 'app-pwa-install-prompt',
   template: `
-    <div class="pwa-install-banner" *ngIf="showPrompt" [@slideIn]>
-      <div class="banner-content">
-        <div class="banner-icon">
-          <mat-icon>get_app</mat-icon>
+    @if (showPrompt) {
+      <div class="pwa-install-banner" [@slideIn]>
+        <div class="banner-content">
+          <div class="banner-icon">
+            <mat-icon>get_app</mat-icon>
+          </div>
+          <div class="banner-text">
+            <h4>Installer l'application</h4>
+            <p>Accédez rapidement à CRM Immobilier depuis votre écran d'accueil</p>
+          </div>
+          <div class="banner-actions">
+            <button mat-button (click)="dismiss()" class="btn-dismiss">
+              Plus tard
+            </button>
+            <button mat-raised-button color="primary" (click)="install()" class="btn-install">
+              Installer
+            </button>
+          </div>
         </div>
-        <div class="banner-text">
-          <h4>Installer l'application</h4>
-          <p>Accédez rapidement à CRM Immobilier depuis votre écran d'accueil</p>
-        </div>
-        <div class="banner-actions">
-          <button mat-button (click)="dismiss()" class="btn-dismiss">
-            Plus tard
-          </button>
-          <button mat-raised-button color="primary" (click)="install()" class="btn-install">
-            Installer
-          </button>
-        </div>
+        <button mat-icon-button class="btn-close" (click)="dismiss()" aria-label="Fermer">
+          <mat-icon>close</mat-icon>
+        </button>
       </div>
-      <button mat-icon-button class="btn-close" (click)="dismiss()" aria-label="Fermer">
-        <mat-icon>close</mat-icon>
-      </button>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     .pwa-install-banner {
       position: fixed;

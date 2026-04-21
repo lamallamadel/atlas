@@ -49,33 +49,43 @@
     </div>
   </div>
 
-  <div class="content" *ngIf="!loading">
-    <div class="list-view" *ngIf="viewMode === ViewMode.LIST">
-      <div class="tasks-grid" *ngIf="filteredTasks.length > 0" [@cardStagger]="filteredTasks.length">
-        <app-task-card
-          *ngFor="let task of filteredTasks"
-          [task]="task"
-          (taskEdit)="onTaskEdit($event)"
-          (taskDeleted)="onTaskDelete($event)"
-          (taskCompleted)="onTaskCompleted($event)">
-        </app-task-card>
-      </div>
-      
-      <app-empty-state
-        *ngIf="filteredTasks.length === 0"
-        icon="task"
-        title="No tasks found"
-        message="Create a new task to get started or adjust your filters">
-      </app-empty-state>
+  @if (!loading) {
+    <div class="content">
+      @if (viewMode === ViewMode.LIST) {
+        <div class="list-view">
+          @if (filteredTasks.length > 0) {
+            <div class="tasks-grid" [@cardStagger]="filteredTasks.length">
+              @for (task of filteredTasks; track task) {
+                <app-task-card
+                  [task]="task"
+                  (taskEdit)="onTaskEdit($event)"
+                  (taskDeleted)="onTaskDelete($event)"
+                  (taskCompleted)="onTaskCompleted($event)">
+                </app-task-card>
+              }
+            </div>
+          }
+          @if (filteredTasks.length === 0) {
+            <app-empty-state
+              icon="task"
+              title="No tasks found"
+              message="Create a new task to get started or adjust your filters">
+            </app-empty-state>
+          }
+        </div>
+      }
+      @if (viewMode === ViewMode.CALENDAR) {
+        <div class="calendar-view">
+          <full-calendar [options]="calendarOptions"></full-calendar>
+        </div>
+      }
     </div>
+  }
 
-    <div class="calendar-view" *ngIf="viewMode === ViewMode.CALENDAR">
-      <full-calendar [options]="calendarOptions"></full-calendar>
+  @if (loading) {
+    <div class="loading-state">
+      <mat-spinner></mat-spinner>
+      <p>Loading tasks...</p>
     </div>
-  </div>
-
-  <div class="loading-state" *ngIf="loading">
-    <mat-spinner></mat-spinner>
-    <p>Loading tasks...</p>
-  </div>
+  }
 </div>

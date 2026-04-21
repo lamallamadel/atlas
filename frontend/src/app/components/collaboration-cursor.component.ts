@@ -15,15 +15,17 @@ interface CursorInfo {
   selector: 'app-collaboration-cursor',
   template: `
     <div class="cursor-indicators">
-      <div *ngFor="let cursor of activeCursors" 
-           class="cursor-indicator"
-           [style.border-color]="cursor.color">
-        <span class="cursor-label" [style.background-color]="cursor.color">
-          {{ cursor.username }} is typing...
-        </span>
-      </div>
+      @for (cursor of activeCursors; track cursor) {
+        <div
+          class="cursor-indicator"
+          [style.border-color]="cursor.color">
+          <span class="cursor-label" [style.background-color]="cursor.color">
+            {{ cursor.username }} is typing...
+          </span>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .cursor-indicators {
       position: relative;

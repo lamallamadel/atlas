@@ -12,95 +12,115 @@
           [(ngModel)]="searchQuery"
           (keyup.enter)="onSearchQueryChange()"
           aria-label="Terme de recherche"
-        />
-        <button class="btn btn-primary" (click)="onSearchQueryChange()" aria-label="Lancer la recherche">
-          Search
+          />
+          <button class="btn btn-primary" (click)="onSearchQueryChange()" aria-label="Lancer la recherche">
+            Search
+          </button>
+        </div>
+        <div class="filter-group">
+          <label for="type-select" class="sr-only">Filtrer par type</label>
+          <select id="type-select" [(ngModel)]="selectedType" (change)="onTypeChange()" class="type-select" aria-label="Filtrer les résultats par type">
+            <option value="">All Types</option>
+            <option value="annonce">Annonces</option>
+            <option value="dossier">Dossiers</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    @if (!isLoading && searchResults.length > 0) {
+      <div class="search-info" role="status" aria-live="polite">
+        <p>Found {{ totalHits }} result(s)</p>
+        @if (!elasticsearchAvailable) {
+          <span class="es-badge" title="Using PostgreSQL search" aria-label="Recherche effectuée avec PostgreSQL">
+            PostgreSQL Fallback
+          </span>
+        }
+        @if (elasticsearchAvailable) {
+          <span class="es-badge success" title="Using Elasticsearch" aria-label="Recherche effectuée avec Elasticsearch">
+            Elasticsearch
+          </span>
+        }
+      </div>
+    }
+
+    @if (isLoading) {
+      <app-loading-skeleton variant="card" [rows]="5" aria-label="Chargement des résultats de recherche"></app-loading-skeleton>
+    }
+
+    @if (error) {
+      <div class="error-message" role="alert" aria-live="assertive">
+        <p>{{ error }}</p>
+      </div>
+    }
+
+    @if (!isLoading && !error) {
+      <main class="search-results">
+        <section aria-labelledby="results-title">
+          <h2 id="results-title" class="sr-only">Résultats de recherche</h2>
+          @for (result of searchResults; track result; let i = $index) {
+            <div class="result-card"
+              (click)="navigateToResult(result)"
+              tabindex="0"
+              role="article"
+              [attr.aria-label]="result.type + ': ' + result.title"
+              (keydown.enter)="navigateToResult(result)"
+              (keydown.space)="navigateToResult(result)">
+              <div class="result-header">
+                <span class="result-type"
+                  [class.annonce]="result.type === 'annonce'"
+                  [class.dossier]="result.type === 'dossier'"
+                  [attr.aria-label]="'Type: ' + result.type">
+                  {{ result.type }}
+                </span>
+                @if (elasticsearchAvailable) {
+                  <span class="result-score" [attr.aria-label]="'Score de pertinence: ' + result.relevanceScore">
+                    Score: {{ result.relevanceScore | number:'1.2-2' }}
+                  </span>
+                }
+              </div>
+              <h3 class="result-title">{{ result.title }}</h3>
+              @if (result.description) {
+                <p class="result-description">
+                  {{ truncate(result.description, 200) }}
+                </p>
+              }
+              <div class="result-meta">
+                <span>Updated: {{ result.updatedAt | date:'short' }}</span>
+              </div>
+            </div>
+          }
+          @if (searchResults.length === 0 && searchQuery) {
+            <div class="empty-state" role="status" aria-live="polite">
+              <p>No results found for "{{ searchQuery }}"</p>
+              <p class="hint">Try adjusting your search terms or filters</p>
+            </div>
+          }
+        </section>
+      </main>
+    }
+
+    @if (!isLoading && searchResults.length > 0) {
+      <nav class="pagination" aria-label="Pagination des résultats de recherche">
+        <button
+          class="btn btn-secondary"
+          (click)="previousPage()"
+          [disabled]="!hasPreviousPage"
+          aria-label="Page précédente"
+          [attr.aria-disabled]="!hasPreviousPage"
+          >
+          Previous
         </button>
-      </div>
-      <div class="filter-group">
-        <label for="type-select" class="sr-only">Filtrer par type</label>
-        <select id="type-select" [(ngModel)]="selectedType" (change)="onTypeChange()" class="type-select" aria-label="Filtrer les résultats par type">
-          <option value="">All Types</option>
-          <option value="annonce">Annonces</option>
-          <option value="dossier">Dossiers</option>
-        </select>
-      </div>
-    </div>
-  </header>
-
-  <div class="search-info" *ngIf="!isLoading && searchResults.length > 0" role="status" aria-live="polite">
-    <p>Found {{ totalHits }} result(s)</p>
-    <span class="es-badge" *ngIf="!elasticsearchAvailable" title="Using PostgreSQL search" aria-label="Recherche effectuée avec PostgreSQL">
-      PostgreSQL Fallback
-    </span>
-    <span class="es-badge success" *ngIf="elasticsearchAvailable" title="Using Elasticsearch" aria-label="Recherche effectuée avec Elasticsearch">
-      Elasticsearch
-    </span>
+        <span class="page-info" role="status" aria-live="polite">Page {{ page + 1 }}</span>
+        <button
+          class="btn btn-secondary"
+          (click)="nextPage()"
+          [disabled]="!hasNextPage"
+          aria-label="Page suivante"
+          [attr.aria-disabled]="!hasNextPage"
+          >
+          Next
+        </button>
+      </nav>
+    }
   </div>
-
-  <app-loading-skeleton *ngIf="isLoading" variant="card" [rows]="5" aria-label="Chargement des résultats de recherche"></app-loading-skeleton>
-
-  <div class="error-message" *ngIf="error" role="alert" aria-live="assertive">
-    <p>{{ error }}</p>
-  </div>
-
-  <main class="search-results" *ngIf="!isLoading && !error">
-    <section aria-labelledby="results-title">
-      <h2 id="results-title" class="sr-only">Résultats de recherche</h2>
-      <div class="result-card" 
-           *ngFor="let result of searchResults; let i = index" 
-           (click)="navigateToResult(result)"
-           tabindex="0"
-           role="article"
-           [attr.aria-label]="result.type + ': ' + result.title"
-           (keydown.enter)="navigateToResult(result)"
-           (keydown.space)="navigateToResult(result)">
-        <div class="result-header">
-          <span class="result-type" 
-                [class.annonce]="result.type === 'annonce'" 
-                [class.dossier]="result.type === 'dossier'"
-                [attr.aria-label]="'Type: ' + result.type">
-            {{ result.type }}
-          </span>
-          <span class="result-score" *ngIf="elasticsearchAvailable" [attr.aria-label]="'Score de pertinence: ' + result.relevanceScore">
-            Score: {{ result.relevanceScore | number:'1.2-2' }}
-          </span>
-        </div>
-        <h3 class="result-title">{{ result.title }}</h3>
-        <p class="result-description" *ngIf="result.description">
-          {{ truncate(result.description, 200) }}
-        </p>
-        <div class="result-meta">
-          <span>Updated: {{ result.updatedAt | date:'short' }}</span>
-        </div>
-      </div>
-
-      <div class="empty-state" *ngIf="searchResults.length === 0 && searchQuery" role="status" aria-live="polite">
-        <p>No results found for "{{ searchQuery }}"</p>
-        <p class="hint">Try adjusting your search terms or filters</p>
-      </div>
-    </section>
-  </main>
-
-  <nav class="pagination" *ngIf="!isLoading && searchResults.length > 0" aria-label="Pagination des résultats de recherche">
-    <button 
-      class="btn btn-secondary" 
-      (click)="previousPage()" 
-      [disabled]="!hasPreviousPage"
-      aria-label="Page précédente"
-      [attr.aria-disabled]="!hasPreviousPage"
-    >
-      Previous
-    </button>
-    <span class="page-info" role="status" aria-live="polite">Page {{ page + 1 }}</span>
-    <button 
-      class="btn btn-secondary" 
-      (click)="nextPage()" 
-      [disabled]="!hasNextPage"
-      aria-label="Page suivante"
-      [attr.aria-disabled]="!hasNextPage"
-    >
-      Next
-    </button>
-  </nav>
-</div>

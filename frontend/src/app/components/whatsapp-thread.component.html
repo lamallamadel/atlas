@@ -1,29 +1,35 @@
 <div class="whatsapp-thread-container" [class.offline]="!isOnline">
-  <div class="offline-banner" *ngIf="!isOnline">
-    <mat-icon>cloud_off</mat-icon>
-    <span>Mode hors ligne - Les messages seront envoyés dès la reconnexion</span>
-  </div>
+  @if (!isOnline) {
+    <div class="offline-banner">
+      <mat-icon>cloud_off</mat-icon>
+      <span>Mode hors ligne - Les messages seront envoyés dès la reconnexion</span>
+    </div>
+  }
 
   <cdk-virtual-scroll-viewport
     #viewport
     itemSize="80"
     class="messages-viewport"
     [class.loading]="loading">
-    
-    <div class="loading-indicator" *ngIf="loading">
-      <mat-spinner diameter="40"></mat-spinner>
-    </div>
+
+    @if (loading) {
+      <div class="loading-indicator">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+    }
 
     <div class="messages-list">
       <ng-container *cdkVirtualFor="let message of messages; trackBy: trackByMessageId; let i = index">
-        
+
         <!-- Date divider -->
-        <div class="date-divider" *ngIf="showDateDivider(i)">
-          <span>{{ getDateDividerText(message.timestamp) }}</span>
-        </div>
+        @if (showDateDivider(i)) {
+          <div class="date-divider">
+            <span>{{ getDateDividerText(message.timestamp) }}</span>
+          </div>
+        }
 
         <!-- Message bubble -->
-        <div 
+        <div
           class="message-wrapper"
           [class.outbound]="message.direction === MessageDirection.OUTBOUND"
           [class.inbound]="message.direction === MessageDirection.INBOUND"
@@ -35,28 +41,29 @@
           (mousedown)="onMouseDown($event, message)"
           (mousemove)="onMouseMove($event, message)"
           (mouseup)="onMouseUp($event, message)">
-          
+
           <!-- Swipe actions (shown on left when swiping) -->
-          <div 
+          <div
             class="swipe-actions"
             [class.visible]="swipedMessageId === message.id && Math.abs(swipeOffset) > 50">
-            <button 
-              mat-icon-button 
-              class="action-retry"
-              *ngIf="message.deliveryStatus === MessageDeliveryStatus.FAILED"
-              (click)="retryMessage(message, $event)"
-              matTooltip="Réessayer">
-              <mat-icon>refresh</mat-icon>
-            </button>
-            <button 
-              mat-icon-button 
+            @if (message.deliveryStatus === MessageDeliveryStatus.FAILED) {
+              <button
+                mat-icon-button
+                class="action-retry"
+                (click)="retryMessage(message, $event)"
+                matTooltip="Réessayer">
+                <mat-icon>refresh</mat-icon>
+              </button>
+            }
+            <button
+              mat-icon-button
               class="action-copy"
               (click)="copyMessage(message, $event)"
               matTooltip="Copier">
               <mat-icon>content_copy</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
+            <button
+              mat-icon-button
               class="action-delete"
               (click)="deleteMessage(message, $event)"
               matTooltip="Supprimer">
@@ -70,12 +77,14 @@
             </div>
             <div class="message-meta">
               <span class="timestamp">{{ formatTimestamp(message.timestamp) }}</span>
-              <span 
-                class="delivery-status"
-                [class]="getDeliveryStatusClass(message.deliveryStatus)"
-                *ngIf="message.direction === MessageDirection.OUTBOUND">
-                {{ getDeliveryStatusIcon(message.deliveryStatus) }}
-              </span>
+              @if (message.direction === MessageDirection.OUTBOUND) {
+                <span
+                  class="delivery-status"
+                  [class]="getDeliveryStatusClass(message.deliveryStatus)"
+                  >
+                  {{ getDeliveryStatusIcon(message.deliveryStatus) }}
+                </span>
+              }
             </div>
           </div>
         </div>

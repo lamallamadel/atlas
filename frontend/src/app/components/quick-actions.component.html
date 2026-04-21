@@ -1,8 +1,8 @@
 <div class="quick-actions-container">
   <!-- FAB Button -->
-  <button 
-    mat-fab 
-    color="primary" 
+  <button
+    mat-fab
+    color="primary"
     class="quick-actions-fab"
     [class.fab-open]="menuOpen"
     (click)="toggleMenu()"
@@ -26,49 +26,55 @@
       <div class="actions-section">
         <h4>Actions</h4>
         <div class="action-buttons">
-          <button 
-            *ngFor="let action of actions"
-            mat-raised-button
-            [color]="action.color"
-            [disabled]="action.disabled"
-            (click)="action.action()"
-            class="action-button">
-            <mat-icon>{{ action.icon }}</mat-icon>
-            <div class="action-content">
-              <span class="action-label">{{ action.label }}</span>
-              <span class="action-shortcut">{{ action.shortcut }}</span>
-            </div>
-          </button>
+          @for (action of actions; track action) {
+            <button
+              mat-raised-button
+              [color]="action.color"
+              [disabled]="action.disabled"
+              (click)="action.action()"
+              class="action-button">
+              <mat-icon>{{ action.icon }}</mat-icon>
+              <div class="action-content">
+                <span class="action-label">{{ action.label }}</span>
+                <span class="action-shortcut">{{ action.shortcut }}</span>
+              </div>
+            </button>
+          }
         </div>
       </div>
 
       <!-- Recent Actions History -->
-      <div class="actions-section" *ngIf="recentActions.length > 0">
-        <h4>Historique récent</h4>
-        <div class="recent-actions-list">
-          <div 
-            *ngFor="let recentAction of recentActions"
-            class="recent-action-item">
-            <mat-icon class="recent-action-icon">{{ getActionIcon(recentAction.actionId) }}</mat-icon>
-            <div class="recent-action-content">
-              <span class="recent-action-label">{{ recentAction.actionLabel }}</span>
-              <span class="recent-action-time">{{ formatActionTimestamp(recentAction.timestamp) }}</span>
-            </div>
+      @if (recentActions.length > 0) {
+        <div class="actions-section">
+          <h4>Historique récent</h4>
+          <div class="recent-actions-list">
+            @for (recentAction of recentActions; track recentAction) {
+              <div
+                class="recent-action-item">
+                <mat-icon class="recent-action-icon">{{ getActionIcon(recentAction.actionId) }}</mat-icon>
+                <div class="recent-action-content">
+                  <span class="recent-action-label">{{ recentAction.actionLabel }}</span>
+                  <span class="recent-action-time">{{ formatActionTimestamp(recentAction.timestamp) }}</span>
+                </div>
+              </div>
+            }
           </div>
         </div>
-      </div>
+      }
 
       <!-- VoIP Status -->
-      <div class="voip-status" *ngIf="voipConfigured">
-        <mat-icon class="voip-status-icon">phone_in_talk</mat-icon>
-        <span class="voip-status-text">Système VoIP connecté</span>
-      </div>
+      @if (voipConfigured) {
+        <div class="voip-status">
+          <mat-icon class="voip-status-icon">phone_in_talk</mat-icon>
+          <span class="voip-status-text">Système VoIP connecté</span>
+        </div>
+      }
     </div>
   </div>
 
   <!-- Backdrop -->
-  <div 
-    class="quick-actions-backdrop" 
+  <div
+    class="quick-actions-backdrop"
     [class.backdrop-visible]="menuOpen"
     (click)="closeMenu()"
     (keydown.enter)="closeMenu()"

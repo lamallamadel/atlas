@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { RouterModule } from '@angular/router';
 import { CardWidgetBaseComponent } from './card-widget-base.component';
 import { DossierApiService } from '../services/dossier-api.service';
@@ -17,53 +17,67 @@ interface Dossier {
 @Component({
   selector: 'app-recent-dossiers-widget',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [RouterModule],
   template: `
     <div class="widget" [class.edit-mode]="editMode">
       <div class="widget-header">
         <h3>{{ config.title || 'Dossiers récents' }}</h3>
-        <div class="widget-actions" *ngIf="editMode">
-          <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
-            <span class="material-icons">refresh</span>
-          </button>
-          <button (click)="onRemove()" class="btn-icon" title="Supprimer">
-            <span class="material-icons">close</span>
-          </button>
-        </div>
+        @if (editMode) {
+          <div class="widget-actions">
+            <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
+              <span class="material-icons">refresh</span>
+            </button>
+            <button (click)="onRemove()" class="btn-icon" title="Supprimer">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+        }
       </div>
-      
-      <div class="widget-content" *ngIf="!loading && !error">
-        <div class="dossier-list" *ngIf="dossiers.length > 0">
-          <a *ngFor="let dossier of dossiers" 
-             [routerLink]="['/dossiers', dossier.id]"
-             class="dossier-item">
-            <div class="dossier-info">
-              <div class="dossier-name">{{ dossier.leadName }}</div>
-              <div class="dossier-contact">{{ dossier.leadPhone }}</div>
+    
+      @if (!loading && !error) {
+        <div class="widget-content">
+          @if (dossiers.length > 0) {
+            <div class="dossier-list">
+              @for (dossier of dossiers; track dossier) {
+                <a
+                  [routerLink]="['/dossiers', dossier.id]"
+                  class="dossier-item">
+                  <div class="dossier-info">
+                    <div class="dossier-name">{{ dossier.leadName }}</div>
+                    <div class="dossier-contact">{{ dossier.leadPhone }}</div>
+                  </div>
+                  <div class="dossier-status">
+                    <span class="badge" [attr.data-status]="dossier.status">
+                      {{ dossier.status }}
+                    </span>
+                  </div>
+                </a>
+              }
             </div>
-            <div class="dossier-status">
-              <span class="badge" [attr.data-status]="dossier.status">
-                {{ dossier.status }}
-              </span>
+          }
+          @if (dossiers.length === 0) {
+            <div class="empty-state">
+              <span class="material-icons">folder_open</span>
+              <p>Aucun dossier récent</p>
             </div>
-          </a>
+          }
         </div>
-        <div class="empty-state" *ngIf="dossiers.length === 0">
-          <span class="material-icons">folder_open</span>
-          <p>Aucun dossier récent</p>
+      }
+    
+      @if (loading) {
+        <div class="widget-loading">
+          <div class="spinner"></div>
         </div>
-      </div>
-
-      <div class="widget-loading" *ngIf="loading">
-        <div class="spinner"></div>
-      </div>
-
-      <div class="widget-error" *ngIf="error">
-        <span class="material-icons">error</span>
-        <p>{{ error }}</p>
-      </div>
+      }
+    
+      @if (error) {
+        <div class="widget-error">
+          <span class="material-icons">error</span>
+          <p>{{ error }}</p>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .widget {
       background: white;

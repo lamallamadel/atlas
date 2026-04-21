@@ -13,83 +13,95 @@
       <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
 
       <div class="kpi-grid">
-        <div 
-          *ngFor="let key of getKpiCardKeys(); trackBy: trackByKey"
-          class="kpi-card-wrapper"
-          [@itemAnimation]>
-          <div 
-            class="kpi-card"
-            [class.kpi-card--loading]="kpiCards[key].loading"
-            [class.kpi-card--clickable]="!kpiCards[key].loading && !kpiCards[key].error"
-            [class.kpi-card--error]="kpiCards[key].error"
-            (click)="onKpiCardClick(key)"
-            (keydown.enter)="onKpiCardClick(key, $event)"
-            (keydown.space)="onKpiCardClick(key, $event)"
-            [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1"
-            role="button"
-            [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)"
-            [attr.aria-disabled]="kpiCards[key].loading || kpiCards[key].error ? 'true' : 'false'">
-            
-            <div class="kpi-card__header">
-              <div class="kpi-card__icon-container" [style.background]="'linear-gradient(135deg, ' + kpiCards[key].color + ' 0%, ' + kpiCards[key].color + 'cc 100%)'">
-                <mat-icon class="kpi-card__icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
-                <div class="kpi-card__badge" [style.background-color]="kpiCards[key].badgeColor" aria-hidden="true"></div>
-              </div>
-              <div class="kpi-card__title-section">
-                <h3 class="kpi-card__title">{{kpiCards[key].title}}</h3>
-                <p class="kpi-card__description" *ngIf="kpiCards[key].description">{{kpiCards[key].description}}</p>
-              </div>
-            </div>
-            
-            <app-skeleton-loader *ngIf="kpiCards[key].loading" variant="dashboard-kpi" aria-label="Chargement des données"></app-skeleton-loader>
-            
-            <div *ngIf="!kpiCards[key].loading" class="kpi-card__content">
-              <div *ngIf="kpiCards[key].error" class="kpi-card__error" role="alert" aria-live="assertive">
-                <mat-icon color="warn" aria-hidden="true">error</mat-icon>
-                <span>{{kpiCards[key].error}}</span>
-              </div>
-              
-              <div *ngIf="!kpiCards[key].error" class="kpi-card__body">
-                <div class="kpi-card__metric">
-                  <span class="kpi-card__value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
-                    {{kpiCards[key].displayValue}}
-                  </span>
-                  <span class="kpi-card__label" *ngIf="selectedPeriod$ | async as period">
-                    sur {{getPeriodLabel(period)}}
-                  </span>
+        @for (key of getKpiCardKeys(); track trackByKey($index, key)) {
+          <div
+            class="kpi-card-wrapper"
+            [@itemAnimation]>
+            <div
+              class="kpi-card"
+              [class.kpi-card--loading]="kpiCards[key].loading"
+              [class.kpi-card--clickable]="!kpiCards[key].loading && !kpiCards[key].error"
+              [class.kpi-card--error]="kpiCards[key].error"
+              (click)="onKpiCardClick(key)"
+              (keydown.enter)="onKpiCardClick(key, $event)"
+              (keydown.space)="onKpiCardClick(key, $event)"
+              [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1"
+              role="button"
+              [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)"
+              [attr.aria-disabled]="kpiCards[key].loading || kpiCards[key].error ? 'true' : 'false'">
+              <div class="kpi-card__header">
+                <div class="kpi-card__icon-container" [style.background]="'linear-gradient(135deg, ' + kpiCards[key].color + ' 0%, ' + kpiCards[key].color + 'cc 100%)'">
+                  <mat-icon class="kpi-card__icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
+                  <div class="kpi-card__badge" [style.background-color]="kpiCards[key].badgeColor" aria-hidden="true"></div>
                 </div>
-                
-                <div class="kpi-card__trend" *ngIf="kpiCards[key].trend">
-                  <div class="kpi-card__trend-indicator" 
-                       [class.kpi-card__trend-indicator--positive]="kpiCards[key].trendValue > 0"
-                       [class.kpi-card__trend-indicator--negative]="kpiCards[key].trendValue < 0"
-                       [class.kpi-card__trend-indicator--neutral]="kpiCards[key].trendValue === 0">
-                    <mat-icon class="kpi-card__trend-icon" aria-hidden="true">
-                      {{kpiCards[key].trendValue > 0 ? 'trending_up' : kpiCards[key].trendValue < 0 ? 'trending_down' : 'trending_flat'}}
-                    </mat-icon>
-                    <span class="kpi-card__trend-value">{{kpiCards[key].trend}}</span>
-                  </div>
-                </div>
-                <div class="kpi-card__chart" aria-hidden="true">
-                  <canvas 
-                    [id]="'chart-' + key"
-                    #annoncesChart 
-                    *ngIf="key === 'annoncesActives'"
-                    class="kpi-card__sparkline"
-                    role="img"
-                    [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
-                  <canvas 
-                    [id]="'chart-' + key"
-                    #dossiersChart 
-                    *ngIf="key === 'dossiersATraiter'"
-                    class="kpi-card__sparkline"
-                    role="img"
-                    [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                <div class="kpi-card__title-section">
+                  <h3 class="kpi-card__title">{{kpiCards[key].title}}</h3>
+                  @if (kpiCards[key].description) {
+                    <p class="kpi-card__description">{{kpiCards[key].description}}</p>
+                  }
                 </div>
               </div>
+              @if (kpiCards[key].loading) {
+                <app-skeleton-loader variant="dashboard-kpi" aria-label="Chargement des données"></app-skeleton-loader>
+              }
+              @if (!kpiCards[key].loading) {
+                <div class="kpi-card__content">
+                  @if (kpiCards[key].error) {
+                    <div class="kpi-card__error" role="alert" aria-live="assertive">
+                      <mat-icon color="warn" aria-hidden="true">error</mat-icon>
+                      <span>{{kpiCards[key].error}}</span>
+                    </div>
+                  }
+                  @if (!kpiCards[key].error) {
+                    <div class="kpi-card__body">
+                      <div class="kpi-card__metric">
+                        <span class="kpi-card__value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
+                          {{kpiCards[key].displayValue}}
+                        </span>
+                        @if (selectedPeriod$ | async; as period) {
+                          <span class="kpi-card__label">
+                            sur {{getPeriodLabel(period)}}
+                          </span>
+                        }
+                      </div>
+                      @if (kpiCards[key].trend) {
+                        <div class="kpi-card__trend">
+                          <div class="kpi-card__trend-indicator"
+                            [class.kpi-card__trend-indicator--positive]="kpiCards[key].trendValue > 0"
+                            [class.kpi-card__trend-indicator--negative]="kpiCards[key].trendValue < 0"
+                            [class.kpi-card__trend-indicator--neutral]="kpiCards[key].trendValue === 0">
+                            <mat-icon class="kpi-card__trend-icon" aria-hidden="true">
+                              {{kpiCards[key].trendValue > 0 ? 'trending_up' : kpiCards[key].trendValue < 0 ? 'trending_down' : 'trending_flat'}}
+                            </mat-icon>
+                            <span class="kpi-card__trend-value">{{kpiCards[key].trend}}</span>
+                          </div>
+                        </div>
+                      }
+                      <div class="kpi-card__chart" aria-hidden="true">
+                        @if (key === 'annoncesActives') {
+                          <canvas
+                            [id]="'chart-' + key"
+                            #annoncesChart
+                            class="kpi-card__sparkline"
+                            role="img"
+                          [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                        }
+                        @if (key === 'dossiersATraiter') {
+                          <canvas
+                            [id]="'chart-' + key"
+                            #dossiersChart
+                            class="kpi-card__sparkline"
+                            role="img"
+                          [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
+                        }
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
       </div>
     </section>
 
@@ -131,59 +143,75 @@
                 </div>
 
 
-                <app-skeleton-loader *ngIf="loadingRecent" variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-skeleton-loader>
-                
+                @if (loadingRecent) {
+                  <app-skeleton-loader variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-skeleton-loader>
+                }
 
-                <app-loading-skeleton *ngIf="loadingRecent" variant="list" [rows]="5"
+
+                @if (loadingRecent) {
+                  <app-loading-skeleton variant="list" [rows]="5"
                   aria-label="Chargement des dossiers récents"></app-loading-skeleton>
+                }
 
 
-                <div *ngIf="!loadingRecent && errorRecent" class="kpi-error" role="alert" aria-live="assertive">
-                  <mat-icon color="warn" aria-hidden="true">error</mat-icon>
-                  <span>{{errorRecent}}</span>
-                </div>
+                @if (!loadingRecent && errorRecent) {
+                  <div class="kpi-error" role="alert" aria-live="assertive">
+                    <mat-icon color="warn" aria-hidden="true">error</mat-icon>
+                    <span>{{errorRecent}}</span>
+                  </div>
+                }
 
-                <app-empty-state *ngIf="!loadingRecent && !errorRecent && recentDossiers.length === 0"
-                  message="Aucun dossier récent" [primaryAction]="getEmptyStatePrimaryAction()"
-                  [secondaryAction]="getEmptyStateSecondaryAction()">
-                </app-empty-state>
+                @if (!loadingRecent && !errorRecent && recentDossiers.length === 0) {
+                  <app-empty-state
+                    message="Aucun dossier récent" [primaryAction]="getEmptyStatePrimaryAction()"
+                    [secondaryAction]="getEmptyStateSecondaryAction()">
+                  </app-empty-state>
+                }
 
-                <div *ngIf="!loadingRecent && !errorRecent && recentDossiers.length > 0" class="dossiers-list"
-                  role="list" [@listStaggerAnimation]="recentDossiers.length">
-                  <mat-card *ngFor="let dossier of recentDossiers; trackBy: trackByDossierId" class="dossier-item"
-                    [@itemAnimation] appearance="outlined" role="listitem" tabindex="0"
-                    [attr.aria-label]="'Dossier ' + dossier.id + ', ' + (dossier.leadName || 'Sans nom')">
-                    <mat-card-content>
-                      <div class="dossier-info">
-                        <div class="dossier-field">
-                          <mat-icon class="field-icon" aria-hidden="true">tag</mat-icon>
-                          <span class="field-label">ID:</span>
-                          <span class="field-value">{{dossier.id}}</span>
-                        </div>
-                        <div class="dossier-field" *ngIf="dossier.leadName">
-                          <mat-icon class="field-icon" aria-hidden="true">person</mat-icon>
-                          <span class="field-label">Lead:</span>
-                          <span class="field-value">{{dossier.leadName}}</span>
-                        </div>
-                        <div class="dossier-field" *ngIf="dossier.leadPhone">
-                          <mat-icon class="field-icon" aria-hidden="true">phone</mat-icon>
-                          <span class="field-label">Téléphone:</span>
-                          <span class="field-value">{{dossier.leadPhone}}</span>
-                        </div>
-                        <div class="dossier-field">
-                          <mat-icon class="field-icon" aria-hidden="true">info</mat-icon>
-                          <span class="field-label">Statut:</span>
-                          <span class="field-value">{{dossier.status}}</span>
-                        </div>
-                        <div class="dossier-field">
-                          <mat-icon class="field-icon" aria-hidden="true">event</mat-icon>
-                          <span class="field-label">Créé le:</span>
-                          <span class="field-value">{{dossier.createdAt | date:'short'}}</span>
-                        </div>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                </div>
+                @if (!loadingRecent && !errorRecent && recentDossiers.length > 0) {
+                  <div class="dossiers-list"
+                    role="list" [@listStaggerAnimation]="recentDossiers.length">
+                    @for (dossier of recentDossiers; track trackByDossierId($index, dossier)) {
+                      <mat-card class="dossier-item"
+                        [@itemAnimation] appearance="outlined" role="listitem" tabindex="0"
+                        [attr.aria-label]="'Dossier ' + dossier.id + ', ' + (dossier.leadName || 'Sans nom')">
+                        <mat-card-content>
+                          <div class="dossier-info">
+                            <div class="dossier-field">
+                              <mat-icon class="field-icon" aria-hidden="true">tag</mat-icon>
+                              <span class="field-label">ID:</span>
+                              <span class="field-value">{{dossier.id}}</span>
+                            </div>
+                            @if (dossier.leadName) {
+                              <div class="dossier-field">
+                                <mat-icon class="field-icon" aria-hidden="true">person</mat-icon>
+                                <span class="field-label">Lead:</span>
+                                <span class="field-value">{{dossier.leadName}}</span>
+                              </div>
+                            }
+                            @if (dossier.leadPhone) {
+                              <div class="dossier-field">
+                                <mat-icon class="field-icon" aria-hidden="true">phone</mat-icon>
+                                <span class="field-label">Téléphone:</span>
+                                <span class="field-value">{{dossier.leadPhone}}</span>
+                              </div>
+                            }
+                            <div class="dossier-field">
+                              <mat-icon class="field-icon" aria-hidden="true">info</mat-icon>
+                              <span class="field-label">Statut:</span>
+                              <span class="field-value">{{dossier.status}}</span>
+                            </div>
+                            <div class="dossier-field">
+                              <mat-icon class="field-icon" aria-hidden="true">event</mat-icon>
+                              <span class="field-label">Créé le:</span>
+                              <span class="field-value">{{dossier.createdAt | date:'short'}}</span>
+                            </div>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    }
+                  </div>
+                }
               </mat-card-content>
             </mat-card>
           </div>
@@ -194,59 +222,63 @@
     </section>
 
     <!-- Ligne 3: Yield Management Alerts -->
-    <section aria-labelledby="yield-section-title" class="dashboard-section" *ngIf="yieldAnnonces.length > 0">
-      <h2 id="yield-section-title" class="sr-only">Ajustements de Prix (Yield)</h2>
-      <div class="grid-container">
-        <div class="grid-row">
-          <div class="grid-col-12">
-            <mat-card class="section-card" appearance="outlined">
-              <mat-card-header>
-                <div mat-card-avatar class="kpi-icon-container" style="background-color: #f44336;" aria-hidden="true">
-                  <mat-icon class="kpi-icon" aria-hidden="true">trending_up</mat-icon>
-                </div>
-                <mat-card-title class="kpi-card-title">
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <h3>Ajustements de Prix (Yield Management)</h3>
-                    <mat-icon
-                      style="font-size: 18px; height: 18px; width: 18px; color: var(--color-neutral-400); cursor: help;"
-                      matTooltip="Calcul dynamique automatisé (Yield) de recommandations de prix à la hausse ou à la baisse basé sur le volume d'interactions mesuré sur l'annonce ces 7 et 30 derniers jours."
-                      matTooltipPosition="right">
-                      help_outline
-                    </mat-icon>
+    @if (yieldAnnonces.length > 0) {
+      <section aria-labelledby="yield-section-title" class="dashboard-section">
+        <h2 id="yield-section-title" class="sr-only">Ajustements de Prix (Yield)</h2>
+        <div class="grid-container">
+          <div class="grid-row">
+            <div class="grid-col-12">
+              <mat-card class="section-card" appearance="outlined">
+                <mat-card-header>
+                  <div mat-card-avatar class="kpi-icon-container" style="background-color: #f44336;" aria-hidden="true">
+                    <mat-icon class="kpi-icon" aria-hidden="true">trending_up</mat-icon>
                   </div>
-                </mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="dossiers-list" role="list">
-                  <mat-card *ngFor="let annonce of yieldAnnonces" class="dossier-item" appearance="outlined"
-                    role="listitem">
-                    <mat-card-content>
-                      <div class="dossier-info">
-                        <div class="dossier-field">
-                          <mat-icon class="field-icon" aria-hidden="true">house</mat-icon>
-                          <span class="field-label">Annonce:</span>
-                          <span class="field-value">{{annonce.title}}</span>
-                        </div>
-                        <div class="dossier-field">
-                          <mat-icon class="field-icon" aria-hidden="true">euro</mat-icon>
-                          <span class="field-label">Prix Actuel:</span>
-                          <span class="field-value">{{annonce.price}} {{annonce.currency}}</span>
-                        </div>
-                        <div class="dossier-field">
-                          <mat-icon class="field-icon" style="color:#ff9800" aria-hidden="true">warning</mat-icon>
-                          <span class="field-label">Alerte:</span>
-                          <span class="field-value"
-                            style="color:#d32f2f; font-weight: 500;">{{annonce.aiScoreDetails}}</span>
-                        </div>
-                      </div>
-                    </mat-card-content>
-                  </mat-card>
-                </div>
-              </mat-card-content>
-            </mat-card>
+                  <mat-card-title class="kpi-card-title">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                      <h3>Ajustements de Prix (Yield Management)</h3>
+                      <mat-icon
+                        style="font-size: 18px; height: 18px; width: 18px; color: var(--color-neutral-400); cursor: help;"
+                        matTooltip="Calcul dynamique automatisé (Yield) de recommandations de prix à la hausse ou à la baisse basé sur le volume d'interactions mesuré sur l'annonce ces 7 et 30 derniers jours."
+                        matTooltipPosition="right">
+                        help_outline
+                      </mat-icon>
+                    </div>
+                  </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="dossiers-list" role="list">
+                    @for (annonce of yieldAnnonces; track annonce) {
+                      <mat-card class="dossier-item" appearance="outlined"
+                        role="listitem">
+                        <mat-card-content>
+                          <div class="dossier-info">
+                            <div class="dossier-field">
+                              <mat-icon class="field-icon" aria-hidden="true">house</mat-icon>
+                              <span class="field-label">Annonce:</span>
+                              <span class="field-value">{{annonce.title}}</span>
+                            </div>
+                            <div class="dossier-field">
+                              <mat-icon class="field-icon" aria-hidden="true">euro</mat-icon>
+                              <span class="field-label">Prix Actuel:</span>
+                              <span class="field-value">{{annonce.price}} {{annonce.currency}}</span>
+                            </div>
+                            <div class="dossier-field">
+                              <mat-icon class="field-icon" style="color:#ff9800" aria-hidden="true">warning</mat-icon>
+                              <span class="field-label">Alerte:</span>
+                              <span class="field-value"
+                              style="color:#d32f2f; font-weight: 500;">{{annonce.aiScoreDetails}}</span>
+                            </div>
+                          </div>
+                        </mat-card-content>
+                      </mat-card>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    }
   </div>
 </div>

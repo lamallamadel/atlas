@@ -15,37 +15,43 @@ export interface ExportProgressDialogData {
         <mat-icon class="title-icon">{{getTitleIcon()}}</mat-icon>
         {{ getTitle() }}
       </h2>
-      
+    
       <mat-dialog-content>
         <div class="progress-container">
-          <mat-progress-bar 
-            mode="determinate" 
+          <mat-progress-bar
+            mode="determinate"
             [value]="progress?.progress || 0"
             [color]="getProgressColor()">
           </mat-progress-bar>
-          
+    
           <div class="progress-message">
-            <mat-icon *ngIf="progress?.stage === 'complete'" class="success-icon">check_circle</mat-icon>
-            <mat-icon *ngIf="progress?.stage === 'error'" class="error-icon">error</mat-icon>
+            @if (progress?.stage === 'complete') {
+              <mat-icon class="success-icon">check_circle</mat-icon>
+            }
+            @if (progress?.stage === 'error') {
+              <mat-icon class="error-icon">error</mat-icon>
+            }
             <span>{{ progress?.message || data.message }}</span>
           </div>
-
-          <div *ngIf="progress && progress.error" class="error-details">
-            {{ progress.error }}
-          </div>
+    
+          @if (progress && progress.error) {
+            <div class="error-details">
+              {{ progress.error }}
+            </div>
+          }
         </div>
       </mat-dialog-content>
-      
+    
       <mat-dialog-actions align="end">
-        <button 
-          mat-button 
+        <button
+          mat-button
           (click)="close()"
           [disabled]="progress?.stage === 'preparing' || progress?.stage === 'generating'">
           {{ progress?.stage === 'complete' ? 'Fermer' : 'Annuler' }}
         </button>
       </mat-dialog-actions>
     </div>
-  `,
+    `,
   styles: [`
     .export-progress-dialog {
       min-width: 400px;

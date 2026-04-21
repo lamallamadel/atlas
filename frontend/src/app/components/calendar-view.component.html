@@ -5,23 +5,23 @@
         <div class="header-row">
           <h2>Calendrier des rendez-vous</h2>
           <div class="header-actions">
-            <button 
-              mat-icon-button 
-              (click)="refreshCalendar()" 
+            <button
+              mat-icon-button
+              (click)="refreshCalendar()"
               matTooltip="Actualiser"
               [disabled]="isLoading">
               <mat-icon>refresh</mat-icon>
             </button>
-            <button 
-              mat-icon-button 
-              (click)="toggleListView()" 
+            <button
+              mat-icon-button
+              (click)="toggleListView()"
               matTooltip="Vue liste"
               [color]="showListView ? 'primary' : 'default'">
               <mat-icon>{{ showListView ? 'calendar_view_month' : 'list' }}</mat-icon>
             </button>
-            <button 
-              mat-raised-button 
-              color="primary" 
+            <button
+              mat-raised-button
+              color="primary"
               (click)="exportToICal()"
               [disabled]="isLoading">
               <mat-icon>file_download</mat-icon>
@@ -36,24 +36,28 @@
       <div class="filters-section">
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Filtrer par assigné</mat-label>
-          <mat-select 
-            [(value)]="filterByAssignedTo" 
+          <mat-select
+            [(value)]="filterByAssignedTo"
             (selectionChange)="onFilterByAssignedToChange($event.value)">
             <mat-option [value]="null">Tous les assignés</mat-option>
-            <mat-option *ngFor="let assignee of availableAssignees" [value]="assignee">
-              {{ assignee }}
-            </mat-option>
+            @for (assignee of availableAssignees; track assignee) {
+              <mat-option [value]="assignee">
+                {{ assignee }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
 
         <mat-form-field appearance="outline" class="filter-field">
           <mat-label>Filtrer par statut</mat-label>
-          <mat-select 
-            [(value)]="filterByStatus" 
+          <mat-select
+            [(value)]="filterByStatus"
             (selectionChange)="onFilterByStatusChange($event.value)">
-            <mat-option *ngFor="let option of statusOptions" [value]="option.value">
-              {{ option.label }}
-            </mat-option>
+            @for (option of statusOptions; track option) {
+              <mat-option [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
       </div>
@@ -76,31 +80,37 @@
         </div>
       </div>
 
-      <div class="calendar-wrapper" *ngIf="!isLoading && !showListView">
-        <full-calendar 
-          #calendar
-          [options]="calendarOptions">
-        </full-calendar>
-      </div>
+      @if (!isLoading && !showListView) {
+        <div class="calendar-wrapper">
+          <full-calendar
+            #calendar
+            [options]="calendarOptions">
+          </full-calendar>
+        </div>
+      }
 
-      <div class="list-view-wrapper" *ngIf="!isLoading && showListView">
-        <app-calendar-list-view
-          [filterByAssignedTo]="filterByAssignedTo"
-          [filterByStatus]="filterByStatus"
-          (appointmentUpdated)="loadAppointments()">
-        </app-calendar-list-view>
-      </div>
+      @if (!isLoading && showListView) {
+        <div class="list-view-wrapper">
+          <app-calendar-list-view
+            [filterByAssignedTo]="filterByAssignedTo"
+            [filterByStatus]="filterByStatus"
+            (appointmentUpdated)="loadAppointments()">
+          </app-calendar-list-view>
+        </div>
+      }
 
-      <div class="loading-state" *ngIf="isLoading">
-        <mat-spinner diameter="50"></mat-spinner>
-        <p>Chargement des rendez-vous...</p>
-      </div>
+      @if (isLoading) {
+        <div class="loading-state">
+          <mat-spinner diameter="50"></mat-spinner>
+          <p>Chargement des rendez-vous...</p>
+        </div>
+      }
 
       <div class="help-text">
         <mat-icon>info</mat-icon>
         <span>
-          Cliquez sur un créneau vide pour créer un rendez-vous. 
-          Cliquez sur un rendez-vous pour le modifier. 
+          Cliquez sur un créneau vide pour créer un rendez-vous.
+          Cliquez sur un rendez-vous pour le modifier.
           Glissez-déposez pour déplacer ou redimensionner.
         </span>
       </div>

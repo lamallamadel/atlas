@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule } from '@angular/forms';
 import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
 import { Subject } from 'rxjs';
@@ -13,221 +13,240 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
   selector: 'app-customizable-dashboard',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     DragDropModule,
     KpiWidgetComponent,
     RecentDossiersWidgetComponent,
     MyTasksWidgetComponent
-  ],
+],
   template: `
     <div class="dashboard-container">
       <!-- Dashboard Header -->
       <div class="dashboard-header">
         <h1>Tableau de bord</h1>
         <div class="dashboard-actions">
-          <button 
-            class="btn-secondary" 
+          <button
+            class="btn-secondary"
             (click)="toggleEditMode()"
             [class.active]="editMode">
             <span class="material-icons">{{ editMode ? 'done' : 'edit' }}</span>
             {{ editMode ? 'Terminer' : 'Personnaliser' }}
           </button>
-          <button 
-            class="btn-secondary" 
-            (click)="showTemplateSelector = true"
-            *ngIf="editMode">
-            <span class="material-icons">dashboard_customize</span>
-            Templates
-          </button>
-          <button 
-            class="btn-secondary" 
-            (click)="exportConfig()"
-            *ngIf="editMode">
-            <span class="material-icons">download</span>
-            Exporter
-          </button>
-          <button 
-            class="btn-secondary" 
-            (click)="showImportDialog = true"
-            *ngIf="editMode">
-            <span class="material-icons">upload</span>
-            Importer
-          </button>
-          <button 
-            class="btn-secondary" 
-            (click)="showWidgetLibrary = true"
-            *ngIf="editMode">
-            <span class="material-icons">add</span>
-            Ajouter widget
-          </button>
+          @if (editMode) {
+            <button
+              class="btn-secondary"
+              (click)="showTemplateSelector = true"
+              >
+              <span class="material-icons">dashboard_customize</span>
+              Templates
+            </button>
+          }
+          @if (editMode) {
+            <button
+              class="btn-secondary"
+              (click)="exportConfig()"
+              >
+              <span class="material-icons">download</span>
+              Exporter
+            </button>
+          }
+          @if (editMode) {
+            <button
+              class="btn-secondary"
+              (click)="showImportDialog = true"
+              >
+              <span class="material-icons">upload</span>
+              Importer
+            </button>
+          }
+          @if (editMode) {
+            <button
+              class="btn-secondary"
+              (click)="showWidgetLibrary = true"
+              >
+              <span class="material-icons">add</span>
+              Ajouter widget
+            </button>
+          }
         </div>
       </div>
-
+    
       <!-- Dashboard Grid -->
-      <div 
+      <div
         class="dashboard-grid"
         cdkDropList
         [cdkDropListDisabled]="!editMode"
         (cdkDropListDropped)="onWidgetDrop($event)">
-        <div 
-          *ngFor="let widget of widgets; trackBy: trackByWidgetId"
-          class="widget-container"
-          cdkDrag
-          [cdkDragDisabled]="!editMode"
-          [style.grid-column]="'span ' + widget.cols"
-          [style.grid-row]="'span ' + widget.rows">
-          
-          <div class="widget-wrapper" [class.dragging]="editMode">
-            <!-- Widget Type Selector -->
-            <ng-container [ngSwitch]="widget.type">
-              <app-kpi-widget 
-                *ngSwitchCase="'kpi-conversion'"
-                [config]="getWidgetConfig(widget, 'Taux de conversion')"
-                [editMode]="editMode"
-                (remove)="removeWidget($event)"
-                (settingsChange)="updateWidgetSettings($event, widget)">
-              </app-kpi-widget>
-
-              <app-kpi-widget 
-                *ngSwitchCase="'kpi-response-time'"
-                [config]="getWidgetConfig(widget, 'Temps de réponse')"
-                [editMode]="editMode"
-                (remove)="removeWidget($event)"
-                (settingsChange)="updateWidgetSettings($event, widget)">
-              </app-kpi-widget>
-
-              <app-kpi-widget 
-                *ngSwitchCase="'kpi-revenue'"
-                [config]="getWidgetConfig(widget, 'Chiffre affaires')"
-                [editMode]="editMode"
-                (remove)="removeWidget($event)"
-                (settingsChange)="updateWidgetSettings($event, widget)">
-              </app-kpi-widget>
-
-              <app-recent-dossiers-widget 
-                *ngSwitchCase="'recent-dossiers'"
-                [config]="getWidgetConfig(widget, 'Dossiers récents')"
-                [editMode]="editMode"
-                (remove)="removeWidget($event)"
-                (settingsChange)="updateWidgetSettings($event, widget)">
-              </app-recent-dossiers-widget>
-
-              <app-my-tasks-widget 
-                *ngSwitchCase="'my-tasks'"
-                [config]="getWidgetConfig(widget, 'Mes tâches')"
-                [editMode]="editMode"
-                (remove)="removeWidget($event)"
-                (settingsChange)="updateWidgetSettings($event, widget)">
-              </app-my-tasks-widget>
-
-              <div *ngSwitchDefault class="widget-placeholder">
-                <span class="material-icons">widgets</span>
-                <p>Widget: {{ widget.type }}</p>
-              </div>
-            </ng-container>
+        @for (widget of widgets; track trackByWidgetId($index, widget)) {
+          <div
+            class="widget-container"
+            cdkDrag
+            [cdkDragDisabled]="!editMode"
+            [style.grid-column]="'span ' + widget.cols"
+            [style.grid-row]="'span ' + widget.rows">
+            <div class="widget-wrapper" [class.dragging]="editMode">
+              <!-- Widget Type Selector -->
+              @switch (widget.type) {
+                @case ('kpi-conversion') {
+                  <app-kpi-widget
+                    [config]="getWidgetConfig(widget, 'Taux de conversion')"
+                    [editMode]="editMode"
+                    (remove)="removeWidget($event)"
+                    (settingsChange)="updateWidgetSettings($event, widget)">
+                  </app-kpi-widget>
+                }
+                @case ('kpi-response-time') {
+                  <app-kpi-widget
+                    [config]="getWidgetConfig(widget, 'Temps de réponse')"
+                    [editMode]="editMode"
+                    (remove)="removeWidget($event)"
+                    (settingsChange)="updateWidgetSettings($event, widget)">
+                  </app-kpi-widget>
+                }
+                @case ('kpi-revenue') {
+                  <app-kpi-widget
+                    [config]="getWidgetConfig(widget, 'Chiffre affaires')"
+                    [editMode]="editMode"
+                    (remove)="removeWidget($event)"
+                    (settingsChange)="updateWidgetSettings($event, widget)">
+                  </app-kpi-widget>
+                }
+                @case ('recent-dossiers') {
+                  <app-recent-dossiers-widget
+                    [config]="getWidgetConfig(widget, 'Dossiers récents')"
+                    [editMode]="editMode"
+                    (remove)="removeWidget($event)"
+                    (settingsChange)="updateWidgetSettings($event, widget)">
+                  </app-recent-dossiers-widget>
+                }
+                @case ('my-tasks') {
+                  <app-my-tasks-widget
+                    [config]="getWidgetConfig(widget, 'Mes tâches')"
+                    [editMode]="editMode"
+                    (remove)="removeWidget($event)"
+                    (settingsChange)="updateWidgetSettings($event, widget)">
+                  </app-my-tasks-widget>
+                }
+                @default {
+                  <div class="widget-placeholder">
+                    <span class="material-icons">widgets</span>
+                    <p>Widget: {{ widget.type }}</p>
+                  </div>
+                }
+              }
+            </div>
           </div>
-        </div>
+        }
       </div>
-
+    
       <!-- Empty State -->
-      <div class="empty-state" *ngIf="widgets.length === 0">
-        <span class="material-icons">dashboard</span>
-        <h3>Tableau de bord vide</h3>
-        <p>Commencez par ajouter des widgets ou appliquer un template</p>
-        <button class="btn-primary" (click)="showTemplateSelector = true">
-          Choisir un template
-        </button>
-      </div>
-
+      @if (widgets.length === 0) {
+        <div class="empty-state">
+          <span class="material-icons">dashboard</span>
+          <h3>Tableau de bord vide</h3>
+          <p>Commencez par ajouter des widgets ou appliquer un template</p>
+          <button class="btn-primary" (click)="showTemplateSelector = true">
+            Choisir un template
+          </button>
+        </div>
+      }
+    
       <!-- Template Selector Modal -->
-      <div class="modal-overlay" *ngIf="showTemplateSelector" role="dialog" aria-modal="true" tabindex="0" (click)="showTemplateSelector = false" (keydown.enter)="showTemplateSelector = false" (keydown.space)="$event.preventDefault(); showTemplateSelector = false">
-        <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h2>Choisir un template</h2>
-            <button class="btn-icon" (click)="showTemplateSelector = false">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="template-grid">
-              <div 
-                *ngFor="let template of availableTemplates"
-                class="template-card"
-                role="button"
-                tabindex="0"
-                (click)="applyTemplate(template.id)"
-                (keydown.enter)="applyTemplate(template.id)"
-                (keydown.space)="applyTemplate(template.id)">
-                <div class="template-icon">
-                  <span class="material-icons">dashboard</span>
-                </div>
-                <h3>{{ template.name }}</h3>
-                <p>{{ template.description }}</p>
-                <div class="template-meta">
-                  <span class="badge">{{ template.layout.widgets.length }} widgets</span>
-                </div>
+      @if (showTemplateSelector) {
+        <div class="modal-overlay" role="dialog" aria-modal="true" tabindex="0" (click)="showTemplateSelector = false" (keydown.enter)="showTemplateSelector = false" (keydown.space)="$event.preventDefault(); showTemplateSelector = false">
+          <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>Choisir un template</h2>
+              <button class="btn-icon" (click)="showTemplateSelector = false">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="template-grid">
+                @for (template of availableTemplates; track template) {
+                  <div
+                    class="template-card"
+                    role="button"
+                    tabindex="0"
+                    (click)="applyTemplate(template.id)"
+                    (keydown.enter)="applyTemplate(template.id)"
+                    (keydown.space)="applyTemplate(template.id)">
+                    <div class="template-icon">
+                      <span class="material-icons">dashboard</span>
+                    </div>
+                    <h3>{{ template.name }}</h3>
+                    <p>{{ template.description }}</p>
+                    <div class="template-meta">
+                      <span class="badge">{{ template.layout.widgets.length }} widgets</span>
+                    </div>
+                  </div>
+                }
               </div>
             </div>
           </div>
         </div>
-      </div>
-
+      }
+    
       <!-- Widget Library Modal -->
-      <div class="modal-overlay" *ngIf="showWidgetLibrary" role="dialog" aria-modal="true" tabindex="0" (click)="showWidgetLibrary = false" (keydown.enter)="showWidgetLibrary = false" (keydown.space)="$event.preventDefault(); showWidgetLibrary = false">
-        <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h2>Bibliothèque de widgets</h2>
-            <button class="btn-icon" (click)="showWidgetLibrary = false">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="widget-library-grid">
-              <div 
-                *ngFor="let widgetType of availableWidgetTypes"
-                class="widget-type-card"
-                role="button"
-                tabindex="0"
-                (click)="addWidgetToGrid(widgetType)"
-                (keydown.enter)="addWidgetToGrid(widgetType)"
-                (keydown.space)="addWidgetToGrid(widgetType)">
-                <span class="material-icons">{{ widgetType.icon }}</span>
-                <h3>{{ widgetType.name }}</h3>
-                <p>{{ widgetType.description }}</p>
+      @if (showWidgetLibrary) {
+        <div class="modal-overlay" role="dialog" aria-modal="true" tabindex="0" (click)="showWidgetLibrary = false" (keydown.enter)="showWidgetLibrary = false" (keydown.space)="$event.preventDefault(); showWidgetLibrary = false">
+          <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>Bibliothèque de widgets</h2>
+              <button class="btn-icon" (click)="showWidgetLibrary = false">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div class="widget-library-grid">
+                @for (widgetType of availableWidgetTypes; track widgetType) {
+                  <div
+                    class="widget-type-card"
+                    role="button"
+                    tabindex="0"
+                    (click)="addWidgetToGrid(widgetType)"
+                    (keydown.enter)="addWidgetToGrid(widgetType)"
+                    (keydown.space)="addWidgetToGrid(widgetType)">
+                    <span class="material-icons">{{ widgetType.icon }}</span>
+                    <h3>{{ widgetType.name }}</h3>
+                    <p>{{ widgetType.description }}</p>
+                  </div>
+                }
               </div>
             </div>
           </div>
         </div>
-      </div>
-
+      }
+    
       <!-- Import Dialog -->
-      <div class="modal-overlay" *ngIf="showImportDialog" role="dialog" aria-modal="true" tabindex="0" (click)="showImportDialog = false" (keydown.enter)="showImportDialog = false" (keydown.space)="$event.preventDefault(); showImportDialog = false">
-        <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
-          <div class="modal-header">
-            <h2>Importer configuration</h2>
-            <button class="btn-icon" (click)="showImportDialog = false">
-              <span class="material-icons">close</span>
-            </button>
-          </div>
-          <div class="modal-body">
-            <textarea 
-              [(ngModel)]="importJson"
-              class="import-textarea"
+      @if (showImportDialog) {
+        <div class="modal-overlay" role="dialog" aria-modal="true" tabindex="0" (click)="showImportDialog = false" (keydown.enter)="showImportDialog = false" (keydown.space)="$event.preventDefault(); showImportDialog = false">
+          <div class="modal-content" tabindex="0" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" (keydown.space)="$event.stopPropagation()">
+            <div class="modal-header">
+              <h2>Importer configuration</h2>
+              <button class="btn-icon" (click)="showImportDialog = false">
+                <span class="material-icons">close</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <textarea
+                [(ngModel)]="importJson"
+                class="import-textarea"
               placeholder="Collez la configuration JSON ici..."></textarea>
-            <div class="modal-actions">
-              <button class="btn-secondary" (click)="showImportDialog = false">
-                Annuler
-              </button>
-              <button class="btn-primary" (click)="importConfig()">
-                Importer
-              </button>
+              <div class="modal-actions">
+                <button class="btn-secondary" (click)="showImportDialog = false">
+                  Annuler
+                </button>
+                <button class="btn-primary" (click)="importConfig()">
+                  Importer
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .dashboard-container {
       padding: 24px;

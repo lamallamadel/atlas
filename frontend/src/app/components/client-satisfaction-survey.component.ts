@@ -9,85 +9,99 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     <div class="survey-container">
       <h2>Évaluez votre expérience</h2>
       <p class="survey-intro">Votre avis nous aide à améliorer nos services</p>
-      
+    
       <form [formGroup]="surveyForm" (ngSubmit)="submitSurvey()" class="survey-form">
         <fieldset class="rating-group">
           <legend>Satisfaction générale *</legend>
           <div class="star-rating" role="group" aria-label="Satisfaction générale">
-            <span *ngFor="let star of [1,2,3,4,5]" 
-                  role="button"
-                  tabindex="0"
-                  (click)="setRating('overallRating', star)"
-                  (keydown.enter)="setRating('overallRating', star)"
-                  (keydown.space)="$event.preventDefault(); setRating('overallRating', star)"
-                  [class.active]="surveyForm.value.overallRating >= star"
-                  class="star">★</span>
+            @for (star of [1,2,3,4,5]; track star) {
+              <span
+                role="button"
+                tabindex="0"
+                (click)="setRating('overallRating', star)"
+                (keydown.enter)="setRating('overallRating', star)"
+                (keydown.space)="$event.preventDefault(); setRating('overallRating', star)"
+                [class.active]="surveyForm.value.overallRating >= star"
+              class="star">★</span>
+            }
           </div>
         </fieldset>
-
+    
         <fieldset class="rating-group">
           <legend>Communication *</legend>
           <div class="star-rating" role="group" aria-label="Communication">
-            <span *ngFor="let star of [1,2,3,4,5]" 
-                  role="button"
-                  tabindex="0"
-                  (click)="setRating('communicationRating', star)"
-                  (keydown.enter)="setRating('communicationRating', star)"
-                  (keydown.space)="$event.preventDefault(); setRating('communicationRating', star)"
-                  [class.active]="surveyForm.value.communicationRating >= star"
-                  class="star">★</span>
+            @for (star of [1,2,3,4,5]; track star) {
+              <span
+                role="button"
+                tabindex="0"
+                (click)="setRating('communicationRating', star)"
+                (keydown.enter)="setRating('communicationRating', star)"
+                (keydown.space)="$event.preventDefault(); setRating('communicationRating', star)"
+                [class.active]="surveyForm.value.communicationRating >= star"
+              class="star">★</span>
+            }
           </div>
         </fieldset>
-
+    
         <fieldset class="rating-group">
           <legend>Réactivité *</legend>
           <div class="star-rating" role="group" aria-label="Réactivité">
-            <span *ngFor="let star of [1,2,3,4,5]" 
-                  role="button"
-                  tabindex="0"
-                  (click)="setRating('responsivenessRating', star)"
-                  (keydown.enter)="setRating('responsivenessRating', star)"
-                  (keydown.space)="$event.preventDefault(); setRating('responsivenessRating', star)"
-                  [class.active]="surveyForm.value.responsivenessRating >= star"
-                  class="star">★</span>
+            @for (star of [1,2,3,4,5]; track star) {
+              <span
+                role="button"
+                tabindex="0"
+                (click)="setRating('responsivenessRating', star)"
+                (keydown.enter)="setRating('responsivenessRating', star)"
+                (keydown.space)="$event.preventDefault(); setRating('responsivenessRating', star)"
+                [class.active]="surveyForm.value.responsivenessRating >= star"
+              class="star">★</span>
+            }
           </div>
         </fieldset>
-
+    
         <fieldset class="rating-group">
           <legend>Professionnalisme *</legend>
           <div class="star-rating" role="group" aria-label="Professionnalisme">
-            <span *ngFor="let star of [1,2,3,4,5]" 
-                  role="button"
-                  tabindex="0"
-                  (click)="setRating('professionalismRating', star)"
-                  (keydown.enter)="setRating('professionalismRating', star)"
-                  (keydown.space)="$event.preventDefault(); setRating('professionalismRating', star)"
-                  [class.active]="surveyForm.value.professionalismRating >= star"
-                  class="star">★</span>
+            @for (star of [1,2,3,4,5]; track star) {
+              <span
+                role="button"
+                tabindex="0"
+                (click)="setRating('professionalismRating', star)"
+                (keydown.enter)="setRating('professionalismRating', star)"
+                (keydown.space)="$event.preventDefault(); setRating('professionalismRating', star)"
+                [class.active]="surveyForm.value.professionalismRating >= star"
+              class="star">★</span>
+            }
           </div>
         </fieldset>
-
+    
         <div class="form-group">
           <label for="survey-comments">Commentaires</label>
-          <textarea id="survey-comments" formControlName="comments" 
-                    placeholder="Partagez votre expérience..."
-                    rows="4"
-                    class="form-control"></textarea>
+          <textarea id="survey-comments" formControlName="comments"
+            placeholder="Partagez votre expérience..."
+            rows="4"
+          class="form-control"></textarea>
         </div>
-
-        <button type="submit" 
-                [disabled]="!surveyForm.valid || submitting"
-                class="submit-button">
-          <span *ngIf="!submitting">✉️ Envoyer l'évaluation</span>
-          <span *ngIf="submitting">⏳ Envoi...</span>
+    
+        <button type="submit"
+          [disabled]="!surveyForm.valid || submitting"
+          class="submit-button">
+          @if (!submitting) {
+            <span>✉️ Envoyer l'évaluation</span>
+          }
+          @if (submitting) {
+            <span>⏳ Envoi...</span>
+          }
         </button>
       </form>
-
-      <div *ngIf="submitted" class="success-message">
-        ✅ Merci pour votre évaluation !
-      </div>
+    
+      @if (submitted) {
+        <div class="success-message">
+          ✅ Merci pour votre évaluation !
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .survey-container {
       padding: 24px;

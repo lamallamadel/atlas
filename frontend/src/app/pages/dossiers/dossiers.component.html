@@ -2,8 +2,8 @@
   <header class="page-header">
     <h1 class="page-title">Dossiers</h1>
     <div class="header-actions">
-      <mat-button-toggle-group 
-        [value]="viewMode" 
+      <mat-button-toggle-group
+        [value]="viewMode"
         (change)="toggleViewMode()"
         aria-label="Mode d'affichage"
         class="view-mode-toggle">
@@ -15,23 +15,23 @@
         </mat-button-toggle>
       </mat-button-toggle-group>
 
-      <button 
+      <button
         mat-button
-        (click)="openImportDialog()" 
+        (click)="openImportDialog()"
         aria-label="Importer des prospects depuis un fichier CSV">
         <mat-icon>upload_file</mat-icon>
         Importer
       </button>
-      <button 
+      <button
         mat-button
-        (click)="openExportDialog()" 
+        (click)="openExportDialog()"
         aria-label="Exporter des prospects vers un fichier CSV">
         <mat-icon>download</mat-icon>
         Exporter
       </button>
-      <button 
-        class="btn-create" 
-        (click)="createDossier()" 
+      <button
+        class="btn-create"
+        (click)="createDossier()"
         aria-label="Ouvrir le formulaire pour créer un nouveau dossier"
         (keydown.enter)="createDossier()"
         (keydown.space)="$event.preventDefault(); createDossier()">
@@ -42,371 +42,407 @@
   </header>
 
   <!-- Kanban Quick Filter (Kanban view only) -->
-  <section *ngIf="viewMode === 'kanban' && !isMobile" class="kanban-quick-filter" aria-label="Filtre rapide Kanban">
-    <mat-card class="quick-filter-card">
-      <mat-card-content>
-        <mat-form-field appearance="outline" class="quick-filter-field">
-          <mat-label>Recherche rapide</mat-label>
-          <input
-            matInput
-            [formControl]="quickFilterControl"
-            placeholder="Filtrer par nom, téléphone, annonce..."
-            aria-label="Filtre rapide pour le tableau Kanban"
-          />
-          <mat-icon matSuffix>search</mat-icon>
-        </mat-form-field>
-      </mat-card-content>
-    </mat-card>
-  </section>
+  @if (viewMode === 'kanban' && !isMobile) {
+    <section class="kanban-quick-filter" aria-label="Filtre rapide Kanban">
+      <mat-card class="quick-filter-card">
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="quick-filter-field">
+            <mat-label>Recherche rapide</mat-label>
+            <input
+              matInput
+              [formControl]="quickFilterControl"
+              placeholder="Filtrer par nom, téléphone, annonce..."
+              aria-label="Filtre rapide pour le tableau Kanban"
+              />
+              <mat-icon matSuffix>search</mat-icon>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+      </section>
+    }
 
-  <!-- Desktop Filters (List view only) -->
-  <section *ngIf="viewMode === 'list' && !isMobile" aria-label="Filtres de recherche">
-    <mat-card class="filters-card">
-      <mat-card-content>
-        <div class="filters-container">
-          <mat-expansion-panel 
-            [(expanded)]="filterPanelExpanded"
-            class="filter-panel">
-            <mat-expansion-panel-header
-              tabindex="0"
-              role="button"
-              [attr.aria-expanded]="filterPanelExpanded"
-              aria-label="Afficher ou masquer les filtres de recherche">
-              <mat-panel-title>
-                <mat-icon aria-hidden="true">filter_list</mat-icon>
-                <span>Filtres</span>
-                <span class="filter-count" *ngIf="appliedFilters.length > 0" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-                  ({{ appliedFilters.length }})
-                </span>
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-
-            <div class="filter-content">
-              <!-- Filter Fields Grid -->
-              <div class="filter-row">
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Statut</mat-label>
-                  <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()" aria-label="Filtrer par statut">
-                    <mat-option value="">Tous</mat-option>
-                    <mat-option [value]="DossierStatus.NEW">Nouveau</mat-option>
-                    <mat-option [value]="DossierStatus.QUALIFYING">Qualification</mat-option>
-                    <mat-option [value]="DossierStatus.QUALIFIED">Qualifié</mat-option>
-                    <mat-option [value]="DossierStatus.APPOINTMENT">Rendez-vous</mat-option>
-                    <mat-option [value]="DossierStatus.WON">Gagné</mat-option>
-                    <mat-option [value]="DossierStatus.LOST">Perdu</mat-option>
-                  </mat-select>
-                  <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Téléphone du prospect</mat-label>
-                  <input
-                    matInput
-                    placeholder="Saisir le numéro de téléphone du prospect"
-                    [(ngModel)]="phoneFilter"
-                    (keyup.enter)="onFilterChange()"
-                    aria-label="Filtrer par numéro de téléphone du prospect"
-                  />
-                  <mat-icon matSuffix aria-hidden="true">search</mat-icon>
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="filter-field">
-                  <mat-label>Annonce liée</mat-label>
-                  <input
-                    matInput
-                    placeholder="Rechercher une annonce liée par titre ou identifiant"
-                    [formControl]="annonceSearchControl"
-                    [matAutocomplete]="annonceAuto"
-                    (keyup.enter)="onFilterChange()"
-                    aria-label="Rechercher une annonce liée par titre ou identifiant"
-                  />
-                  <mat-icon matSuffix aria-hidden="true">search</mat-icon>
-                  <mat-autocomplete 
-                    #annonceAuto="matAutocomplete" 
-                    [displayWith]="displayAnnonceFn.bind(this)"
-                    (optionSelected)="onAnnonceSelected($event.option.value); onFilterChange()">
-                    <mat-option *ngFor="let a of filteredAnnonces | async; trackBy: trackByAnnonce" [value]="a">
-                      {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
-                    </mat-option>
-                  </mat-autocomplete>
-                </mat-form-field>
-              </div>
-
-              <!-- Filter Actions -->
-              <div class="filter-actions">
-                <button 
-                  mat-raised-button 
-                  color="accent" 
-                  (click)="openAdvancedFilters()" 
-                  aria-label="Ouvrir les filtres avancés">
-                  <mat-icon aria-hidden="true">tune</mat-icon>
-                  Filtres avancés
-                </button>
-                <button 
-                  mat-raised-button 
-                  color="primary" 
-                  (click)="onFilterChange()" 
-                  aria-label="Appliquer les filtres sélectionnés"
-                  (keydown.enter)="onFilterChange()"
-                  (keydown.space)="$event.preventDefault(); onFilterChange()">
-                  <mat-icon aria-hidden="true">check</mat-icon>
-                  Appliquer
-                </button>
-                <button 
-                  mat-button 
-                  (click)="clearFilters()" 
-                  aria-label="Réinitialiser tous les filtres"
-                  (keydown.enter)="clearFilters()"
-                  (keydown.space)="$event.preventDefault(); clearFilters()">
-                  <mat-icon aria-hidden="true">clear</mat-icon>
-                  Réinitialiser
-                </button>
-                
-                <button 
-                  mat-button 
-                  [matMenuTriggerFor]="presetMenu" 
-                  aria-label="Ouvrir le menu de gestion des presets de filtres" 
-                  aria-haspopup="true">
-                  <mat-icon aria-hidden="true">bookmark</mat-icon>
-                  Presets
-                </button>
-                <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
-                  <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
-                    <mat-icon aria-hidden="true">save</mat-icon>
-                    <span>Sauvegarder les filtres actuels</span>
-                  </button>
-                  <mat-divider *ngIf="savedPresets.length > 0" role="separator"></mat-divider>
-                  <button 
-                    mat-menu-item 
-                    *ngFor="let preset of savedPresets; trackBy: trackByPreset"
-                    (click)="loadPreset(preset)"
-                    [attr.aria-label]="'Charger le preset ' + preset.name">
-                    <mat-icon aria-hidden="true">folder</mat-icon>
-                    <span>{{ preset.name }}</span>
-                    <button 
-                      mat-icon-button 
-                      (click)="deletePreset(preset, $event)"
-                      class="delete-preset-btn"
-                      [attr.aria-label]="'Supprimer le preset ' + preset.name">
-                      <mat-icon aria-hidden="true">delete</mat-icon>
-                    </button>
-                  </button>
-                  <div *ngIf="savedPresets.length === 0" class="empty-presets" role="status">
-                    <span class="empty-text">Aucun preset sauvegardé</span>
-                  </div>
-                </mat-menu>
-              </div>
-
-              <!-- Active Filter Chips -->
-              <div class="active-filters-row" *ngIf="appliedFilters.length > 0 || useAdvancedFilter" role="region" aria-label="Filtres actifs">
-                <div class="active-filters-header">
-                  <span class="filters-label">Filtres actifs :</span>
-                  <button mat-button (click)="clearFilters()" class="clear-all-btn" aria-label="Effacer tous les filtres">
-                    <mat-icon aria-hidden="true">clear_all</mat-icon>
-                    Tout effacer
-                  </button>
+    <!-- Desktop Filters (List view only) -->
+    @if (viewMode === 'list' && !isMobile) {
+      <section aria-label="Filtres de recherche">
+        <mat-card class="filters-card">
+          <mat-card-content>
+            <div class="filters-container">
+              <mat-expansion-panel
+                [(expanded)]="filterPanelExpanded"
+                class="filter-panel">
+                <mat-expansion-panel-header
+                  tabindex="0"
+                  role="button"
+                  [attr.aria-expanded]="filterPanelExpanded"
+                  aria-label="Afficher ou masquer les filtres de recherche">
+                  <mat-panel-title>
+                    <mat-icon aria-hidden="true">filter_list</mat-icon>
+                    <span>Filtres</span>
+                    @if (appliedFilters.length > 0) {
+                      <span class="filter-count" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
+                        ({{ appliedFilters.length }})
+                      </span>
+                    }
+                  </mat-panel-title>
+                </mat-expansion-panel-header>
+                <div class="filter-content">
+                  <!-- Filter Fields Grid -->
+                  <div class="filter-row">
+                    <mat-form-field appearance="outline" class="filter-field">
+                      <mat-label>Statut</mat-label>
+                      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()" aria-label="Filtrer par statut">
+                        <mat-option value="">Tous</mat-option>
+                        <mat-option [value]="DossierStatus.NEW">Nouveau</mat-option>
+                        <mat-option [value]="DossierStatus.QUALIFYING">Qualification</mat-option>
+                        <mat-option [value]="DossierStatus.QUALIFIED">Qualifié</mat-option>
+                        <mat-option [value]="DossierStatus.APPOINTMENT">Rendez-vous</mat-option>
+                        <mat-option [value]="DossierStatus.WON">Gagné</mat-option>
+                        <mat-option [value]="DossierStatus.LOST">Perdu</mat-option>
+                      </mat-select>
+                      <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="filter-field">
+                      <mat-label>Téléphone du prospect</mat-label>
+                      <input
+                        matInput
+                        placeholder="Saisir le numéro de téléphone du prospect"
+                        [(ngModel)]="phoneFilter"
+                        (keyup.enter)="onFilterChange()"
+                        aria-label="Filtrer par numéro de téléphone du prospect"
+                        />
+                        <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+                      </mat-form-field>
+                      <mat-form-field appearance="outline" class="filter-field">
+                        <mat-label>Annonce liée</mat-label>
+                        <input
+                          matInput
+                          placeholder="Rechercher une annonce liée par titre ou identifiant"
+                          [formControl]="annonceSearchControl"
+                          [matAutocomplete]="annonceAuto"
+                          (keyup.enter)="onFilterChange()"
+                          aria-label="Rechercher une annonce liée par titre ou identifiant"
+                          />
+                          <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+                          <mat-autocomplete
+                            #annonceAuto="matAutocomplete"
+                            [displayWith]="displayAnnonceFn.bind(this)"
+                            (optionSelected)="onAnnonceSelected($event.option.value); onFilterChange()">
+                            @for (a of filteredAnnonces | async; track trackByAnnonce($index, a)) {
+                              <mat-option [value]="a">
+                                {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
+                              </mat-option>
+                            }
+                          </mat-autocomplete>
+                        </mat-form-field>
+                      </div>
+                      <!-- Filter Actions -->
+                      <div class="filter-actions">
+                        <button
+                          mat-raised-button
+                          color="accent"
+                          (click)="openAdvancedFilters()"
+                          aria-label="Ouvrir les filtres avancés">
+                          <mat-icon aria-hidden="true">tune</mat-icon>
+                          Filtres avancés
+                        </button>
+                        <button
+                          mat-raised-button
+                          color="primary"
+                          (click)="onFilterChange()"
+                          aria-label="Appliquer les filtres sélectionnés"
+                          (keydown.enter)="onFilterChange()"
+                          (keydown.space)="$event.preventDefault(); onFilterChange()">
+                          <mat-icon aria-hidden="true">check</mat-icon>
+                          Appliquer
+                        </button>
+                        <button
+                          mat-button
+                          (click)="clearFilters()"
+                          aria-label="Réinitialiser tous les filtres"
+                          (keydown.enter)="clearFilters()"
+                          (keydown.space)="$event.preventDefault(); clearFilters()">
+                          <mat-icon aria-hidden="true">clear</mat-icon>
+                          Réinitialiser
+                        </button>
+                        <button
+                          mat-button
+                          [matMenuTriggerFor]="presetMenu"
+                          aria-label="Ouvrir le menu de gestion des presets de filtres"
+                          aria-haspopup="true">
+                          <mat-icon aria-hidden="true">bookmark</mat-icon>
+                          Presets
+                        </button>
+                        <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
+                          <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
+                            <mat-icon aria-hidden="true">save</mat-icon>
+                            <span>Sauvegarder les filtres actuels</span>
+                          </button>
+                          @if (savedPresets.length > 0) {
+                            <mat-divider role="separator"></mat-divider>
+                          }
+                          @for (preset of savedPresets; track trackByPreset($index, preset)) {
+                            <button
+                              mat-menu-item
+                              (click)="loadPreset(preset)"
+                              [attr.aria-label]="'Charger le preset ' + preset.name">
+                              <mat-icon aria-hidden="true">folder</mat-icon>
+                              <span>{{ preset.name }}</span>
+                              <button
+                                mat-icon-button
+                                (click)="deletePreset(preset, $event)"
+                                class="delete-preset-btn"
+                                [attr.aria-label]="'Supprimer le preset ' + preset.name">
+                                <mat-icon aria-hidden="true">delete</mat-icon>
+                              </button>
+                            </button>
+                          }
+                          @if (savedPresets.length === 0) {
+                            <div class="empty-presets" role="status">
+                              <span class="empty-text">Aucun preset sauvegardé</span>
+                            </div>
+                          }
+                        </mat-menu>
+                      </div>
+                      <!-- Active Filter Chips -->
+                      @if (appliedFilters.length > 0 || useAdvancedFilter) {
+                        <div class="active-filters-row" role="region" aria-label="Filtres actifs">
+                          <div class="active-filters-header">
+                            <span class="filters-label">Filtres actifs :</span>
+                            <button mat-button (click)="clearFilters()" class="clear-all-btn" aria-label="Effacer tous les filtres">
+                              <mat-icon aria-hidden="true">clear_all</mat-icon>
+                              Tout effacer
+                            </button>
+                          </div>
+                          @if (useAdvancedFilter) {
+                            <mat-chip-set aria-label="Filtres avancés actifs">
+                              <mat-chip
+                                (removed)="clearAdvancedFilter()"
+                                color="accent"
+                                aria-label="Filtre avancé actif">
+                                <strong>Filtre avancé</strong>: {{ advancedFilterRequest?.conditions?.length || 0 }} condition(s)
+                                <button matChipRemove aria-label="Retirer le filtre avancé">
+                                  <mat-icon aria-hidden="true">cancel</mat-icon>
+                                </button>
+                              </mat-chip>
+                            </mat-chip-set>
+                          }
+                          <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
+                            @for (filter of appliedFilters; track trackByFilter($index, filter)) {
+                              <mat-chip
+                                (removed)="removeFilter(filter)"
+                                [@itemAnimation]
+                                [attr.aria-label]="filter.label + ': ' + filter.displayValue">
+                                <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
+                                <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
+                                  <mat-icon aria-hidden="true">cancel</mat-icon>
+                                </button>
+                              </mat-chip>
+                            }
+                          </mat-chip-set>
+                        </div>
+                      }
+                    </div>
+                  </mat-expansion-panel>
                 </div>
-                <mat-chip-set aria-label="Filtres avancés actifs" *ngIf="useAdvancedFilter">
-                  <mat-chip 
-                    (removed)="clearAdvancedFilter()"
-                    color="accent"
-                    aria-label="Filtre avancé actif">
-                    <strong>Filtre avancé</strong>: {{ advancedFilterRequest?.conditions?.length || 0 }} condition(s)
-                    <button matChipRemove aria-label="Retirer le filtre avancé">
-                      <mat-icon aria-hidden="true">cancel</mat-icon>
-                    </button>
-                  </mat-chip>
-                </mat-chip-set>
-                <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
-                  <mat-chip
-                    *ngFor="let filter of appliedFilters; trackBy: trackByFilter"
-                    (removed)="removeFilter(filter)"
-                    [@itemAnimation]
-                    [attr.aria-label]="filter.label + ': ' + filter.displayValue">
-                    <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
-                    <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
-                      <mat-icon aria-hidden="true">cancel</mat-icon>
-                    </button>
-                  </mat-chip>
-                </mat-chip-set>
-              </div>
+              </mat-card-content>
+            </mat-card>
+          </section>
+        }
+
+        <!-- Mobile Filter Button -->
+        @if (isMobile && viewMode === 'list') {
+          <div class="mobile-filter-button">
+            <button mat-raised-button color="primary" (click)="openMobileFilters()" aria-label="Ouvrir les filtres">
+              <mat-icon aria-hidden="true">filter_list</mat-icon>
+              Filtres
+              @if (appliedFilters.length > 0) {
+                <span class="filter-badge" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
+                  {{ appliedFilters.length }}
+                </span>
+              }
+            </button>
+          </div>
+        }
+
+        <main class="page-content">
+          @if (loading && viewMode === 'list') {
+            <app-skeleton-loader variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-skeleton-loader>
+          }
+
+          @if (error && !loading) {
+            <div class="error-state" role="alert" aria-live="assertive">
+              <p class="error-message">{{ error }}</p>
+              <button class="btn-retry" (click)="loadDossiers()" aria-label="Réessayer de charger les dossiers">Réessayer</button>
             </div>
-          </mat-expansion-panel>
-        </div>
-      </mat-card-content>
-    </mat-card>
-  </section>
+          }
 
-  <!-- Mobile Filter Button -->
-  <div class="mobile-filter-button" *ngIf="isMobile && viewMode === 'list'">
-    <button mat-raised-button color="primary" (click)="openMobileFilters()" aria-label="Ouvrir les filtres">
-      <mat-icon aria-hidden="true">filter_list</mat-icon>
-      Filtres
-      <span class="filter-badge" *ngIf="appliedFilters.length > 0" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-        {{ appliedFilters.length }}
-      </span>
-    </button>
-  </div>
+          @if (!loading && !error && dossiers.length === 0 && viewMode === 'list') {
+            <app-empty-state
+              [context]="emptyStateContext"
+              [isNewUser]="isNewUser"
+              [primaryAction]="emptyStatePrimaryAction"
+              [secondaryAction]="emptyStateSecondaryAction">
+            </app-empty-state>
+          }
 
-  <main class="page-content">
-    <app-skeleton-loader *ngIf="loading && viewMode === 'list'" variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-skeleton-loader>
+          <!-- List View -->
+          @if (!loading && !error && dossiers.length > 0 && viewMode === 'list') {
+            <section aria-labelledby="results-title">
+              <h2 id="results-title" class="sr-only">Résultats de la recherche</h2>
+              <app-generic-table
+                [columns]="columns"
+                [data]="dossiers"
+                [actions]="actions"
+                [showPagination]="false"
+                [enableSort]="false"
+                [rowClickable]="true"
+                [useKebabMenu]="true"
+                [enableRowSelection]="true"
+                [enableExport]="true"
+                [showTableHeader]="true"
+                [showInlinePagination]="true"
+                [paginationData]="paginationData"
+                [counterSingular]="'dossier'"
+                [counterPlural]="'dossier(s)'"
+                (rowAction)="onRowAction($event)"
+                (rowClick)="onRowClick($event)"
+                (paginationChange)="onPaginationChange($event)"
+                (exportRequest)="onExportRequest($event)">
+              </app-generic-table>
+              @if (page) {
+                <nav class="pagination-section" aria-label="Pagination des dossiers">
+                  <div class="pagination-info" role="status" aria-live="polite">
+                    Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} dossiers
+                  </div>
+                  <div class="pagination-controls">
+                    <button
+                      class="btn-page"
+                      [disabled]="page.first"
+                      (click)="previousPage()"
+                      aria-label="Aller à la page précédente"
+                      [attr.aria-disabled]="page.first"
+                      (keydown.enter)="!page.first && previousPage()"
+                      (keydown.space)="$event.preventDefault(); !page.first && previousPage()"
+                      >
+                      Précédent
+                    </button>
+                    @for (pageNum of getPageNumbers(); track trackByPageNum($index, pageNum)) {
+                      <button
+                        class="btn-page-num"
+                        [class.active]="pageNum === currentPage"
+                        [class.ellipsis]="pageNum === -1"
+                        [disabled]="pageNum === -1"
+                        (click)="pageNum !== -1 && goToPage(pageNum)"
+                        [attr.aria-label]="pageNum === -1 ? null : 'Aller à la page ' + (pageNum + 1)"
+                        [attr.aria-current]="pageNum === currentPage ? 'page' : null"
+                        (keydown.enter)="pageNum !== -1 && goToPage(pageNum)"
+                        (keydown.space)="$event.preventDefault(); pageNum !== -1 && goToPage(pageNum)"
+                        >
+                        {{ pageNum === -1 ? '...' : pageNum + 1 }}
+                      </button>
+                    }
+                    <button
+                      class="btn-page"
+                      [disabled]="page.last"
+                      (click)="nextPage()"
+                      aria-label="Aller à la page suivante"
+                      [attr.aria-disabled]="page.last"
+                      (keydown.enter)="!page.last && nextPage()"
+                      (keydown.space)="$event.preventDefault(); !page.last && nextPage()"
+                      >
+                      Suivant
+                    </button>
+                  </div>
+                </nav>
+              }
+            </section>
+          }
 
-    <div *ngIf="error && !loading" class="error-state" role="alert" aria-live="assertive">
-      <p class="error-message">{{ error }}</p>
-      <button class="btn-retry" (click)="loadDossiers()" aria-label="Réessayer de charger les dossiers">Réessayer</button>
-    </div>
+          <!-- Kanban View -->
+          @if (viewMode === 'kanban') {
+            <section aria-labelledby="kanban-title">
+              <h2 id="kanban-title" class="sr-only">Vue Kanban des dossiers</h2>
+              @if (!loading && !error && dossiers.length === 0) {
+                <app-empty-state
+                  [context]="emptyStateContext"
+                  [isNewUser]="isNewUser"
+                  [primaryAction]="emptyStatePrimaryAction"
+                  [secondaryAction]="emptyStateSecondaryAction">
+                </app-empty-state>
+              }
+              @if (!error) {
+                <app-kanban-board
+                  [dossiers]="allDossiersForKanban"
+                  [loading]="loading"
+                  [quickFilter]="quickFilterValue"
+                  (dossierClick)="onKanbanDossierClick($event)"
+                  (dossierUpdated)="onKanbanDossierUpdated()">
+                </app-kanban-board>
+              }
+            </section>
+          }
 
-    <app-empty-state 
-      *ngIf="!loading && !error && dossiers.length === 0 && viewMode === 'list'"
-      [context]="emptyStateContext"
-      [isNewUser]="isNewUser"
-      [primaryAction]="emptyStatePrimaryAction"
-      [secondaryAction]="emptyStateSecondaryAction">
-    </app-empty-state>
-
-    <!-- List View -->
-    <section *ngIf="!loading && !error && dossiers.length > 0 && viewMode === 'list'" aria-labelledby="results-title">
-      <h2 id="results-title" class="sr-only">Résultats de la recherche</h2>
-      <app-generic-table
-        [columns]="columns"
-        [data]="dossiers"
-        [actions]="actions"
-        [showPagination]="false"
-        [enableSort]="false"
-        [rowClickable]="true"
-        [useKebabMenu]="true"
-        [enableRowSelection]="true"
-        [enableExport]="true"
-        [showTableHeader]="true"
-        [showInlinePagination]="true"
-        [paginationData]="paginationData"
-        [counterSingular]="'dossier'"
-        [counterPlural]="'dossier(s)'"
-        (rowAction)="onRowAction($event)"
-        (rowClick)="onRowClick($event)"
-        (paginationChange)="onPaginationChange($event)"
-        (exportRequest)="onExportRequest($event)">
-      </app-generic-table>
-
-      <nav class="pagination-section" *ngIf="page" aria-label="Pagination des dossiers">
-        <div class="pagination-info" role="status" aria-live="polite">
-          Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} dossiers
-        </div>
-        <div class="pagination-controls">
-          <button
-            class="btn-page"
-            [disabled]="page.first"
-            (click)="previousPage()"
-            aria-label="Aller à la page précédente"
-            [attr.aria-disabled]="page.first"
-            (keydown.enter)="!page.first && previousPage()"
-            (keydown.space)="$event.preventDefault(); !page.first && previousPage()"
-          >
-            Précédent
-          </button>
-
-          <button
-            *ngFor="let pageNum of getPageNumbers(); trackBy: trackByPageNum"
-            class="btn-page-num"
-            [class.active]="pageNum === currentPage"
-            [class.ellipsis]="pageNum === -1"
-            [disabled]="pageNum === -1"
-            (click)="pageNum !== -1 && goToPage(pageNum)"
-            [attr.aria-label]="pageNum === -1 ? null : 'Aller à la page ' + (pageNum + 1)"
-            [attr.aria-current]="pageNum === currentPage ? 'page' : null"
-            (keydown.enter)="pageNum !== -1 && goToPage(pageNum)"
-            (keydown.space)="$event.preventDefault(); pageNum !== -1 && goToPage(pageNum)"
-          >
-            {{ pageNum === -1 ? '...' : pageNum + 1 }}
-          </button>
-
-          <button
-            class="btn-page"
-            [disabled]="page.last"
-            (click)="nextPage()"
-            aria-label="Aller à la page suivante"
-            [attr.aria-disabled]="page.last"
-            (keydown.enter)="!page.last && nextPage()"
-            (keydown.space)="$event.preventDefault(); !page.last && nextPage()"
-          >
-            Suivant
-          </button>
-        </div>
-      </nav>
-    </section>
-
-    <!-- Kanban View -->
-    <section *ngIf="viewMode === 'kanban'" aria-labelledby="kanban-title">
-      <h2 id="kanban-title" class="sr-only">Vue Kanban des dossiers</h2>
-      <app-empty-state 
-        *ngIf="!loading && !error && dossiers.length === 0"
-        [context]="emptyStateContext"
-        [isNewUser]="isNewUser"
-        [primaryAction]="emptyStatePrimaryAction"
-        [secondaryAction]="emptyStateSecondaryAction">
-      </app-empty-state>
-      <app-kanban-board
-        *ngIf="!error"
-        [dossiers]="allDossiersForKanban"
-        [loading]="loading"
-        [quickFilter]="quickFilterValue"
-        (dossierClick)="onKanbanDossierClick($event)"
-        (dossierUpdated)="onKanbanDossierUpdated()">
-      </app-kanban-board>
-    </section>
-
-    <!-- Mobile List View -->
-    <section *ngIf="viewMode === 'list'" class="mobile-dossiers-list" aria-labelledby="mobile-list-title">
-      <div class="mobile-list-header">
-        <h2 id="mobile-list-title">Dossiers</h2>
-        <div class="mobile-list-meta" *ngIf="page">
-          <span>{{ page.totalElements }} résultat(s)</span>
-          <span *ngIf="appliedFilters.length > 0">{{ appliedFilters.length }} filtre(s)</span>
-        </div>
+          <!-- Mobile List View -->
+          @if (viewMode === 'list') {
+            <section class="mobile-dossiers-list" aria-labelledby="mobile-list-title">
+              <div class="mobile-list-header">
+                <h2 id="mobile-list-title">Dossiers</h2>
+                @if (page) {
+                  <div class="mobile-list-meta">
+                    <span>{{ page.totalElements }} résultat(s)</span>
+                    @if (appliedFilters.length > 0) {
+                      <span>{{ appliedFilters.length }} filtre(s)</span>
+                    }
+                  </div>
+                }
+              </div>
+              @if (loading) {
+                <app-skeleton-loader variant="card" [rows]="5" aria-label="Chargement des dossiers"></app-skeleton-loader>
+              }
+              @if (!loading && !error && dossiers.length === 0) {
+                <app-empty-state
+                  [context]="emptyStateContext"
+                  [isNewUser]="isNewUser"
+                  [primaryAction]="emptyStatePrimaryAction"
+                  [secondaryAction]="emptyStateSecondaryAction">
+                </app-empty-state>
+              }
+              @if (!loading && !error && dossiers.length > 0) {
+                <div class="mobile-cards-container">
+                  @for (dossier of dossiers; track trackByDossierId($index, dossier)) {
+                    <app-mobile-dossier-card
+                      [dossier]="dossier"
+                      (action)="onMobileDossierAction($event)">
+                    </app-mobile-dossier-card>
+                  }
+                </div>
+              }
+              @if (page && !loading && !error && dossiers.length > 0) {
+                <nav class="pagination-section" aria-label="Pagination mobile des dossiers">
+                  <div class="pagination-info" role="status" aria-live="polite">
+                    Page {{ page.number + 1 }} sur {{ page.totalPages }}
+                  </div>
+                  <div class="pagination-controls">
+                    <button
+                      class="btn-page"
+                      [disabled]="page.first"
+                      (click)="previousPage()"
+                      aria-label="Page précédente">
+                      <mat-icon>chevron_left</mat-icon>
+                      Précédent
+                    </button>
+                    <button
+                      class="btn-page"
+                      [disabled]="page.last"
+                      (click)="nextPage()"
+                      aria-label="Page suivante">
+                      Suivant
+                      <mat-icon>chevron_right</mat-icon>
+                    </button>
+                  </div>
+                </nav>
+              }
+            </section>
+          }
+        </main>
       </div>
-
-      <app-skeleton-loader *ngIf="loading" variant="card" [rows]="5" aria-label="Chargement des dossiers"></app-skeleton-loader>
-
-      <app-empty-state 
-        *ngIf="!loading && !error && dossiers.length === 0"
-        [context]="emptyStateContext"
-        [isNewUser]="isNewUser"
-        [primaryAction]="emptyStatePrimaryAction"
-        [secondaryAction]="emptyStateSecondaryAction">
-      </app-empty-state>
-
-      <div *ngIf="!loading && !error && dossiers.length > 0" class="mobile-cards-container">
-        <app-mobile-dossier-card
-          *ngFor="let dossier of dossiers; trackBy: trackByDossierId"
-          [dossier]="dossier"
-          (action)="onMobileDossierAction($event)">
-        </app-mobile-dossier-card>
-      </div>
-
-      <nav class="pagination-section" *ngIf="page && !loading && !error && dossiers.length > 0" aria-label="Pagination mobile des dossiers">
-        <div class="pagination-info" role="status" aria-live="polite">
-          Page {{ page.number + 1 }} sur {{ page.totalPages }}
-        </div>
-        <div class="pagination-controls">
-          <button
-            class="btn-page"
-            [disabled]="page.first"
-            (click)="previousPage()"
-            aria-label="Page précédente">
-            <mat-icon>chevron_left</mat-icon>
-            Précédent
-          </button>
-
-          <button
-            class="btn-page"
-            [disabled]="page.last"
-            (click)="nextPage()"
-            aria-label="Page suivante">
-            Suivant
-            <mat-icon>chevron_right</mat-icon>
-          </button>
-        </div>
-      </nav>
-    </section>
-  </main>
-</div>

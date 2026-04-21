@@ -9,55 +9,62 @@ import { IconRegistryService, IconMetadata } from '../../app/services/icon-regis
         <h2>Real Estate Icon Library</h2>
         <p>30+ icônes métier immobilier en SVG 24x24px, style outline 2px cohérent avec Material Icons</p>
       </div>
-
+    
       <div class="gallery-controls">
-        <input 
-          type="text" 
-          placeholder="Rechercher une icône..." 
+        <input
+          type="text"
+          placeholder="Rechercher une icône..."
           [(ngModel)]="searchQuery"
           (input)="onSearch()"
           class="search-input">
-        
-        <div class="category-filters">
-          <button 
-            *ngFor="let cat of categories"
-            [class.active]="selectedCategory === cat.key"
-            (click)="filterByCategory(cat.key)"
-            class="category-btn">
-            {{ cat.label }}
-          </button>
-          <button 
-            [class.active]="selectedCategory === null"
-            (click)="clearFilter()"
-            class="category-btn">
-            Tous
-          </button>
-        </div>
-      </div>
-
-      <div class="icon-grid">
-        <div *ngFor="let icon of filteredIcons" class="icon-card">
-          <div class="icon-display">
-            <app-re-icon [icon]="icon.id" size="large"></app-re-icon>
+    
+          <div class="category-filters">
+            @for (cat of categories; track cat) {
+              <button
+                [class.active]="selectedCategory === cat.key"
+                (click)="filterByCategory(cat.key)"
+                class="category-btn">
+                {{ cat.label }}
+              </button>
+            }
+            <button
+              [class.active]="selectedCategory === null"
+              (click)="clearFilter()"
+              class="category-btn">
+              Tous
+            </button>
           </div>
-          <div class="icon-info">
-            <div class="icon-name">{{ icon.name }}</div>
-            <div class="icon-id">{{ icon.id }}</div>
-            <div class="icon-tags">
-              <span *ngFor="let tag of icon.tags.slice(0, 3)" class="tag">{{ tag }}</span>
+        </div>
+    
+        <div class="icon-grid">
+          @for (icon of filteredIcons; track icon) {
+            <div class="icon-card">
+              <div class="icon-display">
+                <app-re-icon [icon]="icon.id" size="large"></app-re-icon>
+              </div>
+              <div class="icon-info">
+                <div class="icon-name">{{ icon.name }}</div>
+                <div class="icon-id">{{ icon.id }}</div>
+                <div class="icon-tags">
+                  @for (tag of icon.tags.slice(0, 3); track tag) {
+                    <span class="tag">{{ tag }}</span>
+                  }
+                </div>
+              </div>
+              <button class="copy-btn" (click)="copyToClipboard(icon.id)">
+                {{ copiedIcon === icon.id ? '✓ Copié' : 'Copier' }}
+              </button>
             </div>
-          </div>
-          <button class="copy-btn" (click)="copyToClipboard(icon.id)">
-            {{ copiedIcon === icon.id ? '✓ Copié' : 'Copier' }}
-          </button>
+          }
         </div>
+    
+        @if (filteredIcons.length === 0) {
+          <div class="no-results">
+            Aucune icône trouvée pour "{{ searchQuery }}"
+          </div>
+        }
       </div>
-
-      <div *ngIf="filteredIcons.length === 0" class="no-results">
-        Aucune icône trouvée pour "{{ searchQuery }}"
-      </div>
-    </div>
-  `,
+    `,
   styles: [`
     .icon-gallery {
       padding: 24px;

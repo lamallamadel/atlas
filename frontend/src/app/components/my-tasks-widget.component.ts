@@ -21,50 +21,64 @@ interface Task {
     <div class="widget" [class.edit-mode]="editMode">
       <div class="widget-header">
         <h3>{{ config.title || 'Mes tâches' }}</h3>
-        <div class="widget-actions" *ngIf="editMode">
-          <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
-            <span class="material-icons">refresh</span>
-          </button>
-          <button (click)="onRemove()" class="btn-icon" title="Supprimer">
-            <span class="material-icons">close</span>
-          </button>
-        </div>
-      </div>
-      
-      <div class="widget-content" *ngIf="!loading && !error">
-        <div class="task-list" *ngIf="tasks.length > 0">
-          <div *ngFor="let task of tasks" class="task-item">
-            <div class="task-priority" [attr.data-priority]="task.priority"></div>
-            <div class="task-info">
-              <div class="task-title">{{ task.title }}</div>
-              <div class="task-due">
-                <span class="material-icons">schedule</span>
-                {{ task.dueDate | date:'short' }}
-              </div>
-            </div>
-            <div class="task-status">
-              <span class="badge" [attr.data-status]="task.status">
-                {{ task.status }}
-              </span>
-            </div>
+        @if (editMode) {
+          <div class="widget-actions">
+            <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
+              <span class="material-icons">refresh</span>
+            </button>
+            <button (click)="onRemove()" class="btn-icon" title="Supprimer">
+              <span class="material-icons">close</span>
+            </button>
           </div>
+        }
+      </div>
+    
+      @if (!loading && !error) {
+        <div class="widget-content">
+          @if (tasks.length > 0) {
+            <div class="task-list">
+              @for (task of tasks; track task) {
+                <div class="task-item">
+                  <div class="task-priority" [attr.data-priority]="task.priority"></div>
+                  <div class="task-info">
+                    <div class="task-title">{{ task.title }}</div>
+                    <div class="task-due">
+                      <span class="material-icons">schedule</span>
+                      {{ task.dueDate | date:'short' }}
+                    </div>
+                  </div>
+                  <div class="task-status">
+                    <span class="badge" [attr.data-status]="task.status">
+                      {{ task.status }}
+                    </span>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+          @if (tasks.length === 0) {
+            <div class="empty-state">
+              <span class="material-icons">task_alt</span>
+              <p>Aucune tâche en cours</p>
+            </div>
+          }
         </div>
-        <div class="empty-state" *ngIf="tasks.length === 0">
-          <span class="material-icons">task_alt</span>
-          <p>Aucune tâche en cours</p>
+      }
+    
+      @if (loading) {
+        <div class="widget-loading">
+          <div class="spinner"></div>
         </div>
-      </div>
-
-      <div class="widget-loading" *ngIf="loading">
-        <div class="spinner"></div>
-      </div>
-
-      <div class="widget-error" *ngIf="error">
-        <span class="material-icons">error</span>
-        <p>{{ error }}</p>
-      </div>
+      }
+    
+      @if (error) {
+        <div class="widget-error">
+          <span class="material-icons">error</span>
+          <p>{{ error }}</p>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .widget {
       background: white;

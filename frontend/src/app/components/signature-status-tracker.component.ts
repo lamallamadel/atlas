@@ -23,102 +23,119 @@ import { switchMap } from 'rxjs/operators';
   ],
   template: `
     <div class="signature-tracker-container">
-      <mat-card *ngFor="let request of signatureRequests" class="signature-card">
-        <mat-card-header>
-          <mat-card-title>{{ request.subject }}</mat-card-title>
-          <mat-card-subtitle>
-            <mat-chip [class]="getStatusClass(request.status)">
-              {{ getStatusLabel(request.status) }}
-            </mat-chip>
-          </mat-card-subtitle>
-        </mat-card-header>
-
-        <mat-card-content>
-          <div class="workflow-visualization">
-            <div class="workflow-step" [class.active]="isStepActive(request, 'SENT')" [class.completed]="isStepCompleted(request, 'SENT')">
-              <div class="step-icon">
-                <mat-icon>{{ isStepCompleted(request, 'SENT') ? 'check_circle' : 'send' }}</mat-icon>
+      @for (request of signatureRequests; track request) {
+        <mat-card class="signature-card">
+          <mat-card-header>
+            <mat-card-title>{{ request.subject }}</mat-card-title>
+            <mat-card-subtitle>
+              <mat-chip [class]="getStatusClass(request.status)">
+                {{ getStatusLabel(request.status) }}
+              </mat-chip>
+            </mat-card-subtitle>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="workflow-visualization">
+              <div class="workflow-step" [class.active]="isStepActive(request, 'SENT')" [class.completed]="isStepCompleted(request, 'SENT')">
+                <div class="step-icon">
+                  <mat-icon>{{ isStepCompleted(request, 'SENT') ? 'check_circle' : 'send' }}</mat-icon>
+                </div>
+                <div class="step-label">Sent</div>
+                @if (request.sentAt) {
+                  <div class="step-time">{{ request.sentAt | date:'short' }}</div>
+                }
               </div>
-              <div class="step-label">Sent</div>
-              <div class="step-time" *ngIf="request.sentAt">{{ request.sentAt | date:'short' }}</div>
-            </div>
-
-            <div class="workflow-connector" [class.active]="isStepCompleted(request, 'SENT')"></div>
-
-            <div class="workflow-step" [class.active]="isStepActive(request, 'VIEWED')" [class.completed]="isStepCompleted(request, 'VIEWED')">
-              <div class="step-icon">
-                <mat-icon>{{ isStepCompleted(request, 'VIEWED') ? 'check_circle' : 'visibility' }}</mat-icon>
+              <div class="workflow-connector" [class.active]="isStepCompleted(request, 'SENT')"></div>
+              <div class="workflow-step" [class.active]="isStepActive(request, 'VIEWED')" [class.completed]="isStepCompleted(request, 'VIEWED')">
+                <div class="step-icon">
+                  <mat-icon>{{ isStepCompleted(request, 'VIEWED') ? 'check_circle' : 'visibility' }}</mat-icon>
+                </div>
+                <div class="step-label">Viewed</div>
+                @if (request.viewedAt) {
+                  <div class="step-time">{{ request.viewedAt | date:'short' }}</div>
+                }
               </div>
-              <div class="step-label">Viewed</div>
-              <div class="step-time" *ngIf="request.viewedAt">{{ request.viewedAt | date:'short' }}</div>
-            </div>
-
-            <div class="workflow-connector" [class.active]="isStepCompleted(request, 'VIEWED')"></div>
-
-            <div class="workflow-step" [class.active]="isStepActive(request, 'SIGNED')" [class.completed]="isStepCompleted(request, 'SIGNED')">
-              <div class="step-icon">
-                <mat-icon>{{ isStepCompleted(request, 'SIGNED') ? 'check_circle' : 'edit' }}</mat-icon>
+              <div class="workflow-connector" [class.active]="isStepCompleted(request, 'VIEWED')"></div>
+              <div class="workflow-step" [class.active]="isStepActive(request, 'SIGNED')" [class.completed]="isStepCompleted(request, 'SIGNED')">
+                <div class="step-icon">
+                  <mat-icon>{{ isStepCompleted(request, 'SIGNED') ? 'check_circle' : 'edit' }}</mat-icon>
+                </div>
+                <div class="step-label">Signed</div>
+                @if (request.signedAt) {
+                  <div class="step-time">{{ request.signedAt | date:'short' }}</div>
+                }
               </div>
-              <div class="step-label">Signed</div>
-              <div class="step-time" *ngIf="request.signedAt">{{ request.signedAt | date:'short' }}</div>
-            </div>
-
-            <div class="workflow-connector" [class.active]="isStepCompleted(request, 'SIGNED')"></div>
-
-            <div class="workflow-step" [class.active]="isStepActive(request, 'COMPLETED')" [class.completed]="isStepCompleted(request, 'COMPLETED')">
-              <div class="step-icon">
-                <mat-icon>{{ isStepCompleted(request, 'COMPLETED') ? 'check_circle' : 'task_alt' }}</mat-icon>
+              <div class="workflow-connector" [class.active]="isStepCompleted(request, 'SIGNED')"></div>
+              <div class="workflow-step" [class.active]="isStepActive(request, 'COMPLETED')" [class.completed]="isStepCompleted(request, 'COMPLETED')">
+                <div class="step-icon">
+                  <mat-icon>{{ isStepCompleted(request, 'COMPLETED') ? 'check_circle' : 'task_alt' }}</mat-icon>
+                </div>
+                <div class="step-label">Completed</div>
+                @if (request.completedAt) {
+                  <div class="step-time">{{ request.completedAt | date:'short' }}</div>
+                }
               </div>
-              <div class="step-label">Completed</div>
-              <div class="step-time" *ngIf="request.completedAt">{{ request.completedAt | date:'short' }}</div>
             </div>
-          </div>
-
-          <div class="signers-info" *ngIf="getSigners(request).length > 0">
-            <h4>Signers</h4>
-            <div class="signer-item" *ngFor="let signer of getSigners(request)">
-              <mat-icon>person</mat-icon>
-              <span>{{ signer.name }} ({{ signer.email }})</span>
-            </div>
-          </div>
-
-          <div class="declined-info" *ngIf="request.status === 'DECLINED'">
-            <mat-icon color="warn">cancel</mat-icon>
-            <div>
-              <strong>Declined</strong>
-              <p *ngIf="request.declinedReason">{{ request.declinedReason }}</p>
-              <p class="declined-time">{{ request.declinedAt | date:'short' }}</p>
-            </div>
-          </div>
-
-          <div class="voided-info" *ngIf="request.status === 'VOIDED'">
-            <mat-icon color="warn">block</mat-icon>
-            <div>
-              <strong>Voided</strong>
-              <p *ngIf="request.voidedReason">{{ request.voidedReason }}</p>
-              <p class="voided-time">{{ request.voidedAt | date:'short' }}</p>
-            </div>
-          </div>
-
-          <div class="document-info" *ngIf="request.signedDocumentId">
-            <button mat-raised-button color="primary">
-              <mat-icon>download</mat-icon>
-              Download Signed Document
-            </button>
-            <button mat-button *ngIf="request.certificatePath">
-              <mat-icon>verified</mat-icon>
-              Download Certificate
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
-
-      <div class="empty-state" *ngIf="signatureRequests.length === 0">
-        <mat-icon>description</mat-icon>
-        <p>No signature requests for this dossier</p>
-      </div>
+            @if (getSigners(request).length > 0) {
+              <div class="signers-info">
+                <h4>Signers</h4>
+                @for (signer of getSigners(request); track signer) {
+                  <div class="signer-item">
+                    <mat-icon>person</mat-icon>
+                    <span>{{ signer.name }} ({{ signer.email }})</span>
+                  </div>
+                }
+              </div>
+            }
+            @if (request.status === 'DECLINED') {
+              <div class="declined-info">
+                <mat-icon color="warn">cancel</mat-icon>
+                <div>
+                  <strong>Declined</strong>
+                  @if (request.declinedReason) {
+                    <p>{{ request.declinedReason }}</p>
+                  }
+                  <p class="declined-time">{{ request.declinedAt | date:'short' }}</p>
+                </div>
+              </div>
+            }
+            @if (request.status === 'VOIDED') {
+              <div class="voided-info">
+                <mat-icon color="warn">block</mat-icon>
+                <div>
+                  <strong>Voided</strong>
+                  @if (request.voidedReason) {
+                    <p>{{ request.voidedReason }}</p>
+                  }
+                  <p class="voided-time">{{ request.voidedAt | date:'short' }}</p>
+                </div>
+              </div>
+            }
+            @if (request.signedDocumentId) {
+              <div class="document-info">
+                <button mat-raised-button color="primary">
+                  <mat-icon>download</mat-icon>
+                  Download Signed Document
+                </button>
+                @if (request.certificatePath) {
+                  <button mat-button>
+                    <mat-icon>verified</mat-icon>
+                    Download Certificate
+                  </button>
+                }
+              </div>
+            }
+          </mat-card-content>
+        </mat-card>
+      }
+    
+      @if (signatureRequests.length === 0) {
+        <div class="empty-state">
+          <mat-icon>description</mat-icon>
+          <p>No signature requests for this dossier</p>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .signature-tracker-container {
       padding: 16px;

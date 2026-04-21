@@ -1,139 +1,144 @@
-<div *ngIf="listing" class="ad-page">
-  <!-- Breadcrumb -->
-  <div class="at-breadcrumb at-container">
-    <a routerLink="/">Accueil</a>
-    <span class="at-breadcrumb-sep">›</span>
-    <a routerLink="/recherche">Annonces</a>
-    <span class="at-breadcrumb-sep">›</span>
-    <span>{{listing.city}}</span>
-    <span class="at-breadcrumb-sep">›</span>
-    <span>{{listing.title}}</span>
-  </div>
-
-  <div class="at-container ad-layout">
-    <!-- LEFT COLUMN -->
-    <div class="ad-main">
-      <!-- Gallery -->
-      <div class="ad-gallery">
-        <div class="ad-gallery-main">
-          <img [src]="currentImage" [alt]="listing.title" width="800" height="500"/>
-          <button class="ad-gallery-arrow ad-gallery-prev" (click)="galleryPrev()" aria-label="Image précédente">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
-          </button>
-          <button class="ad-gallery-arrow ad-gallery-next" (click)="galleryNext()" aria-label="Image suivante">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
-          </button>
-          <span class="ad-gallery-counter">{{galleryIndex + 1}} / {{listing.imgs.length}}</span>
-          <div class="ad-gallery-badges">
-            <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
-              {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
-            </span>
-            <span class="at-badge-trust" *ngIf="listing.verified">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Annonce vérifiée
-            </span>
-          </div>
-        </div>
-        <div class="ad-gallery-thumbs">
-          <button class="ad-thumb" *ngFor="let img of images; let i = index"
-                  [class.active]="i === galleryIndex" (click)="setGalleryIndex(i)">
-            <img [src]="img" [alt]="'photo ' + (i+1)" loading="lazy" width="80" height="56"/>
-          </button>
-        </div>
-      </div>
-
-      <!-- Info -->
-      <div class="ad-info-block">
-        <div class="ad-info-header">
-          <div>
-            <div class="ad-price">{{formatPrice(listing.price, listing.tx)}}</div>
-            <h1 class="ad-title">{{listing.title}}</h1>
-            <div class="ad-location">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-              {{listing.zone}}, {{listing.city}}
-            </div>
-          </div>
-        </div>
-
-        <div class="ad-specs">
-          <div class="ad-spec"><div class="ad-spec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div><div class="ad-spec-val">{{listing.surface}} m²</div><div class="ad-spec-lbl">Surface</div></div></div>
-          <div class="ad-spec"><div class="ad-spec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg></div><div><div class="ad-spec-val">{{listing.pieces}}</div><div class="ad-spec-lbl">Pièces</div></div></div>
-          <div class="ad-spec"><div class="ad-spec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="ad-spec-val">{{listing.date}}</div><div class="ad-spec-lbl">Date de publication</div></div></div>
-        </div>
-
-        <div class="ad-section-title">Description</div>
-        <p class="ad-desc">{{listing.desc}}</p>
-
-        <div class="ad-section-title">Localisation</div>
-        <div class="at-map-placeholder">
-          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-          <div>{{listing.zone}}, {{listing.city}}<br/><small>Carte disponible prochainement</small></div>
-        </div>
-
-        <button class="ad-report-btn" (click)="openReportModal()">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          Signaler l'annonce
-        </button>
-      </div>
-
-      <!-- Similar -->
-      <div class="ad-similar" *ngIf="similarListings.length > 0">
-        <h2 class="ad-section-title">Annonces similaires</h2>
-        <div class="ad-similar-grid">
-          <article *ngFor="let sl of similarListings" class="ad-similar-card"
-                   (click)="navigateToDetail(sl)" role="button" tabindex="0" (keydown.enter)="navigateToDetail(sl)">
-            <div class="ad-similar-img"><img [src]="sl.imgs && sl.imgs.length > 0 ? sl.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="sl.title" loading="lazy" width="300" height="180"/></div>
-            <div class="ad-similar-body">
-              <div class="ph-price" style="font-size:1rem;">{{formatPrice(sl.price, sl.tx)}}</div>
-              <div class="ph-title">{{sl.title}}</div>
-              <div class="ph-location"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{{sl.zone}}, {{sl.city}}</div>
-            </div>
-          </article>
-        </div>
-      </div>
+@if (listing) {
+  <div class="ad-page">
+    <!-- Breadcrumb -->
+    <div class="at-breadcrumb at-container">
+      <a routerLink="/">Accueil</a>
+      <span class="at-breadcrumb-sep">›</span>
+      <a routerLink="/recherche">Annonces</a>
+      <span class="at-breadcrumb-sep">›</span>
+      <span>{{listing.city}}</span>
+      <span class="at-breadcrumb-sep">›</span>
+      <span>{{listing.title}}</span>
     </div>
-
-    <!-- RIGHT COLUMN — SIDEBAR CONTACT -->
-    <aside class="ad-sidebar">
-      <!-- Agent card -->
-      <div class="ad-agent-card">
-        <div class="ad-agent-header">
-          <div class="ad-agent-avatar">{{listing.agent.initials}}</div>
-          <div>
-            <div class="ad-agent-name">{{listing.agent.name}}</div>
-            <div class="ad-agent-agency">{{listing.agent.agency}}</div>
-            <div class="ad-agent-verified" *ngIf="listing.verified">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Pro Vérifié
+    <div class="at-container ad-layout">
+      <!-- LEFT COLUMN -->
+      <div class="ad-main">
+        <!-- Gallery -->
+        <div class="ad-gallery">
+          <div class="ad-gallery-main">
+            <img [src]="currentImage" [alt]="listing.title" width="800" height="500"/>
+            <button class="ad-gallery-arrow ad-gallery-prev" (click)="galleryPrev()" aria-label="Image précédente">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <button class="ad-gallery-arrow ad-gallery-next" (click)="galleryNext()" aria-label="Image suivante">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            <span class="ad-gallery-counter">{{galleryIndex + 1}} / {{listing.imgs.length}}</span>
+            <div class="ad-gallery-badges">
+              <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
+                {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
+              </span>
+              @if (listing.verified) {
+                <span class="at-badge-trust">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Annonce vérifiée
+                </span>
+              }
             </div>
           </div>
+          <div class="ad-gallery-thumbs">
+            @for (img of images; track img; let i = $index) {
+              <button class="ad-thumb"
+                [class.active]="i === galleryIndex" (click)="setGalleryIndex(i)">
+                <img [src]="img" [alt]="'photo ' + (i+1)" loading="lazy" width="80" height="56"/>
+              </button>
+            }
+          </div>
         </div>
-        <div class="ad-contact-btns">
-          <button class="at-btn at-btn-primary" style="width:100%;justify-content:center;" (click)="openLeadModal('visite')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Planifier une visite
-          </button>
-          <button class="at-btn at-btn-secondary" style="width:100%;justify-content:center;" (click)="openLeadModal('message')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-            Envoyer un message
-          </button>
-          <button class="at-btn ad-whatsapp-btn" style="width:100%;justify-content:center;" (click)="openWhatsApp()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.447h.006c6.585 0 11.946-5.336 11.949-11.896 0-3.176-1.24-6.165-3.48-8.45z"/></svg>
-            WhatsApp
+        <!-- Info -->
+        <div class="ad-info-block">
+          <div class="ad-info-header">
+            <div>
+              <div class="ad-price">{{formatPrice(listing.price, listing.tx)}}</div>
+              <h1 class="ad-title">{{listing.title}}</h1>
+              <div class="ad-location">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                {{listing.zone}}, {{listing.city}}
+              </div>
+            </div>
+          </div>
+          <div class="ad-specs">
+            <div class="ad-spec"><div class="ad-spec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div><div><div class="ad-spec-val">{{listing.surface}} m²</div><div class="ad-spec-lbl">Surface</div></div></div>
+            <div class="ad-spec"><div class="ad-spec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg></div><div><div class="ad-spec-val">{{listing.pieces}}</div><div class="ad-spec-lbl">Pièces</div></div></div>
+            <div class="ad-spec"><div class="ad-spec-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div><div class="ad-spec-val">{{listing.date}}</div><div class="ad-spec-lbl">Date de publication</div></div></div>
+          </div>
+          <div class="ad-section-title">Description</div>
+          <p class="ad-desc">{{listing.desc}}</p>
+          <div class="ad-section-title">Localisation</div>
+          <div class="at-map-placeholder">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            <div>{{listing.zone}}, {{listing.city}}<br/><small>Carte disponible prochainement</small></div>
+          </div>
+          <button class="ad-report-btn" (click)="openReportModal()">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Signaler l'annonce
           </button>
         </div>
-        <p class="ad-ref-text">Réf: ATL-{{listing.id.padStart(6,'0')}}</p>
+        <!-- Similar -->
+        @if (similarListings.length > 0) {
+          <div class="ad-similar">
+            <h2 class="ad-section-title">Annonces similaires</h2>
+            <div class="ad-similar-grid">
+              @for (sl of similarListings; track sl) {
+                <article class="ad-similar-card"
+                  (click)="navigateToDetail(sl)" role="button" tabindex="0" (keydown.enter)="navigateToDetail(sl)">
+                  <div class="ad-similar-img"><img [src]="sl.imgs && sl.imgs.length > 0 ? sl.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="sl.title" loading="lazy" width="300" height="180"/></div>
+                  <div class="ad-similar-body">
+                    <div class="ph-price" style="font-size:1rem;">{{formatPrice(sl.price, sl.tx)}}</div>
+                    <div class="ph-title">{{sl.title}}</div>
+                    <div class="ph-location"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>{{sl.zone}}, {{sl.city}}</div>
+                  </div>
+                </article>
+              }
+            </div>
+          </div>
+        }
       </div>
-
-      <!-- Price info -->
-      <div class="ad-info-box">
-        <div class="ad-info-box-price">{{formatPrice(listing.price, listing.tx)}}</div>
-        <div *ngIf="listing.tx==='vente'" class="ad-info-box-note">≈ {{(listing.price / listing.surface | number: '1.0-0' : 'fr')}} MAD/m²</div>
-        <div class="ad-info-box-note">Publié le {{listing.date}}</div>
-      </div>
-    </aside>
+      <!-- RIGHT COLUMN — SIDEBAR CONTACT -->
+      <aside class="ad-sidebar">
+        <!-- Agent card -->
+        <div class="ad-agent-card">
+          <div class="ad-agent-header">
+            <div class="ad-agent-avatar">{{listing.agent.initials}}</div>
+            <div>
+              <div class="ad-agent-name">{{listing.agent.name}}</div>
+              <div class="ad-agent-agency">{{listing.agent.agency}}</div>
+              @if (listing.verified) {
+                <div class="ad-agent-verified">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Pro Vérifié
+                </div>
+              }
+            </div>
+          </div>
+          <div class="ad-contact-btns">
+            <button class="at-btn at-btn-primary" style="width:100%;justify-content:center;" (click)="openLeadModal('visite')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Planifier une visite
+            </button>
+            <button class="at-btn at-btn-secondary" style="width:100%;justify-content:center;" (click)="openLeadModal('message')">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Envoyer un message
+            </button>
+            <button class="at-btn ad-whatsapp-btn" style="width:100%;justify-content:center;" (click)="openWhatsApp()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M20.52 3.449C18.24 1.245 15.24 0 12.045 0 5.463 0 .104 5.334.101 11.893c0 2.096.549 4.14 1.595 5.945L0 24l6.335-1.652c1.746.943 3.71 1.444 5.71 1.447h.006c6.585 0 11.946-5.336 11.949-11.896 0-3.176-1.24-6.165-3.48-8.45z"/></svg>
+              WhatsApp
+            </button>
+          </div>
+          <p class="ad-ref-text">Réf: ATL-{{listing.id.padStart(6,'0')}}</p>
+        </div>
+        <!-- Price info -->
+        <div class="ad-info-box">
+          <div class="ad-info-box-price">{{formatPrice(listing.price, listing.tx)}}</div>
+          @if (listing.tx==='vente') {
+            <div class="ad-info-box-note">≈ {{(listing.price / listing.surface | number: '1.0-0' : 'fr')}} MAD/m²</div>
+          }
+          <div class="ad-info-box-note">Publié le {{listing.date}}</div>
+        </div>
+      </aside>
+    </div>
   </div>
-</div>
+}
 
 <!-- LEAD MODAL -->
 <div class="at-modal-overlay" [class.open]="leadModalOpen" (click)="closeLeadModal()">
@@ -144,43 +149,47 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div *ngIf="!leadSubmitted" class="at-modal-body">
-      <div class="at-form-stack">
-        <div class="at-form-group">
-          <label class="at-form-label" for="lead-nom">Votre nom <span class="at-req">*</span></label>
-          <input id="lead-nom" class="at-form-input" [(ngModel)]="leadForm.nom" placeholder="Prénom Nom"/>
-        </div>
-        <div class="at-form-grid-2">
+    @if (!leadSubmitted) {
+      <div class="at-modal-body">
+        <div class="at-form-stack">
           <div class="at-form-group">
-            <label class="at-form-label" for="lead-tel">Téléphone <span class="at-req">*</span></label>
-            <input id="lead-tel" class="at-form-input" [(ngModel)]="leadForm.tel" placeholder="+212 6xx xxx xxx"/>
+            <label class="at-form-label" for="lead-nom">Votre nom <span class="at-req">*</span></label>
+            <input id="lead-nom" class="at-form-input" [(ngModel)]="leadForm.nom" placeholder="Prénom Nom"/>
+          </div>
+          <div class="at-form-grid-2">
+            <div class="at-form-group">
+              <label class="at-form-label" for="lead-tel">Téléphone <span class="at-req">*</span></label>
+              <input id="lead-tel" class="at-form-input" [(ngModel)]="leadForm.tel" placeholder="+212 6xx xxx xxx"/>
+            </div>
+            <div class="at-form-group">
+              <label class="at-form-label" for="lead-email">Email</label>
+              <input id="lead-email" class="at-form-input" type="email" [(ngModel)]="leadForm.email" placeholder="votre@email.ma"/>
+            </div>
           </div>
           <div class="at-form-group">
-            <label class="at-form-label" for="lead-email">Email</label>
-            <input id="lead-email" class="at-form-input" type="email" [(ngModel)]="leadForm.email" placeholder="votre@email.ma"/>
-          </div>
-        </div>
-        <div class="at-form-group">
-          <label class="at-form-label" for="lead-msg">Message</label>
-          <textarea id="lead-msg" class="at-form-textarea" [(ngModel)]="leadForm.message"
+            <label class="at-form-label" for="lead-msg">Message</label>
+            <textarea id="lead-msg" class="at-form-textarea" [(ngModel)]="leadForm.message"
             [placeholder]="leadModalType==='visite' ? 'Ex: Je suis disponible samedi après-midi...' : 'Bonjour, je suis intéressé(e) par votre annonce...'"></textarea>
+          </div>
+          <label class="at-consent-label">
+            <input type="checkbox" [(ngModel)]="leadForm.consent" id="lead-consent"/>
+            J'accepte que mes coordonnées soient transmises à l'agent
+          </label>
+          <button class="at-btn at-btn-primary at-btn-lg" [disabled]="!leadForm.nom || !leadForm.tel || !leadForm.consent"
+            (click)="submitLead()" style="width:100%;justify-content:center;">
+            Envoyer ma demande
+          </button>
         </div>
-        <label class="at-consent-label">
-          <input type="checkbox" [(ngModel)]="leadForm.consent" id="lead-consent"/>
-          J'accepte que mes coordonnées soient transmises à l'agent
-        </label>
-        <button class="at-btn at-btn-primary at-btn-lg" [disabled]="!leadForm.nom || !leadForm.tel || !leadForm.consent"
-                (click)="submitLead()" style="width:100%;justify-content:center;">
-          Envoyer ma demande
-        </button>
       </div>
-    </div>
-    <div *ngIf="leadSubmitted" class="at-modal-body" style="text-align:center;padding:var(--at-space-8)">
-      <div style="width:60px;height:60px;border-radius:50%;background:var(--at-color-success-highlight);display:flex;align-items:center;justify-content:center;margin:0 auto var(--at-space-5);">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--at-color-success)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    }
+    @if (leadSubmitted) {
+      <div class="at-modal-body" style="text-align:center;padding:var(--at-space-8)">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--at-color-success-highlight);display:flex;align-items:center;justify-content:center;margin:0 auto var(--at-space-5);">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--at-color-success)" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
+        <h3 style="font-family:var(--at-font-display);margin-bottom:var(--at-space-3);">Demande envoyée !</h3>
+        <p style="color:var(--at-color-text-muted);font-size:var(--at-text-sm);">L'agent vous contactera dans les plus brefs délais.</p>
       </div>
-      <h3 style="font-family:var(--at-font-display);margin-bottom:var(--at-space-3);">Demande envoyée !</h3>
-      <p style="color:var(--at-color-text-muted);font-size:var(--at-text-sm);">L'agent vous contactera dans les plus brefs délais.</p>
-    </div>
+    }
   </div>
 </div>

@@ -8,34 +8,44 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     <div class="recommendations-container">
       <h2>Propriétés recommandées</h2>
       <p class="intro">Basé sur vos préférences et votre recherche</p>
-      
-      <div *ngIf="!recommendations || recommendations.length === 0" class="empty-state">
-        <p>Aucune recommandation disponible pour le moment</p>
-      </div>
-
+    
+      @if (!recommendations || recommendations.length === 0) {
+        <div class="empty-state">
+          <p>Aucune recommandation disponible pour le moment</p>
+        </div>
+      }
+    
       <div class="property-grid">
-        <div *ngFor="let property of recommendations" class="property-card">
-          <div class="property-image">
-            <img [src]="property.imageUrl || 'assets/placeholder-property.jpg'" 
-                 [alt]="property.title">
-            <div class="property-type-badge">{{ property.type }}</div>
-          </div>
-          <div class="property-content">
-            <h3 class="property-title">{{ property.title }}</h3>
-            <div class="property-location">📍 {{ property.location }}</div>
-            <div class="property-price">{{ formatPrice(property.price) }}</div>
-            <div class="property-features">
-              <span *ngIf="property.bedrooms">🛏️ {{ property.bedrooms }}</span>
-              <span *ngIf="property.bathrooms">🚿 {{ property.bathrooms }}</span>
-              <span *ngIf="property.surface">📐 {{ property.surface }}m²</span>
+        @for (property of recommendations; track property) {
+          <div class="property-card">
+            <div class="property-image">
+              <img [src]="property.imageUrl || 'assets/placeholder-property.jpg'"
+                [alt]="property.title">
+                <div class="property-type-badge">{{ property.type }}</div>
+              </div>
+              <div class="property-content">
+                <h3 class="property-title">{{ property.title }}</h3>
+                <div class="property-location">📍 {{ property.location }}</div>
+                <div class="property-price">{{ formatPrice(property.price) }}</div>
+                <div class="property-features">
+                  @if (property.bedrooms) {
+                    <span>🛏️ {{ property.bedrooms }}</span>
+                  }
+                  @if (property.bathrooms) {
+                    <span>🚿 {{ property.bathrooms }}</span>
+                  }
+                  @if (property.surface) {
+                    <span>📐 {{ property.surface }}m²</span>
+                  }
+                </div>
+                <p class="property-description">{{ truncate(property.description, 100) }}</p>
+                <button class="contact-button">Contactez-nous</button>
+              </div>
             </div>
-            <p class="property-description">{{ truncate(property.description, 100) }}</p>
-            <button class="contact-button">Contactez-nous</button>
-          </div>
+          }
         </div>
       </div>
-    </div>
-  `,
+    `,
   styles: [`
     .recommendations-container {
       padding: 24px;

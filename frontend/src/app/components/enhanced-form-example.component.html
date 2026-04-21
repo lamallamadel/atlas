@@ -1,315 +1,375 @@
 <div class="enhanced-form-container elegant-form">
   <form [formGroup]="form" (ngSubmit)="onSubmit()" class="elegant-form-content">
-    
+
     <!-- Progress Stepper -->
     <div class="elegant-stepper">
       <div class="stepper-line">
         <div class="stepper-line-progress" [style.width.%]="(currentStep / (formSteps.length - 1)) * 100"></div>
       </div>
-      
-      <div *ngFor="let step of formSteps; let i = index" 
-           class="stepper-step"
+
+      @for (step of formSteps; track step; let i = $index) {
+        <div
+          class="stepper-step"
            [ngClass]="{
              'step-active': i === currentStep,
              'step-completed': step.completed,
              'step-error': step.error
            }">
-        <div class="step-circle">
-          <mat-icon *ngIf="step.completed">check</mat-icon>
-          <mat-icon *ngIf="step.error">error</mat-icon>
-          <span *ngIf="!step.completed && !step.error">{{ i + 1 }}</span>
+          <div class="step-circle">
+            @if (step.completed) {
+              <mat-icon>check</mat-icon>
+            }
+            @if (step.error) {
+              <mat-icon>error</mat-icon>
+            }
+            @if (!step.completed && !step.error) {
+              <span>{{ i + 1 }}</span>
+            }
+          </div>
+          <div class="step-label">{{ step.label }}</div>
+          @if (step.optional) {
+            <div class="step-description">(optionnel)</div>
+          }
         </div>
-        <div class="step-label">{{ step.label }}</div>
-        <div class="step-description" *ngIf="step.optional">(optionnel)</div>
-      </div>
+      }
     </div>
 
     <!-- Auto-save indicator -->
-    <div class="auto-save-status" *ngIf="autoSaveEnabled && lastSavedAt">
-      <mat-icon class="save-icon">cloud_done</mat-icon>
-      <span>Sauvegarde automatique: {{ lastSavedAt | date:'HH:mm:ss' }}</span>
-    </div>
+    @if (autoSaveEnabled && lastSavedAt) {
+      <div class="auto-save-status">
+        <mat-icon class="save-icon">cloud_done</mat-icon>
+        <span>Sauvegarde automatique: {{ lastSavedAt | date:'HH:mm:ss' }}</span>
+      </div>
+    }
 
     <!-- Step 1: Basic Information -->
-    <div class="form-step" *ngIf="currentStep === 0">
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>person</mat-icon>
-          <div>
-            <h2 class="section-title">Informations de base</h2>
-            <p class="section-subtitle">Renseignez vos informations personnelles</p>
+    @if (currentStep === 0) {
+      <div class="form-step">
+        <div class="form-section-card">
+          <div class="section-header">
+            <mat-icon>person</mat-icon>
+            <div>
+              <h2 class="section-title">Informations de base</h2>
+              <p class="section-subtitle">Renseignez vos informations personnelles</p>
+            </div>
           </div>
-        </div>
-        
-        <div class="section-body">
-          <div class="elegant-form-field" 
+          <div class="section-body">
+            <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': form.get('firstName')?.value,
                  'field-valid': form.get('firstName')?.valid && form.get('firstName')?.touched,
                  'field-error': form.get('firstName')?.invalid && form.get('firstName')?.touched
                }">
-            <input 
-              type="text" 
-              id="firstName" 
-              formControlName="firstName"
-              placeholder=" ">
-            <label for="firstName">Prénom <span class="required-indicator">*</span></label>
-            <div class="validation-icon" *ngIf="form.get('firstName')?.touched">
-              <mat-icon *ngIf="form.get('firstName')?.valid">check_circle</mat-icon>
-              <mat-icon *ngIf="form.get('firstName')?.invalid">error</mat-icon>
-            </div>
-            <div class="field-helper" *ngIf="!form.get('firstName')?.touched || form.get('firstName')?.valid">
-              <mat-icon>info</mat-icon>
-              <span>Prénom tel qu'il apparaîtra sur les documents</span>
-            </div>
-            <div class="error-message" *ngIf="form.get('firstName')?.invalid && form.get('firstName')?.touched">
-              <mat-icon>error</mat-icon>
-              <span>{{ getFieldError('firstName') }}</span>
-            </div>
-          </div>
-
-          <div class="elegant-form-field"
+              <input
+                type="text"
+                id="firstName"
+                formControlName="firstName"
+                placeholder=" ">
+                <label for="firstName">Prénom <span class="required-indicator">*</span></label>
+                @if (form.get('firstName')?.touched) {
+                  <div class="validation-icon">
+                    @if (form.get('firstName')?.valid) {
+                      <mat-icon>check_circle</mat-icon>
+                    }
+                    @if (form.get('firstName')?.invalid) {
+                      <mat-icon>error</mat-icon>
+                    }
+                  </div>
+                }
+                @if (!form.get('firstName')?.touched || form.get('firstName')?.valid) {
+                  <div class="field-helper">
+                    <mat-icon>info</mat-icon>
+                    <span>Prénom tel qu'il apparaîtra sur les documents</span>
+                  </div>
+                }
+                @if (form.get('firstName')?.invalid && form.get('firstName')?.touched) {
+                  <div class="error-message">
+                    <mat-icon>error</mat-icon>
+                    <span>{{ getFieldError('firstName') }}</span>
+                  </div>
+                }
+              </div>
+              <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': form.get('lastName')?.value,
                  'field-valid': form.get('lastName')?.valid && form.get('lastName')?.touched,
                  'field-error': form.get('lastName')?.invalid && form.get('lastName')?.touched
                }">
-            <input 
-              type="text" 
-              id="lastName" 
-              formControlName="lastName"
-              placeholder=" ">
-            <label for="lastName">Nom <span class="required-indicator">*</span></label>
-            <div class="validation-icon" *ngIf="form.get('lastName')?.touched">
-              <mat-icon *ngIf="form.get('lastName')?.valid">check_circle</mat-icon>
-              <mat-icon *ngIf="form.get('lastName')?.invalid">error</mat-icon>
-            </div>
-            <div class="field-helper" *ngIf="!form.get('lastName')?.touched || form.get('lastName')?.valid">
-              <mat-icon>info</mat-icon>
-              <span>Nom tel qu'il apparaîtra sur les documents</span>
-            </div>
-            <div class="error-message" *ngIf="form.get('lastName')?.invalid && form.get('lastName')?.touched">
-              <mat-icon>error</mat-icon>
-              <span>{{ getFieldError('lastName') }}</span>
+                <input
+                  type="text"
+                  id="lastName"
+                  formControlName="lastName"
+                  placeholder=" ">
+                  <label for="lastName">Nom <span class="required-indicator">*</span></label>
+                  @if (form.get('lastName')?.touched) {
+                    <div class="validation-icon">
+                      @if (form.get('lastName')?.valid) {
+                        <mat-icon>check_circle</mat-icon>
+                      }
+                      @if (form.get('lastName')?.invalid) {
+                        <mat-icon>error</mat-icon>
+                      }
+                    </div>
+                  }
+                  @if (!form.get('lastName')?.touched || form.get('lastName')?.valid) {
+                    <div class="field-helper">
+                      <mat-icon>info</mat-icon>
+                      <span>Nom tel qu'il apparaîtra sur les documents</span>
+                    </div>
+                  }
+                  @if (form.get('lastName')?.invalid && form.get('lastName')?.touched) {
+                    <div class="error-message">
+                      <mat-icon>error</mat-icon>
+                      <span>{{ getFieldError('lastName') }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
+        }
 
-    <!-- Step 2: Contact Information -->
-    <div class="form-step" *ngIf="currentStep === 1">
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>contact_mail</mat-icon>
-          <div>
-            <h2 class="section-title">Coordonnées</h2>
-            <p class="section-subtitle">Comment pouvons-nous vous contacter ?</p>
-          </div>
-        </div>
-        
-        <div class="section-body">
-          <div class="elegant-form-field"
+        <!-- Step 2: Contact Information -->
+        @if (currentStep === 1) {
+          <div class="form-step">
+            <div class="form-section-card">
+              <div class="section-header">
+                <mat-icon>contact_mail</mat-icon>
+                <div>
+                  <h2 class="section-title">Coordonnées</h2>
+                  <p class="section-subtitle">Comment pouvons-nous vous contacter ?</p>
+                </div>
+              </div>
+              <div class="section-body">
+                <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': form.get('email')?.value,
                  'field-valid': form.get('email')?.valid && form.get('email')?.touched && !validatingEmail,
                  'field-error': form.get('email')?.invalid && form.get('email')?.touched,
                  'field-validating': validatingEmail
                }">
-            <input 
-              type="email" 
-              id="email" 
-              formControlName="email"
-              placeholder=" "
-              class="has-prefix has-suffix">
-            <label for="email">Email <span class="required-indicator">*</span></label>
-            <div class="field-prefix">
-              <mat-icon>email</mat-icon>
-            </div>
-            <div class="validation-icon">
-              <mat-spinner *ngIf="validatingEmail" diameter="20"></mat-spinner>
-              <mat-icon *ngIf="!validatingEmail && form.get('email')?.valid">check_circle</mat-icon>
-              <mat-icon *ngIf="!validatingEmail && form.get('email')?.invalid">error</mat-icon>
-            </div>
-            <div class="field-helper" *ngIf="!form.get('email')?.touched || (form.get('email')?.valid && !validatingEmail)">
-              <mat-icon>info</mat-icon>
-              <span>Format: utilisateur&#64;domaine.com</span>
-            </div>
-            <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
-              <mat-icon>error</mat-icon>
-              <span>{{ getFieldError('email') }}</span>
-            </div>
-          </div>
-
-          <!-- Email suggestions -->
-          <app-inline-validation-suggestion
-            *ngIf="emailSuggestions.length > 0"
-            [suggestion]="emailSuggestions[0]"
-            (accept)="onAcceptEmailSuggestion($event)"
-            (dismiss)="onDismissEmailSuggestion()">
-          </app-inline-validation-suggestion>
-
-          <div class="elegant-form-field"
+                  <input
+                    type="email"
+                    id="email"
+                    formControlName="email"
+                    placeholder=" "
+                    class="has-prefix has-suffix">
+                    <label for="email">Email <span class="required-indicator">*</span></label>
+                    <div class="field-prefix">
+                      <mat-icon>email</mat-icon>
+                    </div>
+                    <div class="validation-icon">
+                      @if (validatingEmail) {
+                        <mat-spinner diameter="20"></mat-spinner>
+                      }
+                      @if (!validatingEmail && form.get('email')?.valid) {
+                        <mat-icon>check_circle</mat-icon>
+                      }
+                      @if (!validatingEmail && form.get('email')?.invalid) {
+                        <mat-icon>error</mat-icon>
+                      }
+                    </div>
+                    @if (!form.get('email')?.touched || (form.get('email')?.valid && !validatingEmail)) {
+                      <div class="field-helper">
+                        <mat-icon>info</mat-icon>
+                        <span>Format: utilisateur&#64;domaine.com</span>
+                      </div>
+                    }
+                    @if (form.get('email')?.invalid && form.get('email')?.touched) {
+                      <div class="error-message">
+                        <mat-icon>error</mat-icon>
+                        <span>{{ getFieldError('email') }}</span>
+                      </div>
+                    }
+                  </div>
+                  <!-- Email suggestions -->
+                  @if (emailSuggestions.length > 0) {
+                    <app-inline-validation-suggestion
+                      [suggestion]="emailSuggestions[0]"
+                      (accept)="onAcceptEmailSuggestion($event)"
+                      (dismiss)="onDismissEmailSuggestion()">
+                    </app-inline-validation-suggestion>
+                  }
+                  <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': form.get('phone')?.value,
                  'field-valid': form.get('phone')?.valid && form.get('phone')?.touched && !validatingPhone,
                  'field-error': form.get('phone')?.invalid && form.get('phone')?.touched,
                  'field-validating': validatingPhone
                }">
-            <input 
-              type="tel" 
-              id="phone" 
-              formControlName="phone"
-              placeholder=" "
-              class="has-prefix has-suffix">
-            <label for="phone">Téléphone <span class="required-indicator">*</span></label>
-            <div class="field-prefix">
-              <mat-icon>phone</mat-icon>
-            </div>
-            <div class="validation-icon">
-              <mat-spinner *ngIf="validatingPhone" diameter="20"></mat-spinner>
-              <mat-icon *ngIf="!validatingPhone && form.get('phone')?.valid">check_circle</mat-icon>
-              <mat-icon *ngIf="!validatingPhone && form.get('phone')?.invalid">error</mat-icon>
-            </div>
-            <div class="field-helper" *ngIf="!form.get('phone')?.touched || (form.get('phone')?.valid && !validatingPhone)">
-              <mat-icon>info</mat-icon>
-              <span>Format: 06 12 34 56 78 ou +33 6 12 34 56 78</span>
-            </div>
-            <div class="error-message" *ngIf="form.get('phone')?.invalid && form.get('phone')?.touched">
-              <mat-icon>error</mat-icon>
-              <span>{{ getFieldError('phone') }}</span>
-            </div>
-          </div>
-
-          <!-- Phone suggestions -->
-          <app-inline-validation-suggestion
-            *ngIf="phoneSuggestions.length > 0"
-            [suggestion]="phoneSuggestions[0]"
-            (accept)="onAcceptPhoneSuggestion($event)"
-            (dismiss)="onDismissPhoneSuggestion()">
-          </app-inline-validation-suggestion>
-
-          <div class="elegant-form-field"
+                    <input
+                      type="tel"
+                      id="phone"
+                      formControlName="phone"
+                      placeholder=" "
+                      class="has-prefix has-suffix">
+                      <label for="phone">Téléphone <span class="required-indicator">*</span></label>
+                      <div class="field-prefix">
+                        <mat-icon>phone</mat-icon>
+                      </div>
+                      <div class="validation-icon">
+                        @if (validatingPhone) {
+                          <mat-spinner diameter="20"></mat-spinner>
+                        }
+                        @if (!validatingPhone && form.get('phone')?.valid) {
+                          <mat-icon>check_circle</mat-icon>
+                        }
+                        @if (!validatingPhone && form.get('phone')?.invalid) {
+                          <mat-icon>error</mat-icon>
+                        }
+                      </div>
+                      @if (!form.get('phone')?.touched || (form.get('phone')?.valid && !validatingPhone)) {
+                        <div class="field-helper">
+                          <mat-icon>info</mat-icon>
+                          <span>Format: 06 12 34 56 78 ou +33 6 12 34 56 78</span>
+                        </div>
+                      }
+                      @if (form.get('phone')?.invalid && form.get('phone')?.touched) {
+                        <div class="error-message">
+                          <mat-icon>error</mat-icon>
+                          <span>{{ getFieldError('phone') }}</span>
+                        </div>
+                      }
+                    </div>
+                    <!-- Phone suggestions -->
+                    @if (phoneSuggestions.length > 0) {
+                      <app-inline-validation-suggestion
+                        [suggestion]="phoneSuggestions[0]"
+                        (accept)="onAcceptPhoneSuggestion($event)"
+                        (dismiss)="onDismissPhoneSuggestion()">
+                      </app-inline-validation-suggestion>
+                    }
+                    <div class="elegant-form-field"
                [ngClass]="{
                  'has-value': form.get('message')?.value
                }">
-            <textarea 
-              id="message" 
-              formControlName="message"
-              placeholder=" "
-              rows="4"></textarea>
-            <label for="message">Message (optionnel)</label>
-            <div class="field-helper">
-              <mat-icon>info</mat-icon>
-              <span>{{ form.get('message')?.value?.length || 0 }} / 500 caractères</span>
-            </div>
+                      <textarea
+                        id="message"
+                        formControlName="message"
+                        placeholder=" "
+                      rows="4"></textarea>
+                      <label for="message">Message (optionnel)</label>
+                      <div class="field-helper">
+                        <mat-icon>info</mat-icon>
+                        <span>{{ form.get('message')?.value?.length || 0 }} / 500 caractères</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+
+            <!-- Step 3: Confirmation -->
+            @if (currentStep === 2) {
+              <div class="form-step">
+                <div class="form-section-card">
+                  <div class="section-header">
+                    <mat-icon>check_circle</mat-icon>
+                    <div>
+                      <h2 class="section-title">Confirmation</h2>
+                      <p class="section-subtitle">Vérifiez vos informations avant de valider</p>
+                    </div>
+                  </div>
+                  <div class="section-body">
+                    <div class="summary-section">
+                      <h4>Récapitulatif</h4>
+                      <div class="summary-item">
+                        <span class="label">
+                          <mat-icon>person</mat-icon>
+                          Nom complet
+                        </span>
+                        <span class="value">{{ form.get('firstName')?.value }} {{ form.get('lastName')?.value }}</span>
+                      </div>
+                      <div class="summary-item">
+                        <span class="label">
+                          <mat-icon>email</mat-icon>
+                          Email
+                        </span>
+                        <span class="value">{{ form.get('email')?.value }}</span>
+                      </div>
+                      <div class="summary-item">
+                        <span class="label">
+                          <mat-icon>phone</mat-icon>
+                          Téléphone
+                        </span>
+                        <span class="value">{{ form.get('phone')?.value }}</span>
+                      </div>
+                      @if (form.get('message')?.value) {
+                        <div class="summary-item">
+                          <span class="label">
+                            <mat-icon>message</mat-icon>
+                            Message
+                          </span>
+                          <span class="value">{{ form.get('message')?.value }}</span>
+                        </div>
+                      }
+                    </div>
+                    <div class="elegant-form-field checkbox-field">
+                      <label class="checkbox-label">
+                        <input
+                          type="checkbox"
+                          formControlName="acceptTerms">
+                          <span class="checkbox-text">
+                            J'accepte les conditions d'utilisation <span class="required-indicator">*</span>
+                          </span>
+                        </label>
+                        @if (form.get('acceptTerms')?.touched && form.get('acceptTerms')?.invalid) {
+                          <div class="error-message">
+                            <mat-icon>error</mat-icon>
+                            <span>Vous devez accepter les conditions</span>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              <!-- Navigation buttons -->
+              <div class="form-actions">
+                @if (currentStep > 0) {
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="previousStep()"
+                    >
+                    <mat-icon>arrow_back</mat-icon>
+                    Précédent
+                  </button>
+                }
+
+                <div class="spacer"></div>
+
+                <button
+                  mat-button
+                  type="button"
+                  color="warn"
+                  (click)="onReset()">
+                  Réinitialiser
+                </button>
+
+                @if (currentStep < formSteps.length - 1) {
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="button"
+                    (click)="nextStep()"
+                    >
+                    Suivant
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                }
+
+                @if (currentStep === formSteps.length - 1) {
+                  <button
+                    mat-raised-button
+                    color="primary"
+                    type="submit"
+                    [disabled]="form.invalid">
+                    <mat-icon>send</mat-icon>
+                    Envoyer
+                  </button>
+                }
+              </div>
+            </form>
           </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 3: Confirmation -->
-    <div class="form-step" *ngIf="currentStep === 2">
-      <div class="form-section-card">
-        <div class="section-header">
-          <mat-icon>check_circle</mat-icon>
-          <div>
-            <h2 class="section-title">Confirmation</h2>
-            <p class="section-subtitle">Vérifiez vos informations avant de valider</p>
-          </div>
-        </div>
-        
-        <div class="section-body">
-          <div class="summary-section">
-            <h4>Récapitulatif</h4>
-            <div class="summary-item">
-              <span class="label">
-                <mat-icon>person</mat-icon>
-                Nom complet
-              </span>
-              <span class="value">{{ form.get('firstName')?.value }} {{ form.get('lastName')?.value }}</span>
-            </div>
-            <div class="summary-item">
-              <span class="label">
-                <mat-icon>email</mat-icon>
-                Email
-              </span>
-              <span class="value">{{ form.get('email')?.value }}</span>
-            </div>
-            <div class="summary-item">
-              <span class="label">
-                <mat-icon>phone</mat-icon>
-                Téléphone
-              </span>
-              <span class="value">{{ form.get('phone')?.value }}</span>
-            </div>
-            <div class="summary-item" *ngIf="form.get('message')?.value">
-              <span class="label">
-                <mat-icon>message</mat-icon>
-                Message
-              </span>
-              <span class="value">{{ form.get('message')?.value }}</span>
-            </div>
-          </div>
-
-          <div class="elegant-form-field checkbox-field">
-            <label class="checkbox-label">
-              <input 
-                type="checkbox" 
-                formControlName="acceptTerms">
-              <span class="checkbox-text">
-                J'accepte les conditions d'utilisation <span class="required-indicator">*</span>
-              </span>
-            </label>
-            <div class="error-message" *ngIf="form.get('acceptTerms')?.touched && form.get('acceptTerms')?.invalid">
-              <mat-icon>error</mat-icon>
-              <span>Vous devez accepter les conditions</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Navigation buttons -->
-    <div class="form-actions">
-      <button 
-        mat-button 
-        type="button"
-        (click)="previousStep()"
-        *ngIf="currentStep > 0">
-        <mat-icon>arrow_back</mat-icon>
-        Précédent
-      </button>
-
-      <div class="spacer"></div>
-
-      <button 
-        mat-button 
-        type="button"
-        color="warn"
-        (click)="onReset()">
-        Réinitialiser
-      </button>
-
-      <button 
-        mat-raised-button 
-        color="primary"
-        type="button"
-        (click)="nextStep()"
-        *ngIf="currentStep < formSteps.length - 1">
-        Suivant
-        <mat-icon>arrow_forward</mat-icon>
-      </button>
-
-      <button 
-        mat-raised-button 
-        color="primary"
-        type="submit"
-        *ngIf="currentStep === formSteps.length - 1"
-        [disabled]="form.invalid">
-        <mat-icon>send</mat-icon>
-        Envoyer
-      </button>
-    </div>
-  </form>
-</div>

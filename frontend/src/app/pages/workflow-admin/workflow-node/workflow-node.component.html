@@ -1,4 +1,4 @@
-<div 
+<div
   class="workflow-node"
   [class.selected]="selected"
   [class.transition-mode]="isTransitionMode"
@@ -16,25 +16,27 @@
   tabindex="0"
   role="button"
   [attr.aria-label]="'Nœud de workflow: ' + node.label">
-  
+
   <div class="node-header" [style.background-color]="node.color">
     <mat-icon class="node-icon">{{ node.icon || 'radio_button_unchecked' }}</mat-icon>
   </div>
-  
+
   <div class="node-body">
     <div class="node-label">{{ node.label }}</div>
     <div class="node-status">{{ node.status }}</div>
   </div>
 
-  <div class="node-actions" *ngIf="!isTransitionMode">
-    <button 
-      mat-icon-button 
-      class="add-transition-btn"
-      (click)="onAddTransition($event)"
-      matTooltip="Ajouter une transition">
-      <mat-icon>add_link</mat-icon>
-    </button>
-  </div>
+  @if (!isTransitionMode) {
+    <div class="node-actions">
+      <button
+        mat-icon-button
+        class="add-transition-btn"
+        (click)="onAddTransition($event)"
+        matTooltip="Ajouter une transition">
+        <mat-icon>add_link</mat-icon>
+      </button>
+    </div>
+  }
 
   <div class="drag-handle" cdkDragHandle>
     <mat-icon>drag_indicator</mat-icon>

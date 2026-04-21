@@ -9,18 +9,18 @@ import { VoipService, VoipConfiguration } from '../services/voip.service';
     <mat-dialog-content>
       <form #configForm="ngForm">
         <div class="form-field">
-          <mat-slide-toggle 
-            [(ngModel)]="config.enabled" 
+          <mat-slide-toggle
+            [(ngModel)]="config.enabled"
             name="enabled"
             color="primary">
             Activer VoIP
           </mat-slide-toggle>
         </div>
-
+    
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Fournisseur</mat-label>
-          <mat-select 
-            [(ngModel)]="config.provider" 
+          <mat-select
+            [(ngModel)]="config.provider"
             name="provider"
             [disabled]="!config.enabled"
             required>
@@ -31,76 +31,78 @@ import { VoipService, VoipConfiguration } from '../services/voip.service';
           </mat-select>
           <mat-hint>Choisissez votre système de téléphonie</mat-hint>
         </mat-form-field>
-
+    
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>URL Click-to-Call</mat-label>
-          <input 
-            matInput 
-            [(ngModel)]="config.clickToCallUrl" 
+          <input
+            matInput
+            [(ngModel)]="config.clickToCallUrl"
             name="url"
             [disabled]="!config.enabled"
             placeholder="tel:{{'{phone}'}}"
             [required]="config.provider === 'custom'">
-          <mat-hint>
-            Utilisez {{ '{' }}phone{{ '}' }} comme placeholder pour le numéro de téléphone
-          </mat-hint>
-        </mat-form-field>
-
-        <mat-form-field 
-          appearance="outline" 
-          class="full-width"
-          *ngIf="config.provider === 'twilio' || config.provider === 'asterisk'">
-          <mat-label>Clé API</mat-label>
-          <input 
-            matInput 
-            [(ngModel)]="config.apiKey" 
-            name="apiKey"
-            type="password"
-            [disabled]="!config.enabled"
-            [required]="config.provider === 'twilio' || config.provider === 'asterisk'">
-          <mat-hint>Clé d'authentification pour votre fournisseur</mat-hint>
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Format de numéro</mat-label>
-          <mat-select 
-            [(ngModel)]="config.phoneNumberFormat" 
-            name="phoneFormat"
-            [disabled]="!config.enabled">
-            <mat-option [value]="undefined">Par défaut</mat-option>
-            <mat-option value="international">International (+33...)</mat-option>
-          </mat-select>
-          <mat-hint>Format d'affichage et d'appel</mat-hint>
-        </mat-form-field>
-
-        <div class="config-examples">
-          <h3>Exemples de configuration</h3>
-          <div class="example-item">
-            <strong>Mobile (iOS/Android):</strong>
-            <code>tel:{{ '{' }}phone{{ '}' }}</code>
-          </div>
-          <div class="example-item">
-            <strong>Skype:</strong>
-            <code>skype:{{ '{' }}phone{{ '}' }}?call</code>
-          </div>
-          <div class="example-item">
-            <strong>Zoom Phone:</strong>
-            <code>zoommtg://zoom.us/call?number={{ '{' }}phone{{ '}' }}</code>
-          </div>
-        </div>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="onCancel()">Annuler</button>
-      <button 
-        mat-raised-button 
-        color="primary" 
-        (click)="onSave()"
-        [disabled]="!configForm.valid || !config.enabled || !config.provider">
-        Enregistrer
-      </button>
-    </mat-dialog-actions>
-  `,
+            <mat-hint>
+              Utilisez {{ '{' }}phone{{ '}' }} comme placeholder pour le numéro de téléphone
+            </mat-hint>
+          </mat-form-field>
+    
+          @if (config.provider === 'twilio' || config.provider === 'asterisk') {
+            <mat-form-field
+              appearance="outline"
+              class="full-width"
+              >
+              <mat-label>Clé API</mat-label>
+              <input
+                matInput
+                [(ngModel)]="config.apiKey"
+                name="apiKey"
+                type="password"
+                [disabled]="!config.enabled"
+                [required]="config.provider === 'twilio' || config.provider === 'asterisk'">
+                <mat-hint>Clé d'authentification pour votre fournisseur</mat-hint>
+              </mat-form-field>
+            }
+    
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Format de numéro</mat-label>
+              <mat-select
+                [(ngModel)]="config.phoneNumberFormat"
+                name="phoneFormat"
+                [disabled]="!config.enabled">
+                <mat-option [value]="undefined">Par défaut</mat-option>
+                <mat-option value="international">International (+33...)</mat-option>
+              </mat-select>
+              <mat-hint>Format d'affichage et d'appel</mat-hint>
+            </mat-form-field>
+    
+            <div class="config-examples">
+              <h3>Exemples de configuration</h3>
+              <div class="example-item">
+                <strong>Mobile (iOS/Android):</strong>
+                <code>tel:{{ '{' }}phone{{ '}' }}</code>
+              </div>
+              <div class="example-item">
+                <strong>Skype:</strong>
+                <code>skype:{{ '{' }}phone{{ '}' }}?call</code>
+              </div>
+              <div class="example-item">
+                <strong>Zoom Phone:</strong>
+                <code>zoommtg://zoom.us/call?number={{ '{' }}phone{{ '}' }}</code>
+              </div>
+            </div>
+          </form>
+        </mat-dialog-content>
+        <mat-dialog-actions align="end">
+          <button mat-button (click)="onCancel()">Annuler</button>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="onSave()"
+            [disabled]="!configForm.valid || !config.enabled || !config.provider">
+            Enregistrer
+          </button>
+        </mat-dialog-actions>
+    `,
   styles: [`
     mat-dialog-content {
       min-width: 500px;

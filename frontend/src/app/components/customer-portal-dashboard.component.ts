@@ -9,80 +9,98 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     <div class="dashboard-container" [class.branded]="brandingApplied">
       <header class="dashboard-header">
         <div class="header-left">
-          <img *ngIf="branding?.logoUrl" [src]="branding.logoUrl" alt="Logo" class="logo">
-          <h1 *ngIf="!branding?.logoUrl">Portail Client</h1>
+          @if (branding?.logoUrl) {
+            <img [src]="branding.logoUrl" alt="Logo" class="logo">
+          }
+          @if (!branding?.logoUrl) {
+            <h1>Portail Client</h1>
+          }
         </div>
         <div class="header-right">
           <span class="user-name">{{ dossier?.leadName }}</span>
           <button (click)="logout()" class="logout-button">Déconnexion</button>
         </div>
       </header>
-
-      <div *ngIf="loading" class="loading-container">
-        <div class="spinner"></div>
-        <p>Chargement de votre dossier...</p>
-      </div>
-
-      <div *ngIf="!loading && dossier" class="dashboard-content">
-        <div class="status-banner">
-          <div class="status-info">
-            <h2>Statut de votre dossier</h2>
-            <div class="status-badge">{{ dossier.statusDisplay }}</div>
-          </div>
-          <div class="progress-container">
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width.%]="dossier.progressPercentage"></div>
-            </div>
-            <span class="progress-text">{{ dossier.progressPercentage }}% complété</span>
-          </div>
+    
+      @if (loading) {
+        <div class="loading-container">
+          <div class="spinner"></div>
+          <p>Chargement de votre dossier...</p>
         </div>
-
-        <div class="tabs">
-          <button *ngFor="let tab of tabs" 
-                  [class.active]="activeTab === tab.id"
-                  (click)="activeTab = tab.id"
-                  class="tab-button">
-            {{ tab.icon }} {{ tab.label }}
-            <span *ngIf="tab.id === 'messages' && dossier.unreadMessagesCount > 0" 
+      }
+    
+      @if (!loading && dossier) {
+        <div class="dashboard-content">
+          <div class="status-banner">
+            <div class="status-info">
+              <h2>Statut de votre dossier</h2>
+              <div class="status-badge">{{ dossier.statusDisplay }}</div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="dossier.progressPercentage"></div>
+              </div>
+              <span class="progress-text">{{ dossier.progressPercentage }}% complété</span>
+            </div>
+          </div>
+          <div class="tabs">
+            @for (tab of tabs; track tab) {
+              <button
+                [class.active]="activeTab === tab.id"
+                (click)="activeTab = tab.id"
+                class="tab-button">
+                {{ tab.icon }} {{ tab.label }}
+                @if (tab.id === 'messages' && dossier.unreadMessagesCount > 0) {
+                  <span
                   class="badge">{{ dossier.unreadMessagesCount }}</span>
-          </button>
+                }
+              </button>
+            }
+          </div>
+          <div class="tab-content">
+            @if (activeTab === 'overview') {
+              <div class="tab-pane">
+                <div class="grid-2">
+                  <app-dossier-timeline-view [activities]="dossier.activities"></app-dossier-timeline-view>
+                  <app-client-document-library [documents]="dossier.documents"></app-client-document-library>
+                </div>
+              </div>
+            }
+            @if (activeTab === 'messages') {
+              <div class="tab-pane">
+                <app-secure-message-thread [dossierId]="dossier.id"></app-secure-message-thread>
+              </div>
+            }
+            @if (activeTab === 'appointments') {
+              <div class="tab-pane">
+                <app-appointment-request [dossierId]="dossier.id"></app-appointment-request>
+              </div>
+            }
+            @if (activeTab === 'documents') {
+              <div class="tab-pane">
+                <app-client-document-library [documents]="dossier.documents"></app-client-document-library>
+              </div>
+            }
+            @if (activeTab === 'recommendations') {
+              <div class="tab-pane">
+                <app-property-recommendation [dossierId]="dossier.id"></app-property-recommendation>
+              </div>
+            }
+            @if (activeTab === 'feedback') {
+              <div class="tab-pane">
+                <app-client-satisfaction-survey [dossierId]="dossier.id"></app-client-satisfaction-survey>
+              </div>
+            }
+            @if (activeTab === 'settings') {
+              <div class="tab-pane">
+                <app-consent-management [dossierId]="dossier.id"></app-consent-management>
+              </div>
+            }
+          </div>
         </div>
-
-        <div class="tab-content">
-          <div *ngIf="activeTab === 'overview'" class="tab-pane">
-            <div class="grid-2">
-              <app-dossier-timeline-view [activities]="dossier.activities"></app-dossier-timeline-view>
-              <app-client-document-library [documents]="dossier.documents"></app-client-document-library>
-            </div>
-          </div>
-
-          <div *ngIf="activeTab === 'messages'" class="tab-pane">
-            <app-secure-message-thread [dossierId]="dossier.id"></app-secure-message-thread>
-          </div>
-
-          <div *ngIf="activeTab === 'appointments'" class="tab-pane">
-            <app-appointment-request [dossierId]="dossier.id"></app-appointment-request>
-          </div>
-
-          <div *ngIf="activeTab === 'documents'" class="tab-pane">
-            <app-client-document-library [documents]="dossier.documents"></app-client-document-library>
-          </div>
-
-          <div *ngIf="activeTab === 'recommendations'" class="tab-pane">
-            <app-property-recommendation [dossierId]="dossier.id"></app-property-recommendation>
-          </div>
-
-          <div *ngIf="activeTab === 'feedback'" class="tab-pane">
-            <app-client-satisfaction-survey [dossierId]="dossier.id"></app-client-satisfaction-survey>
-          </div>
-
-          <div *ngIf="activeTab === 'settings'" class="tab-pane">
-            <app-consent-management [dossierId]="dossier.id"></app-consent-management>
-          </div>
-        </div>
-      </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .dashboard-container {
       min-height: 100vh;

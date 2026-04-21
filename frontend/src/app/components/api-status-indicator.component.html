@@ -8,7 +8,7 @@
     <span class="status-dot"></span>
     <span class="status-text">{{ getStatusText() }}</span>
   </button>
-  
+
   <mat-menu #statusMenu="matMenu">
     <div class="status-menu-content" mat-menu-item disabled>
       <div class="status-info">
@@ -17,15 +17,17 @@
         </mat-icon>
         <div class="status-details">
           <div class="status-label">{{ getStatusText() }}</div>
-          <div class="status-timestamp" *ngIf="lastChecked">
-            Dernière vérification: {{ lastChecked | date:'short' }}
-          </div>
+          @if (lastChecked) {
+            <div class="status-timestamp">
+              Dernière vérification: {{ lastChecked | date:'short' }}
+            </div>
+          }
         </div>
       </div>
     </div>
     <mat-divider></mat-divider>
-    <button 
-      mat-menu-item 
+    <button
+      mat-menu-item
       (click)="checkApiConnection()"
       [disabled]="apiStatus === 'checking'">
       <mat-icon>refresh</mat-icon>

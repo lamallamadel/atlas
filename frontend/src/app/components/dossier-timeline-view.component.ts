@@ -6,27 +6,33 @@ import { CustomerPortalActivity } from '../models/customer-portal.models';
   template: `
     <div class="timeline-container">
       <h2>Historique de votre dossier</h2>
-      
-      <div *ngIf="!activities || activities.length === 0" class="empty-state">
-        <p>Aucune activité pour le moment</p>
-      </div>
-
+    
+      @if (!activities || activities.length === 0) {
+        <div class="empty-state">
+          <p>Aucune activité pour le moment</p>
+        </div>
+      }
+    
       <div class="timeline">
-        <div *ngFor="let activity of activities" class="timeline-item">
-          <div class="timeline-marker"></div>
-          <div class="timeline-content">
-            <div class="activity-header">
-              <span class="activity-type">{{ activity.friendlyDescription }}</span>
-              <span class="activity-date">{{ activity.createdAt | date:'short' }}</span>
-            </div>
-            <div class="activity-body" *ngIf="activity.content">
-              {{ activity.content }}
+        @for (activity of activities; track activity) {
+          <div class="timeline-item">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <div class="activity-header">
+                <span class="activity-type">{{ activity.friendlyDescription }}</span>
+                <span class="activity-date">{{ activity.createdAt | date:'short' }}</span>
+              </div>
+              @if (activity.content) {
+                <div class="activity-body">
+                  {{ activity.content }}
+                </div>
+              }
             </div>
           </div>
-        </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .timeline-container {
       padding: 24px;

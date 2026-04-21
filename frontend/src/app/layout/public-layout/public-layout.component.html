@@ -12,62 +12,76 @@
         </svg>
         <span class="pub-logo-text">
           atlasia
-          <em *ngIf="isVitrine()" class="pub-logo-biz"> biz</em>
+          @if (isVitrine()) {
+            <em class="pub-logo-biz"> biz</em>
+          }
         </span>
       </a>
 
       <!-- Desktop Navigation — Portail -->
-      <nav *ngIf="isPortail()" class="pub-nav" aria-label="Navigation principale">
-        <ul class="pub-nav-links" role="list">
-          <li><a routerLink="/recherche" [queryParams]="{tx:'vente'}" [class.active]="isActive('/recherche') && currentRoute.includes('vente')">Vente</a></li>
-          <li><a routerLink="/recherche" [queryParams]="{tx:'location'}" [class.active]="isActive('/recherche') && currentRoute.includes('location')">Location</a></li>
-          <li><a routerLink="/recherche" [class.active]="isActive('/recherche') && !currentRoute.includes('tx')">Toutes les annonces</a></li>
-        </ul>
-        <div class="pub-header-actions">
-          <a routerLink="/biz" class="at-btn at-btn-secondary at-btn-sm">Espace Pro</a>
-          <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Passer en mode clair' : 'Passer en mode sombre'">
-            <svg *ngIf="!isDark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            <svg *ngIf="isDark"  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          </button>
-          <button class="pub-mobile-btn" (click)="toggleMobileMenu()" aria-label="Menu">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-          </button>
-        </div>
-      </nav>
+      @if (isPortail()) {
+        <nav class="pub-nav" aria-label="Navigation principale">
+          <ul class="pub-nav-links" role="list">
+            <li><a routerLink="/recherche" [queryParams]="{tx:'vente'}" [class.active]="isActive('/recherche') && currentRoute.includes('vente')">Vente</a></li>
+            <li><a routerLink="/recherche" [queryParams]="{tx:'location'}" [class.active]="isActive('/recherche') && currentRoute.includes('location')">Location</a></li>
+            <li><a routerLink="/recherche" [class.active]="isActive('/recherche') && !currentRoute.includes('tx')">Toutes les annonces</a></li>
+          </ul>
+          <div class="pub-header-actions">
+            <a routerLink="/biz" class="at-btn at-btn-secondary at-btn-sm">Espace Pro</a>
+            <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Passer en mode clair' : 'Passer en mode sombre'">
+              @if (!isDark) {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              }
+              @if (isDark) {
+                <svg  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              }
+            </button>
+            <button class="pub-mobile-btn" (click)="toggleMobileMenu()" aria-label="Menu">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+          </div>
+        </nav>
+      }
 
       <!-- Desktop Navigation — Vitrine -->
-      <nav *ngIf="isVitrine()" class="pub-nav" aria-label="Navigation principale">
-        <ul class="pub-nav-links" role="list">
-          <li><a routerLink="/biz/agences"    [class.active]="isActive('/biz/agences')">Agences</a></li>
-          <li><a routerLink="/biz/promoteurs" [class.active]="isActive('/biz/promoteurs')">Promoteurs</a></li>
-          <li><a routerLink="/biz/tarifs"     [class.active]="isActive('/biz/tarifs')">Tarifs</a></li>
-          <li><a routerLink="/biz/contact"    [class.active]="isActive('/biz/contact')">Contact</a></li>
-        </ul>
-        <div class="pub-header-actions">
-          <a routerLink="/"            class="at-btn at-btn-secondary at-btn-sm">Portail annonces</a>
-          <a routerLink="/biz/demo"    class="at-btn at-btn-primary at-btn-sm">Demander une démo</a>
-          <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Mode clair' : 'Mode sombre'">
-            <svg *ngIf="!isDark" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            <svg *ngIf="isDark"  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          </button>
-          <button class="pub-mobile-btn" (click)="toggleMobileMenu()" aria-label="Menu mobile">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
-          </button>
-        </div>
-      </nav>
+      @if (isVitrine()) {
+        <nav class="pub-nav" aria-label="Navigation principale">
+          <ul class="pub-nav-links" role="list">
+            <li><a routerLink="/biz/agences"    [class.active]="isActive('/biz/agences')">Agences</a></li>
+            <li><a routerLink="/biz/promoteurs" [class.active]="isActive('/biz/promoteurs')">Promoteurs</a></li>
+            <li><a routerLink="/biz/tarifs"     [class.active]="isActive('/biz/tarifs')">Tarifs</a></li>
+            <li><a routerLink="/biz/contact"    [class.active]="isActive('/biz/contact')">Contact</a></li>
+          </ul>
+          <div class="pub-header-actions">
+            <a routerLink="/"            class="at-btn at-btn-secondary at-btn-sm">Portail annonces</a>
+            <a routerLink="/biz/demo"    class="at-btn at-btn-primary at-btn-sm">Demander une démo</a>
+            <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Mode clair' : 'Mode sombre'">
+              @if (!isDark) {
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              }
+              @if (isDark) {
+                <svg  width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              }
+            </button>
+            <button class="pub-mobile-btn" (click)="toggleMobileMenu()" aria-label="Menu mobile">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            </button>
+          </div>
+        </nav>
+      }
 
     </div>
   </div>
 
   <!-- Mobile Navigation -->
   <nav class="pub-mobile-nav" [class.open]="mobileMenuOpen" id="pub-mobile-nav" aria-label="Navigation mobile">
-    <ng-container *ngIf="isPortail()">
+    @if (isPortail()) {
       <a routerLink="/recherche" [queryParams]="{tx:'vente'}" (click)="closeMobileMenu()">Vente</a>
       <a routerLink="/recherche" [queryParams]="{tx:'location'}" (click)="closeMobileMenu()">Location</a>
       <a routerLink="/recherche" (click)="closeMobileMenu()">Toutes les annonces</a>
       <a routerLink="/biz" (click)="closeMobileMenu()">Espace Pro →</a>
-    </ng-container>
-    <ng-container *ngIf="isVitrine()">
+    }
+    @if (isVitrine()) {
       <a routerLink="/biz" (click)="closeMobileMenu()">Accueil</a>
       <a routerLink="/biz/agences" (click)="closeMobileMenu()">Agences</a>
       <a routerLink="/biz/promoteurs" (click)="closeMobileMenu()">Promoteurs</a>
@@ -75,7 +89,7 @@
       <a routerLink="/biz/contact" (click)="closeMobileMenu()">Contact</a>
       <a routerLink="/" (click)="closeMobileMenu()">Portail annonces →</a>
       <a routerLink="/biz/demo" (click)="closeMobileMenu()" style="color:var(--at-color-primary);font-weight:700;">Demander une démo</a>
-    </ng-container>
+    }
   </nav>
 </header>
 
@@ -96,14 +110,21 @@
             <path d="M16 6 L26 16 L16 26 L6 16 Z" fill="none" stroke="#b5622e" stroke-width="1.5"/>
             <circle cx="16" cy="16" r="2.5" fill="#b5622e"/>
           </svg>
-          atlasia<em *ngIf="isVitrine()"> biz</em>
-        </a>
-        <p class="pub-footer-desc" *ngIf="isPortail()">Portail immobilier au Maroc. Annonces vente et location dans toutes les grandes villes.</p>
-        <p class="pub-footer-desc" *ngIf="isVitrine()">La plateforme digitale de l'immobilier professionnel au Maroc. CRM, portail, rendez-vous.</p>
-      </div>
+          atlasia@if (isVitrine()) {
+          <em> biz</em>
+        }
+      </a>
+      @if (isPortail()) {
+        <p class="pub-footer-desc">Portail immobilier au Maroc. Annonces vente et location dans toutes les grandes villes.</p>
+      }
+      @if (isVitrine()) {
+        <p class="pub-footer-desc">La plateforme digitale de l'immobilier professionnel au Maroc. CRM, portail, rendez-vous.</p>
+      }
+    </div>
 
-      <!-- Portail links -->
-      <div *ngIf="isPortail()">
+    <!-- Portail links -->
+    @if (isPortail()) {
+      <div>
         <p class="pub-footer-col-title">Rechercher</p>
         <ul class="pub-footer-links">
           <li><a routerLink="/recherche" [queryParams]="{tx:'vente'}">Vente</a></li>
@@ -111,16 +132,20 @@
           <li><a routerLink="/recherche">Toutes les annonces</a></li>
         </ul>
       </div>
-      <div *ngIf="isPortail()">
+    }
+    @if (isPortail()) {
+      <div>
         <p class="pub-footer-col-title">Professionnels</p>
         <ul class="pub-footer-links">
           <li><a routerLink="/biz">Espace Pro</a></li>
           <li><a routerLink="/biz/demo">Demander une démo</a></li>
         </ul>
       </div>
+    }
 
-      <!-- Vitrine links -->
-      <div *ngIf="isVitrine()">
+    <!-- Vitrine links -->
+    @if (isVitrine()) {
+      <div>
         <p class="pub-footer-col-title">Solutions</p>
         <ul class="pub-footer-links">
           <li><a routerLink="/biz/agences">Agences</a></li>
@@ -128,7 +153,9 @@
           <li><a routerLink="/biz/tarifs">Tarifs</a></li>
         </ul>
       </div>
-      <div *ngIf="isVitrine()">
+    }
+    @if (isVitrine()) {
+      <div>
         <p class="pub-footer-col-title">Contact</p>
         <ul class="pub-footer-links">
           <li><a routerLink="/biz/demo">Demander une démo</a></li>
@@ -136,20 +163,21 @@
           <li><a routerLink="/">Portail annonces</a></li>
         </ul>
       </div>
+    }
 
-      <!-- Legal (shared) -->
-      <div>
-        <p class="pub-footer-col-title">Légal</p>
-        <ul class="pub-footer-links">
-          <li><a routerLink="/mentions-legales">Mentions légales</a></li>
-          <li><a routerLink="/confidentialite">Confidentialité</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="pub-footer-bottom">
-      <span>© 2026 Atlasia Technologies SARL — Maroc</span>
-      <span>Tous droits réservés</span>
+    <!-- Legal (shared) -->
+    <div>
+      <p class="pub-footer-col-title">Légal</p>
+      <ul class="pub-footer-links">
+        <li><a routerLink="/mentions-legales">Mentions légales</a></li>
+        <li><a routerLink="/confidentialite">Confidentialité</a></li>
+      </ul>
     </div>
   </div>
+
+  <div class="pub-footer-bottom">
+    <span>© 2026 Atlasia Technologies SARL — Maroc</span>
+    <span>Tous droits réservés</span>
+  </div>
+</div>
 </footer>

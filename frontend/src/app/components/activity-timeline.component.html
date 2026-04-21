@@ -1,9 +1,9 @@
 <div class="activity-timeline-container">
   <div class="timeline-header">
     <h3>Chronologie d'activité</h3>
-    <button 
-      mat-raised-button 
-      color="primary" 
+    <button
+      mat-raised-button
+      color="primary"
       (click)="openNoteDialog()"
       aria-label="Ajouter une nouvelle note à la chronologie"
       (keydown.enter)="openNoteDialog()"
@@ -13,97 +13,111 @@
     </button>
   </div>
 
-  <div *ngIf="loading" class="loading-container">
-    <mat-spinner></mat-spinner>
-    <p>Chargement des activités...</p>
-  </div>
-
-  <div *ngIf="!loading && activities.length === 0" class="no-activities">
-    <mat-icon>timeline</mat-icon>
-    <p>Aucune activité pour le moment</p>
-  </div>
-
-  <div *ngIf="!loading && activities.length > 0" class="timeline">
-    <div *ngFor="let activity of activities; trackBy: trackByActivityId" class="timeline-item">
-      <div class="timeline-marker">
-        <mat-icon [class]="getActivityTypeBadgeClass(activity.type)">
-          {{ getActivityTypeIcon(activity.type) }}
-        </mat-icon>
-      </div>
-      
-      <mat-card class="activity-card">
-        <mat-card-header>
-          <div class="avatar-container" mat-card-avatar>
-            <div class="user-avatar">
-              {{ getUserInitials(activity.createdByName || activity.createdBy) }}
-            </div>
-          </div>
-          <div class="activity-header-content">
-            <div class="activity-header-top">
-              <div class="activity-title-row">
-                <span class="activity-type">{{ getActivityTypeLabel(activity.type) }}</span>
-                <span [class]="getVisibilityBadgeClass(activity.visibility)">
-                  <mat-icon class="badge-icon">{{ getVisibilityIcon(activity.visibility) }}</mat-icon>
-                  {{ getVisibilityLabel(activity.visibility) }}
-                </span>
-              </div>
-              <button 
-                mat-icon-button 
-                *ngIf="activity.type === ActivityType.NOTE"
-                [matMenuTriggerFor]="actionsMenu"
-                class="actions-menu-button"
-                (click)="$event.stopPropagation()"
-                [attr.aria-label]="'Actions pour la note du ' + formatDateTime(activity.createdAt)"
-                aria-haspopup="true">
-                <mat-icon aria-hidden="true">more_vert</mat-icon>
-              </button>
-              <mat-menu #actionsMenu="matMenu" aria-label="Menu des actions">
-                <button 
-                  mat-menu-item 
-                  (click)="editActivity(activity)"
-                  aria-label="Modifier cette note">
-                  <mat-icon aria-hidden="true">edit</mat-icon>
-                  <span>Modifier</span>
-                </button>
-                <button 
-                  mat-menu-item 
-                  (click)="deleteActivity(activity)"
-                  aria-label="Supprimer cette note">
-                  <mat-icon color="warn" aria-hidden="true">delete</mat-icon>
-                  <span>Supprimer</span>
-                </button>
-              </mat-menu>
-            </div>
-            <div class="activity-meta">
-              <span class="activity-author">{{ activity.createdByName || activity.createdBy }}</span>
-              <span class="meta-separator">•</span>
-              <span class="activity-time">{{ formatDateTime(activity.createdAt) }}</span>
-            </div>
-          </div>
-        </mat-card-header>
-
-        <mat-card-content>
-          <div class="activity-content" *ngIf="activity.content">
-            <div *ngIf="!isExpanded(activity.id) && shouldShowExpand(activity.content)" 
-                 [innerHTML]="sanitizeContent(truncateContent(activity.content))"></div>
-            <div *ngIf="isExpanded(activity.id) || !shouldShowExpand(activity.content)" 
-                 [innerHTML]="sanitizeContent(activity.content)"></div>
-            
-            <button *ngIf="shouldShowExpand(activity.content)" 
-                    mat-button 
-                    color="primary" 
-                    (click)="toggleExpanded(activity.id)"
-                    class="expand-button"
-                    [attr.aria-label]="isExpanded(activity.id) ? 'Réduire le contenu de cette activité' : 'Développer le contenu de cette activité'"
-                    [attr.aria-expanded]="isExpanded(activity.id)"
-                    (keydown.enter)="toggleExpanded(activity.id)"
-                    (keydown.space)="$event.preventDefault(); toggleExpanded(activity.id)">
-              <mat-icon aria-hidden="true">{{ isExpanded(activity.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
-              {{ isExpanded(activity.id) ? 'Voir moins' : 'Voir plus' }}
-            </button>
-          </div>
-        </mat-card-content>
-      </mat-card>
+  @if (loading) {
+    <div class="loading-container">
+      <mat-spinner></mat-spinner>
+      <p>Chargement des activités...</p>
     </div>
-  </div>
+  }
+
+  @if (!loading && activities.length === 0) {
+    <div class="no-activities">
+      <mat-icon>timeline</mat-icon>
+      <p>Aucune activité pour le moment</p>
+    </div>
+  }
+
+  @if (!loading && activities.length > 0) {
+    <div class="timeline">
+      @for (activity of activities; track trackByActivityId($index, activity)) {
+        <div class="timeline-item">
+          <div class="timeline-marker">
+            <mat-icon [class]="getActivityTypeBadgeClass(activity.type)">
+              {{ getActivityTypeIcon(activity.type) }}
+            </mat-icon>
+          </div>
+          <mat-card class="activity-card">
+            <mat-card-header>
+              <div class="avatar-container" mat-card-avatar>
+                <div class="user-avatar">
+                  {{ getUserInitials(activity.createdByName || activity.createdBy) }}
+                </div>
+              </div>
+              <div class="activity-header-content">
+                <div class="activity-header-top">
+                  <div class="activity-title-row">
+                    <span class="activity-type">{{ getActivityTypeLabel(activity.type) }}</span>
+                    <span [class]="getVisibilityBadgeClass(activity.visibility)">
+                      <mat-icon class="badge-icon">{{ getVisibilityIcon(activity.visibility) }}</mat-icon>
+                      {{ getVisibilityLabel(activity.visibility) }}
+                    </span>
+                  </div>
+                  @if (activity.type === ActivityType.NOTE) {
+                    <button
+                      mat-icon-button
+                      [matMenuTriggerFor]="actionsMenu"
+                      class="actions-menu-button"
+                      (click)="$event.stopPropagation()"
+                      [attr.aria-label]="'Actions pour la note du ' + formatDateTime(activity.createdAt)"
+                      aria-haspopup="true">
+                      <mat-icon aria-hidden="true">more_vert</mat-icon>
+                    </button>
+                  }
+                  <mat-menu #actionsMenu="matMenu" aria-label="Menu des actions">
+                    <button
+                      mat-menu-item
+                      (click)="editActivity(activity)"
+                      aria-label="Modifier cette note">
+                      <mat-icon aria-hidden="true">edit</mat-icon>
+                      <span>Modifier</span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="deleteActivity(activity)"
+                      aria-label="Supprimer cette note">
+                      <mat-icon color="warn" aria-hidden="true">delete</mat-icon>
+                      <span>Supprimer</span>
+                    </button>
+                  </mat-menu>
+                </div>
+                <div class="activity-meta">
+                  <span class="activity-author">{{ activity.createdByName || activity.createdBy }}</span>
+                  <span class="meta-separator">•</span>
+                  <span class="activity-time">{{ formatDateTime(activity.createdAt) }}</span>
+                </div>
+              </div>
+            </mat-card-header>
+            <mat-card-content>
+              @if (activity.content) {
+                <div class="activity-content">
+                  @if (!isExpanded(activity.id) && shouldShowExpand(activity.content)) {
+                    <div
+                    [innerHTML]="sanitizeContent(truncateContent(activity.content))"></div>
+                  }
+                  @if (isExpanded(activity.id) || !shouldShowExpand(activity.content)) {
+                    <div
+                    [innerHTML]="sanitizeContent(activity.content)"></div>
+                  }
+                  @if (shouldShowExpand(activity.content)) {
+                    <button
+                      mat-button
+                      color="primary"
+                      (click)="toggleExpanded(activity.id)"
+                      class="expand-button"
+                      [attr.aria-label]="isExpanded(activity.id) ? 'Réduire le contenu de cette activité' : 'Développer le contenu de cette activité'"
+                      [attr.aria-expanded]="isExpanded(activity.id)"
+                      (keydown.enter)="toggleExpanded(activity.id)"
+                      (keydown.space)="$event.preventDefault(); toggleExpanded(activity.id)">
+                      <mat-icon aria-hidden="true">{{ isExpanded(activity.id) ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      {{ isExpanded(activity.id) ? 'Voir moins' : 'Voir plus' }}
+                    </button>
+                  }
+                </div>
+              }
+            </mat-card-content>
+          </mat-card>
+        </div>
+      }
+    </div>
+  }
 </div>

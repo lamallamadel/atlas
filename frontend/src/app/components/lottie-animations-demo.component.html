@@ -31,24 +31,26 @@
   </div>
 
   <div class="lottie-demo-grid">
-    <mat-card *ngFor="let animation of animations" class="animation-card">
-      <mat-card-header>
-        <mat-card-title>{{ animation.type }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <app-animated-empty-state
-          [title]="animation.title"
-          [message]="animation.message"
-          [animationType]="animation.type"
-          [animationWidth]="animationWidth"
-          [animationHeight]="animationHeight"
-          [loop]="loop"
-          [showControls]="showControls"
-          [primaryAction]="getActionConfig(animation, true)"
-          [secondaryAction]="getActionConfig(animation, false)">
-        </app-animated-empty-state>
-      </mat-card-content>
-    </mat-card>
+    @for (animation of animations; track animation) {
+      <mat-card class="animation-card">
+        <mat-card-header>
+          <mat-card-title>{{ animation.type }}</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <app-animated-empty-state
+            [title]="animation.title"
+            [message]="animation.message"
+            [animationType]="animation.type"
+            [animationWidth]="animationWidth"
+            [animationHeight]="animationHeight"
+            [loop]="loop"
+            [showControls]="showControls"
+            [primaryAction]="getActionConfig(animation, true)"
+            [secondaryAction]="getActionConfig(animation, false)">
+          </app-animated-empty-state>
+        </mat-card-content>
+      </mat-card>
+    }
   </div>
 
   <div class="lottie-demo-info">

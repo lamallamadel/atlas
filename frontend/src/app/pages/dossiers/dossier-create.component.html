@@ -4,36 +4,41 @@
   </header>
 
   <main class="page-content">
-    <div *ngIf="error" class="error-alert" role="alert" aria-live="assertive">
-      <span class="error-icon" aria-hidden="true">⚠</span>
-      <span>{{ error }}</span>
-    </div>
+    @if (error) {
+      <div class="error-alert" role="alert" aria-live="assertive">
+        <span class="error-icon" aria-hidden="true">⚠</span>
+        <span>{{ error }}</span>
+      </div>
+    }
 
-    <div *ngIf="duplicates.length > 0" class="warning-banner" role="alert" aria-live="polite">
-      <div class="warning-content">
-        <span class="warning-icon" aria-hidden="true">⚠</span>
-        <div class="warning-text">
-          <strong>Doublon trouvé !</strong>
-          <p>Un dossier avec ce numéro de téléphone existe déjà.</p>
+    @if (duplicates.length > 0) {
+      <div class="warning-banner" role="alert" aria-live="polite">
+        <div class="warning-content">
+          <span class="warning-icon" aria-hidden="true">⚠</span>
+          <div class="warning-text">
+            <strong>Doublon trouvé !</strong>
+            <p>Un dossier avec ce numéro de téléphone existe déjà.</p>
+          </div>
+        </div>
+        <div class="warning-actions">
+          @for (duplicate of duplicates; track duplicate) {
+            <button
+              class="btn-open-existing"
+              (click)="openExistingDossier(duplicate.id)"
+              type="button"
+              [attr.aria-label]="'Ouvrir le dossier existant numéro ' + duplicate.id"
+              >
+              Ouvrir l'existant (ID : {{ duplicate.id }})
+            </button>
+          }
         </div>
       </div>
-      <div class="warning-actions">
-        <button
-          *ngFor="let duplicate of duplicates"
-          class="btn-open-existing"
-          (click)="openExistingDossier(duplicate.id)"
-          type="button"
-          [attr.aria-label]="'Ouvrir le dossier existant numéro ' + duplicate.id"
-        >
-          Ouvrir l'existant (ID : {{ duplicate.id }})
-        </button>
-      </div>
-    </div>
+    }
 
     <form [formGroup]="dossierForm" (ngSubmit)="onSubmit()" class="dossier-form">
       <fieldset>
         <legend class="sr-only">Informations du prospect</legend>
-        
+
         <div class="form-group">
           <label for="leadName" class="form-label">
             Nom du prospect
@@ -48,119 +53,137 @@
             aria-required="false"
             [attr.aria-invalid]="isFieldInvalid('leadName')"
             [attr.aria-describedby]="getFieldError('leadName') ? 'leadName-error' : null"
-          />
-          <div *ngIf="getFieldError('leadName')" class="field-error" id="leadName-error" role="alert">
-            {{ getFieldError('leadName') }}
+            />
+            @if (getFieldError('leadName')) {
+              <div class="field-error" id="leadName-error" role="alert">
+                {{ getFieldError('leadName') }}
+              </div>
+            }
           </div>
-        </div>
 
-        <div class="form-group">
-          <label for="leadPhone" class="form-label">
-            Téléphone du prospect
-          </label>
-          <input
-            id="leadPhone"
-            type="text"
-            class="form-input"
-            formControlName="leadPhone"
-            [class.invalid]="isFieldInvalid('leadPhone')"
-            placeholder="Saisir le numéro de téléphone du prospect"
-            (blur)="onPhoneBlur()"
-            aria-required="false"
-            [attr.aria-invalid]="isFieldInvalid('leadPhone')"
-            [attr.aria-describedby]="checkingDuplicates ? 'leadPhone-checking' : getFieldError('leadPhone') ? 'leadPhone-error' : null"
-          />
-          <div *ngIf="checkingDuplicates" class="checking-duplicates" id="leadPhone-checking" role="status" aria-live="polite">
-            <span class="checking-spinner" aria-hidden="true"></span>
-            Vérification des doublons...
-          </div>
-          <div *ngIf="getFieldError('leadPhone')" class="field-error" id="leadPhone-error" role="alert">
-            {{ getFieldError('leadPhone') }}
-          </div>
-        </div>
+          <div class="form-group">
+            <label for="leadPhone" class="form-label">
+              Téléphone du prospect
+            </label>
+            <input
+              id="leadPhone"
+              type="text"
+              class="form-input"
+              formControlName="leadPhone"
+              [class.invalid]="isFieldInvalid('leadPhone')"
+              placeholder="Saisir le numéro de téléphone du prospect"
+              (blur)="onPhoneBlur()"
+              aria-required="false"
+              [attr.aria-invalid]="isFieldInvalid('leadPhone')"
+              [attr.aria-describedby]="checkingDuplicates ? 'leadPhone-checking' : getFieldError('leadPhone') ? 'leadPhone-error' : null"
+              />
+              @if (checkingDuplicates) {
+                <div class="checking-duplicates" id="leadPhone-checking" role="status" aria-live="polite">
+                  <span class="checking-spinner" aria-hidden="true"></span>
+                  Vérification des doublons...
+                </div>
+              }
+              @if (getFieldError('leadPhone')) {
+                <div class="field-error" id="leadPhone-error" role="alert">
+                  {{ getFieldError('leadPhone') }}
+                </div>
+              }
+            </div>
 
-        <div class="form-group">
-          <label for="leadSource" class="form-label">
-            Source du prospect
-          </label>
-          <input
-            id="leadSource"
-            type="text"
-            class="form-input"
-            formControlName="leadSource"
-            [class.invalid]="isFieldInvalid('leadSource')"
-            placeholder="Saisir la source du prospect (ex : site web, appel entrant, référence...)"
-            aria-required="false"
-            [attr.aria-invalid]="isFieldInvalid('leadSource')"
-            [attr.aria-describedby]="getFieldError('leadSource') ? 'leadSource-error' : 'leadSource-hint'"
-          />
-          <div *ngIf="!getFieldError('leadSource')" class="field-hint" id="leadSource-hint">
-            Indiquez d'où provient le prospect (site web, téléphone, référence, etc.)
-          </div>
-          <div *ngIf="getFieldError('leadSource')" class="field-error" id="leadSource-error" role="alert">
-            {{ getFieldError('leadSource') }}
-          </div>
-        </div>
-
-        <div class="form-group annonce-autocomplete">
-          <label for="annonceSearch" class="form-label">
-            Annonce liée (optionnel)
-          </label>
-          <input
-            id="annonceSearch"
-            type="text"
-            class="form-input"
-            [formControl]="annonceSearchControl"
-            [matAutocomplete]="auto"
-            placeholder="Rechercher une annonce par titre, ville ou identifiant..."
-            aria-label="Rechercher et sélectionner une annonce liée"
-            aria-autocomplete="list"
-            [attr.aria-expanded]="auto.isOpen"
-          />
-          <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
-            <mat-option *ngFor="let annonce of filteredAnnonces | async" [value]="annonce">
-              {{ displayAnnonceFn(annonce) }}
-            </mat-option>
-          </mat-autocomplete>
-          
-          <mat-expansion-panel class="advanced-panel">
-            <mat-expansion-panel-header>
-              <mat-panel-title>
-                Avancé
-              </mat-panel-title>
-            </mat-expansion-panel-header>
-            <div class="advanced-content">
-              <label for="annonceIdDirect" class="form-label">
-                ID annonce (saisie directe)
+            <div class="form-group">
+              <label for="leadSource" class="form-label">
+                Source du prospect
               </label>
               <input
-                id="annonceIdDirect"
-                type="number"
+                id="leadSource"
+                type="text"
                 class="form-input"
-                [value]="dossierForm.get('annonceId')?.value || ''"
-                (input)="onAnnonceIdDirectInput($event)"
-                placeholder="Saisir l'ID de l'annonce"
-                aria-label="Saisir directement l'ID de l'annonce"
-              />
-            </div>
-          </mat-expansion-panel>
-          
-          <div *ngIf="getFieldError('annonceId')" class="field-error" id="annonceId-error" role="alert">
-            {{ getFieldError('annonceId') }}
-          </div>
-        </div>
-      </fieldset>
+                formControlName="leadSource"
+                [class.invalid]="isFieldInvalid('leadSource')"
+                placeholder="Saisir la source du prospect (ex : site web, appel entrant, référence...)"
+                aria-required="false"
+                [attr.aria-invalid]="isFieldInvalid('leadSource')"
+                [attr.aria-describedby]="getFieldError('leadSource') ? 'leadSource-error' : 'leadSource-hint'"
+                />
+                @if (!getFieldError('leadSource')) {
+                  <div class="field-hint" id="leadSource-hint">
+                    Indiquez d'où provient le prospect (site web, téléphone, référence, etc.)
+                  </div>
+                }
+                @if (getFieldError('leadSource')) {
+                  <div class="field-error" id="leadSource-error" role="alert">
+                    {{ getFieldError('leadSource') }}
+                  </div>
+                }
+              </div>
 
-      <div class="form-actions">
-        <button type="button" class="btn-cancel" (click)="onCancel()" aria-label="Annuler la création du dossier">Annuler</button>
-        <button type="submit" class="btn-submit" [disabled]="submitting" [attr.aria-busy]="submitting">
-          <span *ngIf="!submitting">Créer</span>
-          <span *ngIf="submitting" class="btn-loading" role="status" aria-live="polite">
-            <span class="btn-spinner" aria-hidden="true"></span>
-            Création...
-          </span>
-        </button>
-      </div>
-    </form>
-  </main>
-</div>
+              <div class="form-group annonce-autocomplete">
+                <label for="annonceSearch" class="form-label">
+                  Annonce liée (optionnel)
+                </label>
+                <input
+                  id="annonceSearch"
+                  type="text"
+                  class="form-input"
+                  [formControl]="annonceSearchControl"
+                  [matAutocomplete]="auto"
+                  placeholder="Rechercher une annonce par titre, ville ou identifiant..."
+                  aria-label="Rechercher et sélectionner une annonce liée"
+                  aria-autocomplete="list"
+                  [attr.aria-expanded]="auto.isOpen"
+                  />
+                  <mat-autocomplete #auto="matAutocomplete" [displayWith]="displayAnnonceFn.bind(this)" (optionSelected)="onAnnonceSelected($event.option.value)">
+                    @for (annonce of filteredAnnonces | async; track annonce) {
+                      <mat-option [value]="annonce">
+                        {{ displayAnnonceFn(annonce) }}
+                      </mat-option>
+                    }
+                  </mat-autocomplete>
+
+                  <mat-expansion-panel class="advanced-panel">
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        Avancé
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="advanced-content">
+                      <label for="annonceIdDirect" class="form-label">
+                        ID annonce (saisie directe)
+                      </label>
+                      <input
+                        id="annonceIdDirect"
+                        type="number"
+                        class="form-input"
+                        [value]="dossierForm.get('annonceId')?.value || ''"
+                        (input)="onAnnonceIdDirectInput($event)"
+                        placeholder="Saisir l'ID de l'annonce"
+                        aria-label="Saisir directement l'ID de l'annonce"
+                        />
+                      </div>
+                    </mat-expansion-panel>
+
+                    @if (getFieldError('annonceId')) {
+                      <div class="field-error" id="annonceId-error" role="alert">
+                        {{ getFieldError('annonceId') }}
+                      </div>
+                    }
+                  </div>
+                </fieldset>
+
+                <div class="form-actions">
+                  <button type="button" class="btn-cancel" (click)="onCancel()" aria-label="Annuler la création du dossier">Annuler</button>
+                  <button type="submit" class="btn-submit" [disabled]="submitting" [attr.aria-busy]="submitting">
+                    @if (!submitting) {
+                      <span>Créer</span>
+                    }
+                    @if (submitting) {
+                      <span class="btn-loading" role="status" aria-live="polite">
+                        <span class="btn-spinner" aria-hidden="true"></span>
+                        Création...
+                      </span>
+                    }
+                  </button>
+                </div>
+              </form>
+            </main>
+          </div>

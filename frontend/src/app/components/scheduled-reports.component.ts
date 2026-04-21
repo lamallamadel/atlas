@@ -16,29 +16,29 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
             Schedule New Report
           </button>
         </mat-card-header>
-
+    
         <mat-card-content>
           <table mat-table [dataSource]="reports" class="reports-table">
             <ng-container matColumnDef="name">
               <th mat-header-cell *matHeaderCellDef>Name</th>
               <td mat-cell *matCellDef="let report">{{report.name}}</td>
             </ng-container>
-
+    
             <ng-container matColumnDef="reportType">
               <th mat-header-cell *matHeaderCellDef>Type</th>
               <td mat-cell *matCellDef="let report">{{report.reportType}}</td>
             </ng-container>
-
+    
             <ng-container matColumnDef="frequency">
               <th mat-header-cell *matHeaderCellDef>Frequency</th>
               <td mat-cell *matCellDef="let report">{{report.frequency}}</td>
             </ng-container>
-
+    
             <ng-container matColumnDef="format">
               <th mat-header-cell *matHeaderCellDef>Format</th>
               <td mat-cell *matCellDef="let report">{{report.format}}</td>
             </ng-container>
-
+    
             <ng-container matColumnDef="enabled">
               <th mat-header-cell *matHeaderCellDef>Status</th>
               <td mat-cell *matCellDef="let report">
@@ -47,12 +47,12 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
                 </mat-chip>
               </td>
             </ng-container>
-
+    
             <ng-container matColumnDef="nextRunAt">
               <th mat-header-cell *matHeaderCellDef>Next Run</th>
               <td mat-cell *matCellDef="let report">{{report.nextRunAt | date:'short'}}</td>
             </ng-container>
-
+    
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef>Actions</th>
               <td mat-cell *matCellDef="let report">
@@ -64,105 +64,100 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
                 </button>
               </td>
             </ng-container>
-
+    
             <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
           </table>
         </mat-card-content>
       </mat-card>
-
-      <mat-card *ngIf="editingReport" class="report-form-card">
-        <mat-card-header>
-          <mat-card-title>{{editingReport.id ? 'Edit' : 'Create'}} Scheduled Report</mat-card-title>
-        </mat-card-header>
-
-        <mat-card-content>
-          <form [formGroup]="reportForm">
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Name</mat-label>
-              <input matInput formControlName="name" required>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="2"></textarea>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Report Type</mat-label>
-              <mat-select formControlName="reportType" required>
-                <mat-option value="COHORT_ANALYSIS">Cohort Analysis</mat-option>
-                <mat-option value="SALES_FUNNEL">Sales Funnel</mat-option>
-                <mat-option value="AGENT_PERFORMANCE">Agent Performance</mat-option>
-                <mat-option value="MARKET_TRENDS">Market Trends</mat-option>
-                <mat-option value="REVENUE_FORECAST">Revenue Forecast</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Frequency</mat-label>
-              <mat-select formControlName="frequency" required>
-                <mat-option value="DAILY">Daily</mat-option>
-                <mat-option value="WEEKLY">Weekly</mat-option>
-                <mat-option value="MONTHLY">Monthly</mat-option>
-                <mat-option value="QUARTERLY">Quarterly</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width" 
-                            *ngIf="reportForm.get('frequency')?.value === 'WEEKLY'">
-              <mat-label>Day of Week</mat-label>
-              <mat-select formControlName="dayOfWeek">
-                <mat-option value="MONDAY">Monday</mat-option>
-                <mat-option value="TUESDAY">Tuesday</mat-option>
-                <mat-option value="WEDNESDAY">Wednesday</mat-option>
-                <mat-option value="THURSDAY">Thursday</mat-option>
-                <mat-option value="FRIDAY">Friday</mat-option>
-                <mat-option value="SATURDAY">Saturday</mat-option>
-                <mat-option value="SUNDAY">Sunday</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width"
-                            *ngIf="reportForm.get('frequency')?.value === 'MONTHLY'">
-              <mat-label>Day of Month</mat-label>
-              <input matInput type="number" formControlName="dayOfMonth" min="1" max="31">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Hour (24h format)</mat-label>
-              <input matInput type="number" formControlName="hour" min="0" max="23">
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Format</mat-label>
-              <mat-select formControlName="format" required>
-                <mat-option value="PDF">PDF</mat-option>
-                <mat-option value="CSV">CSV</mat-option>
-                <mat-option value="EXCEL">Excel</mat-option>
-                <mat-option value="HTML">HTML</mat-option>
-              </mat-select>
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Recipients (comma-separated emails)</mat-label>
-              <textarea matInput formControlName="recipientsText" 
-                        placeholder="email1@example.com, email2@example.com"
-                        rows="2"></textarea>
-            </mat-form-field>
-
-            <mat-checkbox formControlName="enabled">Enable this report</mat-checkbox>
-
-            <div class="form-actions">
-              <button mat-raised-button (click)="cancelEdit()">Cancel</button>
-              <button mat-raised-button color="primary" (click)="saveReport()" 
-                      [disabled]="!reportForm.valid">Save</button>
-            </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
+    
+      @if (editingReport) {
+        <mat-card class="report-form-card">
+          <mat-card-header>
+            <mat-card-title>{{editingReport.id ? 'Edit' : 'Create'}} Scheduled Report</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <form [formGroup]="reportForm">
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Report Name</mat-label>
+                <input matInput formControlName="name" required>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Description</mat-label>
+                <textarea matInput formControlName="description" rows="2"></textarea>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Report Type</mat-label>
+                <mat-select formControlName="reportType" required>
+                  <mat-option value="COHORT_ANALYSIS">Cohort Analysis</mat-option>
+                  <mat-option value="SALES_FUNNEL">Sales Funnel</mat-option>
+                  <mat-option value="AGENT_PERFORMANCE">Agent Performance</mat-option>
+                  <mat-option value="MARKET_TRENDS">Market Trends</mat-option>
+                  <mat-option value="REVENUE_FORECAST">Revenue Forecast</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Frequency</mat-label>
+                <mat-select formControlName="frequency" required>
+                  <mat-option value="DAILY">Daily</mat-option>
+                  <mat-option value="WEEKLY">Weekly</mat-option>
+                  <mat-option value="MONTHLY">Monthly</mat-option>
+                  <mat-option value="QUARTERLY">Quarterly</mat-option>
+                </mat-select>
+              </mat-form-field>
+              @if (reportForm.get('frequency')?.value === 'WEEKLY') {
+                <mat-form-field appearance="outline" class="full-width"
+                  >
+                  <mat-label>Day of Week</mat-label>
+                  <mat-select formControlName="dayOfWeek">
+                    <mat-option value="MONDAY">Monday</mat-option>
+                    <mat-option value="TUESDAY">Tuesday</mat-option>
+                    <mat-option value="WEDNESDAY">Wednesday</mat-option>
+                    <mat-option value="THURSDAY">Thursday</mat-option>
+                    <mat-option value="FRIDAY">Friday</mat-option>
+                    <mat-option value="SATURDAY">Saturday</mat-option>
+                    <mat-option value="SUNDAY">Sunday</mat-option>
+                  </mat-select>
+                </mat-form-field>
+              }
+              @if (reportForm.get('frequency')?.value === 'MONTHLY') {
+                <mat-form-field appearance="outline" class="full-width"
+                  >
+                  <mat-label>Day of Month</mat-label>
+                  <input matInput type="number" formControlName="dayOfMonth" min="1" max="31">
+                </mat-form-field>
+              }
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Hour (24h format)</mat-label>
+                <input matInput type="number" formControlName="hour" min="0" max="23">
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Format</mat-label>
+                <mat-select formControlName="format" required>
+                  <mat-option value="PDF">PDF</mat-option>
+                  <mat-option value="CSV">CSV</mat-option>
+                  <mat-option value="EXCEL">Excel</mat-option>
+                  <mat-option value="HTML">HTML</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Recipients (comma-separated emails)</mat-label>
+                <textarea matInput formControlName="recipientsText"
+                  placeholder="email1@example.com, email2@example.com"
+                rows="2"></textarea>
+              </mat-form-field>
+              <mat-checkbox formControlName="enabled">Enable this report</mat-checkbox>
+              <div class="form-actions">
+                <button mat-raised-button (click)="cancelEdit()">Cancel</button>
+                <button mat-raised-button color="primary" (click)="saveReport()"
+                [disabled]="!reportForm.valid">Save</button>
+              </div>
+            </form>
+          </mat-card-content>
+        </mat-card>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .scheduled-reports {
       padding: 20px;

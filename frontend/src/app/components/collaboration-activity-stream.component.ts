@@ -9,29 +9,35 @@ import { Subscription } from 'rxjs';
       <h3 class="activity-header">
         <span class="header-icon">📋</span>
         Real-time Activity Stream
-        <span *ngIf="showNewActivityBadge" class="new-badge">NEW</span>
+        @if (showNewActivityBadge) {
+          <span class="new-badge">NEW</span>
+        }
       </h3>
       <div class="activity-list">
-        <div *ngFor="let activity of activities; let i = index" 
-             class="activity-item"
-             [class.new-activity]="i === 0 && showNewActivityAnimation">
-          <div class="activity-avatar" [style.background-color]="getActivityColor(activity.activityType)">
-            {{ getActivityIcon(activity.activityType) }}
-          </div>
-          <div class="activity-content">
-            <div class="activity-description">
-              <strong>{{ activity.username }}</strong> {{ activity.description }}
+        @for (activity of activities; track activity; let i = $index) {
+          <div
+            class="activity-item"
+            [class.new-activity]="i === 0 && showNewActivityAnimation">
+            <div class="activity-avatar" [style.background-color]="getActivityColor(activity.activityType)">
+              {{ getActivityIcon(activity.activityType) }}
             </div>
-            <div class="activity-timestamp">{{ formatTimestamp(activity.timestamp) }}</div>
+            <div class="activity-content">
+              <div class="activity-description">
+                <strong>{{ activity.username }}</strong> {{ activity.description }}
+              </div>
+              <div class="activity-timestamp">{{ formatTimestamp(activity.timestamp) }}</div>
+            </div>
           </div>
-        </div>
-        <div *ngIf="activities.length === 0" class="no-activities">
-          <span class="empty-icon">🔔</span>
-          <p>No recent activity</p>
-        </div>
+        }
+        @if (activities.length === 0) {
+          <div class="no-activities">
+            <span class="empty-icon">🔔</span>
+            <p>No recent activity</p>
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .activity-stream {
       background: white;

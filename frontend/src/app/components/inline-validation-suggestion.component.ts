@@ -5,43 +5,45 @@ import { trigger, transition, style, animate } from '@angular/animations';
 @Component({
   selector: 'app-inline-validation-suggestion',
   template: `
-    <div class="suggestion-container" *ngIf="suggestion" @slideIn>
-      <div class="suggestion-card" [class.high-confidence]="suggestion.confidence === 'high'">
-        <div class="suggestion-header">
-          <mat-icon class="suggestion-icon">{{ getConfidenceIcon() }}</mat-icon>
-          <span class="suggestion-reason">{{ suggestion.reason }}</span>
-        </div>
-        <div class="suggestion-content">
-          <div class="original-value">
-            <span class="label">Valeur actuelle:</span>
-            <span class="value">{{ suggestion.originalValue }}</span>
+    @if (suggestion) {
+      <div class="suggestion-container" @slideIn>
+        <div class="suggestion-card" [class.high-confidence]="suggestion.confidence === 'high'">
+          <div class="suggestion-header">
+            <mat-icon class="suggestion-icon">{{ getConfidenceIcon() }}</mat-icon>
+            <span class="suggestion-reason">{{ suggestion.reason }}</span>
           </div>
-          <mat-icon class="arrow-icon">arrow_forward</mat-icon>
-          <div class="suggested-value">
-            <span class="label">Suggestion:</span>
-            <span class="value suggested">{{ suggestion.suggestedValue }}</span>
+          <div class="suggestion-content">
+            <div class="original-value">
+              <span class="label">Valeur actuelle:</span>
+              <span class="value">{{ suggestion.originalValue }}</span>
+            </div>
+            <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+            <div class="suggested-value">
+              <span class="label">Suggestion:</span>
+              <span class="value suggested">{{ suggestion.suggestedValue }}</span>
+            </div>
           </div>
-        </div>
-        <div class="suggestion-actions">
-          <button 
-            mat-button 
-            color="primary" 
-            (click)="onAccept()"
-            class="accept-btn">
-            <mat-icon>check</mat-icon>
-            Accepter
-          </button>
-          <button 
-            mat-button 
-            (click)="onDismiss()"
-            class="dismiss-btn">
-            <mat-icon>close</mat-icon>
-            Ignorer
-          </button>
+          <div class="suggestion-actions">
+            <button
+              mat-button
+              color="primary"
+              (click)="onAccept()"
+              class="accept-btn">
+              <mat-icon>check</mat-icon>
+              Accepter
+            </button>
+            <button
+              mat-button
+              (click)="onDismiss()"
+              class="dismiss-btn">
+              <mat-icon>close</mat-icon>
+              Ignorer
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     .suggestion-container {
       margin-top: 8px;

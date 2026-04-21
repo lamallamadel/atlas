@@ -11,60 +11,66 @@ import { Subscription } from 'rxjs';
         <span class="header-icon">🔍</span>
         Shared Filter Presets
       </h3>
-      
+    
       <div class="filter-list">
-        <div *ngFor="let filter of sharedFilters" 
-             class="filter-item"
-             role="button"
-             tabindex="0"
-             (click)="applyFilter(filter)"
-             (keydown.enter)="applyFilter(filter)"
-             (keydown.space)="$event.preventDefault(); applyFilter(filter)">
-          <div class="filter-icon">
-            <span>📊</span>
-          </div>
-          <div class="filter-content">
-            <div class="filter-name">{{ filter.name }}</div>
-            <div class="filter-meta">
-              <span class="shared-by">Shared by {{ filter.sharedByUsername }}</span>
-              <span class="shared-time">{{ formatTimestamp(filter.sharedAt) }}</span>
+        @for (filter of sharedFilters; track filter) {
+          <div
+            class="filter-item"
+            role="button"
+            tabindex="0"
+            (click)="applyFilter(filter)"
+            (keydown.enter)="applyFilter(filter)"
+            (keydown.space)="$event.preventDefault(); applyFilter(filter)">
+            <div class="filter-icon">
+              <span>📊</span>
             </div>
-            <div *ngIf="filter.description" class="filter-description">
-              {{ filter.description }}
+            <div class="filter-content">
+              <div class="filter-name">{{ filter.name }}</div>
+              <div class="filter-meta">
+                <span class="shared-by">Shared by {{ filter.sharedByUsername }}</span>
+                <span class="shared-time">{{ formatTimestamp(filter.sharedAt) }}</span>
+              </div>
+              @if (filter.description) {
+                <div class="filter-description">
+                  {{ filter.description }}
+                </div>
+              }
             </div>
+            <button class="apply-btn" (click)="applyFilter(filter); $event.stopPropagation()">
+              Apply
+            </button>
           </div>
-          <button class="apply-btn" (click)="applyFilter(filter); $event.stopPropagation()">
-            Apply
-          </button>
-        </div>
-        
-        <div *ngIf="sharedFilters.length === 0" class="no-filters">
-          <span class="empty-icon">🔍</span>
-          <p>No shared filter presets</p>
-        </div>
+        }
+    
+        @if (sharedFilters.length === 0) {
+          <div class="no-filters">
+            <span class="empty-icon">🔍</span>
+            <p>No shared filter presets</p>
+          </div>
+        }
       </div>
-      
+    
       <div class="share-section">
         <h4>Share Current Filters</h4>
         <div class="share-form">
-          <input type="text" 
-                 [(ngModel)]="newFilterName" 
-                 placeholder="Filter preset name"
-                 class="filter-input">
-          <textarea [(ngModel)]="newFilterDescription" 
-                    placeholder="Description (optional)"
-                    class="filter-textarea"
-                    rows="2"></textarea>
-          <button class="share-btn" 
-                  (click)="shareCurrentFilters()"
-                  [disabled]="!newFilterName">
-            <span class="btn-icon">📤</span>
-            Share with Team
-          </button>
+          <input type="text"
+            [(ngModel)]="newFilterName"
+            placeholder="Filter preset name"
+            class="filter-input">
+            <textarea [(ngModel)]="newFilterDescription"
+              placeholder="Description (optional)"
+              class="filter-textarea"
+            rows="2"></textarea>
+            <button class="share-btn"
+              (click)="shareCurrentFilters()"
+              [disabled]="!newFilterName">
+              <span class="btn-icon">📤</span>
+              Share with Team
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-  `,
+    `,
   styles: [`
     .filter-share-container {
       background: white;

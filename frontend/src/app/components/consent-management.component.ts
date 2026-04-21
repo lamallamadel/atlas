@@ -7,35 +7,37 @@ import { CustomerPortalService } from '../services/customer-portal.service';
     <div class="consent-container">
       <h2>Préférences de communication</h2>
       <p class="intro">Gérez vos préférences pour recevoir des communications</p>
-      
+    
       <div class="consent-list">
-        <div *ngFor="let consent of consents" class="consent-item">
-          <div class="consent-info">
-            <div class="consent-channel">
-              <span class="channel-icon">{{ getChannelIcon(consent.channel) }}</span>
-              <span class="channel-name">{{ getChannelName(consent.channel) }}</span>
+        @for (consent of consents; track consent) {
+          <div class="consent-item">
+            <div class="consent-info">
+              <div class="consent-channel">
+                <span class="channel-icon">{{ getChannelIcon(consent.channel) }}</span>
+                <span class="channel-name">{{ getChannelName(consent.channel) }}</span>
+              </div>
+              <div class="consent-type">{{ consent.consentType }}</div>
             </div>
-            <div class="consent-type">{{ consent.consentType }}</div>
-          </div>
-          <div class="consent-toggle">
-            <label class="switch">
-              <input type="checkbox" 
-                     [checked]="consent.status === 'GRANTED'"
-                     (change)="toggleConsent(consent, $event)">
-              <span class="slider"></span>
-            </label>
-          </div>
+            <div class="consent-toggle">
+              <label class="switch">
+                <input type="checkbox"
+                  [checked]="consent.status === 'GRANTED'"
+                  (change)="toggleConsent(consent, $event)">
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          }
+        </div>
+    
+        <div class="consent-footer">
+          <p class="disclaimer">
+            Vous pouvez modifier vos préférences à tout moment.
+            Certaines communications essentielles liées à votre dossier ne peuvent pas être désactivées.
+          </p>
         </div>
       </div>
-
-      <div class="consent-footer">
-        <p class="disclaimer">
-          Vous pouvez modifier vos préférences à tout moment. 
-          Certaines communications essentielles liées à votre dossier ne peuvent pas être désactivées.
-        </p>
-      </div>
-    </div>
-  `,
+    `,
   styles: [`
     .consent-container {
       padding: 24px;

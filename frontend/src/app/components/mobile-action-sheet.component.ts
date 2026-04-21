@@ -21,14 +21,20 @@ export interface MobileActionSheetData {
   selector: 'app-mobile-action-sheet',
   template: `
     <div class="mobile-action-sheet">
-      <div class="action-sheet-header" *ngIf="data.title || data.subtitle">
-        <div class="action-sheet-drag-handle"></div>
-        <h2 class="action-sheet-title" *ngIf="data.title">{{ data.title }}</h2>
-        <p class="action-sheet-subtitle" *ngIf="data.subtitle">{{ data.subtitle }}</p>
-      </div>
-      
+      @if (data.title || data.subtitle) {
+        <div class="action-sheet-header">
+          <div class="action-sheet-drag-handle"></div>
+          @if (data.title) {
+            <h2 class="action-sheet-title">{{ data.title }}</h2>
+          }
+          @if (data.subtitle) {
+            <p class="action-sheet-subtitle">{{ data.subtitle }}</p>
+          }
+        </div>
+      }
+    
       <div class="action-sheet-content">
-        <ng-container *ngFor="let action of data.actions; let last = last">
+        @for (action of data.actions; track action; let last = $last) {
           <button
             class="action-sheet-item"
             [class.action-primary]="action.color === 'primary'"
@@ -41,10 +47,12 @@ export interface MobileActionSheetData {
             <mat-icon class="action-icon" aria-hidden="true">{{ action.icon }}</mat-icon>
             <span class="action-label">{{ action.label }}</span>
           </button>
-          <mat-divider *ngIf="action.divider && !last"></mat-divider>
-        </ng-container>
+          @if (action.divider && !last) {
+            <mat-divider></mat-divider>
+          }
+        }
       </div>
-      
+    
       <div class="action-sheet-footer">
         <button
           class="action-sheet-cancel"
@@ -54,7 +62,7 @@ export interface MobileActionSheetData {
         </button>
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .mobile-action-sheet {
       display: flex;

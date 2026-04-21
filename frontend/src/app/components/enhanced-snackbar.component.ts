@@ -8,32 +8,42 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
   template: `
     <div class="enhanced-snackbar-content" [@slideIn]="animationState" [class.critical]="data.priority === 'critical'">
       <div class="snackbar-icon" [class]="'icon-' + data.type">
-        <mat-icon *ngIf="data.type === 'success'">check_circle</mat-icon>
-        <mat-icon *ngIf="data.type === 'error'">error</mat-icon>
-        <mat-icon *ngIf="data.type === 'warning'">warning</mat-icon>
-        <mat-icon *ngIf="data.type === 'info'">info</mat-icon>
+        @if (data.type === 'success') {
+          <mat-icon>check_circle</mat-icon>
+        }
+        @if (data.type === 'error') {
+          <mat-icon>error</mat-icon>
+        }
+        @if (data.type === 'warning') {
+          <mat-icon>warning</mat-icon>
+        }
+        @if (data.type === 'info') {
+          <mat-icon>info</mat-icon>
+        }
       </div>
       <div class="snackbar-message">{{ data.message }}</div>
       <div class="snackbar-actions">
-        <button 
-          *ngIf="data.action && data.onAction" 
-          mat-button 
-          class="snackbar-action-btn"
-          (click)="onAction()"
-          [attr.aria-label]="data.action">
-          {{ data.action }}
-        </button>
-        <button 
-          *ngIf="data.dismissible"
-          mat-icon-button 
-          class="snackbar-close-btn"
-          (click)="dismiss()"
-          aria-label="Fermer">
-          <mat-icon>close</mat-icon>
-        </button>
+        @if (data.action && data.onAction) {
+          <button
+            mat-button
+            class="snackbar-action-btn"
+            (click)="onAction()"
+            [attr.aria-label]="data.action">
+            {{ data.action }}
+          </button>
+        }
+        @if (data.dismissible) {
+          <button
+            mat-icon-button
+            class="snackbar-close-btn"
+            (click)="dismiss()"
+            aria-label="Fermer">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .enhanced-snackbar-content {
       display: flex;

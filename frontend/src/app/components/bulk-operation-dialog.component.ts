@@ -17,40 +17,48 @@ export interface BulkOperationDialogData {
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>
       <p>{{ data.message }}</p>
-      
-      <mat-progress-bar 
-        *ngIf="data.inProgress" 
-        mode="indeterminate">
-      </mat-progress-bar>
-      
-      <div *ngIf="!data.inProgress" class="results">
-        <div class="result-summary">
-          <div class="success-count">
-            <mat-icon color="primary">check_circle</mat-icon>
-            <span>{{ data.successCount }} réussi(s)</span>
+    
+      @if (data.inProgress) {
+        <mat-progress-bar
+          mode="indeterminate">
+        </mat-progress-bar>
+      }
+    
+      @if (!data.inProgress) {
+        <div class="results">
+          <div class="result-summary">
+            <div class="success-count">
+              <mat-icon color="primary">check_circle</mat-icon>
+              <span>{{ data.successCount }} réussi(s)</span>
+            </div>
+            @if (data.failureCount > 0) {
+              <div class="failure-count">
+                <mat-icon color="warn">error</mat-icon>
+                <span>{{ data.failureCount }} échoué(s)</span>
+              </div>
+            }
           </div>
-          <div class="failure-count" *ngIf="data.failureCount > 0">
-            <mat-icon color="warn">error</mat-icon>
-            <span>{{ data.failureCount }} échoué(s)</span>
-          </div>
+          @if (data.errors && data.errors.length > 0) {
+            <div class="errors">
+              <h3>Erreurs:</h3>
+              <ul>
+                @for (error of data.errors; track error) {
+                  <li>
+                    <strong>ID {{ error.id }}:</strong> {{ error.message }}
+                  </li>
+                }
+              </ul>
+            </div>
+          }
         </div>
-        
-        <div *ngIf="data.errors && data.errors.length > 0" class="errors">
-          <h3>Erreurs:</h3>
-          <ul>
-            <li *ngFor="let error of data.errors">
-              <strong>ID {{ error.id }}:</strong> {{ error.message }}
-            </li>
-          </ul>
-        </div>
-      </div>
+      }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
       <button mat-button [mat-dialog-close]="true" [disabled]="data.inProgress">
         Fermer
       </button>
     </mat-dialog-actions>
-  `,
+    `,
   styles: [`
     .results {
       margin-top: 16px;

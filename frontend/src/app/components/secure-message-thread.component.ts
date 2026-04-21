@@ -9,32 +9,38 @@ import { CryptoService } from '../services/crypto.service';
   template: `
     <div class="message-container">
       <h2>Messages sécurisés</h2>
-      
+    
       <div class="messages-list">
-        <div *ngFor="let message of decryptedMessages" 
-             [class.from-client]="message.fromClient"
-             [class.from-agent]="!message.fromClient"
-             class="message-bubble">
-          <div class="message-content">{{ message.decryptedContent }}</div>
-          <div class="message-time">{{ message.createdAt | date:'short' }}</div>
-        </div>
+        @for (message of decryptedMessages; track message) {
+          <div
+            [class.from-client]="message.fromClient"
+            [class.from-agent]="!message.fromClient"
+            class="message-bubble">
+            <div class="message-content">{{ message.decryptedContent }}</div>
+            <div class="message-time">{{ message.createdAt | date:'short' }}</div>
+          </div>
+        }
       </div>
-
+    
       <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="message-form">
-        <textarea 
+        <textarea
           formControlName="content"
           placeholder="Écrivez votre message..."
           rows="3"
-          class="message-input"></textarea>
-        <button type="submit" 
-                [disabled]="!messageForm.valid || sending"
-                class="send-button">
-          <span *ngIf="!sending">📩 Envoyer</span>
-          <span *ngIf="sending">⏳ Envoi...</span>
+        class="message-input"></textarea>
+        <button type="submit"
+          [disabled]="!messageForm.valid || sending"
+          class="send-button">
+          @if (!sending) {
+            <span>📩 Envoyer</span>
+          }
+          @if (sending) {
+            <span>⏳ Envoi...</span>
+          }
         </button>
       </form>
     </div>
-  `,
+    `,
   styles: [`
     .message-container {
       padding: 24px;

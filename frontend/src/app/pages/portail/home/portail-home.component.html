@@ -17,7 +17,9 @@
           <label class="ph-search-label" for="hero-ville">Ville ou zone</label>
           <select class="ph-search-select" id="hero-ville" [(ngModel)]="heroVille">
             <option value="">Toutes les villes</option>
-            <option *ngFor="let v of villes" [value]="v">{{v}}</option>
+            @for (v of villes; track v) {
+              <option [value]="v">{{v}}</option>
+            }
           </select>
         </div>
         <div class="ph-search-field">
@@ -51,12 +53,14 @@
       <a routerLink="/recherche" class="at-btn at-btn-ghost at-btn-sm">Toutes les villes →</a>
     </div>
     <div class="ph-cities-grid at-reveal">
-      <a *ngFor="let city of cities; let i = index" class="ph-city-card animate-slide-up stagger-delay-{{ (i % 5) + 1 }}"
-         routerLink="/recherche" [queryParams]="{ville: city.name}">
-        <div class="ph-city-icon">{{city.icon}}</div>
-        <div class="ph-city-name">{{city.name}}</div>
-        <div class="ph-city-count">{{city.count}} annonces</div>
-      </a>
+      @for (city of cities; track city; let i = $index) {
+        <a class="ph-city-card animate-slide-up stagger-delay-{{ (i % 5) + 1 }}"
+          routerLink="/recherche" [queryParams]="{ville: city.name}">
+          <div class="ph-city-icon">{{city.icon}}</div>
+          <div class="ph-city-name">{{city.name}}</div>
+          <div class="ph-city-count">{{city.count}} annonces</div>
+        </a>
+      }
     </div>
   </div>
 </section>
@@ -72,44 +76,48 @@
       <a routerLink="/recherche" class="at-btn at-btn-ghost at-btn-sm">Voir tout →</a>
     </div>
     <div class="ph-listings-grid at-reveal">
-      <article *ngFor="let listing of recentListings; let i = index"
-               class="ph-listing-card animate-slide-up stagger-delay-{{ (i % 4) + 1 }}"
-               (click)="navigateToDetail(listing)"
-               role="button" tabindex="0"
-               [attr.aria-label]="listing.title"
-               (keydown.enter)="navigateToDetail(listing)">
-        <div class="ph-listing-img">
-          <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="400" height="250"/>
-          <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
-            {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
-          </span>
-          <div class="ph-badges" *ngIf="listing.verified">
-            <span class="at-badge-trust">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-              Vérifié
+      @for (listing of recentListings; track listing; let i = $index) {
+        <article
+          class="ph-listing-card animate-slide-up stagger-delay-{{ (i % 4) + 1 }}"
+          (click)="navigateToDetail(listing)"
+          role="button" tabindex="0"
+          [attr.aria-label]="listing.title"
+          (keydown.enter)="navigateToDetail(listing)">
+          <div class="ph-listing-img">
+            <img [src]="listing.imgs && listing.imgs.length > 0 ? listing.imgs[0] : 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=800&q=80'" [alt]="listing.title" loading="lazy" width="400" height="250"/>
+            <span class="ph-tx-badge" [class.tx-vente]="listing.tx==='vente'" [class.tx-location]="listing.tx==='location'">
+              {{listing.tx === 'vente' ? 'Vente' : 'Location'}}
             </span>
+            @if (listing.verified) {
+              <div class="ph-badges">
+                <span class="at-badge-trust">
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                  Vérifié
+                </span>
+              </div>
+            }
           </div>
-        </div>
-        <div class="ph-listing-body">
-          <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
-          <div class="ph-title">{{listing.title}}</div>
-          <div class="ph-location">
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            {{listing.zone}}, {{listing.city}}
+          <div class="ph-listing-body">
+            <div class="ph-price">{{formatPrice(listing.price, listing.tx)}}</div>
+            <div class="ph-title">{{listing.title}}</div>
+            <div class="ph-location">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              {{listing.zone}}, {{listing.city}}
+            </div>
+            <div class="ph-meta">
+              <span class="ph-meta-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                {{listing.surface}} m²
+              </span>
+              <span class="ph-meta-item">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg>
+                {{listing.pieces}} pièces
+              </span>
+              <span class="ph-meta-date">{{listing.date}}</span>
+            </div>
           </div>
-          <div class="ph-meta">
-            <span class="ph-meta-item">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-              {{listing.surface}} m²
-            </span>
-            <span class="ph-meta-item">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 9V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v2"/><path d="M2 11l1 9h18l1-9H2z"/></svg>
-              {{listing.pieces}} pièces
-            </span>
-            <span class="ph-meta-date">{{listing.date}}</span>
-          </div>
-        </div>
-      </article>
+        </article>
+      }
     </div>
   </div>
 </section>

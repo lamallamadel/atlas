@@ -7,15 +7,21 @@
 
   <mat-dialog-actions align="end">
     <button mat-button (click)="onCancel()" [disabled]="isSubmitting" aria-label="Annuler la suppression">Annuler</button>
-    <button mat-raised-button 
-            color="warn" 
-            (click)="onConfirm()" 
-            [disabled]="isSubmitting"
-            [attr.aria-busy]="isSubmitting"
-            [attr.aria-label]="isSubmitting ? 'Suppression en cours' : 'Confirmer la suppression'">
-      <mat-spinner *ngIf="isSubmitting" diameter="20" aria-hidden="true"></mat-spinner>
-      <span *ngIf="!isSubmitting">Supprimer</span>
-      <span *ngIf="isSubmitting" class="sr-only" role="status" aria-live="polite">Suppression en cours</span>
+    <button mat-raised-button
+      color="warn"
+      (click)="onConfirm()"
+      [disabled]="isSubmitting"
+      [attr.aria-busy]="isSubmitting"
+      [attr.aria-label]="isSubmitting ? 'Suppression en cours' : 'Confirmer la suppression'">
+      @if (isSubmitting) {
+        <mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+      }
+      @if (!isSubmitting) {
+        <span>Supprimer</span>
+      }
+      @if (isSubmitting) {
+        <span class="sr-only" role="status" aria-live="polite">Suppression en cours</span>
+      }
     </button>
   </mat-dialog-actions>
 </div>

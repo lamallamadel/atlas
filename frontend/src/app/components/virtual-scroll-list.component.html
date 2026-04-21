@@ -1,23 +1,22 @@
 <div class="virtual-scroll-container">
-  <cdk-virtual-scroll-viewport 
-    [itemSize]="itemHeight" 
+  <cdk-virtual-scroll-viewport
+    [itemSize]="itemHeight"
     class="virtual-scroll-viewport"
     (scrolledIndexChange)="onScrollEnd()">
-    
+
     <!-- Empty state -->
-    <ng-container *ngIf="!loading && items.length === 0">
-      <ng-container *ngIf="emptyTemplate; else defaultEmpty">
+    @if (!loading && items.length === 0) {
+      @if (emptyTemplate) {
         <ng-container *ngTemplateOutlet="emptyTemplate"></ng-container>
-      </ng-container>
-      <ng-template #defaultEmpty>
+      } @else {
         <div class="empty-state">
           <p>Aucun élément à afficher</p>
         </div>
-      </ng-template>
-    </ng-container>
+      }
+    }
 
     <!-- Items -->
-    <div 
+    <div
       *cdkVirtualFor="let item of items; trackBy: trackByItem; templateCacheSize: 0"
       class="virtual-scroll-item"
       role="button"
@@ -29,13 +28,14 @@
     </div>
 
     <!-- Loading state -->
-    <div *ngIf="loading" class="loading-state">
-      <ng-container *ngIf="loadingTemplate; else defaultLoading">
-        <ng-container *ngTemplateOutlet="loadingTemplate"></ng-container>
-      </ng-container>
-      <ng-template #defaultLoading>
-        <app-loading-skeleton variant="list" [rows]="3"></app-loading-skeleton>
-      </ng-template>
-    </div>
+    @if (loading) {
+      <div class="loading-state">
+        @if (loadingTemplate) {
+          <ng-container *ngTemplateOutlet="loadingTemplate"></ng-container>
+        } @else {
+          <app-loading-skeleton variant="list" [rows]="3"></app-loading-skeleton>
+        }
+      </div>
+    }
   </cdk-virtual-scroll-viewport>
 </div>

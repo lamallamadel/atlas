@@ -46,10 +46,14 @@ export interface WaterfallEntry {
   selector: 'app-waterfall-chart',
   template: `
     <div class="waterfall-wrapper glass-card">
-      <div class="waterfall-header" *ngIf="title">
-        <h3 class="waterfall-title">{{ title }}</h3>
-        <span class="waterfall-subtitle" *ngIf="subtitle">{{ subtitle }}</span>
-      </div>
+      @if (title) {
+        <div class="waterfall-header">
+          <h3 class="waterfall-title">{{ title }}</h3>
+          @if (subtitle) {
+            <span class="waterfall-subtitle">{{ subtitle }}</span>
+          }
+        </div>
+      }
       <div class="waterfall-canvas-container">
         <canvas #chartCanvas [attr.aria-label]="title || 'Waterfall chart'" role="img"></canvas>
       </div>
@@ -65,7 +69,7 @@ export interface WaterfallEntry {
         </span>
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .waterfall-wrapper {
       padding: 1.5rem;

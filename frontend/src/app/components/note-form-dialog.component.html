@@ -11,7 +11,7 @@
       class="note-textarea"
       cdkTextareaAutosize
       cdkAutosizeMinRows="8"
-      cdkAutosizeMaxRows="20"></textarea>
+    cdkAutosizeMaxRows="20"></textarea>
     <mat-hint>Vous pouvez saisir du texte simple avec retours à la ligne</mat-hint>
   </mat-form-field>
 
@@ -33,22 +33,26 @@
     </mat-select>
     <mat-hint>
       <mat-icon class="hint-icon" aria-hidden="true">info</mat-icon>
-      <span *ngIf="noteVisibility === ActivityVisibility.CLIENT_VISIBLE">
-        Le client pourra consulter cette note dans son espace personnel
-      </span>
-      <span *ngIf="noteVisibility === ActivityVisibility.INTERNAL">
-        Cette note restera confidentielle et visible uniquement par l'équipe interne
-      </span>
+      @if (noteVisibility === ActivityVisibility.CLIENT_VISIBLE) {
+        <span>
+          Le client pourra consulter cette note dans son espace personnel
+        </span>
+      }
+      @if (noteVisibility === ActivityVisibility.INTERNAL) {
+        <span>
+          Cette note restera confidentielle et visible uniquement par l'équipe interne
+        </span>
+      }
     </mat-hint>
   </mat-form-field>
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
   <button mat-button (click)="onCancel()">Annuler</button>
-  <button 
-    mat-raised-button 
-    color="primary" 
-    (click)="onSave()" 
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onSave()"
     [disabled]="isContentEmpty()">
     {{ isEdit ? 'Modifier' : 'Enregistrer' }}
   </button>

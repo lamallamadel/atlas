@@ -26,7 +26,7 @@ Chart.register(...registerables);
                 <mat-datepicker #endPicker></mat-datepicker>
               </mat-form-field>
             </div>
-
+    
             <div class="charts-grid">
               <mat-card class="chart-card">
                 <mat-card-header>
@@ -36,7 +36,7 @@ Chart.register(...registerables);
                   <canvas id="cohortChart"></canvas>
                 </mat-card-content>
               </mat-card>
-
+    
               <mat-card class="chart-card">
                 <mat-card-header>
                   <mat-card-title>Sales Funnel</mat-card-title>
@@ -45,7 +45,7 @@ Chart.register(...registerables);
                   <canvas id="funnelChart"></canvas>
                 </mat-card-content>
               </mat-card>
-
+    
               <mat-card class="chart-card">
                 <mat-card-header>
                   <mat-card-title>Agent Performance</mat-card-title>
@@ -54,7 +54,7 @@ Chart.register(...registerables);
                   <canvas id="agentChart"></canvas>
                 </mat-card-content>
               </mat-card>
-
+    
               <mat-card class="chart-card">
                 <mat-card-header>
                   <mat-card-title>Market Trends</mat-card-title>
@@ -63,7 +63,7 @@ Chart.register(...registerables);
                   <canvas id="marketChart"></canvas>
                 </mat-card-content>
               </mat-card>
-
+    
               <mat-card class="chart-card full-width">
                 <mat-card-header>
                   <mat-card-title>Revenue Forecast</mat-card-title>
@@ -75,30 +75,36 @@ Chart.register(...registerables);
             </div>
           </div>
         </mat-tab>
-
+    
         <mat-tab label="Metabase Dashboard">
           <div class="tab-content">
-            <iframe *ngIf="metabaseDashboardUrl" 
-                    [src]="metabaseDashboardUrl" 
-                    frameborder="0"
-                    class="metabase-iframe"></iframe>
+            @if (metabaseDashboardUrl) {
+              <iframe
+                [src]="metabaseDashboardUrl"
+                frameborder="0"
+              class="metabase-iframe"></iframe>
+            }
           </div>
         </mat-tab>
-
-        <mat-tab label="Drill-Down" *ngIf="metabaseQuestionUrl">
-          <div class="tab-content">
-            <iframe [src]="metabaseQuestionUrl" 
-                    frameborder="0"
-                    class="metabase-iframe"></iframe>
-          </div>
-        </mat-tab>
+    
+        @if (metabaseQuestionUrl) {
+          <mat-tab label="Drill-Down">
+            <div class="tab-content">
+              <iframe [src]="metabaseQuestionUrl"
+                frameborder="0"
+              class="metabase-iframe"></iframe>
+            </div>
+          </mat-tab>
+        }
       </mat-tab-group>
-
-      <div *ngIf="loading" class="loading-overlay">
-        <mat-spinner></mat-spinner>
-      </div>
+    
+      @if (loading) {
+        <div class="loading-overlay">
+          <mat-spinner></mat-spinner>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .analytics-dashboard {
       padding: 20px;

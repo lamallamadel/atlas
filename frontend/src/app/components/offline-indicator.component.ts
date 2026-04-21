@@ -8,45 +8,46 @@ import { trigger, style, transition, animate } from '@angular/animations';
 @Component({
   selector: 'app-offline-indicator',
   template: `
-    <div class="offline-indicator" 
-         *ngIf="shouldShowIndicator" 
-         [@slideDown]
-         [class.offline]="isOffline"
-         [class.slow]="isSlow"
-         [class.syncing]="isSyncing">
-      <div class="indicator-content">
-        <mat-icon class="indicator-icon">
-          {{ getIcon() }}
-        </mat-icon>
-        <span class="indicator-text">{{ getMessage() }}</span>
-        
-        <div class="sync-progress" *ngIf="isSyncing && syncProgress">
-          <mat-progress-bar 
-            mode="determinate" 
-            [value]="getSyncPercentage()">
-          </mat-progress-bar>
-          <span class="progress-text">
-            {{ syncProgress.completed }}/{{ syncProgress.total }}
-          </span>
+    @if (shouldShowIndicator) {
+      <div class="offline-indicator"
+        [@slideDown]
+        [class.offline]="isOffline"
+        [class.slow]="isSlow"
+        [class.syncing]="isSyncing">
+        <div class="indicator-content">
+          <mat-icon class="indicator-icon">
+            {{ getIcon() }}
+          </mat-icon>
+          <span class="indicator-text">{{ getMessage() }}</span>
+          @if (isSyncing && syncProgress) {
+            <div class="sync-progress">
+              <mat-progress-bar
+                mode="determinate"
+                [value]="getSyncPercentage()">
+              </mat-progress-bar>
+              <span class="progress-text">
+                {{ syncProgress.completed }}/{{ syncProgress.total }}
+              </span>
+            </div>
+          }
+          @if (pendingCount > 0 && !isSyncing && !isOffline) {
+            <button mat-button
+              (click)="triggerSync()"
+              class="sync-button">
+              <mat-icon>sync</mat-icon>
+              Synchroniser ({{ pendingCount }})
+            </button>
+          }
+          <button mat-icon-button
+            (click)="dismiss()"
+            class="dismiss-button"
+            aria-label="Fermer">
+            <mat-icon>close</mat-icon>
+          </button>
         </div>
-        
-        <button mat-button 
-                *ngIf="pendingCount > 0 && !isSyncing && !isOffline"
-                (click)="triggerSync()"
-                class="sync-button">
-          <mat-icon>sync</mat-icon>
-          Synchroniser ({{ pendingCount }})
-        </button>
-        
-        <button mat-icon-button 
-                (click)="dismiss()"
-                class="dismiss-button"
-                aria-label="Fermer">
-          <mat-icon>close</mat-icon>
-        </button>
       </div>
-    </div>
-  `,
+    }
+    `,
   styles: [`
     .offline-indicator {
       position: fixed;

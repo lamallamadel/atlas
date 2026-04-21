@@ -3,7 +3,7 @@
     <mat-card-header>
       <mat-card-title>Workflow Administration</mat-card-title>
     </mat-card-header>
-    
+
     <mat-card-content>
       <mat-tab-group [(selectedIndex)]="selectedTab" animationDuration="300ms">
         <mat-tab label="Workflow Editor">
@@ -14,9 +14,11 @@
                 <mat-button-toggle [value]="CaseType.ANNONCE">Annonce Workflow</mat-button-toggle>
               </mat-button-toggle-group>
             </div>
-            
-            <app-workflow-editor *ngIf="workflow"></app-workflow-editor>
-            
+
+            @if (workflow) {
+              <app-workflow-editor></app-workflow-editor>
+            }
+
             <div class="actions">
               <button mat-raised-button color="primary" (click)="onSaveWorkflow()">
                 <mat-icon>save</mat-icon>
@@ -25,10 +27,12 @@
             </div>
           </div>
         </mat-tab>
-        
+
         <mat-tab label="Preview">
           <div class="tab-content">
-            <app-workflow-preview *ngIf="workflow" [workflow]="workflow"></app-workflow-preview>
+            @if (workflow) {
+              <app-workflow-preview [workflow]="workflow"></app-workflow-preview>
+            }
           </div>
         </mat-tab>
 

@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { WidgetConfig } from '../services/dashboard-customization.service';
 import { KpiWidgetComponent } from './kpi-widget.component';
 import { RecentDossiersWidgetComponent } from './recent-dossiers-widget.component';
@@ -9,47 +9,50 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
   selector: 'app-dashboard-mobile-view',
   standalone: true,
   imports: [
-    CommonModule,
     KpiWidgetComponent,
     RecentDossiersWidgetComponent,
     MyTasksWidgetComponent
-  ],
+],
   template: `
     <div class="mobile-dashboard">
-      <div class="mobile-widget" *ngFor="let widget of widgets">
-        <ng-container [ngSwitch]="widget.type">
-          <app-kpi-widget 
-            *ngSwitchCase="'kpi-conversion'"
-            [config]="widget">
-          </app-kpi-widget>
-
-          <app-kpi-widget 
-            *ngSwitchCase="'kpi-response-time'"
-            [config]="widget">
-          </app-kpi-widget>
-
-          <app-kpi-widget 
-            *ngSwitchCase="'kpi-revenue'"
-            [config]="widget">
-          </app-kpi-widget>
-
-          <app-recent-dossiers-widget 
-            *ngSwitchCase="'recent-dossiers'"
-            [config]="widget">
-          </app-recent-dossiers-widget>
-
-          <app-my-tasks-widget 
-            *ngSwitchCase="'my-tasks'"
-            [config]="widget">
-          </app-my-tasks-widget>
-
-          <div *ngSwitchDefault class="widget-placeholder">
-            <p>Widget: {{ widget.type }}</p>
-          </div>
-        </ng-container>
-      </div>
+      @for (widget of widgets; track widget) {
+        <div class="mobile-widget">
+          @switch (widget.type) {
+            @case ('kpi-conversion') {
+              <app-kpi-widget
+                [config]="widget">
+              </app-kpi-widget>
+            }
+            @case ('kpi-response-time') {
+              <app-kpi-widget
+                [config]="widget">
+              </app-kpi-widget>
+            }
+            @case ('kpi-revenue') {
+              <app-kpi-widget
+                [config]="widget">
+              </app-kpi-widget>
+            }
+            @case ('recent-dossiers') {
+              <app-recent-dossiers-widget
+                [config]="widget">
+              </app-recent-dossiers-widget>
+            }
+            @case ('my-tasks') {
+              <app-my-tasks-widget
+                [config]="widget">
+              </app-my-tasks-widget>
+            }
+            @default {
+              <div class="widget-placeholder">
+                <p>Widget: {{ widget.type }}</p>
+              </div>
+            }
+          }
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .mobile-dashboard {
       display: flex;

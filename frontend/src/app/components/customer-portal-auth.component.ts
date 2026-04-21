@@ -7,22 +7,26 @@ import { CustomerPortalService } from '../services/customer-portal.service';
   template: `
     <div class="auth-container">
       <div class="auth-card">
-        <div *ngIf="loading" class="loading-state">
-          <div class="spinner"></div>
-          <p>Vérification de votre accès...</p>
-        </div>
-
-        <div *ngIf="!loading && error" class="error-state">
-          <div class="error-icon">⚠️</div>
-          <h2>Accès refusé</h2>
-          <p>{{ error }}</p>
-          <p class="help-text">
-            Veuillez contacter votre agent immobilier pour obtenir un nouveau lien d'accès.
-          </p>
-        </div>
+        @if (loading) {
+          <div class="loading-state">
+            <div class="spinner"></div>
+            <p>Vérification de votre accès...</p>
+          </div>
+        }
+    
+        @if (!loading && error) {
+          <div class="error-state">
+            <div class="error-icon">⚠️</div>
+            <h2>Accès refusé</h2>
+            <p>{{ error }}</p>
+            <p class="help-text">
+              Veuillez contacter votre agent immobilier pour obtenir un nouveau lien d'accès.
+            </p>
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .auth-container {
       display: flex;

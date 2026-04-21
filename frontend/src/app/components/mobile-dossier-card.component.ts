@@ -27,18 +27,18 @@ export interface DossierAction {
       (keydown.space)="$event.preventDefault(); onCardClick($event)"
       tabindex="0"
       role="button">
-      
+    
       <!-- Background action indicators -->
       <div class="swipe-action-left" [class.visible]="swipeDirection === 'left' && swipeProgress > 0.3">
         <mat-icon>archive</mat-icon>
         <span>Archiver</span>
       </div>
-      
+    
       <div class="swipe-action-right" [class.visible]="swipeDirection === 'right' && swipeProgress > 0.3">
         <mat-icon>phone</mat-icon>
         <span>Appeler</span>
       </div>
-
+    
       <!-- Card content -->
       <div class="card-content">
         <div class="card-header">
@@ -48,18 +48,20 @@ export interface DossierAction {
           </div>
           <p class="card-subtitle">{{ dossier.leadPhone | phoneFormat }}</p>
         </div>
-
+    
         <div class="card-meta">
-          <div class="meta-item" *ngIf="dossier.leadSource || dossier.source">
-            <mat-icon class="meta-icon">source</mat-icon>
-            <span class="meta-text">{{ dossier.leadSource || dossier.source }}</span>
-          </div>
+          @if (dossier.leadSource || dossier.source) {
+            <div class="meta-item">
+              <mat-icon class="meta-icon">source</mat-icon>
+              <span class="meta-text">{{ dossier.leadSource || dossier.source }}</span>
+            </div>
+          }
           <div class="meta-item">
             <mat-icon class="meta-icon">schedule</mat-icon>
             <span class="meta-text">{{ dossier.updatedAt | dateFormat:'relative' }}</span>
           </div>
         </div>
-
+    
         <div class="card-actions">
           <button
             class="action-btn action-call"
@@ -84,7 +86,7 @@ export interface DossierAction {
         </div>
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .mobile-dossier-card {
       position: relative;

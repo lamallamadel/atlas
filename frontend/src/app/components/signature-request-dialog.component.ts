@@ -1,5 +1,5 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -21,7 +21,6 @@ export interface SignatureRequestDialogData {
   selector: 'app-signature-request-dialog',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     ReactiveFormsModule,
     MatDialogModule,
@@ -31,7 +30,7 @@ export interface SignatureRequestDialogData {
     MatSelectModule,
     MatIconModule,
     MatSnackBarModule
-  ],
+],
   template: `
     <h2 mat-dialog-title>Request Electronic Signature</h2>
     <mat-dialog-content>
@@ -39,25 +38,29 @@ export interface SignatureRequestDialogData {
         <mat-form-field appearance="outline">
           <mat-label>Contract Template</mat-label>
           <mat-select formControlName="templateId">
-            <mat-option *ngFor="let template of templates" [value]="template.id">
-              {{ template.templateName }} ({{ template.templateType }})
-            </mat-option>
+            @for (template of templates; track template) {
+              <mat-option [value]="template.id">
+                {{ template.templateName }} ({{ template.templateType }})
+              </mat-option>
+            }
           </mat-select>
         </mat-form-field>
-
+    
         <mat-form-field appearance="outline">
           <mat-label>Email Subject</mat-label>
           <input matInput formControlName="subject" required>
-          <mat-error *ngIf="requestForm.get('subject')?.hasError('required')">
-            Subject is required
-          </mat-error>
+          @if (requestForm.get('subject')?.hasError('required')) {
+            <mat-error>
+              Subject is required
+            </mat-error>
+          }
         </mat-form-field>
-
+    
         <mat-form-field appearance="outline">
           <mat-label>Email Message</mat-label>
           <textarea matInput formControlName="emailMessage" rows="4"></textarea>
         </mat-form-field>
-
+    
         <div class="signers-section">
           <div class="section-header">
             <h3>Signers</h3>
@@ -65,31 +68,32 @@ export interface SignatureRequestDialogData {
               <mat-icon>add</mat-icon>
             </button>
           </div>
-
+    
           <div formArrayName="signers" class="signers-list">
-            <div *ngFor="let signer of signers.controls; let i = index" [formGroupName]="i" class="signer-item">
-              <mat-form-field appearance="outline">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name" required>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline">
-                <mat-label>Email</mat-label>
-                <input matInput type="email" formControlName="email" required>
-              </mat-form-field>
-
-              <mat-form-field appearance="outline" class="routing-order">
-                <mat-label>Order</mat-label>
-                <input matInput type="number" formControlName="routingOrder" min="1">
-              </mat-form-field>
-
-              <button mat-icon-button color="warn" type="button" (click)="removeSigner(i)" *ngIf="signers.length > 1">
-                <mat-icon>delete</mat-icon>
-              </button>
-            </div>
+            @for (signer of signers.controls; track signer; let i = $index) {
+              <div [formGroupName]="i" class="signer-item">
+                <mat-form-field appearance="outline">
+                  <mat-label>Name</mat-label>
+                  <input matInput formControlName="name" required>
+                </mat-form-field>
+                <mat-form-field appearance="outline">
+                  <mat-label>Email</mat-label>
+                  <input matInput type="email" formControlName="email" required>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="routing-order">
+                  <mat-label>Order</mat-label>
+                  <input matInput type="number" formControlName="routingOrder" min="1">
+                </mat-form-field>
+                @if (signers.length > 1) {
+                  <button mat-icon-button color="warn" type="button" (click)="removeSigner(i)">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                }
+              </div>
+            }
           </div>
         </div>
-
+    
         <mat-form-field appearance="outline">
           <mat-label>Expiration (days)</mat-label>
           <input matInput type="number" formControlName="expirationDays" min="1" max="365">
@@ -103,7 +107,7 @@ export interface SignatureRequestDialogData {
         {{ creating ? 'Creating...' : 'Create & Send' }}
       </button>
     </mat-dialog-actions>
-  `,
+    `,
   styles: [`
     .signature-request-form {
       display: flex;

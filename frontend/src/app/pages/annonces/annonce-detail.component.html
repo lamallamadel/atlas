@@ -7,86 +7,90 @@
       </button>
       <h1 class="page-title">Détails de l'annonce</h1>
     </div>
-    <button *ngIf="annonce" class="btn-edit" (click)="editAnnonce()" aria-label="Modifier cette annonce">
-      <span class="btn-icon" aria-hidden="true">✏️</span>
-      Modifier
-    </button>
+    @if (annonce) {
+      <button class="btn-edit" (click)="editAnnonce()" aria-label="Modifier cette annonce">
+        <span class="btn-icon" aria-hidden="true">✏️</span>
+        Modifier
+      </button>
+    }
   </header>
 
   <main class="page-content">
-    <app-loading-skeleton *ngIf="loading" variant="detail" [rows]="12" aria-label="Chargement des détails de l'annonce"></app-loading-skeleton>
+    @if (loading) {
+      <app-loading-skeleton variant="detail" [rows]="12" aria-label="Chargement des détails de l'annonce"></app-loading-skeleton>
+    }
 
-    <div *ngIf="error && !loading" class="error-state" role="alert" aria-live="assertive">
-      <p class="error-message">{{ error }}</p>
-      <button class="btn-retry" (click)="loadAnnonce()" aria-label="Réessayer de charger l'annonce">Réessayer</button>
-    </div>
+    @if (error && !loading) {
+      <div class="error-state" role="alert" aria-live="assertive">
+        <p class="error-message">{{ error }}</p>
+        <button class="btn-retry" (click)="loadAnnonce()" aria-label="Réessayer de charger l'annonce">Réessayer</button>
+      </div>
+    }
 
-    <div *ngIf="!loading && !error && annonce" class="detail-content">
-      <section class="detail-section" aria-labelledby="annonce-info-title">
-        <h2 id="annonce-info-title" class="sr-only">Informations de l'annonce</h2>
-        
-        <div class="detail-row">
-          <span class="detail-label" id="label-id">ID :</span>
-          <span class="detail-value" aria-labelledby="label-id">{{ annonce.id }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-title">Titre :</span>
-          <span class="detail-value detail-title" aria-labelledby="label-title">{{ annonce.title }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-status">Statut :</span>
-          <div aria-labelledby="label-status">
-            <app-badge-status [status]="annonce.status" entityType="annonce"></app-badge-status>
+    @if (!loading && !error && annonce) {
+      <div class="detail-content">
+        <section class="detail-section" aria-labelledby="annonce-info-title">
+          <h2 id="annonce-info-title" class="sr-only">Informations de l'annonce</h2>
+          <div class="detail-row">
+            <span class="detail-label" id="label-id">ID :</span>
+            <span class="detail-value" aria-labelledby="label-id">{{ annonce.id }}</span>
           </div>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-org">ID organisation :</span>
-          <span class="detail-value" aria-labelledby="label-org">{{ annonce.orgId }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="annonce.description">
-          <span class="detail-label" id="label-description">Description :</span>
-          <span class="detail-value detail-description" aria-labelledby="label-description">{{ annonce.description }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="annonce.category">
-          <span class="detail-label" id="label-category">Catégorie :</span>
-          <span class="detail-value" aria-labelledby="label-category">{{ annonce.category }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="annonce.city">
-          <span class="detail-label" id="label-city">Ville :</span>
-          <span class="detail-value" aria-labelledby="label-city">{{ annonce.city }}</span>
-        </div>
-
-        <div class="detail-row" *ngIf="annonce.price !== undefined">
-          <span class="detail-label" id="label-price">Prix :</span>
-          <span class="detail-value" aria-labelledby="label-price">{{ annonce.price | priceFormat:annonce.currency }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-created">Créé le :</span>
-          <span class="detail-value" aria-labelledby="label-created">{{ annonce.createdAt | dateFormat }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-created-by">Créé par :</span>
-          <span class="detail-value" aria-labelledby="label-created-by">{{ annonce.createdBy }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-updated">Modifié le :</span>
-          <span class="detail-value" aria-labelledby="label-updated">{{ annonce.updatedAt | dateFormat }}</span>
-        </div>
-
-        <div class="detail-row">
-          <span class="detail-label" id="label-updated-by">Modifié par :</span>
-          <span class="detail-value" aria-labelledby="label-updated-by">{{ annonce.updatedBy }}</span>
-        </div>
-      </section>
-    </div>
+          <div class="detail-row">
+            <span class="detail-label" id="label-title">Titre :</span>
+            <span class="detail-value detail-title" aria-labelledby="label-title">{{ annonce.title }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label" id="label-status">Statut :</span>
+            <div aria-labelledby="label-status">
+              <app-badge-status [status]="annonce.status" entityType="annonce"></app-badge-status>
+            </div>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label" id="label-org">ID organisation :</span>
+            <span class="detail-value" aria-labelledby="label-org">{{ annonce.orgId }}</span>
+          </div>
+          @if (annonce.description) {
+            <div class="detail-row">
+              <span class="detail-label" id="label-description">Description :</span>
+              <span class="detail-value detail-description" aria-labelledby="label-description">{{ annonce.description }}</span>
+            </div>
+          }
+          @if (annonce.category) {
+            <div class="detail-row">
+              <span class="detail-label" id="label-category">Catégorie :</span>
+              <span class="detail-value" aria-labelledby="label-category">{{ annonce.category }}</span>
+            </div>
+          }
+          @if (annonce.city) {
+            <div class="detail-row">
+              <span class="detail-label" id="label-city">Ville :</span>
+              <span class="detail-value" aria-labelledby="label-city">{{ annonce.city }}</span>
+            </div>
+          }
+          @if (annonce.price !== undefined) {
+            <div class="detail-row">
+              <span class="detail-label" id="label-price">Prix :</span>
+              <span class="detail-value" aria-labelledby="label-price">{{ annonce.price | priceFormat:annonce.currency }}</span>
+            </div>
+          }
+          <div class="detail-row">
+            <span class="detail-label" id="label-created">Créé le :</span>
+            <span class="detail-value" aria-labelledby="label-created">{{ annonce.createdAt | dateFormat }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label" id="label-created-by">Créé par :</span>
+            <span class="detail-value" aria-labelledby="label-created-by">{{ annonce.createdBy }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label" id="label-updated">Modifié le :</span>
+            <span class="detail-value" aria-labelledby="label-updated">{{ annonce.updatedAt | dateFormat }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label" id="label-updated-by">Modifié par :</span>
+            <span class="detail-value" aria-labelledby="label-updated-by">{{ annonce.updatedBy }}</span>
+          </div>
+        </section>
+      </div>
+    }
   </main>
 </div>

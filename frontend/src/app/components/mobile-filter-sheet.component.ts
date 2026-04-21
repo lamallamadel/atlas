@@ -24,35 +24,38 @@ export interface FilterConfig {
           <mat-icon>close</mat-icon>
         </button>
       </div>
-      
+    
       <div class="sheet-content">
-        <div *ngFor="let filter of config" class="filter-group">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>{{ filter.label }}</mat-label>
-            
-            <input
-              *ngIf="filter.type === 'text'"
-              matInput
-              [placeholder]="filter.placeholder || ''"
-              [(ngModel)]="filters[filter.key]"
-            />
-            
-            <mat-select
-              *ngIf="filter.type === 'select'"
-              [(ngModel)]="filters[filter.key]"
-            >
-              <mat-option [value]="''">Tous</mat-option>
-              <mat-option
-                *ngFor="let option of filter.options"
-                [value]="option.value"
-              >
-                {{ option.label }}
-              </mat-option>
-            </mat-select>
-          </mat-form-field>
-        </div>
+        @for (filter of config; track filter) {
+          <div class="filter-group">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ filter.label }}</mat-label>
+              @if (filter.type === 'text') {
+                <input
+                  matInput
+                  [placeholder]="filter.placeholder || ''"
+                  [(ngModel)]="filters[filter.key]"
+                  />
+              }
+              @if (filter.type === 'select') {
+                <mat-select
+                  [(ngModel)]="filters[filter.key]"
+                  >
+                  <mat-option [value]="''">Tous</mat-option>
+                  @for (option of filter.options; track option) {
+                    <mat-option
+                      [value]="option.value"
+                      >
+                      {{ option.label }}
+                    </mat-option>
+                  }
+                </mat-select>
+              }
+            </mat-form-field>
+          </div>
+        }
       </div>
-      
+    
       <div class="sheet-actions">
         <button mat-button (click)="reset()">Réinitialiser</button>
         <button mat-raised-button color="primary" (click)="apply()">
@@ -60,7 +63,7 @@ export interface FilterConfig {
         </button>
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .mobile-filter-sheet {
       padding: var(--spacing-4);

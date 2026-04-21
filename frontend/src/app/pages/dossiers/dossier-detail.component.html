@@ -1,818 +1,901 @@
 <div class="page-container">
   <div class="page-content">
-    <app-loading-skeleton *ngIf="loading" variant="detail" [rows]="15"></app-loading-skeleton>
+    @if (loading) {
+      <app-loading-skeleton variant="detail" [rows]="15"></app-loading-skeleton>
+    }
 
-    <div *ngIf="error && !loading" class="error-state">
-      <p class="error-message">{{ error }}</p>
-      <button class="btn-retry" (click)="loadDossier()">Réessayer</button>
-    </div>
-
-    <div *ngIf="!loading && !error && dossier" class="detail-content">
-      <a class="link-back" (click)="goBack()" (keydown.enter)="goBack()"
-        (keydown.space)="$event.preventDefault(); goBack()" tabindex="0" role="button"
-        aria-label="Retourner à la liste des dossiers">
-        <span class="arrow-left" aria-hidden="true">←</span>
-        Retour aux dossiers
-      </a>
-
-      <!-- Real-time Collaboration Features -->
-      <div *ngIf="collaborationEnabled" class="collaboration-section">
-        <app-collaboration-presence [dossierId]="dossier.id"></app-collaboration-presence>
+    @if (error && !loading) {
+      <div class="error-state">
+        <p class="error-message">{{ error }}</p>
+        <button class="btn-retry" (click)="loadDossier()">Réessayer</button>
       </div>
+    }
 
-      <div class="dossier-header">
-        <div class="header-line-1">
-          <div class="title-and-badge">
-            <h1 class="dossier-title">
-              Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ (dossier.leadPhone | phoneFormat) ||
-              'Sans téléphone' }}
-            </h1>
-            <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
+    @if (!loading && !error && dossier) {
+      <div class="detail-content">
+        <a class="link-back" (click)="goBack()" (keydown.enter)="goBack()"
+          (keydown.space)="$event.preventDefault(); goBack()" tabindex="0" role="button"
+          aria-label="Retourner à la liste des dossiers">
+          <span class="arrow-left" aria-hidden="true">←</span>
+          Retour aux dossiers
+        </a>
+        <!-- Real-time Collaboration Features -->
+        @if (collaborationEnabled) {
+          <div class="collaboration-section">
+            <app-collaboration-presence [dossierId]="dossier.id"></app-collaboration-presence>
           </div>
-          <button class="btn-change-status-secondary status-change-button" (click)="toggleStatusChange()"
-            aria-label="Ouvrir le formulaire de changement de statut du dossier" (keydown.enter)="toggleStatusChange()"
-            (keydown.space)="$event.preventDefault(); toggleStatusChange()">
-            Changer statut
-          </button>
-        </div>
-        <div class="header-line-2">
-          <div class="metadata-item">
-            <span class="metadata-label">Téléphone du prospect :</span>
-            <span class="metadata-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Source du prospect :</span>
-            <span class="metadata-value">{{ dossier.source || '—' }}</span>
-          </div>
-          <div class="metadata-item" *ngIf="dossier.annonceId">
-            <span class="metadata-label">Annonce liée :</span>
-            <span class="metadata-value">#{{ dossier.annonceId }}</span>
-          </div>
-          <div class="metadata-item">
-            <span class="metadata-label">Créé le :</span>
-            <span class="metadata-value">{{ formatDate(dossier.createdAt) }}</span>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="dossier.existingOpenDossierId" class="warning-message">
-        <strong>ℹ️ Doublon détecté :</strong>
-        un dossier ouvert existe déjà (#{{ dossier.existingOpenDossierId }}).
-        <a class="link" [routerLink]="['/dossiers', dossier.existingOpenDossierId]">Ouvrir</a>
-      </div>
-
-      <!-- Coach Virtuel Nudging Alert -->
-      <div *ngIf="getVirtualCoachNudge()" class="coach-virtuel-card slide-in-top">
-        <div class="coach-icon-container">
-          <span class="coach-icon">💡</span>
-        </div>
-        <div class="coach-content">
-          <div class="coach-header-row">
-            <h4 class="coach-title">Coach Virtuel Atlas</h4>
-            <mat-icon class="explainer-icon"
-              matTooltip="Ce conseil est généré dynamiquement par l'algorithme d'analyse comportementale de l'IA, basé sur la fréquence d'ouverture des emails et les consultations récentes de la propriété liées à ce dossier."
-              matTooltipPosition="right">
-              help_outline
-            </mat-icon>
-          </div>
-          <p class="coach-message">{{ getVirtualCoachNudge() }}</p>
-        </div>
-      </div>
-
-      <div *ngIf="showStatusChange" class="status-change-section">
-        <div *ngIf="successMessage" class="success-message">
-          {{ successMessage }}
-        </div>
-
-        <div *ngIf="statusError" class="error-message">
-          {{ statusError }}
-        </div>
-
-        <div *ngIf="isStatusChangeDisabled()" class="warning-message">
-          <strong>⚠️ Statut terminal :</strong> {{ getStatusChangeTooltip() }}
-        </div>
-
-        <div class="status-change-form">
-          <div class="form-group">
-            <label for="status-select" class="form-label">Nouveau statut :</label>
-            <select id="status-select" class="form-select" [(ngModel)]="selectedStatus"
-              [disabled]="updatingStatus || isStatusChangeDisabled()" [title]="getStatusChangeTooltip()">
-              <option *ngFor="let status of getAvailableStatusOptions()" [value]="status">
-                {{ status === DossierStatus.NEW ? 'Nouveau' :
-                status === DossierStatus.QUALIFYING ? 'Qualification' :
-                status === DossierStatus.QUALIFIED ? 'Qualifié' :
-                status === DossierStatus.APPOINTMENT ? 'Rendez-vous' :
-                status === DossierStatus.WON ? 'Gagné' :
-                status === DossierStatus.LOST ? 'Perdu' : status }}
-              </option>
-            </select>
-          </div>
-
-          <button class="btn-update-status update-status-button" (click)="updateStatus()"
-            [disabled]="updatingStatus || !selectedStatus || isStatusChangeDisabled()"
-            aria-label="Enregistrer le nouveau statut du dossier" (keydown.enter)="updateStatus()"
-            (keydown.space)="$event.preventDefault(); updateStatus()">
-            <span *ngIf="updatingStatus" class="spinner-small"></span>
-            <span *ngIf="!updatingStatus">Mettre à jour le statut</span>
-            <span *ngIf="updatingStatus">Mise à jour...</span>
-          </button>
-
-          <button class="btn-cancel" (click)="toggleStatusChange()" [disabled]="updatingStatus"
-            aria-label="Annuler le changement de statut" (keydown.enter)="toggleStatusChange()"
-            (keydown.space)="$event.preventDefault(); toggleStatusChange()">
-            Annuler
-          </button>
-        </div>
-      </div>
-
-      <mat-tab-group class="tabs-container" aria-label="Onglets de détails du dossier">
-        <mat-tab label="Informations" aria-label="Informations générales du dossier">
-          <div class="tab-content">
-            <!-- Section Essentiel -->
-            <mat-card class="info-section-essential">
-              <mat-card-header>
-                <mat-card-title>Essentiel</mat-card-title>
-              </mat-card-header>
-              <mat-card-content>
-                <div class="essential-grid">
-                  <div class="essential-item">
-                    <span class="essential-label">Statut</span>
-                    <div class="essential-value">
-                      <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
-                    </div>
-                  </div>
-
-                  <div class="essential-item">
-                    <span class="essential-label">Téléphone du prospect</span>
-                    <span class="essential-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
-                  </div>
-
-                  <div class="essential-item">
-                    <span class="essential-label">Source du prospect / Annonce</span>
-                    <span class="essential-value">
-                      {{ dossier.source || '—' }}
-                      <span *ngIf="dossier.annonceId" class="essential-annonce-ref"> / #{{ dossier.annonceId }}</span>
-                    </span>
-                  </div>
-
-                  <div class="essential-item">
-                    <span class="essential-label">Score</span>
-                    <span class="essential-value">{{ getScoreDisplay() }}</span>
-                  </div>
-
-                  <div class="essential-item" *ngIf="hasEmptyFields()">
-                    <span class="essential-label">Non renseigné</span>
-                    <span class="essential-value essential-empty">{{ getEmptyFieldsList() }}</span>
-                  </div>
-                </div>
-              </mat-card-content>
-            </mat-card>
-
-            <!-- Grid 2 colonnes pour Prospect et Annonce -->
-            <div class="sections-container">
-              <mat-card class="info-section">
-                <mat-card-header>
-                  <mat-card-title>Prospect</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div *ngIf="isLeadEmpty()" class="lead-empty-state">
-                    <p class="lead-empty-message">Informations du prospect non renseignées</p>
-                    <button class="btn-add-lead" (click)="toggleLeadForm()" *ngIf="!showLeadForm"
-                      aria-label="Ouvrir le formulaire pour ajouter les informations de contact du prospect"
-                      (keydown.enter)="toggleLeadForm()" (keydown.space)="$event.preventDefault(); toggleLeadForm()">
-                      Ajouter les informations du prospect
-                    </button>
-
-                    <div *ngIf="showLeadForm" class="lead-form-section">
-                      <div *ngIf="leadSuccessMessage" class="success-message">
-                        {{ leadSuccessMessage }}
-                      </div>
-
-                      <div *ngIf="leadError" class="error-message">
-                        {{ leadError }}
-                      </div>
-
-                      <div class="lead-form">
-                        <div class="form-group">
-                          <label for="lead-name" class="form-label">Nom du prospect :</label>
-                          <input id="lead-name" type="text" class="form-input" [(ngModel)]="leadFormName"
-                            [disabled]="updatingLead" placeholder="Saisir le nom complet du prospect"
-                            aria-label="Nom du prospect" />
-                        </div>
-
-                        <div class="form-group">
-                          <label for="lead-phone" class="form-label">Téléphone du prospect :</label>
-                          <input id="lead-phone" type="text" class="form-input" [(ngModel)]="leadFormPhone"
-                            [disabled]="updatingLead" placeholder="Saisir le numéro de téléphone du prospect"
-                            aria-label="Téléphone du prospect" />
-                        </div>
-
-                        <div class="form-actions">
-                          <button class="btn-update-lead" (click)="updateLead()"
-                            [disabled]="updatingLead || !leadFormName || !leadFormPhone"
-                            aria-label="Enregistrer les informations du prospect" (keydown.enter)="updateLead()"
-                            (keydown.space)="$event.preventDefault(); updateLead()">
-                            <span *ngIf="updatingLead" class="spinner-small"></span>
-                            <span *ngIf="!updatingLead">Enregistrer</span>
-                            <span *ngIf="updatingLead">Enregistrement...</span>
-                          </button>
-
-                          <button class="btn-cancel" (click)="toggleLeadForm()" [disabled]="updatingLead"
-                            aria-label="Annuler la saisie des informations du prospect"
-                            (keydown.enter)="toggleLeadForm()"
-                            (keydown.space)="$event.preventDefault(); toggleLeadForm()">
-                            Annuler
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div *ngIf="!isLeadEmpty()" class="field-group">
-                    <div class="field-row" *ngIf="dossier.leadName">
-                      <span class="field-label">Nom du prospect :</span>
-                      <span class="field-value">{{ dossier.leadName }}</span>
-                    </div>
-
-                    <div class="field-row" *ngIf="dossier.leadPhone">
-                      <span class="field-label">Téléphone du prospect :</span>
-                      <span class="field-value">{{ dossier.leadPhone }}</span>
-                    </div>
-
-                    <div class="field-row" *ngIf="dossier.leadSource">
-                      <span class="field-label">Source du prospect :</span>
-                      <span class="field-value">{{ dossier.leadSource }}</span>
-                    </div>
-                  </div>
-                </mat-card-content>
-              </mat-card>
-
-              <mat-card class="info-section">
-                <mat-card-header>
-                  <mat-card-title>Annonce liée</mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="field-group" *ngIf="dossier.annonceId">
-                    <div class="field-row">
-                      <span class="field-label">Identifiant de l'annonce :</span>
-                      <span class="field-value">#{{ dossier.annonceId }}</span>
-                    </div>
-                  </div>
-                  <div class="empty-state-small" *ngIf="!dossier.annonceId">
-                    <p class="empty-state-text">Aucune annonce liée à ce dossier</p>
-                  </div>
-                </mat-card-content>
-              </mat-card>
+        }
+        <div class="dossier-header">
+          <div class="header-line-1">
+            <div class="title-and-badge">
+              <h1 class="dossier-title">
+                Dossier #{{ dossier.id }} — {{ dossier.leadName || 'Sans nom' }}/{{ (dossier.leadPhone | phoneFormat) ||
+                'Sans téléphone' }}
+              </h1>
+              <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
             </div>
-
-            <!-- Accordéon Détails système -->
-            <mat-expansion-panel class="system-details-section">
-              <mat-expansion-panel-header tabindex="0" role="button"
-                aria-label="Afficher ou masquer les détails système du dossier">
-                <mat-panel-title>
-                  Détails système
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-
-              <div class="system-details-content">
-                <div class="field-row">
-                  <span class="field-label">Créé le :</span>
-                  <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
-                </div>
-
-                <div class="field-row" *ngIf="dossier.createdBy">
-                  <span class="field-label">Créé par :</span>
-                  <span class="field-value">{{ dossier.createdBy }}</span>
-                </div>
-
-                <div class="field-row">
-                  <span class="field-label">Modifié le :</span>
-                  <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
-                </div>
-
-                <div class="field-row" *ngIf="dossier.updatedBy">
-                  <span class="field-label">Modifié par :</span>
-                  <span class="field-value">{{ dossier.updatedBy }}</span>
-                </div>
-
-                <div class="field-row">
-                  <span class="field-label">ID Dossier :</span>
-                  <span class="field-value">{{ dossier.id }}</span>
-                </div>
-
-                <div class="field-row">
-                  <span class="field-label">Date de création (ISO) :</span>
-                  <span class="field-value">{{ dossier.createdAt }}</span>
-                </div>
-
-                <div class="field-row">
-                  <span class="field-label">Date de modification (ISO) :</span>
-                  <span class="field-value">{{ dossier.updatedAt }}</span>
-                </div>
-              </div>
-            </mat-expansion-panel>
+            <button class="btn-change-status-secondary status-change-button" (click)="toggleStatusChange()"
+              aria-label="Ouvrir le formulaire de changement de statut du dossier" (keydown.enter)="toggleStatusChange()"
+              (keydown.space)="$event.preventDefault(); toggleStatusChange()">
+              Changer statut
+            </button>
           </div>
-        </mat-tab>
-
-        <mat-tab label="Parties prenantes" aria-label="Gestion des parties prenantes du dossier">
-          <div class="tab-content">
-            <app-empty-state *ngIf="!dossier.parties || dossier.parties.length === 0"
-              message="Aucune partie prenante enregistrée" subtext="Ajoutez propriétaire, acheteur, notaire, etc."
+          <div class="header-line-2">
+            <div class="metadata-item">
+              <span class="metadata-label">Téléphone du prospect :</span>
+              <span class="metadata-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
+            </div>
+            <div class="metadata-item">
+              <span class="metadata-label">Source du prospect :</span>
+              <span class="metadata-value">{{ dossier.source || '—' }}</span>
+            </div>
+            @if (dossier.annonceId) {
+              <div class="metadata-item">
+                <span class="metadata-label">Annonce liée :</span>
+                <span class="metadata-value">#{{ dossier.annonceId }}</span>
+              </div>
+            }
+            <div class="metadata-item">
+              <span class="metadata-label">Créé le :</span>
+              <span class="metadata-value">{{ formatDate(dossier.createdAt) }}</span>
+            </div>
+          </div>
+        </div>
+        @if (dossier.existingOpenDossierId) {
+          <div class="warning-message">
+            <strong>ℹ️ Doublon détecté :</strong>
+            un dossier ouvert existe déjà (#{{ dossier.existingOpenDossierId }}).
+            <a class="link" [routerLink]="['/dossiers', dossier.existingOpenDossierId]">Ouvrir</a>
+          </div>
+        }
+        <!-- Coach Virtuel Nudging Alert -->
+        @if (getVirtualCoachNudge()) {
+          <div class="coach-virtuel-card slide-in-top">
+            <div class="coach-icon-container">
+              <span class="coach-icon">💡</span>
+            </div>
+            <div class="coach-content">
+              <div class="coach-header-row">
+                <h4 class="coach-title">Coach Virtuel Atlas</h4>
+                <mat-icon class="explainer-icon"
+                  matTooltip="Ce conseil est généré dynamiquement par l'algorithme d'analyse comportementale de l'IA, basé sur la fréquence d'ouverture des emails et les consultations récentes de la propriété liées à ce dossier."
+                  matTooltipPosition="right">
+                  help_outline
+                </mat-icon>
+              </div>
+              <p class="coach-message">{{ getVirtualCoachNudge() }}</p>
+            </div>
+          </div>
+        }
+        @if (showStatusChange) {
+          <div class="status-change-section">
+            @if (successMessage) {
+              <div class="success-message">
+                {{ successMessage }}
+              </div>
+            }
+            @if (statusError) {
+              <div class="error-message">
+                {{ statusError }}
+              </div>
+            }
+            @if (isStatusChangeDisabled()) {
+              <div class="warning-message">
+                <strong>⚠️ Statut terminal :</strong> {{ getStatusChangeTooltip() }}
+              </div>
+            }
+            <div class="status-change-form">
+              <div class="form-group">
+                <label for="status-select" class="form-label">Nouveau statut :</label>
+                <select id="status-select" class="form-select" [(ngModel)]="selectedStatus"
+                  [disabled]="updatingStatus || isStatusChangeDisabled()" [title]="getStatusChangeTooltip()">
+                  @for (status of getAvailableStatusOptions(); track status) {
+                    <option [value]="status">
+                      {{ status === DossierStatus.NEW ? 'Nouveau' :
+                      status === DossierStatus.QUALIFYING ? 'Qualification' :
+                      status === DossierStatus.QUALIFIED ? 'Qualifié' :
+                      status === DossierStatus.APPOINTMENT ? 'Rendez-vous' :
+                      status === DossierStatus.WON ? 'Gagné' :
+                      status === DossierStatus.LOST ? 'Perdu' : status }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <button class="btn-update-status update-status-button" (click)="updateStatus()"
+                [disabled]="updatingStatus || !selectedStatus || isStatusChangeDisabled()"
+                aria-label="Enregistrer le nouveau statut du dossier" (keydown.enter)="updateStatus()"
+                (keydown.space)="$event.preventDefault(); updateStatus()">
+                @if (updatingStatus) {
+                  <span class="spinner-small"></span>
+                }
+                @if (!updatingStatus) {
+                  <span>Mettre à jour le statut</span>
+                }
+                @if (updatingStatus) {
+                  <span>Mise à jour...</span>
+                }
+              </button>
+              <button class="btn-cancel" (click)="toggleStatusChange()" [disabled]="updatingStatus"
+                aria-label="Annuler le changement de statut" (keydown.enter)="toggleStatusChange()"
+                (keydown.space)="$event.preventDefault(); toggleStatusChange()">
+                Annuler
+              </button>
+            </div>
+          </div>
+        }
+        <mat-tab-group class="tabs-container" aria-label="Onglets de détails du dossier">
+          <mat-tab label="Informations" aria-label="Informations générales du dossier">
+            <div class="tab-content">
+              <!-- Section Essentiel -->
+              <mat-card class="info-section-essential">
+                <mat-card-header>
+                  <mat-card-title>Essentiel</mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                  <div class="essential-grid">
+                    <div class="essential-item">
+                      <span class="essential-label">Statut</span>
+                      <div class="essential-value">
+                        <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
+                      </div>
+                    </div>
+                    <div class="essential-item">
+                      <span class="essential-label">Téléphone du prospect</span>
+                      <span class="essential-value">{{ (dossier.leadPhone | phoneFormat) || '—' }}</span>
+                    </div>
+                    <div class="essential-item">
+                      <span class="essential-label">Source du prospect / Annonce</span>
+                      <span class="essential-value">
+                        {{ dossier.source || '—' }}
+                        @if (dossier.annonceId) {
+                          <span class="essential-annonce-ref"> / #{{ dossier.annonceId }}</span>
+                        }
+                      </span>
+                    </div>
+                    <div class="essential-item">
+                      <span class="essential-label">Score</span>
+                      <span class="essential-value">{{ getScoreDisplay() }}</span>
+                    </div>
+                    @if (hasEmptyFields()) {
+                      <div class="essential-item">
+                        <span class="essential-label">Non renseigné</span>
+                        <span class="essential-value essential-empty">{{ getEmptyFieldsList() }}</span>
+                      </div>
+                    }
+                  </div>
+                </mat-card-content>
+              </mat-card>
+              <!-- Grid 2 colonnes pour Prospect et Annonce -->
+              <div class="sections-container">
+                <mat-card class="info-section">
+                  <mat-card-header>
+                    <mat-card-title>Prospect</mat-card-title>
+                  </mat-card-header>
+                  <mat-card-content>
+                    @if (isLeadEmpty()) {
+                      <div class="lead-empty-state">
+                        <p class="lead-empty-message">Informations du prospect non renseignées</p>
+                        @if (!showLeadForm) {
+                          <button class="btn-add-lead" (click)="toggleLeadForm()"
+                            aria-label="Ouvrir le formulaire pour ajouter les informations de contact du prospect"
+                            (keydown.enter)="toggleLeadForm()" (keydown.space)="$event.preventDefault(); toggleLeadForm()">
+                            Ajouter les informations du prospect
+                          </button>
+                        }
+                        @if (showLeadForm) {
+                          <div class="lead-form-section">
+                            @if (leadSuccessMessage) {
+                              <div class="success-message">
+                                {{ leadSuccessMessage }}
+                              </div>
+                            }
+                            @if (leadError) {
+                              <div class="error-message">
+                                {{ leadError }}
+                              </div>
+                            }
+                            <div class="lead-form">
+                              <div class="form-group">
+                                <label for="lead-name" class="form-label">Nom du prospect :</label>
+                                <input id="lead-name" type="text" class="form-input" [(ngModel)]="leadFormName"
+                                  [disabled]="updatingLead" placeholder="Saisir le nom complet du prospect"
+                                  aria-label="Nom du prospect" />
+                                </div>
+                                <div class="form-group">
+                                  <label for="lead-phone" class="form-label">Téléphone du prospect :</label>
+                                  <input id="lead-phone" type="text" class="form-input" [(ngModel)]="leadFormPhone"
+                                    [disabled]="updatingLead" placeholder="Saisir le numéro de téléphone du prospect"
+                                    aria-label="Téléphone du prospect" />
+                                  </div>
+                                  <div class="form-actions">
+                                    <button class="btn-update-lead" (click)="updateLead()"
+                                      [disabled]="updatingLead || !leadFormName || !leadFormPhone"
+                                      aria-label="Enregistrer les informations du prospect" (keydown.enter)="updateLead()"
+                                      (keydown.space)="$event.preventDefault(); updateLead()">
+                                      @if (updatingLead) {
+                                        <span class="spinner-small"></span>
+                                      }
+                                      @if (!updatingLead) {
+                                        <span>Enregistrer</span>
+                                      }
+                                      @if (updatingLead) {
+                                        <span>Enregistrement...</span>
+                                      }
+                                    </button>
+                                    <button class="btn-cancel" (click)="toggleLeadForm()" [disabled]="updatingLead"
+                                      aria-label="Annuler la saisie des informations du prospect"
+                                      (keydown.enter)="toggleLeadForm()"
+                                      (keydown.space)="$event.preventDefault(); toggleLeadForm()">
+                                      Annuler
+                                    </button>
+                                  </div>
+                                </div>
+                              </div>
+                            }
+                          </div>
+                        }
+                        @if (!isLeadEmpty()) {
+                          <div class="field-group">
+                            @if (dossier.leadName) {
+                              <div class="field-row">
+                                <span class="field-label">Nom du prospect :</span>
+                                <span class="field-value">{{ dossier.leadName }}</span>
+                              </div>
+                            }
+                            @if (dossier.leadPhone) {
+                              <div class="field-row">
+                                <span class="field-label">Téléphone du prospect :</span>
+                                <span class="field-value">{{ dossier.leadPhone }}</span>
+                              </div>
+                            }
+                            @if (dossier.leadSource) {
+                              <div class="field-row">
+                                <span class="field-label">Source du prospect :</span>
+                                <span class="field-value">{{ dossier.leadSource }}</span>
+                              </div>
+                            }
+                          </div>
+                        }
+                      </mat-card-content>
+                    </mat-card>
+                    <mat-card class="info-section">
+                      <mat-card-header>
+                        <mat-card-title>Annonce liée</mat-card-title>
+                      </mat-card-header>
+                      <mat-card-content>
+                        @if (dossier.annonceId) {
+                          <div class="field-group">
+                            <div class="field-row">
+                              <span class="field-label">Identifiant de l'annonce :</span>
+                              <span class="field-value">#{{ dossier.annonceId }}</span>
+                            </div>
+                          </div>
+                        }
+                        @if (!dossier.annonceId) {
+                          <div class="empty-state-small">
+                            <p class="empty-state-text">Aucune annonce liée à ce dossier</p>
+                          </div>
+                        }
+                      </mat-card-content>
+                    </mat-card>
+                  </div>
+                  <!-- Accordéon Détails système -->
+                  <mat-expansion-panel class="system-details-section">
+                    <mat-expansion-panel-header tabindex="0" role="button"
+                      aria-label="Afficher ou masquer les détails système du dossier">
+                      <mat-panel-title>
+                        Détails système
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+                    <div class="system-details-content">
+                      <div class="field-row">
+                        <span class="field-label">Créé le :</span>
+                        <span class="field-value">{{ formatDate(dossier.createdAt) }}</span>
+                      </div>
+                      @if (dossier.createdBy) {
+                        <div class="field-row">
+                          <span class="field-label">Créé par :</span>
+                          <span class="field-value">{{ dossier.createdBy }}</span>
+                        </div>
+                      }
+                      <div class="field-row">
+                        <span class="field-label">Modifié le :</span>
+                        <span class="field-value">{{ formatDate(dossier.updatedAt) }}</span>
+                      </div>
+                      @if (dossier.updatedBy) {
+                        <div class="field-row">
+                          <span class="field-label">Modifié par :</span>
+                          <span class="field-value">{{ dossier.updatedBy }}</span>
+                        </div>
+                      }
+                      <div class="field-row">
+                        <span class="field-label">ID Dossier :</span>
+                        <span class="field-value">{{ dossier.id }}</span>
+                      </div>
+                      <div class="field-row">
+                        <span class="field-label">Date de création (ISO) :</span>
+                        <span class="field-value">{{ dossier.createdAt }}</span>
+                      </div>
+                      <div class="field-row">
+                        <span class="field-label">Date de modification (ISO) :</span>
+                        <span class="field-value">{{ dossier.updatedAt }}</span>
+                      </div>
+                    </div>
+                  </mat-expansion-panel>
+                </div>
+              </mat-tab>
+              <mat-tab label="Parties prenantes" aria-label="Gestion des parties prenantes du dossier">
+                <div class="tab-content">
+                  @if (!dossier.parties || dossier.parties.length === 0) {
+                    <app-empty-state
+                      message="Aucune partie prenante enregistrée" subtext="Ajoutez propriétaire, acheteur, notaire, etc."
               [primaryAction]="{
                 label: 'Ajouter une partie prenante',
                 handler: togglePartieForm.bind(this)
               }"></app-empty-state>
-
-            <div *ngIf="dossier.parties && dossier.parties.length > 0">
-              <div class="tab-header-actions">
-                <button class="btn-add add-partie-button" (click)="togglePartieForm()"
-                  aria-label="Ouvrir le formulaire pour ajouter une nouvelle partie prenante au dossier"
-                  (keydown.enter)="togglePartieForm()" (keydown.space)="$event.preventDefault(); togglePartieForm()">
-                  <span class="btn-icon" aria-hidden="true">+</span>
-                  Ajouter une partie prenante
-                </button>
-              </div>
-
-              <div class="data-table-wrapper">
-                <table class="data-table parties-table" role="table" aria-label="Liste des parties prenantes">
-                  <thead>
-                    <tr>
-                      <th scope="col">Rôle</th>
-                      <th scope="col">Prénom</th>
-                      <th scope="col">Nom</th>
-                      <th scope="col">Téléphone</th>
-                      <th scope="col">Email</th>
-                      <th scope="col" class="actions-column">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let partie of dossier.parties">
-                      <td>
-                        <span class="role-badge" [class]="getRoleBadgeClass(partie.role)">
-                          {{ getRoleLabel(partie.role) }}
-                        </span>
-                      </td>
-                      <td>{{ partie.firstName || '—' }}</td>
-                      <td>{{ partie.lastName || '—' }}</td>
-                      <td>{{ partie.phone || '—' }}</td>
-                      <td>{{ partie.email || '—' }}</td>
-                      <td class="actions-column">
-                        <div class="action-buttons">
-                          <button class="btn-icon-action btn-edit" (click)="editPartie(partie)"
-                            [matTooltip]="'Modifier ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                            [attr.aria-label]="'Modifier la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                            (keydown.enter)="editPartie(partie)"
-                            (keydown.space)="$event.preventDefault(); editPartie(partie)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                              stroke-linejoin="round" aria-hidden="true">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                            </svg>
-                          </button>
-                          <button class="btn-icon-action btn-delete" (click)="deletePartie(partie)"
-                            [matTooltip]="'Supprimer ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                            [attr.aria-label]="'Supprimer la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
-                            (keydown.enter)="deletePartie(partie)"
-                            (keydown.space)="$event.preventDefault(); deletePartie(partie)">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
-                              fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                              stroke-linejoin="round" aria-hidden="true">
-                              <polyline points="3 6 5 6 21 6"></polyline>
-                              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
-                              </path>
-                              <line x1="10" y1="11" x2="10" y2="17"></line>
-                              <line x1="14" y1="11" x2="14" y2="17"></line>
-                            </svg>
-                          </button>
+                  }
+                  @if (dossier.parties && dossier.parties.length > 0) {
+                    <div>
+                      <div class="tab-header-actions">
+                        <button class="btn-add add-partie-button" (click)="togglePartieForm()"
+                          aria-label="Ouvrir le formulaire pour ajouter une nouvelle partie prenante au dossier"
+                          (keydown.enter)="togglePartieForm()" (keydown.space)="$event.preventDefault(); togglePartieForm()">
+                          <span class="btn-icon" aria-hidden="true">+</span>
+                          Ajouter une partie prenante
+                        </button>
+                      </div>
+                      <div class="data-table-wrapper">
+                        <table class="data-table parties-table" role="table" aria-label="Liste des parties prenantes">
+                          <thead>
+                            <tr>
+                              <th scope="col">Rôle</th>
+                              <th scope="col">Prénom</th>
+                              <th scope="col">Nom</th>
+                              <th scope="col">Téléphone</th>
+                              <th scope="col">Email</th>
+                              <th scope="col" class="actions-column">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (partie of dossier.parties; track partie) {
+                              <tr>
+                                <td>
+                                  <span class="role-badge" [class]="getRoleBadgeClass(partie.role)">
+                                    {{ getRoleLabel(partie.role) }}
+                                  </span>
+                                </td>
+                                <td>{{ partie.firstName || '—' }}</td>
+                                <td>{{ partie.lastName || '—' }}</td>
+                                <td>{{ partie.phone || '—' }}</td>
+                                <td>{{ partie.email || '—' }}</td>
+                                <td class="actions-column">
+                                  <div class="action-buttons">
+                                    <button class="btn-icon-action btn-edit" (click)="editPartie(partie)"
+                                      [matTooltip]="'Modifier ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                                      [attr.aria-label]="'Modifier la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                                      (keydown.enter)="editPartie(partie)"
+                                      (keydown.space)="$event.preventDefault(); editPartie(partie)">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                      </svg>
+                                    </button>
+                                    <button class="btn-icon-action btn-delete" (click)="deletePartie(partie)"
+                                      [matTooltip]="'Supprimer ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                                      [attr.aria-label]="'Supprimer la partie prenante ' + (partie.firstName || '') + ' ' + (partie.lastName || '')"
+                                      (keydown.enter)="deletePartie(partie)"
+                                      (keydown.space)="$event.preventDefault(); deletePartie(partie)">
+                                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" aria-hidden="true">
+                                        <polyline points="3 6 5 6 21 6"></polyline>
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2">
+                                        </path>
+                                        <line x1="10" y1="11" x2="10" y2="17"></line>
+                                        <line x1="14" y1="11" x2="14" y2="17"></line>
+                                      </svg>
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </mat-tab>
+              <mat-tab label="Messages" aria-label="Historique des messages échangés" class="messages-tab">
+                <div class="tab-content">
+                  <div class="tab-header-actions">
+                    <button class="btn-add" (click)="openMessageDialog()"
+                      aria-label="Ouvrir le formulaire pour créer un nouveau message" (keydown.enter)="openMessageDialog()"
+                      (keydown.space)="$event.preventDefault(); openMessageDialog()">
+                      <span class="btn-icon" aria-hidden="true">+</span>
+                      Nouveau message
+                    </button>
+                  </div>
+                  @if (loadingMessages) {
+                    <app-loading-skeleton variant="list" [rows]="5"></app-loading-skeleton>
+                  }
+                  @if (!loadingMessages) {
+                    <div class="timeline-view">
+                      @if (getMessagesSorted().length === 0) {
+                        <div class="empty-message">
+                          Aucun message disponible.
                         </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Messages" aria-label="Historique des messages échangés" class="messages-tab">
-          <div class="tab-content">
-            <div class="tab-header-actions">
-              <button class="btn-add" (click)="openMessageDialog()"
-                aria-label="Ouvrir le formulaire pour créer un nouveau message" (keydown.enter)="openMessageDialog()"
-                (keydown.space)="$event.preventDefault(); openMessageDialog()">
-                <span class="btn-icon" aria-hidden="true">+</span>
-                Nouveau message
-              </button>
-            </div>
-
-            <app-loading-skeleton *ngIf="loadingMessages" variant="list" [rows]="5"></app-loading-skeleton>
-
-            <div *ngIf="!loadingMessages" class="timeline-view">
-              <div *ngIf="getMessagesSorted().length === 0" class="empty-message">
-                Aucun message disponible.
-              </div>
-              <div *ngFor="let message of getMessagesSorted()" class="message-card">
-                <div class="message-card-header">
-                  <span class="message-timestamp">{{ formatMessageTimestamp(message.timestamp) }}</span>
-                  <div class="message-badges">
-                    <span [class]="getChannelBadgeClass(message.channel)">{{ message.channel }}</span>
-                    <span [class]="getDirectionBadgeClass(message.direction)">
-                      {{ message.direction === 'INBOUND' ? 'Entrant' : 'Sortant' }}
-                    </span>
-                  </div>
-                </div>
-                <div class="message-card-body">
-                  <p class="message-content">
-                    {{ truncateContent(message.content) }}
-                    <span *ngIf="shouldShowVoirPlus(message.content)" class="voir-plus">Voir plus</span>
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="WhatsApp" aria-label="Messagerie WhatsApp">
-          <div class="tab-content whatsapp-tab">
-            <!-- Mobile-optimized messaging interface -->
-            <app-whatsapp-messaging-container *ngIf="dossier" [dossierId]="dossier.id"
-              [consentGranted]="isWhatsAppConsentGranted()" [leadName]="dossier.leadName"
-              [templates]="whatsappTemplates">
-            </app-whatsapp-messaging-container>
-
-            <!-- Fallback: consent warning if not granted -->
-            <div *ngIf="!isWhatsAppConsentGranted()" class="consent-warning-overlay">
-              <mat-icon class="warning-icon">warning</mat-icon>
-              <h3>Consentement WhatsApp requis</h3>
-              <p>Le consentement WhatsApp n'est pas accordé pour ce dossier.</p>
-              <a mat-raised-button color="primary" [routerLink]="[]" fragment="consentements">
-                Gérer les consentements
-              </a>
-            </div>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Messages sortants" aria-label="Gestion des messages sortants WhatsApp">
-          <div class="tab-content">
-            <app-messaging-tab *ngIf="dossier" [dossierId]="dossier.id" [recipientPhone]="dossier.leadPhone"
-              [leadName]="dossier.leadName">
-            </app-messaging-tab>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
-          <div class="tab-content appointments-section">
-            <div class="tab-header-actions">
-              <button class="btn-add" (click)="openAppointmentDialog()"
-                aria-label="Ouvrir le formulaire pour planifier un nouveau rendez-vous"
-                (keydown.enter)="openAppointmentDialog()"
-                (keydown.space)="$event.preventDefault(); openAppointmentDialog()">
-                <span class="btn-icon" aria-hidden="true">+</span>
-                Planifier un rendez-vous
-              </button>
-            </div>
-
-            <app-loading-skeleton *ngIf="loadingAppointments" variant="table" [rows]="5"
-              [columns]="6"></app-loading-skeleton>
-
-            <div *ngIf="!loadingAppointments" class="data-table-wrapper">
-              <table class="data-table" *ngIf="appointments.length > 0" role="table" aria-label="Liste des rendez-vous">
-                <thead>
-                  <tr>
-                    <th scope="col">Date et heure</th>
-                    <th scope="col">Lieu</th>
-                    <th scope="col">Assigné à</th>
-                    <th scope="col">Statut</th>
-                    <th scope="col">Notes</th>
-                    <th scope="col">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let appointment of appointments">
-                    <td>
-                      <div class="appointment-datetime">
-                        <div class="datetime-start">{{ formatAppointmentDateTime(appointment.startTime) }}</div>
-                        <div class="datetime-end">→ {{ formatAppointmentDateTime(appointment.endTime) }}</div>
-                      </div>
-                    </td>
-                    <td>{{ appointment.location || '—' }}</td>
-                    <td>{{ appointment.assignedTo || '—' }}</td>
-                    <td>
-                      <span [class]="getAppointmentStatusBadgeClass(appointment.status)">
-                        {{ getAppointmentStatusLabel(appointment.status) }}
-                      </span>
-                    </td>
-                    <td>{{ appointment.notes || '—' }}</td>
-                    <td>
-                      <div class="action-buttons">
-                        <button class="btn-edit" (click)="editAppointment(appointment)"
-                          [attr.aria-label]="'Modifier le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
-                          (keydown.enter)="editAppointment(appointment)"
-                          (keydown.space)="$event.preventDefault(); editAppointment(appointment)">
-                          Modifier
-                        </button>
-                        <button class="btn-complete" (click)="completeAppointment(appointment)"
-                          *ngIf="appointment.status === 'SCHEDULED'"
-                          [attr.aria-label]="'Marquer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime) + ' comme terminé'"
-                          (keydown.enter)="completeAppointment(appointment)"
-                          (keydown.space)="$event.preventDefault(); completeAppointment(appointment)">
-                          Terminer
-                        </button>
-                        <button class="btn-delete" (click)="deleteAppointment(appointment)"
-                          [attr.aria-label]="'Supprimer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
-                          (keydown.enter)="deleteAppointment(appointment)"
-                          (keydown.space)="$event.preventDefault(); deleteAppointment(appointment)">
-                          Supprimer
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-              <p *ngIf="appointments.length === 0" class="empty-message">
-                Aucun rendez-vous planifié.
-              </p>
-            </div>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Consentements" aria-label="Gestion des consentements RGPD">
-          <div class="tab-content consentements-section">
-            <app-loading-skeleton *ngIf="consentementsLoading" variant="card" [rows]="2"
-              aria-label="Chargement des consentements"></app-loading-skeleton>
-
-            <div *ngIf="!consentementsLoading">
-              <div class="consent-cards-grid">
-                <div *ngFor="let group of consentementGroups" class="consent-card">
-                  <div class="consent-card-header">
-                    <span class="consent-channel-icon">
-                      {{ group.channel === ConsentementChannel.EMAIL ? '📧' : '📱' }}
-                    </span>
-                    <h3 class="consent-channel-title">{{ getChannelLabel(group.channel) }}</h3>
-                  </div>
-                  <div class="consent-card-body">
-                    <div *ngIf="group.current" class="consent-current-status">
-                      <div class="consent-status-row">
-                        <span class="consent-label">Statut actuel :</span>
-                        <span [class]="getConsentementStatusBadgeClass(group.current.status)">
-                          {{ getConsentementStatusLabel(group.current.status) }}
-                        </span>
-                      </div>
-                      <div class="consent-date-row">
-                        <span class="consent-date-label">
-                          {{ group.current.status === ConsentementStatus.GRANTED ? 'Accordé le' :
-                          group.current.status === ConsentementStatus.REVOKED ? 'Révoqué le' :
-                          'Modifié le' }} :
-                        </span>
-                        <span class="consent-date-value">{{ getConsentDate(group.current) }}</span>
-                      </div>
-                    </div>
-                    <div *ngIf="!group.current" class="consent-no-status">
-                      <span class="consent-no-status-text">Aucun consentement enregistré</span>
-                    </div>
-
-                    <div class="consent-actions">
-                      <button class="consent-btn consent-btn-granted"
-                        [class.active]="group.current?.status === ConsentementStatus.GRANTED"
-                        (click)="toggleConsentement(group, ConsentementStatus.GRANTED)"
-                        [disabled]="group.current?.status === ConsentementStatus.GRANTED"
-                        [attr.aria-label]="'Accorder le consentement pour ' + getChannelLabel(group.channel)"
-                        [attr.aria-pressed]="group.current?.status === ConsentementStatus.GRANTED"
-                        (keydown.enter)="toggleConsentement(group, ConsentementStatus.GRANTED)"
-                        (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.GRANTED)">
-                        Accorder
-                      </button>
-                      <button class="consent-btn consent-btn-denied"
-                        [class.active]="group.current?.status === ConsentementStatus.DENIED"
-                        (click)="toggleConsentement(group, ConsentementStatus.DENIED)"
-                        [disabled]="group.current?.status === ConsentementStatus.DENIED"
-                        [attr.aria-label]="'Refuser le consentement pour ' + getChannelLabel(group.channel)"
-                        [attr.aria-pressed]="group.current?.status === ConsentementStatus.DENIED"
-                        (keydown.enter)="toggleConsentement(group, ConsentementStatus.DENIED)"
-                        (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.DENIED)">
-                        Refuser
-                      </button>
-                      <button class="consent-btn consent-btn-revoked"
-                        [class.active]="group.current?.status === ConsentementStatus.REVOKED"
-                        (click)="toggleConsentement(group, ConsentementStatus.REVOKED)"
-                        [disabled]="group.current?.status === ConsentementStatus.REVOKED"
-                        [attr.aria-label]="'Révoquer le consentement pour ' + getChannelLabel(group.channel)"
-                        [attr.aria-pressed]="group.current?.status === ConsentementStatus.REVOKED"
-                        (keydown.enter)="toggleConsentement(group, ConsentementStatus.REVOKED)"
-                        (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.REVOKED)">
-                        Révoquer
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <mat-expansion-panel class="consent-history-section">
-                <mat-expansion-panel-header tabindex="0" role="button"
-                  aria-label="Afficher ou masquer l'historique complet des consentements">
-                  <mat-panel-title>
-                    Historique des consentements
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-
-                <div class="consent-history-content">
-                  <div *ngIf="getConsentementsHistory().length === 0" class="empty-message">
-                    Aucun historique de consentement.
-                  </div>
-                  <div *ngIf="getConsentementsHistory().length > 0" class="data-table-wrapper">
-                    <table class="data-table" role="table" aria-label="Historique des consentements">
-                      <thead>
-                        <tr>
-                          <th scope="col">Canal</th>
-                          <th scope="col">Statut</th>
-                          <th scope="col">Date</th>
-                          <th scope="col">Utilisateur</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr *ngFor="let consent of getConsentementsHistory()">
-                          <td>
-                            <span [class]="getChannelBadgeClass(consent.channel)">
-                              {{ getChannelLabel(consent.channel) }}
-                            </span>
-                          </td>
-                          <td>
-                            <span [class]="getConsentementStatusBadgeClass(consent.status)">
-                              {{ getConsentementStatusLabel(consent.status) }}
-                            </span>
-                          </td>
-                          <td>{{ formatDate(consent.updatedAt) }}</td>
-                          <td>{{ getUserFromMeta(consent) }}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </mat-expansion-panel>
-            </div>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Documents" aria-label="Gestion des documents du dossier">
-          <div class="tab-content">
-            <div class="tab-header-actions" style="margin-bottom: 20px;">
-              <button class="btn-add" (click)="generateContract()" [disabled]="generatingContract"
-                aria-label="Générer un compromis IA">
-                <span class="btn-icon" aria-hidden="true" *ngIf="generatingContract" class="spinner-small"></span>
-                <span class="btn-icon" aria-hidden="true" *ngIf="!generatingContract">✨</span>
-                {{ generatingContract ? 'Génération en cours...' : 'Générer le compromis (IA Atlas)' }}
-              </button>
-            </div>
-
-            <div *ngIf="contractGeneratedSuccess" class="success-message slide-in-top" style="margin-bottom: 20px;">
-              {{ contractGeneratedSuccess }}
-
-              <div *ngIf="contractText"
-                style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; color: var(--text-color); font-size: 0.9em; line-height: 1.5; border-left: 4px solid var(--accent-color);">
-                {{ contractText }}
-              </div>
-            </div>
-
-            <div *ngIf="contractGeneratedError" class="error-message slide-in-top" style="margin-bottom: 20px;">
-              {{ contractGeneratedError }}
-            </div>
-
-            <app-document-list [dossierId]="dossier.id"></app-document-list>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Chronologie" aria-label="Chronologie des activités du dossier">
-          <div class="tab-content">
-            <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
-          </div>
-        </mat-tab>
-
-        <mat-tab label="Historique" aria-label="Historique détaillé des modifications">
-          <div class="tab-content">
-            <div class="audit-filters">
-              <div class="filter-group">
-                <label for="entity-type-filter" class="filter-label">Type d'entité :</label>
-                <select id="entity-type-filter" class="filter-select" [(ngModel)]="auditFilterEntityType"
-                  (change)="onAuditFilterChange()">
-                  <option value="">Tous</option>
-                  <option [value]="AuditEntityType.ANNONCE">Annonce</option>
-                  <option [value]="AuditEntityType.DOSSIER">Dossier</option>
-                  <option [value]="AuditEntityType.MESSAGE">Message</option>
-                  <option [value]="AuditEntityType.PARTIE_PRENANTE">PartiePrenante</option>
-                  <option [value]="AuditEntityType.CONSENTEMENT">Consentement</option>
-                </select>
-              </div>
-
-              <div class="filter-group">
-                <label for="action-filter" class="filter-label">Action :</label>
-                <select id="action-filter" class="filter-select" [(ngModel)]="auditFilterAction"
-                  (change)="onAuditFilterChange()">
-                  <option value="">Toutes</option>
-                  <option [value]="AuditAction.CREATED">Création</option>
-                  <option [value]="AuditAction.UPDATED">Modification</option>
-                  <option [value]="AuditAction.DELETED">Suppression</option>
-                </select>
-              </div>
-            </div>
-
-            <app-loading-skeleton *ngIf="auditEventsLoading" variant="table" [rows]="8"
-              [columns]="6"></app-loading-skeleton>
-
-            <div *ngIf="!auditEventsLoading">
-              <div class="data-table-wrapper" *ngIf="auditEvents.length > 0">
-                <table class="data-table audit-table" role="table" aria-label="Historique des événements d'audit">
-                  <thead>
-                    <tr>
-                      <th scope="col">Date et heure</th>
-                      <th scope="col">Action</th>
-                      <th scope="col">Type d'entité</th>
-                      <th scope="col">Identifiant de l'entité</th>
-                      <th scope="col">Utilisateur</th>
-                      <th scope="col">Changements</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let event of auditEvents">
-                      <td class="audit-date">{{ formatDate(event.createdAt) }}</td>
-                      <td>
-                        <span class="audit-action-badge">{{ getAuditActionLabel(event.action) }}</span>
-                      </td>
-                      <td>{{ getAuditEntityTypeLabel(event.entityType) }}</td>
-                      <td>{{ event.entityId }}</td>
-                      <td>{{ event.userId || '—' }}</td>
-                      <td class="audit-changes">
-                        <div *ngIf="parseDiffChanges(event.diff).length === 0" class="no-changes">
-                          Aucun changement
-                        </div>
-                        <div *ngIf="parseDiffChanges(event.diff).length > 0" class="changes-list">
-                          <div *ngFor="let change of parseDiffChanges(event.diff)" class="change-item">
-                            <span class="change-field">{{ change.field }}</span>:
-                            <span class="change-old" *ngIf="change.oldValue !== null">{{
-                              formatDiffValue(change.oldValue) }}</span>
-                            <span class="change-arrow" *ngIf="change.oldValue !== null">→</span>
-                            <span class="change-new">{{ formatDiffValue(change.newValue) }}</span>
+                      }
+                      @for (message of getMessagesSorted(); track message) {
+                        <div class="message-card">
+                          <div class="message-card-header">
+                            <span class="message-timestamp">{{ formatMessageTimestamp(message.timestamp) }}</span>
+                            <div class="message-badges">
+                              <span [class]="getChannelBadgeClass(message.channel)">{{ message.channel }}</span>
+                              <span [class]="getDirectionBadgeClass(message.direction)">
+                                {{ message.direction === 'INBOUND' ? 'Entrant' : 'Sortant' }}
+                              </span>
+                            </div>
+                          </div>
+                          <div class="message-card-body">
+                            <p class="message-content">
+                              {{ truncateContent(message.content) }}
+                              @if (shouldShowVoirPlus(message.content)) {
+                                <span class="voir-plus">Voir plus</span>
+                              }
+                            </p>
                           </div>
                         </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-
-                <mat-paginator #auditPaginator [length]="auditTotalElements" [pageSize]="auditPageSize"
-                  [pageIndex]="auditPageIndex" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onAuditPageChange($event)"
-                  showFirstLastButtons>
-                </mat-paginator>
-              </div>
-
-              <div *ngIf="auditEvents.length === 0" class="empty-message">
-                Aucun événement d'audit disponible.
-              </div>
-            </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </mat-tab>
+              <mat-tab label="WhatsApp" aria-label="Messagerie WhatsApp">
+                <div class="tab-content whatsapp-tab">
+                  <!-- Mobile-optimized messaging interface -->
+                  @if (dossier) {
+                    <app-whatsapp-messaging-container [dossierId]="dossier.id"
+                      [consentGranted]="isWhatsAppConsentGranted()" [leadName]="dossier.leadName"
+                      [templates]="whatsappTemplates">
+                    </app-whatsapp-messaging-container>
+                  }
+                  <!-- Fallback: consent warning if not granted -->
+                  @if (!isWhatsAppConsentGranted()) {
+                    <div class="consent-warning-overlay">
+                      <mat-icon class="warning-icon">warning</mat-icon>
+                      <h3>Consentement WhatsApp requis</h3>
+                      <p>Le consentement WhatsApp n'est pas accordé pour ce dossier.</p>
+                      <a mat-raised-button color="primary" [routerLink]="[]" fragment="consentements">
+                        Gérer les consentements
+                      </a>
+                    </div>
+                  }
+                </div>
+              </mat-tab>
+              <mat-tab label="Messages sortants" aria-label="Gestion des messages sortants WhatsApp">
+                <div class="tab-content">
+                  @if (dossier) {
+                    <app-messaging-tab [dossierId]="dossier.id" [recipientPhone]="dossier.leadPhone"
+                      [leadName]="dossier.leadName">
+                    </app-messaging-tab>
+                  }
+                </div>
+              </mat-tab>
+              <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
+                <div class="tab-content appointments-section">
+                  <div class="tab-header-actions">
+                    <button class="btn-add" (click)="openAppointmentDialog()"
+                      aria-label="Ouvrir le formulaire pour planifier un nouveau rendez-vous"
+                      (keydown.enter)="openAppointmentDialog()"
+                      (keydown.space)="$event.preventDefault(); openAppointmentDialog()">
+                      <span class="btn-icon" aria-hidden="true">+</span>
+                      Planifier un rendez-vous
+                    </button>
+                  </div>
+                  @if (loadingAppointments) {
+                    <app-loading-skeleton variant="table" [rows]="5"
+                    [columns]="6"></app-loading-skeleton>
+                  }
+                  @if (!loadingAppointments) {
+                    <div class="data-table-wrapper">
+                      @if (appointments.length > 0) {
+                        <table class="data-table" role="table" aria-label="Liste des rendez-vous">
+                          <thead>
+                            <tr>
+                              <th scope="col">Date et heure</th>
+                              <th scope="col">Lieu</th>
+                              <th scope="col">Assigné à</th>
+                              <th scope="col">Statut</th>
+                              <th scope="col">Notes</th>
+                              <th scope="col">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (appointment of appointments; track appointment) {
+                              <tr>
+                                <td>
+                                  <div class="appointment-datetime">
+                                    <div class="datetime-start">{{ formatAppointmentDateTime(appointment.startTime) }}</div>
+                                    <div class="datetime-end">→ {{ formatAppointmentDateTime(appointment.endTime) }}</div>
+                                  </div>
+                                </td>
+                                <td>{{ appointment.location || '—' }}</td>
+                                <td>{{ appointment.assignedTo || '—' }}</td>
+                                <td>
+                                  <span [class]="getAppointmentStatusBadgeClass(appointment.status)">
+                                    {{ getAppointmentStatusLabel(appointment.status) }}
+                                  </span>
+                                </td>
+                                <td>{{ appointment.notes || '—' }}</td>
+                                <td>
+                                  <div class="action-buttons">
+                                    <button class="btn-edit" (click)="editAppointment(appointment)"
+                                      [attr.aria-label]="'Modifier le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
+                                      (keydown.enter)="editAppointment(appointment)"
+                                      (keydown.space)="$event.preventDefault(); editAppointment(appointment)">
+                                      Modifier
+                                    </button>
+                                    @if (appointment.status === 'SCHEDULED') {
+                                      <button class="btn-complete" (click)="completeAppointment(appointment)"
+                                        [attr.aria-label]="'Marquer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime) + ' comme terminé'"
+                                        (keydown.enter)="completeAppointment(appointment)"
+                                        (keydown.space)="$event.preventDefault(); completeAppointment(appointment)">
+                                        Terminer
+                                      </button>
+                                    }
+                                    <button class="btn-delete" (click)="deleteAppointment(appointment)"
+                                      [attr.aria-label]="'Supprimer le rendez-vous du ' + formatAppointmentDateTime(appointment.startTime)"
+                                      (keydown.enter)="deleteAppointment(appointment)"
+                                      (keydown.space)="$event.preventDefault(); deleteAppointment(appointment)">
+                                      Supprimer
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      }
+                      @if (appointments.length === 0) {
+                        <p class="empty-message">
+                          Aucun rendez-vous planifié.
+                        </p>
+                      }
+                    </div>
+                  }
+                </div>
+              </mat-tab>
+              <mat-tab label="Consentements" aria-label="Gestion des consentements RGPD">
+                <div class="tab-content consentements-section">
+                  @if (consentementsLoading) {
+                    <app-loading-skeleton variant="card" [rows]="2"
+                    aria-label="Chargement des consentements"></app-loading-skeleton>
+                  }
+                  @if (!consentementsLoading) {
+                    <div>
+                      <div class="consent-cards-grid">
+                        @for (group of consentementGroups; track group) {
+                          <div class="consent-card">
+                            <div class="consent-card-header">
+                              <span class="consent-channel-icon">
+                                {{ group.channel === ConsentementChannel.EMAIL ? '📧' : '📱' }}
+                              </span>
+                              <h3 class="consent-channel-title">{{ getChannelLabel(group.channel) }}</h3>
+                            </div>
+                            <div class="consent-card-body">
+                              @if (group.current) {
+                                <div class="consent-current-status">
+                                  <div class="consent-status-row">
+                                    <span class="consent-label">Statut actuel :</span>
+                                    <span [class]="getConsentementStatusBadgeClass(group.current.status)">
+                                      {{ getConsentementStatusLabel(group.current.status) }}
+                                    </span>
+                                  </div>
+                                  <div class="consent-date-row">
+                                    <span class="consent-date-label">
+                                      {{ group.current.status === ConsentementStatus.GRANTED ? 'Accordé le' :
+                                      group.current.status === ConsentementStatus.REVOKED ? 'Révoqué le' :
+                                      'Modifié le' }} :
+                                    </span>
+                                    <span class="consent-date-value">{{ getConsentDate(group.current) }}</span>
+                                  </div>
+                                </div>
+                              }
+                              @if (!group.current) {
+                                <div class="consent-no-status">
+                                  <span class="consent-no-status-text">Aucun consentement enregistré</span>
+                                </div>
+                              }
+                              <div class="consent-actions">
+                                <button class="consent-btn consent-btn-granted"
+                                  [class.active]="group.current?.status === ConsentementStatus.GRANTED"
+                                  (click)="toggleConsentement(group, ConsentementStatus.GRANTED)"
+                                  [disabled]="group.current?.status === ConsentementStatus.GRANTED"
+                                  [attr.aria-label]="'Accorder le consentement pour ' + getChannelLabel(group.channel)"
+                                  [attr.aria-pressed]="group.current?.status === ConsentementStatus.GRANTED"
+                                  (keydown.enter)="toggleConsentement(group, ConsentementStatus.GRANTED)"
+                                  (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.GRANTED)">
+                                  Accorder
+                                </button>
+                                <button class="consent-btn consent-btn-denied"
+                                  [class.active]="group.current?.status === ConsentementStatus.DENIED"
+                                  (click)="toggleConsentement(group, ConsentementStatus.DENIED)"
+                                  [disabled]="group.current?.status === ConsentementStatus.DENIED"
+                                  [attr.aria-label]="'Refuser le consentement pour ' + getChannelLabel(group.channel)"
+                                  [attr.aria-pressed]="group.current?.status === ConsentementStatus.DENIED"
+                                  (keydown.enter)="toggleConsentement(group, ConsentementStatus.DENIED)"
+                                  (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.DENIED)">
+                                  Refuser
+                                </button>
+                                <button class="consent-btn consent-btn-revoked"
+                                  [class.active]="group.current?.status === ConsentementStatus.REVOKED"
+                                  (click)="toggleConsentement(group, ConsentementStatus.REVOKED)"
+                                  [disabled]="group.current?.status === ConsentementStatus.REVOKED"
+                                  [attr.aria-label]="'Révoquer le consentement pour ' + getChannelLabel(group.channel)"
+                                  [attr.aria-pressed]="group.current?.status === ConsentementStatus.REVOKED"
+                                  (keydown.enter)="toggleConsentement(group, ConsentementStatus.REVOKED)"
+                                  (keydown.space)="$event.preventDefault(); toggleConsentement(group, ConsentementStatus.REVOKED)">
+                                  Révoquer
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                      <mat-expansion-panel class="consent-history-section">
+                        <mat-expansion-panel-header tabindex="0" role="button"
+                          aria-label="Afficher ou masquer l'historique complet des consentements">
+                          <mat-panel-title>
+                            Historique des consentements
+                          </mat-panel-title>
+                        </mat-expansion-panel-header>
+                        <div class="consent-history-content">
+                          @if (getConsentementsHistory().length === 0) {
+                            <div class="empty-message">
+                              Aucun historique de consentement.
+                            </div>
+                          }
+                          @if (getConsentementsHistory().length > 0) {
+                            <div class="data-table-wrapper">
+                              <table class="data-table" role="table" aria-label="Historique des consentements">
+                                <thead>
+                                  <tr>
+                                    <th scope="col">Canal</th>
+                                    <th scope="col">Statut</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Utilisateur</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (consent of getConsentementsHistory(); track consent) {
+                                    <tr>
+                                      <td>
+                                        <span [class]="getChannelBadgeClass(consent.channel)">
+                                          {{ getChannelLabel(consent.channel) }}
+                                        </span>
+                                      </td>
+                                      <td>
+                                        <span [class]="getConsentementStatusBadgeClass(consent.status)">
+                                          {{ getConsentementStatusLabel(consent.status) }}
+                                        </span>
+                                      </td>
+                                      <td>{{ formatDate(consent.updatedAt) }}</td>
+                                      <td>{{ getUserFromMeta(consent) }}</td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            </div>
+                          }
+                        </div>
+                      </mat-expansion-panel>
+                    </div>
+                  }
+                </div>
+              </mat-tab>
+              <mat-tab label="Documents" aria-label="Gestion des documents du dossier">
+                <div class="tab-content">
+                  <div class="tab-header-actions" style="margin-bottom: 20px;">
+                    <button class="btn-add" (click)="generateContract()" [disabled]="generatingContract"
+                      aria-label="Générer un compromis IA">
+                      @if (generatingContract) {
+                        <span class="btn-icon" aria-hidden="true" class="spinner-small"></span>
+                      }
+                      @if (!generatingContract) {
+                        <span class="btn-icon" aria-hidden="true">✨</span>
+                      }
+                      {{ generatingContract ? 'Génération en cours...' : 'Générer le compromis (IA Atlas)' }}
+                    </button>
+                  </div>
+                  @if (contractGeneratedSuccess) {
+                    <div class="success-message slide-in-top" style="margin-bottom: 20px;">
+                      {{ contractGeneratedSuccess }}
+                      @if (contractText) {
+                        <div
+                          style="margin-top: 15px; background: rgba(255,255,255,0.05); padding: 20px; border-radius: 8px; font-family: monospace; white-space: pre-wrap; color: var(--text-color); font-size: 0.9em; line-height: 1.5; border-left: 4px solid var(--accent-color);">
+                          {{ contractText }}
+                        </div>
+                      }
+                    </div>
+                  }
+                  @if (contractGeneratedError) {
+                    <div class="error-message slide-in-top" style="margin-bottom: 20px;">
+                      {{ contractGeneratedError }}
+                    </div>
+                  }
+                  <app-document-list [dossierId]="dossier.id"></app-document-list>
+                </div>
+              </mat-tab>
+              <mat-tab label="Chronologie" aria-label="Chronologie des activités du dossier">
+                <div class="tab-content">
+                  <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
+                </div>
+              </mat-tab>
+              <mat-tab label="Historique" aria-label="Historique détaillé des modifications">
+                <div class="tab-content">
+                  <div class="audit-filters">
+                    <div class="filter-group">
+                      <label for="entity-type-filter" class="filter-label">Type d'entité :</label>
+                      <select id="entity-type-filter" class="filter-select" [(ngModel)]="auditFilterEntityType"
+                        (change)="onAuditFilterChange()">
+                        <option value="">Tous</option>
+                        <option [value]="AuditEntityType.ANNONCE">Annonce</option>
+                        <option [value]="AuditEntityType.DOSSIER">Dossier</option>
+                        <option [value]="AuditEntityType.MESSAGE">Message</option>
+                        <option [value]="AuditEntityType.PARTIE_PRENANTE">PartiePrenante</option>
+                        <option [value]="AuditEntityType.CONSENTEMENT">Consentement</option>
+                      </select>
+                    </div>
+                    <div class="filter-group">
+                      <label for="action-filter" class="filter-label">Action :</label>
+                      <select id="action-filter" class="filter-select" [(ngModel)]="auditFilterAction"
+                        (change)="onAuditFilterChange()">
+                        <option value="">Toutes</option>
+                        <option [value]="AuditAction.CREATED">Création</option>
+                        <option [value]="AuditAction.UPDATED">Modification</option>
+                        <option [value]="AuditAction.DELETED">Suppression</option>
+                      </select>
+                    </div>
+                  </div>
+                  @if (auditEventsLoading) {
+                    <app-loading-skeleton variant="table" [rows]="8"
+                    [columns]="6"></app-loading-skeleton>
+                  }
+                  @if (!auditEventsLoading) {
+                    <div>
+                      @if (auditEvents.length > 0) {
+                        <div class="data-table-wrapper">
+                          <table class="data-table audit-table" role="table" aria-label="Historique des événements d'audit">
+                            <thead>
+                              <tr>
+                                <th scope="col">Date et heure</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Type d'entité</th>
+                                <th scope="col">Identifiant de l'entité</th>
+                                <th scope="col">Utilisateur</th>
+                                <th scope="col">Changements</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (event of auditEvents; track event) {
+                                <tr>
+                                  <td class="audit-date">{{ formatDate(event.createdAt) }}</td>
+                                  <td>
+                                    <span class="audit-action-badge">{{ getAuditActionLabel(event.action) }}</span>
+                                  </td>
+                                  <td>{{ getAuditEntityTypeLabel(event.entityType) }}</td>
+                                  <td>{{ event.entityId }}</td>
+                                  <td>{{ event.userId || '—' }}</td>
+                                  <td class="audit-changes">
+                                    @if (parseDiffChanges(event.diff).length === 0) {
+                                      <div class="no-changes">
+                                        Aucun changement
+                                      </div>
+                                    }
+                                    @if (parseDiffChanges(event.diff).length > 0) {
+                                      <div class="changes-list">
+                                        @for (change of parseDiffChanges(event.diff); track change) {
+                                          <div class="change-item">
+                                            <span class="change-field">{{ change.field }}</span>:
+                                            @if (change.oldValue !== null) {
+                                              <span class="change-old">{{
+                                              formatDiffValue(change.oldValue) }}</span>
+                                            }
+                                            @if (change.oldValue !== null) {
+                                              <span class="change-arrow">→</span>
+                                            }
+                                            <span class="change-new">{{ formatDiffValue(change.newValue) }}</span>
+                                          </div>
+                                        }
+                                      </div>
+                                    }
+                                  </td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                          <mat-paginator #auditPaginator [length]="auditTotalElements" [pageSize]="auditPageSize"
+                            [pageIndex]="auditPageIndex" [pageSizeOptions]="[5, 10, 25, 50]" (page)="onAuditPageChange($event)"
+                            showFirstLastButtons>
+                          </mat-paginator>
+                        </div>
+                      }
+                      @if (auditEvents.length === 0) {
+                        <div class="empty-message">
+                          Aucun événement d'audit disponible.
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </mat-tab>
+              <!-- Real-time Collaboration Tab -->
+              @if (collaborationEnabled) {
+                <mat-tab label="Collaboration" aria-label="Fonctionnalités de collaboration en temps réel">
+                  <div class="tab-content">
+                    <div class="collaboration-grid">
+                      <!-- Activity Stream -->
+                      <div class="collaboration-panel">
+                        <app-collaboration-activity-stream [dossierId]="dossier.id"></app-collaboration-activity-stream>
+                      </div>
+                      <!-- Shared Notes with Live Cursors -->
+                      <div class="collaboration-panel">
+                        <mat-card>
+                          <mat-card-header>
+                            <mat-card-title>
+                              📝 Shared Notes
+                            </mat-card-title>
+                          </mat-card-header>
+                          <mat-card-content>
+                            <textarea
+                              [(ngModel)]="dossier.notes"
+                              (input)="onNotesInput($event)"
+                              placeholder="Add shared notes here..."
+                              class="shared-notes-textarea"
+                              rows="10">
+                            </textarea>
+                            <app-collaboration-cursor fieldName="notes"></app-collaboration-cursor>
+                          </mat-card-content>
+                        </mat-card>
+                      </div>
+                      <!-- Filter Presets -->
+                      <div class="collaboration-panel full-width">
+                        <app-collaboration-filter-share></app-collaboration-filter-share>
+                      </div>
+                    </div>
+                  </div>
+                </mat-tab>
+              }
+            </mat-tab-group>
           </div>
-        </mat-tab>
+        }
+      </div>
 
-        <!-- Real-time Collaboration Tab -->
-        <mat-tab label="Collaboration" aria-label="Fonctionnalités de collaboration en temps réel" *ngIf="collaborationEnabled">
-          <div class="tab-content">
-            <div class="collaboration-grid">
-              <!-- Activity Stream -->
-              <div class="collaboration-panel">
-                <app-collaboration-activity-stream [dossierId]="dossier.id"></app-collaboration-activity-stream>
-              </div>
-
-              <!-- Shared Notes with Live Cursors -->
-              <div class="collaboration-panel">
-                <mat-card>
-                  <mat-card-header>
-                    <mat-card-title>
-                      📝 Shared Notes
-                    </mat-card-title>
-                  </mat-card-header>
-                  <mat-card-content>
-                    <textarea 
-                      [(ngModel)]="dossier.notes"
-                      (input)="onNotesInput($event)"
-                      placeholder="Add shared notes here..."
-                      class="shared-notes-textarea"
-                      rows="10">
-                    </textarea>
-                    <app-collaboration-cursor fieldName="notes"></app-collaboration-cursor>
-                  </mat-card-content>
-                </mat-card>
-              </div>
-
-              <!-- Filter Presets -->
-              <div class="collaboration-panel full-width">
-                <app-collaboration-filter-share></app-collaboration-filter-share>
-              </div>
-            </div>
-          </div>
-        </mat-tab>
-      </mat-tab-group>
+      <!-- Quick Actions Component -->
+      @if (dossier) {
+        <app-quick-actions [dossier]="dossier"></app-quick-actions>
+      }
     </div>
-  </div>
-
-  <!-- Quick Actions Component -->
-  <app-quick-actions *ngIf="dossier" [dossier]="dossier"></app-quick-actions>
-</div>

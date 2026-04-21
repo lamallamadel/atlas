@@ -46,8 +46,10 @@
         <a mat-list-item routerLink="/dossiers" routerLinkActive="active" (click)="closeSidenavOnMobile()"
           aria-label="Accéder aux dossiers" matTooltip="Raccourci: g puis d" matTooltipPosition="right">
           <mat-icon matListItemIcon aria-hidden="true">folder</mat-icon>
-          <span matListItemTitle>Dossiers <span *ngIf="dossiersPendingCount$ | async as count" class="badge-count">({{
-              count }})</span></span>
+          <span matListItemTitle>Dossiers @if (dossiersPendingCount$ | async; as count) {
+            <span class="badge-count">({{
+            count }})</span>
+          }</span>
         </a>
         <mat-divider></mat-divider>
         <a mat-list-item routerLink="/workflow-admin" routerLinkActive="active" (click)="closeSidenavOnMobile()"
@@ -61,10 +63,12 @@
 
   <mat-sidenav-content class="sidenav-content">
     <mat-toolbar color="primary" class="top-toolbar" role="banner">
-      <button type="button" mat-icon-button (click)="drawer.toggle()" *ngIf="isHandset$ | async" class="menu-button"
-        aria-label="Ouvrir le menu de navigation" [attr.aria-expanded]="drawer.opened">
-        <mat-icon aria-hidden="true">menu</mat-icon>
-      </button>
+      @if (isHandset$ | async) {
+        <button type="button" mat-icon-button (click)="drawer.toggle()" class="menu-button"
+          aria-label="Ouvrir le menu de navigation" [attr.aria-expanded]="drawer.opened">
+          <mat-icon aria-hidden="true">menu</mat-icon>
+        </button>
+      }
 
       <span class="toolbar-spacer"></span>
 
@@ -158,13 +162,13 @@
             </div>
           </div>
           <mat-divider role="separator"></mat-divider>
-          
+
           <button mat-menu-item [matMenuTriggerFor]="toursSubMenu" aria-label="Guides interactifs">
             <mat-icon aria-hidden="true">school</mat-icon>
             <span>Guides interactifs</span>
             <mat-icon class="submenu-arrow" aria-hidden="true">chevron_right</mat-icon>
           </button>
-          
+
           <mat-divider role="separator"></mat-divider>
           <button mat-menu-item (click)="logout()" aria-label="Se déconnecter de l'application">
             <mat-icon aria-hidden="true">logout</mat-icon>
@@ -180,51 +184,61 @@
             </div>
           </div>
           <mat-divider role="separator"></mat-divider>
-          
+
           <button mat-menu-item (click)="viewAllTours()" aria-label="Voir tous les guides">
             <mat-icon aria-hidden="true">format_list_bulleted</mat-icon>
             <span>Voir tous les guides</span>
           </button>
-          
+
           <mat-divider role="separator"></mat-divider>
-          
+
           <button mat-menu-item (click)="startQuickTour('dashboard-overview')" aria-label="Démarrer le guide du dashboard">
             <mat-icon aria-hidden="true">dashboard</mat-icon>
             <span>Dashboard</span>
-            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('dashboard-overview')" aria-hidden="true">check_circle</mat-icon>
+            @if (isTourCompleted('dashboard-overview')) {
+              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
+            }
           </button>
-          
+
           <button mat-menu-item (click)="startQuickTour('create-dossier')" aria-label="Démarrer le guide de création de dossier">
             <mat-icon aria-hidden="true">add_box</mat-icon>
             <span>Créer un dossier</span>
-            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('create-dossier')" aria-hidden="true">check_circle</mat-icon>
+            @if (isTourCompleted('create-dossier')) {
+              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
+            }
           </button>
-          
+
           <button mat-menu-item (click)="startQuickTour('message-workflow')" aria-label="Démarrer le guide de messagerie">
             <mat-icon aria-hidden="true">message</mat-icon>
             <span>Messagerie</span>
-            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('message-workflow')" aria-hidden="true">check_circle</mat-icon>
+            @if (isTourCompleted('message-workflow')) {
+              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
+            }
           </button>
-          
+
           <button mat-menu-item (click)="startQuickTour('status-transitions')" aria-label="Démarrer le guide de workflow">
             <mat-icon aria-hidden="true">sync_alt</mat-icon>
             <span>Workflow de statut</span>
-            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('status-transitions')" aria-hidden="true">check_circle</mat-icon>
+            @if (isTourCompleted('status-transitions')) {
+              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
+            }
           </button>
-          
+
           <button mat-menu-item (click)="startQuickTour('reports')" aria-label="Démarrer le guide des rapports">
             <mat-icon aria-hidden="true">assessment</mat-icon>
             <span>Rapports</span>
-            <mat-icon class="tour-status-icon" *ngIf="isTourCompleted('reports')" aria-hidden="true">check_circle</mat-icon>
+            @if (isTourCompleted('reports')) {
+              <mat-icon class="tour-status-icon" aria-hidden="true">check_circle</mat-icon>
+            }
           </button>
-          
+
           <mat-divider role="separator"></mat-divider>
-          
+
           <button mat-menu-item (click)="skipAllTours()" aria-label="Ignorer tous les guides">
             <mat-icon aria-hidden="true">cancel</mat-icon>
             <span>Ignorer tous les guides</span>
           </button>
-          
+
           <button mat-menu-item (click)="restartAllTours()" aria-label="Redémarrer tous les guides">
             <mat-icon aria-hidden="true">restart_alt</mat-icon>
             <span>Redémarrer tous les guides</span>

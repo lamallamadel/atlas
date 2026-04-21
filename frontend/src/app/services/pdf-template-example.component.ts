@@ -12,51 +12,55 @@ import { PdfTemplateService, PdfBrandConfig, PdfDocument, PdfTemplateType } from
   template: `
     <div class="pdf-examples-container">
       <h2>Exemples de Génération PDF</h2>
-      
+    
       <div class="example-section">
         <h3>1. Dossier Complet</h3>
         <button (click)="exportDossierExample()" [disabled]="isGenerating">
           {{ isGenerating ? 'Génération...' : 'Exporter Dossier' }}
         </button>
       </div>
-      
+    
       <div class="example-section">
         <h3>2. Rapport Mensuel</h3>
         <button (click)="exportReportExample()" [disabled]="isGenerating">
           {{ isGenerating ? 'Génération...' : 'Exporter Rapport' }}
         </button>
       </div>
-      
+    
       <div class="example-section">
         <h3>3. Contrat Type</h3>
         <button (click)="exportContractExample()" [disabled]="isGenerating">
           {{ isGenerating ? 'Génération...' : 'Exporter Contrat' }}
         </button>
       </div>
-      
+    
       <div class="example-section">
         <h3>4. Document Personnalisé</h3>
         <button (click)="exportCustomExample()" [disabled]="isGenerating">
           {{ isGenerating ? 'Génération...' : 'Exporter Document Personnalisé' }}
         </button>
       </div>
-      
+    
       <div class="example-section">
         <h3>5. Avec Watermark</h3>
         <button (click)="exportWithWatermark()" [disabled]="isGenerating">
           {{ isGenerating ? 'Génération...' : 'Exporter avec Watermark' }}
         </button>
       </div>
-      
-      <div *ngIf="error" class="error-message">
-        {{ error }}
-      </div>
-      
-      <div *ngIf="success" class="success-message">
-        {{ success }}
-      </div>
+    
+      @if (error) {
+        <div class="error-message">
+          {{ error }}
+        </div>
+      }
+    
+      @if (success) {
+        <div class="success-message">
+          {{ success }}
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .pdf-examples-container {
       padding: 20px;

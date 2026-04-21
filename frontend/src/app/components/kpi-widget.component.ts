@@ -12,35 +12,43 @@ import { takeUntil } from 'rxjs/operators';
     <div class="kpi-widget" [class.edit-mode]="editMode">
       <div class="widget-header">
         <h3>{{ config.title || 'KPI' }}</h3>
-        <div class="widget-actions" *ngIf="editMode">
-          <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
-            <span class="material-icons">refresh</span>
-          </button>
-          <button (click)="onRemove()" class="btn-icon" title="Supprimer">
-            <span class="material-icons">close</span>
-          </button>
+        @if (editMode) {
+          <div class="widget-actions">
+            <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
+              <span class="material-icons">refresh</span>
+            </button>
+            <button (click)="onRemove()" class="btn-icon" title="Supprimer">
+              <span class="material-icons">close</span>
+            </button>
+          </div>
+        }
+      </div>
+    
+      @if (!loading && !error) {
+        <div class="widget-content">
+          <div class="kpi-value">{{ kpiData.value | number:'1.0-0' }}</div>
+          <div class="kpi-label">{{ kpiData.label }}</div>
+          <div class="kpi-change" [class.positive]="kpiData.change >= 0" [class.negative]="kpiData.change < 0">
+            <span class="material-icons">{{ kpiData.change >= 0 ? 'trending_up' : 'trending_down' }}</span>
+            {{ kpiData.change >= 0 ? '+' : '' }}{{ kpiData.change | number:'1.1-1' }}%
+          </div>
         </div>
-      </div>
-      
-      <div class="widget-content" *ngIf="!loading && !error">
-        <div class="kpi-value">{{ kpiData.value | number:'1.0-0' }}</div>
-        <div class="kpi-label">{{ kpiData.label }}</div>
-        <div class="kpi-change" [class.positive]="kpiData.change >= 0" [class.negative]="kpiData.change < 0">
-          <span class="material-icons">{{ kpiData.change >= 0 ? 'trending_up' : 'trending_down' }}</span>
-          {{ kpiData.change >= 0 ? '+' : '' }}{{ kpiData.change | number:'1.1-1' }}%
+      }
+    
+      @if (loading) {
+        <div class="widget-loading">
+          <div class="spinner"></div>
         </div>
-      </div>
-
-      <div class="widget-loading" *ngIf="loading">
-        <div class="spinner"></div>
-      </div>
-
-      <div class="widget-error" *ngIf="error">
-        <span class="material-icons">error</span>
-        <p>{{ error }}</p>
-      </div>
+      }
+    
+      @if (error) {
+        <div class="widget-error">
+          <span class="material-icons">error</span>
+          <p>{{ error }}</p>
+        </div>
+      }
     </div>
-  `,
+    `,
   styles: [`
     .kpi-widget {
       background: white;

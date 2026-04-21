@@ -5,12 +5,14 @@
       <mat-form-field appearance="outline">
         <mat-label>Palette de couleurs</mat-label>
         <mat-select [(ngModel)]="selectedPalette" (selectionChange)="onPaletteChange()">
-          <mat-option *ngFor="let palette of palettes" [value]="palette">
-            {{ palette | titlecase }}
-          </mat-option>
+          @for (palette of palettes; track palette) {
+            <mat-option [value]="palette">
+              {{ palette | titlecase }}
+            </mat-option>
+          }
         </mat-select>
       </mat-form-field>
-      
+
       <button mat-raised-button (click)="toggleDarkMode()">
         <mat-icon>{{ darkMode ? 'light_mode' : 'dark_mode' }}</mat-icon>
         {{ darkMode ? 'Mode Clair' : 'Mode Sombre' }}
@@ -19,14 +21,16 @@
   </div>
 
   <div class="chart-kpi-grid">
-    <div class="chart-kpi-card" *ngFor="let kpi of kpiData">
-      <div class="chart-kpi-label">{{ kpi.label }}</div>
-      <div class="chart-kpi-value">{{ kpi.value }}</div>
-      <div class="chart-kpi-trend" [class]="kpi.trendType">
-        <mat-icon>{{ kpi.trendType === 'positive' ? 'trending_up' : 'trending_down' }}</mat-icon>
-        <span>{{ kpi.trend }}</span>
+    @for (kpi of kpiData; track kpi) {
+      <div class="chart-kpi-card">
+        <div class="chart-kpi-label">{{ kpi.label }}</div>
+        <div class="chart-kpi-value">{{ kpi.value }}</div>
+        <div class="chart-kpi-trend" [class]="kpi.trendType">
+          <mat-icon>{{ kpi.trendType === 'positive' ? 'trending_up' : 'trending_down' }}</mat-icon>
+          <span>{{ kpi.trend }}</span>
+        </div>
       </div>
-    </div>
+    }
   </div>
 
   <div class="chart-section">

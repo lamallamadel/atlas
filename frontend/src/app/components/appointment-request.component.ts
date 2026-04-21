@@ -8,31 +8,39 @@ import { CustomerPortalService } from '../services/customer-portal.service';
   template: `
     <div class="appointment-container">
       <h2>Demander un rendez-vous</h2>
-      
-      <div class="existing-requests" *ngIf="requests.length > 0">
-        <h3>Vos demandes</h3>
-        <div *ngFor="let request of requests" class="request-card">
-          <div class="request-header">
-            <span class="request-date">{{ request.proposedStartTime | date:'short' }}</span>
-            <span class="request-status" [class]="'status-' + request.status.toLowerCase()">
-              {{ getStatusLabel(request.status) }}
-            </span>
-          </div>
-          <div class="request-details" *ngIf="request.preferredLocation">
-            📍 {{ request.preferredLocation }}
-          </div>
-          <div class="request-response" *ngIf="request.agentResponse">
-            <strong>Réponse de l'agent:</strong> {{ request.agentResponse }}
-          </div>
+    
+      @if (requests.length > 0) {
+        <div class="existing-requests">
+          <h3>Vos demandes</h3>
+          @for (request of requests; track request) {
+            <div class="request-card">
+              <div class="request-header">
+                <span class="request-date">{{ request.proposedStartTime | date:'short' }}</span>
+                <span class="request-status" [class]="'status-' + request.status.toLowerCase()">
+                  {{ getStatusLabel(request.status) }}
+                </span>
+              </div>
+              @if (request.preferredLocation) {
+                <div class="request-details">
+                  📍 {{ request.preferredLocation }}
+                </div>
+              }
+              @if (request.agentResponse) {
+                <div class="request-response">
+                  <strong>Réponse de l'agent:</strong> {{ request.agentResponse }}
+                </div>
+              }
+            </div>
+          }
         </div>
-      </div>
-
+      }
+    
       <form [formGroup]="requestForm" (ngSubmit)="submitRequest()" class="request-form">
         <div class="form-group">
           <label for="proposedStartTime">Date et heure souhaitée *</label>
           <input id="proposedStartTime" type="datetime-local" formControlName="proposedStartTime" class="form-control">
         </div>
-
+    
         <div class="form-group">
           <label for="duration">Durée estimée</label>
           <select id="duration" formControlName="duration" class="form-control">
@@ -42,31 +50,35 @@ import { CustomerPortalService } from '../services/customer-portal.service';
             <option value="120">2 heures</option>
           </select>
         </div>
-
+    
         <div class="form-group">
           <label for="preferredLocation">Lieu préféré</label>
-          <input id="preferredLocation" type="text" formControlName="preferredLocation" 
-                 placeholder="Adresse ou lieu de rendez-vous" 
-                 class="form-control">
-        </div>
-
-        <div class="form-group">
-          <label for="notes">Notes</label>
-          <textarea id="notes" formControlName="notes" 
-                    placeholder="Informations complémentaires..." 
-                    rows="3"
-                    class="form-control"></textarea>
-        </div>
-
-        <button type="submit" 
-                [disabled]="!requestForm.valid || submitting"
-                class="submit-button">
-          <span *ngIf="!submitting">✉️ Envoyer la demande</span>
-          <span *ngIf="submitting">⏳ Envoi...</span>
-        </button>
-      </form>
-    </div>
-  `,
+          <input id="preferredLocation" type="text" formControlName="preferredLocation"
+            placeholder="Adresse ou lieu de rendez-vous"
+            class="form-control">
+          </div>
+    
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" formControlName="notes"
+              placeholder="Informations complémentaires..."
+              rows="3"
+            class="form-control"></textarea>
+          </div>
+    
+          <button type="submit"
+            [disabled]="!requestForm.valid || submitting"
+            class="submit-button">
+            @if (!submitting) {
+              <span>✉️ Envoyer la demande</span>
+            }
+            @if (submitting) {
+              <span>⏳ Envoi...</span>
+            }
+          </button>
+        </form>
+      </div>
+    `,
   styles: [`
     .appointment-container {
       padding: 24px;

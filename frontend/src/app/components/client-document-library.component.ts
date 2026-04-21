@@ -7,31 +7,41 @@ import { CustomerPortalService } from '../services/customer-portal.service';
   template: `
     <div class="document-library">
       <h2>Vos documents</h2>
-      
-      <div *ngIf="!documents || documents.length === 0" class="empty-state">
-        <p>Aucun document disponible</p>
-      </div>
-
-      <div class="document-grid">
-        <div *ngFor="let doc of documents" class="document-card" role="button" tabindex="0" (click)="downloadDocument(doc)" (keydown.enter)="downloadDocument(doc)" (keydown.space)="$event.preventDefault(); downloadDocument(doc)">
-          <div class="document-icon">
-            <span *ngIf="isImage(doc)">🖼️</span>
-            <span *ngIf="isPdf(doc)">📄</span>
-            <span *ngIf="!isImage(doc) && !isPdf(doc)">📎</span>
-          </div>
-          <div class="document-info">
-            <div class="document-name">{{ doc.fileName }}</div>
-            <div class="document-meta">
-              <span class="document-category">{{ doc.categoryDisplay }}</span>
-              <span class="document-size">{{ formatFileSize(doc.fileSize) }}</span>
-            </div>
-            <div class="document-date">{{ doc.uploadedAt | date:'short' }}</div>
-          </div>
-          <div class="download-icon">⬇️</div>
+    
+      @if (!documents || documents.length === 0) {
+        <div class="empty-state">
+          <p>Aucun document disponible</p>
         </div>
+      }
+    
+      <div class="document-grid">
+        @for (doc of documents; track doc) {
+          <div class="document-card" role="button" tabindex="0" (click)="downloadDocument(doc)" (keydown.enter)="downloadDocument(doc)" (keydown.space)="$event.preventDefault(); downloadDocument(doc)">
+            <div class="document-icon">
+              @if (isImage(doc)) {
+                <span>🖼️</span>
+              }
+              @if (isPdf(doc)) {
+                <span>📄</span>
+              }
+              @if (!isImage(doc) && !isPdf(doc)) {
+                <span>📎</span>
+              }
+            </div>
+            <div class="document-info">
+              <div class="document-name">{{ doc.fileName }}</div>
+              <div class="document-meta">
+                <span class="document-category">{{ doc.categoryDisplay }}</span>
+                <span class="document-size">{{ formatFileSize(doc.fileSize) }}</span>
+              </div>
+              <div class="document-date">{{ doc.uploadedAt | date:'short' }}</div>
+            </div>
+            <div class="download-icon">⬇️</div>
+          </div>
+        }
       </div>
     </div>
-  `,
+    `,
   styles: [`
     .document-library {
       padding: 24px;
