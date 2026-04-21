@@ -37,19 +37,19 @@
       <p class="at-section-lead">Atlasia Biz s'adapte à votre métier, quelle que soit votre structure.</p>
     </div>
     <div class="vz-profiles at-reveal">
-      <a routerLink="/biz/agences" class="vz-profile-card">
+      <a routerLink="/biz/agences" class="vz-profile-card animate-scale-in stagger-delay-1">
         <div class="vz-profile-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
         <h3>Agences immobilières</h3>
         <p>Centralisez vos annonces, gérez vos agents et suivez vos leads depuis un tableau de bord unifié.</p>
         <span class="vz-profile-link">Découvrir →</span>
       </a>
-      <a routerLink="/biz/promoteurs" class="vz-profile-card">
+      <a routerLink="/biz/promoteurs" class="vz-profile-card animate-scale-in stagger-delay-2">
         <div class="vz-profile-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
         <h3>Promoteurs</h3>
         <p>Gérez vos programmes immobiliers, diffusez vos lots disponibles et collectez les réservations en ligne.</p>
         <span class="vz-profile-link">Découvrir →</span>
       </a>
-      <div class="vz-profile-card">
+      <div class="vz-profile-card animate-scale-in stagger-delay-3">
         <div class="vz-profile-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
         <h3>Agents indépendants</h3>
         <p>Publiez vos annonces, gérez vos rendez-vous et développez votre réputation professionnelle en ligne.</p>
@@ -68,7 +68,7 @@
       <p class="at-section-lead">Une suite complète d'outils pour piloter votre activité immobilière avec efficacité.</p>
     </div>
     <div class="at-features-grid at-reveal">
-      <div class="at-card" *ngFor="let f of features">
+      <div class="at-card animate-slide-up stagger-delay-{{ (i % 6) + 1 }}" *ngFor="let f of features; let i = index">
         <div class="at-card-icon">
           <!-- Target -->
           <svg *ngIf="f.icon==='target'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
