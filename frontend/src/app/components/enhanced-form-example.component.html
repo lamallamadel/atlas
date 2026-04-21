@@ -133,7 +133,7 @@
             </div>
             <div class="field-helper" *ngIf="!form.get('email')?.touched || (form.get('email')?.valid && !validatingEmail)">
               <mat-icon>info</mat-icon>
-              <span>Format: utilisateur@domaine.com</span>
+              <span>Format: utilisateur&#64;domaine.com</span>
             </div>
             <div class="error-message" *ngIf="form.get('email')?.invalid && form.get('email')?.touched">
               <mat-icon>error</mat-icon>

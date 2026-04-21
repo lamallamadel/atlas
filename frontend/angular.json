@@ -156,19 +156,19 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "frontend:build:production"
+              "buildTarget": "frontend:build:production"
             },
             "development": {
-              "browserTarget": "frontend:build:development"
+              "buildTarget": "frontend:build:development"
             },
             "fr": {
-              "browserTarget": "frontend:build:development,fr"
+              "buildTarget": "frontend:build:development,fr"
             },
             "en": {
-              "browserTarget": "frontend:build:development,en"
+              "buildTarget": "frontend:build:development,en"
             },
             "es": {
-              "browserTarget": "frontend:build:development,es"
+              "buildTarget": "frontend:build:development,es"
             }
           },
           "defaultConfiguration": "development"
@@ -176,9 +176,9 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "frontend:build",
             "format": "xlf2",
-            "outputPath": "src/locale"
+            "outputPath": "src/locale",
+            "buildTarget": "frontend:build"
           }
         },
         "test": {

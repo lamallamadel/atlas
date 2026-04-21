@@ -170,7 +170,7 @@
             </div>
             <div class="field-helper" *ngIf="!partieForm.get('email')?.touched || partieForm.get('email')?.valid">
               <mat-icon>info</mat-icon>
-              <span>Format: exemple@domaine.com</span>
+              <span>Format: exemple&#64;domaine.com</span>
             </div>
             <div class="error-message" *ngIf="partieForm.get('email')?.invalid && partieForm.get('email')?.touched" role="alert">
               <mat-icon>error</mat-icon>
