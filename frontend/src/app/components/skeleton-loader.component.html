@@ -4,7 +4,7 @@
   <!-- Card variant -->
   @if (variant === 'card') {
     <div class="skeleton-card" aria-hidden="true">
-      @for (i of rowsArray; track trackByIndex($index, i)) {
+      @for (i of rowsArray; track $index) {
         <div class="skeleton-card-item">
           <div class="skeleton-card-header">
             <div class="skeleton-rectangle skeleton-avatar"></div>
@@ -30,7 +30,7 @@
   <!-- List variant -->
   @if (variant === 'list') {
     <div class="skeleton-list" aria-hidden="true">
-      @for (i of rowsArray; track trackByIndex($index, i)) {
+      @for (i of rowsArray; track $index) {
         <div class="skeleton-list-item">
           <div class="skeleton-rectangle skeleton-list-icon"></div>
           <div class="skeleton-list-content">
@@ -47,14 +47,14 @@
   @if (variant === 'table') {
     <div class="skeleton-table" aria-hidden="true">
       <div class="skeleton-table-header">
-        @for (i of columnsArray; track trackByIndex($index, i)) {
+        @for (i of columnsArray; track $index) {
           <div class="skeleton-rectangle skeleton-table-header-cell"></div>
         }
       </div>
       <div class="skeleton-table-body">
-        @for (i of rowsArray; track trackByIndex($index, i)) {
+        @for (i of rowsArray; track $index) {
           <div class="skeleton-table-row">
-            @for (j of columnsArray; track trackByIndex($index, j)) {
+            @for (j of columnsArray; track $index) {
               <div class="skeleton-rectangle skeleton-table-cell"></div>
             }
           </div>
@@ -66,7 +66,7 @@
   <!-- Form variant -->
   @if (variant === 'form') {
     <div class="skeleton-form" aria-hidden="true">
-      @for (i of rowsArray; track trackByIndex($index, i)) {
+      @for (i of rowsArray; track $index) {
         <div class="skeleton-form-group">
           <div class="skeleton-rectangle skeleton-form-label"></div>
           <div class="skeleton-rectangle skeleton-form-input"></div>
@@ -103,7 +103,7 @@
         <div class="skeleton-rectangle skeleton-detail-badge"></div>
       </div>
       <div class="skeleton-detail-content">
-        @for (i of rowsArray; track trackByIndex($index, i)) {
+        @for (i of rowsArray; track $index) {
           <div class="skeleton-detail-row">
             <div class="skeleton-rectangle skeleton-detail-label"></div>
             <div class="skeleton-rectangle skeleton-detail-value"></div>
@@ -116,7 +116,7 @@
   <!-- Grid variant -->
   @if (variant === 'grid') {
     <div class="skeleton-grid" aria-hidden="true">
-      @for (i of rowsArray; track trackByIndex($index, i)) {
+      @for (i of rowsArray; track $index) {
         <div class="skeleton-grid-item">
           <div class="skeleton-rectangle skeleton-grid-image"></div>
           <div class="skeleton-grid-content">
@@ -132,7 +132,7 @@
   <!-- Message variant -->
   @if (variant === 'message') {
     <div class="skeleton-message" aria-hidden="true">
-      @for (i of rowsArray; track trackByIndex($index, i)) {
+      @for (i of rowsArray; track $index) {
         <div [ngClass]="{'skeleton-message-item': true, 'skeleton-message-right': i % 2 === 0}">
           @if (i % 2 !== 0) {
             <div class="skeleton-rectangle skeleton-message-avatar"></div>
@@ -153,7 +153,7 @@
   <!-- Timeline variant -->
   @if (variant === 'timeline') {
     <div class="skeleton-timeline" aria-hidden="true">
-      @for (i of rowsArray; track trackByIndex($index, i)) {
+      @for (i of rowsArray; track $index) {
         <div class="skeleton-timeline-item">
           <div class="skeleton-timeline-marker">
             <div class="skeleton-rectangle skeleton-timeline-dot"></div>

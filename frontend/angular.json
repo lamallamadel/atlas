@@ -63,7 +63,7 @@
               "src/styles.scss"
             ],
             "scripts": [],
-            "allowedCommonJsDependencies": [
+            "allowedCommonJsDependencies": ["ical.js", "@fullcalendar/icalendar",
               "jspdf",
               "jspdf-autotable",
               "papaparse",
