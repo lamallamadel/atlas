@@ -1,8 +1,4 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
+import { Routes } from '@angular/router';
 import { VitrineHomeComponent } from './home/vitrine-home.component';
 import { AgencesComponent } from './agences/agences.component';
 import { PromoTeursComponent } from './promoteurs/promoteurs.component';
@@ -10,7 +6,7 @@ import { TarifsComponent } from './tarifs/tarifs.component';
 import { DemoComponent } from './demo/demo.component';
 import { ContactComponent } from './contact/contact.component';
 
-const routes: Routes = [
+export const VITRINE_ROUTES: Routes = [
   { path: '',           component: VitrineHomeComponent },
   { path: 'agences',    component: AgencesComponent },
   { path: 'promoteurs', component: PromoTeursComponent },
@@ -18,19 +14,3 @@ const routes: Routes = [
   { path: 'demo',       component: DemoComponent },
   { path: 'contact',    component: ContactComponent },
 ];
-
-@NgModule({
-    imports: [
-        CommonModule,
-        RouterModule.forChild(routes),
-        FormsModule,
-        ReactiveFormsModule,
-        VitrineHomeComponent,
-        AgencesComponent,
-        PromoTeursComponent,
-        TarifsComponent,
-        DemoComponent,
-        ContactComponent,
-    ]
-})
-export class VitrineModule {}

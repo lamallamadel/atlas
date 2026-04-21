@@ -1,8 +1,8 @@
-import { ApplicationConfig, LOCALE_ID, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
+import { ApplicationConfig, LOCALE_ID, importProvidersFrom, APP_INITIALIZER, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { routes } from './app-routing.module';
+import { routes } from './app.routes';
 import { OAuthModule } from 'angular-oauth2-oidc';
 import { AuthService } from './services/auth.service';
 import { CorrelationIdInterceptor } from './interceptors/correlation-id.interceptor';
@@ -21,6 +21,7 @@ export function initAuth(authService: AuthService): () => Promise<void> {
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes, 
       withInMemoryScrolling({
         scrollPositionRestoration: 'disabled',

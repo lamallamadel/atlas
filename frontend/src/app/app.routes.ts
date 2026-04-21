@@ -1,5 +1,4 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AppLayoutComponent } from './layout/app-layout/app-layout.component';
 import { PublicLayoutComponent } from './layout/public-layout/public-layout.component';
 import { LoginComponent } from './pages/login/login.component';
@@ -28,12 +27,12 @@ export const routes: Routes = [
       // Portail B2C (lazy-loaded)
       {
         path: '',
-        loadChildren: () => import('./pages/portail/portail.module').then(m => m.PortailModule)
+        loadChildren: () => import('./pages/portail/portail.routes').then(m => m.PORTAIL_ROUTES)
       },
       // Vitrine B2B (lazy-loaded)
       {
         path: 'biz',
-        loadChildren: () => import('./pages/vitrine/vitrine.module').then(m => m.VitrineModule)
+        loadChildren: () => import('./pages/vitrine/vitrine.routes').then(m => m.VITRINE_ROUTES)
       },
     ]
   },
@@ -47,7 +46,7 @@ export const routes: Routes = [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
       {
         path: 'dashboard',
-        loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule),
+        loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
         data: { animation: 'DashboardPage' }
       },
       { path: 'reports',       component: ReportsDashboardComponent,     data: { animation: 'ReportsPage' } },
@@ -58,17 +57,17 @@ export const routes: Routes = [
       { path: 'settings',      component: SettingsPageComponent,         data: { animation: 'SettingsPage' } },
       {
         path: 'annonces',
-        loadChildren: () => import('./pages/annonces/annonces.module').then(m => m.AnnoncesModule),
+        loadChildren: () => import('./pages/annonces/annonces.routes').then(m => m.ANNONCES_ROUTES),
         data: { animation: 'AnnoncesPage' }
       },
       {
         path: 'dossiers',
-        loadChildren: () => import('./pages/dossiers/dossiers.module').then(m => m.DossiersModule),
+        loadChildren: () => import('./pages/dossiers/dossiers.routes').then(m => m.DOSSIERS_ROUTES),
         data: { animation: 'DossiersPage' }
       },
       {
         path: 'workflow-admin',
-        loadChildren: () => import('./pages/workflow-admin/workflow-admin.module').then(m => m.WorkflowAdminModule),
+        loadChildren: () => import('./pages/workflow-admin/workflow-admin.routes').then(m => m.WORKFLOW_ADMIN_ROUTES),
         data: { animation: 'WorkflowAdminPage' }
       }
     ]
@@ -88,13 +87,3 @@ export const routes: Routes = [
 
   { path: '**', redirectTo: '' }
 ];
-
-@NgModule({
-  imports: [RouterModule.forRoot(routes, {
-    scrollPositionRestoration: 'disabled',
-    anchorScrolling: 'enabled',
-    scrollOffset: [0, 64]
-  })],
-  exports: [RouterModule]
-})
-export class AppRoutingModule { }

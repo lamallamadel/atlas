@@ -1,33 +1,14 @@
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
-import { ReactiveFormsModule, FormsModule } from '@angular/forms';
-
+import { Routes } from '@angular/router';
 import { PortailHomeComponent } from './home/portail-home.component';
 import { RechercheComponent } from './recherche/recherche.component';
 import { AnnonceDetailComponent } from './annonce-detail/annonce-detail.component';
 import { MentionsLegalesComponent } from './mentions-legales/mentions-legales.component';
 import { ConfidentialiteComponent } from './confidentialite/confidentialite.component';
 
-const routes: Routes = [
+export const PORTAIL_ROUTES: Routes = [
   { path: '', component: PortailHomeComponent },
   { path: 'recherche', component: RechercheComponent },
   { path: 'annonces/:id', component: AnnonceDetailComponent },
   { path: 'mentions-legales', component: MentionsLegalesComponent },
   { path: 'confidentialite', component: ConfidentialiteComponent },
 ];
-
-@NgModule({
-    imports: [
-        CommonModule,
-        RouterModule.forChild(routes),
-        FormsModule,
-        ReactiveFormsModule,
-        PortailHomeComponent,
-        RechercheComponent,
-        AnnonceDetailComponent,
-        MentionsLegalesComponent,
-        ConfidentialiteComponent,
-    ]
-})
-export class PortailModule {}
