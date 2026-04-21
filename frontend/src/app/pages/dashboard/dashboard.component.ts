@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, AfterViewInit, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -105,9 +105,9 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   yieldAnnonces: AnnonceResponse[] = [];
   loadingYield = false;
 
-  @ViewChild('annoncesChart') annoncesChartRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('dossiersChart') dossiersChartRef!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('conversionWhatsAppChart') conversionWhatsAppChartRef!: ElementRef<HTMLCanvasElement>;
+  readonly annoncesChartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('annoncesChart');
+  readonly dossiersChartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('dossiersChart');
+  readonly conversionWhatsAppChartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('conversionWhatsAppChart');
 
   private annoncesChart?: Chart;
   private dossiersChart?: Chart;
@@ -347,23 +347,26 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async initCharts(): Promise<void> {
-    if (this.annoncesChartRef) {
+    const annoncesChartRef = this.annoncesChartRef();
+    if (annoncesChartRef) {
       this.annoncesChart = await this.createChart(
-        this.annoncesChartRef.nativeElement,
+        annoncesChartRef.nativeElement,
         this.kpiCards['annoncesActives']
       );
     }
 
-    if (this.dossiersChartRef) {
+    const dossiersChartRef = this.dossiersChartRef();
+    if (dossiersChartRef) {
       this.dossiersChart = await this.createChart(
-        this.dossiersChartRef.nativeElement,
+        dossiersChartRef.nativeElement,
         this.kpiCards['dossiersATraiter']
       );
     }
 
-    if (this.conversionWhatsAppChartRef) {
+    const conversionWhatsAppChartRef = this.conversionWhatsAppChartRef();
+    if (conversionWhatsAppChartRef) {
       this.conversionWhatsAppChart = await this.createChart(
-        this.conversionWhatsAppChartRef.nativeElement,
+        conversionWhatsAppChartRef.nativeElement,
         this.kpiCards['conversionWhatsApp']
       );
     }

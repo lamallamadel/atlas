@@ -1,5 +1,5 @@
 <div class="photo-gallery-container">
-  @if (!photos || photos.length === 0) {
+  @if (!photos() || photos().length === 0) {
     <div
       class="empty-state">
       <mat-icon class="empty-icon">photo_library</mat-icon>
@@ -7,11 +7,11 @@
     </div>
   }
 
-  @if (photos && photos.length > 0) {
+  @if (photos() && photos().length > 0) {
     <div
       class="masonry-grid"
       cdkDropList
-      [cdkDropListDisabled]="!editable"
+      [cdkDropListDisabled]="!editable()"
       (cdkDropListDropped)="onDrop($event)">
       @for (column of getMasonryColumns(); track column; let colIndex = $index) {
         <div
@@ -19,10 +19,10 @@
           @for (photo of column; track photo; let i = $index) {
             <div
               class="photo-item"
-              [class.editable]="editable"
+              [class.editable]="editable()"
               cdkDrag
-              [cdkDragDisabled]="!editable"
-              role="button" tabindex="0" (click)="openLightbox(photos.indexOf(photo))" (keydown.enter)="openLightbox(photos.indexOf(photo))" (keydown.space)="$event.preventDefault(); openLightbox(photos.indexOf(photo))">
+              [cdkDragDisabled]="!editable()"
+              role="button" tabindex="0" (click)="openLightbox(photos().indexOf(photo))" (keydown.enter)="openLightbox(photos().indexOf(photo))" (keydown.space)="$event.preventDefault(); openLightbox(photos().indexOf(photo))">
               <div class="photo-wrapper">
                 <div
                   class="photo-placeholder"
@@ -39,7 +39,7 @@
                   <div class="photo-overlay">
                     <mat-icon class="zoom-icon">zoom_in</mat-icon>
                   </div>
-                  @if (editable) {
+                  @if (editable()) {
                     <button
                       mat-icon-button
                       class="delete-btn"
@@ -48,7 +48,7 @@
                       <mat-icon>delete</mat-icon>
                     </button>
                   }
-                  @if (editable) {
+                  @if (editable()) {
                     <div class="drag-handle" cdkDragHandle>
                       <mat-icon>drag_indicator</mat-icon>
                     </div>
@@ -119,7 +119,7 @@
             <mat-icon>chevron_left</mat-icon>
           </button>
         }
-        @if (currentPhotoIndex < photos.length - 1) {
+        @if (currentPhotoIndex < photos().length - 1) {
           <button
             mat-icon-button
             class="lightbox-nav lightbox-next"
@@ -144,7 +144,7 @@
         @if (getCurrentPhoto(); as currentPhoto) {
           <div class="lightbox-info">
             <div class="photo-counter">
-              {{ currentPhotoIndex + 1 }} / {{ photos.length }}
+              {{ currentPhotoIndex + 1 }} / {{ photos().length }}
             </div>
             @if (currentPhoto.title) {
               <div class="photo-title-lightbox">
@@ -155,7 +155,7 @@
         }
         <div class="lightbox-thumbnails">
           <div class="thumbnails-wrapper">
-            @for (photo of photos; track photo; let i = $index) {
+            @for (photo of photos(); track photo; let i = $index) {
               <div
                 class="thumbnail-item"
                 role="button"

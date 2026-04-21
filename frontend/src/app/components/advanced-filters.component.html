@@ -20,7 +20,7 @@
             <mat-form-field appearance="outline" class="field-selector">
               <mat-label>Champ</mat-label>
               <mat-select formControlName="field" (selectionChange)="onFieldChange(i)">
-                @for (field of fields; track field) {
+                @for (field of fields(); track field) {
                   <mat-option [value]="field.key">
                     {{ field.label }}
                   </mat-option>

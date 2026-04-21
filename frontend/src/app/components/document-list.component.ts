@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { DocumentApiService, DocumentResponse } from '../services/document-api.service';
@@ -17,7 +17,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [DocumentUploadComponent, LoadingSkeletonComponent, MatButton, MatIcon, MatIconButton, MatTooltip]
 })
 export class DocumentListComponent implements OnInit {
-  @Input() dossierId!: number;
+  readonly dossierId = input.required<number>();
 
   documents: DocumentResponse[] = [];
   loading = false;
@@ -34,14 +34,15 @@ export class DocumentListComponent implements OnInit {
   }
 
   loadDocuments(): void {
-    if (!this.dossierId) {
+    const dossierId = this.dossierId();
+    if (!dossierId) {
       return;
     }
 
     this.loading = true;
     this.error = null;
 
-    this.documentApiService.listByDossier(this.dossierId, 0, 100)
+    this.documentApiService.listByDossier(dossierId, 0, 100)
       .subscribe({
         next: (response) => {
           this.documents = response.content;

@@ -19,15 +19,15 @@ describe('LogoComponent', () => {
   });
 
   it('should have default variant as horizontal', () => {
-    expect(component.variant).toBe('horizontal');
+    expect(component.variant()).toBe('horizontal');
   });
 
   it('should have default theme as auto', () => {
-    expect(component.theme).toBe('auto');
+    expect(component.theme()).toBe('auto');
   });
 
   it('should not animate by default', () => {
-    expect(component.animate).toBe(false);
+    expect(component.animate()).toBe(false);
   });
 
   it('should generate correct logo path for horizontal variant', () => {

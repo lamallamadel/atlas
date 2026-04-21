@@ -22,9 +22,9 @@ describe('BadgeComponent', () => {
   });
 
   it('should apply default variant, size, and color', () => {
-    expect(component.variant).toBe('soft');
-    expect(component.size).toBe('md');
-    expect(component.color).toBe('neutral');
+    expect(component.variant()).toBe('soft');
+    expect(component.size()).toBe('md');
+    expect(component.color()).toBe('neutral');
   });
 
   it('should generate correct badge classes', () => {

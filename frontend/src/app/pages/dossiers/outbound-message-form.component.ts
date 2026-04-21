@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, OnInit, input, output } from '@angular/core';
 import { OutboundMessageApiService, OutboundMessageTemplate, OutboundMessageCreateRequest } from '../../services/outbound-message-api.service';
 import { FormsModule } from '@angular/forms';
 
@@ -9,10 +9,10 @@ import { FormsModule } from '@angular/forms';
     imports: [FormsModule]
 })
 export class OutboundMessageFormComponent implements OnInit {
-  @Input() dossierId!: number;
-  @Input() recipientPhone?: string;
-  @Input() leadName?: string;
-  @Output() messageSent = new EventEmitter<void>();
+  readonly dossierId = input.required<number>();
+  readonly recipientPhone = input<string>();
+  readonly leadName = input<string>();
+  readonly messageSent = output<void>();
 
   templates: OutboundMessageTemplate[] = [];
   selectedTemplate: OutboundMessageTemplate | null = null;
@@ -44,8 +44,9 @@ export class OutboundMessageFormComponent implements OnInit {
   }
 
   initializeDefaultVariables(): void {
-    if (this.leadName) {
-      this.templateVariables['name'] = this.leadName;
+    const leadName = this.leadName();
+    if (leadName) {
+      this.templateVariables['name'] = leadName;
     }
   }
 
@@ -67,8 +68,9 @@ export class OutboundMessageFormComponent implements OnInit {
 
     this.templateVariables = {};
     this.selectedTemplate.variables.forEach(variable => {
-      if (variable === 'name' && this.leadName) {
-        this.templateVariables[variable] = this.leadName;
+      const leadName = this.leadName();
+      if (variable === 'name' && leadName) {
+        this.templateVariables[variable] = leadName;
       } else {
         this.templateVariables[variable] = '';
       }
@@ -93,7 +95,8 @@ export class OutboundMessageFormComponent implements OnInit {
   }
 
   canSendMessage(): boolean {
-    if (!this.recipientPhone || this.recipientPhone.trim() === '') {
+    const recipientPhone = this.recipientPhone();
+    if (!recipientPhone || recipientPhone.trim() === '') {
       return false;
     }
 
@@ -122,8 +125,8 @@ export class OutboundMessageFormComponent implements OnInit {
     this.error = null;
 
     const request: OutboundMessageCreateRequest = {
-      dossierId: this.dossierId,
-      recipientPhone: this.recipientPhone!,
+      dossierId: this.dossierId(),
+      recipientPhone: this.recipientPhone()!,
       content: this.messageContent,
       channel: 'WHATSAPP',
       templateId: this.selectedTemplate?.id,
@@ -134,6 +137,7 @@ export class OutboundMessageFormComponent implements OnInit {
       next: () => {
         this.sending = false;
         this.resetForm();
+        // TODO: The 'emit' function requires a mandatory void argument
         this.messageSent.emit();
       },
       error: (err) => {

@@ -1,6 +1,6 @@
 <div class="elegant-stepper-wrapper">
   <!-- Percentage Progress Bar (Optional) -->
-  @if (showPercentage) {
+  @if (showPercentage()) {
     <div class="progress-bar-wrapper">
       <div class="progress-bar-container">
         <div class="progress-bar-fill" [style.width.%]="progressPercentage"></div>
@@ -15,14 +15,14 @@
       <div class="stepper-line-progress" [style.width.%]="getLineProgress()"></div>
     </div>
 
-    @for (step of steps; track step; let i = $index) {
+    @for (step of steps(); track step; let i = $index) {
       <div
         class="stepper-step"
          [ngClass]="{
-           'step-active': i === currentStep,
+           'step-active': i === currentStep(),
            'step-completed': isStepCompleted(i),
            'step-error': step.error,
-           'step-pending': !isStepCompleted(i) && i !== currentStep
+           'step-pending': !isStepCompleted(i) && i !== currentStep()
          }">
         <div class="step-circle">
           @if (isStepCompleted(i) && !step.error) {

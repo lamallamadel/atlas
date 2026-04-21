@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ElementRef, AfterViewInit, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -34,10 +34,10 @@ import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, Ma
     imports: [MatFormField, MatLabel, MatInput, MatDatepickerInput, FormsModule, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton, MatIcon, MatProgressSpinner, LoadingSkeletonComponent, MatCard, MatCardContent, MatCardHeader, MatCardTitle, MatTooltip, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, NgChartsModule, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class ReportsDashboardComponent implements OnInit, AfterViewInit {
-  @ViewChild('conversionFunnelCanvas') conversionFunnelCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('agentPerformanceCanvas') agentPerformanceCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('revenueForecastCanvas') revenueForecastCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('leadSourceCanvas') leadSourceCanvas!: ElementRef<HTMLCanvasElement>;
+  readonly conversionFunnelCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('conversionFunnelCanvas');
+  readonly agentPerformanceCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('agentPerformanceCanvas');
+  readonly revenueForecastCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('revenueForecastCanvas');
+  readonly leadSourceCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('leadSourceCanvas');
 
   kpiReport: KpiReportResponse | null = null;
   pipelineSummary: PipelineSummaryResponse | null = null;
@@ -294,11 +294,12 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     const { Chart } = await import('chart.js');
 
     // Render conversion funnel chart
-    if (this.conversionFunnelCanvas && this.analyticsData.conversionFunnel.length > 0) {
+    const conversionFunnelCanvas = this.conversionFunnelCanvas();
+    if (conversionFunnelCanvas && this.analyticsData.conversionFunnel.length > 0) {
       if (this.conversionFunnelChart) {
         this.conversionFunnelChart.destroy();
       }
-      this.conversionFunnelChart = new Chart(this.conversionFunnelCanvas.nativeElement, {
+      this.conversionFunnelChart = new Chart(conversionFunnelCanvas.nativeElement, {
         type: this.conversionFunnelChartType as any,
         data: this.conversionFunnelChartData,
         options: this.conversionFunnelChartOptions
@@ -306,11 +307,12 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     }
 
     // Render agent performance chart
-    if (this.agentPerformanceCanvas && this.analyticsData.agentPerformance.length > 0) {
+    const agentPerformanceCanvas = this.agentPerformanceCanvas();
+    if (agentPerformanceCanvas && this.analyticsData.agentPerformance.length > 0) {
       if (this.agentPerformanceChart) {
         this.agentPerformanceChart.destroy();
       }
-      this.agentPerformanceChart = new Chart(this.agentPerformanceCanvas.nativeElement, {
+      this.agentPerformanceChart = new Chart(agentPerformanceCanvas.nativeElement, {
         type: this.agentPerformanceChartType as any,
         data: this.agentPerformanceChartData,
         options: this.agentPerformanceChartOptions
@@ -318,11 +320,12 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     }
 
     // Render revenue forecast chart
-    if (this.revenueForecastCanvas && this.analyticsData.revenueForecast.length > 0) {
+    const revenueForecastCanvas = this.revenueForecastCanvas();
+    if (revenueForecastCanvas && this.analyticsData.revenueForecast.length > 0) {
       if (this.revenueForecastChart) {
         this.revenueForecastChart.destroy();
       }
-      this.revenueForecastChart = new Chart(this.revenueForecastCanvas.nativeElement, {
+      this.revenueForecastChart = new Chart(revenueForecastCanvas.nativeElement, {
         type: this.revenueForecastChartType as any,
         data: this.revenueForecastChartData,
         options: this.revenueForecastChartOptions
@@ -330,11 +333,12 @@ export class ReportsDashboardComponent implements OnInit, AfterViewInit {
     }
 
     // Render lead source chart
-    if (this.leadSourceCanvas && this.analyticsData.leadSources.length > 0) {
+    const leadSourceCanvas = this.leadSourceCanvas();
+    if (leadSourceCanvas && this.analyticsData.leadSources.length > 0) {
       if (this.leadSourceChart) {
         this.leadSourceChart.destroy();
       }
-      this.leadSourceChart = new Chart(this.leadSourceCanvas.nativeElement, {
+      this.leadSourceChart = new Chart(leadSourceCanvas.nativeElement, {
         type: this.leadSourceChartType as any,
         data: this.leadSourceChartData,
         options: this.leadSourceChartOptions

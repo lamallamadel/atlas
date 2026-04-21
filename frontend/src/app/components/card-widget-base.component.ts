@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output } from '@angular/core';
 import { Subject } from 'rxjs';
 
 export interface WidgetConfig {
@@ -18,11 +18,11 @@ export interface WidgetConfig {
     standalone: false
 })
 export abstract class CardWidgetBaseComponent implements OnInit, OnDestroy {
-  @Input() config!: WidgetConfig;
-  @Input() editMode = false;
-  @Output() remove = new EventEmitter<string>();
-  @Output() settingsChange = new EventEmitter<Record<string, unknown>>();
-  @Output() refresh = new EventEmitter<void>();
+  readonly config = input.required<WidgetConfig>();
+  readonly editMode = input(false);
+  readonly remove = output<string>();
+  readonly settingsChange = output<Record<string, unknown>>();
+  readonly refresh = output<void>();
 
   loading = false;
   error: string | null = null;
@@ -41,17 +41,18 @@ export abstract class CardWidgetBaseComponent implements OnInit, OnDestroy {
   abstract loadData(): void;
 
   onRemove(): void {
-    this.remove.emit(this.config.id);
+    this.remove.emit(this.config().id);
   }
 
   onRefresh(): void {
     this.loadData();
+    // TODO: The 'emit' function requires a mandatory void argument
     this.refresh.emit();
   }
 
   updateSettings(settings: Record<string, unknown>): void {
-    this.config.settings = { ...this.config.settings, ...settings };
-    this.settingsChange.emit(this.config.settings);
+    config.settings = { ...config.settings, ...settings };
+    this.settingsChange.emit(config.settings);
     this.loadData();
   }
 
@@ -64,12 +65,13 @@ export abstract class CardWidgetBaseComponent implements OnInit, OnDestroy {
   }
 
   private setupAutoRefresh(): void {
-    if (this.config.refreshInterval && this.config.refreshInterval > 0) {
+    const config = this.config();
+    if (config.refreshInterval && config.refreshInterval > 0) {
       setInterval(() => {
-        if (!this.editMode) {
+        if (!this.editMode()) {
           this.loadData();
         }
-      }, this.config.refreshInterval * 1000);
+      }, config.refreshInterval * 1000);
     }
   }
 }

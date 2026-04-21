@@ -4,9 +4,9 @@
     <div class="recipient-info">
       <mat-icon class="whatsapp-icon">chat</mat-icon>
       <div class="recipient-details">
-        <div class="recipient-name">{{ recipientName || 'Contact WhatsApp' }}</div>
-        @if (recipientPhone) {
-          <div class="recipient-phone">{{ recipientPhone }}</div>
+        <div class="recipient-name">{{ recipientName() || 'Contact WhatsApp' }}</div>
+        @if (recipientPhone()) {
+          <div class="recipient-phone">{{ recipientPhone() }}</div>
         }
       </div>
     </div>

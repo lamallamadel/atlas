@@ -41,6 +41,6 @@ describe('SuccessAnimationComponent', () => {
   });
 
   it('should have default size as medium', () => {
-    expect(component.size).toBe('medium');
+    expect(component.size()).toBe('medium');
   });
 });

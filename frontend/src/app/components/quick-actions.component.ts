@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, input } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
@@ -24,7 +24,7 @@ import { MatIcon } from '@angular/material/icon';
     imports: [MatFabButton, MatTooltip, MatIcon, MatIconButton, MatButton]
 })
 export class QuickActionsComponent implements OnInit, OnDestroy {
-  @Input() dossier: DossierResponse | null = null;
+  readonly dossier = input<DossierResponse | null>(null);
   
   menuOpen = false;
   recentActions: RecentAction[] = [];
@@ -161,25 +161,28 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
   }
 
   private loadRecentActions(): void {
-    if (this.dossier) {
-      this.recentActions = this.quickActionsService.getRecentActions(this.dossier.id);
+    const dossier = this.dossier();
+    if (dossier) {
+      this.recentActions = this.quickActionsService.getRecentActions(dossier.id);
     }
   }
 
   private canCallClient(): boolean {
-    return this.voipConfigured && !!this.dossier?.leadPhone;
+    return this.voipConfigured && !!this.dossier()?.leadPhone;
   }
 
   private isStatusChangeDisabled(): boolean {
-    if (!this.dossier) {
+    const dossier = this.dossier();
+    if (!dossier) {
       return true;
     }
-    return this.dossier.status === DossierStatus.WON || 
-           this.dossier.status === DossierStatus.LOST;
+    return dossier.status === DossierStatus.WON || 
+           dossier.status === DossierStatus.LOST;
   }
 
   callClient(): void {
-    if (!this.dossier || !this.dossier.leadPhone) {
+    const dossier = this.dossier();
+    if (!dossier || !dossier.leadPhone) {
       this.snackBar.open('Aucun numéro de téléphone disponible', 'Fermer', {
         duration: 3000,
         horizontalPosition: 'center',
@@ -199,15 +202,15 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.voipService.initiateCall(this.dossier.leadPhone, this.dossier.leadName || 'Client');
+    this.voipService.initiateCall(dossier.leadPhone, dossier.leadName || 'Client');
     this.quickActionsService.addRecentAction({
-      dossierId: this.dossier.id,
+      dossierId: dossier.id,
       actionId: 'call-client',
       actionLabel: 'Appel client',
       timestamp: new Date().toISOString()
     });
     
-    this.snackBar.open(`Appel en cours vers ${this.dossier.leadName || this.dossier.leadPhone}`, 'Fermer', {
+    this.snackBar.open(`Appel en cours vers ${dossier.leadName || dossier.leadPhone}`, 'Fermer', {
       duration: 3000,
       horizontalPosition: 'center',
       verticalPosition: 'top',
@@ -218,12 +221,13 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
-    if (!this.dossier) {
+    const dossier = this.dossier();
+    if (!dossier) {
       return;
     }
 
     const dialogData: MessageFormData = {
-      dossierId: this.dossier.id
+      dossierId: dossier.id
     };
 
     const dialogRef = this.dialog.open(MessageFormDialogComponent, {
@@ -245,9 +249,10 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
               panelClass: ['success-snackbar']
             });
             
-            if (this.dossier) {
+            const dossierValue = this.dossier();
+            if (dossierValue) {
               this.quickActionsService.addRecentAction({
-                dossierId: this.dossier.id,
+                dossierId: dossierValue.id,
                 actionId: 'send-message',
                 actionLabel: 'Message envoyé',
                 timestamp: new Date().toISOString()
@@ -271,12 +276,13 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
   }
 
   scheduleAppointment(): void {
-    if (!this.dossier) {
+    const dossier = this.dossier();
+    if (!dossier) {
       return;
     }
 
     const dialogData: AppointmentFormData = {
-      dossierId: this.dossier.id
+      dossierId: dossier.id
     };
 
     const dialogRef = this.dialog.open(AppointmentFormDialogComponent, {
@@ -308,9 +314,10 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
               panelClass: ['success-snackbar']
             });
             
-            if (this.dossier) {
+            const dossierValue = this.dossier();
+            if (dossierValue) {
               this.quickActionsService.addRecentAction({
-                dossierId: this.dossier.id,
+                dossierId: dossierValue.id,
                 actionId: 'schedule-appointment',
                 actionLabel: 'Rendez-vous planifié',
                 timestamp: new Date().toISOString()
@@ -334,7 +341,7 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
   }
 
   changeStatus(): void {
-    if (!this.dossier || this.isStatusChangeDisabled()) {
+    if (!this.dossier() || this.isStatusChangeDisabled()) {
       return;
     }
     
@@ -348,11 +355,12 @@ export class QuickActionsComponent implements OnInit, OnDestroy {
   }
 
   private getAvailableStatusOptions(): DossierStatus[] {
-    if (!this.dossier) {
+    const dossier = this.dossier();
+    if (!dossier) {
       return [];
     }
 
-    const currentStatus = this.dossier.status;
+    const currentStatus = dossier.status;
 
     switch (currentStatus) {
       case DossierStatus.WON:

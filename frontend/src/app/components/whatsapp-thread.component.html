@@ -1,5 +1,5 @@
-<div class="whatsapp-thread-container" [class.offline]="!isOnline">
-  @if (!isOnline) {
+<div class="whatsapp-thread-container" [class.offline]="!isOnline()">
+  @if (!isOnline()) {
     <div class="offline-banner">
       <mat-icon>cloud_off</mat-icon>
       <span>Mode hors ligne - Les messages seront envoyés dès la reconnexion</span>
@@ -10,16 +10,16 @@
     #viewport
     itemSize="80"
     class="messages-viewport"
-    [class.loading]="loading">
+    [class.loading]="loading()">
 
-    @if (loading) {
+    @if (loading()) {
       <div class="loading-indicator">
         <mat-spinner diameter="40"></mat-spinner>
       </div>
     }
 
     <div class="messages-list">
-      <ng-container *cdkVirtualFor="let message of messages; trackBy: trackByMessageId; let i = index">
+      <ng-container *cdkVirtualFor="let message of messages(); trackBy: trackByMessageId; let i = index">
 
         <!-- Date divider -->
         @if (showDateDivider(i)) {

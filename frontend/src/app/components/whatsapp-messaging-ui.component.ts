@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, AfterViewChecked, ChangeDetectorRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, ChangeDetectorRef, HostListener, input, output, viewChild } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
@@ -47,14 +47,17 @@ export interface MessageAttachment {
     imports: [MatIcon, MatIconButton, MatTooltip, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, MatProgressSpinner, CdkVirtualForOf, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, CdkTextareaAutosize, MatFabButton]
 })
 export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterViewChecked {
-  @Input() dossierId!: number;
-  @Input() recipientPhone?: string;
-  @Input() recipientName?: string;
-  @Output() messageActionEvent = new EventEmitter<{ type: string; message: MessageResponse }>();
+  readonly dossierId = input.required<number>();
+  readonly recipientPhone = input<string>();
+  readonly recipientName = input<string>();
+  readonly messageActionEvent = output<{
+    type: string;
+    message: MessageResponse;
+}>();
 
-  @ViewChild(CdkVirtualScrollViewport) viewport?: CdkVirtualScrollViewport;
-  @ViewChild('messageInput') messageInputRef?: any;
-  @ViewChild('fileInput') fileInput?: any;
+  readonly viewport = viewChild(CdkVirtualScrollViewport);
+  readonly messageInputRef = viewChild<any>('messageInput');
+  readonly fileInput = viewChild<any>('fileInput');
 
   messages: MessageResponse[] = [];
   templates: OutboundMessageTemplate[] = [];
@@ -111,7 +114,7 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   }
 
   ngAfterViewChecked(): void {
-    if (this.shouldScrollToBottom && this.viewport) {
+    if (this.shouldScrollToBottom && this.viewport()) {
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
     }
@@ -181,7 +184,7 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
 
   private loadConsent(): void {
     this.consentementApiService.list({
-      dossierId: this.dossierId,
+      dossierId: this.dossierId(),
       channel: ConsentementChannel.WHATSAPP
     }).subscribe({
       next: (response) => {
@@ -212,7 +215,7 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
   loadMessages(): void {
     this.loading = true;
     this.messageApiService.list({
-      dossierId: this.dossierId,
+      dossierId: this.dossierId(),
       channel: MessageChannel.WHATSAPP,
       size: 100,
       sort: 'timestamp,asc'
@@ -314,8 +317,9 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
       }
     }
     
-    if (this.fileInput) {
-      this.fileInput.nativeElement.value = '';
+    const fileInput = this.fileInput();
+    if (fileInput) {
+      fileInput.nativeElement.value = '';
     }
   }
 
@@ -400,7 +404,7 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
     this.sending = true;
 
     const request: MessageCreateRequest = {
-      dossierId: this.dossierId,
+      dossierId: this.dossierId(),
       channel: MessageChannel.WHATSAPP,
       direction: MessageDirection.OUTBOUND,
       content: this.messageContent.trim(),
@@ -432,15 +436,17 @@ export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterVie
     this.templateVariables = {};
     this.attachments = [];
     
-    if (this.messageInputRef) {
-      const textarea = this.messageInputRef.nativeElement;
+    const messageInputRef = this.messageInputRef();
+    if (messageInputRef) {
+      const textarea = messageInputRef.nativeElement;
       textarea.style.height = 'auto';
     }
   }
 
   scrollToBottom(): void {
-    if (this.viewport) {
-      this.viewport.scrollToIndex(this.messages.length - 1, 'smooth');
+    const viewport = this.viewport();
+    if (viewport) {
+      viewport.scrollToIndex(this.messages.length - 1, 'smooth');
     }
   }
 

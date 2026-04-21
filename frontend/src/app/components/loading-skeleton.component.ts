@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { SpinnerVariant, SpinnerSize, SpinnerColor, SpinnerComponent } from './spinner.component';
 import { NgClass } from '@angular/common';
 
@@ -12,23 +12,23 @@ export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kp
     imports: [NgClass, SpinnerComponent]
 })
 export class LoadingSkeletonComponent {
-  @Input() variant: SkeletonVariant = 'card';
-  @Input() rows = 3;
-  @Input() columns = 8;
-  @Input() animate = true;
+  readonly variant = input<SkeletonVariant>('card');
+  readonly rows = input(3);
+  readonly columns = input(8);
+  readonly animate = input(true);
   
   // Spinner integration properties
-  @Input() spinnerVariant: SpinnerVariant = 'circular';
-  @Input() spinnerSize: SpinnerSize = 'md';
-  @Input() spinnerColor: SpinnerColor = 'primary';
-  @Input() spinnerMessage?: string;
+  readonly spinnerVariant = input<SpinnerVariant>('circular');
+  readonly spinnerSize = input<SpinnerSize>('md');
+  readonly spinnerColor = input<SpinnerColor>('primary');
+  readonly spinnerMessage = input<string>();
 
   get rowsArray(): number[] {
-    return Array(this.rows).fill(0).map((_, i) => i);
+    return Array(this.rows()).fill(0).map((_, i) => i);
   }
 
   get columnsArray(): number[] {
-    return Array(this.columns).fill(0).map((_, i) => i);
+    return Array(this.columns()).fill(0).map((_, i) => i);
   }
 
   trackByIndex(index: number): number {

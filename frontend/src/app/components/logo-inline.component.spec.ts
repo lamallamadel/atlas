@@ -19,15 +19,15 @@ describe('LogoInlineComponent', () => {
   });
 
   it('should have default variant as horizontal', () => {
-    expect(component.variant).toBe('horizontal');
+    expect(component.variant()).toBe('horizontal');
   });
 
   it('should have default theme as auto', () => {
-    expect(component.theme).toBe('auto');
+    expect(component.theme()).toBe('auto');
   });
 
   it('should animate by default', () => {
-    expect(component.animate).toBe(true);
+    expect(component.animate()).toBe(true);
   });
 
   it('should generate inline SVG content', () => {

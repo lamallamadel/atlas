@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy, HostListener } from '@angular/core';
+import { Component, OnInit, ElementRef, AfterViewInit, OnDestroy, HostListener, viewChild } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
@@ -48,7 +48,7 @@ interface FuzzyResult {
     imports: [FocusTrapDirective, MatIcon, FormsModule, MatProgressSpinner, AsyncPipe]
 })
 export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy {
-  @ViewChild('commandInput') commandInput!: ElementRef;
+  readonly commandInput = viewChild.required<ElementRef>('commandInput');
 
   visible$: Observable<boolean>;
   searchQuery = '';
@@ -85,7 +85,7 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     this.visible$.pipe(takeUntil(this.destroy$)).subscribe(visible => {
       if (visible) {
         setTimeout(() => {
-          this.commandInput?.nativeElement?.focus();
+          this.commandInput()?.nativeElement?.focus();
           this.updateFilteredItems();
         }, 100);
       } else {
@@ -98,8 +98,8 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     this.keyboardShortcutService.commandPaletteVisible$
       .pipe(takeUntil(this.destroy$))
       .subscribe(visible => {
-        if (visible && this.commandInput) {
-          setTimeout(() => this.commandInput.nativeElement.focus(), 100);
+        if (visible && this.commandInput()) {
+          setTimeout(() => this.commandInput().nativeElement.focus(), 100);
         }
       });
   }

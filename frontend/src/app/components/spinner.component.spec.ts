@@ -20,11 +20,11 @@ describe('SpinnerComponent', () => {
   });
 
   it('should have default values', () => {
-    expect(component.variant).toBe('circular');
-    expect(component.size).toBe('md');
-    expect(component.color).toBe('primary');
-    expect(component.timeout).toBe(5000);
-    expect(component.showCancelButton).toBe(false);
+    expect(component.variant()).toBe('circular');
+    expect(component.size()).toBe('md');
+    expect(component.color()).toBe('primary');
+    expect(component.timeout()).toBe(5000);
+    expect(component.showCancelButton()).toBe(false);
   });
 
   it('should display circular spinner by default', () => {

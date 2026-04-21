@@ -22,12 +22,12 @@ describe('LottieAnimationComponent', () => {
   });
 
   it('should have default values', () => {
-    expect(component.width).toBe(200);
-    expect(component.height).toBe(200);
-    expect(component.loop).toBe(true);
-    expect(component.autoplay).toBe(true);
-    expect(component.speed).toBe(1);
-    expect(component.showControls).toBe(false);
+    expect(component.width()).toBe(200);
+    expect(component.height()).toBe(200);
+    expect(component.loop()).toBe(true);
+    expect(component.autoplay()).toBe(true);
+    expect(component.speed()).toBe(1);
+    expect(component.showControls()).toBe(false);
   });
 
   it('should set useFallback to true on animation load error', fakeAsync(() => {
@@ -92,6 +92,7 @@ describe('LottieAnimationComponent', () => {
     component.animationComplete.subscribe(() => {
       done();
     });
+    // TODO: The 'emit' function requires a mandatory void argument
     component.animationComplete.emit();
   });
 
@@ -99,6 +100,7 @@ describe('LottieAnimationComponent', () => {
     component.loopComplete.subscribe(() => {
       done();
     });
+    // TODO: The 'emit' function requires a mandatory void argument
     component.loopComplete.emit();
   });
 

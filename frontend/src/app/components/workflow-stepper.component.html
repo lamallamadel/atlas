@@ -4,7 +4,7 @@
       <mat-icon aria-hidden="true">timeline</mat-icon>
       <span>Pipeline dossier</span>
     </div>
-    @if (status) {
+    @if (status()) {
       <div class="workflow-meta">
         @if (isClosed) {
           <span class="workflow-chip" [ngClass]="closeVariantClass">

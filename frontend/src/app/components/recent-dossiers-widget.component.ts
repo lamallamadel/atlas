@@ -18,10 +18,10 @@ interface Dossier {
     selector: 'app-recent-dossiers-widget',
     imports: [RouterModule],
     template: `
-    <div class="widget" [class.edit-mode]="editMode">
+    <div class="widget" [class.edit-mode]="editMode()">
       <div class="widget-header">
-        <h3>{{ config.title || 'Dossiers récents' }}</h3>
-        @if (editMode) {
+        <h3>{{ config().title || 'Dossiers récents' }}</h3>
+        @if (editMode()) {
           <div class="widget-actions">
             <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
               <span class="material-icons">refresh</span>
@@ -243,7 +243,7 @@ export class RecentDossiersWidgetComponent extends CardWidgetBaseComponent {
     this.setLoading(true);
     this.setError(null);
 
-    const limit = this.config.settings?.['limit'] as number || 5;
+    const limit = this.config().settings?.['limit'] as number || 5;
 
     this.dossierService.list({ size: limit, sort: 'createdAt,desc' })
       .pipe(takeUntil(this.destroy$))

@@ -1,10 +1,10 @@
-import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Directive, ElementRef, OnDestroy, OnInit, input, output } from '@angular/core';
 
 @Directive({ selector: '[appInfiniteScroll]' })
 export class InfiniteScrollDirective implements OnInit, OnDestroy {
-  @Input() scrollThreshold = 0.8;
-  @Input() scrollDebounceTime = 200;
-  @Output() scrolled = new EventEmitter<void>();
+  readonly scrollThreshold = input(0.8);
+  readonly scrollDebounceTime = input(200);
+  readonly scrolled = output<void>();
 
   private intersectionObserver?: IntersectionObserver;
   private scrollTimeout?: any;
@@ -38,7 +38,7 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
         },
         {
           root: null,
-          rootMargin: `${(1 - this.scrollThreshold) * 100}%`,
+          rootMargin: `${(1 - this.scrollThreshold()) * 100}%`,
           threshold: 0.1
         }
       );
@@ -68,13 +68,14 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
 
       const scrollPosition = (scrollTop + clientHeight) / scrollHeight;
 
-      if (scrollPosition >= this.scrollThreshold) {
+      if (scrollPosition >= this.scrollThreshold()) {
         this.onScroll();
       }
-    }, this.scrollDebounceTime);
+    }, this.scrollDebounceTime());
   }
 
   private onScroll(): void {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.scrolled.emit();
   }
 }

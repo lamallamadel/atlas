@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, OnInit, OnChanges } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, OnChanges, input } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { EmptyStateIllustrationsService, EmptyStateContext } from '../services/empty-state-illustrations.service';
 import { MatIcon } from '@angular/material/icon';
@@ -23,18 +23,18 @@ export interface HelpLinkConfig {
 })
 export class EmptyStateComponent implements OnInit, OnChanges {
   // Legacy inputs (for backwards compatibility)
-  @Input() message = '';
-  @Input() subtext = '';
-  @Input() primaryAction?: ActionButtonConfig;
-  @Input() secondaryAction?: ActionButtonConfig;
+  readonly message = input('');
+  readonly subtext = input('');
+  readonly primaryAction = input<ActionButtonConfig>();
+  readonly secondaryAction = input<ActionButtonConfig>();
   
   // New context-based inputs
-  @Input() context?: EmptyStateContext;
-  @Input() isNewUser = false;
+  readonly context = input<EmptyStateContext>();
+  readonly isNewUser = input(false);
   
   // New inputs for enhanced functionality
-  @Input() helpLink?: HelpLinkConfig;
-  @Input() customIllustration?: SafeHtml;
+  readonly helpLink = input<HelpLinkConfig>();
+  readonly customIllustration = input<SafeHtml>();
   
   // Computed properties
   displayTitle = '';
@@ -56,33 +56,34 @@ export class EmptyStateComponent implements OnInit, OnChanges {
 
   private updateDisplayProperties(): void {
     // If context is provided, use the service to get configuration
-    if (this.context) {
-      const config = this.illustrationsService.getConfig(this.context, this.isNewUser);
+    const context = this.context();
+    if (context) {
+      const config = this.illustrationsService.getConfig(context, this.isNewUser());
       this.displayTitle = config.title;
       this.displayMessage = config.message;
-      this.displayIllustration = this.customIllustration || config.illustration;
+      this.displayIllustration = this.customIllustration() || config.illustration;
       
       // Map service config to component format
       this.displayPrimaryAction = config.primaryCta ? {
         label: config.primaryCta.label,
         icon: config.primaryCta.icon,
-        handler: this.primaryAction?.handler || (() => { /* no-op */ })
-      } : this.primaryAction;
+        handler: this.primaryAction()?.handler || (() => { /* no-op */ })
+      } : this.primaryAction();
       
       this.displaySecondaryAction = config.secondaryCta ? {
         label: config.secondaryCta.label,
         icon: config.secondaryCta.icon,
-        handler: this.secondaryAction?.handler || (() => { /* no-op */ })
-      } : this.secondaryAction;
+        handler: this.secondaryAction()?.handler || (() => { /* no-op */ })
+      } : this.secondaryAction();
       
-      this.displayHelpLink = config.helpLink || this.helpLink;
+      this.displayHelpLink = config.helpLink || this.helpLink();
     } else {
       // Fall back to legacy mode
-      this.displayTitle = this.message;
-      this.displayMessage = this.subtext;
-      this.displayPrimaryAction = this.primaryAction;
-      this.displaySecondaryAction = this.secondaryAction;
-      this.displayHelpLink = this.helpLink;
+      this.displayTitle = this.message();
+      this.displayMessage = this.subtext();
+      this.displayPrimaryAction = this.primaryAction();
+      this.displaySecondaryAction = this.secondaryAction();
+      this.displayHelpLink = this.helpLink();
     }
   }
 

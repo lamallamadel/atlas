@@ -8,10 +8,10 @@ import { takeUntil } from 'rxjs/operators';
     selector: 'app-kpi-widget',
     imports: [CommonModule],
     template: `
-    <div class="kpi-widget" [class.edit-mode]="editMode">
+    <div class="kpi-widget" [class.edit-mode]="editMode()">
       <div class="widget-header">
-        <h3>{{ config.title || 'KPI' }}</h3>
-        @if (editMode) {
+        <h3>{{ config().title || 'KPI' }}</h3>
+        @if (editMode()) {
           <div class="widget-actions">
             <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
               <span class="material-icons">refresh</span>
@@ -190,7 +190,7 @@ export class KpiWidgetComponent extends CardWidgetBaseComponent {
     this.setLoading(true);
     this.setError(null);
 
-    const kpiType = this.config.settings?.['kpiType'] as string || 'conversion';
+    const kpiType = this.config().settings?.['kpiType'] as string || 'conversion';
 
     this.kpiService.getKPI(kpiType)
       .pipe(takeUntil(this.destroy$))

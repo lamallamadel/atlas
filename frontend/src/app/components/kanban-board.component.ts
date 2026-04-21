@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, input, output } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
 import { DossierResponse, DossierStatus, DossierApiService } from '../services/dossier-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
@@ -22,11 +22,11 @@ interface KanbanColumn {
     imports: [MatIcon, CdkDropList, CdkDrag, CdkDragHandle, CdkDragPlaceholder, MatProgressSpinner, DatePipe]
 })
 export class KanbanBoardComponent implements OnInit, OnChanges {
-  @Input() dossiers: DossierResponse[] = [];
-  @Input() loading = false;
-  @Input() quickFilter = '';
-  @Output() dossierClick = new EventEmitter<DossierResponse>();
-  @Output() dossierUpdated = new EventEmitter<void>();
+  readonly dossiers = input<DossierResponse[]>([]);
+  readonly loading = input(false);
+  readonly quickFilter = input('');
+  readonly dossierClick = output<DossierResponse>();
+  readonly dossierUpdated = output<void>();
 
   columns: KanbanColumn[] = [];
   filteredColumns: KanbanColumn[] = [];
@@ -114,18 +114,19 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
 
   private distributeDosiersToColumns(): void {
     this.columns.forEach(column => {
-      column.dossiers = this.dossiers.filter(d => d.status === column.id);
+      column.dossiers = this.dossiers().filter(d => d.status === column.id);
     });
     this.applyQuickFilter();
   }
 
   private applyQuickFilter(): void {
-    if (!this.quickFilter || this.quickFilter.trim() === '') {
+    const quickFilter = this.quickFilter();
+    if (!quickFilter || quickFilter.trim() === '') {
       this.filteredColumns = this.columns;
       return;
     }
 
-    const filter = this.quickFilter.toLowerCase().trim();
+    const filter = quickFilter.toLowerCase().trim();
     this.filteredColumns = this.columns.map(column => ({
       ...column,
       dossiers: column.dossiers.filter(dossier => 
@@ -176,6 +177,7 @@ export class KanbanBoardComponent implements OnInit, OnChanges {
       this.toastService.success(
         `Dossier #${dossier.id} déplacé vers "${targetColumn.title}"`
       );
+      // TODO: The 'emit' function requires a mandatory void argument
       this.dossierUpdated.emit();
     } catch (error) {
       console.error('Failed to update dossier status:', error);

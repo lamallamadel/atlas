@@ -3,62 +3,62 @@
     <!-- Lottie Animation -->
     <div class="animated-empty-state-animation">
       <app-lottie-animation
-        [animationType]="animationType"
-        [width]="animationWidth"
-        [height]="animationHeight"
-        [loop]="loop"
+        [animationType]="animationType()"
+        [width]="animationWidth()"
+        [height]="animationHeight()"
+        [loop]="loop()"
         [autoplay]="true"
-        [showControls]="showControls"
+        [showControls]="showControls()"
         (animationError)="onAnimationError($event)">
       </app-lottie-animation>
     </div>
 
     <!-- Title -->
-    <h3 class="animated-empty-state-title">{{ title }}</h3>
+    <h3 class="animated-empty-state-title">{{ title() }}</h3>
 
     <!-- Message -->
-    @if (message) {
-      <p class="animated-empty-state-message">{{ message }}</p>
+    @if (message()) {
+      <p class="animated-empty-state-message">{{ message() }}</p>
     }
 
     <!-- Action buttons -->
-    @if (primaryAction || secondaryAction) {
+    @if (primaryAction() || secondaryAction()) {
       <div class="animated-empty-state-actions">
-        @if (primaryAction) {
+        @if (primaryAction()) {
           <button
             class="btn-primary-action"
             (click)="onPrimaryClick()"
-            [attr.aria-label]="primaryAction.label">
-            @if (primaryAction.icon) {
-              <mat-icon class="btn-icon">{{ primaryAction.icon }}</mat-icon>
+            [attr.aria-label]="primaryAction().label">
+            @if (primaryAction().icon) {
+              <mat-icon class="btn-icon">{{ primaryAction().icon }}</mat-icon>
             }
-            <span>{{ primaryAction.label }}</span>
+            <span>{{ primaryAction().label }}</span>
           </button>
         }
-        @if (secondaryAction) {
+        @if (secondaryAction()) {
           <button
             class="btn-secondary-action"
             (click)="onSecondaryClick()"
-            [attr.aria-label]="secondaryAction.label">
-            @if (secondaryAction.icon) {
-              <mat-icon class="btn-icon">{{ secondaryAction.icon }}</mat-icon>
+            [attr.aria-label]="secondaryAction().label">
+            @if (secondaryAction().icon) {
+              <mat-icon class="btn-icon">{{ secondaryAction().icon }}</mat-icon>
             }
-            <span>{{ secondaryAction.label }}</span>
+            <span>{{ secondaryAction().label }}</span>
           </button>
         }
       </div>
     }
 
     <!-- Help link -->
-    @if (helpLink) {
+    @if (helpLink()) {
       <div class="animated-empty-state-help">
         <a
           href="javascript:void(0)"
           class="help-link"
           (click)="onHelpLinkClick()"
-          [attr.aria-label]="helpLink.label">
+          [attr.aria-label]="helpLink().label">
           <mat-icon class="help-icon">help_outline</mat-icon>
-          <span>{{ helpLink.label }}</span>
+          <span>{{ helpLink().label }}</span>
         </a>
       </div>
     }

@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, OnInit, input, output } from '@angular/core';
 import { FormArray, FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { debounceTime } from 'rxjs/operators';
@@ -45,11 +45,11 @@ export interface FilterOperator {
     imports: [FormsModule, ReactiveFormsModule, MatButtonToggleGroup, MatButtonToggle, MatFormField, MatLabel, MatSelect, MatOption, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker, MatIconButton, MatIcon, MatButton, MatCard, MatCardContent, MatProgressSpinner]
 })
 export class AdvancedFiltersComponent implements OnInit {
-  @Input() fields: FilterField[] = [];
-  @Input() initialFilter?: AdvancedFilter;
-  @Output() filterChange = new EventEmitter<AdvancedFilter>();
-  @Output() countRequest = new EventEmitter<AdvancedFilter>();
-  @Output() filterApplied = new EventEmitter<AdvancedFilter>();
+  readonly fields = input<FilterField[]>([]);
+  readonly initialFilter = input<AdvancedFilter>();
+  readonly filterChange = output<AdvancedFilter>();
+  readonly countRequest = output<AdvancedFilter>();
+  readonly filterApplied = output<AdvancedFilter>();
 
   filterForm!: FormGroup;
   resultCount: number | null = null;
@@ -117,12 +117,13 @@ export class AdvancedFiltersComponent implements OnInit {
       conditions: this.fb.array([])
     });
 
-    if (this.initialFilter && this.initialFilter.conditions.length > 0) {
-      this.initialFilter.conditions.forEach(condition => {
+    const initialFilter = this.initialFilter();
+    if (initialFilter && initialFilter.conditions.length > 0) {
+      initialFilter.conditions.forEach(condition => {
         this.addCondition(condition);
       });
       this.filterForm.patchValue({
-        logicOperator: this.initialFilter.logicOperator || 'AND'
+        logicOperator: initialFilter.logicOperator || 'AND'
       });
     } else {
       this.addCondition();
@@ -142,8 +143,8 @@ export class AdvancedFiltersComponent implements OnInit {
   }
 
   addCondition(condition?: FilterCondition): void {
-    const field = condition?.field || (this.fields.length > 0 ? this.fields[0].key : '');
-    const fieldConfig = this.fields.find(f => f.key === field);
+    const field = condition?.field || (this.fields().length > 0 ? this.fields()[0].key : '');
+    const fieldConfig = this.fields().find(f => f.key === field);
     const operator = condition?.operator || (fieldConfig?.operators[0]?.value || 'EQUALS');
     
     const conditionGroup = this.fb.group({
@@ -165,7 +166,7 @@ export class AdvancedFiltersComponent implements OnInit {
   onFieldChange(index: number): void {
     const condition = this.conditions.at(index) as FormGroup;
     const field = condition.get('field')?.value;
-    const fieldConfig = this.fields.find(f => f.key === field);
+    const fieldConfig = this.fields().find(f => f.key === field);
     
     if (fieldConfig && fieldConfig.operators.length > 0) {
       condition.patchValue({
@@ -186,7 +187,7 @@ export class AdvancedFiltersComponent implements OnInit {
   }
 
   getFieldConfig(fieldKey: string): FilterField | undefined {
-    return this.fields.find(f => f.key === fieldKey);
+    return this.fields().find(f => f.key === fieldKey);
   }
 
   getOperators(index: number): FilterOperator[] {

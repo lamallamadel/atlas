@@ -17,7 +17,7 @@
   <app-whatsapp-message-input
     class="input-area"
     [templates]="getEnrichedTemplates()"
-    [disabled]="!consentGranted"
+    [disabled]="!consentGranted()"
     [sending]="sending"
     [isOnline]="isOnline"
     [queuedMessagesCount]="queuedMessagesCount"

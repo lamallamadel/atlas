@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 
@@ -17,9 +17,9 @@ export interface FormStep {
     imports: [NgClass, MatIcon]
 })
 export class FormProgressIndicatorComponent implements OnInit {
-  @Input() steps: FormStep[] = [];
-  @Input() currentStep = 0;
-  @Input() showPercentage = true;
+  readonly steps = input<FormStep[]>([]);
+  readonly currentStep = input(0);
+  readonly showPercentage = input(true);
 
   progressPercentage = 0;
 
@@ -32,25 +32,26 @@ export class FormProgressIndicatorComponent implements OnInit {
   }
 
   calculateProgress(): void {
-    if (this.steps.length === 0) {
+    const steps = this.steps();
+    if (steps.length === 0) {
       this.progressPercentage = 0;
       return;
     }
 
-    const completedSteps = this.steps.filter(step => step.completed).length;
-    this.progressPercentage = Math.round((completedSteps / this.steps.length) * 100);
+    const completedSteps = steps.filter(step => step.completed).length;
+    this.progressPercentage = Math.round((completedSteps / steps.length) * 100);
   }
 
   isStepActive(index: number): boolean {
-    return index === this.currentStep;
+    return index === this.currentStep();
   }
 
   isStepCompleted(index: number): boolean {
-    return this.steps[index]?.completed || false;
+    return this.steps()[index]?.completed || false;
   }
 
   getStepIcon(index: number): string {
-    const step = this.steps[index];
+    const step = this.steps()[index];
     if (step?.icon) {
       return step.icon;
     }
@@ -68,15 +69,15 @@ export class FormProgressIndicatorComponent implements OnInit {
   }
 
   getLineProgress(): number {
-    if (this.steps.length <= 1) {
+    if (this.steps().length <= 1) {
       return 0;
     }
     
     // Calculate progress based on current step and completion
-    const totalSteps = this.steps.length - 1;
-    const completedSteps = this.steps.filter((step, index) => step.completed && index < this.currentStep).length;
+    const totalSteps = this.steps().length - 1;
+    const completedSteps = this.steps().filter((step, index) => step.completed && index < this.currentStep()).length;
     const baseProgress = (completedSteps / totalSteps) * 100;
-    const currentStepProgress = (this.currentStep / totalSteps) * 100;
+    const currentStepProgress = (this.currentStep() / totalSteps) * 100;
     
     return Math.max(baseProgress, currentStepProgress);
   }

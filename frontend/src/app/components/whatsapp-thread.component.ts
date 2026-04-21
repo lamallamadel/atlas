@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, AfterViewChecked, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewChecked, ChangeDetectorRef, input, output, viewChild } from '@angular/core';
 import { MessageResponse, MessageDirection, MessageDeliveryStatus } from '../services/message-api.service';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
 import { Subject } from 'rxjs';
@@ -19,12 +19,12 @@ export interface MessageAction {
     imports: [MatIcon, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, MatProgressSpinner, CdkVirtualForOf, MatIconButton, MatTooltip]
 })
 export class WhatsappThreadComponent implements OnInit, OnDestroy, AfterViewChecked {
-  @Input() messages: MessageResponse[] = [];
-  @Input() loading = false;
-  @Input() isOnline = true;
-  @Output() messageAction = new EventEmitter<MessageAction>();
+  readonly messages = input<MessageResponse[]>([]);
+  readonly loading = input(false);
+  readonly isOnline = input(true);
+  readonly messageAction = output<MessageAction>();
 
-  @ViewChild(CdkVirtualScrollViewport) viewport?: CdkVirtualScrollViewport;
+  readonly viewport = viewChild(CdkVirtualScrollViewport);
 
   MessageDirection = MessageDirection;
   MessageDeliveryStatus = MessageDeliveryStatus;
@@ -45,7 +45,7 @@ export class WhatsappThreadComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   ngAfterViewChecked(): void {
-    if (this.shouldScrollToBottom && this.viewport) {
+    if (this.shouldScrollToBottom && this.viewport()) {
       this.scrollToBottom();
       this.shouldScrollToBottom = false;
     }
@@ -57,8 +57,9 @@ export class WhatsappThreadComponent implements OnInit, OnDestroy, AfterViewChec
   }
 
   scrollToBottom(): void {
-    if (this.viewport) {
-      this.viewport.scrollToIndex(this.messages.length - 1, 'smooth');
+    const viewport = this.viewport();
+    if (viewport) {
+      viewport.scrollToIndex(this.messages().length - 1, 'smooth');
     }
   }
 
@@ -210,8 +211,8 @@ export class WhatsappThreadComponent implements OnInit, OnDestroy, AfterViewChec
       return true;
     }
 
-    const currentDate = new Date(this.messages[index].timestamp);
-    const previousDate = new Date(this.messages[index - 1].timestamp);
+    const currentDate = new Date(this.messages()[index].timestamp);
+    const previousDate = new Date(this.messages()[index - 1].timestamp);
 
     return currentDate.toDateString() !== previousDate.toDateString();
   }

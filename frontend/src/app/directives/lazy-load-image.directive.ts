@@ -1,11 +1,11 @@
-import { Directive, ElementRef, Input, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, OnInit, OnDestroy, Renderer2, input } from '@angular/core';
 
 @Directive({ selector: '[appLazyLoadImage]' })
 export class LazyLoadImageDirective implements OnInit, OnDestroy {
-  @Input() appLazyLoadImage!: string;
-  @Input() placeholder = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%23f0f0f0"/%3E%3C/svg%3E';
-  @Input() blurUpPlaceholder?: string;
-  @Input() errorImage = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%23e0e0e0"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23999" font-family="sans-serif" font-size="16"%3EImage non disponible%3C/text%3E%3C/svg%3E';
+  readonly appLazyLoadImage = input.required<string>();
+  readonly placeholder = input('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%23f0f0f0"/%3E%3C/svg%3E');
+  readonly blurUpPlaceholder = input<string>();
+  readonly errorImage = input('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%23e0e0e0"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" fill="%23999" font-family="sans-serif" font-size="16"%3EImage non disponible%3C/text%3E%3C/svg%3E');
 
   private intersectionObserver?: IntersectionObserver;
 
@@ -32,10 +32,11 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
     this.renderer.addClass(img, 'lazy-image-loading');
 
     // Set placeholder
-    if (this.blurUpPlaceholder) {
-      this.renderer.setAttribute(img, 'src', this.blurUpPlaceholder);
+    const blurUpPlaceholder = this.blurUpPlaceholder();
+    if (blurUpPlaceholder) {
+      this.renderer.setAttribute(img, 'src', blurUpPlaceholder);
     } else {
-      this.renderer.setAttribute(img, 'src', this.placeholder);
+      this.renderer.setAttribute(img, 'src', this.placeholder());
     }
 
     // Setup intersection observer
@@ -68,17 +69,17 @@ export class LazyLoadImageDirective implements OnInit, OnDestroy {
     const tempImg = new Image();
 
     tempImg.onload = () => {
-      this.renderer.setAttribute(img, 'src', this.appLazyLoadImage);
+      this.renderer.setAttribute(img, 'src', this.appLazyLoadImage());
       this.renderer.removeClass(img, 'lazy-image-loading');
       this.renderer.addClass(img, 'lazy-image-loaded');
     };
 
     tempImg.onerror = () => {
-      this.renderer.setAttribute(img, 'src', this.errorImage);
+      this.renderer.setAttribute(img, 'src', this.errorImage());
       this.renderer.removeClass(img, 'lazy-image-loading');
       this.renderer.addClass(img, 'lazy-image-error');
     };
 
-    tempImg.src = this.appLazyLoadImage;
+    tempImg.src = this.appLazyLoadImage();
   }
 }

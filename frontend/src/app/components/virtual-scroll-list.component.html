@@ -1,13 +1,13 @@
 <div class="virtual-scroll-container">
   <cdk-virtual-scroll-viewport
-    [itemSize]="itemHeight"
+    [itemSize]="itemHeight()"
     class="virtual-scroll-viewport"
     (scrolledIndexChange)="onScrollEnd()">
 
     <!-- Empty state -->
-    @if (!loading && items.length === 0) {
-      @if (emptyTemplate) {
-        <ng-container *ngTemplateOutlet="emptyTemplate"></ng-container>
+    @if (!loading() && items().length === 0) {
+      @if (emptyTemplate()) {
+        <ng-container *ngTemplateOutlet="emptyTemplate()"></ng-container>
       } @else {
         <div class="empty-state">
           <p>Aucun élément à afficher</p>
@@ -17,21 +17,21 @@
 
     <!-- Items -->
     <div
-      *cdkVirtualFor="let item of items; trackBy: trackByItem; templateCacheSize: 0"
+      *cdkVirtualFor="let item of items(); trackBy: trackByItem; templateCacheSize: 0"
       class="virtual-scroll-item"
       role="button"
       tabindex="0"
       (click)="itemClick.emit(item)"
       (keydown.enter)="itemClick.emit(item)"
       (keydown.space)="$event.preventDefault(); itemClick.emit(item)">
-      <ng-container *ngTemplateOutlet="itemTemplate; context: { $implicit: item }"></ng-container>
+      <ng-container *ngTemplateOutlet="itemTemplate(); context: { $implicit: item }"></ng-container>
     </div>
 
     <!-- Loading state -->
-    @if (loading) {
+    @if (loading()) {
       <div class="loading-state">
-        @if (loadingTemplate) {
-          <ng-container *ngTemplateOutlet="loadingTemplate"></ng-container>
+        @if (loadingTemplate()) {
+          <ng-container *ngTemplateOutlet="loadingTemplate()"></ng-container>
         } @else {
           <app-loading-skeleton variant="list" [rows]="3"></app-loading-skeleton>
         }

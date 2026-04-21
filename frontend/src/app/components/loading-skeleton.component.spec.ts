@@ -21,15 +21,15 @@ describe('LoadingSkeletonComponent', () => {
   });
 
   it('should default to card variant', () => {
-    expect(component.variant).toBe('card');
+    expect(component.variant()).toBe('card');
   });
 
   it('should default to 3 rows', () => {
-    expect(component.rows).toBe(3);
+    expect(component.rows()).toBe(3);
   });
 
   it('should default to 8 columns', () => {
-    expect(component.columns).toBe(8);
+    expect(component.columns()).toBe(8);
   });
 
   it('should generate correct number of rows', () => {
@@ -45,6 +45,6 @@ describe('LoadingSkeletonComponent', () => {
   it('should accept different variants', () => {
     component.variant = 'table';
     fixture.detectChanges();
-    expect(component.variant).toBe('table');
+    expect(component.variant()).toBe('table');
   });
 });

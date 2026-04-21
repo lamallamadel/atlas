@@ -55,10 +55,10 @@ describe('InlineValidationSuggestionComponent', () => {
     };
     expect(component.getConfidenceIcon()).toBe('verified');
 
-    component.suggestion.confidence = 'medium';
+    suggestion.confidence = 'medium';
     expect(component.getConfidenceIcon()).toBe('help_outline');
 
-    component.suggestion.confidence = 'low';
+    suggestion.confidence = 'low';
     expect(component.getConfidenceIcon()).toBe('info');
   });
 });

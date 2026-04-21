@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { TaskResponse, TaskPriority, TaskStatus } from '../services/task-api.service';
 import { fadeIn, scaleIn } from '../animations';
 import { MatCard, MatCardHeader, MatCardContent, MatCardActions } from '@angular/material/card';
@@ -15,17 +15,17 @@ import { DatePipe } from '@angular/common';
     imports: [MatCard, MatCardHeader, MatCheckbox, MatCardContent, MatIcon, MatCardActions, MatButton, DatePipe]
 })
 export class TaskCardComponent {
-  @Input() task!: TaskResponse;
-  @Output() taskUpdated = new EventEmitter<TaskResponse>();
-  @Output() taskDeleted = new EventEmitter<number>();
-  @Output() taskCompleted = new EventEmitter<number>();
-  @Output() taskEdit = new EventEmitter<TaskResponse>();
+  readonly task = input.required<TaskResponse>();
+  readonly taskUpdated = output<TaskResponse>();
+  readonly taskDeleted = output<number>();
+  readonly taskCompleted = output<number>();
+  readonly taskEdit = output<TaskResponse>();
 
   TaskPriority = TaskPriority;
   TaskStatus = TaskStatus;
 
   get priorityColor(): string {
-    switch (this.task.priority) {
+    switch (this.task().priority) {
       case TaskPriority.HIGH:
         return 'high';
       case TaskPriority.MEDIUM:
@@ -38,7 +38,7 @@ export class TaskCardComponent {
   }
 
   get priorityLabel(): string {
-    switch (this.task.priority) {
+    switch (this.task().priority) {
       case TaskPriority.HIGH:
         return 'High';
       case TaskPriority.MEDIUM:
@@ -51,27 +51,30 @@ export class TaskCardComponent {
   }
 
   get isOverdue(): boolean {
-    if (!this.task.dueDate || this.task.status === TaskStatus.COMPLETED) {
+    const task = this.task();
+    if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
       return false;
     }
-    return new Date(this.task.dueDate) < new Date();
+    return new Date(task.dueDate) < new Date();
   }
 
   get isApproaching(): boolean {
-    if (!this.task.dueDate || this.task.status === TaskStatus.COMPLETED) {
+    const task = this.task();
+    if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
       return false;
     }
-    const dueDate = new Date(this.task.dueDate);
+    const dueDate = new Date(task.dueDate);
     const now = new Date();
     const daysDiff = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
     return daysDiff >= 0 && daysDiff <= 3;
   }
 
   get dueDateLabel(): string {
-    if (!this.task.dueDate) {
+    const task = this.task();
+    if (!task.dueDate) {
       return 'No due date';
     }
-    const dueDate = new Date(this.task.dueDate);
+    const dueDate = new Date(task.dueDate);
     const now = new Date();
     const daysDiff = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -90,17 +93,17 @@ export class TaskCardComponent {
 
   onCheckboxChange(event: any): void {
     if (event.checked) {
-      this.taskCompleted.emit(this.task.id);
+      this.taskCompleted.emit(this.task().id);
     } else {
-      this.taskCompleted.emit(this.task.id);
+      this.taskCompleted.emit(this.task().id);
     }
   }
 
   onEdit(): void {
-    this.taskEdit.emit(this.task);
+    this.taskEdit.emit(this.task());
   }
 
   onDelete(): void {
-    this.taskDeleted.emit(this.task.id);
+    this.taskDeleted.emit(this.task().id);
   }
 }

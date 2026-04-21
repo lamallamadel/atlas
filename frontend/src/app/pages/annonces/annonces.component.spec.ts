@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -37,16 +37,16 @@ import { FilterPresetService } from '../../services/filter-preset.service';
         MatDialogModule]
 })
 class GenericTableStubComponent {
-  @Input() columns: any;
-  @Input() data: any;
-  @Input() actions: any;
-  @Input() showPagination = false;
-  @Input() enableSort = false;
-  @Input() enableRowSelection = false;
-  @Input() enableExport = false;
-  @Input() showTableHeader = false;
-  @Output() rowAction = new EventEmitter<any>();
-  @Output() exportRequest = new EventEmitter<any>();
+  readonly columns = input<any>();
+  readonly data = input<any>();
+  readonly actions = input<any>();
+  readonly showPagination = input(false);
+  readonly enableSort = input(false);
+  readonly enableRowSelection = input(false);
+  readonly enableExport = input(false);
+  readonly showTableHeader = input(false);
+  readonly rowAction = output<any>();
+  readonly exportRequest = output<any>();
 }
 
 @Component({
@@ -65,12 +65,12 @@ class GenericTableStubComponent {
         MatDialogModule]
 })
 class EmptyStateStubComponent {
-  @Input() message = '';
-  @Input() subtext = '';
-  @Input() primaryAction: any;
-  @Input() secondaryAction: any;
-  @Input() context: any;
-  @Input() isNewUser = false;
+  readonly message = input('');
+  readonly subtext = input('');
+  readonly primaryAction = input<any>();
+  readonly secondaryAction = input<any>();
+  readonly context = input<any>();
+  readonly isNewUser = input(false);
 }
 
 @Component({
@@ -89,9 +89,9 @@ class EmptyStateStubComponent {
         MatDialogModule]
 })
 class LoadingSkeletonStubComponent {
-  @Input() variant = '';
-  @Input() rows = 0;
-  @Input() columns = 0;
+  readonly variant = input('');
+  readonly rows = input(0);
+  readonly columns = input(0);
 }
 
 describe('AnnoncesComponent', () => {

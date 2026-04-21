@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, viewChild } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
@@ -178,7 +178,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     }
   ];
 
-  @ViewChild('auditPaginator') auditPaginator: MatPaginator | undefined;
+  readonly auditPaginator = viewChild<MatPaginator>('auditPaginator');
 
   showPartieForm = false;
   partieFormRole: PartiePrenanteRole = PartiePrenanteRole.BUYER;
@@ -600,8 +600,9 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
 
   onAuditFilterChange(): void {
     this.auditPageIndex = 0;
-    if (this.auditPaginator) {
-      this.auditPaginator.firstPage();
+    const auditPaginator = this.auditPaginator();
+    if (auditPaginator) {
+      auditPaginator.firstPage();
     }
     this.loadAuditEvents();
   }

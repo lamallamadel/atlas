@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
+import { Component, TemplateRef, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
 import { NgTemplateOutlet } from '@angular/common';
 import { LoadingSkeletonComponent } from './loading-skeleton.component';
@@ -11,16 +11,16 @@ import { LoadingSkeletonComponent } from './loading-skeleton.component';
     imports: [CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, NgTemplateOutlet, CdkVirtualForOf, LoadingSkeletonComponent]
 })
 export class VirtualScrollListComponent {
-  @Input() items: any[] = [];
-  @Input() itemHeight = 60;
-  @Input() itemTemplate!: TemplateRef<any>;
-  @Input() loading = false;
-  @Input() loadingTemplate?: TemplateRef<any>;
-  @Input() emptyTemplate?: TemplateRef<any>;
-  @Input() bufferSize = 5;
+  readonly items = input<any[]>([]);
+  readonly itemHeight = input(60);
+  readonly itemTemplate = input.required<TemplateRef<any>>();
+  readonly loading = input(false);
+  readonly loadingTemplate = input<TemplateRef<any>>();
+  readonly emptyTemplate = input<TemplateRef<any>>();
+  readonly bufferSize = input(5);
   
-  @Output() scrollEnd = new EventEmitter<void>();
-  @Output() itemClick = new EventEmitter<any>();
+  readonly scrollEnd = output<void>();
+  readonly itemClick = output<any>();
 
   trackByIndex(index: number): number {
     return index;
@@ -31,6 +31,7 @@ export class VirtualScrollListComponent {
   }
 
   onScrollEnd(): void {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.scrollEnd.emit();
   }
 }

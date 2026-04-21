@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { ActionButtonConfig, HelpLinkConfig } from './empty-state.component';
 import { LottieAnimationType, LottieAnimationComponent } from './lottie-animation.component';
 import { MatIcon } from '@angular/material/icon';
@@ -11,32 +11,35 @@ import { MatIcon } from '@angular/material/icon';
     imports: [LottieAnimationComponent, MatIcon]
 })
 export class AnimatedEmptyStateComponent {
-  @Input() title = '';
-  @Input() message = '';
-  @Input() animationType: LottieAnimationType = 'search-empty';
-  @Input() animationWidth = 200;
-  @Input() animationHeight = 200;
-  @Input() loop = true;
-  @Input() showControls = false;
-  @Input() primaryAction?: ActionButtonConfig;
-  @Input() secondaryAction?: ActionButtonConfig;
-  @Input() helpLink?: HelpLinkConfig;
+  readonly title = input('');
+  readonly message = input('');
+  readonly animationType = input<LottieAnimationType>('search-empty');
+  readonly animationWidth = input(200);
+  readonly animationHeight = input(200);
+  readonly loop = input(true);
+  readonly showControls = input(false);
+  readonly primaryAction = input<ActionButtonConfig>();
+  readonly secondaryAction = input<ActionButtonConfig>();
+  readonly helpLink = input<HelpLinkConfig>();
 
   onPrimaryClick(): void {
-    if (this.primaryAction) {
-      this.primaryAction.handler();
+    const primaryAction = this.primaryAction();
+    if (primaryAction) {
+      primaryAction.handler();
     }
   }
 
   onSecondaryClick(): void {
-    if (this.secondaryAction) {
-      this.secondaryAction.handler();
+    const secondaryAction = this.secondaryAction();
+    if (secondaryAction) {
+      secondaryAction.handler();
     }
   }
 
   onHelpLinkClick(): void {
-    if (this.helpLink) {
-      window.open(this.helpLink.url, '_blank');
+    const helpLink = this.helpLink();
+    if (helpLink) {
+      window.open(helpLink.url, '_blank');
     }
   }
 

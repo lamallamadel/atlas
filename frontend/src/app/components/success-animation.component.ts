@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { trigger, state, style, transition, animate, keyframes } from '@angular/animations';
 
 @Component({
@@ -11,8 +11,8 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
           <path class="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
         </svg>
       </div>
-      @if (message) {
-        <div class="success-message">{{ message }}</div>
+      @if (message()) {
+        <div class="success-message">{{ message() }}</div>
       }
     </div>
     `,
@@ -85,8 +85,8 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
     ]
 })
 export class SuccessAnimationComponent implements OnInit {
-  @Input() message?: string;
-  @Input() size: 'small' | 'medium' | 'large' = 'medium';
+  readonly message = input<string>();
+  readonly size = input<'small' | 'medium' | 'large'>('medium');
   
   animationState = 'in';
 

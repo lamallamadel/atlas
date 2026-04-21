@@ -1,10 +1,10 @@
-import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
     selector: 'app-progress-bar',
     template: `
-    @if (isNavigating) {
+    @if (isNavigating()) {
       <div class="progress-bar-container" [@slideDown]>
         <div class="progress-bar" [style.width.%]="progress"></div>
       </div>
@@ -60,13 +60,13 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
     ]
 })
 export class ProgressBarComponent implements OnChanges, OnDestroy {
-  @Input() isNavigating = false;
+  readonly isNavigating = input(false);
   progress = 0;
   private progressInterval: any;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isNavigating']) {
-      if (this.isNavigating) {
+      if (this.isNavigating()) {
         this.startProgress();
       } else {
         this.completeProgress();

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ValidationSuggestion } from '../services/form-validation.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { MatIcon } from '@angular/material/icon';
@@ -7,22 +7,22 @@ import { MatButton } from '@angular/material/button';
 @Component({
     selector: 'app-inline-validation-suggestion',
     template: `
-    @if (suggestion) {
+    @if (suggestion()) {
       <div class="suggestion-container" @slideIn>
-        <div class="suggestion-card" [class.high-confidence]="suggestion.confidence === 'high'">
+        <div class="suggestion-card" [class.high-confidence]="suggestion().confidence === 'high'">
           <div class="suggestion-header">
             <mat-icon class="suggestion-icon">{{ getConfidenceIcon() }}</mat-icon>
-            <span class="suggestion-reason">{{ suggestion.reason }}</span>
+            <span class="suggestion-reason">{{ suggestion().reason }}</span>
           </div>
           <div class="suggestion-content">
             <div class="original-value">
               <span class="label">Valeur actuelle:</span>
-              <span class="value">{{ suggestion.originalValue }}</span>
+              <span class="value">{{ suggestion().originalValue }}</span>
             </div>
             <mat-icon class="arrow-icon">arrow_forward</mat-icon>
             <div class="suggested-value">
               <span class="label">Suggestion:</span>
-              <span class="value suggested">{{ suggestion.suggestedValue }}</span>
+              <span class="value suggested">{{ suggestion().suggestedValue }}</span>
             </div>
           </div>
           <div class="suggestion-actions">
@@ -193,24 +193,27 @@ import { MatButton } from '@angular/material/button';
     imports: [MatIcon, MatButton]
 })
 export class InlineValidationSuggestionComponent {
-  @Input() suggestion: ValidationSuggestion | null = null;
-  @Output() accept = new EventEmitter<ValidationSuggestion>();
-  @Output() dismiss = new EventEmitter<void>();
+  readonly suggestion = input<ValidationSuggestion | null>(null);
+  readonly accept = output<ValidationSuggestion>();
+  readonly dismiss = output<void>();
 
   onAccept(): void {
-    if (this.suggestion) {
-      this.accept.emit(this.suggestion);
+    const suggestion = this.suggestion();
+    if (suggestion) {
+      this.accept.emit(suggestion);
     }
   }
 
   onDismiss(): void {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.dismiss.emit();
   }
 
   getConfidenceIcon(): string {
-    if (!this.suggestion) return 'info';
+    const suggestion = this.suggestion();
+    if (!suggestion) return 'info';
     
-    switch (this.suggestion.confidence) {
+    switch (suggestion.confidence) {
       case 'high':
         return 'verified';
       case 'medium':

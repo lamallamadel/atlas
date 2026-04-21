@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewState } from '../models/workflow.model';
 import { MatButton } from '@angular/material/button';
@@ -13,14 +13,15 @@ import { DatePipe } from '@angular/common';
     imports: [MatButton, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardContent, DatePipe]
 })
 export class WorkflowPreviewComponent implements OnInit {
-  @Input() workflow: WorkflowConfiguration | null = null;
+  readonly workflow = input<WorkflowConfiguration | null>(null);
   previewState: WorkflowPreviewState | null = null;
 
   constructor(private workflowService: WorkflowConfigService) {}
 
   ngOnInit(): void {
-    if (this.workflow && this.workflow.nodes.length > 0) {
-      this.initializePreview(this.workflow.nodes[0].status);
+    const workflow = this.workflow();
+    if (workflow && workflow.nodes.length > 0) {
+      this.initializePreview(workflow.nodes[0].status);
     }
   }
 
@@ -50,17 +51,18 @@ export class WorkflowPreviewComponent implements OnInit {
   }
 
   resetPreview(): void {
-    if (this.workflow && this.workflow.nodes.length > 0) {
-      this.initializePreview(this.workflow.nodes[0].status);
+    const workflow = this.workflow();
+    if (workflow && workflow.nodes.length > 0) {
+      this.initializePreview(workflow.nodes[0].status);
     }
   }
 
   getCurrentNode(): WorkflowNode | undefined {
-    return this.workflow?.nodes.find(n => n.status === this.previewState?.currentStatus);
+    return this.workflow()?.nodes.find(n => n.status === this.previewState?.currentStatus);
   }
 
   getNodeByStatus(status: string): WorkflowNode | undefined {
-    return this.workflow?.nodes.find(n => n.status === status);
+    return this.workflow()?.nodes.find(n => n.status === status);
   }
 
   canExecuteTransition(transition: TransitionRule): boolean {

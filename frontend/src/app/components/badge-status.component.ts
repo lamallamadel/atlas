@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { MatChip } from '@angular/material/chips';
 import { NgClass } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -28,29 +28,31 @@ interface StatusConfig {
     imports: [MatChip, NgClass, MatTooltip, MatIcon]
 })
 export class BadgeStatusComponent {
-  @Input() status!: string;
-  @Input() entityType!: EntityType;
+  readonly status = input.required<string>();
+  readonly entityType = input.required<EntityType>();
 
   getStatusClass(): string {
-    if (this.entityType === 'annonce') {
-      return this.getAnnonceStatusClass(this.status as AnnonceStatusType);
-    } else if (this.entityType === 'dossier') {
-      return this.getDossierStatusClass(this.status as DossierStatusType);
-    } else if (this.entityType === 'property') {
-      return this.getPropertyStatusClass(this.status as PropertyStatusType);
+    const entityType = this.entityType();
+    if (entityType === 'annonce') {
+      return this.getAnnonceStatusClass(this.status() as AnnonceStatusType);
+    } else if (entityType === 'dossier') {
+      return this.getDossierStatusClass(this.status() as DossierStatusType);
+    } else if (entityType === 'property') {
+      return this.getPropertyStatusClass(this.status() as PropertyStatusType);
     }
     return '';
   }
 
   getStatusConfig(): StatusConfig {
-    if (this.entityType === 'annonce') {
-      return this.getAnnonceStatusConfig(this.status as AnnonceStatusType);
-    } else if (this.entityType === 'dossier') {
-      return this.getDossierStatusConfig(this.status as DossierStatusType);
-    } else if (this.entityType === 'property') {
-      return this.getPropertyStatusConfig(this.status as PropertyStatusType);
+    const entityType = this.entityType();
+    if (entityType === 'annonce') {
+      return this.getAnnonceStatusConfig(this.status() as AnnonceStatusType);
+    } else if (entityType === 'dossier') {
+      return this.getDossierStatusConfig(this.status() as DossierStatusType);
+    } else if (entityType === 'property') {
+      return this.getPropertyStatusConfig(this.status() as PropertyStatusType);
     }
-    return { label: this.status, icon: 'circle', description: '' };
+    return { label: this.status(), icon: 'circle', description: '' };
   }
 
   getStatusLabel(): string {

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { AnimatedEmptyStateComponent } from './animated-empty-state.component';
@@ -10,13 +10,13 @@ import { MatIconModule } from '@angular/material/icon';
     imports: [CommonModule, MatIconModule]
 })
 class StubLottieAnimationComponent {
-  @Input() animationType!: string;
-  @Input() width!: number;
-  @Input() height!: number;
-  @Input() loop!: boolean;
-  @Input() autoplay!: boolean;
-  @Input() showControls!: boolean;
-  @Output() animationError = new EventEmitter<Error>();
+  readonly animationType = input.required<string>();
+  readonly width = input.required<number>();
+  readonly height = input.required<number>();
+  readonly loop = input.required<boolean>();
+  readonly autoplay = input.required<boolean>();
+  readonly showControls = input.required<boolean>();
+  readonly animationError = output<Error>();
 }
 
 describe('AnimatedEmptyStateComponent', () => {
@@ -40,13 +40,13 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should have default values', () => {
-    expect(component.title).toBe('');
-    expect(component.message).toBe('');
-    expect(component.animationType).toBe('search-empty');
-    expect(component.animationWidth).toBe(200);
-    expect(component.animationHeight).toBe(200);
-    expect(component.loop).toBe(true);
-    expect(component.showControls).toBe(false);
+    expect(component.title()).toBe('');
+    expect(component.message()).toBe('');
+    expect(component.animationType()).toBe('search-empty');
+    expect(component.animationWidth()).toBe(200);
+    expect(component.animationHeight()).toBe(200);
+    expect(component.loop()).toBe(true);
+    expect(component.showControls()).toBe(false);
   });
 
   it('should call primaryAction handler when onPrimaryClick is called', () => {
@@ -113,18 +113,18 @@ describe('AnimatedEmptyStateComponent', () => {
     component.animationType = 'search-empty';
     fixture.detectChanges();
 
-    expect(component.title).toBe('Test Title');
-    expect(component.message).toBe('Test Message');
+    expect(component.title()).toBe('Test Title');
+    expect(component.message()).toBe('Test Message');
     const compiled = fixture.nativeElement as HTMLElement;
     const titleEl = compiled.querySelector('.animated-empty-state-title');
     const messageEl = compiled.querySelector('.animated-empty-state-message');
     expect(titleEl).toBeTruthy();
     const titleText = (titleEl as HTMLElement)?.textContent?.trim() ?? '';
-    expect(titleText || component.title).toContain('Test Title');
+    expect(titleText || component.title()).toContain('Test Title');
     if (messageEl) {
       expect((messageEl as HTMLElement).textContent?.trim()).toContain('Test Message');
     } else {
-      expect(component.message).toBe('Test Message');
+      expect(component.message()).toBe('Test Message');
     }
   });
 
@@ -136,7 +136,7 @@ describe('AnimatedEmptyStateComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(component.primaryAction?.label).toBe('Primary Action');
+    expect(component.primaryAction()?.label).toBe('Primary Action');
     const compiled = fixture.nativeElement as HTMLElement;
     const button = compiled.querySelector('.btn-primary-action');
     if (button) {
@@ -152,7 +152,7 @@ describe('AnimatedEmptyStateComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(component.secondaryAction?.label).toBe('Secondary Action');
+    expect(component.secondaryAction()?.label).toBe('Secondary Action');
     const compiled = fixture.nativeElement as HTMLElement;
     const button = compiled.querySelector('.btn-secondary-action');
     if (button) {
@@ -167,7 +167,7 @@ describe('AnimatedEmptyStateComponent', () => {
     };
     fixture.detectChanges();
 
-    expect(component.helpLink?.label).toBe('Need help?');
+    expect(component.helpLink()?.label).toBe('Need help?');
     const compiled = fixture.nativeElement as HTMLElement;
     const link = compiled.querySelector('.help-link');
     if (link) {
@@ -184,10 +184,10 @@ describe('AnimatedEmptyStateComponent', () => {
     fixture.detectChanges();
 
     // Verify the template bindings are correct
-    expect(component.animationType).toBe('success');
-    expect(component.animationWidth).toBe(300);
-    expect(component.animationHeight).toBe(300);
-    expect(component.loop).toBe(false);
-    expect(component.showControls).toBe(true);
+    expect(component.animationType()).toBe('success');
+    expect(component.animationWidth()).toBe(300);
+    expect(component.animationHeight()).toBe(300);
+    expect(component.loop()).toBe(false);
+    expect(component.showControls()).toBe(true);
   });
 });

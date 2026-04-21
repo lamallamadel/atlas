@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output } from '@angular/core';
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus } from '../services/appointment-api.service';
 import { Subject, takeUntil } from 'rxjs';
 import { ToastNotificationService } from '../services/toast-notification.service';
@@ -24,14 +24,14 @@ interface AppointmentGroup {
     imports: [MatProgressSpinner, MatIcon, MatChip, MatIconButton, MatTooltip]
 })
 export class CalendarListViewComponent implements OnInit, OnDestroy {
-  @Input() filterByAssignedTo: string | null = null;
-  @Input() filterByStatus: AppointmentStatus | null = null;
-  @Input() startDate?: Date;
-  @Input() endDate?: Date;
+  readonly filterByAssignedTo = input<string | null>(null);
+  readonly filterByStatus = input<AppointmentStatus | null>(null);
+  readonly startDate = input<Date>();
+  readonly endDate = input<Date>();
   
-  @Output() appointmentClick = new EventEmitter<AppointmentResponse>();
-  @Output() appointmentUpdated = new EventEmitter<AppointmentResponse>();
-  @Output() appointmentDeleted = new EventEmitter<number>();
+  readonly appointmentClick = output<AppointmentResponse>();
+  readonly appointmentUpdated = output<AppointmentResponse>();
+  readonly appointmentDeleted = output<number>();
 
   private destroy$ = new Subject<void>();
   
@@ -83,20 +83,24 @@ export class CalendarListViewComponent implements OnInit, OnDestroy {
       sort: 'startTime,asc'
     };
     
-    if (this.filterByStatus) {
-      params.status = this.filterByStatus;
+    const filterByStatus = this.filterByStatus();
+    if (filterByStatus) {
+      params.status = filterByStatus;
     }
 
-    if (this.filterByAssignedTo) {
-      params.assignedTo = this.filterByAssignedTo;
+    const filterByAssignedTo = this.filterByAssignedTo();
+    if (filterByAssignedTo) {
+      params.assignedTo = filterByAssignedTo;
     }
 
-    if (this.startDate) {
-      params.startTimeFrom = this.startDate.toISOString();
+    const startDate = this.startDate();
+    if (startDate) {
+      params.startTimeFrom = startDate.toISOString();
     }
 
-    if (this.endDate) {
-      params.startTimeTo = this.endDate.toISOString();
+    const endDate = this.endDate();
+    if (endDate) {
+      params.startTimeTo = endDate.toISOString();
     }
 
     this.appointmentService.list(params)

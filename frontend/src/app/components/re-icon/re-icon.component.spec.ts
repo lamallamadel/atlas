@@ -91,7 +91,7 @@ describe('ReIconComponent', () => {
   });
 
   it('should use default size when not specified', () => {
-    expect(component.size).toBe('medium');
+    expect(component.size()).toBe('medium');
   });
 
   it('should render with correct aria-label', () => {

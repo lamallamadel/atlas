@@ -1,4 +1,4 @@
-import { Component, Input, Pipe, PipeTransform } from '@angular/core';
+import { Component, Pipe, PipeTransform, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { of, throwError, EMPTY } from 'rxjs';
@@ -11,8 +11,8 @@ import { RecentNavigationService } from '../../services/recent-navigation.servic
     selector: 'app-badge-status', template: ''
 })
 class BadgeStatusStubComponent {
-  @Input() status: any;
-  @Input() entityType: any;
+  readonly status = input<any>();
+  readonly entityType = input<any>();
 }
 
 @Pipe({ name: 'dateFormat' })

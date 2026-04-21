@@ -1,4 +1,4 @@
-@if (!loading) {
+@if (!loading()) {
   <div class="kanban-board">
     <div class="kanban-columns">
       @for (column of filteredColumns; track trackByColumnId($index, column)) {
@@ -98,7 +98,7 @@
   </div>
 }
 
-@if (loading) {
+@if (loading()) {
   <div class="kanban-loading">
     <mat-spinner diameter="48"></mat-spinner>
     <p>Chargement des dossiers...</p>

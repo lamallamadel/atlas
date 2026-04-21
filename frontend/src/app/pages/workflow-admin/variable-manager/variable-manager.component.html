@@ -7,7 +7,7 @@
   </div>
 
   <div class="variables-container" cdkDropList (cdkDropListDropped)="drop($event)">
-    @for (variable of variables; track variable; let i = $index) {
+    @for (variable of variables(); track variable; let i = $index) {
       <div
         cdkDrag
         class="variable-card">
@@ -51,7 +51,7 @@
       </div>
     }
 
-    @if (variables.length === 0) {
+    @if (variables().length === 0) {
       <div class="empty-state">
         <mat-icon>variables</mat-icon>
         <p>No variables added yet</p>

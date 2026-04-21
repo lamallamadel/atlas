@@ -1,8 +1,8 @@
-<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate, 'skeleton-card': variant === 'card', 'skeleton-list': variant === 'list', 'skeleton-table': variant === 'table', 'skeleton-form': variant === 'form', 'skeleton-dashboard-kpi': variant === 'dashboard-kpi', 'skeleton-detail': variant === 'detail', 'skeleton-grid': variant === 'grid', 'skeleton-message': variant === 'message', 'skeleton-timeline': variant === 'timeline'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
+<div class="skeleton-container" [ngClass]="{'skeleton-animated': animate(), 'skeleton-card': variant() === 'card', 'skeleton-list': variant() === 'list', 'skeleton-table': variant() === 'table', 'skeleton-form': variant() === 'form', 'skeleton-dashboard-kpi': variant() === 'dashboard-kpi', 'skeleton-detail': variant() === 'detail', 'skeleton-grid': variant() === 'grid', 'skeleton-message': variant() === 'message', 'skeleton-timeline': variant() === 'timeline'}" role="status" aria-live="polite" [attr.aria-label]="'Chargement en cours'">
   <span class="sr-only">Chargement des données en cours...</span>
 
   <!-- Card variant -->
-  @if (variant === 'card') {
+  @if (variant() === 'card') {
     <div class="skeleton-card" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-card-item">
@@ -28,7 +28,7 @@
   }
 
   <!-- List variant -->
-  @if (variant === 'list') {
+  @if (variant() === 'list') {
     <div class="skeleton-list" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-list-item">
@@ -44,7 +44,7 @@
   }
 
   <!-- Table variant -->
-  @if (variant === 'table') {
+  @if (variant() === 'table') {
     <div class="skeleton-table" aria-hidden="true">
       <div class="skeleton-table-header">
         @for (i of columnsArray; track $index) {
@@ -64,7 +64,7 @@
   }
 
   <!-- Form variant -->
-  @if (variant === 'form') {
+  @if (variant() === 'form') {
     <div class="skeleton-form" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-form-group">
@@ -80,7 +80,7 @@
   }
 
   <!-- Dashboard KPI variant -->
-  @if (variant === 'dashboard-kpi') {
+  @if (variant() === 'dashboard-kpi') {
     <div class="skeleton-dashboard-kpi" aria-hidden="true">
       <div class="skeleton-kpi-header">
         <div class="skeleton-rectangle skeleton-kpi-title"></div>
@@ -95,7 +95,7 @@
   }
 
   <!-- Detail variant -->
-  @if (variant === 'detail') {
+  @if (variant() === 'detail') {
     <div class="skeleton-detail" aria-hidden="true">
       <div class="skeleton-detail-header">
         <div class="skeleton-rectangle skeleton-detail-back"></div>
@@ -114,7 +114,7 @@
   }
 
   <!-- Grid variant -->
-  @if (variant === 'grid') {
+  @if (variant() === 'grid') {
     <div class="skeleton-grid" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-grid-item">
@@ -130,7 +130,7 @@
   }
 
   <!-- Message variant -->
-  @if (variant === 'message') {
+  @if (variant() === 'message') {
     <div class="skeleton-message" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div [ngClass]="{'skeleton-message-item': true, 'skeleton-message-right': i % 2 === 0}">
@@ -151,7 +151,7 @@
   }
 
   <!-- Timeline variant -->
-  @if (variant === 'timeline') {
+  @if (variant() === 'timeline') {
     <div class="skeleton-timeline" aria-hidden="true">
       @for (i of rowsArray; track $index) {
         <div class="skeleton-timeline-item">

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, input } from '@angular/core';
 import { CollaborationService, CollaborationPresence } from '../services/collaboration.service';
 import { Subscription } from 'rxjs';
 
@@ -23,11 +23,11 @@ interface ViewerInfo {
               {{ viewer.initials }}
             </div>
           }
-          @if (viewerCount > maxVisibleViewers) {
+          @if (viewerCount > maxVisibleViewers()) {
             <div
               class="viewer-count"
               [title]="getExtraViewersTooltip()">
-              +{{ viewerCount - maxVisibleViewers }}
+              +{{ viewerCount - maxVisibleViewers() }}
             </div>
           }
         </div>
@@ -141,8 +141,8 @@ interface ViewerInfo {
   `]
 })
 export class CollaborationPresenceComponent implements OnInit, OnDestroy {
-  @Input() dossierId!: number;
-  @Input() maxVisibleViewers = 5;
+  readonly dossierId = input.required<number>();
+  readonly maxVisibleViewers = input(5);
 
   viewers: ViewerInfo[] = [];
   viewerCount = 0;
@@ -172,7 +172,7 @@ export class CollaborationPresenceComponent implements OnInit, OnDestroy {
 
   private updateViewerList(viewerIds: Set<string>): void {
     this.viewers = Array.from(viewerIds)
-      .slice(0, this.maxVisibleViewers)
+      .slice(0, this.maxVisibleViewers())
       .map(userId => {
         const username = this.getUsernameFromCache(userId);
         return {
@@ -225,7 +225,7 @@ export class CollaborationPresenceComponent implements OnInit, OnDestroy {
   }
 
   getExtraViewersTooltip(): string {
-    return `${this.viewerCount - this.maxVisibleViewers} more viewers`;
+    return `${this.viewerCount - this.maxVisibleViewers()} more viewers`;
   }
 
   ngOnDestroy(): void {

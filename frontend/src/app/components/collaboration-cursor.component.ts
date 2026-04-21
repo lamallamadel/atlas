@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, input } from '@angular/core';
 import { CollaborationService, CollaborationCursor } from '../services/collaboration.service';
 import { Subscription } from 'rxjs';
 
@@ -72,7 +72,7 @@ interface CursorInfo {
   `]
 })
 export class CollaborationCursorComponent implements OnInit, OnDestroy {
-  @Input() fieldName!: string;
+  readonly fieldName = input.required<string>();
 
   activeCursors: CursorInfo[] = [];
   private subscriptions: Subscription[] = [];
@@ -83,7 +83,7 @@ export class CollaborationCursorComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.subscriptions.push(
       this.collaborationService.getCursorUpdates().subscribe(cursor => {
-        if (cursor.fieldName === this.fieldName) {
+        if (cursor.fieldName === this.fieldName()) {
           this.updateCursor(cursor);
         }
       })

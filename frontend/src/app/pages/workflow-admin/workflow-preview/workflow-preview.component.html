@@ -10,7 +10,7 @@
     </button>
   </div>
 
-  @if (previewState && workflow) {
+  @if (previewState && workflow()) {
     <div class="preview-container">
       <div class="preview-layout">
         <div class="current-state-panel">
@@ -140,14 +140,14 @@
                 <div class="stat-item">
                   <mat-icon>account_tree</mat-icon>
                   <div class="stat-content">
-                    <span class="stat-value">{{ workflow.nodes.length }}</span>
+                    <span class="stat-value">{{ workflow()?.nodes?.length || 0 }}</span>
                     <span class="stat-label">Statuts</span>
                   </div>
                 </div>
                 <div class="stat-item">
                   <mat-icon>swap_horiz</mat-icon>
                   <div class="stat-content">
-                    <span class="stat-value">{{ workflow.transitions.length }}</span>
+                    <span class="stat-value">{{ workflow()?.transitions?.length || 0 }}</span>
                     <span class="stat-label">Transitions</span>
                   </div>
                 </div>

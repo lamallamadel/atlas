@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DashboardComponent } from './dashboard.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -23,8 +23,8 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         MatButtonToggleModule]
 })
 class MockLoadingSkeletonComponent {
-  @Input() variant?: string;
-  @Input() rows?: number;
+  readonly variant = input<string>();
+  readonly rows = input<number>();
 }
 
 @Component({
@@ -37,9 +37,9 @@ class MockLoadingSkeletonComponent {
         MatButtonToggleModule]
 })
 class MockEmptyStateComponent {
-  @Input() message?: string;
-  @Input() primaryAction?: any;
-  @Input() secondaryAction?: any;
+  readonly message = input<string>();
+  readonly primaryAction = input<any>();
+  readonly secondaryAction = input<any>();
 }
 
 describe('DashboardComponent', () => {

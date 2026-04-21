@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, input } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { IconRegistryService } from '../../services/icon-registry.service';
 
@@ -10,10 +10,10 @@ import { IconRegistryService } from '../../services/icon-registry.service';
     standalone: false
 })
 export class ReIconComponent implements OnInit {
-  @Input() icon!: string;
-  @Input() size: 'small' | 'medium' | 'large' | 'xlarge' = 'medium';
-  @Input() color?: string;
-  @Input() ariaLabel?: string;
+  readonly icon = input.required<string>();
+  readonly size = input<'small' | 'medium' | 'large' | 'xlarge'>('medium');
+  readonly color = input<string>();
+  readonly ariaLabel = input<string>();
 
   iconSvg: SafeHtml | null = null;
 
@@ -28,10 +28,10 @@ export class ReIconComponent implements OnInit {
 
   private loadIcon(): void {
     if (this.iconRegistry.isLoaded()) {
-      this.iconSvg = this.iconRegistry.getIconSync(this.icon);
+      this.iconSvg = this.iconRegistry.getIconSync(this.icon());
       this.cdr.markForCheck();
     } else {
-      this.iconRegistry.getIcon(this.icon).subscribe(svg => {
+      this.iconRegistry.getIcon(this.icon()).subscribe(svg => {
         this.iconSvg = svg;
         this.cdr.markForCheck();
       });
@@ -39,13 +39,14 @@ export class ReIconComponent implements OnInit {
   }
 
   get sizeClass(): string {
-    return `re-icon-${this.size}`;
+    return `re-icon-${this.size()}`;
   }
 
   get styles(): { [key: string]: string } {
     const styles: { [key: string]: string } = {};
-    if (this.color) {
-      styles['color'] = this.color;
+    const color = this.color();
+    if (color) {
+      styles['color'] = color;
     }
     return styles;
   }

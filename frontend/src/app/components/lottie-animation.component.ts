@@ -1,14 +1,13 @@
-import { 
-  Component, 
-  Input, 
-  Output, 
-  EventEmitter, 
-  ViewChild, 
-  ElementRef, 
-  OnInit, 
+import {
+  Component,
+  ElementRef,
+  OnInit,
   OnDestroy,
   ChangeDetectionStrategy,
-  ChangeDetectorRef
+  ChangeDetectorRef,
+  input,
+  output,
+  viewChild
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 
@@ -28,20 +27,20 @@ export interface LottieOptions {
     imports: [MatIcon]
 })
 export class LottieAnimationComponent implements OnInit, OnDestroy {
-  @Input() animationType!: LottieAnimationType;
-  @Input() width = 200;
-  @Input() height = 200;
-  @Input() loop = true;
-  @Input() autoplay = true;
-  @Input() speed = 1;
-  @Input() showControls = false;
+  readonly animationType = input.required<LottieAnimationType>();
+  readonly width = input(200);
+  readonly height = input(200);
+  readonly loop = input(true);
+  readonly autoplay = input(true);
+  readonly speed = input(1);
+  readonly showControls = input(false);
   
-  @Output() animationCreated = new EventEmitter<any>();
-  @Output() animationComplete = new EventEmitter<void>();
-  @Output() loopComplete = new EventEmitter<void>();
-  @Output() animationError = new EventEmitter<Error>();
+  readonly animationCreated = output<any>();
+  readonly animationComplete = output<void>();
+  readonly loopComplete = output<void>();
+  readonly animationError = output<Error>();
   
-  @ViewChild('lottieContainer', { static: true }) lottieContainer!: ElementRef;
+  readonly lottieContainer = viewChild.required<ElementRef>('lottieContainer');
   
   isPlaying = true;
   isPaused = false;
@@ -72,10 +71,10 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
       if (this.destroyed) return;
       
       this.lottieInstance = lottie.default.loadAnimation({
-        container: this.lottieContainer.nativeElement,
+        container: this.lottieContainer().nativeElement,
         renderer: 'svg',
-        loop: this.loop,
-        autoplay: this.autoplay,
+        loop: this.loop(),
+        autoplay: this.autoplay(),
         animationData: animationData,
         rendererSettings: {
           preserveAspectRatio: 'xMidYMid meet',
@@ -84,16 +83,18 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
         }
       });
 
-      this.lottieInstance.setSpeed(this.speed);
+      this.lottieInstance.setSpeed(this.speed());
       
       this.lottieInstance.addEventListener('complete', () => {
         if (!this.destroyed) {
+          // TODO: The 'emit' function requires a mandatory void argument
           this.animationComplete.emit();
         }
       });
       
       this.lottieInstance.addEventListener('loopComplete', () => {
         if (!this.destroyed) {
+          // TODO: The 'emit' function requires a mandatory void argument
           this.loopComplete.emit();
         }
       });
@@ -117,7 +118,8 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
 
   private async loadAnimationData(): Promise<any> {
     // Import animation JSON files dynamically
-    switch (this.animationType) {
+    const animationType = this.animationType();
+    switch (animationType) {
       case 'search-empty':
         return (await import('../../assets/search-empty.animation.json')).default;
       case 'success':
@@ -129,7 +131,7 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
       case 'maintenance':
         return (await import('../../assets/maintenance.animation.json')).default;
       default:
-        throw new Error(`Unknown animation type: ${this.animationType}`);
+        throw new Error(`Unknown animation type: ${animationType}`);
     }
   }
 
@@ -209,7 +211,7 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
       'upload': 'cloud_upload',
       'maintenance': 'build'
     };
-    return icons[this.animationType] || 'help_outline';
+    return icons[this.animationType()] || 'help_outline';
   }
 
   getFallbackColor(): string {
@@ -220,6 +222,6 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
       'upload': '#667eea',
       'maintenance': '#9ca3af'
     };
-    return colors[this.animationType] || '#6b7280';
+    return colors[this.animationType()] || '#6b7280';
   }
 }

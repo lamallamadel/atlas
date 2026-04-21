@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, input } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -15,10 +15,10 @@ import { MatProgressBar } from '@angular/material/progress-bar';
     imports: [MatProgressBar, WhatsappThreadComponent, WhatsappMessageInputComponent]
 })
 export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
-  @Input() dossierId!: number;
-  @Input() consentGranted = false;
-  @Input() leadName?: string;
-  @Input() templates: WhatsAppTemplate[] = [];
+  readonly dossierId = input.required<number>();
+  readonly consentGranted = input(false);
+  readonly leadName = input<string>();
+  readonly templates = input<WhatsAppTemplate[]>([]);
 
   messages: MessageResponse[] = [];
   loading = false;
@@ -74,13 +74,14 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
   }
 
   loadMessages(): void {
-    if (!this.dossierId) {
+    const dossierId = this.dossierId();
+    if (!dossierId) {
       return;
     }
 
     this.loading = true;
     this.messageApiService.list({
-      dossierId: this.dossierId,
+      dossierId: dossierId,
       channel: MessageChannel.WHATSAPP,
       size: 100,
       sort: 'timestamp,asc'
@@ -100,7 +101,7 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
   }
 
   onSendMessage(event: { content: string; templateId?: string; templateVariables?: Record<string, string> }): void {
-    if (!this.consentGranted) {
+    if (!this.consentGranted()) {
       this.snackBar.open(
         '⚠️ Le consentement WhatsApp n\'est pas accordé',
         'Fermer',
@@ -115,7 +116,7 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
     this.sending = true;
 
     const request: MessageCreateRequest = {
-      dossierId: this.dossierId,
+      dossierId: this.dossierId(),
       channel: MessageChannel.WHATSAPP,
       direction: MessageDirection.OUTBOUND,
       content: event.content,
@@ -220,11 +221,11 @@ export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
   }
 
   getEnrichedTemplates(): WhatsAppTemplate[] {
-    if (!this.leadName) {
-      return this.templates;
+    if (!this.leadName()) {
+      return this.templates();
     }
 
-    return this.templates.map(template => {
+    return this.templates().map(template => {
       const enrichedVariables = { ...template };
       return enrichedVariables;
     });

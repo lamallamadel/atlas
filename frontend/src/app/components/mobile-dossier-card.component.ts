@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { DossierResponse } from '../services/dossier-api.service';
 import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
 import { MatIcon } from '@angular/material/icon';
@@ -48,22 +48,22 @@ export interface DossierAction {
       <div class="card-content">
         <div class="card-header">
           <div class="card-title-row">
-            <h3 class="card-title">{{ dossier.leadName || 'Sans nom' }}</h3>
-            <app-badge-status [status]="dossier.status" entityType="dossier"></app-badge-status>
+            <h3 class="card-title">{{ dossier().leadName || 'Sans nom' }}</h3>
+            <app-badge-status [status]="dossier().status" entityType="dossier"></app-badge-status>
           </div>
-          <p class="card-subtitle">{{ dossier.leadPhone | phoneFormat }}</p>
+          <p class="card-subtitle">{{ dossier().leadPhone | phoneFormat }}</p>
         </div>
     
         <div class="card-meta">
-          @if (dossier.leadSource || dossier.source) {
+          @if (dossier().leadSource || dossier().source) {
             <div class="meta-item">
               <mat-icon class="meta-icon">source</mat-icon>
-              <span class="meta-text">{{ dossier.leadSource || dossier.source }}</span>
+              <span class="meta-text">{{ dossier().leadSource || dossier().source }}</span>
             </div>
           }
           <div class="meta-item">
             <mat-icon class="meta-icon">schedule</mat-icon>
-            <span class="meta-text">{{ dossier.updatedAt | dateFormat:'relative' }}</span>
+            <span class="meta-text">{{ dossier().updatedAt | dateFormat:'relative' }}</span>
           </div>
         </div>
     
@@ -71,21 +71,21 @@ export interface DossierAction {
           <button
             class="action-btn action-call"
             (click)="onCall($event)"
-            [attr.aria-label]="'Appeler ' + (dossier.leadName || 'le prospect')"
-            [disabled]="!dossier.leadPhone">
+            [attr.aria-label]="'Appeler ' + (dossier().leadName || 'le prospect')"
+            [disabled]="!dossier().leadPhone">
             <mat-icon>phone</mat-icon>
           </button>
           <button
             class="action-btn action-message"
             (click)="onMessage($event)"
-            [attr.aria-label]="'Envoyer un message à ' + (dossier.leadName || 'le prospect')"
-            [disabled]="!dossier.leadPhone">
+            [attr.aria-label]="'Envoyer un message à ' + (dossier().leadName || 'le prospect')"
+            [disabled]="!dossier().leadPhone">
             <mat-icon>message</mat-icon>
           </button>
           <button
             class="action-btn action-more"
             (click)="onMore($event)"
-            [attr.aria-label]="'Plus d\\'actions pour ' + (dossier.leadName || 'le dossier')">
+            [attr.aria-label]="'Plus d\\'actions pour ' + (dossier().leadName || 'le dossier')">
             <mat-icon>more_vert</mat-icon>
           </button>
         </div>
@@ -298,8 +298,8 @@ export interface DossierAction {
     imports: [SwipeGestureDirective, MatIcon, BadgeStatusComponent, DateFormatPipe, PhoneFormatPipe]
 })
 export class MobileDossierCardComponent {
-  @Input() dossier!: DossierResponse;
-  @Output() action = new EventEmitter<DossierAction>();
+  readonly dossier = input.required<DossierResponse>();
+  readonly action = output<DossierAction>();
 
   swipeProgress = 0;
   swipeDirection: 'left' | 'right' | null = null;
@@ -307,36 +307,36 @@ export class MobileDossierCardComponent {
   onCardClick(event: Event): void {
     const target = event.target as HTMLElement;
     if (!target.closest('.action-btn')) {
-      this.action.emit({ type: 'view', dossier: this.dossier });
+      this.action.emit({ type: 'view', dossier: this.dossier() });
     }
   }
 
   onCall(event: Event): void {
     event.stopPropagation();
-    this.action.emit({ type: 'call', dossier: this.dossier });
+    this.action.emit({ type: 'call', dossier: this.dossier() });
   }
 
   onMessage(event: Event): void {
     event.stopPropagation();
-    this.action.emit({ type: 'message', dossier: this.dossier });
+    this.action.emit({ type: 'message', dossier: this.dossier() });
   }
 
   onMore(event: Event): void {
     event.stopPropagation();
-    this.action.emit({ type: 'view', dossier: this.dossier });
+    this.action.emit({ type: 'view', dossier: this.dossier() });
   }
 
   onSwipeLeft(event: { deltaX: number; deltaY: number }): void {
     if (Math.abs(event.deltaX) > 100) {
       // Swipe left = Archive / "Pas intéressé" (marks as LOST)
-      this.action.emit({ type: 'archive', dossier: this.dossier });
+      this.action.emit({ type: 'archive', dossier: this.dossier() });
     }
     this.resetSwipe();
   }
 
   onSwipeRight(event: { deltaX: number; deltaY: number }): void {
     if (Math.abs(event.deltaX) > 100) {
-      this.action.emit({ type: 'call', dossier: this.dossier });
+      this.action.emit({ type: 'call', dossier: this.dossier() });
     }
     this.resetSwipe();
   }

@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { TemplateVariable, ComponentType } from '../models/template.model';
 import { MatIconButton } from '@angular/material/button';
@@ -14,20 +14,22 @@ import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } fr
     imports: [MatIconButton, MatTooltip, MatIcon, CdkDropList, CdkDrag, CdkDragHandle, MatChip, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class VariableManagerComponent {
-  @Input() variables: TemplateVariable[] = [];
-  @Output() variablesChange = new EventEmitter<TemplateVariable[]>();
-  @Output() addVariable = new EventEmitter<void>();
-  @Output() removeVariable = new EventEmitter<number>();
+  readonly variables = input<TemplateVariable[]>([]);
+  readonly variablesChange = output<TemplateVariable[]>();
+  readonly addVariable = output<void>();
+  readonly removeVariable = output<number>();
 
   ComponentType = ComponentType;
 
   drop(event: CdkDragDrop<TemplateVariable[]>): void {
-    moveItemInArray(this.variables, event.previousIndex, event.currentIndex);
+    const variables = this.variables();
+    moveItemInArray(variables, event.previousIndex, event.currentIndex);
     this.updatePositions();
-    this.variablesChange.emit(this.variables);
+    this.variablesChange.emit(variables);
   }
 
   onAddVariable(): void {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.addVariable.emit();
   }
 
@@ -36,11 +38,11 @@ export class VariableManagerComponent {
   }
 
   onVariableChange(): void {
-    this.variablesChange.emit(this.variables);
+    this.variablesChange.emit(this.variables());
   }
 
   private updatePositions(): void {
-    this.variables.forEach((variable, index) => {
+    this.variables().forEach((variable, index) => {
       variable.position = index + 1;
     });
   }

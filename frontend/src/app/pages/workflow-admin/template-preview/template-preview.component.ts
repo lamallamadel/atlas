@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnChanges, SimpleChanges, input } from '@angular/core';
 import { WhatsAppTemplate, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';
@@ -15,7 +15,7 @@ import { LineBreakPipe } from '../pipes/line-break.pipe';
     imports: [MatCard, MatCardHeader, MatCardTitle, MatIcon, MatTooltip, MatCardContent, MatButton, MatDivider, MatChipListbox, MatChip, LineBreakPipe]
 })
 export class TemplatePreviewComponent implements OnChanges {
-  @Input() template?: WhatsAppTemplate;
+  readonly template = input<WhatsAppTemplate>();
   
   formattedMessage = '';
   headerComponent?: TemplateComponent;
@@ -27,23 +27,24 @@ export class TemplatePreviewComponent implements OnChanges {
   ButtonType = ButtonType;
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['template'] && this.template) {
+    if (changes['template'] && this.template()) {
       this.parseTemplate();
       this.formatMessage();
     }
   }
 
   parseTemplate(): void {
-    if (!this.template?.components) return;
+    const template = this.template();
+    if (!template?.components) return;
 
-    this.headerComponent = this.template.components.find(c => c.type === ComponentType.HEADER);
-    this.bodyComponent = this.template.components.find(c => c.type === ComponentType.BODY);
-    this.footerComponent = this.template.components.find(c => c.type === ComponentType.FOOTER);
-    this.buttonsComponent = this.template.components.find(c => c.type === ComponentType.BUTTONS);
+    this.headerComponent = template.components.find(c => c.type === ComponentType.HEADER);
+    this.bodyComponent = template.components.find(c => c.type === ComponentType.BODY);
+    this.footerComponent = template.components.find(c => c.type === ComponentType.FOOTER);
+    this.buttonsComponent = template.components.find(c => c.type === ComponentType.BUTTONS);
   }
 
   formatMessage(): void {
-    if (!this.template) {
+    if (!this.template()) {
       this.formattedMessage = '';
       return;
     }
@@ -66,11 +67,12 @@ export class TemplatePreviewComponent implements OnChanges {
   }
 
   formatTextWithVariables(text: string): string {
-    if (!this.template?.variables) return text;
+    const template = this.template();
+    if (!template?.variables) return text;
 
     let formatted = text;
     
-    this.template.variables.forEach(variable => {
+    template.variables.forEach(variable => {
       const placeholder = new RegExp(`\\{\\{${variable.variableName}\\}\\}`, 'g');
       const replacement = variable.exampleValue || `[${variable.variableName}]`;
       formatted = formatted.replace(placeholder, replacement);

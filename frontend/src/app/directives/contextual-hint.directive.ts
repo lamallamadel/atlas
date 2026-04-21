@@ -1,4 +1,4 @@
-import { Directive, Input, OnInit, OnDestroy, ElementRef, HostListener } from '@angular/core';
+import { Directive, OnInit, OnDestroy, ElementRef, HostListener, input } from '@angular/core';
 import { MatTooltip } from '@angular/material/tooltip';
 import { AbstractControl } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -20,9 +20,9 @@ export interface ContextualHint {
     providers: [MatTooltip]
 })
 export class ContextualHintDirective implements OnInit, OnDestroy {
-  @Input() appContextualHint!: ContextualHint | string;
-  @Input() hintControl?: AbstractControl;
-  @Input() hintPosition: 'above' | 'below' | 'left' | 'right' = 'above';
+  readonly appContextualHint = input.required<ContextualHint | string>();
+  readonly hintControl = input<AbstractControl>();
+  readonly hintPosition = input<'above' | 'below' | 'left' | 'right'>('above');
   
   private destroy$ = new Subject<void>();
   private isFocused = false;
@@ -33,15 +33,16 @@ export class ContextualHintDirective implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.tooltip.position = this.hintPosition;
+    this.tooltip.position = this.hintPosition();
     this.updateTooltip();
 
-    if (this.hintControl) {
-      this.hintControl.statusChanges
+    const hintControl = this.hintControl();
+    if (hintControl) {
+      hintControl.statusChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.updateTooltip());
 
-      this.hintControl.valueChanges
+      hintControl.valueChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => this.updateTooltip());
     }
@@ -72,13 +73,15 @@ export class ContextualHintDirective implements OnInit, OnDestroy {
   }
 
   private getContextualMessage(): string {
-    if (typeof this.appContextualHint === 'string') {
-      return this.appContextualHint;
+    const appContextualHint = this.appContextualHint();
+    if (typeof appContextualHint === 'string') {
+      return appContextualHint;
     }
 
-    const hints = this.appContextualHint;
+    const hints = appContextualHint;
     
-    if (!this.hintControl) {
+    const hintControl = this.hintControl();
+    if (!hintControl) {
       return hints.default;
     }
 
@@ -87,27 +90,27 @@ export class ContextualHintDirective implements OnInit, OnDestroy {
       return hints.focused;
     }
 
-    if (this.hintControl.invalid && this.hintControl.touched && hints.invalid) {
+    if (hintControl.invalid && hintControl.touched && hints.invalid) {
       return hints.invalid;
     }
 
-    if (this.hintControl.valid && this.hintControl.dirty && hints.valid) {
+    if (hintControl.valid && hintControl.dirty && hints.valid) {
       return hints.valid;
     }
 
-    if (this.hintControl.value && hints.hasValue) {
+    if (hintControl.value && hints.hasValue) {
       return hints.hasValue;
     }
 
-    if (this.hintControl.dirty && hints.dirty) {
+    if (hintControl.dirty && hints.dirty) {
       return hints.dirty;
     }
 
-    if (this.hintControl.touched && hints.touched) {
+    if (hintControl.touched && hints.touched) {
       return hints.touched;
     }
 
-    if (this.hintControl.pristine && hints.pristine) {
+    if (hintControl.pristine && hints.pristine) {
       return hints.pristine;
     }
 

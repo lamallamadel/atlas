@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, viewChild } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
@@ -26,7 +26,7 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
     imports: [LoadingSkeletonComponent, MatStepper, MatStep, MatStepLabel, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatError, MatInput, MatButton, MatStepperNext, MatStepperPrevious, MatIconButton, MatSuffix, CdkDropList, CdkDrag, CdkDragPlaceholder, MatHint, MatProgressSpinner]
 })
 export class AnnonceCreateComponent implements OnInit {
-  @ViewChild('stepper') stepper!: MatStepper;
+  readonly stepper = viewChild.required<MatStepper>('stepper');
 
   step1FormGroup!: FormGroup;
   step2FormGroup!: FormGroup;

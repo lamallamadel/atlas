@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, viewChild } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
@@ -39,7 +39,7 @@ import { AsyncPipe } from '@angular/common';
     imports: [KeyboardShortcutsComponent, CommandPaletteComponent, AiAgentPanelComponent, MatSidenavContainer, MatSidenav, MatToolbar, MatNavList, MatListItem, RouterLink, RouterLinkActive, MatTooltip, MatIcon, MatListItemIcon, MatListItemTitle, MatDivider, MatSidenavContent, MatIconButton, GlobalSearchBarComponent, ApiStatusIndicatorComponent, MatMenuTrigger, MatBadge, MatMenu, NotificationCenterComponent, MatMenuItem, MaintainScrollDirective, RouterOutlet, MobileBottomNavigationComponent, PwaInstallPromptComponent, AppShellComponent, AsyncPipe]
 })
 export class AppLayoutComponent implements OnInit {
-  @ViewChild('drawer') drawer!: MatSidenav;
+  readonly drawer = viewChild.required<MatSidenav>('drawer');
 
   isHandset$: Observable<boolean>;
   isMobile$: Observable<boolean>;
@@ -83,13 +83,14 @@ export class AppLayoutComponent implements OnInit {
 
   ngOnInit(): void {
     this.isHandset$.subscribe(isHandset => {
-      if (this.drawer) {
+      const drawer = this.drawer();
+      if (drawer) {
         if (isHandset) {
-          this.drawer.mode = 'over';
-          this.drawer.close();
+          drawer.mode = 'over';
+          drawer.close();
         } else {
-          this.drawer.mode = 'side';
-          this.drawer.open();
+          drawer.mode = 'side';
+          drawer.open();
         }
       }
     });
@@ -120,8 +121,9 @@ export class AppLayoutComponent implements OnInit {
 
   closeSidenavOnMobile(): void {
     this.isHandset$.subscribe(isHandset => {
-      if (isHandset && this.drawer) {
-        this.drawer.close();
+      const drawer = this.drawer();
+      if (isHandset && drawer) {
+        drawer.close();
       }
     }).unsubscribe();
   }

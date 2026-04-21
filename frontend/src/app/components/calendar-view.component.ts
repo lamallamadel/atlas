@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, viewChild } from '@angular/core';
 
 
 import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
@@ -51,7 +51,7 @@ interface CalendarEvent extends EventInput {
     imports: [MatCard, MatCardHeader, MatCardTitle, MatIconButton, MatTooltip, MatIcon, MatButton, MatCardContent, MatFormField, MatLabel, MatSelect, MatOption, FullCalendarModule, CalendarListViewComponent, MatProgressSpinner]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
-  @ViewChild('calendar') calendarComponent: any;
+  readonly calendarComponent = viewChild<any>('calendar');
 
   private destroy$ = new Subject<void>();
   isMobile = false;
@@ -672,7 +672,7 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
   changeView(viewType: string): void {
     this.currentView = viewType;
-    const calendarApi = this.calendarComponent?.getApi();
+    const calendarApi = this.calendarComponent()?.getApi();
     if (calendarApi) {
       calendarApi.changeView(viewType);
     }
@@ -683,21 +683,21 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   }
 
   goToToday(): void {
-    const calendarApi = this.calendarComponent?.getApi();
+    const calendarApi = this.calendarComponent()?.getApi();
     if (calendarApi) {
       calendarApi.today();
     }
   }
 
   goToPrev(): void {
-    const calendarApi = this.calendarComponent?.getApi();
+    const calendarApi = this.calendarComponent()?.getApi();
     if (calendarApi) {
       calendarApi.prev();
     }
   }
 
   goToNext(): void {
-    const calendarApi = this.calendarComponent?.getApi();
+    const calendarApi = this.calendarComponent()?.getApi();
     if (calendarApi) {
       calendarApi.next();
     }

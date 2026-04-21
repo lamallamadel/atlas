@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import { DocumentApiService, DocumentCategory, DocumentResponse } from '../services/document-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -23,9 +23,9 @@ export interface UploadProgress {
     imports: [FormsModule, MatIcon, MatButton, MatIconButton, MatProgressBar]
 })
 export class DocumentUploadComponent {
-  @Input() dossierId!: number;
-  @Output() uploadComplete = new EventEmitter<DocumentResponse>();
-  @Output() uploadError = new EventEmitter<string>();
+  readonly dossierId = input.required<number>();
+  readonly uploadComplete = output<DocumentResponse>();
+  readonly uploadError = output<string>();
 
   selectedFiles: File[] = [];
   uploadProgresses: Map<string, UploadProgress> = new Map();
@@ -99,7 +99,7 @@ export class DocumentUploadComponent {
         error: null
       });
 
-      this.documentApiService.upload(this.dossierId, file, this.selectedCategory || undefined)
+      this.documentApiService.upload(this.dossierId(), file, this.selectedCategory || undefined)
         .subscribe({
           next: (event) => {
             const progress = this.uploadProgresses.get(key);

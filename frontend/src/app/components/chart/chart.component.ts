@@ -1,4 +1,4 @@
-import { Component, Input, ViewChild, ElementRef, AfterViewInit, OnDestroy, OnChanges, SimpleChanges, Output, EventEmitter, HostListener } from '@angular/core';
+import { Component, ElementRef, AfterViewInit, OnDestroy, OnChanges, SimpleChanges, HostListener, input, output, viewChild } from '@angular/core';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -38,27 +38,30 @@ export interface ChartExportOptions {
     standalone: false
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
-  @ViewChild('chartCanvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;
+  readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
-  @Input() type: ChartType = 'bar';
-  @Input() labels: string[] = [];
-  @Input() datasets: ChartDataset[] = [];
-  @Input() title?: string;
-  @Input() subtitle?: string;
-  @Input() height = 400;
-  @Input() aspectRatio = 2;
-  @Input() animation = true;
-  @Input() showLegend = true;
-  @Input() showGrid = true;
-  @Input() showTooltips = true;
-  @Input() darkMode = false;
-  @Input() stacked = false;
-  @Input() customOptions?: ChartOptions;
-  @Input() enableExport = true;
+  readonly type = input<ChartType>('bar');
+  readonly labels = input<string[]>([]);
+  readonly datasets = input<ChartDataset[]>([]);
+  readonly title = input<string>();
+  readonly subtitle = input<string>();
+  readonly height = input(400);
+  readonly aspectRatio = input(2);
+  readonly animation = input(true);
+  readonly showLegend = input(true);
+  readonly showGrid = input(true);
+  readonly showTooltips = input(true);
+  readonly darkMode = input(false);
+  readonly stacked = input(false);
+  readonly customOptions = input<ChartOptions>();
+  readonly enableExport = input(true);
 
-  @Output() chartClick = new EventEmitter<any>();
-  @Output() chartHover = new EventEmitter<any>();
-  @Output() exportComplete = new EventEmitter<{ format: string; blob: Blob }>();
+  readonly chartClick = output<any>();
+  readonly chartHover = output<any>();
+  readonly exportComplete = output<{
+    format: string;
+    blob: Blob;
+}>();
 
   private chart?: Chart;
   private resizeObserver?: ResizeObserver;
@@ -82,15 +85,16 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private initializeChart(): void {
-    if (!this.canvasRef?.nativeElement) return;
+    const canvasRef = this.canvasRef();
+    if (!canvasRef?.nativeElement) return;
 
-    const ctx = this.canvasRef.nativeElement.getContext('2d');
+    const ctx = canvasRef.nativeElement.getContext('2d');
     if (!ctx) return;
 
     const config: ChartConfiguration = {
-      type: this.type,
+      type: this.type(),
       data: {
-        labels: this.labels,
+        labels: this.labels(),
         datasets: this.prepareDatasets()
       },
       options: this.buildChartOptions()
@@ -100,12 +104,12 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private prepareDatasets(): any[] {
-    return this.datasets.map((dataset, index) => ({
+    return this.datasets().map((dataset, index) => ({
       ...dataset,
       backgroundColor: dataset.backgroundColor || this.getColorForIndex(index, 0.2),
       borderColor: dataset.borderColor || this.getColorForIndex(index, 1),
       borderWidth: dataset.borderWidth ?? 2,
-      fill: dataset.fill ?? ((this.type as string) === 'area' || this.type === 'radar'),
+      fill: dataset.fill ?? ((this.type() as string) === 'area' || this.type() === 'radar'),
       tension: dataset.tension ?? 0.4,
       pointRadius: dataset.pointRadius ?? 4,
       pointHoverRadius: dataset.pointHoverRadius ?? 6
@@ -113,7 +117,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private buildChartOptions(): any {
-    const isDark = this.darkMode;
+    const isDark = this.darkMode();
     const gridColor = isDark ? 'rgba(158, 158, 158, 0.15)' : 'rgba(189, 189, 189, 0.15)';
     const textColor = isDark ? '#E0E0E0' : '#616161';
     const borderColor = isDark ? 'rgba(158, 158, 158, 0.3)' : 'rgba(189, 189, 189, 0.3)';
@@ -121,14 +125,15 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
     const baseOptions: any = {
       responsive: true,
       maintainAspectRatio: true,
-      aspectRatio: this.aspectRatio,
-      animation: this.animation ? {
+      aspectRatio: this.aspectRatio(),
+      animation: this.animation() ? {
         duration: 750,
         easing: 'easeInOutQuart',
         onComplete: () => {
-          if (this.type === 'bar') {
+          const type = this.type();
+          if (type === 'bar') {
             this.animateBarStagger();
-          } else if (this.type === 'line') {
+          } else if (type === 'line') {
             this.animateLineProgressive();
           }
         }
@@ -139,7 +144,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
       },
       plugins: {
         legend: {
-          display: this.showLegend,
+          display: this.showLegend(),
           position: 'top',
           align: 'start',
           labels: {
@@ -157,7 +162,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
           }
         },
         tooltip: {
-          enabled: this.showTooltips,
+          enabled: this.showTooltips(),
           backgroundColor: isDark ? 'rgba(66, 66, 66, 0.95)' : 'rgba(255, 255, 255, 0.95)',
           titleColor: isDark ? '#FFFFFF' : '#212121',
           bodyColor: isDark ? '#E0E0E0' : '#424242',
@@ -203,12 +208,13 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
       }
     };
 
-    if (this.type !== 'pie' && this.type !== 'doughnut' && this.type !== 'polarArea' && this.type !== 'radar') {
+    const type = this.type();
+    if (type !== 'pie' && type !== 'doughnut' && type !== 'polarArea' && type !== 'radar') {
       baseOptions.scales = {
         x: {
-          display: this.showGrid,
+          display: this.showGrid(),
           grid: {
-            display: this.showGrid,
+            display: this.showGrid(),
             color: gridColor,
             drawBorder: false,
             drawTicks: false
@@ -225,12 +231,12 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
           border: {
             display: false
           },
-          stacked: this.stacked
+          stacked: this.stacked()
         },
         y: {
-          display: this.showGrid,
+          display: this.showGrid(),
           grid: {
-            display: this.showGrid,
+            display: this.showGrid(),
             color: gridColor,
             drawBorder: false,
             drawTicks: false
@@ -248,12 +254,12 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
           border: {
             display: false
           },
-          stacked: this.stacked
+          stacked: this.stacked()
         }
       };
     }
 
-    return { ...baseOptions, ...this.customOptions };
+    return { ...baseOptions, ...this.customOptions() };
   }
 
   private getColorForIndex(index: number, alpha = 1): string {
@@ -285,7 +291,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private animateBarStagger(): void {
-    if (!this.animation || !this.chart) return;
+    if (!this.animation() || !this.chart) return;
 
     const meta = this.chart.getDatasetMeta(0);
     if (!meta || !meta.data) return;
@@ -298,14 +304,14 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private animateLineProgressive(): void {
-    if (!this.animation || !this.chart) return;
+    if (!this.animation() || !this.chart) return;
 
   }
 
   private updateChart(): void {
     if (!this.chart) return;
 
-    this.chart.data.labels = this.labels;
+    this.chart.data.labels = this.labels();
     this.chart.data.datasets = this.prepareDatasets();
     this.chart.options = this.buildChartOptions();
     this.chart.update('none');
@@ -319,7 +325,8 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private setupResizeObserver(): void {
-    if (!this.canvasRef?.nativeElement) return;
+    const canvasRef = this.canvasRef();
+    if (!canvasRef?.nativeElement) return;
 
     this.resizeObserver = new ResizeObserver(() => {
       if (this.chart) {
@@ -327,7 +334,7 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
       }
     });
 
-    this.resizeObserver.observe(this.canvasRef.nativeElement.parentElement!);
+    this.resizeObserver.observe(canvasRef.nativeElement.parentElement!);
   }
 
   @HostListener('window:resize')
@@ -352,9 +359,10 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private async exportAsSVG(filename: string): Promise<void> {
-    if (!this.canvasRef?.nativeElement) return;
+    const canvasRef = this.canvasRef();
+    if (!canvasRef?.nativeElement) return;
 
-    const canvas = this.canvasRef.nativeElement;
+    const canvas = canvasRef.nativeElement;
     const svg = this.canvasToSVG(canvas);
     const blob = new Blob([svg], { type: 'image/svg+xml' });
 
@@ -363,9 +371,10 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private async exportAsPNG(filename: string, quality: number): Promise<void> {
-    if (!this.canvasRef?.nativeElement) return;
+    const canvasRef = this.canvasRef();
+    if (!canvasRef?.nativeElement) return;
 
-    const canvas = this.canvasRef.nativeElement;
+    const canvas = canvasRef.nativeElement;
     canvas.toBlob((blob) => {
       if (blob) {
         this.downloadBlob(blob, `${filename}.png`);

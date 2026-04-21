@@ -32,10 +32,10 @@ describe('ChartComponent', () => {
   });
 
   it('should initialize with default values', () => {
-    expect(component.type).toBe('bar');
-    expect(component.animation).toBe(true);
-    expect(component.showLegend).toBe(true);
-    expect(component.showGrid).toBe(true);
+    expect(component.type()).toBe('bar');
+    expect(component.animation()).toBe(true);
+    expect(component.showLegend()).toBe(true);
+    expect(component.showGrid()).toBe(true);
   });
 
   it('should handle empty datasets', () => {

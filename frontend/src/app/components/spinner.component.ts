@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, input, output } from '@angular/core';
 
 export type SpinnerVariant = 'circular' | 'linear' | 'dots';
 export type SpinnerSize = 'sm' | 'md' | 'lg';
@@ -11,27 +11,28 @@ export type SpinnerColor = 'primary' | 'white' | 'neutral';
     changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SpinnerComponent implements OnInit, OnDestroy {
-  @Input() variant: SpinnerVariant = 'circular';
-  @Input() size: SpinnerSize = 'md';
-  @Input() color: SpinnerColor = 'primary';
-  @Input() message?: string;
-  @Input() timeout = 5000; // 5 seconds default
-  @Input() showCancelButton = false;
-  @Input() cancelButtonLabel = 'Annuler';
-  @Input() timeoutMessage = 'Cette opération prend plus de temps que prévu...';
+  readonly variant = input<SpinnerVariant>('circular');
+  readonly size = input<SpinnerSize>('md');
+  readonly color = input<SpinnerColor>('primary');
+  readonly message = input<string>();
+  readonly timeout = input(5000); // 5 seconds default
+  readonly showCancelButton = input(false);
+  readonly cancelButtonLabel = input('Annuler');
+  readonly timeoutMessage = input('Cette opération prend plus de temps que prévu...');
   
-  @Output() cancel = new EventEmitter<void>();
-  @Output() timeoutReached = new EventEmitter<void>();
+  readonly cancel = output<void>();
+  readonly timeoutReached = output<void>();
 
   showTimeoutMessage = false;
   private timeoutTimer?: number;
 
   ngOnInit(): void {
-    if (this.timeout > 0) {
+    if (this.timeout() > 0) {
       this.timeoutTimer = window.setTimeout(() => {
         this.showTimeoutMessage = true;
+        // TODO: The 'emit' function requires a mandatory void argument
         this.timeoutReached.emit();
-      }, this.timeout);
+      }, this.timeout());
     }
   }
 
@@ -42,18 +43,19 @@ export class SpinnerComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
+    // TODO: The 'emit' function requires a mandatory void argument
     this.cancel.emit();
   }
 
   get sizeClass(): string {
-    return `spinner-${this.size}`;
+    return `spinner-${this.size()}`;
   }
 
   get colorClass(): string {
-    return `spinner-${this.color}`;
+    return `spinner-${this.color()}`;
   }
 
   get variantClass(): string {
-    return `spinner-${this.variant}`;
+    return `spinner-${this.variant()}`;
   }
 }

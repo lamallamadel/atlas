@@ -11,7 +11,7 @@
         <span>WhatsApp Message Preview</span>
       </div>
 
-      @if (template) {
+      @if (template()) {
         <div class="whatsapp-body">
           <div class="message-bubble">
             @if (headerComponent?.text) {
@@ -47,16 +47,16 @@
               }
             </div>
           }
-          @if (template.variables && template.variables.length > 0) {
+          @if (template()?.variables && template()!.variables!.length > 0) {
             <div class="variable-info">
               <mat-divider></mat-divider>
               <div class="info-header">
                 <mat-icon>code</mat-icon>
-                <strong>Variables ({{ template.variables.length }})</strong>
+                <strong>Variables ({{ template()?.variables?.length || 0 }})</strong>
               </div>
               <div class="variables-list">
                 <mat-chip-listbox>
-                  @for (variable of template.variables; track variable) {
+                  @for (variable of (template()?.variables || []); track variable) {
                     <mat-chip>
                       <strong>{{variable.variableName}}</strong>
                       @if (variable.exampleValue) {
@@ -71,7 +71,7 @@
         </div>
       }
 
-      @if (!template) {
+      @if (!template()) {
         <div class="empty-preview">
           <mat-icon>preview</mat-icon>
           <p>Start creating your template to see a preview</p>
@@ -79,22 +79,22 @@
       }
     </div>
 
-    @if (template) {
+    @if (template()) {
       <div class="preview-meta">
         <mat-divider></mat-divider>
         <div class="meta-info">
           <div class="meta-item">
             <mat-icon>translate</mat-icon>
-            <span>{{ template.language }}</span>
+            <span>{{ template()?.language }}</span>
           </div>
           <div class="meta-item">
             <mat-icon>category</mat-icon>
-            <span>{{ template.category }}</span>
+            <span>{{ template()?.category }}</span>
           </div>
-          @if (template.status) {
+          @if (template()?.status) {
             <div class="meta-item">
               <mat-icon>info</mat-icon>
-              <span>{{ template.status }}</span>
+              <span>{{ template()?.status }}</span>
             </div>
           }
         </div>

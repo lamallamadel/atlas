@@ -1,6 +1,6 @@
 <div class="spinner-container" [class]="variantClass + ' ' + sizeClass + ' ' + colorClass">
   <!-- Circular Spinner -->
-  @if (variant === 'circular') {
+  @if (variant() === 'circular') {
     <div class="spinner-circular">
       <svg class="spinner-svg" viewBox="0 0 50 50">
         <circle
@@ -25,7 +25,7 @@
   }
 
   <!-- Linear Spinner -->
-  @if (variant === 'linear') {
+  @if (variant() === 'linear') {
     <div class="spinner-linear">
       <div class="spinner-linear-track">
         <div class="spinner-linear-bar spinner-linear-bar-1"></div>
@@ -35,7 +35,7 @@
   }
 
   <!-- Dots Spinner -->
-  @if (variant === 'dots') {
+  @if (variant() === 'dots') {
     <div class="spinner-dots">
       <div class="spinner-dot"></div>
       <div class="spinner-dot"></div>
@@ -44,27 +44,27 @@
   }
 
   <!-- Message -->
-  @if (message && !showTimeoutMessage) {
+  @if (message() && !showTimeoutMessage) {
     <div class="spinner-message">
-      {{ message }}
+      {{ message() }}
     </div>
   }
 
   <!-- Timeout Message -->
   @if (showTimeoutMessage) {
     <div class="spinner-timeout-message">
-      {{ timeoutMessage }}
+      {{ timeoutMessage() }}
     </div>
   }
 
   <!-- Cancel Button -->
-  @if (showCancelButton) {
+  @if (showCancelButton()) {
     <button
       class="spinner-cancel-btn"
       (click)="onCancel()"
       type="button"
       aria-label="Annuler l'opération">
-      {{ cancelButtonLabel }}
+      {{ cancelButtonLabel() }}
     </button>
   }
 </div>

@@ -3,7 +3,7 @@
     <h3 class="section-title">Documents</h3>
   </div>
 
-  <app-document-upload [dossierId]="dossierId" (uploadComplete)="onUploadComplete($event)">
+  <app-document-upload [dossierId]="dossierId()" (uploadComplete)="onUploadComplete($event)">
   </app-document-upload>
 
   <div class="documents-section">

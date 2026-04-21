@@ -1,15 +1,15 @@
-<div class="chart-wrapper" [class.dark-mode]="darkMode">
-  @if (title || subtitle || enableExport) {
+<div class="chart-wrapper" [class.dark-mode]="darkMode()">
+  @if (title() || subtitle() || enableExport()) {
     <div class="chart-header">
       <div class="chart-title-section">
-        @if (title) {
-          <h3 class="chart-title">{{ title }}</h3>
+        @if (title()) {
+          <h3 class="chart-title">{{ title() }}</h3>
         }
-        @if (subtitle) {
-          <p class="chart-subtitle">{{ subtitle }}</p>
+        @if (subtitle()) {
+          <p class="chart-subtitle">{{ subtitle() }}</p>
         }
       </div>
-      @if (enableExport) {
+      @if (enableExport()) {
         <div class="chart-actions">
           <button
             mat-icon-button
@@ -33,7 +33,7 @@
     </div>
   }
 
-  <div class="chart-container" [style.height.px]="height">
+  <div class="chart-container" [style.height.px]="height()">
     <canvas #chartCanvas></canvas>
   </div>
 </div>

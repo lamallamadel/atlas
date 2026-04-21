@@ -1,14 +1,14 @@
-<mat-card class="task-card" [class.overdue]="isOverdue" [class.completed]="task.status === TaskStatus.COMPLETED" @scaleIn>
+<mat-card class="task-card" [class.overdue]="isOverdue" [class.completed]="task().status === TaskStatus.COMPLETED" @scaleIn>
   <mat-card-header>
     <div class="task-header">
       <mat-checkbox
-        [checked]="task.status === TaskStatus.COMPLETED"
+        [checked]="task().status === TaskStatus.COMPLETED"
         (change)="onCheckboxChange($event)"
         [disabled]="false"
         color="primary">
       </mat-checkbox>
-      <span class="task-title" [class.completed-text]="task.status === TaskStatus.COMPLETED">
-        {{ task.title }}
+      <span class="task-title" [class.completed-text]="task().status === TaskStatus.COMPLETED">
+        {{ task().title }}
       </span>
       <span class="priority-badge" [class]="'priority-' + priorityColor">
         {{ priorityLabel }}
@@ -17,17 +17,17 @@
   </mat-card-header>
 
   <mat-card-content>
-    @if (task.description) {
+    @if (task().description) {
       <p class="task-description">
-        {{ task.description }}
+        {{ task().description }}
       </p>
     }
 
     <div class="task-meta">
-      @if (task.assignedToName) {
+      @if (task().assignedToName) {
         <div class="meta-item">
           <mat-icon>person</mat-icon>
-          <span>{{ task.assignedToName }}</span>
+          <span>{{ task().assignedToName }}</span>
         </div>
       }
 
@@ -39,10 +39,10 @@
         }
       </div>
 
-      @if (task.completedAt) {
+      @if (task().completedAt) {
         <div class="meta-item">
           <mat-icon>check_circle</mat-icon>
-          <span>Completed {{ task.completedAt | date:'short':'':'fr-FR' }}</span>
+          <span>Completed {{ task().completedAt | date:'short':'':'fr-FR' }}</span>
         </div>
       }
     </div>

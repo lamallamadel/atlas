@@ -1,7 +1,7 @@
 <div class="datetime-wrapper" [formGroup]="form" (blur)="markTouched()">
   <div class="datetime-label">
-    <span>{{ label }}</span>
-    @if (required) {
+    <span>{{ label() }}</span>
+    @if (required()) {
       <span class="required" aria-label="obligatoire">*</span>
     }
   </div>
@@ -13,7 +13,7 @@
         matInput
         [matDatepicker]="picker"
         formControlName="date"
-        [placeholder]="datePlaceholder"
+        [placeholder]="datePlaceholder()"
         (blur)="markTouched()"
         />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
@@ -26,7 +26,7 @@
           matInput
           type="time"
           formControlName="time"
-          [placeholder]="timePlaceholder"
+          [placeholder]="timePlaceholder()"
           (blur)="markTouched()"
           />
         </mat-form-field>

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnChanges, SimpleChanges, input } from '@angular/core';
 import { DossierStatus } from '../services/dossier-api.service';
 
 type UiStep = {
@@ -15,7 +15,7 @@ type UiStep = {
     standalone: false
 })
 export class WorkflowStepperComponent implements OnChanges {
-  @Input() status: DossierStatus | null = null;
+  readonly status = input<DossierStatus | null>(null);
 
   constructor(private cdr: ChangeDetectorRef) {}
 
@@ -34,7 +34,7 @@ export class WorkflowStepperComponent implements OnChanges {
   }
 
   get currentIndex(): number {
-    const s = this.status;
+    const s = this.status();
     if (!s) return 0;
     switch (s) {
       case DossierStatus.NEW:
@@ -54,14 +54,16 @@ export class WorkflowStepperComponent implements OnChanges {
   }
 
   get closeLabel(): string {
-    if (this.status === DossierStatus.WON) return 'Gagné';
-    if (this.status === DossierStatus.LOST) return 'Perdu';
+    const status = this.status();
+    if (status === DossierStatus.WON) return 'Gagné';
+    if (status === DossierStatus.LOST) return 'Perdu';
     return 'En cours';
   }
 
   get closeIcon(): string {
-    if (this.status === DossierStatus.WON) return 'emoji_events';
-    if (this.status === DossierStatus.LOST) return 'cancel';
+    const status = this.status();
+    if (status === DossierStatus.WON) return 'emoji_events';
+    if (status === DossierStatus.LOST) return 'cancel';
     return 'hourglass_top';
   }
 
@@ -70,7 +72,7 @@ export class WorkflowStepperComponent implements OnChanges {
   }
 
   get hint(): string {
-    const s = this.status;
+    const s = this.status();
     switch (s) {
       case DossierStatus.NEW:
         return 'Complétez les informations du prospect et démarrez la qualification.';
@@ -91,16 +93,18 @@ export class WorkflowStepperComponent implements OnChanges {
 
 
   get isClosed(): boolean {
-    return this.status === DossierStatus.WON || this.status === DossierStatus.LOST;
+    const status = this.status();
+    return status === DossierStatus.WON || status === DossierStatus.LOST;
   }
 
   get isWon(): boolean {
-    return this.status === DossierStatus.WON;
+    return this.status() === DossierStatus.WON;
   }
 
   get closeVariantClass(): string {
-    if (this.status === DossierStatus.WON) return 'won';
-    if (this.status === DossierStatus.LOST) return 'lost';
+    const status = this.status();
+    if (status === DossierStatus.WON) return 'won';
+    if (status === DossierStatus.LOST) return 'lost';
     return '';
   }
 

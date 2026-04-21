@@ -1,11 +1,11 @@
 <div
   class="workflow-node"
-  [class.selected]="selected"
-  [class.transition-mode]="isTransitionMode"
-  [class.transition-start]="isTransitionStart"
-  [style.left.px]="node.x"
-  [style.top.px]="node.y"
-  [style.border-color]="node.color"
+  [class.selected]="selected()"
+  [class.transition-mode]="isTransitionMode()"
+  [class.transition-start]="isTransitionStart()"
+  [style.left.px]="node().x"
+  [style.top.px]="node().y"
+  [style.border-color]="node().color"
   cdkDrag
   cdkDragBoundary=".nodes-container"
   (cdkDragStarted)="onDragStarted($event)"
@@ -15,18 +15,18 @@
   (keyup.space)="onNodeClick()"
   tabindex="0"
   role="button"
-  [attr.aria-label]="'Nœud de workflow: ' + node.label">
+  [attr.aria-label]="'Nœud de workflow: ' + node().label">
 
-  <div class="node-header" [style.background-color]="node.color">
-    <mat-icon class="node-icon">{{ node.icon || 'radio_button_unchecked' }}</mat-icon>
+  <div class="node-header" [style.background-color]="node().color">
+    <mat-icon class="node-icon">{{ node().icon || 'radio_button_unchecked' }}</mat-icon>
   </div>
 
   <div class="node-body">
-    <div class="node-label">{{ node.label }}</div>
-    <div class="node-status">{{ node.status }}</div>
+    <div class="node-label">{{ node().label }}</div>
+    <div class="node-status">{{ node().status }}</div>
   </div>
 
-  @if (!isTransitionMode) {
+  @if (!isTransitionMode()) {
     <div class="node-actions">
       <button
         mat-icon-button

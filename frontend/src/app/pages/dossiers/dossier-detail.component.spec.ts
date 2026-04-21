@@ -1,4 +1,4 @@
-import { Component, Input, NO_ERRORS_SCHEMA } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -22,7 +22,7 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
     ]
 })
 class BadgeStatusStubComponent {
-  @Input() status: any;
+  readonly status = input<any>();
 }
 
 describe('DossierDetailComponent', () => {

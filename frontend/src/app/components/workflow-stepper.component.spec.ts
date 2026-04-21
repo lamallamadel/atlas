@@ -25,7 +25,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should initialize with null status', () => {
-      expect(component.status).toBeNull();
+      expect(component.status()).toBeNull();
     });
 
     it('should have 5 workflow steps defined', () => {

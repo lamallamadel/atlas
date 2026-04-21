@@ -1,9 +1,9 @@
-<div class="message-input-container" [class.offline]="!isOnline">
+<div class="message-input-container" [class.offline]="!isOnline()">
   <!-- Queue indicator -->
-  @if (queuedMessagesCount > 0) {
+  @if (queuedMessagesCount() > 0) {
     <div class="queue-indicator">
       <mat-icon>schedule</mat-icon>
-      <span>{{ queuedMessagesCount }} message(s) en file d'attente</span>
+      <span>{{ queuedMessagesCount() }} message(s) en file d'attente</span>
     </div>
   }
 
@@ -45,7 +45,7 @@
       <button
         mat-icon-button
         class="template-button"
-        [disabled]="disabled"
+        [disabled]="disabled()"
         (click)="openTemplateSelector()"
         matTooltip="Sélectionner un modèle">
         <mat-icon>{{ selectedTemplate ? 'edit' : 'insert_drive_file' }}</mat-icon>
@@ -56,7 +56,7 @@
         class="message-textarea"
         [placeholder]="getPlaceholder()"
         [(ngModel)]="messageContent"
-        [disabled]="disabled || selectedTemplate !== null"
+        [disabled]="disabled() || selectedTemplate !== null"
         (input)="autoGrow($event)"
         (keydown.enter)="onEnterKey($any($event))"
         rows="1"
@@ -68,11 +68,11 @@
         class="send-button"
         [disabled]="!canSend()"
         (click)="onSend()"
-        [class.sending]="sending">
-        @if (!sending) {
+        [class.sending]="sending()">
+        @if (!sending()) {
           <mat-icon>send</mat-icon>
         }
-        @if (sending) {
+        @if (sending()) {
           <mat-spinner diameter="24"></mat-spinner>
         }
       </button>

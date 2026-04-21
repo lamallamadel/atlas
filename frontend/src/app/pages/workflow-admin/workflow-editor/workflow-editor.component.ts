@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, viewChild } from '@angular/core';
 import { Subject, takeUntil } from 'rxjs';
 import { CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { WorkflowConfigService } from '../services/workflow-config.service';
@@ -19,7 +19,7 @@ import { DecimalPipe } from '@angular/common';
     imports: [MatIcon, MatButton, WorkflowNodeComponent, MatIconButton, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatDivider, MatTooltip, MatChipListbox, MatChip, DecimalPipe]
 })
 export class WorkflowEditorComponent implements OnInit, OnDestroy {
-  @ViewChild('canvas', { static: false }) canvas?: ElementRef<HTMLCanvasElement>;
+  readonly canvas = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   
   workflow: WorkflowConfiguration | null = null;
   selectedNode: WorkflowNode | null = null;
@@ -124,9 +124,10 @@ export class WorkflowEditorComponent implements OnInit, OnDestroy {
   }
 
   drawConnections(): void {
-    if (!this.canvas || !this.workflow) return;
+    const canvasValue = this.canvas();
+    if (!canvasValue || !this.workflow) return;
 
-    const canvas = this.canvas.nativeElement;
+    const canvas = canvasValue.nativeElement;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 

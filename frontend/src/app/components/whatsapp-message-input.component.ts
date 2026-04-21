@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Component, ElementRef, input, output, viewChild } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
 import { MatIcon } from '@angular/material/icon';
@@ -31,14 +31,14 @@ export interface MessageSendRequest {
     imports: [MatIcon, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatTooltip, MatFabButton, MatProgressSpinner]
 })
 export class WhatsappMessageInputComponent {
-  @Input() templates: WhatsAppTemplate[] = [];
-  @Input() disabled = false;
-  @Input() sending = false;
-  @Input() isOnline = true;
-  @Input() queuedMessagesCount = 0;
-  @Output() sendMessage = new EventEmitter<MessageSendRequest>();
+  readonly templates = input<WhatsAppTemplate[]>([]);
+  readonly disabled = input(false);
+  readonly sending = input(false);
+  readonly isOnline = input(true);
+  readonly queuedMessagesCount = input(0);
+  readonly sendMessage = output<MessageSendRequest>();
 
-  @ViewChild('messageInput') messageInput?: ElementRef<HTMLTextAreaElement>;
+  readonly messageInput = viewChild<ElementRef<HTMLTextAreaElement>>('messageInput');
 
   messageContent = '';
   selectedTemplate: WhatsAppTemplate | null = null;
@@ -49,7 +49,7 @@ export class WhatsappMessageInputComponent {
   openTemplateSelector(): void {
     const sheetRef = this.bottomSheet.open(TemplateSelectionSheetComponent, {
       data: { 
-        templates: this.templates,
+        templates: this.templates(),
         currentTemplate: this.selectedTemplate
       },
       panelClass: 'template-bottom-sheet',
@@ -128,7 +128,7 @@ export class WhatsappMessageInputComponent {
       return false;
     }
 
-    if (this.disabled || this.sending) {
+    if (this.disabled() || this.sending()) {
       return false;
     }
 
@@ -149,8 +149,9 @@ export class WhatsappMessageInputComponent {
     this.selectedTemplate = null;
     this.templateVariables = {};
     
-    if (this.messageInput) {
-      const textarea = this.messageInput.nativeElement;
+    const messageInput = this.messageInput();
+    if (messageInput) {
+      const textarea = messageInput.nativeElement;
       textarea.style.height = 'auto';
       textarea.focus();
     }
@@ -163,10 +164,10 @@ export class WhatsappMessageInputComponent {
   }
 
   getPlaceholder(): string {
-    if (this.disabled) {
+    if (this.disabled()) {
       return 'Messagerie désactivée';
     }
-    if (!this.isOnline) {
+    if (!this.isOnline()) {
       return 'Hors ligne - Message sera mis en file d\'attente';
     }
     return 'Tapez un message...';

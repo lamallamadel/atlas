@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, input } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
@@ -18,7 +18,7 @@ import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
     imports: [MatButton, MatIcon, MatProgressSpinner, MatCard, MatCardHeader, MatCardAvatar, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, MatCardContent]
 })
 export class ActivityTimelineComponent implements OnInit, OnChanges {
-  @Input() dossierId!: number;
+  readonly dossierId = input.required<number>();
 
   activities: ActivityResponse[] = [];
   loading = false;
@@ -35,7 +35,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   ) {}
 
   ngOnInit(): void {
-    if (this.dossierId) {
+    if (this.dossierId()) {
       this.loadActivities();
     }
   }
@@ -47,13 +47,14 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
   }
 
   loadActivities(): void {
-    if (!this.dossierId) {
+    const dossierId = this.dossierId();
+    if (!dossierId) {
       return;
     }
 
     this.loading = true;
     this.activityApiService.list({
-      dossierId: this.dossierId,
+      dossierId: dossierId,
       size: 100,
       sort: 'createdAt,desc'
     }).subscribe({
@@ -79,7 +80,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
       width: '600px',
       maxWidth: '90vw',
       data: {
-        dossierId: this.dossierId,
+        dossierId: this.dossierId(),
         content: activity?.content || '',
         visibility: activity?.visibility || ActivityVisibility.INTERNAL,
         isEdit: !!activity
@@ -101,7 +102,7 @@ export class ActivityTimelineComponent implements OnInit, OnChanges {
     const request: ActivityCreateRequest = {
       type: ActivityType.NOTE,
       content: content,
-      dossierId: this.dossierId,
+      dossierId: this.dossierId(),
       visibility: visibility
     };
 

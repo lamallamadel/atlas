@@ -39,10 +39,10 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should initialize with default input values', () => {
-      expect(component.label).toBe('Date et heure');
-      expect(component.required).toBe(false);
-      expect(component.datePlaceholder).toBe('jj/mm/aaaa');
-      expect(component.timePlaceholder).toBe('hh:mm');
+      expect(component.label()).toBe('Date et heure');
+      expect(component.required()).toBe(false);
+      expect(component.datePlaceholder()).toBe('jj/mm/aaaa');
+      expect(component.timePlaceholder()).toBe('hh:mm');
     });
 
     it('should accept custom input values', () => {
@@ -52,10 +52,10 @@ describe('DatetimePickerComponent', () => {
       component.timePlaceholder = 'HH:MM';
       fixture.detectChanges();
 
-      expect(component.label).toBe('Custom Label');
-      expect(component.required).toBe(true);
-      expect(component.datePlaceholder).toBe('dd/mm/yyyy');
-      expect(component.timePlaceholder).toBe('HH:MM');
+      expect(component.label()).toBe('Custom Label');
+      expect(component.required()).toBe(true);
+      expect(component.datePlaceholder()).toBe('dd/mm/yyyy');
+      expect(component.timePlaceholder()).toBe('HH:MM');
     });
   });
 

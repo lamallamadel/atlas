@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, HostListener, viewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
@@ -30,7 +30,7 @@ interface RecentSearch {
     imports: [FormsModule, UpperCasePipe]
 })
 export class GlobalSearchBarComponent implements OnInit, OnDestroy {
-  @ViewChild('searchInput') searchInput!: ElementRef;
+  readonly searchInput = viewChild.required<ElementRef>('searchInput');
 
   searchQuery = '';
   groupedResults: GroupedResults = {
@@ -143,7 +143,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
   selectRecentSearch(search: RecentSearch) {
     this.searchQuery = search.query;
     this.searchSubject.next(search.query);
-    this.searchInput.nativeElement.focus();
+    this.searchInput().nativeElement.focus();
   }
 
   removeRecentSearch(search: RecentSearch, event: Event) {
@@ -164,7 +164,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
   handleKeyboardShortcut(event: KeyboardEvent) {
     if (event.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
       event.preventDefault();
-      this.searchInput.nativeElement.focus();
+      this.searchInput().nativeElement.focus();
       return;
     }
 
@@ -198,7 +198,7 @@ export class GlobalSearchBarComponent implements OnInit, OnDestroy {
       case 'Escape':
         event.preventDefault();
         this.clearSearch();
-        this.searchInput?.nativeElement?.blur();
+        this.searchInput()?.nativeElement?.blur();
         break;
     }
   }

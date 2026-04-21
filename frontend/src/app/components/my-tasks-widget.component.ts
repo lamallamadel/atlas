@@ -17,10 +17,10 @@ interface Task {
     selector: 'app-my-tasks-widget',
     imports: [CommonModule, RouterModule],
     template: `
-    <div class="widget" [class.edit-mode]="editMode">
+    <div class="widget" [class.edit-mode]="editMode()">
       <div class="widget-header">
-        <h3>{{ config.title || 'Mes tâches' }}</h3>
-        @if (editMode) {
+        <h3>{{ config().title || 'Mes tâches' }}</h3>
+        @if (editMode()) {
           <div class="widget-actions">
             <button (click)="onRefresh()" class="btn-icon" title="Rafraîchir">
               <span class="material-icons">refresh</span>
@@ -270,7 +270,7 @@ export class MyTasksWidgetComponent extends CardWidgetBaseComponent {
     this.setLoading(true);
     this.setError(null);
 
-    const statusFilter = this.config.settings?.['status'] as string || 'PENDING,IN_PROGRESS';
+    const statusFilter = this.config().settings?.['status'] as string || 'PENDING,IN_PROGRESS';
 
     this.taskService.list({ size: 50 })
       .pipe(takeUntil(this.destroy$))

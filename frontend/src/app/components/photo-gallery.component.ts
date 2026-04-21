@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, input, output, viewChildren } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -25,13 +25,13 @@ export interface Photo {
     imports: [MatIcon, CdkDropList, CdkDrag, MatIconButton, CdkDragHandle, MatTooltip]
 })
 export class PhotoGalleryComponent implements OnInit, OnDestroy {
-  @Input() photos: Photo[] = [];
-  @Input() editable = false;
-  @Input() columns = 3;
-  @Output() photosReordered = new EventEmitter<Photo[]>();
-  @Output() photoDeleted = new EventEmitter<Photo>();
+  readonly photos = input<Photo[]>([]);
+  readonly editable = input(false);
+  readonly columns = input(3);
+  readonly photosReordered = output<Photo[]>();
+  readonly photoDeleted = output<Photo>();
 
-  @ViewChildren('photoImage') photoImages!: QueryList<ElementRef<HTMLImageElement>>;
+  readonly photoImages = viewChildren<ElementRef<HTMLImageElement>>('photoImage');
 
   lightboxOpen = false;
   currentPhotoIndex = 0;
@@ -96,21 +96,22 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
     );
 
     setTimeout(() => {
-      this.photoImages?.forEach(imgRef => {
+      this.photoImages()?.forEach(imgRef => {
         this.intersectionObserver?.observe(imgRef.nativeElement);
       });
     }, 100);
   }
 
   getMasonryColumns(): Photo[][] {
-    if (!this.photos || this.photos.length === 0) {
+    const photos = this.photos();
+    if (!photos || photos.length === 0) {
       return [];
     }
 
     const columnCount = this.getColumnCount();
     const columns: Photo[][] = Array.from({ length: columnCount }, () => []);
 
-    this.photos.forEach((photo, index) => {
+    photos.forEach((photo, index) => {
       const columnIndex = index % columnCount;
       columns[columnIndex].push(photo);
     });
@@ -122,9 +123,9 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
     if (window.innerWidth < 768) {
       return 2;
     } else if (window.innerWidth < 1024) {
-      return Math.min(this.columns, 3);
+      return Math.min(this.columns(), 3);
     }
-    return this.columns;
+    return this.columns();
   }
 
   openLightbox(index: number): void {
@@ -154,7 +155,7 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
   }
 
   nextPhoto(): void {
-    if (this.currentPhotoIndex < this.photos.length - 1) {
+    if (this.currentPhotoIndex < this.photos().length - 1) {
       this.currentPhotoIndex++;
       this.resetLightboxTransform();
     }
@@ -255,11 +256,11 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
   }
 
   onDrop(event: CdkDragDrop<Photo[]>): void {
-    if (!this.editable) {
+    if (!this.editable()) {
       return;
     }
 
-    const photosCopy = [...this.photos];
+    const photosCopy = [...this.photos()];
     moveItemInArray(photosCopy, event.previousIndex, event.currentIndex);
     this.photos = photosCopy;
     this.photosReordered.emit(photosCopy);
@@ -300,7 +301,7 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
   }
 
   getCurrentPhoto(): Photo | null {
-    return this.photos[this.currentPhotoIndex] || null;
+    return this.photos()[this.currentPhotoIndex] || null;
   }
 
   getSrcset(photo: Photo): string {

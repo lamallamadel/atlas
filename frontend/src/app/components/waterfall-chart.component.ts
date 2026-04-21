@@ -1,12 +1,12 @@
 import {
   Component,
-  Input,
   OnChanges,
   OnDestroy,
   AfterViewInit,
-  ViewChild,
   ElementRef,
-  SimpleChanges
+  SimpleChanges,
+  input,
+  viewChild
 } from '@angular/core';
 import { Chart, ChartConfiguration, ChartDataset, registerables } from 'chart.js';
 
@@ -46,16 +46,16 @@ export interface WaterfallEntry {
     selector: 'app-waterfall-chart',
     template: `
     <div class="waterfall-wrapper glass-card">
-      @if (title) {
+      @if (title()) {
         <div class="waterfall-header">
-          <h3 class="waterfall-title">{{ title }}</h3>
-          @if (subtitle) {
-            <span class="waterfall-subtitle">{{ subtitle }}</span>
+          <h3 class="waterfall-title">{{ title() }}</h3>
+          @if (subtitle()) {
+            <span class="waterfall-subtitle">{{ subtitle() }}</span>
           }
         </div>
       }
       <div class="waterfall-canvas-container">
-        <canvas #chartCanvas [attr.aria-label]="title || 'Waterfall chart'" role="img"></canvas>
+        <canvas #chartCanvas [attr.aria-label]="title() || 'Waterfall chart'" role="img"></canvas>
       </div>
       <div class="waterfall-legend">
         <span class="legend-item positive">
@@ -139,12 +139,12 @@ export interface WaterfallEntry {
   `]
 })
 export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDestroy {
-  @Input() entries: WaterfallEntry[] = [];
-  @Input() title = '';
-  @Input() subtitle = '';
-  @Input() currency = 'MAD';
+  readonly entries = input<WaterfallEntry[]>([]);
+  readonly title = input('');
+  readonly subtitle = input('');
+  readonly currency = input('MAD');
 
-  @ViewChild('chartCanvas') chartCanvas!: ElementRef<HTMLCanvasElement>;
+  readonly chartCanvas = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
 
   private chart: Chart | null = null;
 
@@ -163,7 +163,8 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
   }
 
   private buildChart(): void {
-    if (!this.chartCanvas) return;
+    const chartCanvas = this.chartCanvas();
+    if (!chartCanvas) return;
 
     this.chart?.destroy();
 
@@ -172,7 +173,7 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
     const config: ChartConfiguration = {
       type: 'bar',
       data: {
-        labels: this.entries.map(e => e.label),
+        labels: this.entries().map(e => e.label),
         datasets: [
           // Invisible "float" bars to offset each bar to the right start position
           {
@@ -184,7 +185,7 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
           } as ChartDataset<'bar'>,
           // Visible value bars
           {
-            label: this.currency,
+            label: this.currency(),
             data: totals,
             backgroundColor: colors,
             borderRadius: 4,
@@ -209,7 +210,7 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
                   maximumFractionDigits: 0
                 }).format(Math.abs(raw));
                 const sign = raw >= 0 ? '+' : '-';
-                return ` ${sign}${formatted} ${this.currency}`;
+                return ` ${sign}${formatted} ${this.currency()}`;
               },
               title: (items) => items[0]?.label ?? ''
             },
@@ -255,7 +256,7 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
       }
     };
 
-    this.chart = new Chart(this.chartCanvas.nativeElement, config);
+    this.chart = new Chart(chartCanvas.nativeElement, config);
   }
 
   private computeWaterfallData(): {
@@ -273,7 +274,7 @@ export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDest
 
     let runningTotal = 0;
 
-    for (const entry of this.entries) {
+    for (const entry of this.entries()) {
       if (entry.isTotal) {
         // Absolute total bar — starts from 0
         const currentVal = (entry.value !== undefined && entry.value !== 0) ? entry.value : runningTotal;

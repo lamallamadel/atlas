@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, ViewEncapsulation, input } from '@angular/core';
 import { NgStyle } from '@angular/common';
 
 export type LogoVariant = 'horizontal' | 'vertical' | 'icon';
@@ -12,12 +12,12 @@ export type LogoTheme = 'default' | 'light' | 'dark' | 'mono' | 'auto';
     imports: [NgStyle]
 })
 export class LogoComponent implements OnInit {
-  @Input() variant: LogoVariant = 'horizontal';
-  @Input() theme: LogoTheme = 'auto';
-  @Input() animate = false;
-  @Input() width?: string;
-  @Input() height?: string;
-  @Input() ariaLabel = 'Atlas Immobilier';
+  readonly variant = input<LogoVariant>('horizontal');
+  readonly theme = input<LogoTheme>('auto');
+  readonly animate = input(false);
+  readonly width = input<string>();
+  readonly height = input<string>();
+  readonly ariaLabel = input('Atlas Immobilier');
 
   logoPath = '';
   showAnimation = false;
@@ -25,7 +25,7 @@ export class LogoComponent implements OnInit {
   ngOnInit(): void {
     this.updateLogoPath();
     
-    if (this.animate) {
+    if (this.animate()) {
       // Trigger animation after component initialization
       setTimeout(() => {
         this.showAnimation = true;
@@ -36,23 +36,25 @@ export class LogoComponent implements OnInit {
   private updateLogoPath(): void {
     let themeSuffix = '';
     
-    if (this.theme === 'auto') {
+    const theme = this.theme();
+    if (theme === 'auto') {
       // Detect system theme preference
       const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       themeSuffix = prefersDark ? '-dark' : '';
-    } else if (this.theme !== 'default') {
-      themeSuffix = `-${this.theme}`;
+    } else if (theme !== 'default') {
+      themeSuffix = `-${theme}`;
     }
 
-    if (this.variant === 'icon') {
+    const variant = this.variant();
+    if (variant === 'icon') {
       this.logoPath = `/assets/brand/logo-icon${themeSuffix === '-light' ? '' : themeSuffix}.svg`;
     } else {
-      this.logoPath = `/assets/brand/logo-${this.variant}${themeSuffix}.svg`;
+      this.logoPath = `/assets/brand/logo-${variant}${themeSuffix}.svg`;
     }
   }
 
   get containerClass(): string {
-    const classes = ['logo-container', `logo-${this.variant}`];
+    const classes = ['logo-container', `logo-${this.variant()}`];
     if (this.showAnimation) {
       classes.push('logo-animated');
     }
@@ -61,11 +63,13 @@ export class LogoComponent implements OnInit {
 
   get imageStyles(): any {
     const styles: any = {};
-    if (this.width) {
-      styles.width = this.width;
+    const width = this.width();
+    if (width) {
+      styles.width = width;
     }
-    if (this.height) {
-      styles.height = this.height;
+    const height = this.height();
+    if (height) {
+      styles.height = height;
     }
     return styles;
   }

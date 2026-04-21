@@ -1,9 +1,9 @@
 import {
   Component,
   forwardRef,
-  Input,
   OnDestroy,
-  OnInit
+  OnInit,
+  input
 } from '@angular/core';
 import { AbstractControl, ControlValueAccessor, FormBuilder, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
@@ -36,10 +36,10 @@ import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular
 class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy
 {
-  @Input() label = 'Date et heure';
-  @Input() required = false;
-  @Input() datePlaceholder = 'jj/mm/aaaa';
-  @Input() timePlaceholder = 'hh:mm';
+  readonly label = input('Date et heure');
+  readonly required = input(false);
+  readonly datePlaceholder = input('jj/mm/aaaa');
+  readonly timePlaceholder = input('hh:mm');
 
   form!: FormGroup;
 
@@ -53,10 +53,10 @@ class DatetimePickerComponent
 
   ngOnInit(): void {
     this.form = this.fb.group({
-      date: [null, this.required ? [Validators.required] : []],
+      date: [null, this.required() ? [Validators.required] : []],
       time: [
         '',
-        this.required
+        this.required()
           ? [Validators.required, DatetimePickerComponent.timeValidator]
           : [DatetimePickerComponent.timeValidator]
       ]
@@ -118,7 +118,7 @@ class DatetimePickerComponent
     if (!this.form) return null;
     const dateCtrl = this.form.get('date');
     const timeCtrl = this.form.get('time');
-    if (this.required && (!dateCtrl?.value || !timeCtrl?.value)) {
+    if (this.required() && (!dateCtrl?.value || !timeCtrl?.value)) {
       return { required: true };
     }
     if (timeCtrl?.hasError('invalidTime')) {
@@ -135,7 +135,7 @@ class DatetimePickerComponent
   get showRequiredError(): boolean {
     return (
       this.form.touched &&
-      this.required &&
+      this.required() &&
       (!this.form.get('date')?.value || !this.form.get('time')?.value)
     );
   }

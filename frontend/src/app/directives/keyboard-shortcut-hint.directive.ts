@@ -1,10 +1,10 @@
-import { Directive, Input, OnInit, ElementRef, Renderer2, OnDestroy } from '@angular/core';
+import { Directive, OnInit, ElementRef, Renderer2, OnDestroy, input } from '@angular/core';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Subscription } from 'rxjs';
 
 @Directive({ selector: '[appKeyboardShortcutHint]' })
 export class KeyboardShortcutHintDirective implements OnInit, OnDestroy {
-  @Input() appKeyboardShortcutHint = '';
+  readonly appKeyboardShortcutHint = input('');
   
   private hintElement: HTMLElement | null = null;
   private subscription: Subscription | null = null;
@@ -17,7 +17,7 @@ export class KeyboardShortcutHintDirective implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscription = this.keyboardShortcutService.preferences$.subscribe(prefs => {
-      if (prefs.showShortcutHints && this.appKeyboardShortcutHint) {
+      if (prefs.showShortcutHints && this.appKeyboardShortcutHint()) {
         this.addHint();
       } else {
         this.removeHint();
@@ -40,7 +40,7 @@ export class KeyboardShortcutHintDirective implements OnInit, OnDestroy {
     this.hintElement = this.renderer.createElement('span');
     this.renderer.addClass(this.hintElement, 'keyboard-hint');
     
-    const text = this.renderer.createText(this.appKeyboardShortcutHint);
+    const text = this.renderer.createText(this.appKeyboardShortcutHint());
     this.renderer.appendChild(this.hintElement, text);
     
     const hostElement = this.el.nativeElement;

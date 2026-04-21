@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { CdkDragStart, CdkDragEnd, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { WorkflowNode } from '../models/workflow.model';
 import { MatIcon } from '@angular/material/icon';
@@ -12,35 +12,42 @@ import { MatTooltip } from '@angular/material/tooltip';
     imports: [CdkDrag, MatIcon, MatIconButton, MatTooltip, CdkDragHandle]
 })
 export class WorkflowNodeComponent {
-  @Input() node!: WorkflowNode;
-  @Input() selected = false;
-  @Input() isTransitionMode = false;
-  @Input() isTransitionStart = false;
+  readonly node = input.required<WorkflowNode>();
+  readonly selected = input(false);
+  readonly isTransitionMode = input(false);
+  readonly isTransitionStart = input(false);
 
-  @Output() nodeClicked = new EventEmitter<WorkflowNode>();
-  @Output() addTransitionClicked = new EventEmitter<WorkflowNode>();
-  @Output() transitionTargetClicked = new EventEmitter<WorkflowNode>();
-  @Output() nodeDragStarted = new EventEmitter<{ node: WorkflowNode; dragEvent: CdkDragStart }>();
-  @Output() nodeDragEnded = new EventEmitter<{ node: WorkflowNode; dragEvent: CdkDragEnd }>();
+  readonly nodeClicked = output<WorkflowNode>();
+  readonly addTransitionClicked = output<WorkflowNode>();
+  readonly transitionTargetClicked = output<WorkflowNode>();
+  readonly nodeDragStarted = output<{
+    node: WorkflowNode;
+    dragEvent: CdkDragStart;
+}>();
+  readonly nodeDragEnded = output<{
+    node: WorkflowNode;
+    dragEvent: CdkDragEnd;
+}>();
 
   onNodeClick(): void {
-    if (this.isTransitionMode && !this.isTransitionStart) {
-      this.transitionTargetClicked.emit(this.node);
-    } else if (!this.isTransitionMode) {
-      this.nodeClicked.emit(this.node);
+    const isTransitionMode = this.isTransitionMode();
+    if (isTransitionMode && !this.isTransitionStart()) {
+      this.transitionTargetClicked.emit(this.node());
+    } else if (!isTransitionMode) {
+      this.nodeClicked.emit(this.node());
     }
   }
 
   onAddTransition(event: Event): void {
     event.stopPropagation();
-    this.addTransitionClicked.emit(this.node);
+    this.addTransitionClicked.emit(this.node());
   }
 
   onDragStarted(event: CdkDragStart): void {
-    this.nodeDragStarted.emit({ node: this.node, dragEvent: event });
+    this.nodeDragStarted.emit({ node: this.node(), dragEvent: event });
   }
 
   onDragEnded(event: CdkDragEnd): void {
-    this.nodeDragEnded.emit({ node: this.node, dragEvent: event });
+    this.nodeDragEnded.emit({ node: this.node(), dragEvent: event });
   }
 }

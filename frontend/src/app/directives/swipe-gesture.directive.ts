@@ -1,4 +1,4 @@
-import { Directive, ElementRef, EventEmitter, HostListener, Input, Output } from '@angular/core';
+import { Directive, ElementRef, HostListener, input, output } from '@angular/core';
 
 export interface SwipeEvent {
   direction: 'left' | 'right' | 'up' | 'down';
@@ -9,21 +9,24 @@ export interface SwipeEvent {
 
 @Directive({ selector: '[appSwipeGesture]' })
 export class SwipeGestureDirective {
-  @Input() swipeThreshold = 50;
-  @Input() swipeVelocityThreshold = 0.3;
-  @Input() enableSwipeLeft = true;
-  @Input() enableSwipeRight = true;
-  @Input() enableSwipeUp = false;
-  @Input() enableSwipeDown = false;
+  readonly swipeThreshold = input(50);
+  readonly swipeVelocityThreshold = input(0.3);
+  readonly enableSwipeLeft = input(true);
+  readonly enableSwipeRight = input(true);
+  readonly enableSwipeUp = input(false);
+  readonly enableSwipeDown = input(false);
   
-  @Output() swipe = new EventEmitter<SwipeEvent>();
-  @Output() swipeLeft = new EventEmitter<SwipeEvent>();
-  @Output() swipeRight = new EventEmitter<SwipeEvent>();
-  @Output() swipeUp = new EventEmitter<SwipeEvent>();
-  @Output() swipeDown = new EventEmitter<SwipeEvent>();
-  @Output() swipeStart = new EventEmitter<TouchEvent>();
-  @Output() swipeMove = new EventEmitter<{ progress: number; direction: string }>();
-  @Output() swipeCancel = new EventEmitter<void>();
+  readonly swipe = output<SwipeEvent>();
+  readonly swipeLeft = output<SwipeEvent>();
+  readonly swipeRight = output<SwipeEvent>();
+  readonly swipeUp = output<SwipeEvent>();
+  readonly swipeDown = output<SwipeEvent>();
+  readonly swipeStart = output<TouchEvent>();
+  readonly swipeMove = output<{
+    progress: number;
+    direction: string;
+}>();
+  readonly swipeCancel = output<void>();
 
   private startX = 0;
   private startY = 0;
@@ -58,11 +61,11 @@ export class SwipeGestureDirective {
     // Determine direction
     if (absDeltaX > absDeltaY) {
       this.currentDirection = deltaX > 0 ? 'right' : 'left';
-      const progress = Math.min(Math.abs(deltaX) / this.swipeThreshold, 1);
+      const progress = Math.min(Math.abs(deltaX) / this.swipeThreshold(), 1);
       this.swipeMove.emit({ progress, direction: this.currentDirection });
     } else {
       this.currentDirection = deltaY > 0 ? 'down' : 'up';
-      const progress = Math.min(Math.abs(deltaY) / this.swipeThreshold, 1);
+      const progress = Math.min(Math.abs(deltaY) / this.swipeThreshold(), 1);
       this.swipeMove.emit({ progress, direction: this.currentDirection });
     }
   }
@@ -82,23 +85,24 @@ export class SwipeGestureDirective {
     const velocity = Math.max(absDeltaX, absDeltaY) / deltaTime;
 
     // Determine if it's a valid swipe
-    if (velocity >= this.swipeVelocityThreshold || absDeltaX >= this.swipeThreshold || absDeltaY >= this.swipeThreshold) {
+    if (velocity >= this.swipeVelocityThreshold() || absDeltaX >= this.swipeThreshold() || absDeltaY >= this.swipeThreshold()) {
       if (absDeltaX > absDeltaY) {
         // Horizontal swipe
-        if (deltaX > 0 && this.enableSwipeRight) {
+        if (deltaX > 0 && this.enableSwipeRight()) {
           this.emitSwipe('right', deltaX, deltaY);
-        } else if (deltaX < 0 && this.enableSwipeLeft) {
+        } else if (deltaX < 0 && this.enableSwipeLeft()) {
           this.emitSwipe('left', deltaX, deltaY);
         }
       } else {
         // Vertical swipe
-        if (deltaY > 0 && this.enableSwipeDown) {
+        if (deltaY > 0 && this.enableSwipeDown()) {
           this.emitSwipe('down', deltaX, deltaY);
-        } else if (deltaY < 0 && this.enableSwipeUp) {
+        } else if (deltaY < 0 && this.enableSwipeUp()) {
           this.emitSwipe('up', deltaX, deltaY);
         }
       }
     } else {
+      // TODO: The 'emit' function requires a mandatory void argument
       this.swipeCancel.emit();
     }
 
@@ -110,6 +114,7 @@ export class SwipeGestureDirective {
   onTouchCancel(): void {
     this.isSwiping = false;
     this.currentDirection = null;
+    // TODO: The 'emit' function requires a mandatory void argument
     this.swipeCancel.emit();
   }
 

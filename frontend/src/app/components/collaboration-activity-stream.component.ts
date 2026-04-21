@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, input } from '@angular/core';
 import { CollaborationService, CollaborationActivity } from '../services/collaboration.service';
 import { Subscription } from 'rxjs';
 
@@ -155,8 +155,8 @@ import { Subscription } from 'rxjs';
   `]
 })
 export class CollaborationActivityStreamComponent implements OnInit, OnDestroy {
-  @Input() dossierId!: number;
-  @Input() maxActivities = 20;
+  readonly dossierId = input.required<number>();
+  readonly maxActivities = input(20);
 
   activities: CollaborationActivity[] = [];
   showNewActivityBadge = false;
@@ -178,8 +178,8 @@ export class CollaborationActivityStreamComponent implements OnInit, OnDestroy {
   private addActivity(activity: CollaborationActivity): void {
     this.activities.unshift(activity);
     
-    if (this.activities.length > this.maxActivities) {
-      this.activities = this.activities.slice(0, this.maxActivities);
+    if (this.activities.length > this.maxActivities()) {
+      this.activities = this.activities.slice(0, this.maxActivities());
     }
 
     this.showNewActivityBadge = true;

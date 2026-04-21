@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit, input } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OutboundMessageApiService, OutboundMessageResponse } from '../../services/outbound-message-api.service';
@@ -13,9 +13,9 @@ import { OutboundMessageListComponent } from './outbound-message-list.component'
     imports: [OutboundMessageFormComponent, OutboundMessageListComponent]
 })
 export class MessagingTabComponent implements OnInit {
-  @Input() dossierId!: number;
-  @Input() recipientPhone?: string;
-  @Input() leadName?: string;
+  readonly dossierId = input.required<number>();
+  readonly recipientPhone = input<string>();
+  readonly leadName = input<string>();
 
   constructor(
     private outboundMessageService: OutboundMessageApiService,
@@ -24,7 +24,7 @@ export class MessagingTabComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (!this.dossierId) {
+    if (!this.dossierId()) {
       console.error('MessagingTabComponent: dossierId is required');
     }
   }

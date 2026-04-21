@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, ViewChild, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy, input, output, viewChild } from '@angular/core';
 import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort, MatSortHeader } from '@angular/material/sort';
@@ -49,46 +49,52 @@ export interface PaginationData {
     imports: [MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgStyle, MatMenuTrigger, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, MatCard, MatCardContent, MatCardActions, MatPaginator]
 })
 export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
-  @Input() columns: ColumnConfig[] = [];
-  @Input() data: unknown[] = [];
-  @Input() showActions = true;
-  @Input() actions: RowAction[] = [
+  readonly columns = input<ColumnConfig[]>([]);
+  readonly data = input<unknown[]>([]);
+  readonly showActions = input(true);
+  readonly actions = input<RowAction[]>([
     { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' },
     { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'accent' },
     { icon: 'delete', tooltip: 'Supprimer', action: 'delete', color: 'warn' }
-  ];
-  @Input() pageSize = 10;
-  @Input() pageSizeOptions: number[] = [5, 10, 25, 50, 100];
-  @Input() showPagination = true;
-  @Input() enableSort = true;
-  @Input() rowClickable = false;
-  @Input() enableRowSelection = false;
-  @Input() stickyHeader = true;
-  @Input() enableVirtualScroll = false;
-  @Input() virtualScrollItemSize = 48;
-  @Input() useKebabMenu = false;
-  @Input() showTableHeader = false;
-  @Input() showInlinePagination = false;
-  @Input() paginationData?: PaginationData;
-  @Input() counterSingular = 'élément';
-  @Input() counterPlural = 'éléments';
-  @Input() enableExport = false;
-  @Input() exportConfig?: {
+]);
+  readonly pageSize = input(10);
+  readonly pageSizeOptions = input<number[]>([5, 10, 25, 50, 100]);
+  readonly showPagination = input(true);
+  readonly enableSort = input(true);
+  readonly rowClickable = input(false);
+  readonly enableRowSelection = input(false);
+  readonly stickyHeader = input(true);
+  readonly enableVirtualScroll = input(false);
+  readonly virtualScrollItemSize = input(48);
+  readonly useKebabMenu = input(false);
+  readonly showTableHeader = input(false);
+  readonly showInlinePagination = input(false);
+  readonly paginationData = input<PaginationData>();
+  readonly counterSingular = input('élément');
+  readonly counterPlural = input('éléments');
+  readonly enableExport = input(false);
+  readonly exportConfig = input<{
     title?: string;
     filename?: string;
     logo?: string;
     primaryColor?: string;
     secondaryColor?: string;
-  };
+}>();
 
-  @Output() rowAction = new EventEmitter<{ action: string; row: unknown }>();
-  @Output() rowClick = new EventEmitter<unknown>();
-  @Output() selectionChange = new EventEmitter<unknown[]>();
-  @Output() paginationChange = new EventEmitter<'previous' | 'next'>();
-  @Output() exportRequest = new EventEmitter<{ format: 'pdf' | 'excel' | 'print'; data: unknown[] }>();
+  readonly rowAction = output<{
+    action: string;
+    row: unknown;
+}>();
+  readonly rowClick = output<unknown>();
+  readonly selectionChange = output<unknown[]>();
+  readonly paginationChange = output<'previous' | 'next'>();
+  readonly exportRequest = output<{
+    format: 'pdf' | 'excel' | 'print';
+    data: unknown[];
+}>();
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
-  @ViewChild(MatSort) sort!: MatSort;
+  readonly paginator = viewChild.required(MatPaginator);
+  readonly sort = viewChild.required(MatSort);
 
   dataSource = new MatTableDataSource<unknown>([]);
   displayedColumns: string[] = [];
@@ -101,7 +107,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   constructor(private breakpointObserver: BreakpointObserver) {}
 
   ngOnInit(): void {
-    this.dataSource.data = this.data;
+    this.dataSource.data = this.data();
     this.updateDisplayedColumns();
     this.initializeColumnWidths();
     this.observeBreakpoints();
@@ -109,7 +115,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['data']) {
-      this.dataSource.data = this.data;
+      this.dataSource.data = this.data();
       this.selection.clear();
     }
     if (changes['columns']) {
@@ -119,11 +125,11 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   ngAfterViewInit(): void {
-    if (this.showPagination) {
-      this.dataSource.paginator = this.paginator;
+    if (this.showPagination()) {
+      this.dataSource.paginator = this.paginator();
     }
-    if (this.enableSort) {
-      this.dataSource.sort = this.sort;
+    if (this.enableSort()) {
+      this.dataSource.sort = this.sort();
     }
   }
 
@@ -142,7 +148,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   initializeColumnWidths(): void {
-    this.columns.forEach(col => {
+    this.columns().forEach(col => {
       if (col.width) {
         const widthValue = parseInt(col.width);
         this.columnWidths.set(col.key, widthValue);
@@ -153,13 +159,13 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   updateDisplayedColumns(): void {
     this.displayedColumns = [];
     
-    if (this.enableRowSelection) {
+    if (this.enableRowSelection()) {
       this.displayedColumns.push('select');
     }
     
-    this.displayedColumns.push(...this.columns.map(col => col.key));
+    this.displayedColumns.push(...this.columns().map(col => col.key));
     
-    if (this.showActions) {
+    if (this.showActions()) {
       this.displayedColumns.push('actions');
     }
   }
@@ -197,7 +203,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   onRowClick(row: unknown): void {
-    if (this.rowClickable) {
+    if (this.rowClickable()) {
       this.rowClick.emit(row);
     }
   }

@@ -2,10 +2,10 @@ import {
   Component,
   OnInit,
   OnDestroy,
-  ViewChild,
   ElementRef,
   AfterViewChecked,
-  HostListener
+  HostListener,
+  viewChild
 } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -594,8 +594,8 @@ import { AsyncPipe } from '@angular/common';
     imports: [MatTooltip, MatIcon, MatIconButton, FormsModule, AsyncPipe]
 })
 export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecked {
-  @ViewChild('conversationEl') conversationEl?: ElementRef<HTMLDivElement>;
-  @ViewChild('inputEl') inputEl?: ElementRef<HTMLTextAreaElement>;
+  readonly conversationEl = viewChild<ElementRef<HTMLDivElement>>('conversationEl');
+  readonly inputEl = viewChild<ElementRef<HTMLTextAreaElement>>('inputEl');
 
   panelOpen$ = this.agentService.panelOpen$;
   messages$ = this.agentService.messages$;
@@ -621,7 +621,7 @@ export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecke
           this.inputValue = q;
           setTimeout(() => {
             this.adjustHeight();
-            this.inputEl?.nativeElement?.focus();
+            this.inputEl()?.nativeElement?.focus();
           }, 150);
         }
       });
@@ -705,14 +705,14 @@ export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecke
   }
 
   private adjustHeight(): void {
-    const ta = this.inputEl?.nativeElement;
+    const ta = this.inputEl()?.nativeElement;
     if (!ta) return;
     ta.style.height = 'auto';
     ta.style.height = Math.min(ta.scrollHeight, 96) + 'px';
   }
 
   private scrollToBottom(): void {
-    const el = this.conversationEl?.nativeElement;
+    const el = this.conversationEl()?.nativeElement;
     if (el) el.scrollTop = el.scrollHeight;
   }
 }

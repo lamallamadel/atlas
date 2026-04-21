@@ -92,7 +92,7 @@ describe('CommandPaletteComponent', () => {
     fixture.detectChanges();
 
     setTimeout(() => {
-      expect(component.commandInput).toBeDefined();
+      expect(component.commandInput()).toBeDefined();
       done();
     }, 150);
   });

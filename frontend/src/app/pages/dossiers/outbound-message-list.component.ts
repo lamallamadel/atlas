@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, input, output } from '@angular/core';
 import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { OutboundMessageApiService, OutboundMessageResponse, OutboundMessageStatus } from '../../services/outbound-message-api.service';
@@ -12,8 +12,8 @@ import { EmptyStateComponent } from '../../components/empty-state.component';
     imports: [EmptyStateComponent]
 })
 export class OutboundMessageListComponent implements OnInit, OnDestroy {
-  @Input() dossierId!: number;
-  @Output() retryMessage = new EventEmitter<OutboundMessageResponse>();
+  readonly dossierId = input.required<number>();
+  readonly retryMessage = output<OutboundMessageResponse>();
 
   messages: OutboundMessageResponse[] = [];
   loading = false;
@@ -36,7 +36,8 @@ export class OutboundMessageListComponent implements OnInit, OnDestroy {
   }
 
   loadMessages(): void {
-    if (!this.dossierId) {
+    const dossierId = this.dossierId();
+    if (!dossierId) {
       return;
     }
 
@@ -44,7 +45,7 @@ export class OutboundMessageListComponent implements OnInit, OnDestroy {
     this.error = null;
 
     this.outboundMessageService.list({
-      dossierId: this.dossierId,
+      dossierId: dossierId,
       size: 100,
       sort: 'createdAt,desc'
     }).subscribe({
@@ -64,7 +65,7 @@ export class OutboundMessageListComponent implements OnInit, OnDestroy {
     this.pollingSubscription = interval(this.POLLING_INTERVAL)
       .pipe(
         switchMap(() => this.outboundMessageService.list({
-          dossierId: this.dossierId,
+          dossierId: this.dossierId(),
           size: 100,
           sort: 'createdAt,desc'
         }))

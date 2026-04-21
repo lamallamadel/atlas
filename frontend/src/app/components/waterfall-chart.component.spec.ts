@@ -52,7 +52,7 @@ describe('WaterfallChartComponent', () => {
 
         // simulate ngOnChanges not as firstChange
         component.ngOnChanges({
-            entries: new SimpleChange(null, component.entries, false)
+            entries: new SimpleChange(null, component.entries(), false)
         });
 
         expect((component as unknown as { buildChart: jasmine.Spy }).buildChart).toHaveBeenCalled();
