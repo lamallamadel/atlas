@@ -13,35 +13,35 @@
 
 // Modular Typography Scale - Perfect Fourth Ratio (1.25)
 // Base: 14px → 17.5px → 21.9px → 27.4px → 34.2px → 42.8px
-$custom-typography: mat.define-typography-config(
+$custom-typography: mat.m2-define-typography-config(
   $font-family: '"Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
-  $headline-1: mat.define-typography-level(42.8px, 51.36px, 700, 'Roboto', -0.02em),  // line-height: 42.8 * 1.2
-  $headline-2: mat.define-typography-level(34.2px, 41.04px, 700, 'Roboto', -0.02em),  // line-height: 34.2 * 1.2
-  $headline-3: mat.define-typography-level(27.4px, 32.88px, 600, 'Roboto', -0.02em),  // line-height: 27.4 * 1.2
-  $headline-4: mat.define-typography-level(21.9px, 26.28px, 600, 'Roboto', 0em),      // line-height: 21.9 * 1.2
-  $headline-5: mat.define-typography-level(17.5px, 21px, 500, 'Roboto', 0em),         // line-height: 17.5 * 1.2
-  $headline-6: mat.define-typography-level(14px, 16.8px, 500, 'Roboto', 0em),         // line-height: 14 * 1.2
-  $subtitle-1: mat.define-typography-level(17.5px, 28px, 400, 'Roboto', 0em),         // body line-height: 1.6
-  $subtitle-2: mat.define-typography-level(14px, 22.4px, 500, 'Roboto', 0em),         // body line-height: 1.6
-  $body-1: mat.define-typography-level(17.5px, 28px, 400, 'Open Sans', 0em),          // 17.5 * 1.6
-  $body-2: mat.define-typography-level(14px, 22.4px, 400, 'Open Sans', 0em),          // 14 * 1.6
-  $caption: mat.define-typography-level(11.2px, 17.92px, 400, 'Open Sans', 0em),      // 14 / 1.25 * 1.6
-  $button: mat.define-typography-level(14px, 22.4px, 500, 'Roboto', 0em),
+  $headline-1: mat.m2-define-typography-level(42.8px, 51.36px, 700, 'Roboto', -0.02em),  // line-height: 42.8 * 1.2
+  $headline-2: mat.m2-define-typography-level(34.2px, 41.04px, 700, 'Roboto', -0.02em),  // line-height: 34.2 * 1.2
+  $headline-3: mat.m2-define-typography-level(27.4px, 32.88px, 600, 'Roboto', -0.02em),  // line-height: 27.4 * 1.2
+  $headline-4: mat.m2-define-typography-level(21.9px, 26.28px, 600, 'Roboto', 0em),      // line-height: 21.9 * 1.2
+  $headline-5: mat.m2-define-typography-level(17.5px, 21px, 500, 'Roboto', 0em),         // line-height: 17.5 * 1.2
+  $headline-6: mat.m2-define-typography-level(14px, 16.8px, 500, 'Roboto', 0em),         // line-height: 14 * 1.2
+  $subtitle-1: mat.m2-define-typography-level(17.5px, 28px, 400, 'Roboto', 0em),         // body line-height: 1.6
+  $subtitle-2: mat.m2-define-typography-level(14px, 22.4px, 500, 'Roboto', 0em),         // body line-height: 1.6
+  $body-1: mat.m2-define-typography-level(17.5px, 28px, 400, 'Open Sans', 0em),          // 17.5 * 1.6
+  $body-2: mat.m2-define-typography-level(14px, 22.4px, 400, 'Open Sans', 0em),          // 14 * 1.6
+  $caption: mat.m2-define-typography-level(11.2px, 17.92px, 400, 'Open Sans', 0em),      // 14 / 1.25 * 1.6
+  $button: mat.m2-define-typography-level(14px, 22.4px, 500, 'Roboto', 0em),
 );
 
-$custom-typography: mat.define-typography-config($font-family: '"Urbanist", "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
-    $headline-1: mat.define-typography-level(112px, 112px, 300, 'Urbanist', -0.0134em),
-    $headline-2: mat.define-typography-level(56px, 56px, 400, 'Urbanist', -0.0089em),
-    $headline-3: mat.define-typography-level(45px, 48px, 400, 'Urbanist', 0em),
-    $headline-4: mat.define-typography-level(34px, 40px, 400, 'Urbanist', 0.0074em),
-    $headline-5: mat.define-typography-level(24px, 32px, 600, 'Urbanist', 0em),
-    $headline-6: mat.define-typography-level(20px, 32px, 600, 'Urbanist', 0.0075em),
-    $subtitle-1: mat.define-typography-level(16px, 28px, 500, 'Urbanist', 0.0094em),
-    $subtitle-2: mat.define-typography-level(14px, 24px, 600, 'Urbanist', 0.0071em),
-    $body-1: mat.define-typography-level(16px, 24px, 400, 'Urbanist', 0.0179em),
-    $body-2: mat.define-typography-level(14px, 20px, 400, 'Urbanist', 0.0179em),
-    $caption: mat.define-typography-level(12px, 20px, 400, 'Urbanist', 0.0333em),
-    $button: mat.define-typography-level(14px, 14px, 600, 'Urbanist', 0.0893em),
+$custom-typography: mat.m2-define-typography-config($font-family: '"Urbanist", "Roboto", "Open Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif',
+    $headline-1: mat.m2-define-typography-level(112px, 112px, 300, 'Urbanist', -0.0134em),
+    $headline-2: mat.m2-define-typography-level(56px, 56px, 400, 'Urbanist', -0.0089em),
+    $headline-3: mat.m2-define-typography-level(45px, 48px, 400, 'Urbanist', 0em),
+    $headline-4: mat.m2-define-typography-level(34px, 40px, 400, 'Urbanist', 0.0074em),
+    $headline-5: mat.m2-define-typography-level(24px, 32px, 600, 'Urbanist', 0em),
+    $headline-6: mat.m2-define-typography-level(20px, 32px, 600, 'Urbanist', 0.0075em),
+    $subtitle-1: mat.m2-define-typography-level(16px, 28px, 500, 'Urbanist', 0.0094em),
+    $subtitle-2: mat.m2-define-typography-level(14px, 24px, 600, 'Urbanist', 0.0071em),
+    $body-1: mat.m2-define-typography-level(16px, 24px, 400, 'Urbanist', 0.0179em),
+    $body-2: mat.m2-define-typography-level(14px, 20px, 400, 'Urbanist', 0.0179em),
+    $caption: mat.m2-define-typography-level(12px, 20px, 400, 'Urbanist', 0.0333em),
+    $button: mat.m2-define-typography-level(14px, 14px, 600, 'Urbanist', 0.0893em),
   );
 
 
@@ -143,11 +143,11 @@ $real-estate-warn: (
   )
 );
 
-$primary-palette: mat.define-palette($real-estate-primary, 500, 300, 700);
-$accent-palette: mat.define-palette($real-estate-accent, 500, 300, 700);
-$warn-palette: mat.define-palette($real-estate-warn, 500, 300, 700);
+$primary-palette: mat.m2-define-palette($real-estate-primary, 500, 300, 700);
+$accent-palette: mat.m2-define-palette($real-estate-accent, 500, 300, 700);
+$warn-palette: mat.m2-define-palette($real-estate-warn, 500, 300, 700);
 
-$real-estate-theme: mat.define-light-theme((color: (primary: $primary-palette,
+$real-estate-theme: mat.m2-define-light-theme((color: (primary: $primary-palette,
         accent: $accent-palette,
         warn: $warn-palette,
       ),
@@ -158,7 +158,7 @@ $real-estate-theme: mat.define-light-theme((color: (primary: $primary-palette,
 @include mat.all-component-themes($real-estate-theme);
 
 .compact-density {
-  $compact-theme: mat.define-light-theme((color: (primary: $primary-palette,
+  $compact-theme: mat.m2-define-light-theme((color: (primary: $primary-palette,
           accent: $accent-palette,
           warn: $warn-palette,
         ),
@@ -170,7 +170,7 @@ $real-estate-theme: mat.define-light-theme((color: (primary: $primary-palette,
 }
 
 .compact-density-max {
-  $compact-max-theme: mat.define-light-theme((color: (primary: $primary-palette,
+  $compact-max-theme: mat.m2-define-light-theme((color: (primary: $primary-palette,
           accent: $accent-palette,
           warn: $warn-palette,
         ),

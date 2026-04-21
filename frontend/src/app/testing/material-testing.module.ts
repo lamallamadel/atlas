@@ -1,7 +1,7 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatDialogModule } from '@angular/material/dialog';
@@ -27,15 +27,14 @@ import { MatListModule } from '@angular/material/list';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatDividerModule } from '@angular/material/divider';
 import { LayoutModule } from '@angular/cdk/layout';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
-@NgModule({
-    imports: [
+@NgModule({ exports: [
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
         HttpClientTestingModule,
         NoopAnimationsModule,
-
         MatDialogModule,
         MatIconModule,
         MatButtonModule,
@@ -57,14 +56,10 @@ import { LayoutModule } from '@angular/cdk/layout';
         MatMenuModule,
         MatDividerModule,
         LayoutModule
-    ],
-    exports: [
-        CommonModule,
+    ], imports: [CommonModule,
         FormsModule,
         ReactiveFormsModule,
-        HttpClientTestingModule,
         NoopAnimationsModule,
-
         MatDialogModule,
         MatIconModule,
         MatButtonModule,
@@ -85,7 +80,5 @@ import { LayoutModule } from '@angular/cdk/layout';
         MatListModule,
         MatMenuModule,
         MatDividerModule,
-        LayoutModule
-    ]
-})
+        LayoutModule], providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()] })
 export class MaterialTestingModule { }

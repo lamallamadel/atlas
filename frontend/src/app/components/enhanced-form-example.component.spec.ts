@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -17,6 +17,7 @@ import { InlineValidationSuggestionComponent } from './inline-validation-suggest
 import { ContextualHintDirective } from '../directives/contextual-hint.directive';
 import { FormValidationService } from '../services/form-validation.service';
 import { FormDraftService } from '../services/form-draft.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('EnhancedFormExampleComponent', () => {
   let component: EnhancedFormExampleComponent;
@@ -24,16 +25,14 @@ describe('EnhancedFormExampleComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
+    declarations: [
         EnhancedFormExampleComponent,
         FormProgressIndicatorComponent,
         InlineValidationSuggestionComponent,
         ContextualHintDirective
-      ],
-      imports: [
-        ReactiveFormsModule,
+    ],
+    imports: [ReactiveFormsModule,
         BrowserAnimationsModule,
-        HttpClientTestingModule,
         MatCardModule,
         MatFormFieldModule,
         MatInputModule,
@@ -42,13 +41,14 @@ describe('EnhancedFormExampleComponent', () => {
         MatCheckboxModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
-        MatProgressBarModule
-      ],
-      providers: [
+        MatProgressBarModule],
+    providers: [
         FormValidationService,
-        FormDraftService
-      ]
-    }).compileComponents();
+        FormDraftService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(EnhancedFormExampleComponent);
     component = fixture.componentInstance;

@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { CalendarSyncService } from './calendar-sync.service';
 import { AppointmentResponse, AppointmentStatus } from './appointment-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CalendarSyncService', () => {
   let service: CalendarSyncService;
@@ -9,9 +10,9 @@ describe('CalendarSyncService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [CalendarSyncService]
-    });
+    imports: [],
+    providers: [CalendarSyncService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(CalendarSyncService);
     httpMock = TestBed.inject(HttpTestingController);
   });

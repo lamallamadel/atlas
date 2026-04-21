@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AuditEventApiService, AuditAction, AuditEntityType } from './audit-event-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AuditEventApiService', () => {
   let service: AuditEventApiService;
@@ -8,9 +9,9 @@ describe('AuditEventApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [AuditEventApiService]
-    });
+    imports: [],
+    providers: [AuditEventApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(AuditEventApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });

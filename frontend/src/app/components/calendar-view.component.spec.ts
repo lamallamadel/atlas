@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -19,6 +19,7 @@ import { CalendarViewComponent } from './calendar-view.component';
 import { AppointmentApiService, AppointmentStatus, AppointmentResponse } from '../services/appointment-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { CalendarSyncService } from '../services/calendar-sync.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CalendarViewComponent', () => {
   let component: CalendarViewComponent;
@@ -71,10 +72,9 @@ describe('CalendarViewComponent', () => {
     const calendarSyncServiceSpy = jasmine.createSpyObj('CalendarSyncService', ['downloadICalendar']);
 
     await TestBed.configureTestingModule({
-      declarations: [CalendarViewComponent],
-      imports: [
-        HttpClientTestingModule,
-        BrowserAnimationsModule,
+    declarations: [CalendarViewComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [BrowserAnimationsModule,
         MatDialogModule,
         MatFormFieldModule,
         MatSelectModule,
@@ -82,15 +82,15 @@ describe('CalendarViewComponent', () => {
         MatButtonModule,
         MatCardModule,
         MatProgressSpinnerModule,
-        MatTooltipModule
-      ],
-      providers: [
+        MatTooltipModule],
+    providers: [
         { provide: AppointmentApiService, useValue: appointmentServiceSpy },
         { provide: ToastNotificationService, useValue: toastServiceSpy },
-        { provide: CalendarSyncService, useValue: calendarSyncServiceSpy }
-      ],
-      schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
+        { provide: CalendarSyncService, useValue: calendarSyncServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     appointmentService = TestBed.inject(AppointmentApiService) as jasmine.SpyObj<AppointmentApiService>;
     toastService = TestBed.inject(ToastNotificationService) as jasmine.SpyObj<ToastNotificationService>;

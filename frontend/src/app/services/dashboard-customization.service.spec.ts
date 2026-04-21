@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DashboardCustomizationService, DashboardLayout, UserPreferences, WidgetConfig } from './dashboard-customization.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DashboardCustomizationService', () => {
   let service: DashboardCustomizationService;
@@ -8,9 +9,9 @@ describe('DashboardCustomizationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [DashboardCustomizationService]
-    });
+    imports: [],
+    providers: [DashboardCustomizationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(DashboardCustomizationService);
     httpMock = TestBed.inject(HttpTestingController);
   });

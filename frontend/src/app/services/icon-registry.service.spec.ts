@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { IconRegistryService } from './icon-registry.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('IconRegistryService', () => {
   let service: IconRegistryService;
@@ -19,9 +20,9 @@ describe('IconRegistryService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [IconRegistryService]
-    });
+    imports: [],
+    providers: [IconRegistryService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(IconRegistryService);
     httpMock = TestBed.inject(HttpTestingController);
   });

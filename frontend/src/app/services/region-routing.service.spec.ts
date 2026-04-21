@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { RegionRoutingService } from './region-routing.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('RegionRoutingService', () => {
   let service: RegionRoutingService;
@@ -8,9 +9,9 @@ describe('RegionRoutingService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [RegionRoutingService]
-    });
+    imports: [],
+    providers: [RegionRoutingService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(RegionRoutingService);
     httpMock = TestBed.inject(HttpTestingController);
   });

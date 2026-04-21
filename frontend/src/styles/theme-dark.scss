@@ -1,11 +1,11 @@
 @use '@angular/material' as mat;
 @use 'theme' as base-theme;
 
-$dark-primary: mat.define-palette(base-theme.$real-estate-primary, 400, 300, 700);
-$dark-accent: mat.define-palette(base-theme.$real-estate-accent, 400, 300, 700);
-$dark-warn: mat.define-palette(base-theme.$real-estate-warn, 400, 300, 700);
+$dark-primary: mat.m2-define-palette(base-theme.$real-estate-primary, 400, 300, 700);
+$dark-accent: mat.m2-define-palette(base-theme.$real-estate-accent, 400, 300, 700);
+$dark-warn: mat.m2-define-palette(base-theme.$real-estate-warn, 400, 300, 700);
 
-$real-estate-dark-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+$real-estate-dark-theme: mat.m2-define-dark-theme((color: (primary: $dark-primary,
         accent: $dark-accent,
         warn: $dark-warn,
       ),
@@ -142,7 +142,7 @@ body.dark-theme {
 }
 
 .dark-theme .compact-density {
-  $dark-compact-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+  $dark-compact-theme: mat.m2-define-dark-theme((color: (primary: $dark-primary,
           accent: $dark-accent,
           warn: $dark-warn,
         ),
@@ -154,7 +154,7 @@ body.dark-theme {
 }
 
 .dark-theme .compact-density-max {
-  $dark-compact-max-theme: mat.define-dark-theme((color: (primary: $dark-primary,
+  $dark-compact-max-theme: mat.m2-define-dark-theme((color: (primary: $dark-primary,
           accent: $dark-accent,
           warn: $dark-warn,
         ),

@@ -1,7 +1,8 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormControl } from '@angular/forms';
 import { FormValidationService, ValidationSuggestion } from './form-validation.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('FormValidationService', () => {
   let service: FormValidationService;
@@ -9,9 +10,9 @@ describe('FormValidationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [FormValidationService]
-    });
+    imports: [],
+    providers: [FormValidationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(FormValidationService);
     httpMock = TestBed.inject(HttpTestingController);
   });

@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { of } from 'rxjs';
 import { OfflineMessageQueueService } from './offline-message-queue.service';
 import { MessageApiService, MessageCreateRequest, MessageChannel, MessageDirection } from './message-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OfflineMessageQueueService', () => {
   let service: OfflineMessageQueueService;
@@ -12,12 +13,14 @@ describe('OfflineMessageQueueService', () => {
     const messageApiServiceSpy = jasmine.createSpyObj('MessageApiService', ['create']);
     
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [
+    imports: [],
+    providers: [
         OfflineMessageQueueService,
-        { provide: MessageApiService, useValue: messageApiServiceSpy }
-      ]
-    });
+        { provide: MessageApiService, useValue: messageApiServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     
     messageApiService = TestBed.inject(MessageApiService) as jasmine.SpyObj<MessageApiService>;
     localStorage.clear();

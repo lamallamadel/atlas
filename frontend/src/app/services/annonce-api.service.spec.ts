@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AnnonceApiService, AnnonceStatus, AnnonceCreateRequest, AnnonceUpdateRequest } from './annonce-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AnnonceApiService', () => {
   let service: AnnonceApiService;
@@ -8,9 +9,9 @@ describe('AnnonceApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [AnnonceApiService]
-    });
+    imports: [],
+    providers: [AnnonceApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(AnnonceApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });

@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { AppointmentApiService, AppointmentStatus } from './appointment-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AppointmentApiService', () => {
   let service: AppointmentApiService;
@@ -8,9 +9,9 @@ describe('AppointmentApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [AppointmentApiService]
-    });
+    imports: [],
+    providers: [AppointmentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(AppointmentApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });

@@ -12,10 +12,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LeadExportDialogComponent } from './lead-export-dialog.component';
 import { LeadApiService } from '../services/lead-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LeadExportDialogComponent', () => {
   let component: LeadExportDialogComponent;
@@ -23,12 +24,10 @@ describe('LeadExportDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LeadExportDialogComponent ],
-      imports: [
-        CommonModule,
+    declarations: [LeadExportDialogComponent],
+    imports: [CommonModule,
         FormsModule,
         BrowserAnimationsModule,
-        HttpClientTestingModule,
         MatDialogModule,
         MatSnackBarModule,
         MatIconModule,
@@ -38,13 +37,14 @@ describe('LeadExportDialogComponent', () => {
         MatFormFieldModule,
         MatSelectModule,
         MatInputModule,
-        MatProgressBarModule
-      ],
-      providers: [
+        MatProgressBarModule],
+    providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
-        LeadApiService
-      ]
-    })
+        LeadApiService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
   });
 

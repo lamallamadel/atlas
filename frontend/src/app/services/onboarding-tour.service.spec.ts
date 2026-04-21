@@ -1,8 +1,9 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { OnboardingTourService } from './onboarding-tour.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OnboardingTourService', () => {
   let service: OnboardingTourService;
@@ -22,13 +23,15 @@ describe('OnboardingTourService', () => {
     ]);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [
+    imports: [],
+    providers: [
         OnboardingTourService,
         { provide: Router, useValue: routerSpy },
-        { provide: OAuthService, useValue: mockOAuthService }
-      ]
-    });
+        { provide: OAuthService, useValue: mockOAuthService },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
 
     service = TestBed.inject(OnboardingTourService);
     mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;

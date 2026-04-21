@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClient, HTTP_INTERCEPTORS, provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { CorrelationIdInterceptor } from './correlation-id.interceptor';
 import { AuthService } from '../services/auth.service';
@@ -21,18 +21,20 @@ describe('CorrelationIdInterceptor', () => {
     const authSpy = jasmine.createSpyObj('AuthService', ['handleSessionExpired']);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [
+    imports: [],
+    providers: [
         { provide: Router, useValue: routerSpy },
         { provide: ToastNotificationService, useValue: toastServiceSpy },
         { provide: AuthService, useValue: authSpy },
         {
-          provide: HTTP_INTERCEPTORS,
-          useClass: CorrelationIdInterceptor,
-          multi: true
-        }
-      ]
-    });
+            provide: HTTP_INTERCEPTORS,
+            useClass: CorrelationIdInterceptor,
+            multi: true
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
 
     httpMock = TestBed.inject(HttpTestingController);
     httpClient = TestBed.inject(HttpClient);

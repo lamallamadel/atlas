@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -8,6 +8,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NotificationService } from './notification.service';
 import { ThemeService } from './theme.service';
 import { EnhancedSnackbarComponent } from '../components/enhanced-snackbar.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -16,22 +17,21 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
+    declarations: [
         EnhancedSnackbarComponent
-      ],
-      imports: [
-        CommonModule,
-        HttpClientTestingModule,
+    ],
+    imports: [CommonModule,
         MatSnackBarModule,
         MatIconModule,
         MatButtonModule,
-        BrowserAnimationsModule
-      ],
-      providers: [
+        BrowserAnimationsModule],
+    providers: [
         NotificationService,
-        ThemeService
-      ]
-    });
+        ThemeService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     service = TestBed.inject(NotificationService);
     httpMock = TestBed.inject(HttpTestingController);
     themeService = TestBed.inject(ThemeService);

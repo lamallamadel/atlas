@@ -1,6 +1,6 @@
 // FE/src/app/pages/dossiers/dossiers.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DossiersComponent } from './dossiers.component';
@@ -32,6 +32,7 @@ import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DossiersComponent', () => {
   let component: DossiersComponent;
@@ -78,10 +79,9 @@ describe('DossiersComponent', () => {
     }));
 
     await TestBed.configureTestingModule({
-      declarations: [DossiersComponent, GenericTableComponent],
-      imports: [
-        HttpClientTestingModule,
-        RouterTestingModule,
+    declarations: [DossiersComponent, GenericTableComponent],
+    schemas: [NO_ERRORS_SCHEMA],
+    imports: [RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
         MatCardModule,
@@ -99,19 +99,19 @@ describe('DossiersComponent', () => {
         MatSelectModule,
         MatMenuModule,
         MatSnackBarModule,
-        NoopAnimationsModule
-      ],
-      providers: [
+        NoopAnimationsModule],
+    providers: [
         { provide: LOCALE_ID, useValue: 'fr-FR' },
         { provide: DossierApiService, useValue: dossierApiServiceSpy },
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
         { provide: MatBottomSheet, useValue: bottomSheetSpy },
         { provide: BreakpointObserver, useValue: breakpointObserverSpy },
-        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) }
-      ],
-      schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
+        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     dossierApiService = TestBed.inject(DossierApiService) as jasmine.SpyObj<DossierApiService>;
     annonceApiService = TestBed.inject(AnnonceApiService) as jasmine.SpyObj<AnnonceApiService>;

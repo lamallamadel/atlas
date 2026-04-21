@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { OfflineQueueService, QueuedActionType } from './offline-queue.service';
 import { OfflineService } from './offline.service';
 import { OfflineStorageService } from './offline-storage.service';
 import { NotificationService } from './notification.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OfflineQueueService', () => {
   let service: OfflineQueueService;
@@ -13,14 +14,16 @@ describe('OfflineQueueService', () => {
     const mockNotificationService = jasmine.createSpyObj('NotificationService', ['success', 'error', 'info', 'warning', 'critical']);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule],
-      providers: [
+    imports: [MatSnackBarModule],
+    providers: [
         OfflineQueueService,
         OfflineService,
         OfflineStorageService,
-        { provide: NotificationService, useValue: mockNotificationService }
-      ]
-    });
+        { provide: NotificationService, useValue: mockNotificationService },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     service = TestBed.inject(OfflineQueueService);
   });
 

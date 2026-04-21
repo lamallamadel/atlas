@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ConsentementApiService, ConsentementChannel, ConsentementStatus } from './consentement-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ConsentementApiService', () => {
   let service: ConsentementApiService;
@@ -8,9 +9,9 @@ describe('ConsentementApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [ConsentementApiService]
-    });
+    imports: [],
+    providers: [ConsentementApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(ConsentementApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });

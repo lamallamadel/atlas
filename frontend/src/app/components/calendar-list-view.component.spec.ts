@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
@@ -11,6 +11,7 @@ import { CalendarListViewComponent } from './calendar-list-view.component';
 import { AppointmentApiService } from '../services/appointment-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { of } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CalendarListViewComponent', () => {
   let component: CalendarListViewComponent;
@@ -18,33 +19,32 @@ describe('CalendarListViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ CalendarListViewComponent ],
-      imports: [
-        HttpClientTestingModule,
-        MatDialogModule,
+    declarations: [CalendarListViewComponent],
+    imports: [MatDialogModule,
         MatIconModule,
         MatChipsModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
         MatButtonModule,
-        LayoutModule
-      ],
-      providers: [
+        LayoutModule],
+    providers: [
         {
-          provide: AppointmentApiService,
-          useValue: {
-            list: jasmine.createSpy('list').and.returnValue(of({ content: [], totalElements: 0 }))
-          }
+            provide: AppointmentApiService,
+            useValue: {
+                list: jasmine.createSpy('list').and.returnValue(of({ content: [], totalElements: 0 }))
+            }
         },
         {
-          provide: ToastNotificationService,
-          useValue: {
-            error: jasmine.createSpy('error'),
-            success: jasmine.createSpy('success')
-          }
-        }
-      ]
-    })
+            provide: ToastNotificationService,
+            useValue: {
+                error: jasmine.createSpy('error'),
+                success: jasmine.createSpy('success')
+            }
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(CalendarListViewComponent);

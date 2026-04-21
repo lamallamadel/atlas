@@ -11,9 +11,10 @@ import { MatRadioModule } from '@angular/material/radio';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { LeadImportDialogComponent } from './lead-import-dialog.component';
 import { LeadApiService } from '../services/lead-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('LeadImportDialogComponent', () => {
   let component: LeadImportDialogComponent;
@@ -21,11 +22,9 @@ describe('LeadImportDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LeadImportDialogComponent ],
-      imports: [
-        CommonModule,
+    declarations: [LeadImportDialogComponent],
+    imports: [CommonModule,
         FormsModule,
-        HttpClientTestingModule,
         MatDialogModule,
         MatSnackBarModule,
         MatIconModule,
@@ -34,13 +33,14 @@ describe('LeadImportDialogComponent', () => {
         MatProgressSpinnerModule,
         MatTableModule,
         MatRadioModule,
-        NoopAnimationsModule
-      ],
-      providers: [
+        NoopAnimationsModule],
+    providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
-        LeadApiService
-      ]
-    })
+        LeadApiService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
   });
 

@@ -9,7 +9,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { EmptyStateComponent } from './empty-state.component';
@@ -17,6 +17,7 @@ import { TaskCardComponent } from './task-card.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OAuthService } from 'angular-oauth2-oidc';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -24,13 +25,12 @@ describe('TaskListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ 
+    declarations: [
         TaskListComponent,
         EmptyStateComponent,
         TaskCardComponent
-      ],
-      imports: [
-        FormsModule,
+    ],
+    imports: [FormsModule,
         MatDialogModule,
         MatSnackBarModule,
         MatButtonModule,
@@ -41,14 +41,14 @@ describe('TaskListComponent', () => {
         MatProgressSpinnerModule,
         MatCardModule,
         MatCheckboxModule,
-        HttpClientTestingModule,
         BrowserAnimationsModule,
-        FullCalendarModule
-      ],
-      providers: [
-        { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken', 'configure', 'setStorage', 'logOut', 'getAccessToken']) }
-      ]
-    })
+        FullCalendarModule],
+    providers: [
+        { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken', 'configure', 'setStorage', 'logOut', 'getAccessToken']) },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(TaskListComponent);

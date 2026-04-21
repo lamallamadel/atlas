@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -14,6 +14,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 import { AdvancedFiltersDialogComponent } from './advanced-filters-dialog.component';
 import { AdvancedFiltersComponent } from './advanced-filters.component';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AdvancedFiltersDialogComponent', () => {
   let component: AdvancedFiltersDialogComponent;
@@ -30,13 +31,11 @@ describe('AdvancedFiltersDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ 
+    declarations: [
         AdvancedFiltersDialogComponent,
         AdvancedFiltersComponent
-      ],
-      imports: [
-        HttpClientTestingModule,
-        BrowserAnimationsModule,
+    ],
+    imports: [BrowserAnimationsModule,
         ReactiveFormsModule,
         MatDialogModule,
         MatSnackBarModule,
@@ -46,13 +45,14 @@ describe('AdvancedFiltersDialogComponent', () => {
         MatSelectModule,
         MatIconModule,
         MatCheckboxModule,
-        MatButtonToggleModule
-      ],
-      providers: [
+        MatButtonToggleModule],
+    providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: mockDialogData }
-      ]
-    })
+        { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
   });
 

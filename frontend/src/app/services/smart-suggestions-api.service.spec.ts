@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { SmartSuggestionsApiService, SmartSuggestion, TrackBehaviorRequest, SuggestionFeedback } from './smart-suggestions-api.service';
 import { environment } from '../../environments/environment';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('SmartSuggestionsApiService', () => {
   let service: SmartSuggestionsApiService;
@@ -10,9 +11,9 @@ describe('SmartSuggestionsApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [SmartSuggestionsApiService]
-    });
+    imports: [],
+    providers: [SmartSuggestionsApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(SmartSuggestionsApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });

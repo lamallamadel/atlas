@@ -9,8 +9,9 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('TaskFormDialogComponent', () => {
   let component: TaskFormDialogComponent;
@@ -18,9 +19,8 @@ describe('TaskFormDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskFormDialogComponent ],
-      imports: [
-        ReactiveFormsModule,
+    declarations: [TaskFormDialogComponent],
+    imports: [ReactiveFormsModule,
         MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
@@ -29,14 +29,14 @@ describe('TaskFormDialogComponent', () => {
         MatNativeDateModule,
         MatButtonModule,
         MatProgressSpinnerModule,
-        HttpClientTestingModule,
-        BrowserAnimationsModule
-      ],
-      providers: [
+        BrowserAnimationsModule],
+    providers: [
         { provide: MatDialogRef, useValue: {} },
-        { provide: MAT_DIALOG_DATA, useValue: {} }
-      ]
-    })
+        { provide: MAT_DIALOG_DATA, useValue: {} },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(TaskFormDialogComponent);

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
@@ -19,6 +19,7 @@ import { WhatsappMessagingUiComponent } from './whatsapp-messaging-ui.component'
 import { MessageApiService, MessageChannel, MessageDirection, MessageDeliveryStatus } from '../services/message-api.service';
 import { OutboundMessageApiService } from '../services/outbound-message-api.service';
 import { ConsentementApiService, ConsentementChannel, ConsentementStatus } from '../services/consentement-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('WhatsappMessagingUiComponent', () => {
   let component: WhatsappMessagingUiComponent;
@@ -33,10 +34,8 @@ describe('WhatsappMessagingUiComponent', () => {
     const consentementApiServiceSpy = jasmine.createSpyObj('ConsentementApiService', ['list']);
 
     await TestBed.configureTestingModule({
-      declarations: [ WhatsappMessagingUiComponent ],
-      imports: [
-        HttpClientTestingModule,
-        BrowserAnimationsModule,
+    declarations: [WhatsappMessagingUiComponent],
+    imports: [BrowserAnimationsModule,
         FormsModule,
         MatBottomSheetModule,
         MatSnackBarModule,
@@ -48,14 +47,15 @@ describe('WhatsappMessagingUiComponent', () => {
         MatChipsModule,
         MatProgressSpinnerModule,
         ScrollingModule,
-        TextFieldModule
-      ],
-      providers: [
+        TextFieldModule],
+    providers: [
         { provide: MessageApiService, useValue: messageApiServiceSpy },
         { provide: OutboundMessageApiService, useValue: outboundMessageApiServiceSpy },
-        { provide: ConsentementApiService, useValue: consentementApiServiceSpy }
-      ]
-    })
+        { provide: ConsentementApiService, useValue: consentementApiServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
 
     messageApiService = TestBed.inject(MessageApiService) as jasmine.SpyObj<MessageApiService>;

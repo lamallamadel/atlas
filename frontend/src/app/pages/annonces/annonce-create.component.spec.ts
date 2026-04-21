@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -14,6 +14,7 @@ import { of } from 'rxjs';
 
 import { AnnonceCreateComponent } from './annonce-create.component';
 import { AnnonceApiService } from '../../services/annonce-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('AnnonceCreateComponent', () => {
   let component: AnnonceCreateComponent;
@@ -27,10 +28,8 @@ describe('AnnonceCreateComponent', () => {
     annonceApiServiceSpy.update.and.returnValue(of(undefined as any));
 
     await TestBed.configureTestingModule({
-      declarations: [AnnonceCreateComponent],
-      imports: [
-        HttpClientTestingModule,
-        RouterTestingModule,
+    declarations: [AnnonceCreateComponent],
+    imports: [RouterTestingModule,
         FormsModule, // required because template uses [(ngModel)] for photo URL input
         ReactiveFormsModule,
         MatStepperModule,
@@ -39,22 +38,23 @@ describe('AnnonceCreateComponent', () => {
         MatSelectModule,
         MatIconModule,
         MatButtonModule,
-        NoopAnimationsModule
-      ],
-      providers: [
+        NoopAnimationsModule],
+    providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         {
-          provide: ActivatedRoute,
-          useValue: {
-            snapshot: {
-              paramMap: {
-                get: () => null
-              }
+            provide: ActivatedRoute,
+            useValue: {
+                snapshot: {
+                    paramMap: {
+                        get: () => null
+                    }
+                }
             }
-          }
-        }
-      ]
-    }).compileComponents();
+        },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     annonceApiService = TestBed.inject(AnnonceApiService) as jasmine.SpyObj<AnnonceApiService>;
     fixture = TestBed.createComponent(AnnonceCreateComponent);

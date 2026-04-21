@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CustomizableDashboardComponent } from './customizable-dashboard.component';
 import { DashboardCustomizationService } from '../services/dashboard-customization.service';
 import { of } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CustomizableDashboardComponent', () => {
   let component: CustomizableDashboardComponent;
@@ -37,11 +38,13 @@ describe('CustomizableDashboardComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      imports: [CustomizableDashboardComponent, HttpClientTestingModule],
-      providers: [
-        { provide: DashboardCustomizationService, useValue: serviceSpy }
-      ]
-    }).compileComponents();
+    imports: [CustomizableDashboardComponent],
+    providers: [
+        { provide: DashboardCustomizationService, useValue: serviceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     customizationService = TestBed.inject(DashboardCustomizationService) as jasmine.SpyObj<DashboardCustomizationService>;
   });

@@ -1,11 +1,12 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { OfflineInterceptor } from './offline.interceptor';
 import { OfflineService } from '../services/offline.service';
 import { OfflineQueueService } from '../services/offline-queue.service';
 import { OfflineStorageService } from '../services/offline-storage.service';
 import { NotificationService } from '../services/notification.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OfflineInterceptor', () => {
   let interceptor: OfflineInterceptor;
@@ -14,15 +15,17 @@ describe('OfflineInterceptor', () => {
     const mockNotificationService = jasmine.createSpyObj('NotificationService', ['success', 'error', 'info', 'warning', 'critical']);
 
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule],
-      providers: [
+    imports: [MatSnackBarModule],
+    providers: [
         OfflineInterceptor,
         OfflineService,
         OfflineQueueService,
         OfflineStorageService,
-        { provide: NotificationService, useValue: mockNotificationService }
-      ]
-    });
+        { provide: NotificationService, useValue: mockNotificationService },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+});
     interceptor = TestBed.inject(OfflineInterceptor);
   });
 

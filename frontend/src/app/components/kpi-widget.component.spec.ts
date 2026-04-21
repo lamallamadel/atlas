@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { KpiWidgetComponent } from './kpi-widget.component';
 import { DashboardKpiService } from '../services/dashboard-kpi.service';
 import { of, throwError } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('KpiWidgetComponent', () => {
   let component: KpiWidgetComponent;
@@ -13,11 +14,13 @@ describe('KpiWidgetComponent', () => {
     const kpiServiceSpy = jasmine.createSpyObj('DashboardKpiService', ['getKPI']);
 
     await TestBed.configureTestingModule({
-      imports: [KpiWidgetComponent, HttpClientTestingModule],
-      providers: [
-        { provide: DashboardKpiService, useValue: kpiServiceSpy }
-      ]
-    }).compileComponents();
+    imports: [KpiWidgetComponent],
+    providers: [
+        { provide: DashboardKpiService, useValue: kpiServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     kpiService = TestBed.inject(DashboardKpiService) as jasmine.SpyObj<DashboardKpiService>;
   });

@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ObservabilityDashboardComponent } from './observability-dashboard.component';
 import { ReportingApiService } from '../services/reporting-api.service';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,6 +17,7 @@ import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ObservabilityDashboardComponent', () => {
   let component: ObservabilityDashboardComponent;
@@ -95,10 +96,8 @@ describe('ObservabilityDashboardComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      declarations: [ObservabilityDashboardComponent],
-      imports: [
-        HttpClientTestingModule,
-        FormsModule,
+    declarations: [ObservabilityDashboardComponent],
+    imports: [FormsModule,
         BrowserAnimationsModule,
         MatCardModule,
         MatIconModule,
@@ -111,12 +110,13 @@ describe('ObservabilityDashboardComponent', () => {
         MatChipsModule,
         MatListModule,
         MatTableModule,
-        MatTooltipModule
-      ],
-      providers: [
-        { provide: ReportingApiService, useValue: reportingServiceSpy }
-      ]
-    }).compileComponents();
+        MatTooltipModule],
+    providers: [
+        { provide: ReportingApiService, useValue: reportingServiceSpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     reportingService = TestBed.inject(ReportingApiService) as jasmine.SpyObj<ReportingApiService>;
     reportingService.getObservabilityMetrics.and.returnValue(of(createMockMetrics()));

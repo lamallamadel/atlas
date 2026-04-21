@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { OutboundMessageApiService, OutboundMessageStatus, OutboundMessageCreateRequest, OutboundMessageResponse } from './outbound-message-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('OutboundMessageApiService', () => {
   let service: OutboundMessageApiService;
@@ -8,9 +9,9 @@ describe('OutboundMessageApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [OutboundMessageApiService]
-    });
+    imports: [],
+    providers: [OutboundMessageApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(OutboundMessageApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });

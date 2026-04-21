@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -13,6 +13,7 @@ import { TourProgressComponent } from './tour-progress.component';
 import { TourDefinitionService } from '../services/tour-definition.service';
 import { OnboardingTourService } from '../services/onboarding-tour.service';
 import { UserPreferencesService } from '../services/user-preferences.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('TourProgressComponent', () => {
   let component: TourProgressComponent;
@@ -24,24 +25,23 @@ describe('TourProgressComponent', () => {
       'configure', 'setStorage', 'logOut', 'getAccessToken'
     ]);
     await TestBed.configureTestingModule({
-      declarations: [ TourProgressComponent ],
-      imports: [
-        RouterTestingModule,
-        HttpClientTestingModule,
+    declarations: [TourProgressComponent],
+    imports: [RouterTestingModule,
         MatCardModule,
         MatIconModule,
         MatProgressBarModule,
         MatButtonModule,
         MatChipsModule,
-        MatProgressSpinnerModule
-      ],
-      providers: [
+        MatProgressSpinnerModule],
+    providers: [
         TourDefinitionService,
         OnboardingTourService,
         UserPreferencesService,
-        { provide: OAuthService, useValue: mockOAuthService }
-      ]
-    })
+        { provide: OAuthService, useValue: mockOAuthService },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(TourProgressComponent);

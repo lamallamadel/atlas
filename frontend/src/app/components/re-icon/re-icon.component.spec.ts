@@ -1,8 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ReIconComponent } from './re-icon.component';
 import { IconRegistryService } from '../../services/icon-registry.service';
 import { of } from 'rxjs';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ReIconComponent', () => {
   let component: ReIconComponent;
@@ -17,12 +18,14 @@ describe('ReIconComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      declarations: [ReIconComponent],
-      imports: [HttpClientTestingModule],
-      providers: [
-        { provide: IconRegistryService, useValue: iconRegistrySpy }
-      ]
-    }).compileComponents();
+    declarations: [ReIconComponent],
+    imports: [],
+    providers: [
+        { provide: IconRegistryService, useValue: iconRegistrySpy },
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting()
+    ]
+}).compileComponents();
 
     iconRegistryService = TestBed.inject(IconRegistryService) as jasmine.SpyObj<IconRegistryService>;
   });

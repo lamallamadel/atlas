@@ -1,17 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { ServiceWorkerRegistrationService } from './service-worker-registration.service';
 import { NotificationService } from './notification.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ServiceWorkerRegistrationService', () => {
   let service: ServiceWorkerRegistrationService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule, MatSnackBarModule],
-      providers: [NotificationService]
-    });
+    imports: [MatSnackBarModule],
+    providers: [NotificationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(ServiceWorkerRegistrationService);
   });
 

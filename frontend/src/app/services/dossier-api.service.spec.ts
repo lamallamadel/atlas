@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { DossierApiService, DossierStatus, DossierCreateRequest } from './dossier-api.service';
+import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('DossierApiService', () => {
   let service: DossierApiService;
@@ -8,9 +9,9 @@ describe('DossierApiService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      providers: [DossierApiService]
-    });
+    imports: [],
+    providers: [DossierApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+});
     service = TestBed.inject(DossierApiService);
     httpMock = TestBed.inject(HttpTestingController);
   });
