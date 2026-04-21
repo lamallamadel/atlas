@@ -3,7 +3,7 @@
 # -------------------------
 # Build stage
 # -------------------------
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Copy build descriptors first (best cache hit)
@@ -12,13 +12,13 @@ COPY backend/settings.xml /app/settings.xml
 
 # Create toolchains inside the image layer (Linux-safe)
 RUN mkdir -p /root/.m2 && \
-    cat > /root/.m2/toolchains.xml <<EOF
+  cat > /root/.m2/toolchains.xml <<EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <toolchains>
   <toolchain>
     <type>jdk</type>
     <provides>
-      <version>17</version>
+      <version>21</version>
     </provides>
     <configuration>
       <jdkHome>${JAVA_HOME}</jdkHome>
@@ -29,19 +29,19 @@ EOF
 
 # Download deps with cache mounted ONLY on repository
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -ntp -s /app/settings.xml dependency:go-offline
+  mvn -ntp -s /app/settings.xml dependency:go-offline
 
 # Copy sources and build
 COPY backend/src /app/src
 
 RUN --mount=type=cache,target=/root/.m2/repository \
-    mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
+  mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
 
 
 # -------------------------
 # JRE creation stage (jlink)
 # -------------------------
-FROM eclipse-temurin:17-jdk-alpine AS jre-builder
+FROM eclipse-temurin:21-jdk-alpine AS jre-builder
 WORKDIR /jre-build
 
 # Create minimal JRE with only required modules
@@ -56,12 +56,12 @@ WORKDIR /jre-build
 # - jdk.unsupported (some dependencies use Unsafe)
 # - jdk.crypto.ec (TLS/SSL)
 RUN jlink \
-    --add-modules java.base,java.logging,java.management,java.naming,java.sql,java.prefs,java.instrument,jdk.unsupported,jdk.crypto.ec \
-    --output /opt/java-minimal \
-    --compress=2 \
-    --strip-debug \
-    --no-header-files \
-    --no-man-pages
+  --add-modules java.base,java.logging,java.management,java.naming,java.sql,java.prefs,java.instrument,java.desktop,java.security.jgss,java.net.http,java.compiler,jdk.unsupported,jdk.crypto.ec \
+  --output /opt/java-minimal \
+  --compress=2 \
+  --strip-debug \
+  --no-header-files \
+  --no-man-pages
 
 # Verify JRE works
 RUN /opt/java-minimal/bin/java -version
@@ -70,7 +70,7 @@ RUN /opt/java-minimal/bin/java -version
 # -------------------------
 # Runtime stage (minimal)
 # -------------------------
-FROM alpine:3.18
+FROM alpine:3.21
 WORKDIR /app
 
 # Install minimal runtime dependencies (ca-certificates for HTTPS)

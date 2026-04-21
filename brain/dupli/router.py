@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from pydantic import BaseModel
 from pydantic_settings import BaseSettings
@@ -26,7 +26,7 @@ logger.info("Modèle prêt ✅")
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="Dupli Service — Atlasia", version="1.0.0")
+router = APIRouter()
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -69,11 +69,7 @@ def detecter_doublons(annonces: list[Annonce]) -> list[DoublonResult]:
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "service": "dupli-service"}
-
-@app.post("/api/dupli/verifier", response_model=list[DoublonResult])
+@router.post("/api/dupli/verifier", response_model=list[DoublonResult])
 def verifier_doublons(annonces: list[Annonce], _: str = Depends(verify_api_key)):
     if len(annonces) < 2:
         raise HTTPException(status_code=400, detail="Minimum 2 annonces requises")

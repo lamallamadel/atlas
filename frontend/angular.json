@@ -41,6 +41,7 @@
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
+              "src/global-polyfill.js",
               "zone.js",
               "@angular/localize/init"
             ],

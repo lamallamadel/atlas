@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -27,15 +27,9 @@ settings = Settings()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("agent-service")
 
-app = FastAPI(title="Atlas IA Agent API", version="1.0.0")
+router = APIRouter()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -191,11 +185,7 @@ async def process_with_openai(query: str, context: str | None = None) -> AgentRe
         logger.error(f"Erreur OpenAI: {e}")
         return parse_with_rules(query)
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0.0"}
-
-@app.post("/api/agent/process", response_model=AgentResponse)
+@router.post("/api/agent/process", response_model=AgentResponse)
 async def process(req: AgentRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     

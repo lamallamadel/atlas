@@ -138,7 +138,6 @@
     "@types/node": "^20.11.0",
     "@types/papaparse": "^5.3.14",
     "@types/sockjs-client": "^1.5.4",
-    "@types/xlsx": "^0.0.36",
     "@typescript-eslint/eslint-plugin": "^8.56.1",
     "@typescript-eslint/parser": "^8.56.1",
     "axe-core": "^4.8.3",

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,15 +17,9 @@ settings = Settings()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nego-service")
 
-app = FastAPI(title="Negotiation Optimizer API", version="1.0.0")
+router = APIRouter()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -63,11 +57,7 @@ def analyser_nego(req: NegoRequest) -> NegoResponse:
         contre_proposition_optimale=opt
     )
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0.0"}
-
-@app.post("/api/nego/analyser", response_model=NegoResponse)
+@router.post("/api/nego/analyser", response_model=NegoResponse)
 def analyser(req: NegoRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     # Correct Pydantic issue (offre vs prix_offre in method)

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
@@ -25,15 +25,9 @@ logger = logging.getLogger("scoring-service")
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="Scoring Immobilier API", version="1.0.0")
+router = APIRouter()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 # ─── Sécurité API Key ────────────────────────────────────────────────────────
 
@@ -121,18 +115,14 @@ def score_bien(bien: BienRequest) -> ScoreResponse:
 
 # ─── Endpoints ───────────────────────────────────────────────────────────────
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0.0"}
-
-@app.post("/api/scoring/bien", response_model=ScoreResponse)
+@router.post("/api/scoring/bien", response_model=ScoreResponse)
 def scorer_bien(bien: BienRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     result = score_bien(bien)
     logger.info(f"Scoring [{bien.titre}] → {result.score}/100 ({round((time.time()-start)*1000)}ms)")
     return result
 
-@app.post("/api/scoring/biens", response_model=list[ScoreResponse])
+@router.post("/api/scoring/biens", response_model=list[ScoreResponse])
 def scorer_biens(biens: list[BienRequest], _: str = Depends(verify_api_key)):
     if len(biens) > 100:
         raise HTTPException(status_code=400, detail="Maximum 100 biens par requête")

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -20,15 +20,9 @@ settings = Settings()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("document-service")
 
-app = FastAPI(title="Atlas IA Document Service", version="1.0.0")
+router = APIRouter()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -61,10 +55,6 @@ class ContractResponse(BaseModel):
     content: str
     status: str
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0.0"}
-
 def mock_verify(req: VerifyRequest) -> VerifyResponse:
     category = req.category.upper() if req.category else "UNKNOWN"
     if category == "DPE":
@@ -89,7 +79,7 @@ def mock_verify(req: VerifyRequest) -> VerifyResponse:
         flags=[]
     )
 
-@app.post("/api/document/verify", response_model=VerifyResponse)
+@router.post("/api/document/verify", response_model=VerifyResponse)
 async def verify_document(req: VerifyRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     
@@ -99,7 +89,7 @@ async def verify_document(req: VerifyRequest, _: str = Depends(verify_api_key)):
     logger.info(f"Verify [{req.file_name}] -> Valid: {result.is_valid} ({round((time.time()-start)*1000)}ms)")
     return result
 
-@app.post("/api/document/generate-contract", response_model=ContractResponse)
+@router.post("/api/document/generate-contract", response_model=ContractResponse)
 async def generate_contract(req: ContractRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     

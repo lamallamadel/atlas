@@ -1,6 +1,6 @@
 # Infrastructure (Docker-first)
 
-Ce dossier fournit un environnement local complet via **Docker Compose**. Le backend est exécuté **dans Docker** (profil `elk` par défaut) et les outils d’observabilité (logs + métriques) sont inclus.
+Ce dossier fournit un environnement local complet via **Docker Compose**. Le backend est exécuté **dans Docker** (profil `elk` par défaut) et les outils d'observabilité (logs + métriques) sont inclus.
 
 Pour le dépannage et la vérification (Kibana/Grafana/Prometheus), voir : `docs/RUNBOOK_OBSERVABILITY.md`.
 
@@ -8,15 +8,27 @@ Pour le dépannage et la vérification (Kibana/Grafana/Prometheus), voir : `docs
 
 - **PostgreSQL** : base de données
 - **Keycloak** : IAM / OIDC (realm importé au démarrage)
-- **Backend** : Spring Boot
+- **Backend** : Spring Boot (Java 21)
+- **Brain** : FastAPI monolithe AI (scoring, dupli, fraud, match, proposal, nego, agent, document)
 - **Nginx** : reverse proxy (SSL via Cloudflare Origin certificates)
 - **Logs** : Elasticsearch + Kibana + Logstash + Filebeat
 - **Metrics** : Prometheus + Grafana
 - **Adminer** : UI DB
 
+## Compose Files
+
+| Fichier | Usage | Description |
+|---------|-------|-------------|
+| `docker-compose.yml` | Production/Staging | Stack complète avec PostgreSQL, Keycloak, ELK, Prometheus/Grafana |
+| `docker-compose.local.yml` | Dev local | Stack légère avec H2, sans Keycloak/ELK, frontend dev server |
+| `docker-compose.e2e-postgres.yml` | E2E tests | Override de production pour Playwright E2E |
+| `docker-compose-analytics.yml` | Analytics | Stack analytics optionnelle |
+
 ## Démarrage
 
-1) Copier le fichier d’environnement :
+### Production/Staging
+
+1) Copier le fichier d'environnement :
 
 ```bash
 cp .env.example .env
@@ -28,24 +40,45 @@ cp .env.example .env
 docker compose up -d
 ```
 
-3) Vérifier l’état :
+3) Vérifier l'état :
 
 ```bash
 docker compose ps
 ```
 
+### Développement local
+
+```bash
+docker compose -f docker-compose.local.yml up
+```
+
 ## URLs et ports (par défaut — local)
 
-- Backend API: http://localhost:8080
-  - Swagger UI: http://localhost:8080/swagger-ui
-  - Health: http://localhost:8080/actuator/health
-  - Prometheus metrics: http://localhost:8080/actuator/prometheus
-- Keycloak: http://localhost:8081
-- Adminer: http://localhost:8082
-- Elasticsearch: http://localhost:9200
-- Kibana: http://localhost:5601
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000
+### Stack production (`docker-compose.yml`)
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| Backend API | http://localhost:8080 | Spring Boot |
+| Swagger UI | http://localhost:8080/swagger-ui | API docs |
+| Health | http://localhost:8080/actuator/health | Actuator |
+| Keycloak | http://localhost:8081 | IAM |
+| Adminer | http://localhost:8082 | DB UI |
+| Brain AI | http://localhost:8000 | FastAPI monolith |
+| Elasticsearch | http://localhost:9200 | Search engine |
+| Kibana | http://localhost:5601 | Log explorer |
+| Prometheus | http://localhost:9090 | Metrics |
+| Grafana | http://localhost:3000 | Dashboards |
+
+### Stack locale (`docker-compose.local.yml`)
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| Frontend | http://localhost | Via Nginx |
+| Frontend Dev | http://localhost:4200 | Angular dev server direct |
+| Backend API | http://localhost:8080 | Spring Boot |
+| H2 Console | http://localhost:8083 | DB web UI |
+| Brain AI | http://localhost:8000 | FastAPI monolith |
+| llama.cpp | http://localhost:8008 | Local LLM (optionnel, `--profile llama`) |
 
 ## URLs production (via Nginx + Cloudflare)
 
@@ -65,11 +98,33 @@ docker compose ps
 - Le certificat doit couvrir `*.afroware.app` + `afroware.app` (wildcard)
 - Nginx écoute sur les ports `80` (redirect HTTPS) et `443` (SSL)
 
+## Nginx Routing
+
+### Production (`nginx.conf`)
+
+```
+/            → Static Angular SPA (try_files)
+/api/        → Backend Spring Boot
+/actuator/   → Backend actuator
+/brain/      → Brain FastAPI monolith (strip prefix)
+/health      → Nginx health check (200 OK)
+```
+
+### Local (`nginx-local.conf`)
+
+```
+/            → Frontend Angular dev server (WebSocket proxy)
+/api/        → Backend Spring Boot
+/actuator/   → Backend actuator
+/brain/      → Brain FastAPI monolith (strip prefix)
+/health      → Nginx health check (200 OK)
+```
+
 ## OIDC / Keycloak (important)
 
-- **Dans Docker** (backend), l’issuer doit pointer vers le service Docker :
+- **Dans Docker** (backend), l'issuer doit pointer vers le service Docker :
   - `OAUTH2_ISSUER_URI=http://keycloak:8080/realms/myrealm`
-- **Dans le navigateur** (frontend), l’issuer doit pointer vers l’hôte :
+- **Dans le navigateur** (frontend), l'issuer doit pointer vers l'hôte :
   - `http://localhost:8081/realms/myrealm`
 
 ## Logs (ELK)

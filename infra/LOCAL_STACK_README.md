@@ -1,12 +1,35 @@
 # Local Development Stack with H2 & llama.cpp
 
-Lightweight local development environment with H2 database and local LLM inference.
+Lightweight local development environment with H2 database, unified Brain AI, and optional local LLM inference.
 
 ## 🚀 Quick Start
 
-### 1. Download a Model (First Time Only)
+### 1. Start the Stack
 
-Choose a model size based on your hardware:
+```bash
+cd infra
+
+# Start the local stack (H2 + Brain + Backend + Frontend)
+docker compose -f docker-compose.local.yml up
+
+# With local LLM (optional)
+docker compose -f docker-compose.local.yml --profile llama up
+```
+
+### 2. Access Services
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| **Frontend** | http://localhost | Via Nginx reverse proxy |
+| **Frontend Dev** | http://localhost:4200 | Direct Angular dev server |
+| **Backend API** | http://localhost:8080 | Spring Boot app |
+| **H2 Console** | http://localhost:8083 | Database web UI |
+| **Brain AI** | http://localhost:8000 | Unified FastAPI monolith |
+| **llama.cpp** | http://localhost:8008 | Local LLM API (optional) |
+
+### 3. (Optional) Download a Model for llama.cpp
+
+Only needed if you use `--profile llama`. Choose a model size based on your hardware:
 
 **Option A: TinyLlama (Recommended for most laptops)**
 ```bash
@@ -31,28 +54,6 @@ Choose a model size based on your hardware:
 
 Models are downloaded to `infra/models/model.gguf` (~600MB to 4GB).
 
-### 2. Start the Stack
-
-```bash
-cd infra
-
-# Start with llama.cpp (recommended)
-docker compose -f docker-compose.local.yml --profile llama up
-
-# OR use vLLM instead (faster but more RAM)
-# docker compose -f docker-compose.local.yml --profile vllm up
-```
-
-### 3. Access Services
-
-| Service | URL | Notes |
-|---------|-----|-------|
-| **Backend API** | http://localhost:8080 | Spring Boot app |
-| **Frontend** | http://localhost | Nginx serving dist/ |
-| **H2 Console** | http://localhost:8083 | Database web UI |
-| **Redis** | localhost:6379 | Cache service |
-| **llama.cpp** | http://localhost:8008 | Local LLM API |
-
 ## 🔧 Configuration
 
 ### Backend Environment Variables
@@ -62,15 +63,31 @@ Edit `docker-compose.local.yml` to customize:
 ```yaml
 environment:
   # Database (H2)
-  SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2:9092/~/atlas
-  
-  # LLM endpoints
-  BRAIN_SCORING_URL: http://llama-cpp:8000
-  BRAIN_DUPLI_URL: http://llama-cpp:8000
-  
+  SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2:9092/atlas;MODE=PostgreSQL
+
+  # Brain AI (unified, all services on same host)
+  BRAIN_SCORING_URL: http://brain:8000
+  BRAIN_DUPLI_URL: http://brain:8000
+  BRAIN_FRAUD_URL: http://brain:8000
+
   # Redis
   REDIS_HOST: redis
 ```
+
+### Brain AI Service
+
+The brain is a **unified FastAPI monolith** running all AI services on port 8000:
+
+- Scoring (`/api/scoring/*`)
+- Duplicate detection (`/api/dupli/*`)
+- Fraud detection (`/api/fraud/*`)
+- Matching (`/api/match/*`)
+- Proposals (`/api/proposal/*`)
+- Negotiation (`/api/nego/*`)
+- Agent NLP (`/api/agent/*`)
+- Document analysis (`/api/document/*`)
+
+Health check: `GET http://localhost:8000/health`
 
 ### LLM Configuration
 
@@ -125,20 +142,24 @@ Then increase `-ngl` value (e.g., `-ngl 33`).
 - **Password:** (leave empty)
 
 ### Convert to PostgreSQL Later
-Just switch back to production compose and change:
-```yaml
-backend:
-  depends_on:
-    postgres:
-      condition: service_healthy
-  environment:
-    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/atlas
+Just switch to the production compose (`docker-compose.yml`) which uses PostgreSQL by default.
+
+## 🎯 API Examples
+
+### Brain Health Check
+```bash
+curl http://localhost:8000/health
 ```
 
-## 🎯 LLM API Examples
+### Brain Scoring API
+```bash
+curl http://localhost:8000/api/scoring/score \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: local-dev" \
+  -d '{"prix": 250000, "surface": 65, "etage": 3}'
+```
 
-### llama.cpp Completion API
-
+### llama.cpp Completion API (optional, with --profile llama)
 ```bash
 curl http://localhost:8008/v1/completions \
   -H "Content-Type: application/json" \
@@ -150,15 +171,19 @@ curl http://localhost:8008/v1/completions \
   }'
 ```
 
-### Backend → llama.cpp
-Backend services call LLM at `http://llama-cpp:8000` for:
-- Lead scoring
-- Duplicate detection
-- Fraud detection
-
 ## 🔍 Troubleshooting
 
-### Model stuck at "Downloading"
+### Brain service takes long to start
+The brain service downloads ML models on first start (~2-3 min). Subsequent starts use the Docker layer cache.
+
+### Backend can't reach brain
+Check that the brain service is healthy:
+```bash
+docker compose -f docker-compose.local.yml ps brain
+docker logs brain_app
+```
+
+### Model stuck at "Downloading" (llama.cpp)
 Check available disk space (requires 4-5GB minimum).
 
 ### Backend can't reach llama-cpp
@@ -167,7 +192,7 @@ Ensure `--profile llama` is used:
 docker compose -f docker-compose.local.yml --profile llama up
 ```
 
-### Out of memory
+### Out of memory (llama.cpp)
 Reduce model size or lower context:
 ```yaml
 -n 128           # Fewer tokens
@@ -198,13 +223,13 @@ docker compose -f docker-compose.local.yml down --rmi all
 ## 📚 References
 
 - **llama.cpp:** https://github.com/ggerganov/llama.cpp
-- **vLLM:** https://github.com/vllm-project/vllm
 - **Models (HuggingFace):** https://huggingface.co/TheBloke
 - **H2 Database:** https://www.h2database.com/
+- **FastAPI:** https://fastapi.tiangolo.com/
 
 ## 💡 Tips
 
+- The brain service includes all AI capabilities — no need to start individual services
 - Use **TinyLlama** for rapid iteration, **Mistral** for production-like quality
-- Increase `-t` (threads) for better CPU utilization
-- Use **vLLM** for batch processing and OpenAI-compatible API
+- Increase `-t` (threads) for better CPU utilization on llama.cpp
 - Monitor resource usage: `docker stats`

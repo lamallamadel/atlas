@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,15 +17,9 @@ settings = Settings()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("match-service")
 
-app = FastAPI(title="Match Immobilier API", version="1.0.0")
+router = APIRouter()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
@@ -56,11 +50,7 @@ def calculer_match(req: MatchRequest) -> MatchResponse:
         })
     return MatchResponse(matches=sorted(matches, key=lambda x: x["score_match"], reverse=True))
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0.0"}
-
-@app.post("/api/match/calculer", response_model=MatchResponse)
+@router.post("/api/match/calculer", response_model=MatchResponse)
 def calculer(req: MatchRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     result = calculer_match(req)

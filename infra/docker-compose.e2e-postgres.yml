@@ -1,7 +1,7 @@
 # Docker Compose override for frontend E2E tests with Postgres backend
 #
 # Usage:
-#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml up -d
+#   docker compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml up -d
 #
 # This configuration:
 # - Starts only postgres and backend services (no keycloak, adminer, elasticsearch)
@@ -11,13 +11,13 @@
 # - Suitable for running full-stack Playwright E2E tests locally
 #
 # To stop:
-#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml down
+#   docker compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml down
 #
 # To view logs:
-#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml logs -f
+#   docker compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml logs -f
 #
 # To check service health:
-#   docker-compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml ps
+#   docker compose -f docker-compose.yml -f docker-compose.e2e-postgres.yml ps
 
 services:
   postgres:
@@ -30,20 +30,25 @@ services:
     container_name: backend_e2e
     ports:
       - "8081:8080"  # Expose on 8081 to avoid conflict with dev backend on 8080
+    # Override depends_on to remove disabled services (keycloak, brain, elasticsearch, logstash)
     depends_on:
       postgres:
         condition: service_healthy
     environment:
       SPRING_PROFILES_ACTIVE: e2e-postgres-mock
-      
+
       # Database connection (uses postgres service from base config)
       DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-atlas}
       DB_USERNAME: ${POSTGRES_USER:-atlas}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-atlas}
-      
+
       # CORS for frontend E2E tests (allow common frontend dev ports)
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-http://localhost:4200,http://localhost:3000}
-      
+
+      # Disable features not needed for E2E
+      ELASTICSEARCH_ENABLED: "false"
+      OAUTH2_ENABLED: "false"
+
       # Mock JWT configuration (no keycloak required for e2e-postgres-mock profile)
       # The e2e-postgres-mock Spring profile should handle authentication mocking
     healthcheck:
@@ -65,31 +70,29 @@ services:
       replicas: 0
     restart: "no"
 
-  # Disable elasticsearch - not needed for E2E tests
+  # Disable brain - not needed for E2E tests (backend uses fallbacks)
+  brain:
+    deploy:
+      replicas: 0
+    restart: "no"
+
+  # Disable ELK stack - not needed for E2E tests
   elasticsearch:
-    profiles:
-      - disabled
     deploy:
       replicas: 0
     restart: "no"
 
   kibana:
-    profiles:
-      - disabled
     deploy:
       replicas: 0
     restart: "no"
 
   logstash:
-    profiles:
-      - disabled
     deploy:
       replicas: 0
     restart: "no"
 
   filebeat:
-    profiles:
-      - disabled
     deploy:
       replicas: 0
     restart: "no"

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.security import APIKeyHeader
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, field_validator
@@ -27,15 +27,9 @@ logger = logging.getLogger("fraud-service")
 
 # ─── App ─────────────────────────────────────────────────────────────────────
 
-app = FastAPI(title="Fraud Detection Immobilier API", version="1.0.0")
+router = APIRouter()
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+
 
 # ─── Sécurité API Key ────────────────────────────────────────────────────────
 
@@ -184,12 +178,7 @@ def analyser_fraude(req: FraudRequest) -> FraudResponse:
 # ─── Endpoints ───────────────────────────────────────────────────────────────
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok", "version": "1.0.0"}
-
-
-@app.post("/api/fraud/analyser", response_model=FraudResponse)
+@router.post("/api/fraud/analyser", response_model=FraudResponse)
 def analyser(req: FraudRequest, _: str = Depends(verify_api_key)):
     start = time.time()
     result = analyser_fraude(req)

@@ -60,7 +60,17 @@ export class AuthService {
     }
 
     try {
-      await this.oauthService.loadDiscoveryDocumentAndTryLogin();
+      // Race the discovery call against a timeout so the app still boots
+      // when Keycloak is unreachable (e.g. local dev without the IdP).
+      const OIDC_TIMEOUT_MS = 5_000;
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error(`OIDC discovery timed out after ${OIDC_TIMEOUT_MS}ms`)), OIDC_TIMEOUT_MS)
+      );
+
+      await Promise.race([
+        this.oauthService.loadDiscoveryDocumentAndTryLogin(),
+        timeout
+      ]);
 
       if (this.oauthService.hasValidAccessToken()) {
         localStorage.setItem(this.AUTH_MODE_KEY, 'oidc');
@@ -77,7 +87,7 @@ export class AuthService {
         this.router.navigate(['/login'], { replaceUrl: true });
       }
     } catch (err) {
-      console.error('[AuthService] OIDC init error:', err);
+      console.warn('[AuthService] OIDC init failed (app will continue without SSO):', err);
     }
   }
 

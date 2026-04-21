@@ -3,7 +3,7 @@
 # -------------------------
 # Build stage
 # -------------------------
-FROM maven:3.9-eclipse-temurin-17 AS build
+FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 
 # Copy build descriptors first (best cache hit)
@@ -18,7 +18,7 @@ RUN mkdir -p /root/.m2 && \
   <toolchain>
     <type>jdk</type>
     <provides>
-      <version>17</version>
+      <version>21</version>
     </provides>
     <configuration>
       <jdkHome>${JAVA_HOME}</jdkHome>
@@ -39,7 +39,7 @@ RUN mvn -ntp -s /app/settings.xml clean package -Dmaven.test.skip=true
 # -------------------------
 # Runtime stage
 # -------------------------
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 
 # Keep curl for healthcheck
