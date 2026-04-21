@@ -12,24 +12,25 @@ export const parameters = {
     sort: 'requiredFirst'
   },
   backgrounds: {
-    default: 'light',
-    values: [
-      {
+    options: {
+      light: {
         name: 'light',
         value: '#ffffff',
       },
-      {
+
+      gray: {
         name: 'gray',
         value: '#f5f5f5',
       },
-      {
+
+      dark: {
         name: 'dark',
         value: '#1a1a1a',
-      },
-    ],
+      }
+    }
   },
   viewport: {
-    viewports: {
+    options: {
       mobile: {
         name: 'Mobile',
         styles: {
@@ -132,4 +133,10 @@ export const globalTypes = {
       dynamicTitle: true,
     },
   },
+};
+
+export const initialGlobals = {
+  backgrounds: {
+    value: 'light'
+  }
 };
