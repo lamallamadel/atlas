@@ -17,9 +17,10 @@ interface MetricOption {
 }
 
 @Component({
-  selector: 'app-report-builder',
-  templateUrl: './report-builder.component.html',
-  styleUrls: ['./report-builder.component.scss']
+    selector: 'app-report-builder',
+    templateUrl: './report-builder.component.html',
+    styleUrls: ['./report-builder.component.scss'],
+    standalone: false
 })
 export class ReportBuilderComponent {
   availableDimensions: DimensionOption[] = [

@@ -15,8 +15,8 @@ interface CachedDossier {
 }
 
 @Component({
-  selector: 'app-offline-dossiers-viewer',
-  template: `
+    selector: 'app-offline-dossiers-viewer',
+    template: `
     <div class="offline-viewer">
       <div class="viewer-header">
         <h3>
@@ -97,7 +97,7 @@ interface CachedDossier {
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .offline-viewer {
       padding: 16px;
       max-width: 800px;
@@ -345,7 +345,8 @@ interface CachedDossier {
         width: 100%;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class OfflineDossiersViewerComponent implements OnInit {
   dossiers: CachedDossier[] = [];

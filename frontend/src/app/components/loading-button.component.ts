@@ -2,8 +2,8 @@ import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
-  selector: 'app-loading-button',
-  template: `
+    selector: 'app-loading-button',
+    template: `
     <button
       [type]="type"
       [disabled]="disabled || loading"
@@ -21,7 +21,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       </span>
     </button>
   `,
-  styles: [`
+    styles: [`
     button {
       position: relative;
       transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
@@ -58,24 +58,25 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       justify-content: center;
     }
   `],
-  animations: [
-    trigger('buttonState', [
-      state('idle', style({ minWidth: '*' })),
-      state('loading', style({ minWidth: '*' })),
-      transition('idle <=> loading', animate('200ms ease-out'))
-    ]),
-    trigger('contentState', [
-      state('visible', style({ opacity: 1, transform: 'scale(1)' })),
-      state('hidden', style({ opacity: 0, transform: 'scale(0.8)' })),
-      transition('visible <=> hidden', animate('150ms ease-out'))
-    ]),
-    trigger('spinnerState', [
-      state('visible', style({ opacity: 1, transform: 'translate(-50%, -50%) scale(1)' })),
-      state('hidden', style({ opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' })),
-      transition('hidden => visible', animate('200ms ease-out')),
-      transition('visible => hidden', animate('150ms ease-in'))
-    ])
-  ]
+    animations: [
+        trigger('buttonState', [
+            state('idle', style({ minWidth: '*' })),
+            state('loading', style({ minWidth: '*' })),
+            transition('idle <=> loading', animate('200ms ease-out'))
+        ]),
+        trigger('contentState', [
+            state('visible', style({ opacity: 1, transform: 'scale(1)' })),
+            state('hidden', style({ opacity: 0, transform: 'scale(0.8)' })),
+            transition('visible <=> hidden', animate('150ms ease-out'))
+        ]),
+        trigger('spinnerState', [
+            state('visible', style({ opacity: 1, transform: 'translate(-50%, -50%) scale(1)' })),
+            state('hidden', style({ opacity: 0, transform: 'translate(-50%, -50%) scale(0.5)' })),
+            transition('hidden => visible', animate('200ms ease-out')),
+            transition('visible => hidden', animate('150ms ease-in'))
+        ])
+    ],
+    standalone: false
 })
 export class LoadingButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';

@@ -8,8 +8,8 @@ export interface SwipeAction {
 }
 
 @Component({
-  selector: 'app-swipeable-card',
-  template: `
+    selector: 'app-swipeable-card',
+    template: `
     <div class="swipeable-container" 
          [class.swiping]="isSwiping"
          [style.transform]="getTransform()">
@@ -41,7 +41,7 @@ export interface SwipeAction {
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .swipeable-container {
       position: relative;
       overflow: hidden;
@@ -117,7 +117,8 @@ export interface SwipeAction {
     .dark-theme .card-content {
       background: var(--color-neutral-800, #424242);
     }
-  `]
+  `],
+    standalone: false
 })
 export class SwipeableCardComponent {
   @Input() leftAction?: SwipeAction;

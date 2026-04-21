@@ -4,9 +4,10 @@ import { By } from '@angular/platform-browser';
 import { LazyLoadImageDirective } from './lazy-load-image.directive';
 
 @Component({
-  template: `
+    template: `
     <img [appLazyLoadImage]="imageUrl" [placeholder]="placeholderUrl" alt="Test image" />
-  `
+  `,
+    standalone: false
 })
 class TestComponent {
   imageUrl = 'https://example.com/image.jpg';

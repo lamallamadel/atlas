@@ -38,10 +38,11 @@ interface AppliedFilter {
 }
 
 @Component({
-  selector: 'app-dossiers',
-  templateUrl: './dossiers.component.html',
-  styleUrls: ['./dossiers.component.css'],
-  animations: [listStaggerAnimation, itemAnimation]
+    selector: 'app-dossiers',
+    templateUrl: './dossiers.component.html',
+    styleUrls: ['./dossiers.component.css'],
+    animations: [listStaggerAnimation, itemAnimation],
+    standalone: false
 })
 export class DossiersComponent implements OnInit {
   dossiers: DossierResponse[] = [];

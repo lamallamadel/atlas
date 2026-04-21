@@ -13,10 +13,11 @@ export type LogoTheme = 'default' | 'light' | 'dark' | 'mono' | 'auto';
  * For simple logo display without animation, use LogoComponent instead.
  */
 @Component({
-  selector: 'app-logo-inline',
-  templateUrl: './logo-inline.component.html',
-  styleUrls: ['./logo-inline.component.css'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-logo-inline',
+    templateUrl: './logo-inline.component.html',
+    styleUrls: ['./logo-inline.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class LogoInlineComponent implements OnInit {
   @Input() variant: LogoVariant = 'horizontal';

@@ -14,8 +14,9 @@ import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 @Component({
-  selector: 'app-loading-skeleton',
-  template: ''
+    selector: 'app-loading-skeleton',
+    template: '',
+    standalone: false
 })
 class MockLoadingSkeletonComponent {
   @Input() variant?: string;
@@ -23,8 +24,9 @@ class MockLoadingSkeletonComponent {
 }
 
 @Component({
-  selector: 'app-empty-state',
-  template: ''
+    selector: 'app-empty-state',
+    template: '',
+    standalone: false
 })
 class MockEmptyStateComponent {
   @Input() message?: string;

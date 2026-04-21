@@ -10,16 +10,15 @@ import { RecentDossiersWidgetComponent } from './recent-dossiers-widget.componen
 import { MyTasksWidgetComponent } from './my-tasks-widget.component';
 
 @Component({
-  selector: 'app-customizable-dashboard',
-  standalone: true,
-  imports: [
-    FormsModule,
-    DragDropModule,
-    KpiWidgetComponent,
-    RecentDossiersWidgetComponent,
-    MyTasksWidgetComponent
-],
-  template: `
+    selector: 'app-customizable-dashboard',
+    imports: [
+        FormsModule,
+        DragDropModule,
+        KpiWidgetComponent,
+        RecentDossiersWidgetComponent,
+        MyTasksWidgetComponent
+    ],
+    template: `
     <div class="dashboard-container">
       <!-- Dashboard Header -->
       <div class="dashboard-header">
@@ -247,7 +246,7 @@ import { MyTasksWidgetComponent } from './my-tasks-widget.component';
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .dashboard-container {
       padding: 24px;
       max-width: 1600px;

@@ -3,9 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../../services/search-api.service';
 
 @Component({
-  selector: 'app-search',
-  templateUrl: './search.component.html',
-  styleUrls: ['./search.component.css']
+    selector: 'app-search',
+    templateUrl: './search.component.html',
+    styleUrls: ['./search.component.css'],
+    standalone: false
 })
 export class SearchComponent implements OnInit {
   searchQuery = '';

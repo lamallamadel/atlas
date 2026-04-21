@@ -6,9 +6,10 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component'
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
 
 @Component({
-  selector: 'app-document-list',
-  templateUrl: './document-list.component.html',
-  styleUrls: ['./document-list.component.css']
+    selector: 'app-document-list',
+    templateUrl: './document-list.component.html',
+    styleUrls: ['./document-list.component.css'],
+    standalone: false
 })
 export class DocumentListComponent implements OnInit {
   @Input() dossierId!: number;

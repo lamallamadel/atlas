@@ -8,7 +8,8 @@ export interface SwipeEvent {
 }
 
 @Directive({
-  selector: '[appSwipeGesture]'
+    selector: '[appSwipeGesture]',
+    standalone: false
 })
 export class SwipeGestureDirective {
   @Input() swipeThreshold = 50;

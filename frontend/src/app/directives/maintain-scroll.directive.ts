@@ -5,7 +5,8 @@ import { filter } from 'rxjs/operators';
 import { NavigationService } from '../services/navigation.service';
 
 @Directive({
-  selector: '[appMaintainScroll]'
+    selector: '[appMaintainScroll]',
+    standalone: false
 })
 export class MaintainScrollDirective implements OnInit, OnDestroy {
   private subscription!: Subscription;

@@ -5,10 +5,11 @@ export type SpinnerSize = 'sm' | 'md' | 'lg';
 export type SpinnerColor = 'primary' | 'white' | 'neutral';
 
 @Component({
-  selector: 'app-spinner',
-  templateUrl: './spinner.component.html',
-  styleUrls: ['./spinner.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-spinner',
+    templateUrl: './spinner.component.html',
+    styleUrls: ['./spinner.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SpinnerComponent implements OnInit, OnDestroy {
   @Input() variant: SpinnerVariant = 'circular';

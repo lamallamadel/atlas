@@ -12,8 +12,8 @@ export interface BulkOperationDialogData {
 }
 
 @Component({
-  selector: 'app-bulk-operation-dialog',
-  template: `
+    selector: 'app-bulk-operation-dialog',
+    template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>
       <p>{{ data.message }}</p>
@@ -59,7 +59,7 @@ export interface BulkOperationDialogData {
       </button>
     </mat-dialog-actions>
     `,
-  styles: [`
+    styles: [`
     .results {
       margin-top: 16px;
     }
@@ -103,7 +103,8 @@ export interface BulkOperationDialogData {
     mat-progress-bar {
       margin: 16px 0;
     }
-  `]
+  `],
+    standalone: false
 })
 export class BulkOperationDialogComponent {
   constructor(

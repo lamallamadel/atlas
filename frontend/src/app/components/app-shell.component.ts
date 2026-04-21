@@ -4,8 +4,8 @@ import { filter } from 'rxjs/operators';
 import { ServiceWorkerRegistrationService } from '../services/service-worker-registration.service';
 
 @Component({
-  selector: 'app-shell',
-  template: `
+    selector: 'app-shell',
+    template: `
     <div class="app-shell" [class.loading]="isLoading">
       <!-- Critical app shell content -->
       <div class="app-shell-header">
@@ -37,7 +37,7 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .app-shell {
       position: fixed;
       top: 0;
@@ -200,7 +200,8 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
     .dark-theme .footer-item-skeleton {
       background: var(--color-neutral-700, #616161);
     }
-  `]
+  `],
+    standalone: false
 })
 export class AppShellComponent implements OnInit {
   isLoading = true;

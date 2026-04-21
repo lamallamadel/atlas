@@ -2,8 +2,8 @@ import { Component, Input, OnInit } from '@angular/core';
 import { trigger, state, style, transition, animate, keyframes } from '@angular/animations';
 
 @Component({
-  selector: 'app-success-animation',
-  template: `
+    selector: 'app-success-animation',
+    template: `
     <div class="success-animation-container" [@checkmark]="animationState">
       <div class="checkmark-circle">
         <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
@@ -16,7 +16,7 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .success-animation-container {
       display: flex;
       flex-direction: column;
@@ -70,19 +70,20 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
       max-width: 300px;
     }
   `],
-  animations: [
-    trigger('checkmark', [
-      state('void', style({ transform: 'scale(0)', opacity: 0 })),
-      state('*', style({ transform: 'scale(1)', opacity: 1 })),
-      transition('void => *', [
-        animate('400ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
-          style({ transform: 'scale(0)', opacity: 0, offset: 0 }),
-          style({ transform: 'scale(1.1)', opacity: 1, offset: 0.7 }),
-          style({ transform: 'scale(1)', opacity: 1, offset: 1 })
-        ]))
-      ])
-    ])
-  ]
+    animations: [
+        trigger('checkmark', [
+            state('void', style({ transform: 'scale(0)', opacity: 0 })),
+            state('*', style({ transform: 'scale(1)', opacity: 1 })),
+            transition('void => *', [
+                animate('400ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
+                    style({ transform: 'scale(0)', opacity: 0, offset: 0 }),
+                    style({ transform: 'scale(1.1)', opacity: 1, offset: 0.7 }),
+                    style({ transform: 'scale(1)', opacity: 1, offset: 1 })
+                ]))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class SuccessAnimationComponent implements OnInit {
   @Input() message?: string;

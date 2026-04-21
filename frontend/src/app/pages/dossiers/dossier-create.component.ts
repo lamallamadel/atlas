@@ -7,9 +7,10 @@ import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-dossier-create',
-  templateUrl: './dossier-create.component.html',
-  styleUrls: ['./dossier-create.component.css']
+    selector: 'app-dossier-create',
+    templateUrl: './dossier-create.component.html',
+    styleUrls: ['./dossier-create.component.css'],
+    standalone: false
 })
 export class DossierCreateComponent implements OnInit {
   dossierForm!: FormGroup;

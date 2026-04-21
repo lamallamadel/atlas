@@ -3,10 +3,11 @@ import { SafeHtml } from '@angular/platform-browser';
 import { IconRegistryService } from '../../services/icon-registry.service';
 
 @Component({
-  selector: 'app-re-icon',
-  templateUrl: './re-icon.component.html',
-  styleUrls: ['./re-icon.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-re-icon',
+    templateUrl: './re-icon.component.html',
+    styleUrls: ['./re-icon.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class ReIconComponent implements OnInit {
   @Input() icon!: string;

@@ -8,9 +8,10 @@ import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus, TemplateCategory, ComponentType, TemplateComponent, TemplateVariable, ButtonType } from '../models/template.model';
 
 @Component({
-  selector: 'app-template-editor',
-  templateUrl: './template-editor.component.html',
-  styleUrls: ['./template-editor.component.css']
+    selector: 'app-template-editor',
+    templateUrl: './template-editor.component.html',
+    styleUrls: ['./template-editor.component.css'],
+    standalone: false
 })
 export class TemplateEditorComponent implements OnInit, OnDestroy {
   templateForm!: FormGroup;

@@ -8,9 +8,10 @@ import { WhatsAppTemplate } from './whatsapp-message-input.component';
 import { MessageAction } from './whatsapp-thread.component';
 
 @Component({
-  selector: 'app-whatsapp-messaging-container',
-  templateUrl: './whatsapp-messaging-container.component.html',
-  styleUrls: ['./whatsapp-messaging-container.component.css']
+    selector: 'app-whatsapp-messaging-container',
+    templateUrl: './whatsapp-messaging-container.component.html',
+    styleUrls: ['./whatsapp-messaging-container.component.css'],
+    standalone: false
 })
 export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

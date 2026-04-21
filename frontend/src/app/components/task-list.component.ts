@@ -28,10 +28,11 @@ enum StatusFilter {
 }
 
 @Component({
-  selector: 'app-task-list',
-  templateUrl: './task-list.component.html',
-  styleUrls: ['./task-list.component.css'],
-  animations: [staggerList, cardStagger]
+    selector: 'app-task-list',
+    templateUrl: './task-list.component.html',
+    styleUrls: ['./task-list.component.css'],
+    animations: [staggerList, cardStagger],
+    standalone: false
 })
 export class TaskListComponent implements OnInit {
   tasks: TaskResponse[] = [];

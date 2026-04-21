@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { PortailService, City, Listing } from '../../../services/portail.service';
 
 @Component({
-  selector: 'app-portail-home',
-  templateUrl: './portail-home.component.html',
-  styleUrls: ['./portail-home.component.scss']
+    selector: 'app-portail-home',
+    templateUrl: './portail-home.component.html',
+    styleUrls: ['./portail-home.component.scss'],
+    standalone: false
 })
 export class PortailHomeComponent implements OnInit, AfterViewInit {
   cities: City[] = [];

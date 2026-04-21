@@ -13,9 +13,10 @@ export interface UploadProgress {
 }
 
 @Component({
-  selector: 'app-document-upload',
-  templateUrl: './document-upload.component.html',
-  styleUrls: ['./document-upload.component.css']
+    selector: 'app-document-upload',
+    templateUrl: './document-upload.component.html',
+    styleUrls: ['./document-upload.component.css'],
+    standalone: false
 })
 export class DocumentUploadComponent {
   @Input() dossierId!: number;

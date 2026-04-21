@@ -3,9 +3,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { PortailService, Listing, FilterState } from '../../../services/portail.service';
 
 @Component({
-  selector: 'app-recherche',
-  templateUrl: './recherche.component.html',
-  styleUrls: ['./recherche.component.scss']
+    selector: 'app-recherche',
+    templateUrl: './recherche.component.html',
+    styleUrls: ['./recherche.component.scss'],
+    standalone: false
 })
 export class RechercheComponent implements OnInit {
 

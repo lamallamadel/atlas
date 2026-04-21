@@ -5,9 +5,10 @@ import { OutboundMessageApiService, OutboundMessageResponse } from '../../servic
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 
 @Component({
-  selector: 'app-messaging-tab',
-  templateUrl: './messaging-tab.component.html',
-  styleUrls: ['./messaging-tab.component.css']
+    selector: 'app-messaging-tab',
+    templateUrl: './messaging-tab.component.html',
+    styleUrls: ['./messaging-tab.component.css'],
+    standalone: false
 })
 export class MessagingTabComponent implements OnInit {
   @Input() dossierId!: number;

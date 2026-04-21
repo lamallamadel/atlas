@@ -9,9 +9,10 @@ interface TimeSeriesPoint {
 }
 
 @Component({
-  selector: 'app-observability-dashboard',
-  templateUrl: './observability-dashboard.component.html',
-  styleUrls: ['./observability-dashboard.component.css']
+    selector: 'app-observability-dashboard',
+    templateUrl: './observability-dashboard.component.html',
+    styleUrls: ['./observability-dashboard.component.css'],
+    standalone: false
 })
 export class ObservabilityDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   metrics: ObservabilityMetrics | null = null;

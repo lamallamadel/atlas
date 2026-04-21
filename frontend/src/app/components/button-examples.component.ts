@@ -5,8 +5,8 @@ import { Component } from '@angular/core';
  * Showcases appAnimatedButton directive, loading buttons, and feedback animations
  */
 @Component({
-  selector: 'app-button-examples',
-  template: `
+    selector: 'app-button-examples',
+    template: `
     <div class="button-examples">
       <h2>Button Animation Examples</h2>
       
@@ -176,7 +176,7 @@ import { Component } from '@angular/core';
       </section>
     </div>
   `,
-  styles: [`
+    styles: [`
     .button-examples {
       padding: 24px;
       max-width: 1200px;
@@ -215,7 +215,8 @@ import { Component } from '@angular/core';
       margin-bottom: 12px;
       font-style: italic;
     }
-  `]
+  `],
+    standalone: false
 })
 export class ButtonExamplesComponent {
   loading1 = false;

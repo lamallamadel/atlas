@@ -8,8 +8,8 @@ export interface ExportProgressDialogData {
 }
 
 @Component({
-  selector: 'app-export-progress-dialog',
-  template: `
+    selector: 'app-export-progress-dialog',
+    template: `
     <div class="export-progress-dialog">
       <h2 mat-dialog-title>
         <mat-icon class="title-icon">{{getTitleIcon()}}</mat-icon>
@@ -52,7 +52,7 @@ export interface ExportProgressDialogData {
       </mat-dialog-actions>
     </div>
     `,
-  styles: [`
+    styles: [`
     .export-progress-dialog {
       min-width: 400px;
       max-width: 500px;
@@ -124,7 +124,8 @@ export interface ExportProgressDialogData {
       padding: 16px 24px;
       border-top: 1px solid #e0e0e0;
     }
-  `]
+  `],
+    standalone: false
 })
 export class ExportProgressDialogComponent implements OnDestroy {
   progress: ExportProgress | null = null;

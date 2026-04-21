@@ -19,10 +19,11 @@ export type BadgeColor =
   | 'neutral-warmth';
 
 @Component({
-  selector: 'app-badge',
-  templateUrl: './badge.component.html',
-  styleUrls: ['./badge.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-badge',
+    templateUrl: './badge.component.html',
+    styleUrls: ['./badge.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BadgeComponent {
   @Input() variant: BadgeVariant = 'soft';

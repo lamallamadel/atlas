@@ -16,7 +16,10 @@ import { AuditEventApiService } from '../../services/audit-event-api.service';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
-@Component({ selector: 'app-badge-status', template: '' })
+@Component({
+    selector: 'app-badge-status', template: '',
+    standalone: false
+})
 class BadgeStatusStubComponent {
   @Input() status: any;
 }

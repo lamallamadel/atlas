@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-promoteurs',
-  templateUrl: './promoteurs.component.html',
-  styleUrls: ['./promoteurs.component.scss']
+    selector: 'app-promoteurs',
+    templateUrl: './promoteurs.component.html',
+    styleUrls: ['./promoteurs.component.scss'],
+    standalone: false
 })
 export class PromoTeursComponent {
   readonly features = [

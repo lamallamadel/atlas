@@ -4,9 +4,10 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { TaskApiService, TaskResponse, TaskPriority, User } from '../services/task-api.service';
 
 @Component({
-  selector: 'app-task-form-dialog',
-  templateUrl: './task-form-dialog.component.html',
-  styleUrls: ['./task-form-dialog.component.css']
+    selector: 'app-task-form-dialog',
+    templateUrl: './task-form-dialog.component.html',
+    styleUrls: ['./task-form-dialog.component.css'],
+    standalone: false
 })
 export class TaskFormDialogComponent implements OnInit {
   taskForm: FormGroup;

@@ -5,9 +5,10 @@ import { WorkflowConfiguration, CaseType } from './models/workflow.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-workflow-admin',
-  templateUrl: './workflow-admin.component.html',
-  styleUrls: ['./workflow-admin.component.css']
+    selector: 'app-workflow-admin',
+    templateUrl: './workflow-admin.component.html',
+    styleUrls: ['./workflow-admin.component.css'],
+    standalone: false
 })
 export class WorkflowAdminComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

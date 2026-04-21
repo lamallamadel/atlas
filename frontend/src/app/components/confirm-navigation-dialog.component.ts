@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 
 @Component({
-  selector: 'app-confirm-navigation-dialog',
-  template: `
+    selector: 'app-confirm-navigation-dialog',
+    template: `
     <h2 mat-dialog-title>Modifications non enregistrées</h2>
     <mat-dialog-content>
       <p>Vous avez des modifications non enregistrées. Êtes-vous sûr de vouloir quitter cette page ?</p>
@@ -21,7 +21,7 @@ import { MatDialogRef } from '@angular/material/dialog';
       </button>
     </mat-dialog-actions>
   `,
-  styles: [`
+    styles: [`
     .warning-text {
       display: flex;
       align-items: center;
@@ -42,7 +42,8 @@ import { MatDialogRef } from '@angular/material/dialog';
     mat-dialog-actions {
       padding: 16px 0 0 0;
     }
-  `]
+  `],
+    standalone: false
 })
 export class ConfirmNavigationDialogComponent {
   

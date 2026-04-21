@@ -13,9 +13,10 @@ export interface AdvancedFiltersDialogData {
 }
 
 @Component({
-  selector: 'app-advanced-filters-dialog',
-  templateUrl: './advanced-filters-dialog.component.html',
-  styleUrls: ['./advanced-filters-dialog.component.css']
+    selector: 'app-advanced-filters-dialog',
+    templateUrl: './advanced-filters-dialog.component.html',
+    styleUrls: ['./advanced-filters-dialog.component.css'],
+    standalone: false
 })
 export class AdvancedFiltersDialogComponent implements OnInit {
   predefinedPresets: FilterPreset[] = [];

@@ -5,12 +5,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { ContextualHintDirective } from './contextual-hint.directive';
 
 @Component({
-  template: `
+    template: `
     <input 
       [formControl]="testControl"
       [appContextualHint]="hints"
       [hintControl]="testControl">
-  `
+  `,
+    standalone: false
 })
 class TestComponent {
   testControl = new FormControl('');

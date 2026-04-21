@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { PwaService } from '../services/pwa.service';
 
 @Component({
-  selector: 'app-pwa-install-prompt',
-  template: `
+    selector: 'app-pwa-install-prompt',
+    template: `
     @if (showPrompt) {
       <div class="pwa-install-banner" [@slideIn]>
         <div class="banner-content">
@@ -29,7 +29,7 @@ import { PwaService } from '../services/pwa.service';
       </div>
     }
     `,
-  styles: [`
+    styles: [`
     .pwa-install-banner {
       position: fixed;
       bottom: 80px;
@@ -159,7 +159,8 @@ import { PwaService } from '../services/pwa.service';
       }
     }
   `],
-  animations: []
+    animations: [],
+    standalone: false
 })
 export class PwaInstallPromptComponent implements OnInit {
   showPrompt = false;

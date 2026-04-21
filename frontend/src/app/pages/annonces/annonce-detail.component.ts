@@ -4,9 +4,10 @@ import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../service
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 @Component({
-  selector: 'app-annonce-detail',
-  templateUrl: './annonce-detail.component.html',
-  styleUrls: ['./annonce-detail.component.css']
+    selector: 'app-annonce-detail',
+    templateUrl: './annonce-detail.component.html',
+    styleUrls: ['./annonce-detail.component.css'],
+    standalone: false
 })
 export class AnnonceDetailComponent implements OnInit {
   annonce: AnnonceResponse | null = null;

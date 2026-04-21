@@ -20,10 +20,11 @@ export interface LottieOptions {
 }
 
 @Component({
-  selector: 'app-lottie-animation',
-  templateUrl: './lottie-animation.component.html',
-  styleUrls: ['./lottie-animation.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-lottie-animation',
+    templateUrl: './lottie-animation.component.html',
+    styleUrls: ['./lottie-animation.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class LottieAnimationComponent implements OnInit, OnDestroy {
   @Input() animationType!: LottieAnimationType;

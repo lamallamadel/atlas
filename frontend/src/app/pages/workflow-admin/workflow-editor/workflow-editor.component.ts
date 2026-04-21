@@ -5,9 +5,10 @@ import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule } from '../models/workflow.model';
 
 @Component({
-  selector: 'app-workflow-editor',
-  templateUrl: './workflow-editor.component.html',
-  styleUrls: ['./workflow-editor.component.css']
+    selector: 'app-workflow-editor',
+    templateUrl: './workflow-editor.component.html',
+    styleUrls: ['./workflow-editor.component.css'],
+    standalone: false
 })
 export class WorkflowEditorComponent implements OnInit, OnDestroy {
   @ViewChild('canvas', { static: false }) canvas?: ElementRef<HTMLCanvasElement>;

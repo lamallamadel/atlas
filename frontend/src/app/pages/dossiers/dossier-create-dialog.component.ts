@@ -7,9 +7,10 @@ import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-dossier-create-dialog',
-  templateUrl: './dossier-create-dialog.component.html',
-  styleUrls: ['./dossier-create-dialog.component.css']
+    selector: 'app-dossier-create-dialog',
+    templateUrl: './dossier-create-dialog.component.html',
+    styleUrls: ['./dossier-create-dialog.component.css'],
+    standalone: false
 })
 export class DossierCreateDialogComponent implements OnInit {
   dossierForm!: FormGroup;

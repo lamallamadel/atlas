@@ -4,10 +4,11 @@ export type LogoVariant = 'horizontal' | 'vertical' | 'icon';
 export type LogoTheme = 'default' | 'light' | 'dark' | 'mono' | 'auto';
 
 @Component({
-  selector: 'app-logo',
-  templateUrl: './logo.component.html',
-  styleUrls: ['./logo.component.css'],
-  encapsulation: ViewEncapsulation.None
+    selector: 'app-logo',
+    templateUrl: './logo.component.html',
+    styleUrls: ['./logo.component.css'],
+    encapsulation: ViewEncapsulation.None,
+    standalone: false
 })
 export class LogoComponent implements OnInit {
   @Input() variant: LogoVariant = 'horizontal';

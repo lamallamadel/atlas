@@ -13,9 +13,10 @@ interface KanbanColumn {
 }
 
 @Component({
-  selector: 'app-kanban-board',
-  templateUrl: './kanban-board.component.html',
-  styleUrls: ['./kanban-board.component.css']
+    selector: 'app-kanban-board',
+    templateUrl: './kanban-board.component.html',
+    styleUrls: ['./kanban-board.component.css'],
+    standalone: false
 })
 export class KanbanBoardComponent implements OnInit, OnChanges {
   @Input() dossiers: DossierResponse[] = [];

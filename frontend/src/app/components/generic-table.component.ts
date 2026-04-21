@@ -34,10 +34,11 @@ export interface PaginationData {
 }
 
 @Component({
-  selector: 'app-generic-table',
-  templateUrl: './generic-table.component.html',
-  styleUrls: ['./generic-table.component.scss'],
-  animations: [listStaggerAnimation]
+    selector: 'app-generic-table',
+    templateUrl: './generic-table.component.html',
+    styleUrls: ['./generic-table.component.scss'],
+    animations: [listStaggerAnimation],
+    standalone: false
 })
 export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() columns: ColumnConfig[] = [];

@@ -3,8 +3,8 @@ import { ValidationSuggestion } from '../services/form-validation.service';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 @Component({
-  selector: 'app-inline-validation-suggestion',
-  template: `
+    selector: 'app-inline-validation-suggestion',
+    template: `
     @if (suggestion) {
       <div class="suggestion-container" @slideIn>
         <div class="suggestion-card" [class.high-confidence]="suggestion.confidence === 'high'">
@@ -44,7 +44,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
       </div>
     }
     `,
-  styles: [`
+    styles: [`
     .suggestion-container {
       margin-top: 8px;
       margin-bottom: 8px;
@@ -177,17 +177,18 @@ import { trigger, transition, style, animate } from '@angular/animations';
       }
     }
   `],
-  animations: [
-    trigger('slideIn', [
-      transition(':enter', [
-        style({ transform: 'translateY(-10px)', opacity: 0 }),
-        animate('200ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
-      ]),
-      transition(':leave', [
-        animate('200ms ease-in', style({ transform: 'translateY(-10px)', opacity: 0 }))
-      ])
-    ])
-  ]
+    animations: [
+        trigger('slideIn', [
+            transition(':enter', [
+                style({ transform: 'translateY(-10px)', opacity: 0 }),
+                animate('200ms ease-out', style({ transform: 'translateY(0)', opacity: 1 }))
+            ]),
+            transition(':leave', [
+                animate('200ms ease-in', style({ transform: 'translateY(-10px)', opacity: 0 }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class InlineValidationSuggestionComponent {
   @Input() suggestion: ValidationSuggestion | null = null;

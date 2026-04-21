@@ -3,9 +3,10 @@ import { PingService } from '../services/ping.service';
 import { Subject, takeUntil } from 'rxjs';
 
 @Component({
-  selector: 'app-api-status-indicator',
-  templateUrl: './api-status-indicator.component.html',
-  styleUrls: ['./api-status-indicator.component.css']
+    selector: 'app-api-status-indicator',
+    templateUrl: './api-status-indicator.component.html',
+    styleUrls: ['./api-status-indicator.component.css'],
+    standalone: false
 })
 export class ApiStatusIndicatorComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

@@ -4,11 +4,12 @@ import { By } from '@angular/platform-browser';
 import { InfiniteScrollDirective } from './infinite-scroll.directive';
 
 @Component({
-  template: `
+    template: `
     <div appInfiniteScroll (scrolled)="onScrolled()" style="height: 200px; overflow-y: auto;">
       <div style="height: 1000px;">Content</div>
     </div>
-  `
+  `,
+    standalone: false
 })
 class TestComponent {
   scrolledCount = 0;

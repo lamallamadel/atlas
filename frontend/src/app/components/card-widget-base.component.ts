@@ -14,7 +14,8 @@ export interface WidgetConfig {
 }
 
 @Component({
-  template: ''
+    template: '',
+    standalone: false
 })
 export abstract class CardWidgetBaseComponent implements OnInit, OnDestroy {
   @Input() config!: WidgetConfig;

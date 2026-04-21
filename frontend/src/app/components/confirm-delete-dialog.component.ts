@@ -8,10 +8,11 @@ export interface ConfirmDeleteDialogData {
 }
 
 @Component({
-  selector: 'app-confirm-delete-dialog',
-  templateUrl: './confirm-delete-dialog.component.html',
-  styleUrls: ['./confirm-delete-dialog.component.css'],
-  animations: [dialogSlideUp, shakeX]
+    selector: 'app-confirm-delete-dialog',
+    templateUrl: './confirm-delete-dialog.component.html',
+    styleUrls: ['./confirm-delete-dialog.component.css'],
+    animations: [dialogSlideUp, shakeX],
+    standalone: false
 })
 export class ConfirmDeleteDialogComponent {
   isSubmitting = false;

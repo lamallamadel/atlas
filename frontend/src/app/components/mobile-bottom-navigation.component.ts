@@ -10,8 +10,8 @@ interface NavItem {
 }
 
 @Component({
-  selector: 'app-mobile-bottom-navigation',
-  template: `
+    selector: 'app-mobile-bottom-navigation',
+    template: `
     @if (shouldShowNav) {
       <nav class="mobile-bottom-nav" role="navigation" aria-label="Navigation principale mobile">
         @for (item of navItems; track item) {
@@ -36,7 +36,7 @@ interface NavItem {
       </nav>
     }
     `,
-  styles: [`
+    styles: [`
     .mobile-bottom-nav {
       display: none;
       position: fixed;
@@ -160,7 +160,8 @@ interface NavItem {
         padding-bottom: calc(8px + env(safe-area-inset-bottom));
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class MobileBottomNavigationComponent implements OnInit {
   currentRoute = '';

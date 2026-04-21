@@ -1,10 +1,11 @@
 import { Component, Input, Output, EventEmitter, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
 
 @Component({
-  selector: 'app-virtual-scroll-list',
-  templateUrl: './virtual-scroll-list.component.html',
-  styleUrls: ['./virtual-scroll-list.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-virtual-scroll-list',
+    templateUrl: './virtual-scroll-list.component.html',
+    styleUrls: ['./virtual-scroll-list.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class VirtualScrollListComponent {
   @Input() items: any[] = [];

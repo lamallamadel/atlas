@@ -14,9 +14,10 @@ interface BadgeExample {
 }
 
 @Component({
-  selector: 'app-badge-showcase',
-  templateUrl: './badge-showcase.component.html',
-  styleUrls: ['./badge-showcase.component.css']
+    selector: 'app-badge-showcase',
+    templateUrl: './badge-showcase.component.html',
+    styleUrls: ['./badge-showcase.component.css'],
+    standalone: false
 })
 export class BadgeShowcaseComponent {
   variants: BadgeVariant[] = ['solid', 'outline', 'soft'];

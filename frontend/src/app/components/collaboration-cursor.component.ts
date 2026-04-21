@@ -12,8 +12,8 @@ interface CursorInfo {
 }
 
 @Component({
-  selector: 'app-collaboration-cursor',
-  template: `
+    selector: 'app-collaboration-cursor',
+    template: `
     <div class="cursor-indicators">
       @for (cursor of activeCursors; track cursor) {
         <div
@@ -26,7 +26,7 @@ interface CursorInfo {
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .cursor-indicators {
       position: relative;
       margin-top: 4px;
@@ -69,7 +69,8 @@ interface CursorInfo {
         opacity: 0.6;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class CollaborationCursorComponent implements OnInit, OnDestroy {
   @Input() fieldName!: string;

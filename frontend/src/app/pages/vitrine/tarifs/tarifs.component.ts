@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-tarifs',
-  templateUrl: './tarifs.component.html',
-  styleUrls: ['./tarifs.component.scss']
+    selector: 'app-tarifs',
+    templateUrl: './tarifs.component.html',
+    styleUrls: ['./tarifs.component.scss'],
+    standalone: false
 })
 export class TarifsComponent {
   annual = false;

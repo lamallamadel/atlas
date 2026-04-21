@@ -5,8 +5,9 @@ import { AnimatedEmptyStateComponent } from './animated-empty-state.component';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-  selector: 'app-lottie-animation',
-  template: '',
+    selector: 'app-lottie-animation',
+    template: '',
+    standalone: false
 })
 class StubLottieAnimationComponent {
   @Input() animationType!: string;

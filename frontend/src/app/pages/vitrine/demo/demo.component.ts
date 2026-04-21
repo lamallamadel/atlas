@@ -3,9 +3,10 @@ import { Router } from '@angular/router';
 import { VitrineService, DemoFormData } from '../../../services/vitrine.service';
 
 @Component({
-  selector: 'app-demo',
-  templateUrl: './demo.component.html',
-  styleUrls: ['./demo.component.scss']
+    selector: 'app-demo',
+    templateUrl: './demo.component.html',
+    styleUrls: ['./demo.component.scss'],
+    standalone: false
 })
 export class DemoComponent {
   submitting = false;

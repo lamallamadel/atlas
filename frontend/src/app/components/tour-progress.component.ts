@@ -7,9 +7,10 @@ import { OnboardingTourService } from '../services/onboarding-tour.service';
 import { UserPreferencesService } from '../services/user-preferences.service';
 
 @Component({
-  selector: 'app-tour-progress',
-  templateUrl: './tour-progress.component.html',
-  styleUrls: ['./tour-progress.component.css']
+    selector: 'app-tour-progress',
+    templateUrl: './tour-progress.component.html',
+    styleUrls: ['./tour-progress.component.css'],
+    standalone: false
 })
 export class TourProgressComponent implements OnInit, OnDestroy {
   tours: TourDefinition[] = [];

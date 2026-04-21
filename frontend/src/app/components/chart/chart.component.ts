@@ -32,9 +32,10 @@ export interface ChartExportOptions {
 }
 
 @Component({
-  selector: 'app-chart',
-  templateUrl: './chart.component.html',
-  styleUrls: ['./chart.component.css']
+    selector: 'app-chart',
+    templateUrl: './chart.component.html',
+    styleUrls: ['./chart.component.css'],
+    standalone: false
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   @ViewChild('chartCanvas', { static: false }) canvasRef!: ElementRef<HTMLCanvasElement>;

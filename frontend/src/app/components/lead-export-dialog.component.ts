@@ -11,9 +11,10 @@ interface ColumnOption {
 }
 
 @Component({
-  selector: 'app-lead-export-dialog',
-  templateUrl: './lead-export-dialog.component.html',
-  styleUrls: ['./lead-export-dialog.component.css']
+    selector: 'app-lead-export-dialog',
+    templateUrl: './lead-export-dialog.component.html',
+    styleUrls: ['./lead-export-dialog.component.css'],
+    standalone: false
 })
 export class LeadExportDialogComponent {
   columns: ColumnOption[] = [

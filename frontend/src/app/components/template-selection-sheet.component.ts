@@ -8,9 +8,10 @@ export interface TemplateSelectionData {
 }
 
 @Component({
-  selector: 'app-template-selection-sheet',
-  templateUrl: './template-selection-sheet.component.html',
-  styleUrls: ['./template-selection-sheet.component.css']
+    selector: 'app-template-selection-sheet',
+    templateUrl: './template-selection-sheet.component.html',
+    styleUrls: ['./template-selection-sheet.component.css'],
+    standalone: false
 })
 export class TemplateSelectionSheetComponent {
   searchQuery = '';

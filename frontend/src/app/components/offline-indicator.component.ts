@@ -6,8 +6,8 @@ import { OfflineQueueService, SyncProgress } from '../services/offline-queue.ser
 import { trigger, style, transition, animate } from '@angular/animations';
 
 @Component({
-  selector: 'app-offline-indicator',
-  template: `
+    selector: 'app-offline-indicator',
+    template: `
     @if (shouldShowIndicator) {
       <div class="offline-indicator"
         [@slideDown]
@@ -48,7 +48,7 @@ import { trigger, style, transition, animate } from '@angular/animations';
       </div>
     }
     `,
-  styles: [`
+    styles: [`
     .offline-indicator {
       position: fixed;
       top: 64px;
@@ -140,17 +140,18 @@ import { trigger, style, transition, animate } from '@angular/animations';
       }
     }
   `],
-  animations: [
-    trigger('slideDown', [
-      transition(':enter', [
-        style({ transform: 'translateY(-100%)' }),
-        animate('300ms ease-out', style({ transform: 'translateY(0)' }))
-      ]),
-      transition(':leave', [
-        animate('300ms ease-in', style({ transform: 'translateY(-100%)' }))
-      ])
-    ])
-  ]
+    animations: [
+        trigger('slideDown', [
+            transition(':enter', [
+                style({ transform: 'translateY(-100%)' }),
+                animate('300ms ease-out', style({ transform: 'translateY(0)' }))
+            ]),
+            transition(':leave', [
+                animate('300ms ease-in', style({ transform: 'translateY(-100%)' }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class OfflineIndicatorComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

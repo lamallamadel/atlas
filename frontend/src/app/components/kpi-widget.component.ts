@@ -5,10 +5,9 @@ import { DashboardKpiService } from '../services/dashboard-kpi.service';
 import { takeUntil } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-kpi-widget',
-  standalone: true,
-  imports: [CommonModule],
-  template: `
+    selector: 'app-kpi-widget',
+    imports: [CommonModule],
+    template: `
     <div class="kpi-widget" [class.edit-mode]="editMode">
       <div class="widget-header">
         <h3>{{ config.title || 'KPI' }}</h3>
@@ -49,7 +48,7 @@ import { takeUntil } from 'rxjs/operators';
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .kpi-widget {
       background: white;
       border-radius: 8px;

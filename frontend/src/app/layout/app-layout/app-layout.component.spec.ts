@@ -13,7 +13,10 @@ import { DossierApiService } from '../../services/dossier-api.service';
 import { NotificationApiService } from '../../services/notification-api.service';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
 
-@Component({ selector: 'app-global-search-bar', template: '' })
+@Component({
+    selector: 'app-global-search-bar', template: '',
+    standalone: false
+})
 class GlobalSearchBarStubComponent { }
 
 describe('AppLayoutComponent', () => {

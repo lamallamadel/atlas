@@ -1,7 +1,8 @@
 import { Directive, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 
 @Directive({
-  selector: '[appInfiniteScroll]'
+    selector: '[appInfiniteScroll]',
+    standalone: false
 })
 export class InfiniteScrollDirective implements OnInit, OnDestroy {
   @Input() scrollThreshold = 0.8;

@@ -13,9 +13,10 @@ interface Route {
 }
 
 @Component({
-  selector: 'app-ui-preferences-form',
-  templateUrl: './ui-preferences-form.component.html',
-  styleUrls: ['./ui-preferences-form.component.css']
+    selector: 'app-ui-preferences-form',
+    templateUrl: './ui-preferences-form.component.html',
+    styleUrls: ['./ui-preferences-form.component.css'],
+    standalone: false
 })
 export class UiPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

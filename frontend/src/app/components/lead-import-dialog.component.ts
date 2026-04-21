@@ -19,9 +19,10 @@ export interface LeadImportResponse {
 }
 
 @Component({
-  selector: 'app-lead-import-dialog',
-  templateUrl: './lead-import-dialog.component.html',
-  styleUrls: ['./lead-import-dialog.component.css']
+    selector: 'app-lead-import-dialog',
+    templateUrl: './lead-import-dialog.component.html',
+    styleUrls: ['./lead-import-dialog.component.css'],
+    standalone: false
 })
 export class LeadImportDialogComponent {
   selectedFile: File | null = null;

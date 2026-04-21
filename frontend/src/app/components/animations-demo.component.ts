@@ -21,8 +21,8 @@ interface DemoCard {
 }
 
 @Component({
-  selector: 'app-animations-demo',
-  template: `
+    selector: 'app-animations-demo',
+    template: `
     <div class="animations-demo">
       <h1 @fadeIn>Angular Micro-Animations Demo</h1>
     
@@ -169,7 +169,7 @@ interface DemoCard {
       </section>
     </div>
     `,
-  styles: [`
+    styles: [`
     .animations-demo {
       padding: 24px;
       max-width: 1200px;
@@ -282,20 +282,21 @@ interface DemoCard {
       font-size: 14px;
     }
   `],
-  animations: [
-    fadeIn,
-    slideUp,
-    scaleIn,
-    staggerList,
-    bounceIn,
-    shakeX,
-    buttonHover,
-    focusPulse,
-    cardStagger,
-    dialogSlideUp,
-    successState,
-    errorState
-  ]
+    animations: [
+        fadeIn,
+        slideUp,
+        scaleIn,
+        staggerList,
+        bounceIn,
+        shakeX,
+        buttonHover,
+        focusPulse,
+        cardStagger,
+        dialogSlideUp,
+        successState,
+        errorState
+    ],
+    standalone: false
 })
 export class AnimationsDemoComponent {
   isLoading = false;

@@ -29,9 +29,10 @@ export interface FilterOperator {
 }
 
 @Component({
-  selector: 'app-advanced-filters',
-  templateUrl: './advanced-filters.component.html',
-  styleUrls: ['./advanced-filters.component.css']
+    selector: 'app-advanced-filters',
+    templateUrl: './advanced-filters.component.html',
+    styleUrls: ['./advanced-filters.component.css'],
+    standalone: false
 })
 export class AdvancedFiltersComponent implements OnInit {
   @Input() fields: FilterField[] = [];

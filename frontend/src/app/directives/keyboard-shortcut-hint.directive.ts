@@ -3,7 +3,8 @@ import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Subscription } from 'rxjs';
 
 @Directive({
-  selector: '[appKeyboardShortcutHint]'
+    selector: '[appKeyboardShortcutHint]',
+    standalone: false
 })
 export class KeyboardShortcutHintDirective implements OnInit, OnDestroy {
   @Input() appKeyboardShortcutHint = '';

@@ -7,9 +7,10 @@ import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus } from '../models/template.model';
 
 @Component({
-  selector: 'app-template-library',
-  templateUrl: './template-library.component.html',
-  styleUrls: ['./template-library.component.css']
+    selector: 'app-template-library',
+    templateUrl: './template-library.component.html',
+    styleUrls: ['./template-library.component.css'],
+    standalone: false
 })
 export class TemplateLibraryComponent implements OnInit, OnDestroy {
   templates: WhatsAppTemplate[] = [];

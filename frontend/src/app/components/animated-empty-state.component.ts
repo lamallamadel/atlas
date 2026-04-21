@@ -3,10 +3,11 @@ import { ActionButtonConfig, HelpLinkConfig } from './empty-state.component';
 import { LottieAnimationType } from './lottie-animation.component';
 
 @Component({
-  selector: 'app-animated-empty-state',
-  templateUrl: './animated-empty-state.component.html',
-  styleUrls: ['./animated-empty-state.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-animated-empty-state',
+    templateUrl: './animated-empty-state.component.html',
+    styleUrls: ['./animated-empty-state.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class AnimatedEmptyStateComponent {
   @Input() title = '';

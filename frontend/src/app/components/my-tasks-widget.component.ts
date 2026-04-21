@@ -14,10 +14,9 @@ interface Task {
 }
 
 @Component({
-  selector: 'app-my-tasks-widget',
-  standalone: true,
-  imports: [CommonModule, RouterModule],
-  template: `
+    selector: 'app-my-tasks-widget',
+    imports: [CommonModule, RouterModule],
+    template: `
     <div class="widget" [class.edit-mode]="editMode">
       <div class="widget-header">
         <h3>{{ config.title || 'Mes tâches' }}</h3>
@@ -79,7 +78,7 @@ interface Task {
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .widget {
       background: white;
       border-radius: 8px;

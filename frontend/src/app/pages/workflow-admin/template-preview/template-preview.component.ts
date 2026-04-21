@@ -2,9 +2,10 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { WhatsAppTemplate, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
 
 @Component({
-  selector: 'app-template-preview',
-  templateUrl: './template-preview.component.html',
-  styleUrls: ['./template-preview.component.css']
+    selector: 'app-template-preview',
+    templateUrl: './template-preview.component.html',
+    styleUrls: ['./template-preview.component.css'],
+    standalone: false
 })
 export class TemplatePreviewComponent implements OnChanges {
   @Input() template?: WhatsAppTemplate;

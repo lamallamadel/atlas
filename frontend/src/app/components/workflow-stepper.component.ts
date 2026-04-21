@@ -8,10 +8,11 @@ type UiStep = {
 };
 
 @Component({
-  selector: 'app-workflow-stepper',
-  templateUrl: './workflow-stepper.component.html',
-  styleUrls: ['./workflow-stepper.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-workflow-stepper',
+    templateUrl: './workflow-stepper.component.html',
+    styleUrls: ['./workflow-stepper.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class WorkflowStepperComponent implements OnChanges {
   @Input() status: DossierStatus | null = null;

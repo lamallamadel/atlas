@@ -36,9 +36,10 @@ interface CalendarEvent extends EventInput {
 }
 
 @Component({
-  selector: 'app-calendar-view',
-  templateUrl: './calendar-view.component.html',
-  styleUrls: ['./calendar-view.component.css']
+    selector: 'app-calendar-view',
+    templateUrl: './calendar-view.component.html',
+    styleUrls: ['./calendar-view.component.css'],
+    standalone: false
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
   @ViewChild('calendar') calendarComponent: any;

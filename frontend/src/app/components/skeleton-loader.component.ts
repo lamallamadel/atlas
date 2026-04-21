@@ -3,10 +3,11 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kpi' | 'detail' | 'grid' | 'message' | 'timeline';
 
 @Component({
-  selector: 'app-skeleton-loader',
-  templateUrl: './skeleton-loader.component.html',
-  styleUrls: ['./skeleton-loader.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-skeleton-loader',
+    templateUrl: './skeleton-loader.component.html',
+    styleUrls: ['./skeleton-loader.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class SkeletonLoaderComponent {
   @Input() variant: SkeletonVariant = 'card';

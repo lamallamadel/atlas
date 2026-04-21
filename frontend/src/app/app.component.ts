@@ -15,18 +15,19 @@ import { filter } from 'rxjs/operators';
 import { Capacitor } from '@capacitor/core';
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
-  animations: [
-    routeFadeInAnimation,
-    trigger('fadeInOut', [
-      state('void', style({ opacity: 0 })),
-      state('*', style({ opacity: 1 })),
-      transition('void => *', animate('150ms ease-out')),
-      transition('* => void', animate('150ms ease-in'))
-    ])
-  ]
+    selector: 'app-root',
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.css'],
+    animations: [
+        routeFadeInAnimation,
+        trigger('fadeInOut', [
+            state('void', style({ opacity: 0 })),
+            state('*', style({ opacity: 1 })),
+            transition('void => *', animate('150ms ease-out')),
+            transition('* => void', animate('150ms ease-in'))
+        ])
+    ],
+    standalone: false
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'frontend';

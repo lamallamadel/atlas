@@ -6,13 +6,14 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormValidationAnimationDirective } from './form-validation-animation.directive';
 
 @Component({
-  template: `
+    template: `
     <form [formGroup]="testForm">
       <div class="form-field">
         <input formControlName="email" appFormValidationAnimation>
       </div>
     </form>
-  `
+  `,
+    standalone: false
 })
 class TestComponent {
   testForm = new FormGroup({

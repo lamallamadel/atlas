@@ -13,9 +13,10 @@ interface ExecutiveKPI {
 }
 
 @Component({
-  selector: 'app-executive-dashboard',
-  templateUrl: './executive-dashboard.component.html',
-  styleUrls: ['./executive-dashboard.component.scss']
+    selector: 'app-executive-dashboard',
+    templateUrl: './executive-dashboard.component.html',
+    styleUrls: ['./executive-dashboard.component.scss'],
+    standalone: false
 })
 export class ExecutiveDashboardComponent implements OnInit {
   loading = false;

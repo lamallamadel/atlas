@@ -5,9 +5,10 @@ import { OutboundMessageApiService, OutboundMessageResponse, OutboundMessageStat
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 
 @Component({
-  selector: 'app-outbound-message-list',
-  templateUrl: './outbound-message-list.component.html',
-  styleUrls: ['./outbound-message-list.component.css']
+    selector: 'app-outbound-message-list',
+    templateUrl: './outbound-message-list.component.html',
+    styleUrls: ['./outbound-message-list.component.css'],
+    standalone: false
 })
 export class OutboundMessageListComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

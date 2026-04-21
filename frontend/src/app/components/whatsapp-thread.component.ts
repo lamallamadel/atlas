@@ -9,9 +9,10 @@ export interface MessageAction {
 }
 
 @Component({
-  selector: 'app-whatsapp-thread',
-  templateUrl: './whatsapp-thread.component.html',
-  styleUrls: ['./whatsapp-thread.component.css']
+    selector: 'app-whatsapp-thread',
+    templateUrl: './whatsapp-thread.component.html',
+    styleUrls: ['./whatsapp-thread.component.css'],
+    standalone: false
 })
 export class WhatsappThreadComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() messages: MessageResponse[] = [];

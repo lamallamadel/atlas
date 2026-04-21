@@ -1,7 +1,8 @@
 import { Directive, ElementRef, Input, OnInit, OnDestroy, Renderer2 } from '@angular/core';
 
 @Directive({
-  selector: '[appLazyLoadImage]'
+    selector: '[appLazyLoadImage]',
+    standalone: false
 })
 export class LazyLoadImageDirective implements OnInit, OnDestroy {
   @Input() appLazyLoadImage!: string;

@@ -14,10 +14,11 @@ export interface HelpLinkConfig {
 }
 
 @Component({
-  selector: 'app-empty-state',
-  templateUrl: './empty-state.component.html',
-  styleUrls: ['./empty-state.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-empty-state',
+    templateUrl: './empty-state.component.html',
+    styleUrls: ['./empty-state.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class EmptyStateComponent implements OnInit, OnChanges {
   // Legacy inputs (for backwards compatibility)

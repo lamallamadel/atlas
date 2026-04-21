@@ -15,8 +15,8 @@ export interface FilterConfig {
 }
 
 @Component({
-  selector: 'app-mobile-filter-sheet',
-  template: `
+    selector: 'app-mobile-filter-sheet',
+    template: `
     <div class="mobile-filter-sheet">
       <div class="sheet-header">
         <h3>Filtres</h3>
@@ -64,7 +64,7 @@ export interface FilterConfig {
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .mobile-filter-sheet {
       padding: var(--spacing-4);
       min-height: 60vh;
@@ -109,7 +109,8 @@ export interface FilterConfig {
     .sheet-actions button {
       flex: 1;
     }
-  `]
+  `],
+    standalone: false
 })
 export class MobileFilterSheetComponent {
   filters: Record<string, unknown>;

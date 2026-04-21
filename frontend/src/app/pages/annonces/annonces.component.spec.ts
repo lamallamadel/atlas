@@ -21,7 +21,10 @@ import { AnnoncesComponent } from './annonces.component';
 import { AnnonceApiService, AnnonceStatus } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 
-@Component({ selector: 'app-generic-table', template: '' })
+@Component({
+    selector: 'app-generic-table', template: '',
+    standalone: false
+})
 class GenericTableStubComponent {
   @Input() columns: any;
   @Input() data: any;
@@ -35,7 +38,10 @@ class GenericTableStubComponent {
   @Output() exportRequest = new EventEmitter<any>();
 }
 
-@Component({ selector: 'app-empty-state', template: '' })
+@Component({
+    selector: 'app-empty-state', template: '',
+    standalone: false
+})
 class EmptyStateStubComponent {
   @Input() message = '';
   @Input() subtext = '';
@@ -45,7 +51,10 @@ class EmptyStateStubComponent {
   @Input() isNewUser = false;
 }
 
-@Component({ selector: 'app-loading-skeleton', template: '' })
+@Component({
+    selector: 'app-loading-skeleton', template: '',
+    standalone: false
+})
 class LoadingSkeletonStubComponent {
   @Input() variant = '';
   @Input() rows = 0;

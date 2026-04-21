@@ -38,21 +38,22 @@ interface NotificationExample {
 }
 
 @Component({
-  selector: 'app-notification-preferences-form',
-  templateUrl: './notification-preferences-form.component.html',
-  styleUrls: ['./notification-preferences-form.component.css'],
-  animations: [
-    trigger('slideDown', [
-      transition(':enter', [
-        style({ height: '0', opacity: '0', overflow: 'hidden' }),
-        animate('300ms ease-out', style({ height: '*', opacity: '1' }))
-      ]),
-      transition(':leave', [
-        style({ height: '*', opacity: '1', overflow: 'hidden' }),
-        animate('300ms ease-in', style({ height: '0', opacity: '0' }))
-      ])
-    ])
-  ]
+    selector: 'app-notification-preferences-form',
+    templateUrl: './notification-preferences-form.component.html',
+    styleUrls: ['./notification-preferences-form.component.css'],
+    animations: [
+        trigger('slideDown', [
+            transition(':enter', [
+                style({ height: '0', opacity: '0', overflow: 'hidden' }),
+                animate('300ms ease-out', style({ height: '*', opacity: '1' }))
+            ]),
+            transition(':leave', [
+                style({ height: '*', opacity: '1', overflow: 'hidden' }),
+                animate('300ms ease-in', style({ height: '0', opacity: '0' }))
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

@@ -7,9 +7,10 @@ import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component'
 import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
 
 @Component({
-  selector: 'app-activity-timeline',
-  templateUrl: './activity-timeline.component.html',
-  styleUrls: ['./activity-timeline.component.css']
+    selector: 'app-activity-timeline',
+    templateUrl: './activity-timeline.component.html',
+    styleUrls: ['./activity-timeline.component.css'],
+    standalone: false
 })
 export class ActivityTimelineComponent implements OnInit, OnChanges {
   @Input() dossierId!: number;

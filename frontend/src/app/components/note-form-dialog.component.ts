@@ -15,9 +15,10 @@ export interface NoteFormDialogResult {
 }
 
 @Component({
-  selector: 'app-note-form-dialog',
-  templateUrl: './note-form-dialog.component.html',
-  styleUrls: ['./note-form-dialog.component.css']
+    selector: 'app-note-form-dialog',
+    templateUrl: './note-form-dialog.component.html',
+    styleUrls: ['./note-form-dialog.component.css'],
+    standalone: false
 })
 export class NoteFormDialogComponent {
   noteContent = '';

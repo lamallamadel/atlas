@@ -23,21 +23,22 @@ import { Subject, takeUntil } from 'rxjs';
  * <input type="datetime-local">: YYYY-MM-DDTHH:mm
  */
 @Component({
-  selector: 'app-datetime-picker',
-  templateUrl: './datetime-picker.component.html',
-  styleUrls: ['./datetime-picker.component.css'],
-  providers: [
-    {
-      provide: NG_VALUE_ACCESSOR,
-      useExisting: forwardRef(() => DatetimePickerComponent),
-      multi: true
-    },
-    {
-      provide: NG_VALIDATORS,
-      useExisting: forwardRef(() => DatetimePickerComponent),
-      multi: true
-    }
-  ]
+    selector: 'app-datetime-picker',
+    templateUrl: './datetime-picker.component.html',
+    styleUrls: ['./datetime-picker.component.css'],
+    providers: [
+        {
+            provide: NG_VALUE_ACCESSOR,
+            useExisting: forwardRef(() => DatetimePickerComponent),
+            multi: true
+        },
+        {
+            provide: NG_VALIDATORS,
+            useExisting: forwardRef(() => DatetimePickerComponent),
+            multi: true
+        }
+    ],
+    standalone: false
 })
 class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy

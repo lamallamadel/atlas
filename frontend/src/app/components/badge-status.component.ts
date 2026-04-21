@@ -17,10 +17,11 @@ interface StatusConfig {
 }
 
 @Component({
-  selector: 'app-badge-status',
-  templateUrl: './badge-status.component.html',
-  styleUrls: ['./badge-status.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-badge-status',
+    templateUrl: './badge-status.component.html',
+    styleUrls: ['./badge-status.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class BadgeStatusComponent {
   @Input() status!: string;

@@ -6,9 +6,10 @@ import { WorkflowConfiguration, TransitionRule, WorkflowNode } from '../models/w
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
-  selector: 'app-transition-rule-form',
-  templateUrl: './transition-rule-form.component.html',
-  styleUrls: ['./transition-rule-form.component.css']
+    selector: 'app-transition-rule-form',
+    templateUrl: './transition-rule-form.component.html',
+    styleUrls: ['./transition-rule-form.component.css'],
+    standalone: false
 })
 export class TransitionRuleFormComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

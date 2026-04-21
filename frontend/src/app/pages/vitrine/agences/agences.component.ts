@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-agences',
-  templateUrl: './agences.component.html',
-  styleUrls: ['./agences.component.scss']
+    selector: 'app-agences',
+    templateUrl: './agences.component.html',
+    styleUrls: ['./agences.component.scss'],
+    standalone: false
 })
 export class AgencesComponent {
   readonly features = [

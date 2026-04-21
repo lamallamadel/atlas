@@ -1,8 +1,8 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-custom-spinner',
-  template: `
+    selector: 'app-custom-spinner',
+    template: `
     <svg 
       class="custom-spinner"
       [attr.width]="size"
@@ -31,7 +31,7 @@ import { Component, Input } from '@angular/core';
       </circle>
     </svg>
   `,
-  styles: [`
+    styles: [`
     .custom-spinner {
       animation: rotate 1.4s linear infinite;
     }
@@ -69,7 +69,8 @@ import { Component, Input } from '@angular/core';
         stroke-dashoffset: -124;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class CustomSpinnerComponent {
   @Input() size = 24;

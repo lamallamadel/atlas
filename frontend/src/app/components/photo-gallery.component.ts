@@ -16,9 +16,10 @@ export interface Photo {
 }
 
 @Component({
-  selector: 'app-photo-gallery',
-  templateUrl: './photo-gallery.component.html',
-  styleUrls: ['./photo-gallery.component.css']
+    selector: 'app-photo-gallery',
+    templateUrl: './photo-gallery.component.html',
+    styleUrls: ['./photo-gallery.component.css'],
+    standalone: false
 })
 export class PhotoGalleryComponent implements OnInit, OnDestroy {
   @Input() photos: Photo[] = [];

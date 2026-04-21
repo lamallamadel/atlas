@@ -3,9 +3,10 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { TemplateVariable, ComponentType } from '../models/template.model';
 
 @Component({
-  selector: 'app-variable-manager',
-  templateUrl: './variable-manager.component.html',
-  styleUrls: ['./variable-manager.component.css']
+    selector: 'app-variable-manager',
+    templateUrl: './variable-manager.component.html',
+    styleUrls: ['./variable-manager.component.css'],
+    standalone: false
 })
 export class VariableManagerComponent {
   @Input() variables: TemplateVariable[] = [];

@@ -9,9 +9,10 @@ export interface FormStep {
 }
 
 @Component({
-  selector: 'app-form-progress-indicator',
-  templateUrl: './form-progress-indicator.component.html',
-  styleUrls: ['./form-progress-indicator.component.css']
+    selector: 'app-form-progress-indicator',
+    templateUrl: './form-progress-indicator.component.html',
+    styleUrls: ['./form-progress-indicator.component.css'],
+    standalone: false
 })
 export class FormProgressIndicatorComponent implements OnInit {
   @Input() steps: FormStep[] = [];

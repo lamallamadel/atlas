@@ -15,10 +15,9 @@ interface Dossier {
 }
 
 @Component({
-  selector: 'app-recent-dossiers-widget',
-  standalone: true,
-  imports: [RouterModule],
-  template: `
+    selector: 'app-recent-dossiers-widget',
+    imports: [RouterModule],
+    template: `
     <div class="widget" [class.edit-mode]="editMode">
       <div class="widget-header">
         <h3>{{ config.title || 'Dossiers récents' }}</h3>
@@ -78,7 +77,7 @@ interface Dossier {
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .widget {
       background: white;
       border-radius: 8px;

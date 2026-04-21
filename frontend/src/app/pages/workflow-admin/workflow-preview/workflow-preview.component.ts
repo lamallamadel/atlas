@@ -3,9 +3,10 @@ import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule, WorkflowPreviewState } from '../models/workflow.model';
 
 @Component({
-  selector: 'app-workflow-preview',
-  templateUrl: './workflow-preview.component.html',
-  styleUrls: ['./workflow-preview.component.css']
+    selector: 'app-workflow-preview',
+    templateUrl: './workflow-preview.component.html',
+    styleUrls: ['./workflow-preview.component.css'],
+    standalone: false
 })
 export class WorkflowPreviewComponent implements OnInit {
   @Input() workflow: WorkflowConfiguration | null = null;

@@ -6,7 +6,8 @@ import { Pipe, PipeTransform } from '@angular/core';
  * It's provided for template consistency and potential runtime fallback
  */
 @Pipe({
-  name: 'localize'
+    name: 'localize',
+    standalone: false
 })
 export class LocalizePipe implements PipeTransform {
   transform(value: string): string {

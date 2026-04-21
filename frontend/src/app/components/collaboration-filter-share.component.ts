@@ -4,8 +4,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-collaboration-filter-share',
-  template: `
+    selector: 'app-collaboration-filter-share',
+    template: `
     <div class="filter-share-container">
       <h3 class="section-header">
         <span class="header-icon">🔍</span>
@@ -71,7 +71,7 @@ import { Subscription } from 'rxjs';
         </div>
       </div>
     `,
-  styles: [`
+    styles: [`
     .filter-share-container {
       background: white;
       border-radius: 8px;
@@ -239,7 +239,8 @@ import { Subscription } from 'rxjs';
     .btn-icon {
       font-size: 16px;
     }
-  `]
+  `],
+    standalone: false
 })
 export class CollaborationFilterShareComponent implements OnInit, OnDestroy {
   sharedFilters: SharedFilterPreset[] = [];

@@ -10,9 +10,10 @@ interface AnimationDemo {
 }
 
 @Component({
-  selector: 'app-lottie-animations-demo',
-  templateUrl: './lottie-animations-demo.component.html',
-  styleUrls: ['./lottie-animations-demo.component.css']
+    selector: 'app-lottie-animations-demo',
+    templateUrl: './lottie-animations-demo.component.html',
+    styleUrls: ['./lottie-animations-demo.component.css'],
+    standalone: false
 })
 export class LottieAnimationsDemoComponent {
   animations: AnimationDemo[] = [

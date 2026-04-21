@@ -20,9 +20,10 @@ import {
 } from '../../services/annonce-api.service';
 
 @Component({
-  selector: 'app-annonce-create',
-  templateUrl: './annonce-create.component.html',
-  styleUrls: ['./annonce-create.component.css']
+    selector: 'app-annonce-create',
+    templateUrl: './annonce-create.component.html',
+    styleUrls: ['./annonce-create.component.css'],
+    standalone: false
 })
 export class AnnonceCreateComponent implements OnInit {
   @ViewChild('stepper') stepper!: MatStepper;

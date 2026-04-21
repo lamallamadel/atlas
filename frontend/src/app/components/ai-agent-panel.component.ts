@@ -22,8 +22,8 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
  *   <app-ai-agent-panel></app-ai-agent-panel>
  */
 @Component({
-  selector: 'app-ai-agent-panel',
-  template: `
+    selector: 'app-ai-agent-panel',
+    template: `
     @if ((panelOpen$ | async) === false) {
       <div
         class="ai-panel-fab"
@@ -187,7 +187,7 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
       </div>
     }
     `,
-  styles: [`
+    styles: [`
     /* ── FAB button ───────────────────────────────────────── */
     .ai-panel-fab {
       position: fixed;
@@ -585,7 +585,8 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
         right: 16px;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('conversationEl') conversationEl?: ElementRef<HTMLDivElement>;

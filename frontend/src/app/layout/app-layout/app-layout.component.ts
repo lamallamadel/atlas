@@ -14,10 +14,11 @@ import { RouterOutlet, Router } from '@angular/router';
 import { routeFadeSlideAnimation } from '../../animations/route-animations';
 
 @Component({
-  selector: 'app-layout',
-  templateUrl: './app-layout.component.html',
-  styleUrls: ['./app-layout.component.scss'],
-  animations: [routeFadeSlideAnimation]
+    selector: 'app-layout',
+    templateUrl: './app-layout.component.html',
+    styleUrls: ['./app-layout.component.scss'],
+    animations: [routeFadeSlideAnimation],
+    standalone: false
 })
 export class AppLayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;

@@ -17,9 +17,10 @@ export interface MessageSendRequest {
 }
 
 @Component({
-  selector: 'app-whatsapp-message-input',
-  templateUrl: './whatsapp-message-input.component.html',
-  styleUrls: ['./whatsapp-message-input.component.css']
+    selector: 'app-whatsapp-message-input',
+    templateUrl: './whatsapp-message-input.component.html',
+    styleUrls: ['./whatsapp-message-input.component.css'],
+    standalone: false
 })
 export class WhatsappMessageInputComponent {
   @Input() templates: WhatsAppTemplate[] = [];

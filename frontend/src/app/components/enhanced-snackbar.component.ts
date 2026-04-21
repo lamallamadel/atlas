@@ -4,8 +4,8 @@ import { NotificationConfig } from '../services/notification.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
-  selector: 'app-enhanced-snackbar',
-  template: `
+    selector: 'app-enhanced-snackbar',
+    template: `
     <div class="enhanced-snackbar-content" [@slideIn]="animationState" [class.critical]="data.priority === 'critical'">
       <div class="snackbar-icon" [class]="'icon-' + data.type">
         @if (data.type === 'success') {
@@ -44,7 +44,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .enhanced-snackbar-content {
       display: flex;
       align-items: center;
@@ -127,14 +127,15 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       }
     }
   `],
-  animations: [
-    trigger('slideIn', [
-      state('void', style({ transform: 'translateY(-100%)', opacity: 0 })),
-      state('*', style({ transform: 'translateY(0)', opacity: 1 })),
-      transition('void => *', animate('300ms cubic-bezier(0, 0, 0.2, 1)')),
-      transition('* => void', animate('200ms cubic-bezier(0.4, 0, 1, 1)'))
-    ])
-  ]
+    animations: [
+        trigger('slideIn', [
+            state('void', style({ transform: 'translateY(-100%)', opacity: 0 })),
+            state('*', style({ transform: 'translateY(0)', opacity: 1 })),
+            transition('void => *', animate('300ms cubic-bezier(0, 0, 0.2, 1)')),
+            transition('* => void', animate('200ms cubic-bezier(0.4, 0, 1, 1)'))
+        ])
+    ],
+    standalone: false
 })
 export class EnhancedSnackbarComponent {
   animationState = 'in';

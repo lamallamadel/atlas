@@ -2,15 +2,15 @@ import { Component, Input, OnChanges, OnDestroy, SimpleChanges } from '@angular/
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
-  selector: 'app-progress-bar',
-  template: `
+    selector: 'app-progress-bar',
+    template: `
     @if (isNavigating) {
       <div class="progress-bar-container" [@slideDown]>
         <div class="progress-bar" [style.width.%]="progress"></div>
       </div>
     }
     `,
-  styles: [`
+    styles: [`
     .progress-bar-container {
       position: fixed;
       top: 0;
@@ -40,24 +40,25 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
       background: linear-gradient(90deg, #60a5fa, #22d3ee, #34d399);
     }
   `],
-  animations: [
-    trigger('slideDown', [
-      state('void', style({
-        transform: 'translateY(-100%)',
-        opacity: 0
-      })),
-      state('*', style({
-        transform: 'translateY(0)',
-        opacity: 1
-      })),
-      transition('void => *', [
-        animate('150ms ease-out')
-      ]),
-      transition('* => void', [
-        animate('150ms ease-in')
-      ])
-    ])
-  ]
+    animations: [
+        trigger('slideDown', [
+            state('void', style({
+                transform: 'translateY(-100%)',
+                opacity: 0
+            })),
+            state('*', style({
+                transform: 'translateY(0)',
+                opacity: 1
+            })),
+            transition('void => *', [
+                animate('150ms ease-out')
+            ]),
+            transition('* => void', [
+                animate('150ms ease-in')
+            ])
+        ])
+    ],
+    standalone: false
 })
 export class ProgressBarComponent implements OnChanges, OnDestroy {
   @Input() isNavigating = false;

@@ -5,7 +5,8 @@ import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Router } from '@angular/router';
 
 @Component({
-  template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>`
+    template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>`,
+    standalone: false
 })
 class TestComponent {}
 

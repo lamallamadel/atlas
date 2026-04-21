@@ -3,9 +3,10 @@ import { KeyboardShortcutService, KeyboardShortcut, UserPreferences } from '../s
 import { Observable } from 'rxjs';
 
 @Component({
-  selector: 'app-keyboard-shortcuts',
-  templateUrl: './keyboard-shortcuts.component.html',
-  styleUrls: ['./keyboard-shortcuts.component.css']
+    selector: 'app-keyboard-shortcuts',
+    templateUrl: './keyboard-shortcuts.component.html',
+    styleUrls: ['./keyboard-shortcuts.component.css'],
+    standalone: false
 })
 export class KeyboardShortcutsComponent implements OnInit {
   visible$: Observable<boolean>;

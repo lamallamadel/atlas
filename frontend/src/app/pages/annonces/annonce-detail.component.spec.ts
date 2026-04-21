@@ -7,20 +7,29 @@ import { AnnonceDetailComponent } from './annonce-detail.component';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 
-@Component({ selector: 'app-badge-status', template: '' })
+@Component({
+    selector: 'app-badge-status', template: '',
+    standalone: false
+})
 class BadgeStatusStubComponent {
   @Input() status: any;
   @Input() entityType: any;
 }
 
-@Pipe({ name: 'dateFormat' })
+@Pipe({
+    name: 'dateFormat',
+    standalone: false
+})
 class DateFormatPipeStub implements PipeTransform {
   transform(value: any): any {
     return value;
   }
 }
 
-@Pipe({ name: 'priceFormat' })
+@Pipe({
+    name: 'priceFormat',
+    standalone: false
+})
 class PriceFormatPipeStub implements PipeTransform {
   transform(value: any): any {
     return value;

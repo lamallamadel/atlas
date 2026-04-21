@@ -2,7 +2,8 @@ import { Directive, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { FocusManagementService } from '../services/focus-management.service';
 
 @Directive({
-  selector: '[appFocusTrap]'
+    selector: '[appFocusTrap]',
+    standalone: false
 })
 export class FocusTrapDirective implements AfterViewInit, OnDestroy {
   private releaseFocusTrap: (() => void) | null = null;

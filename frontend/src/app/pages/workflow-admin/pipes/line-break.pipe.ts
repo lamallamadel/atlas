@@ -2,7 +2,8 @@ import { Pipe, PipeTransform } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Pipe({
-  name: 'lineBreak'
+    name: 'lineBreak',
+    standalone: false
 })
 export class LineBreakPipe implements PipeTransform {
   constructor(private sanitizer: DomSanitizer) {}

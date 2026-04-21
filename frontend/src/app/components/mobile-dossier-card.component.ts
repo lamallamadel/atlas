@@ -7,8 +7,8 @@ export interface DossierAction {
 }
 
 @Component({
-  selector: 'app-mobile-dossier-card',
-  template: `
+    selector: 'app-mobile-dossier-card',
+    template: `
     <div
       class="mobile-dossier-card"
       [class.swipe-active]="swipeProgress > 0"
@@ -87,7 +87,7 @@ export interface DossierAction {
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .mobile-dossier-card {
       position: relative;
       background: var(--color-neutral-0);
@@ -289,7 +289,8 @@ export interface DossierAction {
     .action-more:hover:not(:disabled) {
       background: var(--color-neutral-300);
     }
-  `]
+  `],
+    standalone: false
 })
 export class MobileDossierCardComponent {
   @Input() dossier!: DossierResponse;

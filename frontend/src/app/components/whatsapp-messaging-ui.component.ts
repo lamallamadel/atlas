@@ -32,9 +32,10 @@ export interface MessageAttachment {
 }
 
 @Component({
-  selector: 'app-whatsapp-messaging-ui',
-  templateUrl: './whatsapp-messaging-ui.component.html',
-  styleUrls: ['./whatsapp-messaging-ui.component.css']
+    selector: 'app-whatsapp-messaging-ui',
+    templateUrl: './whatsapp-messaging-ui.component.html',
+    styleUrls: ['./whatsapp-messaging-ui.component.css'],
+    standalone: false
 })
 export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() dossierId!: number;

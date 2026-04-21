@@ -3,8 +3,8 @@ import { CollaborationService, CollaborationActivity } from '../services/collabo
 import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'app-collaboration-activity-stream',
-  template: `
+    selector: 'app-collaboration-activity-stream',
+    template: `
     <div class="activity-stream">
       <h3 class="activity-header">
         <span class="header-icon">📋</span>
@@ -38,7 +38,7 @@ import { Subscription } from 'rxjs';
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .activity-stream {
       background: white;
       border-radius: 8px;
@@ -152,7 +152,8 @@ import { Subscription } from 'rxjs';
         opacity: 0.7;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class CollaborationActivityStreamComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

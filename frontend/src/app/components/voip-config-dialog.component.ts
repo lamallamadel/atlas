@@ -3,8 +3,8 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { VoipService, VoipConfiguration } from '../services/voip.service';
 
 @Component({
-  selector: 'app-voip-config-dialog',
-  template: `
+    selector: 'app-voip-config-dialog',
+    template: `
     <h2 mat-dialog-title>Configuration VoIP</h2>
     <mat-dialog-content>
       <form #configForm="ngForm">
@@ -103,7 +103,7 @@ import { VoipService, VoipConfiguration } from '../services/voip.service';
           </button>
         </mat-dialog-actions>
     `,
-  styles: [`
+    styles: [`
     mat-dialog-content {
       min-width: 500px;
       max-width: 600px;
@@ -157,7 +157,8 @@ import { VoipService, VoipConfiguration } from '../services/voip.service';
         max-width: 100%;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class VoipConfigDialogComponent {
   config: VoipConfiguration;

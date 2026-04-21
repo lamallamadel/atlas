@@ -2,8 +2,8 @@ import { Component } from '@angular/core';
 import { NotificationService } from '../services/notification.service';
 
 @Component({
-  selector: 'app-notification-demo',
-  template: `
+    selector: 'app-notification-demo',
+    template: `
     <div class="notification-demo">
       <h2>NotificationService Demo</h2>
       
@@ -115,7 +115,7 @@ import { NotificationService } from '../services/notification.service';
       </div>
     </div>
   `,
-  styles: [`
+    styles: [`
     .notification-demo {
       padding: 24px;
       max-width: 1200px;
@@ -166,7 +166,8 @@ import { NotificationService } from '../services/notification.service';
         min-width: 140px;
       }
     }
-  `]
+  `],
+    standalone: false
 })
 export class NotificationDemoComponent {
   queueLength = 0;

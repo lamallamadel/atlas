@@ -3,7 +3,8 @@ import { NgControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Directive({
-  selector: '[appFormValidationAnimation]'
+    selector: '[appFormValidationAnimation]',
+    standalone: false
 })
 export class FormValidationAnimationDirective implements OnInit, OnDestroy {
   private statusChangeSubscription?: Subscription;

@@ -49,9 +49,10 @@ export interface WhatsAppTemplate {
 }
 
 @Component({
-  selector: 'app-dossier-detail',
-  templateUrl: './dossier-detail.component.html',
-  styleUrls: ['./dossier-detail.component.css']
+    selector: 'app-dossier-detail',
+    templateUrl: './dossier-detail.component.html',
+    styleUrls: ['./dossier-detail.component.css'],
+    standalone: false
 })
 export class DossierDetailComponent implements OnInit, OnDestroy {
   dossier: DossierResponse | null = null;

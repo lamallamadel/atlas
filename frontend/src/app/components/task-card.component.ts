@@ -3,10 +3,11 @@ import { TaskResponse, TaskPriority, TaskStatus } from '../services/task-api.ser
 import { fadeIn, scaleIn } from '../animations';
 
 @Component({
-  selector: 'app-task-card',
-  templateUrl: './task-card.component.html',
-  styleUrls: ['./task-card.component.css'],
-  animations: [fadeIn, scaleIn]
+    selector: 'app-task-card',
+    templateUrl: './task-card.component.html',
+    styleUrls: ['./task-card.component.css'],
+    animations: [fadeIn, scaleIn],
+    standalone: false
 })
 export class TaskCardComponent {
   @Input() task!: TaskResponse;

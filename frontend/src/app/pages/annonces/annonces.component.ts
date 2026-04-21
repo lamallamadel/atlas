@@ -23,10 +23,11 @@ interface AppliedFilter {
 }
 
 @Component({
-  selector: 'app-annonces',
-  templateUrl: './annonces.component.html',
-  styleUrls: ['./annonces.component.css'],
-  animations: [listStaggerAnimation, itemAnimation]
+    selector: 'app-annonces',
+    templateUrl: './annonces.component.html',
+    styleUrls: ['./annonces.component.css'],
+    animations: [listStaggerAnimation, itemAnimation],
+    standalone: false
 })
 export class AnnoncesComponent implements OnInit {
   annonces: AnnonceResponse[] = [];

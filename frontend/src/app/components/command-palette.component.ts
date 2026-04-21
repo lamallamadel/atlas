@@ -37,9 +37,10 @@ interface FuzzyResult {
 }
 
 @Component({
-  selector: 'app-command-palette',
-  templateUrl: './command-palette.component.html',
-  styleUrls: ['./command-palette.component.css']
+    selector: 'app-command-palette',
+    templateUrl: './command-palette.component.html',
+    styleUrls: ['./command-palette.component.css'],
+    standalone: false
 })
 export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('commandInput') commandInput!: ElementRef;

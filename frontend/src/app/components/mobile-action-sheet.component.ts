@@ -18,8 +18,8 @@ export interface MobileActionSheetData {
 }
 
 @Component({
-  selector: 'app-mobile-action-sheet',
-  template: `
+    selector: 'app-mobile-action-sheet',
+    template: `
     <div class="mobile-action-sheet">
       @if (data.title || data.subtitle) {
         <div class="action-sheet-header">
@@ -63,7 +63,7 @@ export interface MobileActionSheetData {
       </div>
     </div>
     `,
-  styles: [`
+    styles: [`
     .mobile-action-sheet {
       display: flex;
       flex-direction: column;
@@ -217,7 +217,8 @@ export interface MobileActionSheetData {
     ::ng-deep .mat-divider {
       margin: 0 var(--spacing-6);
     }
-  `]
+  `],
+    standalone: false
 })
 export class MobileActionSheetComponent {
   constructor(

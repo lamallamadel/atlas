@@ -4,9 +4,10 @@ import { PortailService, Listing } from '../../../services/portail.service';
 import { HttpClient } from '@angular/common/http';
 
 @Component({
-  selector: 'app-annonce-detail',
-  templateUrl: './annonce-detail.component.html',
-  styleUrls: ['./annonce-detail.component.scss']
+    selector: 'app-annonce-detail',
+    templateUrl: './annonce-detail.component.html',
+    styleUrls: ['./annonce-detail.component.scss'],
+    standalone: false
 })
 export class AnnonceDetailComponent implements OnInit {
 

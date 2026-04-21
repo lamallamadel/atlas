@@ -4,10 +4,11 @@ import { SpinnerVariant, SpinnerSize, SpinnerColor } from './spinner.component';
 export type SkeletonVariant = 'card' | 'list' | 'table' | 'form' | 'dashboard-kpi' | 'detail' | 'grid' | 'message' | 'timeline' | 'spinner';
 
 @Component({
-  selector: 'app-loading-skeleton',
-  templateUrl: './loading-skeleton.component.html',
-  styleUrls: ['./loading-skeleton.component.css'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'app-loading-skeleton',
+    templateUrl: './loading-skeleton.component.html',
+    styleUrls: ['./loading-skeleton.component.css'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
+    standalone: false
 })
 export class LoadingSkeletonComponent {
   @Input() variant: SkeletonVariant = 'card';

@@ -8,9 +8,10 @@ import { FormStep } from './form-progress-indicator.component';
 import { ComponentCanDeactivate } from '../guards/form-unsaved-changes.guard';
 
 @Component({
-  selector: 'app-enhanced-form-example',
-  templateUrl: './enhanced-form-example.component.html',
-  styleUrls: ['./enhanced-form-example.component.css']
+    selector: 'app-enhanced-form-example',
+    templateUrl: './enhanced-form-example.component.html',
+    styleUrls: ['./enhanced-form-example.component.css'],
+    standalone: false
 })
 export class EnhancedFormExampleComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   form!: FormGroup;

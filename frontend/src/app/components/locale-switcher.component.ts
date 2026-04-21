@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { I18nService, SupportedLocale } from '../services/i18n.service';
 
 @Component({
-  selector: 'app-locale-switcher',
-  template: `
+    selector: 'app-locale-switcher',
+    template: `
     <button mat-icon-button [matMenuTriggerFor]="localeMenu"
       class="locale-switcher"
       [attr.aria-label]="'Change language' | localize">
@@ -31,7 +31,7 @@ import { I18nService, SupportedLocale } from '../services/i18n.service';
       }
     </mat-menu>
     `,
-  styles: [`
+    styles: [`
     .locale-switcher {
       display: flex;
       align-items: center;
@@ -101,7 +101,8 @@ import { I18nService, SupportedLocale } from '../services/i18n.service';
     :host-context(.dark-theme) .locale-name-secondary {
       color: rgba(255, 255, 255, 0.6);
     }
-  `]
+  `],
+    standalone: false
 })
 export class LocaleSwitcherComponent implements OnInit {
   supportedLocales: SupportedLocale[] = [];

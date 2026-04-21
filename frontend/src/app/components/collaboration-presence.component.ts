@@ -10,8 +10,8 @@ interface ViewerInfo {
 }
 
 @Component({
-  selector: 'app-collaboration-presence',
-  template: `
+    selector: 'app-collaboration-presence',
+    template: `
     <div class="collaboration-presence">
       <div class="viewers-container">
         <div class="viewer-avatars">
@@ -43,7 +43,7 @@ interface ViewerInfo {
       }
     </div>
     `,
-  styles: [`
+    styles: [`
     .collaboration-presence {
       display: flex;
       align-items: center;
@@ -138,7 +138,8 @@ interface ViewerInfo {
     .activity-text {
       font-style: italic;
     }
-  `]
+  `],
+    standalone: false
 })
 export class CollaborationPresenceComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

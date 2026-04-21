@@ -3,9 +3,10 @@ import { CdkDragStart, CdkDragEnd } from '@angular/cdk/drag-drop';
 import { WorkflowNode } from '../models/workflow.model';
 
 @Component({
-  selector: 'app-workflow-node',
-  templateUrl: './workflow-node.component.html',
-  styleUrls: ['./workflow-node.component.css']
+    selector: 'app-workflow-node',
+    templateUrl: './workflow-node.component.html',
+    styleUrls: ['./workflow-node.component.css'],
+    standalone: false
 })
 export class WorkflowNodeComponent {
   @Input() node!: WorkflowNode;
