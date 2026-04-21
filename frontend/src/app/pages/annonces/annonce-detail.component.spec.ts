@@ -8,28 +8,21 @@ import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../service
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 @Component({
-    selector: 'app-badge-status', template: '',
-    standalone: false
+    selector: 'app-badge-status', template: ''
 })
 class BadgeStatusStubComponent {
   @Input() status: any;
   @Input() entityType: any;
 }
 
-@Pipe({
-    name: 'dateFormat',
-    standalone: false
-})
+@Pipe({ name: 'dateFormat' })
 class DateFormatPipeStub implements PipeTransform {
   transform(value: any): any {
     return value;
   }
 }
 
-@Pipe({
-    name: 'priceFormat',
-    standalone: false
-})
+@Pipe({ name: 'priceFormat' })
 class PriceFormatPipeStub implements PipeTransform {
   transform(value: any): any {
     return value;
@@ -79,19 +72,17 @@ describe('AnnonceDetailComponent', () => {
     const mockRecentNavService = jasmine.createSpyObj('RecentNavigationService', ['addRecentItem']);
 
     await TestBed.configureTestingModule({
-      declarations: [
-        AnnonceDetailComponent,
+    imports: [AnnonceDetailComponent,
         BadgeStatusStubComponent,
         DateFormatPipeStub,
-        PriceFormatPipeStub
-      ],
-      providers: [
+        PriceFormatPipeStub],
+    providers: [
         { provide: AnnonceApiService, useValue: mockAnnonceApiService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: RecentNavigationService, useValue: mockRecentNavService }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(AnnonceDetailComponent);
     component = fixture.componentInstance;

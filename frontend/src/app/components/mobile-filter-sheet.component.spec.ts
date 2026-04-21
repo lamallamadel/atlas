@@ -43,21 +43,21 @@ describe('MobileFilterSheetComponent', () => {
     const bottomSheetRefSpy = jasmine.createSpyObj('MatBottomSheetRef', ['dismiss']);
 
     await TestBed.configureTestingModule({
-      declarations: [MobileFilterSheetComponent],
-      imports: [
+    imports: [
         FormsModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
         MatIconModule,
         MatButtonModule,
-        NoopAnimationsModule
-      ],
-      providers: [
+        NoopAnimationsModule,
+        MobileFilterSheetComponent
+    ],
+    providers: [
         { provide: MatBottomSheetRef, useValue: bottomSheetRefSpy },
         { provide: MAT_BOTTOM_SHEET_DATA, useValue: mockData }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     bottomSheetRef = TestBed.inject(MatBottomSheetRef) as jasmine.SpyObj<MatBottomSheetRef<MobileFilterSheetComponent>>;
     fixture = TestBed.createComponent(MobileFilterSheetComponent);

@@ -18,19 +18,19 @@ describe('ApiStatusIndicatorComponent', () => {
     mockPingService = jasmine.createSpyObj('PingService', ['ping']);
 
     await TestBed.configureTestingModule({
-      declarations: [ ApiStatusIndicatorComponent ],
-      imports: [
+    imports: [
         MatMenuModule,
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,
         MatDividerModule,
-        NoopAnimationsModule
-      ],
-      providers: [
+        NoopAnimationsModule,
+        ApiStatusIndicatorComponent
+    ],
+    providers: [
         { provide: PingService, useValue: mockPingService }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ApiStatusIndicatorComponent);

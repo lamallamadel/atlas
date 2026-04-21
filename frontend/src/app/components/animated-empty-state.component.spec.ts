@@ -7,7 +7,7 @@ import { MatIconModule } from '@angular/material/icon';
 @Component({
     selector: 'app-lottie-animation',
     template: '',
-    standalone: false
+    imports: [CommonModule, MatIconModule]
 })
 class StubLottieAnimationComponent {
   @Input() animationType!: string;
@@ -25,12 +25,9 @@ describe('AnimatedEmptyStateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
-        AnimatedEmptyStateComponent,
-        StubLottieAnimationComponent
-      ],
-      imports: [ CommonModule, MatIconModule ]
-    })
+    imports: [CommonModule, MatIconModule, AnimatedEmptyStateComponent,
+        StubLottieAnimationComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(AnimatedEmptyStateComponent);

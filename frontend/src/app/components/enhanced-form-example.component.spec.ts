@@ -25,12 +25,6 @@ describe('EnhancedFormExampleComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [
-        EnhancedFormExampleComponent,
-        FormProgressIndicatorComponent,
-        InlineValidationSuggestionComponent,
-        ContextualHintDirective
-    ],
     imports: [ReactiveFormsModule,
         BrowserAnimationsModule,
         MatCardModule,
@@ -41,7 +35,10 @@ describe('EnhancedFormExampleComponent', () => {
         MatCheckboxModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
-        MatProgressBarModule],
+        MatProgressBarModule, EnhancedFormExampleComponent,
+        FormProgressIndicatorComponent,
+        InlineValidationSuggestionComponent,
+        ContextualHintDirective],
     providers: [
         FormValidationService,
         FormDraftService,

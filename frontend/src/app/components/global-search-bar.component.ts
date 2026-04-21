@@ -3,6 +3,8 @@ import { Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../services/search-api.service';
 import { debounceTime, distinctUntilChanged, switchMap, catchError } from 'rxjs/operators';
 import { Subject, of, Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { UpperCasePipe } from '@angular/common';
 
 interface GroupedResults {
   annonces: EnhancedSearchResult[];
@@ -25,7 +27,7 @@ interface RecentSearch {
     selector: 'app-global-search-bar',
     templateUrl: './global-search-bar.component.html',
     styleUrls: ['./global-search-bar.component.scss'],
-    standalone: false
+    imports: [FormsModule, UpperCasePipe]
 })
 export class GlobalSearchBarComponent implements OnInit, OnDestroy {
   @ViewChild('searchInput') searchInput!: ElementRef;

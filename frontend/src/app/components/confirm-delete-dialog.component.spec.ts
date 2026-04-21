@@ -10,13 +10,12 @@ describe('ConfirmDeleteDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ConfirmDeleteDialogComponent],
-      imports: [MaterialTestingModule],
-      providers: [
+    imports: [MaterialTestingModule, ConfirmDeleteDialogComponent],
+    providers: [
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { title: 'Supprimer ?', message: 'Confirmer suppression ?' } }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmDeleteDialogComponent);
     component = fixture.componentInstance;

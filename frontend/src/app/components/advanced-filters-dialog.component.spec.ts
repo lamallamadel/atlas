@@ -31,10 +31,6 @@ describe('AdvancedFiltersDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [
-        AdvancedFiltersDialogComponent,
-        AdvancedFiltersComponent
-    ],
     imports: [BrowserAnimationsModule,
         ReactiveFormsModule,
         MatDialogModule,
@@ -45,7 +41,8 @@ describe('AdvancedFiltersDialogComponent', () => {
         MatSelectModule,
         MatIconModule,
         MatCheckboxModule,
-        MatButtonToggleModule],
+        MatButtonToggleModule, AdvancedFiltersDialogComponent,
+        AdvancedFiltersComponent],
     providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: mockDialogData },

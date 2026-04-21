@@ -1,4 +1,5 @@
 import { Component, Input, Output, EventEmitter, HostListener, ElementRef } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 
 export interface SwipeAction {
   icon: string;
@@ -118,7 +119,7 @@ export interface SwipeAction {
       background: var(--color-neutral-800, #424242);
     }
   `],
-    standalone: false
+    imports: [MatIcon]
 })
 export class SwipeableCardComponent {
   @Input() leftAction?: SwipeAction;

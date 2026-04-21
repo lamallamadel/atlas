@@ -1,4 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
+import { NgClass } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
 
 export interface FormStep {
   label: string;
@@ -12,7 +14,7 @@ export interface FormStep {
     selector: 'app-form-progress-indicator',
     templateUrl: './form-progress-indicator.component.html',
     styleUrls: ['./form-progress-indicator.component.css'],
-    standalone: false
+    imports: [NgClass, MatIcon]
 })
 export class FormProgressIndicatorComponent implements OnInit {
   @Input() steps: FormStep[] = [];

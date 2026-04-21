@@ -16,13 +16,12 @@ describe('NotificationCenterComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [NotificationCenterComponent],
     imports: [RouterTestingModule,
         MatIconModule,
         MatButtonModule,
         MatButtonToggleModule,
         MatProgressSpinnerModule,
-        MatTooltipModule],
+        MatTooltipModule, NotificationCenterComponent],
     providers: [NotificationApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 }).compileComponents();
 

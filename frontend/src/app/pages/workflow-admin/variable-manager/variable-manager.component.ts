@@ -1,12 +1,17 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { TemplateVariable, ComponentType } from '../models/template.model';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatChip } from '@angular/material/chips';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 
 @Component({
     selector: 'app-variable-manager',
     templateUrl: './variable-manager.component.html',
     styleUrls: ['./variable-manager.component.css'],
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, CdkDropList, CdkDrag, CdkDragHandle, MatChip, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle]
 })
 export class VariableManagerComponent {
   @Input() variables: TemplateVariable[] = [];

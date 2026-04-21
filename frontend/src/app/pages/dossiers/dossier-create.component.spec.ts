@@ -42,14 +42,13 @@ describe('DossierCreateComponent', () => {
     } as any));
 
     await TestBed.configureTestingModule({
-      declarations: [DossierCreateComponent],
-      imports: [ReactiveFormsModule],
-      providers: [
+    imports: [ReactiveFormsModule, DossierCreateComponent],
+    providers: [
         { provide: DossierApiService, useValue: dossierApiService },
         { provide: AnnonceApiService, useValue: annonceApiService },
         { provide: Router, useValue: router }
-      ]
-    })
+    ]
+})
       .overrideTemplate(DossierCreateComponent, '')
       .compileComponents();
 

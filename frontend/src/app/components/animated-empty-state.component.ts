@@ -1,13 +1,14 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { ActionButtonConfig, HelpLinkConfig } from './empty-state.component';
-import { LottieAnimationType } from './lottie-animation.component';
+import { LottieAnimationType, LottieAnimationComponent } from './lottie-animation.component';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-animated-empty-state',
     templateUrl: './animated-empty-state.component.html',
     styleUrls: ['./animated-empty-state.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [LottieAnimationComponent, MatIcon]
 })
 export class AnimatedEmptyStateComponent {
   @Input() title = '';

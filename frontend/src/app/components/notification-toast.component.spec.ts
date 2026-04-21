@@ -20,14 +20,13 @@ describe('NotificationToastComponent', () => {
     toastServiceSpy.activeToasts = of([]);
 
     await TestBed.configureTestingModule({
-      declarations: [NotificationToastComponent],
-      imports: [BrowserAnimationsModule, MatIconModule],
-      providers: [
+    imports: [BrowserAnimationsModule, MatIconModule, NotificationToastComponent],
+    providers: [
         { provide: ToastNotificationService, useValue: toastServiceSpy },
         AriaLiveAnnouncerService,
         MatSnackBar
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     toastService = TestBed.inject(ToastNotificationService) as jasmine.SpyObj<ToastNotificationService>;
   });

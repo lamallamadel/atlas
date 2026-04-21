@@ -58,8 +58,7 @@ describe('NotificationPreferencesFormComponent', () => {
     }));
 
     await TestBed.configureTestingModule({
-      declarations: [ NotificationPreferencesFormComponent ],
-      imports: [
+    imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
         MatCardModule,
@@ -70,13 +69,14 @@ describe('NotificationPreferencesFormComponent', () => {
         MatDividerModule,
         MatButtonModule,
         MatProgressBarModule,
-        MatProgressSpinnerModule
-      ],
-      providers: [
+        MatProgressSpinnerModule,
+        NotificationPreferencesFormComponent
+    ],
+    providers: [
         { provide: UserPreferencesService, useValue: mockUserPreferencesService },
         { provide: NotificationService, useValue: mockNotificationService }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(NotificationPreferencesFormComponent);

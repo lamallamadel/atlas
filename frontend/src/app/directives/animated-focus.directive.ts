@@ -3,10 +3,7 @@ import { Directive, ElementRef, HostListener, Renderer2, OnInit, Input } from '@
 /**
  * Directive that adds pulse animation to border on focus
  */
-@Directive({
-    selector: 'input[appAnimatedFocus], textarea[appAnimatedFocus], select[appAnimatedFocus], [contenteditable][appAnimatedFocus]',
-    standalone: false
-})
+@Directive({ selector: 'input[appAnimatedFocus], textarea[appAnimatedFocus], select[appAnimatedFocus], [contenteditable][appAnimatedFocus]' })
 export class AnimatedFocusDirective implements OnInit {
   @Input() pulseColor = 'rgba(59, 130, 246, 0.5)';
   @Input() pulseSize = '3px';

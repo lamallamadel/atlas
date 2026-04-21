@@ -10,6 +10,11 @@ import {
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.service';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { AsyncPipe } from '@angular/common';
 
 /**
  * AiAgentPanelComponent — Atlas 2026 Phase 2
@@ -586,7 +591,7 @@ import { AiAgentService, AgentMessage, AgentAction } from '../services/ai-agent.
       }
     }
   `],
-    standalone: false
+    imports: [MatTooltip, MatIcon, MatIconButton, FormsModule, AsyncPipe]
 })
 export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('conversationEl') conversationEl?: ElementRef<HTMLDivElement>;

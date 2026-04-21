@@ -1,6 +1,15 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ActivityVisibility } from '../services/activity-api.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
+import { FormsModule } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 export interface NoteFormDialogData {
   dossierId: number;
@@ -18,7 +27,7 @@ export interface NoteFormDialogResult {
     selector: 'app-note-form-dialog',
     templateUrl: './note-form-dialog.component.html',
     styleUrls: ['./note-form-dialog.component.css'],
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatFormField, MatLabel, MatInput, CdkTextareaAutosize, FormsModule, MatHint, MatSelect, MatOption, MatIcon, MatDialogActions, MatButton]
 })
 export class NoteFormDialogComponent {
   noteContent = '';

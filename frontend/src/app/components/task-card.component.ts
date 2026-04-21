@@ -1,13 +1,18 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { TaskResponse, TaskPriority, TaskStatus } from '../services/task-api.service';
 import { fadeIn, scaleIn } from '../animations';
+import { MatCard, MatCardHeader, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-task-card',
     templateUrl: './task-card.component.html',
     styleUrls: ['./task-card.component.css'],
     animations: [fadeIn, scaleIn],
-    standalone: false
+    imports: [MatCard, MatCardHeader, MatCheckbox, MatCardContent, MatIcon, MatCardActions, MatButton, DatePipe]
 })
 export class TaskCardComponent {
   @Input() task!: TaskResponse;

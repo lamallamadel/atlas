@@ -9,9 +9,8 @@ describe('LottieAnimationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LottieAnimationComponent],
-      imports: [MatIconModule]
-    })
+    imports: [MatIconModule, LottieAnimationComponent]
+})
       .compileComponents();
 
     fixture = TestBed.createComponent(LottieAnimationComponent);

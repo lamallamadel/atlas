@@ -1,8 +1,13 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { PartiePrenanteRole } from '../services/dossier-api.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { NgClass } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface PartiePrenanteFormData {
   id?: number;
@@ -25,7 +30,7 @@ export interface PartiePrenanteFormData {
             ])
         ])
     ],
-    standalone: false
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, NgClass, MatDialogActions, MatButton, MatProgressSpinner]
 })
 export class PartiePrenanteFormDialogComponent implements OnInit {
   partieForm!: FormGroup;

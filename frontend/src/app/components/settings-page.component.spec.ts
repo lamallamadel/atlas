@@ -51,8 +51,7 @@ describe('SettingsPageComponent', () => {
     mockAuthService.getUserRoles.and.returnValue([]);
 
     await TestBed.configureTestingModule({
-      declarations: [SettingsPageComponent],
-      imports: [
+    imports: [
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatTabsModule,
@@ -67,15 +66,16 @@ describe('SettingsPageComponent', () => {
         MatButtonToggleModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
-        MatDividerModule
-      ],
-      providers: [
+        MatDividerModule,
+        SettingsPageComponent
+    ],
+    providers: [
         { provide: UserPreferencesService, useValue: mockUserPreferencesService },
         { provide: ThemeService, useValue: mockThemeService },
         { provide: NotificationService, useValue: mockNotificationService },
         { provide: AuthService, useValue: mockAuthService }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(SettingsPageComponent);
     component = fixture.componentInstance;

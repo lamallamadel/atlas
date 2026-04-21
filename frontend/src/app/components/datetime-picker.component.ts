@@ -5,18 +5,11 @@ import {
   OnDestroy,
   OnInit
 } from '@angular/core';
-import {
-  AbstractControl,
-  ControlValueAccessor,
-  FormBuilder,
-  FormGroup,
-  NG_VALIDATORS,
-  NG_VALUE_ACCESSOR,
-  ValidationErrors,
-  Validator,
-  Validators
-} from '@angular/forms';
+import { AbstractControl, ControlValueAccessor, FormBuilder, FormGroup, NG_VALIDATORS, NG_VALUE_ACCESSOR, ValidationErrors, Validator, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
 
 /**
  * Mat-styled Date+Time field that outputs the same string format as native
@@ -38,7 +31,7 @@ import { Subject, takeUntil } from 'rxjs';
             multi: true
         }
     ],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker]
 })
 class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy

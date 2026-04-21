@@ -4,6 +4,9 @@ import { takeUntil } from 'rxjs/operators';
 import { OfflineService, ConnectionStatus, ConnectivityState } from '../services/offline.service';
 import { OfflineQueueService, SyncProgress } from '../services/offline-queue.service';
 import { trigger, style, transition, animate } from '@angular/animations';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatButton, MatIconButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-offline-indicator',
@@ -151,7 +154,7 @@ import { trigger, style, transition, animate } from '@angular/animations';
             ])
         ])
     ],
-    standalone: false
+    imports: [MatIcon, MatProgressBar, MatButton, MatIconButton]
 })
 export class OfflineIndicatorComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

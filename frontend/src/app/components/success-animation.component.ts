@@ -82,8 +82,7 @@ import { trigger, state, style, transition, animate, keyframes } from '@angular/
                 ]))
             ])
         ])
-    ],
-    standalone: false
+    ]
 })
 export class SuccessAnimationComponent implements OnInit {
   @Input() message?: string;

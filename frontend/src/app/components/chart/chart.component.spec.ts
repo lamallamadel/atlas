@@ -12,15 +12,15 @@ describe('ChartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ChartComponent ],
-      imports: [
+    declarations: [ChartComponent],
+    imports: [
         MatIconModule,
         MatButtonModule,
         MatMenuModule,
         MatTooltipModule,
         NoopAnimationsModule
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ChartComponent);

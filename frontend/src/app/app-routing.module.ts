@@ -13,7 +13,7 @@ import { CalendarViewComponent } from './components/calendar-view.component';
 import { SettingsPageComponent } from './components/settings-page.component';
 import { AuthGuard } from './guards/auth.guard';
 
-const routes: Routes = [
+export const routes: Routes = [
   // ── Standalone pages ──────────────────────────────────────────
   { path: 'login',          component: LoginComponent,          data: { animation: 'LoginPage' } },
   { path: 'auth/callback',  component: LoginComponent,          data: { animation: 'LoginPage' } },

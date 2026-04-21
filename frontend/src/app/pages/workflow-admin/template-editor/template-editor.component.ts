@@ -1,17 +1,27 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus, TemplateCategory, ComponentType, TemplateComponent, TemplateVariable, ButtonType } from '../models/template.model';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel, MatHint, MatError, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { TemplatePreviewComponent } from '../template-preview/template-preview.component';
 
 @Component({
     selector: 'app-template-editor',
     templateUrl: './template-editor.component.html',
     styleUrls: ['./template-editor.component.css'],
-    standalone: false
+    imports: [MatIconButton, MatIcon, FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, MatInput, MatHint, MatError, MatSelect, MatOption, MatSuffix, MatTooltip, CdkDropList, CdkDrag, CdkDragHandle, MatCheckbox, MatButton, TemplatePreviewComponent]
 })
 export class TemplateEditorComponent implements OnInit, OnDestroy {
   templateForm!: FormGroup;

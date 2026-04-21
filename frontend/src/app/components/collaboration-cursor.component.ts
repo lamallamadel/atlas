@@ -69,8 +69,7 @@ interface CursorInfo {
         opacity: 0.6;
       }
     }
-  `],
-    standalone: false
+  `]
 })
 export class CollaborationCursorComponent implements OnInit, OnDestroy {
   @Input() fieldName!: string;

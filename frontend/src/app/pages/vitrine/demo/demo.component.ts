@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { VitrineService, DemoFormData } from '../../../services/vitrine.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-demo',
     templateUrl: './demo.component.html',
     styleUrls: ['./demo.component.scss'],
-    standalone: false
+    imports: [RouterLink, FormsModule]
 })
 export class DemoComponent {
   submitting = false;

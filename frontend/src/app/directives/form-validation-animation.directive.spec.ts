@@ -13,7 +13,7 @@ import { FormValidationAnimationDirective } from './form-validation-animation.di
       </div>
     </form>
   `,
-    standalone: false
+    imports: [ReactiveFormsModule]
 })
 class TestComponent {
   testForm = new FormGroup({
@@ -28,15 +28,13 @@ describe('FormValidationAnimationDirective', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [
+    imports: [
+        ReactiveFormsModule,
+        BrowserAnimationsModule,
         FormValidationAnimationDirective,
         TestComponent
-      ],
-      imports: [
-        ReactiveFormsModule,
-        BrowserAnimationsModule
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);

@@ -13,12 +13,11 @@ describe('ConfirmNavigationDialogComponent', () => {
     const spy = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
-      declarations: [ConfirmNavigationDialogComponent],
-      imports: [MatIconModule, MatButtonModule, MatDialogModule],
-      providers: [
+    imports: [MatIconModule, MatButtonModule, MatDialogModule, ConfirmNavigationDialogComponent],
+    providers: [
         { provide: MatDialogRef, useValue: spy }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmNavigationDialogComponent);
     component = fixture.componentInstance;

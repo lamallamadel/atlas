@@ -16,7 +16,11 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 @Component({
     selector: 'app-loading-skeleton',
     template: '',
-    standalone: false
+    imports: [RouterTestingModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        MatButtonToggleModule]
 })
 class MockLoadingSkeletonComponent {
   @Input() variant?: string;
@@ -26,7 +30,11 @@ class MockLoadingSkeletonComponent {
 @Component({
     selector: 'app-empty-state',
     template: '',
-    standalone: false
+    imports: [RouterTestingModule,
+        MatCardModule,
+        MatIconModule,
+        MatButtonModule,
+        MatButtonToggleModule]
 })
 class MockEmptyStateComponent {
   @Input() message?: string;
@@ -55,17 +63,14 @@ describe('DashboardComponent', () => {
     mockDashboardKpiService.getRecentDossiers.and.returnValue(of([]));
 
     await TestBed.configureTestingModule({
-    declarations: [
-        DashboardComponent,
-        MockLoadingSkeletonComponent,
-        MockEmptyStateComponent
-    ],
     imports: [RouterTestingModule,
         MatCardModule,
         MatIconModule,
         MatButtonModule,
         MatButtonToggleModule,
-        NoopAnimationsModule],
+        NoopAnimationsModule, DashboardComponent,
+        MockLoadingSkeletonComponent,
+        MockEmptyStateComponent],
     providers: [
         { provide: DashboardKpiService, useValue: mockDashboardKpiService },
         { provide: MatDialog, useValue: mockDialog },

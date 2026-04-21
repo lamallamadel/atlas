@@ -6,10 +6,18 @@ import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
-import { ActionButtonConfig } from '../../components/empty-state.component';
+import { ActionButtonConfig, EmptyStateComponent } from '../../components/empty-state.component';
 import { DossierCreateDialogComponent } from '../dossiers/dossier-create-dialog.component';
 import { interval, Subject, takeUntil, takeWhile, BehaviorSubject, skip } from 'rxjs';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatIcon } from '@angular/material/icon';
+import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
+import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
+import { AsyncPipe, DatePipe } from '@angular/common';
 
 type Chart = any;
 type ChartConfiguration = any;
@@ -34,7 +42,7 @@ interface KpiCard {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     animations: [listStaggerAnimation, itemAnimation],
-    standalone: false
+    imports: [MatButtonToggleGroup, MatButtonToggle, MatIcon, SkeletonLoaderComponent, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatIconButton, MatTooltip, MatCardContent, LoadingSkeletonComponent, EmptyStateComponent, AsyncPipe, DatePipe]
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();

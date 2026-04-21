@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { PwaService } from '../services/pwa.service';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-pwa-install-prompt',
@@ -160,7 +162,7 @@ import { PwaService } from '../services/pwa.service';
     }
   `],
     animations: [],
-    standalone: false
+    imports: [MatIcon, MatButton, MatIconButton]
 })
 export class PwaInstallPromptComponent implements OnInit {
   showPrompt = false;

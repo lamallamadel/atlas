@@ -13,6 +13,9 @@ import { NativePlatformService } from './services/native-platform.service';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { Capacitor } from '@capacitor/core';
+import { OfflineIndicatorComponent } from './components/offline-indicator.component';
+import { ProgressBarComponent } from './components/progress-bar.component';
+import { NotificationToastComponent } from './components/notification-toast.component';
 
 @Component({
     selector: 'app-root',
@@ -27,7 +30,13 @@ import { Capacitor } from '@capacitor/core';
             transition('* => void', animate('150ms ease-in'))
         ])
     ],
-    standalone: false
+    standalone: true,
+    imports: [
+        RouterOutlet,
+        OfflineIndicatorComponent,
+        ProgressBarComponent,
+        NotificationToastComponent
+    ]
 })
 export class AppComponent implements OnInit, OnDestroy {
   title = 'frontend';

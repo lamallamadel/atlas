@@ -1,8 +1,15 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { AppointmentStatus } from '../services/appointment-api.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { FocusTrapDirective } from '../directives/focus-trap.directive';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import DatetimePickerComponent from './datetime-picker.component';
+import { NgClass } from '@angular/common';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface AppointmentFormData {
   id?: number;
@@ -28,7 +35,7 @@ export interface AppointmentFormData {
             ])
         ])
     ],
-    standalone: false
+    imports: [FocusTrapDirective, MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, FormsModule, ReactiveFormsModule, DatetimePickerComponent, NgClass, MatDialogActions, MatButton, MatProgressSpinner]
 })
 export class AppointmentFormDialogComponent implements OnInit {
   appointmentForm!: FormGroup;

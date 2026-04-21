@@ -24,7 +24,6 @@ describe('LeadExportDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [LeadExportDialogComponent],
     imports: [CommonModule,
         FormsModule,
         BrowserAnimationsModule,
@@ -37,7 +36,7 @@ describe('LeadExportDialogComponent', () => {
         MatFormFieldModule,
         MatSelectModule,
         MatInputModule,
-        MatProgressBarModule],
+        MatProgressBarModule, LeadExportDialogComponent],
     providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
         LeadApiService,

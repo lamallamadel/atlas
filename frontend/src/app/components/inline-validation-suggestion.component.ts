@@ -1,6 +1,8 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { ValidationSuggestion } from '../services/form-validation.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-inline-validation-suggestion',
@@ -188,7 +190,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
             ])
         ])
     ],
-    standalone: false
+    imports: [MatIcon, MatButton]
 })
 export class InlineValidationSuggestionComponent {
   @Input() suggestion: ValidationSuggestion | null = null;

@@ -2,12 +2,16 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
+import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
+import { BadgeStatusComponent } from '../../components/badge-status.component';
+import { DateFormatPipe } from '../../pipes/date-format.pipe';
+import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 
 @Component({
     selector: 'app-annonce-detail',
     templateUrl: './annonce-detail.component.html',
     styleUrls: ['./annonce-detail.component.css'],
-    standalone: false
+    imports: [LoadingSkeletonComponent, BadgeStatusComponent, DateFormatPipe, PriceFormatPipe]
 })
 export class AnnonceDetailComponent implements OnInit {
   annonce: AnnonceResponse | null = null;

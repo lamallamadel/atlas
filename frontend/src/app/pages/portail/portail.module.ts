@@ -18,18 +18,16 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
-    PortailHomeComponent,
-    RechercheComponent,
-    AnnonceDetailComponent,
-    MentionsLegalesComponent,
-    ConfidentialiteComponent,
-  ],
-  imports: [
-    CommonModule,
-    RouterModule.forChild(routes),
-    FormsModule,
-    ReactiveFormsModule,
-  ]
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes),
+        FormsModule,
+        ReactiveFormsModule,
+        PortailHomeComponent,
+        RechercheComponent,
+        AnnonceDetailComponent,
+        MentionsLegalesComponent,
+        ConfidentialiteComponent,
+    ]
 })
 export class PortailModule {}

@@ -1,4 +1,8 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { MatChip } from '@angular/material/chips';
+import { NgClass } from '@angular/common';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 export type EntityType = 'annonce' | 'dossier' | 'property';
 
@@ -21,7 +25,7 @@ interface StatusConfig {
     templateUrl: './badge-status.component.html',
     styleUrls: ['./badge-status.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatChip, NgClass, MatTooltip, MatIcon]
 })
 export class BadgeStatusComponent {
   @Input() status!: string;

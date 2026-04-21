@@ -28,7 +28,6 @@ describe('AnnonceCreateComponent', () => {
     annonceApiServiceSpy.update.and.returnValue(of(undefined as any));
 
     await TestBed.configureTestingModule({
-    declarations: [AnnonceCreateComponent],
     imports: [RouterTestingModule,
         FormsModule, // required because template uses [(ngModel)] for photo URL input
         ReactiveFormsModule,
@@ -38,7 +37,7 @@ describe('AnnonceCreateComponent', () => {
         MatSelectModule,
         MatIconModule,
         MatButtonModule,
-        NoopAnimationsModule],
+        NoopAnimationsModule, AnnonceCreateComponent],
     providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         {

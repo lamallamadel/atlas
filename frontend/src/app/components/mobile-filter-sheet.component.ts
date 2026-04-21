@@ -1,5 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
 
 export interface MobileFilterData {
   filters: Record<string, unknown>;
@@ -110,7 +117,7 @@ export interface FilterConfig {
       flex: 1;
     }
   `],
-    standalone: false
+    imports: [MatIconButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MatButton]
 })
 export class MobileFilterSheetComponent {
   filters: Record<string, unknown>;

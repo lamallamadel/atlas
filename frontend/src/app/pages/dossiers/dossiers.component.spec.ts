@@ -79,7 +79,6 @@ describe('DossiersComponent', () => {
     }));
 
     await TestBed.configureTestingModule({
-    declarations: [DossiersComponent, GenericTableComponent],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [RouterTestingModule,
         FormsModule,
@@ -99,7 +98,7 @@ describe('DossiersComponent', () => {
         MatSelectModule,
         MatMenuModule,
         MatSnackBarModule,
-        NoopAnimationsModule],
+        NoopAnimationsModule, DossiersComponent, GenericTableComponent],
     providers: [
         { provide: LOCALE_ID, useValue: 'fr-FR' },
         { provide: DossierApiService, useValue: dossierApiServiceSpy },

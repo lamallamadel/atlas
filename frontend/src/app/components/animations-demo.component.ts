@@ -13,6 +13,16 @@ import {
   successState,
   errorState
 } from '../animations';
+import { MatButton } from '@angular/material/button';
+import { AnimatedButtonDirective } from '../directives/animated-button.directive';
+import { MatIcon } from '@angular/material/icon';
+import { LoadingButtonComponent } from './loading-button.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { AnimatedFocusDirective } from '../directives/animated-focus.directive';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatList, MatListItem, MatListItemIcon, MatListItemTitle } from '@angular/material/list';
+import { CustomSpinnerComponent } from './custom-spinner.component';
 
 interface DemoCard {
   id: number;
@@ -296,7 +306,7 @@ interface DemoCard {
         successState,
         errorState
     ],
-    standalone: false
+    imports: [MatButton, AnimatedButtonDirective, MatIcon, LoadingButtonComponent, MatFormField, MatLabel, MatInput, AnimatedFocusDirective, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatCardActions, MatList, MatListItem, MatListItemIcon, MatListItemTitle, CustomSpinnerComponent]
 })
 export class AnimationsDemoComponent {
   isLoading = false;

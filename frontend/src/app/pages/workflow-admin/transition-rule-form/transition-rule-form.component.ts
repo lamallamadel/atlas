@@ -1,15 +1,26 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, TransitionRule, WorkflowNode } from '../models/workflow.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatChipListbox, MatChip, MatChipRemove } from '@angular/material/chips';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-transition-rule-form',
     templateUrl: './transition-rule-form.component.html',
     styleUrls: ['./transition-rule-form.component.css'],
-    standalone: false
+    imports: [MatAccordion, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatTooltip, FormsModule, ReactiveFormsModule, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatFormField, MatLabel, MatInput, MatSuffix, MatChipListbox, MatChip, MatChipRemove, MatSelect, MatOption, MatSlideToggle, MatButton]
 })
 export class TransitionRuleFormComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

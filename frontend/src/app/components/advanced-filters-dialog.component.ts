@@ -1,10 +1,17 @@
 import { Component, Inject, OnInit } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialog, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { AdvancedFilter, FilterField } from './advanced-filters.component';
+import { AdvancedFilter, FilterField, AdvancedFiltersComponent } from './advanced-filters.component';
 import { FilterPreset, FilterPresetRequest, FilterPresetService } from '../services/filter-preset.service';
 import { DossierFilterApiService, DossierFilterRequest } from '../services/dossier-filter-api.service';
 import { DossierStatus } from '../services/dossier-api.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatCheckbox } from '@angular/material/checkbox';
 
 export interface AdvancedFiltersDialogData {
   filterType: string;
@@ -16,7 +23,7 @@ export interface AdvancedFiltersDialogData {
     selector: 'app-advanced-filters-dialog',
     templateUrl: './advanced-filters-dialog.component.html',
     styleUrls: ['./advanced-filters-dialog.component.css'],
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatButton, MatIcon, MatIconButton, AdvancedFiltersComponent, MatDialogActions, MatFormField, MatLabel, MatInput, FormsModule, MatCheckbox]
 })
 export class AdvancedFiltersDialogComponent implements OnInit {
   predefinedPresets: FilterPreset[] = [];

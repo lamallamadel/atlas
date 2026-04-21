@@ -3,6 +3,11 @@ import { Router } from '@angular/router';
 import { NotificationApiService, NotificationResponse } from '../services/notification-api.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface GroupedNotifications {
   date: string;
@@ -14,7 +19,7 @@ interface GroupedNotifications {
     selector: 'app-notification-center',
     templateUrl: './notification-center.component.html',
     styleUrls: ['./notification-center.component.scss'],
-    standalone: false
+    imports: [MatIcon, MatIconButton, MatTooltip, MatButtonToggleGroup, MatButtonToggle, MatButton, MatProgressSpinner]
 })
 export class NotificationCenterComponent implements OnInit, OnDestroy {
   notifications: NotificationResponse[] = [];

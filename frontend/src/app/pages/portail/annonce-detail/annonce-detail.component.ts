@@ -1,13 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PortailService, Listing } from '../../../services/portail.service';
 import { HttpClient } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'app-annonce-detail',
     templateUrl: './annonce-detail.component.html',
     styleUrls: ['./annonce-detail.component.scss'],
-    standalone: false
+    imports: [RouterLink, FormsModule, DecimalPipe]
 })
 export class AnnonceDetailComponent implements OnInit {
 

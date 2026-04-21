@@ -22,7 +22,6 @@ describe('ReportsDashboardComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    declarations: [ReportsDashboardComponent],
     imports: [FormsModule,
         MatCardModule,
         MatFormFieldModule,
@@ -34,7 +33,7 @@ describe('ReportsDashboardComponent', () => {
         MatNativeDateModule,
         MatIconModule,
         BrowserAnimationsModule,
-        NgChartsModule],
+        NgChartsModule, ReportsDashboardComponent],
     providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     fixture = TestBed.createComponent(ReportsDashboardComponent);

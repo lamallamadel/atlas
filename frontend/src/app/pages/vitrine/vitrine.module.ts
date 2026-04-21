@@ -20,19 +20,17 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
-    VitrineHomeComponent,
-    AgencesComponent,
-    PromoTeursComponent,
-    TarifsComponent,
-    DemoComponent,
-    ContactComponent,
-  ],
-  imports: [
-    CommonModule,
-    RouterModule.forChild(routes),
-    FormsModule,
-    ReactiveFormsModule,
-  ]
+    imports: [
+        CommonModule,
+        RouterModule.forChild(routes),
+        FormsModule,
+        ReactiveFormsModule,
+        VitrineHomeComponent,
+        AgencesComponent,
+        PromoTeursComponent,
+        TarifsComponent,
+        DemoComponent,
+        ContactComponent,
+    ]
 })
 export class VitrineModule {}

@@ -1,6 +1,14 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatChipListbox, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface WhatsAppTemplate {
   id: string;
@@ -20,7 +28,7 @@ export interface MessageSendRequest {
     selector: 'app-whatsapp-message-input',
     templateUrl: './whatsapp-message-input.component.html',
     styleUrls: ['./whatsapp-message-input.component.css'],
-    standalone: false
+    imports: [MatIcon, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatIconButton, MatTooltip, MatFabButton, MatProgressSpinner]
 })
 export class WhatsappMessageInputComponent {
   @Input() templates: WhatsAppTemplate[] = [];

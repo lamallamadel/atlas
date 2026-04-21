@@ -9,24 +9,23 @@ describe('BulkOperationDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [BulkOperationDialogComponent],
-      imports: [MaterialTestingModule],
-      providers: [
+    imports: [MaterialTestingModule, BulkOperationDialogComponent],
+    providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
         {
-          provide: MAT_DIALOG_DATA,
-          useValue: {
-            title: 'Test',
-            message: 'Test',
-            successCount: 0,
-            failureCount: 0,
-            totalCount: 1,
-            errors: [],
-            inProgress: true
-          }
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+                title: 'Test',
+                message: 'Test',
+                successCount: 0,
+                failureCount: 0,
+                totalCount: 1,
+                errors: [],
+                inProgress: true
+            }
         }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(BulkOperationDialogComponent);
     component = fixture.componentInstance;

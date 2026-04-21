@@ -1,17 +1,22 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime } from 'rxjs/operators';
 import { FormValidationService, ValidationSuggestion } from '../services/form-validation.service';
 import { FormDraftService } from '../services/form-draft.service';
 import { FormStep } from './form-progress-indicator.component';
 import { ComponentCanDeactivate } from '../guards/form-unsaved-changes.guard';
+import { NgClass, DatePipe } from '@angular/common';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { InlineValidationSuggestionComponent } from './inline-validation-suggestion.component';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-enhanced-form-example',
     templateUrl: './enhanced-form-example.component.html',
     styleUrls: ['./enhanced-form-example.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, NgClass, MatIcon, MatProgressSpinner, InlineValidationSuggestionComponent, MatButton, DatePipe]
 })
 export class EnhancedFormExampleComponent implements OnInit, OnDestroy, ComponentCanDeactivate {
   form!: FormGroup;

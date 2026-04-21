@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
 
 
-import { FullCalendarComponent } from '@fullcalendar/angular';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
 import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg, EventChangeArg } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -17,6 +17,15 @@ import { Subject, takeUntil } from 'rxjs';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { CalendarListViewComponent } from './calendar-list-view.component';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface CalendarEvent extends EventInput {
   id: string;
@@ -39,7 +48,7 @@ interface CalendarEvent extends EventInput {
     selector: 'app-calendar-view',
     templateUrl: './calendar-view.component.html',
     styleUrls: ['./calendar-view.component.css'],
-    standalone: false
+    imports: [MatCard, MatCardHeader, MatCardTitle, MatIconButton, MatTooltip, MatIcon, MatButton, MatCardContent, MatFormField, MatLabel, MatSelect, MatOption, FullCalendarModule, CalendarListViewComponent, MatProgressSpinner]
 })
 export class CalendarViewComponent implements OnInit, OnDestroy {
   @ViewChild('calendar') calendarComponent: any;

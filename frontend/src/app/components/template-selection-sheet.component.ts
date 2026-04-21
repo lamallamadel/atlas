@@ -1,6 +1,12 @@
 import { Component, Inject } from '@angular/core';
 import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
 import { WhatsAppTemplate } from './whatsapp-message-input.component';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatPrefix, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatSelectionList, MatListOption } from '@angular/material/list';
 
 export interface TemplateSelectionData {
   templates: WhatsAppTemplate[];
@@ -11,7 +17,7 @@ export interface TemplateSelectionData {
     selector: 'app-template-selection-sheet',
     templateUrl: './template-selection-sheet.component.html',
     styleUrls: ['./template-selection-sheet.component.css'],
-    standalone: false
+    imports: [MatIconButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatSuffix, MatSelectionList, MatListOption, MatButton]
 })
 export class TemplateSelectionSheetComponent {
   searchQuery = '';

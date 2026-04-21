@@ -4,14 +4,15 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { MessageApiService, MessageChannel, MessageDirection, MessageResponse, MessageCreateRequest } from '../services/message-api.service';
 import { OfflineMessageQueueService } from '../services/offline-message-queue.service';
-import { WhatsAppTemplate } from './whatsapp-message-input.component';
-import { MessageAction } from './whatsapp-thread.component';
+import { WhatsAppTemplate, WhatsappMessageInputComponent } from './whatsapp-message-input.component';
+import { MessageAction, WhatsappThreadComponent } from './whatsapp-thread.component';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 @Component({
     selector: 'app-whatsapp-messaging-container',
     templateUrl: './whatsapp-messaging-container.component.html',
     styleUrls: ['./whatsapp-messaging-container.component.css'],
-    standalone: false
+    imports: [MatProgressBar, WhatsappThreadComponent, WhatsappMessageInputComponent]
 })
 export class WhatsappMessagingContainerComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

@@ -23,9 +23,9 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
 import { LayoutModule } from '@angular/cdk/layout';
 
-import { DossierSharedModule } from './dossier-shared.module';
-import { SharedPipesModule } from '../../shared/shared-pipes.module';
-import { SharedComponentsModule } from '../../shared/shared-components.module';
+
+
+
 
 import { DossiersComponent } from './dossiers.component';
 import { DossierDetailComponent } from './dossier-detail.component';
@@ -40,22 +40,11 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
-    DossiersComponent,
-    DossierDetailComponent,
-    DossierCreateComponent,
-    MessagingTabComponent,
-    OutboundMessageFormComponent,
-    OutboundMessageListComponent
-  ],
-  imports: [
+    imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
-    DossierSharedModule,
-    SharedPipesModule,
-    SharedComponentsModule,
     MatTabsModule,
     MatCardModule,
     MatExpansionModule,
@@ -75,7 +64,13 @@ const routes: Routes = [
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatBottomSheetModule,
-    LayoutModule
-  ]
+    LayoutModule,
+    DossiersComponent,
+    DossierDetailComponent,
+    DossierCreateComponent,
+    MessagingTabComponent,
+    OutboundMessageFormComponent,
+    OutboundMessageListComponent
+]
 })
 export class DossiersModule {}

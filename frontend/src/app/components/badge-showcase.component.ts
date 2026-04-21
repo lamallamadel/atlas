@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
-import { BadgeVariant, BadgeSize, BadgeColor } from './badge.component';
+import { BadgeVariant, BadgeSize, BadgeColor, BadgeComponent } from './badge.component';
+import { UpperCasePipe, TitleCasePipe } from '@angular/common';
 
 interface BadgeExample {
   label: string;
@@ -17,7 +18,7 @@ interface BadgeExample {
     selector: 'app-badge-showcase',
     templateUrl: './badge-showcase.component.html',
     styleUrls: ['./badge-showcase.component.css'],
-    standalone: false
+    imports: [BadgeComponent, UpperCasePipe, TitleCasePipe]
 })
 export class BadgeShowcaseComponent {
   variants: BadgeVariant[] = ['solid', 'outline', 'soft'];

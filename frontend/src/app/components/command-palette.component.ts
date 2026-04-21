@@ -8,6 +8,11 @@ import { ThemeService } from '../services/theme.service';
 import { AiAgentService } from '../services/ai-agent.service';
 import { Observable, Subject, debounceTime, distinctUntilChanged, switchMap, of, takeUntil, filter } from 'rxjs';
 import { DossierCreateDialogComponent } from '../pages/dossiers/dossier-create-dialog.component';
+import { FocusTrapDirective } from '../directives/focus-trap.directive';
+import { MatIcon } from '@angular/material/icon';
+import { FormsModule } from '@angular/forms';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { AsyncPipe } from '@angular/common';
 
 interface CommandItem {
   id: string;
@@ -40,7 +45,7 @@ interface FuzzyResult {
     selector: 'app-command-palette',
     templateUrl: './command-palette.component.html',
     styleUrls: ['./command-palette.component.css'],
-    standalone: false
+    imports: [FocusTrapDirective, MatIcon, FormsModule, MatProgressSpinner, AsyncPipe]
 })
 export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('commandInput') commandInput!: ElementRef;

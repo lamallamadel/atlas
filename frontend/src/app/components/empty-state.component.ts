@@ -1,6 +1,7 @@
 import { Component, Input, ChangeDetectionStrategy, OnInit, OnChanges } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { EmptyStateIllustrationsService, EmptyStateContext } from '../services/empty-state-illustrations.service';
+import { MatIcon } from '@angular/material/icon';
 
 export interface ActionButtonConfig {
   label: string;
@@ -18,7 +19,7 @@ export interface HelpLinkConfig {
     templateUrl: './empty-state.component.html',
     styleUrls: ['./empty-state.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatIcon]
 })
 export class EmptyStateComponent implements OnInit, OnChanges {
   // Legacy inputs (for backwards compatibility)

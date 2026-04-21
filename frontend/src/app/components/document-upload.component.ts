@@ -2,6 +2,10 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { HttpEventType } from '@angular/common/http';
 import { DocumentApiService, DocumentCategory, DocumentResponse } from '../services/document-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 export interface UploadProgress {
   file: File;
@@ -16,7 +20,7 @@ export interface UploadProgress {
     selector: 'app-document-upload',
     templateUrl: './document-upload.component.html',
     styleUrls: ['./document-upload.component.css'],
-    standalone: false
+    imports: [FormsModule, MatIcon, MatButton, MatIconButton, MatProgressBar]
 })
 export class DocumentUploadComponent {
   @Input() dossierId!: number;

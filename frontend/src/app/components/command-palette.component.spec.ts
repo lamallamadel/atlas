@@ -52,22 +52,22 @@ describe('CommandPaletteComponent', () => {
     const mockAiAgentService = jasmine.createSpyObj('AiAgentService', ['openPanel']);
 
     await TestBed.configureTestingModule({
-      declarations: [CommandPaletteComponent],
-      imports: [
+    imports: [
         MatIconModule,
         MatProgressSpinnerModule,
         FormsModule,
-        BrowserAnimationsModule
-      ],
-      providers: [
+        BrowserAnimationsModule,
+        CommandPaletteComponent
+    ],
+    providers: [
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         { provide: KeyboardShortcutService, useValue: mockKeyboardService },
         { provide: SearchApiService, useValue: mockSearchService },
         { provide: RecentNavigationService, useValue: mockRecentNavService },
         { provide: AiAgentService, useValue: mockAiAgentService }
-      ]
-    })
+    ]
+})
       .compileComponents();
 
     fixture = TestBed.createComponent(CommandPaletteComponent);

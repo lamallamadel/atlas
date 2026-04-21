@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-agences',
     templateUrl: './agences.component.html',
     styleUrls: ['./agences.component.scss'],
-    standalone: false
+    imports: [RouterLink]
 })
 export class AgencesComponent {
   readonly features = [

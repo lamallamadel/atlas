@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, AfterViewChecked, ChangeDetectorRef, HostListener } from '@angular/core';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
+import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
 import { Subject, interval } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { 
@@ -23,6 +23,15 @@ import {
   ConsentementResponse 
 } from '../services/consentement-api.service';
 import { TemplateSelectionSheetComponent } from './template-selection-sheet.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatChipListbox, MatChip, MatChipAvatar, MatChipRemove } from '@angular/material/chips';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { CdkTextareaAutosize } from '@angular/cdk/text-field';
 
 export interface MessageAttachment {
   file: File;
@@ -35,7 +44,7 @@ export interface MessageAttachment {
     selector: 'app-whatsapp-messaging-ui',
     templateUrl: './whatsapp-messaging-ui.component.html',
     styleUrls: ['./whatsapp-messaging-ui.component.css'],
-    standalone: false
+    imports: [MatIcon, MatIconButton, MatTooltip, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, MatProgressSpinner, CdkVirtualForOf, MatChipListbox, MatChip, MatChipAvatar, MatChipRemove, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, CdkTextareaAutosize, MatFabButton]
 })
 export class WhatsappMessagingUiComponent implements OnInit, OnDestroy, AfterViewChecked {
   @Input() dossierId!: number;

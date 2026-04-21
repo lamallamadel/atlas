@@ -17,8 +17,7 @@ export interface ContextualHint {
 
 @Directive({
     selector: '[appContextualHint]',
-    providers: [MatTooltip],
-    standalone: false
+    providers: [MatTooltip]
 })
 export class ContextualHintDirective implements OnInit, OnDestroy {
   @Input() appContextualHint!: ContextualHint | string;

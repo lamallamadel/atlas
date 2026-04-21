@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
@@ -17,6 +17,26 @@ import { RecentNavigationService } from '../../services/recent-navigation.servic
 import { CollaborationService, CollaborationEdit } from '../../services/collaboration.service';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
+import { CollaborationPresenceComponent } from '../../components/collaboration-presence.component';
+import { BadgeStatusComponent } from '../../components/badge-status.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { FormsModule } from '@angular/forms';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { EmptyStateComponent } from '../../components/empty-state.component';
+import { WhatsappMessagingContainerComponent } from '../../components/whatsapp-messaging-container.component';
+import { MatAnchor } from '@angular/material/button';
+import { MessagingTabComponent } from './messaging-tab.component';
+import { DocumentListComponent } from '../../components/document-list.component';
+import { ActivityTimelineComponent } from '../../components/activity-timeline.component';
+import { CollaborationActivityStreamComponent } from '../../components/collaboration-activity-stream.component';
+import { CollaborationCursorComponent } from '../../components/collaboration-cursor.component';
+import { CollaborationFilterShareComponent } from '../../components/collaboration-filter-share.component';
+import { QuickActionsComponent } from '../../components/quick-actions.component';
+import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
 
 
@@ -52,7 +72,7 @@ export interface WhatsAppTemplate {
     selector: 'app-dossier-detail',
     templateUrl: './dossier-detail.component.html',
     styleUrls: ['./dossier-detail.component.css'],
-    standalone: false
+    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, MatTooltip, FormsModule, MatTabGroup, MatTab, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, EmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
 })
 export class DossierDetailComponent implements OnInit, OnDestroy {
   dossier: DossierResponse | null = null;

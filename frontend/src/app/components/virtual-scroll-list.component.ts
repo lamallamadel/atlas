@@ -1,11 +1,14 @@
 import { Component, Input, Output, EventEmitter, TemplateRef, ChangeDetectionStrategy } from '@angular/core';
+import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
+import { NgTemplateOutlet } from '@angular/common';
+import { LoadingSkeletonComponent } from './loading-skeleton.component';
 
 @Component({
     selector: 'app-virtual-scroll-list',
     templateUrl: './virtual-scroll-list.component.html',
     styleUrls: ['./virtual-scroll-list.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, NgTemplateOutlet, CdkVirtualForOf, LoadingSkeletonComponent]
 })
 export class VirtualScrollListComponent {
   @Input() items: any[] = [];

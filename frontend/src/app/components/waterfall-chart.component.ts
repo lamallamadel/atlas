@@ -136,8 +136,7 @@ export interface WaterfallEntry {
     .legend-item.positive .legend-dot { background: #27ae60; }
     .legend-item.negative .legend-dot { background: #e74c3c; }
     .legend-item.total .legend-dot    { background: #2c5aa0; }
-  `],
-    standalone: false
+  `]
 })
 export class WaterfallChartComponent implements AfterViewInit, OnChanges, OnDestroy {
   @Input() entries: WaterfallEntry[] = [];

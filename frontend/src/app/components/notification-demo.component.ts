@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
 import { NotificationService } from '../services/notification.service';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-notification-demo',
@@ -167,7 +169,7 @@ import { NotificationService } from '../services/notification.service';
       }
     }
   `],
-    standalone: false
+    imports: [MatButton, MatIcon]
 })
 export class NotificationDemoComponent {
   queueLength = 0;

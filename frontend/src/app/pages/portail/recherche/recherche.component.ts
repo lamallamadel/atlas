@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { PortailService, Listing, FilterState } from '../../../services/portail.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-recherche',
     templateUrl: './recherche.component.html',
     styleUrls: ['./recherche.component.scss'],
-    standalone: false
+    imports: [FormsModule]
 })
 export class RechercheComponent implements OnInit {
 

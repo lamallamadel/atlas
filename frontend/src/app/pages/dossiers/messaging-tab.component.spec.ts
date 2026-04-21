@@ -22,18 +22,15 @@ describe('MessagingTabComponent', () => {
     mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['retry', 'listTemplates', 'create', 'list']);
 
     await TestBed.configureTestingModule({
-      declarations: [ 
-        MessagingTabComponent,
+    imports: [MaterialTestingModule, MessagingTabComponent,
         OutboundMessageFormComponent,
-        OutboundMessageListComponent
-      ],
-      imports: [ MaterialTestingModule ],
-      providers: [
+        OutboundMessageListComponent],
+    providers: [
         { provide: MatDialog, useValue: mockDialog },
         { provide: MatSnackBar, useValue: mockSnackBar },
         { provide: OutboundMessageApiService, useValue: mockOutboundMessageService }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(MessagingTabComponent);

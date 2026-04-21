@@ -23,7 +23,18 @@ import { FilterPresetService } from '../../services/filter-preset.service';
 
 @Component({
     selector: 'app-generic-table', template: '',
-    standalone: false
+    imports: [FormsModule,
+        RouterTestingModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatIconModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatMenuModule,
+        MatCardModule,
+        MatDialogModule]
 })
 class GenericTableStubComponent {
   @Input() columns: any;
@@ -40,7 +51,18 @@ class GenericTableStubComponent {
 
 @Component({
     selector: 'app-empty-state', template: '',
-    standalone: false
+    imports: [FormsModule,
+        RouterTestingModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatIconModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatMenuModule,
+        MatCardModule,
+        MatDialogModule]
 })
 class EmptyStateStubComponent {
   @Input() message = '';
@@ -53,7 +75,18 @@ class EmptyStateStubComponent {
 
 @Component({
     selector: 'app-loading-skeleton', template: '',
-    standalone: false
+    imports: [FormsModule,
+        RouterTestingModule,
+        MatExpansionModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatIconModule,
+        MatButtonModule,
+        MatChipsModule,
+        MatMenuModule,
+        MatCardModule,
+        MatDialogModule]
 })
 class LoadingSkeletonStubComponent {
   @Input() variant = '';
@@ -120,15 +153,9 @@ describe('AnnoncesComponent', () => {
     filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
 
     await TestBed.configureTestingModule({
-      declarations: [
-        AnnoncesComponent, 
-        GenericTableStubComponent, 
-        EmptyStateStubComponent,
-        LoadingSkeletonStubComponent
-      ],
-      imports: [
-        FormsModule, 
-        RouterTestingModule, 
+    imports: [
+        FormsModule,
+        RouterTestingModule,
         NoopAnimationsModule,
         MatExpansionModule,
         MatFormFieldModule,
@@ -139,15 +166,19 @@ describe('AnnoncesComponent', () => {
         MatChipsModule,
         MatMenuModule,
         MatCardModule,
-        MatDialogModule
-      ],
-      providers: [
+        MatDialogModule,
+        AnnoncesComponent,
+        GenericTableStubComponent,
+        EmptyStateStubComponent,
+        LoadingSkeletonStubComponent
+    ],
+    providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
         { provide: MatBottomSheet, useValue: bottomSheetSpy },
         { provide: BreakpointObserver, useValue: breakpointObserverSpy }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     annonceApiService = TestBed.inject(AnnonceApiService) as jasmine.SpyObj<AnnonceApiService>;
     filterPresetService = TestBed.inject(FilterPresetService) as jasmine.SpyObj<FilterPresetService>;

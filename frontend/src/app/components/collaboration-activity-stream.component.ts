@@ -152,8 +152,7 @@ import { Subscription } from 'rxjs';
         opacity: 0.7;
       }
     }
-  `],
-    standalone: false
+  `]
 })
 export class CollaborationActivityStreamComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

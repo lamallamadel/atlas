@@ -32,12 +32,11 @@ describe('AiAgentPanelComponent', () => {
         spy['_panelOpen$'] = mockPanelOpen$;
 
         await TestBed.configureTestingModule({
-            declarations: [AiAgentPanelComponent],
-            imports: [FormsModule, MatIconModule, MatTooltipModule, NoopAnimationsModule],
-            providers: [
-                { provide: AiAgentService, useValue: spy }
-            ]
-        }).compileComponents();
+    imports: [FormsModule, MatIconModule, MatTooltipModule, NoopAnimationsModule, AiAgentPanelComponent],
+    providers: [
+        { provide: AiAgentService, useValue: spy }
+    ]
+}).compileComponents();
 
         fixture = TestBed.createComponent(AiAgentPanelComponent);
         component = fixture.componentInstance;

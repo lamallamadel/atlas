@@ -1,4 +1,5 @@
 import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 
 export type BadgeVariant = 'solid' | 'outline' | 'soft';
 export type BadgeSize = 'sm' | 'md' | 'lg';
@@ -23,7 +24,7 @@ export type BadgeColor =
     templateUrl: './badge.component.html',
     styleUrls: ['./badge.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatIcon]
 })
 export class BadgeComponent {
   @Input() variant: BadgeVariant = 'soft';

@@ -22,7 +22,6 @@ describe('LeadImportDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [LeadImportDialogComponent],
     imports: [CommonModule,
         FormsModule,
         MatDialogModule,
@@ -33,7 +32,7 @@ describe('LeadImportDialogComponent', () => {
         MatProgressSpinnerModule,
         MatTableModule,
         MatRadioModule,
-        NoopAnimationsModule],
+        NoopAnimationsModule, LeadImportDialogComponent],
     providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
         LeadApiService,

@@ -13,12 +13,25 @@ import {
   LeadSourceData,
   ConversionFunnel
 } from '../services/reporting-api.service';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular/material/datepicker';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { LoadingSkeletonComponent } from './loading-skeleton.component';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { NgChartsModule } from 'ng2-charts';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
 
 @Component({
     selector: 'app-reports-dashboard',
     templateUrl: './reports-dashboard.component.html',
     styleUrls: ['./reports-dashboard.component.css'],
-    standalone: false
+    imports: [MatFormField, MatLabel, MatInput, MatDatepickerInput, FormsModule, MatDatepickerToggle, MatSuffix, MatDatepicker, MatButton, MatIcon, MatProgressSpinner, LoadingSkeletonComponent, MatCard, MatCardContent, MatCardHeader, MatCardTitle, MatTooltip, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, NgChartsModule, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow]
 })
 export class ReportsDashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('conversionFunnelCanvas') conversionFunnelCanvas!: ElementRef<HTMLCanvasElement>;

@@ -12,11 +12,11 @@ describe('OutboundMessageListComponent', () => {
     mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['list']);
 
     await TestBed.configureTestingModule({
-      declarations: [ OutboundMessageListComponent ],
-      providers: [
+    imports: [OutboundMessageListComponent],
+    providers: [
         { provide: OutboundMessageApiService, useValue: mockOutboundMessageService }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(OutboundMessageListComponent);

@@ -3,14 +3,11 @@ import { Component, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { InfiniteScrollDirective } from './infinite-scroll.directive';
 
-@Component({
-    template: `
+@Component({ template: `
     <div appInfiniteScroll (scrolled)="onScrolled()" style="height: 200px; overflow-y: auto;">
       <div style="height: 1000px;">Content</div>
     </div>
-  `,
-    standalone: false
-})
+  ` })
 class TestComponent {
   scrolledCount = 0;
 
@@ -26,8 +23,8 @@ describe('InfiniteScrollDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [InfiniteScrollDirective, TestComponent]
-    });
+    imports: [InfiniteScrollDirective, TestComponent]
+});
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;

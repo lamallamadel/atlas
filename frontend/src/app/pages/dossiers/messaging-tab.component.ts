@@ -3,12 +3,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { OutboundMessageApiService, OutboundMessageResponse } from '../../services/outbound-message-api.service';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
+import { OutboundMessageFormComponent } from './outbound-message-form.component';
+import { OutboundMessageListComponent } from './outbound-message-list.component';
 
 @Component({
     selector: 'app-messaging-tab',
     templateUrl: './messaging-tab.component.html',
     styleUrls: ['./messaging-tab.component.css'],
-    standalone: false
+    imports: [OutboundMessageFormComponent, OutboundMessageListComponent]
 })
 export class MessagingTabComponent implements OnInit {
   @Input() dossierId!: number;

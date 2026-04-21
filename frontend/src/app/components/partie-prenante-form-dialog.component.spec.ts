@@ -10,16 +10,15 @@ describe('PartiePrenanteFormDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [PartiePrenanteFormDialogComponent],
-      imports: [MaterialTestingModule],
-      providers: [
+    imports: [MaterialTestingModule, PartiePrenanteFormDialogComponent],
+    providers: [
         { provide: MatDialogRef, useValue: dialogRef },
         {
-          provide: MAT_DIALOG_DATA,
-          useValue: { mode: 'add', dossierId: 1, party: null }
+            provide: MAT_DIALOG_DATA,
+            useValue: { mode: 'add', dossierId: 1, party: null }
         }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(PartiePrenanteFormDialogComponent);
     component = fixture.componentInstance;

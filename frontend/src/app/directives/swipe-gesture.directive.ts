@@ -7,10 +7,7 @@ export interface SwipeEvent {
   target: HTMLElement;
 }
 
-@Directive({
-    selector: '[appSwipeGesture]',
-    standalone: false
-})
+@Directive({ selector: '[appSwipeGesture]' })
 export class SwipeGestureDirective {
   @Input() swipeThreshold = 50;
   @Input() swipeVelocityThreshold = 0.3;

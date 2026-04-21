@@ -9,6 +9,17 @@ import { CalendarOptions, EventInput } from '@fullcalendar/core';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { staggerList, cardStagger } from '../animations';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { TaskCardComponent } from './task-card.component';
+import { EmptyStateComponent } from './empty-state.component';
+import { FullCalendarModule } from '@fullcalendar/angular';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 enum ViewMode {
   LIST = 'list',
@@ -32,7 +43,7 @@ enum StatusFilter {
     templateUrl: './task-list.component.html',
     styleUrls: ['./task-list.component.css'],
     animations: [staggerList, cardStagger],
-    standalone: false
+    imports: [MatButton, MatIcon, MatButtonToggleGroup, FormsModule, MatButtonToggle, MatFormField, MatLabel, MatSelect, MatOption, TaskCardComponent, EmptyStateComponent, FullCalendarModule, MatProgressSpinner]
 })
 export class TaskListComponent implements OnInit {
   tasks: TaskResponse[] = [];

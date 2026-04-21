@@ -1,4 +1,5 @@
 import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+import { NgStyle } from '@angular/common';
 
 export type LogoVariant = 'horizontal' | 'vertical' | 'icon';
 export type LogoTheme = 'default' | 'light' | 'dark' | 'mono' | 'auto';
@@ -8,7 +9,7 @@ export type LogoTheme = 'default' | 'light' | 'dark' | 'mono' | 'auto';
     templateUrl: './logo.component.html',
     styleUrls: ['./logo.component.css'],
     encapsulation: ViewEncapsulation.None,
-    standalone: false
+    imports: [NgStyle]
 })
 export class LogoComponent implements OnInit {
   @Input() variant: LogoVariant = 'horizontal';

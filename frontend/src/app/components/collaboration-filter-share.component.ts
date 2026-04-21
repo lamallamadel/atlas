@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CollaborationService, SharedFilterPreset } from '../services/collaboration.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subscription } from 'rxjs';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-collaboration-filter-share',
@@ -240,7 +241,7 @@ import { Subscription } from 'rxjs';
       font-size: 16px;
     }
   `],
-    standalone: false
+    imports: [FormsModule]
 })
 export class CollaborationFilterShareComponent implements OnInit, OnDestroy {
   sharedFilters: SharedFilterPreset[] = [];

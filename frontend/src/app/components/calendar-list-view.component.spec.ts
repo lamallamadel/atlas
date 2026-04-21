@@ -19,14 +19,13 @@ describe('CalendarListViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [CalendarListViewComponent],
     imports: [MatDialogModule,
         MatIconModule,
         MatChipsModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
         MatButtonModule,
-        LayoutModule],
+        LayoutModule, CalendarListViewComponent],
     providers: [
         {
             provide: AppointmentApiService,

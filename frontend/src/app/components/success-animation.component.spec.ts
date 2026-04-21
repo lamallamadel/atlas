@@ -8,9 +8,8 @@ describe('SuccessAnimationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ SuccessAnimationComponent ],
-      imports: [ BrowserAnimationsModule ]
-    })
+    imports: [BrowserAnimationsModule, SuccessAnimationComponent]
+})
     .compileComponents();
   });
 

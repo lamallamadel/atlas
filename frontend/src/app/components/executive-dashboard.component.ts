@@ -2,6 +2,12 @@ import { Component, OnInit } from '@angular/core';
 import { ReportingApiService, AnalyticsData } from '../services/reporting-api.service';
 import { PredictiveAnalyticsService, PipelineForecast } from '../services/predictive-analytics.service';
 import { ChartConfiguration, ChartOptions } from 'chart.js';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { NgChartsModule } from 'ng2-charts';
+import { MatDivider } from '@angular/material/list';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface ExecutiveKPI {
   label: string;
@@ -16,7 +22,7 @@ interface ExecutiveKPI {
     selector: 'app-executive-dashboard',
     templateUrl: './executive-dashboard.component.html',
     styleUrls: ['./executive-dashboard.component.scss'],
-    standalone: false
+    imports: [MatButton, MatIcon, MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, NgChartsModule, MatDivider, MatProgressSpinner]
 })
 export class ExecutiveDashboardComponent implements OnInit {
   loading = false;

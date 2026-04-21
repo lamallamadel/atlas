@@ -8,9 +8,8 @@ describe('ActivityTimelineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ActivityTimelineComponent],
-      imports: [MaterialTestingModule]
-    }).compileComponents();
+    imports: [MaterialTestingModule, ActivityTimelineComponent]
+}).compileComponents();
 
     fixture = TestBed.createComponent(ActivityTimelineComponent);
     component = fixture.componentInstance;

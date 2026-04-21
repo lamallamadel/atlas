@@ -5,12 +5,23 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { TemplateApiService } from '../services/template-api.service';
 import { WhatsAppTemplate, TemplateStatus } from '../models/template.model';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatPrefix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatCardActions } from '@angular/material/card';
+import { MatChip } from '@angular/material/chips';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-template-library',
     templateUrl: './template-library.component.html',
     styleUrls: ['./template-library.component.css'],
-    standalone: false
+    imports: [MatButton, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatPrefix, MatButtonToggleGroup, MatButtonToggle, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardSubtitle, MatCardContent, MatChip, MatCardActions, MatMenuTrigger, MatMenu, MatMenuItem, MatProgressSpinner, DatePipe]
 })
 export class TemplateLibraryComponent implements OnInit, OnDestroy {
   templates: WhatsAppTemplate[] = [];

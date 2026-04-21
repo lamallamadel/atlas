@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-tarifs',
     templateUrl: './tarifs.component.html',
     styleUrls: ['./tarifs.component.scss'],
-    standalone: false
+    imports: [RouterLink]
 })
 export class TarifsComponent {
   annual = false;

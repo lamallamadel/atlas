@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { MatDialog } from '@angular/material/dialog';
@@ -7,8 +7,8 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { DossierApiService, DossierResponse, DossierStatus, Page } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
-import { ColumnConfig, RowAction, PaginationData } from '../../components/generic-table.component';
-import { ActionButtonConfig } from '../../components/empty-state.component';
+import { ColumnConfig, RowAction, PaginationData, GenericTableComponent } from '../../components/generic-table.component';
+import { ActionButtonConfig, EmptyStateComponent } from '../../components/empty-state.component';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
@@ -16,7 +16,7 @@ import { FilterPresetService, FilterPreset } from '../../services/filter-preset.
 import { UserPreferencesService } from '../../services/user-preferences.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
 import { MobileActionSheetComponent, MobileActionSheetData, MobileAction } from '../../components/mobile-action-sheet.component';
-import { DossierAction } from '../../components/mobile-dossier-card.component';
+import { DossierAction, MobileDossierCardComponent } from '../../components/mobile-dossier-card.component';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { LeadImportDialogComponent } from '../../components/lead-import-dialog.component';
@@ -29,6 +29,21 @@ import { DossierFilterApiService, DossierFilterRequest, FilterCondition } from '
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatSelect } from '@angular/material/select';
+import { MatOption, MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/list';
+import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
+import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
+import { KanbanBoardComponent } from '../../components/kanban-board.component';
+import { AsyncPipe } from '@angular/common';
 
 interface AppliedFilter {
   key: string;
@@ -42,7 +57,7 @@ interface AppliedFilter {
     templateUrl: './dossiers.component.html',
     styleUrls: ['./dossiers.component.css'],
     animations: [listStaggerAnimation, itemAnimation],
-    standalone: false
+    imports: [MatButtonToggleGroup, MatButtonToggle, MatIcon, MatButton, MatCard, MatCardContent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatSuffix, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatSelect, MatOption, MatAutocompleteTrigger, MatAutocomplete, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider, MatIconButton, MatChipSet, MatChip, MatChipRemove, SkeletonLoaderComponent, EmptyStateComponent, GenericTableComponent, KanbanBoardComponent, MobileDossierCardComponent, AsyncPipe]
 })
 export class DossiersComponent implements OnInit {
   dossiers: DossierResponse[] = [];

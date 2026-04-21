@@ -15,13 +15,12 @@ describe('AppointmentFormDialogComponent', () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
 
     await TestBed.configureTestingModule({
-      declarations: [AppointmentFormDialogComponent, DatetimePickerComponent],
-      imports: [MaterialTestingModule],
-      providers: [
+    imports: [MaterialTestingModule, AppointmentFormDialogComponent, DatetimePickerComponent],
+    providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(AppointmentFormDialogComponent);
     component = fixture.componentInstance;

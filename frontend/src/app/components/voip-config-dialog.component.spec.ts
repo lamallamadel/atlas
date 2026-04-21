@@ -27,22 +27,22 @@ describe('VoipConfigDialogComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-      declarations: [VoipConfigDialogComponent],
-      imports: [
+    imports: [
         NoopAnimationsModule,
         FormsModule,
         MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
         MatSelectModule,
-        MatSlideToggleModule
-      ],
-      providers: [
+        MatSlideToggleModule,
+        VoipConfigDialogComponent
+    ],
+    providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: VoipService, useValue: mockVoipService },
         { provide: MAT_DIALOG_DATA, useValue: null }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(VoipConfigDialogComponent);
     component = fixture.componentInstance;

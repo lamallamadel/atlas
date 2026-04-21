@@ -18,7 +18,8 @@ import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
 @Component({
     selector: 'app-badge-status', template: '',
-    standalone: false
+    imports: [MaterialTestingModule // centralized: animations + forms + material + http testing
+    ]
 })
 class BadgeStatusStubComponent {
   @Input() status: any;
@@ -161,11 +162,12 @@ describe('DossierDetailComponent', () => {
     };
 
     await TestBed.configureTestingModule({
-      declarations: [DossierDetailComponent, BadgeStatusStubComponent, PhoneFormatPipe],
-      imports: [
+    imports: [
         MaterialTestingModule // centralized: animations + forms + material + http testing
-      ],
-      providers: [
+        ,
+        DossierDetailComponent, BadgeStatusStubComponent, PhoneFormatPipe
+    ],
+    providers: [
         { provide: DossierApiService, useValue: dossierApiService },
         { provide: PartiePrenanteApiService, useValue: partiePrenanteApiService },
         { provide: MessageApiService, useValue: messageApiService },
@@ -177,10 +179,10 @@ describe('DossierDetailComponent', () => {
         { provide: MatSnackBar, useValue: snackBar },
         { provide: MatDialog, useValue: dialog },
         { provide: RecentNavigationService, useValue: jasmine.createSpyObj('RecentNavigationService', ['addRecentItem']) }
-      ],
-      // If more unknown components appear in template, this prevents NG0304 noise.
-      schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
+    ],
+    // If more unknown components appear in template, this prevents NG0304 noise.
+    schemas: [NO_ERRORS_SCHEMA]
+}).compileComponents();
 
     fixture = TestBed.createComponent(DossierDetailComponent);
     component = fixture.componentInstance;

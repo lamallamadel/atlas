@@ -10,13 +10,13 @@ describe('BadgeStatusComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ BadgeStatusComponent ],
-      imports: [
+    imports: [
         MatChipsModule,
         MatIconModule,
-        MatTooltipModule
-      ]
-    })
+        MatTooltipModule,
+        BadgeStatusComponent
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(BadgeStatusComponent);

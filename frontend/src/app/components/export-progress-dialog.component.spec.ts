@@ -14,21 +14,21 @@ describe('ExportProgressDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ExportProgressDialogComponent],
-      imports: [
+    imports: [
         CommonModule,
         MatDialogModule,
         MatIconModule,
         MatButtonModule,
         MatProgressBarModule,
-        BrowserAnimationsModule
-      ],
-      providers: [
+        BrowserAnimationsModule,
+        ExportProgressDialogComponent
+    ],
+    providers: [
         { provide: MAT_DIALOG_DATA, useValue: { message: 'Test message' } },
-        { provide: MatDialogRef, useValue: { close: () => { /* Mock close */ } } },
+        { provide: MatDialogRef, useValue: { close: () => { } } },
         ExportService
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(ExportProgressDialogComponent);
     component = fixture.componentInstance;

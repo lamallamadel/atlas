@@ -1,5 +1,10 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { DossierResponse } from '../services/dossier-api.service';
+import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
+import { MatIcon } from '@angular/material/icon';
+import { BadgeStatusComponent } from './badge-status.component';
+import { DateFormatPipe } from '../pipes/date-format.pipe';
+import { PhoneFormatPipe } from '../pipes/phone-format.pipe';
 
 export interface DossierAction {
   type: 'call' | 'message' | 'view' | 'delete' | 'archive';
@@ -290,7 +295,7 @@ export interface DossierAction {
       background: var(--color-neutral-300);
     }
   `],
-    standalone: false
+    imports: [SwipeGestureDirective, MatIcon, BadgeStatusComponent, DateFormatPipe, PhoneFormatPipe]
 })
 export class MobileDossierCardComponent {
   @Input() dossier!: DossierResponse;

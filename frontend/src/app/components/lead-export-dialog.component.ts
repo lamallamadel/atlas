@@ -1,8 +1,19 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LeadApiService, LeadExportRequest } from '../services/lead-api.service';
 import { DossierStatus } from '../services/dossier-api.service';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatButton } from '@angular/material/button';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
+import { MatDivider } from '@angular/material/list';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatInput } from '@angular/material/input';
+import { MatProgressBar } from '@angular/material/progress-bar';
 
 interface ColumnOption {
   value: string;
@@ -14,7 +25,7 @@ interface ColumnOption {
     selector: 'app-lead-export-dialog',
     templateUrl: './lead-export-dialog.component.html',
     styleUrls: ['./lead-export-dialog.component.css'],
-    standalone: false
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatButton, MatCheckbox, FormsModule, MatDivider, MatFormField, MatLabel, MatSelect, MatOption, MatSuffix, MatInput, MatProgressBar, MatDialogActions]
 })
 export class LeadExportDialogComponent {
   columns: ColumnOption[] = [

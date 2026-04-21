@@ -9,9 +9,8 @@ describe('VirtualScrollListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [VirtualScrollListComponent, LoadingSkeletonComponent],
-      imports: [ScrollingModule]
-    });
+    imports: [ScrollingModule, VirtualScrollListComponent, LoadingSkeletonComponent]
+});
     fixture = TestBed.createComponent(VirtualScrollListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

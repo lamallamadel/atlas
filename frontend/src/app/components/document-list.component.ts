@@ -4,12 +4,17 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { DocumentApiService, DocumentResponse } from '../services/document-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
+import { DocumentUploadComponent } from './document-upload.component';
+import { LoadingSkeletonComponent } from './loading-skeleton.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-document-list',
     templateUrl: './document-list.component.html',
     styleUrls: ['./document-list.component.css'],
-    standalone: false
+    imports: [DocumentUploadComponent, LoadingSkeletonComponent, MatButton, MatIcon, MatIconButton, MatTooltip]
 })
 export class DocumentListComponent implements OnInit {
   @Input() dossierId!: number;

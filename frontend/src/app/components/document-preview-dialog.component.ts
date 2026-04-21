@@ -2,6 +2,10 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { DocumentApiService, DocumentResponse } from '../services/document-api.service';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 export interface DocumentPreviewDialogData {
   document: DocumentResponse;
@@ -11,7 +15,7 @@ export interface DocumentPreviewDialogData {
     selector: 'app-document-preview-dialog',
     templateUrl: './document-preview-dialog.component.html',
     styleUrls: ['./document-preview-dialog.component.css'],
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, MatProgressSpinner, MatButton]
 })
 export class DocumentPreviewDialogComponent implements OnInit {
   previewUrl: SafeResourceUrl | null = null;

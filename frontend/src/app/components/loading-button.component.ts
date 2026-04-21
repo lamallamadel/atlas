@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { CustomSpinnerComponent } from './custom-spinner.component';
 
 @Component({
     selector: 'app-loading-button',
@@ -76,7 +77,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
             transition('visible => hidden', animate('150ms ease-in'))
         ])
     ],
-    standalone: false
+    imports: [CustomSpinnerComponent]
 })
 export class LoadingButtonComponent {
   @Input() type: 'button' | 'submit' | 'reset' = 'button';

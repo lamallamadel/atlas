@@ -19,8 +19,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { LayoutModule } from '@angular/cdk/layout';
 
-import { SharedPipesModule } from '../../shared/shared-pipes.module';
-import { SharedComponentsModule } from '../../shared/shared-components.module';
+
+
 
 import { AnnoncesComponent } from './annonces.component';
 import { AnnonceCreateComponent } from './annonce-create.component';
@@ -34,18 +34,11 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [
-    AnnoncesComponent,
-    AnnonceCreateComponent,
-    AnnonceDetailComponent
-  ],
-  imports: [
+    imports: [
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forChild(routes),
-    SharedPipesModule,
-    SharedComponentsModule,
     MatCardModule,
     MatExpansionModule,
     MatIconModule,
@@ -61,7 +54,10 @@ const routes: Routes = [
     MatBottomSheetModule,
     MatDialogModule,
     DragDropModule,
-    LayoutModule
-  ]
+    LayoutModule,
+    AnnoncesComponent,
+    AnnonceCreateComponent,
+    AnnonceDetailComponent
+]
 })
 export class AnnoncesModule {}

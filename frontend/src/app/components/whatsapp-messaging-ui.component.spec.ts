@@ -34,7 +34,6 @@ describe('WhatsappMessagingUiComponent', () => {
     const consentementApiServiceSpy = jasmine.createSpyObj('ConsentementApiService', ['list']);
 
     await TestBed.configureTestingModule({
-    declarations: [WhatsappMessagingUiComponent],
     imports: [BrowserAnimationsModule,
         FormsModule,
         MatBottomSheetModule,
@@ -47,7 +46,7 @@ describe('WhatsappMessagingUiComponent', () => {
         MatChipsModule,
         MatProgressSpinnerModule,
         ScrollingModule,
-        TextFieldModule],
+        TextFieldModule, WhatsappMessagingUiComponent],
     providers: [
         { provide: MessageApiService, useValue: messageApiServiceSpy },
         { provide: OutboundMessageApiService, useValue: outboundMessageApiServiceSpy },

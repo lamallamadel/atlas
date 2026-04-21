@@ -200,8 +200,7 @@ import { ServiceWorkerRegistrationService } from '../services/service-worker-reg
     .dark-theme .footer-item-skeleton {
       background: var(--color-neutral-700, #616161);
     }
-  `],
-    standalone: false
+  `]
 })
 export class AppShellComponent implements OnInit {
   isLoading = true;

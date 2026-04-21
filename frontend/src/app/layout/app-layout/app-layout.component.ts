@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, HostListener } from '@angular/core';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { MatSidenav } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { DossierApiService } from '../../services/dossier-api.service';
@@ -10,15 +10,33 @@ import { OnboardingTourService } from '../../services/onboarding-tour.service';
 import { TourDefinitionService } from '../../services/tour-definition.service';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
-import { RouterOutlet, Router } from '@angular/router';
+import { RouterOutlet, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { routeFadeSlideAnimation } from '../../animations/route-animations';
+import { KeyboardShortcutsComponent } from '../../components/keyboard-shortcuts.component';
+import { CommandPaletteComponent } from '../../components/command-palette.component';
+import { AiAgentPanelComponent } from '../../components/ai-agent-panel.component';
+import { MatToolbar } from '@angular/material/toolbar';
+import { MatNavList, MatListItem, MatListItemIcon, MatListItemTitle, MatDivider } from '@angular/material/list';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { GlobalSearchBarComponent } from '../../components/global-search-bar.component';
+import { ApiStatusIndicatorComponent } from '../../components/api-status-indicator.component';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatBadge } from '@angular/material/badge';
+import { NotificationCenterComponent } from '../../components/notification-center.component';
+import { MaintainScrollDirective } from '../../directives/maintain-scroll.directive';
+import { MobileBottomNavigationComponent } from '../../components/mobile-bottom-navigation.component';
+import { PwaInstallPromptComponent } from '../../components/pwa-install-prompt.component';
+import { AppShellComponent } from '../../components/app-shell.component';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-layout',
     templateUrl: './app-layout.component.html',
     styleUrls: ['./app-layout.component.scss'],
     animations: [routeFadeSlideAnimation],
-    standalone: false
+    imports: [KeyboardShortcutsComponent, CommandPaletteComponent, AiAgentPanelComponent, MatSidenavContainer, MatSidenav, MatToolbar, MatNavList, MatListItem, RouterLink, RouterLinkActive, MatTooltip, MatIcon, MatListItemIcon, MatListItemTitle, MatDivider, MatSidenavContent, MatIconButton, GlobalSearchBarComponent, ApiStatusIndicatorComponent, MatMenuTrigger, MatBadge, MatMenu, NotificationCenterComponent, MatMenuItem, MaintainScrollDirective, RouterOutlet, MobileBottomNavigationComponent, PwaInstallPromptComponent, AppShellComponent, AsyncPipe]
 })
 export class AppLayoutComponent implements OnInit {
   @ViewChild('drawer') drawer!: MatSidenav;

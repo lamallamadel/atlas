@@ -1,12 +1,16 @@
 import { Component, OnInit } from '@angular/core';
 import { KeyboardShortcutService, KeyboardShortcut, UserPreferences } from '../services/keyboard-shortcut.service';
 import { Observable } from 'rxjs';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-keyboard-shortcuts',
     templateUrl: './keyboard-shortcuts.component.html',
     styleUrls: ['./keyboard-shortcuts.component.css'],
-    standalone: false
+    imports: [MatIconButton, MatIcon, MatCheckbox, AsyncPipe]
 })
 export class KeyboardShortcutsComponent implements OnInit {
   visible$: Observable<boolean>;

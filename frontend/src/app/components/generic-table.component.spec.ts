@@ -28,8 +28,7 @@ describe('GenericTableComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [GenericTableComponent],
-      imports: [
+    imports: [
         BrowserAnimationsModule,
         MatTableModule,
         MatPaginatorModule,
@@ -39,9 +38,10 @@ describe('GenericTableComponent', () => {
         MatTooltipModule,
         MatCheckboxModule,
         MatCardModule,
-        LayoutModule
-      ]
-    })
+        LayoutModule,
+        GenericTableComponent
+    ]
+})
       .compileComponents();
 
     fixture = TestBed.createComponent(GenericTableComponent);

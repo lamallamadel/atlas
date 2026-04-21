@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { trigger, transition, style, animate } from '@angular/animations';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-session-expired',
@@ -15,7 +17,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
             ])
         ])
     ],
-    standalone: false
+    imports: [MatIcon, MatButton]
 })
 export class SessionExpiredComponent {
 

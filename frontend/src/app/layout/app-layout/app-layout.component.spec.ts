@@ -15,7 +15,7 @@ import { MaterialTestingModule } from '../../testing/material-testing.module';
 
 @Component({
     selector: 'app-global-search-bar', template: '',
-    standalone: false
+    imports: [RouterTestingModule, MaterialTestingModule]
 })
 class GlobalSearchBarStubComponent { }
 
@@ -40,17 +40,16 @@ describe('AppLayoutComponent', () => {
     mockNotificationApiService.getUnreadCount.and.returnValue(of(0));
 
     await TestBed.configureTestingModule({
-      declarations: [AppLayoutComponent, GlobalSearchBarStubComponent],
-      imports: [RouterTestingModule, MaterialTestingModule],
-      providers: [
+    imports: [RouterTestingModule, MaterialTestingModule, AppLayoutComponent, GlobalSearchBarStubComponent],
+    providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: ThemeService, useValue: mockThemeService },
         { provide: BreakpointObserver, useValue: mockBreakpointObserver },
         { provide: DossierApiService, useValue: mockDossierApiService },
         { provide: NotificationApiService, useValue: mockNotificationApiService }
-      ],
-      schemas: [NO_ERRORS_SCHEMA]
-    }).compileComponents();
+    ],
+    schemas: [NO_ERRORS_SCHEMA]
+}).compileComponents();
 
     fixture = TestBed.createComponent(AppLayoutComponent);
     component = fixture.componentInstance;

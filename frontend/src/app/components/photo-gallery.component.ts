@@ -1,8 +1,11 @@
 import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, HostListener, ViewChildren, QueryList, ElementRef } from '@angular/core';
-import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 export interface Photo {
   id: string | number;
@@ -19,7 +22,7 @@ export interface Photo {
     selector: 'app-photo-gallery',
     templateUrl: './photo-gallery.component.html',
     styleUrls: ['./photo-gallery.component.css'],
-    standalone: false
+    imports: [MatIcon, CdkDropList, CdkDrag, MatIconButton, CdkDragHandle, MatTooltip]
 })
 export class PhotoGalleryComponent implements OnInit, OnDestroy {
   @Input() photos: Photo[] = [];

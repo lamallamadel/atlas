@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { filter } from 'rxjs/operators';
+import { MatIcon } from '@angular/material/icon';
 
 interface NavItem {
   label: string;
@@ -161,7 +162,7 @@ interface NavItem {
       }
     }
   `],
-    standalone: false
+    imports: [MatIcon]
 })
 export class MobileBottomNavigationComponent implements OnInit {
   currentRoute = '';

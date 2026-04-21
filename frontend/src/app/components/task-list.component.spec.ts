@@ -25,11 +25,6 @@ describe('TaskListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [
-        TaskListComponent,
-        EmptyStateComponent,
-        TaskCardComponent
-    ],
     imports: [FormsModule,
         MatDialogModule,
         MatSnackBarModule,
@@ -42,7 +37,9 @@ describe('TaskListComponent', () => {
         MatCardModule,
         MatCheckboxModule,
         BrowserAnimationsModule,
-        FullCalendarModule],
+        FullCalendarModule, TaskListComponent,
+        EmptyStateComponent,
+        TaskCardComponent],
     providers: [
         { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken', 'configure', 'setStorage', 'logOut', 'getAccessToken']) },
         provideHttpClient(withInterceptorsFromDi()),

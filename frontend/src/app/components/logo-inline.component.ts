@@ -16,8 +16,7 @@ export type LogoTheme = 'default' | 'light' | 'dark' | 'mono' | 'auto';
     selector: 'app-logo-inline',
     templateUrl: './logo-inline.component.html',
     styleUrls: ['./logo-inline.component.css'],
-    encapsulation: ViewEncapsulation.None,
-    standalone: false
+    encapsulation: ViewEncapsulation.None
 })
 export class LogoInlineComponent implements OnInit {
   @Input() variant: LogoVariant = 'horizontal';

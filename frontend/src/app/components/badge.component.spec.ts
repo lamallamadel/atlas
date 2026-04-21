@@ -8,9 +8,8 @@ describe('BadgeComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ BadgeComponent ],
-      imports: [ MatIconModule ]
-    })
+    imports: [MatIconModule, BadgeComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(BadgeComponent);

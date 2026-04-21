@@ -5,6 +5,11 @@ import { ToastNotificationService } from '../services/toast-notification.service
 import { MatDialog } from '@angular/material/dialog';
 import { AppointmentFormDialogComponent, AppointmentFormData } from './appointment-form-dialog.component';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatIcon } from '@angular/material/icon';
+import { MatChip } from '@angular/material/chips';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 interface AppointmentGroup {
   date: Date;
@@ -16,7 +21,7 @@ interface AppointmentGroup {
     selector: 'app-calendar-list-view',
     templateUrl: './calendar-list-view.component.html',
     styleUrls: ['./calendar-list-view.component.css'],
-    standalone: false
+    imports: [MatProgressSpinner, MatIcon, MatChip, MatIconButton, MatTooltip]
 })
 export class CalendarListViewComponent implements OnInit, OnDestroy {
   @Input() filterByAssignedTo: string | null = null;

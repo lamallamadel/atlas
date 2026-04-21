@@ -1,16 +1,25 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { DossierApiService, DossierCreateRequest, DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel, MatError, MatHint, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatAutocompleteTrigger, MatAutocomplete, MatOption } from '@angular/material/autocomplete';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-dossier-create-dialog',
     templateUrl: './dossier-create-dialog.component.html',
     styleUrls: ['./dossier-create-dialog.component.css'],
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatIcon, MatButton, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatError, MatHint, MatSuffix, MatProgressSpinner, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatDialogActions, AsyncPipe]
 })
 export class DossierCreateDialogComponent implements OnInit {
   dossierForm!: FormGroup;

@@ -15,9 +15,9 @@ describe('RegionStatusComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-      declarations: [ RegionStatusComponent ],
-      providers: [{ provide: RegionRoutingService, useValue: mockService }]
-    }).compileComponents();
+    declarations: [RegionStatusComponent],
+    providers: [{ provide: RegionRoutingService, useValue: mockService }]
+}).compileComponents();
 
     fixture = TestBed.createComponent(RegionStatusComponent);
     component = fixture.componentInstance;

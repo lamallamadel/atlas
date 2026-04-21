@@ -15,18 +15,18 @@ describe('DatetimePickerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [DatetimePickerComponent],
-      imports: [
+    imports: [
         CommonModule,
         ReactiveFormsModule,
         MatFormFieldModule,
         MatInputModule,
         MatDatepickerModule,
         MatNativeDateModule,
-        BrowserAnimationsModule
-      ],
-      providers: [FormBuilder]
-    }).compileComponents();
+        BrowserAnimationsModule,
+        DatetimePickerComponent
+    ],
+    providers: [FormBuilder]
+}).compileComponents();
 
     formBuilder = TestBed.inject(FormBuilder);
     fixture = TestBed.createComponent(DatetimePickerComponent);

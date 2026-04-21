@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { SearchApiService, SearchResult } from '../../services/search-api.service';
+import { FormsModule } from '@angular/forms';
+import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
+import { DecimalPipe, DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-search',
     templateUrl: './search.component.html',
     styleUrls: ['./search.component.css'],
-    standalone: false
+    imports: [FormsModule, LoadingSkeletonComponent, DecimalPipe, DatePipe]
 })
 export class SearchComponent implements OnInit {
   searchQuery = '';

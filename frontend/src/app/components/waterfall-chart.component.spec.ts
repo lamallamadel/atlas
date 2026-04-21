@@ -8,8 +8,8 @@ describe('WaterfallChartComponent', () => {
 
     beforeEach(async () => {
         await TestBed.configureTestingModule({
-            declarations: [WaterfallChartComponent]
-        }).compileComponents();
+    imports: [WaterfallChartComponent]
+}).compileComponents();
 
         fixture = TestBed.createComponent(WaterfallChartComponent);
         component = fixture.componentInstance;

@@ -17,14 +17,11 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    declarations: [
-        EnhancedSnackbarComponent
-    ],
     imports: [CommonModule,
         MatSnackBarModule,
         MatIconModule,
         MatButtonModule,
-        BrowserAnimationsModule],
+        BrowserAnimationsModule, EnhancedSnackbarComponent],
     providers: [
         NotificationService,
         ThemeService,

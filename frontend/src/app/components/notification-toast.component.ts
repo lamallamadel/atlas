@@ -19,6 +19,9 @@ import {
   ToastPosition,
   ToastType
 } from '../services/toast-notification.service';
+import { NgClass } from '@angular/common';
+import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
+import { MatIcon } from '@angular/material/icon';
 
 interface ToastGroup {
   position: ToastPosition;
@@ -57,7 +60,7 @@ interface ToastGroup {
             ])
         ])
     ],
-    standalone: false
+    imports: [NgClass, SwipeGestureDirective, MatIcon]
 })
 export class NotificationToastComponent implements OnInit, OnDestroy {
   toastGroups: Map<ToastPosition, ActiveToast[]> = new Map();

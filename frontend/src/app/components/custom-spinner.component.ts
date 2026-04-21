@@ -69,8 +69,7 @@ import { Component, Input } from '@angular/core';
         stroke-dashoffset: -124;
       }
     }
-  `],
-    standalone: false
+  `]
 })
 export class CustomSpinnerComponent {
   @Input() size = 24;

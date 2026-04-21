@@ -11,9 +11,9 @@ describe('WorkflowStepperComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [WorkflowStepperComponent],
-      imports: [CommonModule, MatIconModule]
-    }).compileComponents();
+    declarations: [WorkflowStepperComponent],
+    imports: [CommonModule, MatIconModule]
+}).compileComponents();
 
     fixture = TestBed.createComponent(WorkflowStepperComponent);
     component = fixture.componentInstance;

@@ -22,18 +22,18 @@ describe('EnhancedSnackbarComponent', () => {
     mockSnackBarRef = jasmine.createSpyObj('MatSnackBarRef', ['dismiss']);
 
     await TestBed.configureTestingModule({
-      declarations: [EnhancedSnackbarComponent],
-      imports: [
+    imports: [
         CommonModule,
         MatIconModule,
         MatButtonModule,
-        BrowserAnimationsModule
-      ],
-      providers: [
+        BrowserAnimationsModule,
+        EnhancedSnackbarComponent
+    ],
+    providers: [
         { provide: MAT_SNACK_BAR_DATA, useValue: mockData },
         { provide: MatSnackBarRef, useValue: mockSnackBarRef }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(EnhancedSnackbarComponent);
     component = fixture.componentInstance;

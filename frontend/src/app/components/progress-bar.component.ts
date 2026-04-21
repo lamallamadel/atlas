@@ -57,8 +57,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
                 animate('150ms ease-in')
             ])
         ])
-    ],
-    standalone: false
+    ]
 })
 export class ProgressBarComponent implements OnChanges, OnDestroy {
   @Input() isNavigating = false;

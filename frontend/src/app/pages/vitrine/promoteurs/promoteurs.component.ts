@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-promoteurs',
     templateUrl: './promoteurs.component.html',
     styleUrls: ['./promoteurs.component.scss'],
-    standalone: false
+    imports: [RouterLink]
 })
 export class PromoTeursComponent {
   readonly features = [

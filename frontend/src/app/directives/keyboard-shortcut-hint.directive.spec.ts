@@ -4,10 +4,7 @@ import { KeyboardShortcutHintDirective } from './keyboard-shortcut-hint.directiv
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Router } from '@angular/router';
 
-@Component({
-    template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>`,
-    standalone: false
-})
+@Component({ template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>` })
 class TestComponent {}
 
 describe('KeyboardShortcutHintDirective', () => {
@@ -18,12 +15,12 @@ describe('KeyboardShortcutHintDirective', () => {
     const routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      declarations: [ TestComponent, KeyboardShortcutHintDirective ],
-      providers: [
+    imports: [TestComponent, KeyboardShortcutHintDirective],
+    providers: [
         KeyboardShortcutService,
         { provide: Router, useValue: routerMock }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);

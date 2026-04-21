@@ -2,10 +2,7 @@ import { Directive, ElementRef, Renderer2, OnInit, OnDestroy } from '@angular/co
 import { NgControl } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-@Directive({
-    selector: '[appFormValidationAnimation]',
-    standalone: false
-})
+@Directive({ selector: '[appFormValidationAnimation]' })
 export class FormValidationAnimationDirective implements OnInit, OnDestroy {
   private statusChangeSubscription?: Subscription;
   private errorContainer?: HTMLElement;

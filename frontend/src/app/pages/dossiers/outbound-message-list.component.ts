@@ -3,12 +3,13 @@ import { interval, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { OutboundMessageApiService, OutboundMessageResponse, OutboundMessageStatus } from '../../services/outbound-message-api.service';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
+import { EmptyStateComponent } from '../../components/empty-state.component';
 
 @Component({
     selector: 'app-outbound-message-list',
     templateUrl: './outbound-message-list.component.html',
     styleUrls: ['./outbound-message-list.component.css'],
-    standalone: false
+    imports: [EmptyStateComponent]
 })
 export class OutboundMessageListComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

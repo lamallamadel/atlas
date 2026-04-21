@@ -1,7 +1,11 @@
 import { Component, Inject, OnDestroy } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { MAT_DIALOG_DATA, MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { ExportService, ExportProgress } from '../services/export.service';
 import { Subscription } from 'rxjs';
+import { MatIcon } from '@angular/material/icon';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatButton } from '@angular/material/button';
 
 export interface ExportProgressDialogData {
   message: string;
@@ -125,7 +129,7 @@ export interface ExportProgressDialogData {
       border-top: 1px solid #e0e0e0;
     }
   `],
-    standalone: false
+    imports: [MatDialogTitle, MatIcon, CdkScrollable, MatDialogContent, MatProgressBar, MatDialogActions, MatButton]
 })
 export class ExportProgressDialogComponent implements OnDestroy {
   progress: ExportProgress | null = null;

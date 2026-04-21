@@ -11,7 +11,7 @@ import { ContextualHintDirective } from './contextual-hint.directive';
       [appContextualHint]="hints"
       [hintControl]="testControl">
   `,
-    standalone: false
+    imports: [ReactiveFormsModule, MatTooltipModule]
 })
 class TestComponent {
   testControl = new FormControl('');
@@ -29,9 +29,8 @@ describe('ContextualHintDirective', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ContextualHintDirective, TestComponent],
-      imports: [ReactiveFormsModule, MatTooltipModule]
-    }).compileComponents();
+    imports: [ReactiveFormsModule, MatTooltipModule, ContextualHintDirective, TestComponent]
+}).compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;

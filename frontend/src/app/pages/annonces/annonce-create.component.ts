@@ -1,16 +1,8 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import {
-  FormBuilder,
-  FormGroup,
-  Validators,
-  FormArray,
-  FormControl,
-  AbstractControl,
-  ValidationErrors
-} from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl, AbstractControl, ValidationErrors, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CdkDragDrop } from '@angular/cdk/drag-drop';
-import { MatStepper } from '@angular/material/stepper';
+import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPlaceholder } from '@angular/cdk/drag-drop';
+import { MatStepper, MatStep, MatStepLabel, MatStepperNext, MatStepperPrevious } from '@angular/material/stepper';
 import {
   AnnonceApiService,
   AnnonceCreateRequest,
@@ -18,12 +10,20 @@ import {
   AnnonceStatus,
   AnnonceResponse
 } from '../../services/annonce-api.service';
+import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatError, MatSuffix, MatHint } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatInput } from '@angular/material/input';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
     selector: 'app-annonce-create',
     templateUrl: './annonce-create.component.html',
     styleUrls: ['./annonce-create.component.css'],
-    standalone: false
+    imports: [LoadingSkeletonComponent, MatStepper, MatStep, MatStepLabel, MatIcon, FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatSelect, MatOption, MatError, MatInput, MatButton, MatStepperNext, MatStepperPrevious, MatIconButton, MatSuffix, CdkDropList, CdkDrag, CdkDragPlaceholder, MatHint, MatProgressSpinner]
 })
 export class AnnonceCreateComponent implements OnInit {
   @ViewChild('stepper') stepper!: MatStepper;

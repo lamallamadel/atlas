@@ -1,10 +1,20 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { trigger, style, transition, animate } from '@angular/animations';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { NotificationService } from '../services/notification.service';
+import { MatProgressBar } from '@angular/material/progress-bar';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatSlider, MatSliderThumb } from '@angular/material/slider';
+import { MatHint } from '@angular/material/form-field';
+import { MatRadioGroup, MatRadioButton } from '@angular/material/radio';
+import { MatDivider } from '@angular/material/list';
+import { MatButton } from '@angular/material/button';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 interface NotificationChannel {
   id: string;
@@ -53,7 +63,7 @@ interface NotificationExample {
             ])
         ])
     ],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatProgressBar, MatCard, MatCardHeader, MatCardTitle, MatIcon, MatCardSubtitle, MatCardContent, MatSlideToggle, MatSlider, MatSliderThumb, MatHint, MatRadioGroup, MatRadioButton, MatDivider, MatButton, MatProgressSpinner]
 })
 export class NotificationPreferencesFormComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

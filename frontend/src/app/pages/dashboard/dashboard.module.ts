@@ -9,7 +9,7 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogModule } from '@angular/material/dialog';
 import { LayoutModule } from '@angular/cdk/layout';
 
-import { SharedComponentsModule } from '../../shared/shared-components.module';
+
 
 import { DashboardComponent } from './dashboard.component';
 
@@ -18,18 +18,17 @@ const routes: Routes = [
 ];
 
 @NgModule({
-  declarations: [DashboardComponent],
-  imports: [
+    imports: [
     CommonModule,
     RouterModule.forChild(routes),
-    SharedComponentsModule,
     MatCardModule,
     MatIconModule,
     MatButtonModule,
     MatButtonToggleModule,
     MatTooltipModule,
     MatDialogModule,
-    LayoutModule
-  ]
+    LayoutModule,
+    DashboardComponent
+]
 })
 export class DashboardModule {}

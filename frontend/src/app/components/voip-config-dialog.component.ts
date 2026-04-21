@@ -1,6 +1,14 @@
 import { Component, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
 import { VoipService, VoipConfiguration } from '../services/voip.service';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { FormsModule } from '@angular/forms';
+import { MatSlideToggle } from '@angular/material/slide-toggle';
+import { MatFormField, MatLabel, MatHint } from '@angular/material/form-field';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatInput } from '@angular/material/input';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-voip-config-dialog',
@@ -158,7 +166,7 @@ import { VoipService, VoipConfiguration } from '../services/voip.service';
       }
     }
   `],
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, FormsModule, MatSlideToggle, MatFormField, MatLabel, MatSelect, MatOption, MatHint, MatInput, MatDialogActions, MatButton]
 })
 export class VoipConfigDialogComponent {
   config: VoipConfiguration;

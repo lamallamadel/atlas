@@ -12,7 +12,6 @@ import { Component } from '@angular/core';
     </p>
     <p style="color:var(--at-color-text-muted);font-size:var(--at-text-sm);line-height:1.8;">Ce site est édité par Atlasia Technologies SARL conformément aux régulations marocaines en vigueur. Toute reproduction partielle ou totale du contenu est interdite sans accord préalable écrit.</p>
   </div>
-`,
-    standalone: false
+`
 })
 export class MentionsLegalesComponent {}

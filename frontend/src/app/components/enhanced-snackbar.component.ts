@@ -2,6 +2,8 @@ import { Component, Inject } from '@angular/core';
 import { MAT_SNACK_BAR_DATA, MatSnackBarRef } from '@angular/material/snack-bar';
 import { NotificationConfig } from '../services/notification.service';
 import { trigger, state, style, transition, animate } from '@angular/animations';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-enhanced-snackbar',
@@ -135,7 +137,7 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
             transition('* => void', animate('200ms cubic-bezier(0.4, 0, 1, 1)'))
         ])
     ],
-    standalone: false
+    imports: [MatIcon, MatButton, MatIconButton]
 })
 export class EnhancedSnackbarComponent {
   animationState = 'in';

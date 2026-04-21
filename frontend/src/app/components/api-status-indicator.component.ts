@@ -1,12 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { PingService } from '../services/ping.service';
 import { Subject, takeUntil } from 'rxjs';
+import { MatButton } from '@angular/material/button';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/list';
+import { DatePipe } from '@angular/common';
 
 @Component({
     selector: 'app-api-status-indicator',
     templateUrl: './api-status-indicator.component.html',
     styleUrls: ['./api-status-indicator.component.css'],
-    standalone: false
+    imports: [MatButton, MatMenuTrigger, MatTooltip, MatMenu, MatMenuItem, MatIcon, MatDivider, DatePipe]
 })
 export class ApiStatusIndicatorComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();

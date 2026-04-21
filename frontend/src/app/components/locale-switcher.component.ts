@@ -1,5 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { I18nService, SupportedLocale } from '../services/i18n.service';
+import { MatIconButton } from '@angular/material/button';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/list';
+import { LocalizePipe } from '../pipes/localize.pipe';
 
 @Component({
     selector: 'app-locale-switcher',
@@ -102,7 +107,7 @@ import { I18nService, SupportedLocale } from '../services/i18n.service';
       color: rgba(255, 255, 255, 0.6);
     }
   `],
-    standalone: false
+    imports: [MatIconButton, MatMenuTrigger, MatIcon, MatMenu, MatDivider, MatMenuItem, LocalizePipe]
 })
 export class LocaleSwitcherComponent implements OnInit {
   supportedLocales: SupportedLocale[] = [];

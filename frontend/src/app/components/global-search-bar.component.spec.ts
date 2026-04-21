@@ -16,13 +16,12 @@ describe('GlobalSearchBarComponent', () => {
     mockRouter = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      declarations: [GlobalSearchBarComponent],
-      imports: [FormsModule],
-      providers: [
+    imports: [FormsModule, GlobalSearchBarComponent],
+    providers: [
         { provide: SearchApiService, useValue: mockSearchService },
         { provide: Router, useValue: mockRouter }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(GlobalSearchBarComponent);
     component = fixture.componentInstance;

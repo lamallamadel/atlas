@@ -3,12 +3,20 @@ import { Subject, takeUntil } from 'rxjs';
 import { WorkflowConfigService } from './services/workflow-config.service';
 import { WorkflowConfiguration, CaseType } from './models/workflow.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { WorkflowEditorComponent } from './workflow-editor/workflow-editor.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { WorkflowPreviewComponent } from './workflow-preview/workflow-preview.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-workflow-admin',
     templateUrl: './workflow-admin.component.html',
     styleUrls: ['./workflow-admin.component.css'],
-    standalone: false
+    imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatButtonToggleGroup, MatButtonToggle, WorkflowEditorComponent, MatButton, MatIcon, WorkflowPreviewComponent, RouterLink]
 })
 export class WorkflowAdminComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

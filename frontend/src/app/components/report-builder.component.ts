@@ -1,7 +1,18 @@
 import { Component } from '@angular/core';
-import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
 import { ReportApiService, CustomReportDefinition, ReportColumn, ReportExportOptions } from '../services/report-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { DecimalPipe, CurrencyPipe } from '@angular/common';
 
 interface DimensionOption {
   id: string;
@@ -20,7 +31,7 @@ interface MetricOption {
     selector: 'app-report-builder',
     templateUrl: './report-builder.component.html',
     styleUrls: ['./report-builder.component.scss'],
-    standalone: false
+    imports: [MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent, CdkDropList, CdkDrag, MatIcon, MatIconButton, MatButton, MatFormField, MatLabel, MatInput, FormsModule, MatSelect, MatOption, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatProgressSpinner, DecimalPipe, CurrencyPipe]
 })
 export class ReportBuilderComponent {
   availableDimensions: DimensionOption[] = [

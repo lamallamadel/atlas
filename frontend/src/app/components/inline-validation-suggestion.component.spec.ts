@@ -11,9 +11,8 @@ describe('InlineValidationSuggestionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [InlineValidationSuggestionComponent],
-      imports: [MatIconModule, MatButtonModule, BrowserAnimationsModule]
-    }).compileComponents();
+    imports: [MatIconModule, MatButtonModule, BrowserAnimationsModule, InlineValidationSuggestionComponent]
+}).compileComponents();
 
     fixture = TestBed.createComponent(InlineValidationSuggestionComponent);
     component = fixture.componentInstance;

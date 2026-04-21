@@ -1,5 +1,12 @@
 import { Component } from '@angular/core';
 import { LottieAnimationType } from './lottie-animation.component';
+import { MatCard, MatCardContent, MatCardHeader, MatCardTitle } from '@angular/material/card';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { FormsModule } from '@angular/forms';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { AnimatedEmptyStateComponent } from './animated-empty-state.component';
+import { MatIcon } from '@angular/material/icon';
 
 interface AnimationDemo {
   type: LottieAnimationType;
@@ -13,7 +20,7 @@ interface AnimationDemo {
     selector: 'app-lottie-animations-demo',
     templateUrl: './lottie-animations-demo.component.html',
     styleUrls: ['./lottie-animations-demo.component.css'],
-    standalone: false
+    imports: [MatCard, MatCardContent, MatCheckbox, FormsModule, MatFormField, MatLabel, MatInput, MatCardHeader, MatCardTitle, AnimatedEmptyStateComponent, MatIcon]
 })
 export class LottieAnimationsDemoComponent {
   animations: AnimationDemo[] = [

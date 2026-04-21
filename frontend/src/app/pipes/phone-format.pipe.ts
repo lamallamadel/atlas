@@ -1,9 +1,6 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
-@Pipe({
-    name: 'phoneFormat',
-    standalone: false
-})
+@Pipe({ name: 'phoneFormat' })
 export class PhoneFormatPipe implements PipeTransform {
   transform(value: string | null | undefined): string {
     if (!value) {

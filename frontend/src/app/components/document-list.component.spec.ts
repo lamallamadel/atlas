@@ -17,14 +17,13 @@ describe('DocumentListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    declarations: [DocumentListComponent],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [CommonModule,
         MatDialogModule,
         MatSnackBarModule,
         MatIconModule,
         MatButtonModule,
-        MatTooltipModule],
+        MatTooltipModule, DocumentListComponent],
     providers: [DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     fixture = TestBed.createComponent(DocumentListComponent);

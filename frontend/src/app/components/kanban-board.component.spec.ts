@@ -17,13 +17,12 @@ describe('KanbanBoardComponent', () => {
     mockToastService = jasmine.createSpyObj('ToastNotificationService', ['success', 'error', 'warning', 'info']);
 
     await TestBed.configureTestingModule({
-      declarations: [KanbanBoardComponent],
-      imports: [DragDropModule, MatIconModule, MatProgressSpinnerModule],
-      providers: [
+    imports: [DragDropModule, MatIconModule, MatProgressSpinnerModule, KanbanBoardComponent],
+    providers: [
         { provide: DossierApiService, useValue: mockDossierService },
         { provide: ToastNotificationService, useValue: mockToastService }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(KanbanBoardComponent);
     component = fixture.componentInstance;

@@ -13,12 +13,11 @@ describe('OutboundMessageFormComponent', () => {
     mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['listTemplates', 'create']);
 
     await TestBed.configureTestingModule({
-      declarations: [ OutboundMessageFormComponent ],
-      imports: [ FormsModule ],
-      providers: [
+    imports: [FormsModule, OutboundMessageFormComponent],
+    providers: [
         { provide: OutboundMessageApiService, useValue: mockOutboundMessageService }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(OutboundMessageFormComponent);

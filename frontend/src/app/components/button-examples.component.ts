@@ -1,4 +1,8 @@
 import { Component } from '@angular/core';
+import { MatButton, MatIconButton, MatFabButton, MatMiniFabButton } from '@angular/material/button';
+import { AnimatedButtonDirective } from '../directives/animated-button.directive';
+import { MatIcon } from '@angular/material/icon';
+import { LoadingButtonComponent } from './loading-button.component';
 
 /**
  * Component demonstrating various button animations and states
@@ -216,7 +220,7 @@ import { Component } from '@angular/core';
       font-style: italic;
     }
   `],
-    standalone: false
+    imports: [MatButton, AnimatedButtonDirective, MatIcon, LoadingButtonComponent, MatIconButton, MatFabButton, MatMiniFabButton]
 })
 export class ButtonExamplesComponent {
   loading1 = false;

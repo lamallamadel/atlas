@@ -1,16 +1,19 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DossierApiService, DossierCreateRequest, DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { Observable } from 'rxjs';
 import { map, startWith, debounceTime, switchMap } from 'rxjs/operators';
+import { MatAutocompleteTrigger, MatAutocomplete, MatOption } from '@angular/material/autocomplete';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
     selector: 'app-dossier-create',
     templateUrl: './dossier-create.component.html',
     styleUrls: ['./dossier-create.component.css'],
-    standalone: false
+    imports: [FormsModule, ReactiveFormsModule, MatAutocompleteTrigger, MatAutocomplete, MatOption, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, AsyncPipe]
 })
 export class DossierCreateComponent implements OnInit {
   dossierForm!: FormGroup;

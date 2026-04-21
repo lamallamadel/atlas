@@ -5,12 +5,17 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { ActivityApiService, ActivityResponse, ActivityType, ActivityVisibility, ActivityCreateRequest, ActivityUpdateRequest } from '../services/activity-api.service';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { NoteFormDialogComponent, NoteFormDialogResult } from './note-form-dialog.component';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import { MatCard, MatCardHeader, MatCardAvatar, MatCardContent } from '@angular/material/card';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
 
 @Component({
     selector: 'app-activity-timeline',
     templateUrl: './activity-timeline.component.html',
     styleUrls: ['./activity-timeline.component.css'],
-    standalone: false
+    imports: [MatButton, MatIcon, MatProgressSpinner, MatCard, MatCardHeader, MatCardAvatar, MatIconButton, MatMenuTrigger, MatMenu, MatMenuItem, MatCardContent]
 })
 export class ActivityTimelineComponent implements OnInit, OnChanges {
   @Input() dossierId!: number;

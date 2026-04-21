@@ -16,13 +16,12 @@ describe('DocumentUploadComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    declarations: [DocumentUploadComponent],
     imports: [CommonModule,
         FormsModule,
         MatSnackBarModule,
         MatIconModule,
         MatButtonModule,
-        MatProgressBarModule],
+        MatProgressBarModule, DocumentUploadComponent],
     providers: [DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     fixture = TestBed.createComponent(DocumentUploadComponent);

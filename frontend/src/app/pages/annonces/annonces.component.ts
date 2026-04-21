@@ -3,8 +3,8 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
-import { ColumnConfig, RowAction } from '../../components/generic-table.component';
-import { ActionButtonConfig } from '../../components/empty-state.component';
+import { ColumnConfig, RowAction, GenericTableComponent } from '../../components/generic-table.component';
+import { ActionButtonConfig, EmptyStateComponent } from '../../components/empty-state.component';
 import { EmptyStateContext } from '../../services/empty-state-illustrations.service';
 import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
@@ -14,6 +14,19 @@ import { MatDialog } from '@angular/material/dialog';
 import { ExportService, ColumnDef } from '../../services/export.service';
 import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
+import { MatCard, MatCardContent } from '@angular/material/card';
+import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
+import { MatIcon } from '@angular/material/icon';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
+import { MatSelect } from '@angular/material/select';
+import { MatOption } from '@angular/material/autocomplete';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/list';
+import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
+import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
 
 interface AppliedFilter {
   key: string;
@@ -27,7 +40,7 @@ interface AppliedFilter {
     templateUrl: './annonces.component.html',
     styleUrls: ['./annonces.component.css'],
     animations: [listStaggerAnimation, itemAnimation],
-    standalone: false
+    imports: [MatCard, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, MatSelect, MatOption, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider, MatIconButton, MatChipSet, MatChip, MatChipRemove, SkeletonLoaderComponent, EmptyStateComponent, GenericTableComponent]
 })
 export class AnnoncesComponent implements OnInit {
   annonces: AnnonceResponse[] = [];

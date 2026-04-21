@@ -1,12 +1,13 @@
 import { Component, OnInit, AfterViewInit, ElementRef } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { PortailService, City, Listing } from '../../../services/portail.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-portail-home',
     templateUrl: './portail-home.component.html',
     styleUrls: ['./portail-home.component.scss'],
-    standalone: false
+    imports: [FormsModule, RouterLink]
 })
 export class PortailHomeComponent implements OnInit, AfterViewInit {
   cities: City[] = [];

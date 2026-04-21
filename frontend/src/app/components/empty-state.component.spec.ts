@@ -11,10 +11,9 @@ describe('EmptyStateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ EmptyStateComponent ],
-      imports: [ CommonModule, MatIconModule, MatButtonModule ],
-      providers: [ EmptyStateIllustrationsService ]
-    })
+    imports: [CommonModule, MatIconModule, MatButtonModule, EmptyStateComponent],
+    providers: [EmptyStateIllustrationsService]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(EmptyStateComponent);

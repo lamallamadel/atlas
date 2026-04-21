@@ -10,13 +10,12 @@ describe('MessageFormDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [MessageFormDialogComponent, DatetimePickerComponent],
-      imports: [MaterialTestingModule],
-      providers: [
+    imports: [MaterialTestingModule, MessageFormDialogComponent, DatetimePickerComponent],
+    providers: [
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
         { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(MessageFormDialogComponent);
     component = fixture.componentInstance;

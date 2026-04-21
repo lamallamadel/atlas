@@ -52,8 +52,7 @@ describe('UiPreferencesFormComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-      declarations: [UiPreferencesFormComponent],
-      imports: [
+    imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
         MatCardModule,
@@ -68,14 +67,15 @@ describe('UiPreferencesFormComponent', () => {
         MatButtonModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
-        MatDividerModule
-      ],
-      providers: [
+        MatDividerModule,
+        UiPreferencesFormComponent
+    ],
+    providers: [
         { provide: UserPreferencesService, useValue: userPreferencesServiceSpy },
         { provide: ThemeService, useValue: themeServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     userPreferencesService = TestBed.inject(UserPreferencesService) as jasmine.SpyObj<UserPreferencesService>;
     themeService = TestBed.inject(ThemeService) as jasmine.SpyObj<ThemeService>;

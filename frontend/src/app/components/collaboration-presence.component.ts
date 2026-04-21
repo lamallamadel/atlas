@@ -138,8 +138,7 @@ interface ViewerInfo {
     .activity-text {
       font-style: italic;
     }
-  `],
-    standalone: false
+  `]
 })
 export class CollaborationPresenceComponent implements OnInit, OnDestroy {
   @Input() dossierId!: number;

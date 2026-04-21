@@ -3,12 +3,9 @@ import { Component, DebugElement } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { LazyLoadImageDirective } from './lazy-load-image.directive';
 
-@Component({
-    template: `
+@Component({ template: `
     <img [appLazyLoadImage]="imageUrl" [placeholder]="placeholderUrl" alt="Test image" />
-  `,
-    standalone: false
-})
+  ` })
 class TestComponent {
   imageUrl = 'https://example.com/image.jpg';
   placeholderUrl = 'data:image/svg+xml;base64,placeholder';
@@ -21,8 +18,8 @@ describe('LazyLoadImageDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [LazyLoadImageDirective, TestComponent]
-    });
+    imports: [LazyLoadImageDirective, TestComponent]
+});
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;

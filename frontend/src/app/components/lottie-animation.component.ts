@@ -10,6 +10,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef
 } from '@angular/core';
+import { MatIcon } from '@angular/material/icon';
 
 export type LottieAnimationType = 'search-empty' | 'success' | 'error' | 'upload' | 'maintenance';
 
@@ -24,7 +25,7 @@ export interface LottieOptions {
     templateUrl: './lottie-animation.component.html',
     styleUrls: ['./lottie-animation.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    imports: [MatIcon]
 })
 export class LottieAnimationComponent implements OnInit, OnDestroy {
   @Input() animationType!: LottieAnimationType;

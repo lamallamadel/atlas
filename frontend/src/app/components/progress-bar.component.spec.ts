@@ -9,9 +9,8 @@ describe('ProgressBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ ProgressBarComponent ],
-      imports: [ BrowserAnimationsModule ]
-    })
+    imports: [BrowserAnimationsModule, ProgressBarComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(ProgressBarComponent);

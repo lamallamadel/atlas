@@ -21,8 +21,7 @@ describe('AdvancedFiltersComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ AdvancedFiltersComponent ],
-      imports: [
+    imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
         MatDialogModule,
@@ -35,9 +34,10 @@ describe('AdvancedFiltersComponent', () => {
         MatDatepickerModule,
         MatNativeDateModule,
         MatProgressSpinnerModule,
-        MatButtonToggleModule
-      ]
-    })
+        MatButtonToggleModule,
+        AdvancedFiltersComponent
+    ]
+})
     .compileComponents();
   });
 

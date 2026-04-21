@@ -61,24 +61,24 @@ describe('QuickActionsComponent', () => {
     mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['patchStatus']);
 
     await TestBed.configureTestingModule({
-      declarations: [QuickActionsComponent],
-      imports: [
+    imports: [
         NoopAnimationsModule,
         MatDialogModule,
         MatSnackBarModule,
         MatButtonModule,
         MatIconModule,
-        MatTooltipModule
-      ],
-      providers: [
+        MatTooltipModule,
+        QuickActionsComponent
+    ],
+    providers: [
         { provide: QuickActionsService, useValue: mockQuickActionsService },
         { provide: VoipService, useValue: mockVoipService },
         { provide: KeyboardShortcutService, useValue: mockKeyboardShortcutService },
         { provide: MessageApiService, useValue: mockMessageApiService },
         { provide: AppointmentApiService, useValue: mockAppointmentApiService },
         { provide: DossierApiService, useValue: mockDossierApiService }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(QuickActionsComponent);
     component = fixture.componentInstance;

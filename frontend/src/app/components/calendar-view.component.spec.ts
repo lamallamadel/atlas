@@ -72,7 +72,6 @@ describe('CalendarViewComponent', () => {
     const calendarSyncServiceSpy = jasmine.createSpyObj('CalendarSyncService', ['downloadICalendar']);
 
     await TestBed.configureTestingModule({
-    declarations: [CalendarViewComponent],
     schemas: [NO_ERRORS_SCHEMA],
     imports: [BrowserAnimationsModule,
         MatDialogModule,
@@ -82,7 +81,7 @@ describe('CalendarViewComponent', () => {
         MatButtonModule,
         MatCardModule,
         MatProgressSpinnerModule,
-        MatTooltipModule],
+        MatTooltipModule, CalendarViewComponent],
     providers: [
         { provide: AppointmentApiService, useValue: appointmentServiceSpy },
         { provide: ToastNotificationService, useValue: toastServiceSpy },

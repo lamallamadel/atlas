@@ -3,12 +3,20 @@ import { Subject, takeUntil } from 'rxjs';
 import { CdkDragEnd, CdkDragStart } from '@angular/cdk/drag-drop';
 import { WorkflowConfigService } from '../services/workflow-config.service';
 import { WorkflowConfiguration, WorkflowNode, TransitionRule } from '../models/workflow.model';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { WorkflowNodeComponent } from '../workflow-node/workflow-node.component';
+import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
+import { MatDivider } from '@angular/material/list';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatChipListbox, MatChip } from '@angular/material/chips';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
     selector: 'app-workflow-editor',
     templateUrl: './workflow-editor.component.html',
     styleUrls: ['./workflow-editor.component.css'],
-    standalone: false
+    imports: [MatIcon, MatButton, WorkflowNodeComponent, MatIconButton, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatDivider, MatTooltip, MatChipListbox, MatChip, DecimalPipe]
 })
 export class WorkflowEditorComponent implements OnInit, OnDestroy {
   @ViewChild('canvas', { static: false }) canvas?: ElementRef<HTMLCanvasElement>;

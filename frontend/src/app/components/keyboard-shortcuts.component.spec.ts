@@ -16,18 +16,18 @@ describe('KeyboardShortcutsComponent', () => {
     const routerMock = jasmine.createSpyObj('Router', ['navigate']);
 
     await TestBed.configureTestingModule({
-      declarations: [ KeyboardShortcutsComponent ],
-      imports: [
+    imports: [
         CommonModule,
         MatIconModule,
         MatCheckboxModule,
-        MatButtonModule
-      ],
-      providers: [
+        MatButtonModule,
+        KeyboardShortcutsComponent
+    ],
+    providers: [
         KeyboardShortcutService,
         { provide: Router, useValue: routerMock }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(KeyboardShortcutsComponent);

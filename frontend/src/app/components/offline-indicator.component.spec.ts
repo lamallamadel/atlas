@@ -18,12 +18,11 @@ describe('OfflineIndicatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [OfflineIndicatorComponent],
     imports: [BrowserAnimationsModule,
         MatIconModule,
         MatButtonModule,
         MatProgressBarModule,
-        MatSnackBarModule],
+        MatSnackBarModule, OfflineIndicatorComponent],
     providers: [
         OfflineService,
         OfflineQueueService,

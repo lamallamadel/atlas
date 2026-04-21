@@ -1,5 +1,7 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatIcon } from '@angular/material/icon';
+import { MatDivider } from '@angular/material/list';
 
 export interface MobileAction {
   icon: string;
@@ -218,7 +220,7 @@ export interface MobileActionSheetData {
       margin: 0 var(--spacing-6);
     }
   `],
-    standalone: false
+    imports: [MatIcon, MatDivider]
 })
 export class MobileActionSheetComponent {
   constructor(

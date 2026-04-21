@@ -29,8 +29,7 @@ describe('DossierCreateDialogComponent', () => {
     mockAnnonceApiService.list.and.returnValue(of({ content: [], totalElements: 0, totalPages: 0, size: 20, number: 0, first: true, last: true, empty: true } as any));
 
     await TestBed.configureTestingModule({
-      declarations: [ DossierCreateDialogComponent ],
-      imports: [
+    imports: [
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatDialogModule,
@@ -40,14 +39,15 @@ describe('DossierCreateDialogComponent', () => {
         MatExpansionModule,
         MatIconModule,
         MatButtonModule,
-        MatProgressSpinnerModule
-      ],
-      providers: [
+        MatProgressSpinnerModule,
+        DossierCreateDialogComponent
+    ],
+    providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: DossierApiService, useValue: mockDossierApiService },
         { provide: AnnonceApiService, useValue: mockAnnonceApiService }
-      ]
-    })
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(DossierCreateDialogComponent);

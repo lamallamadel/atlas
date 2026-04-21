@@ -9,9 +9,8 @@ describe('FormProgressIndicatorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [FormProgressIndicatorComponent],
-      imports: [MatProgressBarModule, MatIconModule]
-    }).compileComponents();
+    imports: [MatProgressBarModule, MatIconModule, FormProgressIndicatorComponent]
+}).compileComponents();
 
     fixture = TestBed.createComponent(FormProgressIndicatorComponent);
     component = fixture.componentInstance;

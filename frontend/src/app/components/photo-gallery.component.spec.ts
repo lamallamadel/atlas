@@ -51,19 +51,19 @@ describe('PhotoGalleryComponent', () => {
     mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
 
     await TestBed.configureTestingModule({
-      declarations: [PhotoGalleryComponent],
-      imports: [
+    imports: [
         DragDropModule,
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
-        NoopAnimationsModule
-      ],
-      providers: [
+        NoopAnimationsModule,
+        PhotoGalleryComponent
+    ],
+    providers: [
         { provide: MatDialog, useValue: mockDialog },
         { provide: MatSnackBar, useValue: mockSnackBar }
-      ]
-    }).compileComponents();
+    ]
+}).compileComponents();
 
     fixture = TestBed.createComponent(PhotoGalleryComponent);
     component = fixture.componentInstance;

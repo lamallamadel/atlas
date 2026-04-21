@@ -21,33 +21,33 @@ describe('DocumentPreviewDialogComponent', () => {
     mockDocumentApiService.formatFileSize.and.returnValue('1 KB');
 
     TestBed.configureTestingModule({
-      declarations: [DocumentPreviewDialogComponent],
-      imports: [
+    imports: [
         CommonModule,
         MatDialogModule,
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,
-        MatProgressSpinnerModule
-      ],
-      providers: [
+        MatProgressSpinnerModule,
+        DocumentPreviewDialogComponent
+    ],
+    providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
-        { 
-          provide: MAT_DIALOG_DATA, 
-          useValue: { 
-            document: {
-              id: 1,
-              fileName: 'test.pdf',
-              contentType: 'application/pdf',
-              fileSize: 1024,
-              uploadedAt: '2024-01-01T00:00:00Z',
-              uploadedBy: 'test-user'
+        {
+            provide: MAT_DIALOG_DATA,
+            useValue: {
+                document: {
+                    id: 1,
+                    fileName: 'test.pdf',
+                    contentType: 'application/pdf',
+                    fileSize: 1024,
+                    uploadedAt: '2024-01-01T00:00:00Z',
+                    uploadedBy: 'test-user'
+                }
             }
-          } 
         },
         { provide: DocumentApiService, useValue: mockDocumentApiService }
-      ]
-    });
+    ]
+});
     fixture = TestBed.createComponent(DocumentPreviewDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

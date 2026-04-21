@@ -1,11 +1,19 @@
 import { Component, Input, Output, EventEmitter, ViewChild, OnInit, AfterViewInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
-import { MatTableDataSource } from '@angular/material/table';
+import { MatTableDataSource, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow } from '@angular/material/table';
 import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortHeader } from '@angular/material/sort';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { SelectionModel } from '@angular/cdk/collections';
 import { Subject, takeUntil } from 'rxjs';
 import { listStaggerAnimation } from '../animations/list-animations';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { NgStyle } from '@angular/common';
+import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
+import { CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf } from '@angular/cdk/scrolling';
+import { MatCard, MatCardContent, MatCardActions } from '@angular/material/card';
 
 export interface ColumnConfig {
   key: string;
@@ -38,7 +46,7 @@ export interface PaginationData {
     templateUrl: './generic-table.component.html',
     styleUrls: ['./generic-table.component.scss'],
     animations: [listStaggerAnimation],
-    standalone: false
+    imports: [MatIconButton, MatTooltip, MatIcon, MatTable, MatSort, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCheckbox, MatCellDef, MatCell, MatSortHeader, NgStyle, MatMenuTrigger, MatMenu, MatMenuItem, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatNoDataRow, CdkVirtualScrollViewport, CdkFixedSizeVirtualScroll, CdkVirtualForOf, MatCard, MatCardContent, MatCardActions, MatPaginator]
 })
 export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, OnDestroy {
   @Input() columns: ColumnConfig[] = [];

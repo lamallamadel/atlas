@@ -1,11 +1,12 @@
 import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { OutboundMessageApiService, OutboundMessageTemplate, OutboundMessageCreateRequest } from '../../services/outbound-message-api.service';
+import { FormsModule } from '@angular/forms';
 
 @Component({
     selector: 'app-outbound-message-form',
     templateUrl: './outbound-message-form.component.html',
     styleUrls: ['./outbound-message-form.component.css'],
-    standalone: false
+    imports: [FormsModule]
 })
 export class OutboundMessageFormComponent implements OnInit {
   @Input() dossierId!: number;

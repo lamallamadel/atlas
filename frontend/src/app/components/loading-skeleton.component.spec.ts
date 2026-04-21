@@ -7,8 +7,8 @@ describe('LoadingSkeletonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ LoadingSkeletonComponent ]
-    })
+    imports: [LoadingSkeletonComponent]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(LoadingSkeletonComponent);

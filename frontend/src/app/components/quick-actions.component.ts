@@ -13,12 +13,15 @@ import { MessageCreateRequest } from '../services/message-api.service';
 import { MessageApiService } from '../services/message-api.service';
 import { AppointmentApiService, AppointmentCreateRequest } from '../services/appointment-api.service';
 import { DossierApiService } from '../services/dossier-api.service';
+import { MatFabButton, MatIconButton, MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
     selector: 'app-quick-actions',
     templateUrl: './quick-actions.component.html',
     styleUrls: ['./quick-actions.component.css'],
-    standalone: false
+    imports: [MatFabButton, MatTooltip, MatIcon, MatIconButton, MatButton]
 })
 export class QuickActionsComponent implements OnInit, OnDestroy {
   @Input() dossier: DossierResponse | null = null;

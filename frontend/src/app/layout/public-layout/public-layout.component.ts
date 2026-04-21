@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy, HostListener } from '@angular/core';
-import { Router, NavigationEnd } from '@angular/router';
+import { Router, NavigationEnd, RouterLink, RouterOutlet } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
@@ -7,7 +7,7 @@ import { filter } from 'rxjs/operators';
     selector: 'app-public-layout',
     templateUrl: './public-layout.component.html',
     styleUrls: ['./public-layout.component.scss'],
-    standalone: false
+    imports: [RouterLink, RouterOutlet]
 })
 export class PublicLayoutComponent implements OnInit, OnDestroy {
 

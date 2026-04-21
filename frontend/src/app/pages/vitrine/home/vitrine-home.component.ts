@@ -1,11 +1,11 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
     selector: 'app-vitrine-home',
     templateUrl: './vitrine-home.component.html',
     styleUrls: ['./vitrine-home.component.scss'],
-    standalone: false
+    imports: [RouterLink]
 })
 export class VitrineHomeComponent implements OnInit, AfterViewInit {
   billingAnnual = false;

@@ -19,7 +19,6 @@ describe('TaskFormDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [TaskFormDialogComponent],
     imports: [ReactiveFormsModule,
         MatDialogModule,
         MatFormFieldModule,
@@ -29,7 +28,7 @@ describe('TaskFormDialogComponent', () => {
         MatNativeDateModule,
         MatButtonModule,
         MatProgressSpinnerModule,
-        BrowserAnimationsModule],
+        BrowserAnimationsModule, TaskFormDialogComponent],
     providers: [
         { provide: MatDialogRef, useValue: {} },
         { provide: MAT_DIALOG_DATA, useValue: {} },

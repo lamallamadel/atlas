@@ -1,12 +1,15 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CdkDragStart, CdkDragEnd } from '@angular/cdk/drag-drop';
+import { CdkDragStart, CdkDragEnd, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { WorkflowNode } from '../models/workflow.model';
+import { MatIcon } from '@angular/material/icon';
+import { MatIconButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
     selector: 'app-workflow-node',
     templateUrl: './workflow-node.component.html',
     styleUrls: ['./workflow-node.component.css'],
-    standalone: false
+    imports: [CdkDrag, MatIcon, MatIconButton, MatTooltip, CdkDragHandle]
 })
 export class WorkflowNodeComponent {
   @Input() node!: WorkflowNode;

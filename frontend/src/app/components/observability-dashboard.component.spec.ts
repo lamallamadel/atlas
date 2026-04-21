@@ -96,7 +96,6 @@ describe('ObservabilityDashboardComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-    declarations: [ObservabilityDashboardComponent],
     imports: [FormsModule,
         BrowserAnimationsModule,
         MatCardModule,
@@ -110,7 +109,7 @@ describe('ObservabilityDashboardComponent', () => {
         MatChipsModule,
         MatListModule,
         MatTableModule,
-        MatTooltipModule],
+        MatTooltipModule, ObservabilityDashboardComponent],
     providers: [
         { provide: ReportingApiService, useValue: reportingServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),

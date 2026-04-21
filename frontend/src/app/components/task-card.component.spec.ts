@@ -13,15 +13,15 @@ describe('TaskCardComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ TaskCardComponent ],
-      imports: [
+    imports: [
         NoopAnimationsModule,
         MatCardModule,
         MatCheckboxModule,
         MatIconModule,
-        MatButtonModule
-      ]
-    })
+        MatButtonModule,
+        TaskCardComponent
+    ]
+})
     .compileComponents();
 
     fixture = TestBed.createComponent(TaskCardComponent);

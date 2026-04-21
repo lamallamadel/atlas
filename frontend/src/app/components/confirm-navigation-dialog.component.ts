@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogTitle, MatDialogContent, MatDialogActions } from '@angular/material/dialog';
+import { CdkScrollable } from '@angular/cdk/scrolling';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton } from '@angular/material/button';
 
 @Component({
     selector: 'app-confirm-navigation-dialog',
@@ -43,7 +46,7 @@ import { MatDialogRef } from '@angular/material/dialog';
       padding: 16px 0 0 0;
     }
   `],
-    standalone: false
+    imports: [MatDialogTitle, CdkScrollable, MatDialogContent, MatIcon, MatDialogActions, MatButton]
 })
 export class ConfirmNavigationDialogComponent {
   

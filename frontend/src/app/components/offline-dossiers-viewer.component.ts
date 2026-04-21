@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { OfflineStorageService } from '../services/offline-storage.service';
 import { Router } from '@angular/router';
+import { MatIcon } from '@angular/material/icon';
+import { SwipeableCardComponent } from './swipeable-card.component';
+import { MatButton } from '@angular/material/button';
 
 interface CachedDossier {
   id: number;
@@ -346,7 +349,7 @@ interface CachedDossier {
       }
     }
   `],
-    standalone: false
+    imports: [MatIcon, SwipeableCardComponent, MatButton]
 })
 export class OfflineDossiersViewerComponent implements OnInit {
   dossiers: CachedDossier[] = [];
