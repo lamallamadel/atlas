@@ -1,6 +1,8 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -34,7 +36,7 @@ describe('AdvancedFiltersDialogComponent', () => {
     imports: [BrowserAnimationsModule,
         ReactiveFormsModule,
         MatDialogModule,
-        MatSnackBarModule,
+        
         MatButtonModule,
         MatFormFieldModule,
         MatInputModule,
@@ -44,6 +46,7 @@ describe('AdvancedFiltersDialogComponent', () => {
         MatButtonToggleModule, AdvancedFiltersDialogComponent,
         AdvancedFiltersComponent],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: MAT_DIALOG_DATA, useValue: mockDialogData },
         provideHttpClient(withInterceptorsFromDi()),

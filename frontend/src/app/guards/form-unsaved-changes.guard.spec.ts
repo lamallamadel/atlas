@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { FormUnsavedChangesGuard, ComponentCanDeactivate } from './form-unsaved-changes.guard';
 
 describe('FormUnsavedChangesGuard', () => {

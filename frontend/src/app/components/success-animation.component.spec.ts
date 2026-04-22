@@ -24,7 +24,7 @@ describe('SuccessAnimationComponent', () => {
   });
 
   it('should display message when provided', () => {
-    component.message = 'Success!';
+    fixture.componentRef.setInput('message', 'Success!');
     fixture.detectChanges();
     
     const compiled = fixture.nativeElement;

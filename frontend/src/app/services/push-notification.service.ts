@@ -161,7 +161,7 @@ export class PushNotificationService {
         requireInteraction: payload.requireInteraction || false,
         vibrate: [200, 100, 200],
         timestamp: Date.now()
-      });
+      } as any);
     } catch (error) {
       console.error('Error showing notification:', error);
     }

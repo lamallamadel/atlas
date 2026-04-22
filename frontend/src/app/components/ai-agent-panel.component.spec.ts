@@ -4,7 +4,7 @@ import { AiAgentService, AgentMessage } from '../services/ai-agent.service';
 import { FormsModule } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { BehaviorSubject, Subject, of } from 'rxjs';
+import { BehaviorSubject, Subject, of } from "rxjs";
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('AiAgentPanelComponent', () => {

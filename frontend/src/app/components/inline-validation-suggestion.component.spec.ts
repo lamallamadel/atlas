@@ -31,7 +31,7 @@ describe('InlineValidationSuggestionComponent', () => {
       confidence: 'high'
     };
 
-    component.suggestion = suggestion;
+    fixture.componentRef.setInput('suggestion', suggestion);
     
     spyOn(component.accept, 'emit');
     component.onAccept();
@@ -46,19 +46,31 @@ describe('InlineValidationSuggestionComponent', () => {
   });
 
   it('should return correct confidence icon', () => {
-    component.suggestion = {
+    fixture.componentRef.setInput('suggestion', {
       field: 'test',
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
       confidence: 'high'
-    };
+    });
     expect(component.getConfidenceIcon()).toBe('verified');
 
-    suggestion.confidence = 'medium';
+    fixture.componentRef.setInput('suggestion', {
+      field: 'test',
+      originalValue: 'old',
+      suggestedValue: 'new',
+      reason: 'test',
+      confidence: 'medium'
+    });
     expect(component.getConfidenceIcon()).toBe('help_outline');
 
-    suggestion.confidence = 'low';
+    fixture.componentRef.setInput('suggestion', {
+      field: 'test',
+      originalValue: 'old',
+      suggestedValue: 'new',
+      reason: 'test',
+      confidence: 'low'
+    });
     expect(component.getConfidenceIcon()).toBe('info');
   });
 });

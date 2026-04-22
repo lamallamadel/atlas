@@ -1,4 +1,4 @@
-@import '../../../styles/utilities.scss';
+@use '../../../styles/utilities' as *;
 
 .page-container {
   background-color: var(--color-neutral-0);

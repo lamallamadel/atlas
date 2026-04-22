@@ -9,7 +9,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { DossierCreateDialogComponent } from './dossier-create-dialog.component';
 import { DossierApiService } from '../../services/dossier-api.service';
 import { AnnonceApiService } from '../../services/annonce-api.service';

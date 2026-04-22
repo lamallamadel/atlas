@@ -1,3 +1,4 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
 // FE/src/app/pages/dossiers/dossiers.component.spec.ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -25,9 +26,9 @@ import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
@@ -97,9 +98,10 @@ describe('DossiersComponent', () => {
         MatExpansionModule,
         MatSelectModule,
         MatMenuModule,
-        MatSnackBarModule,
+        
         NoopAnimationsModule, DossiersComponent, GenericTableComponent],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: LOCALE_ID, useValue: 'fr-FR' },
         { provide: DossierApiService, useValue: dossierApiServiceSpy },
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },

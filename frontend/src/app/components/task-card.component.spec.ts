@@ -26,14 +26,14 @@ describe('TaskCardComponent', () => {
 
     fixture = TestBed.createComponent(TaskCardComponent);
     component = fixture.componentInstance;
-    component.task = {
+    fixture.componentRef.setInput('task', {
       id: 1,
       title: 'Test Task',
       priority: TaskPriority.MEDIUM,
       status: TaskStatus.PENDING,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
-    };
+    });
     fixture.detectChanges();
   });
 

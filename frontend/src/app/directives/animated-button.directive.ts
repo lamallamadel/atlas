@@ -4,7 +4,10 @@ import { Directive, ElementRef, HostListener, Renderer2, OnInit } from '@angular
  * Directive that adds hover animations to buttons
  * Scales to 1.02 and adds shadow-lg on hover
  */
-@Directive({ selector: 'button[appAnimatedButton], a[appAnimatedButton]' })
+@Directive({ 
+    selector: 'button[appAnimatedButton], a[appAnimatedButton]',
+    standalone: true
+})
 export class AnimatedButtonDirective implements OnInit {
   constructor(
     private el: ElementRef,

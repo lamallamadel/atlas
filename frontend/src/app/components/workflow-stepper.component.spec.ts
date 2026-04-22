@@ -59,212 +59,212 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Status Index Mapping', () => {
     it('should return index 0 for NEW status', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       expect(component.currentIndex).toBe(0);
     });
 
     it('should return index 1 for QUALIFYING status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.currentIndex).toBe(1);
     });
 
     it('should return index 2 for QUALIFIED status', () => {
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       expect(component.currentIndex).toBe(2);
     });
 
     it('should return index 3 for APPOINTMENT status', () => {
-      component.status = DossierStatus.APPOINTMENT;
+      fixture.componentRef.setInput('status', DossierStatus.APPOINTMENT);
       expect(component.currentIndex).toBe(3);
     });
 
     it('should return index 4 for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.currentIndex).toBe(4);
     });
 
     it('should return index 4 for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.currentIndex).toBe(4);
     });
 
     it('should return index 0 for null status', () => {
-      component.status = null;
+      fixture.componentRef.setInput('status', null);
       expect(component.currentIndex).toBe(0);
     });
   });
 
   describe('Close Label and Icon', () => {
     it('should return "Gagné" label for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.closeLabel).toBe('Gagné');
     });
 
     it('should return "Perdu" label for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.closeLabel).toBe('Perdu');
     });
 
     it('should return "En cours" label for active status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.closeLabel).toBe('En cours');
     });
 
     it('should return "emoji_events" icon for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.closeIcon).toBe('emoji_events');
     });
 
     it('should return "cancel" icon for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.closeIcon).toBe('cancel');
     });
 
     it('should return "hourglass_top" icon for active status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.closeIcon).toBe('hourglass_top');
     });
   });
 
   describe('Progress Calculation', () => {
     it('should return 0% progress for NEW status', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       expect(component.progressPercent).toBe(0);
     });
 
     it('should return 25% progress for QUALIFYING status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.progressPercent).toBe(25);
     });
 
     it('should return 50% progress for QUALIFIED status', () => {
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       expect(component.progressPercent).toBe(50);
     });
 
     it('should return 75% progress for APPOINTMENT status', () => {
-      component.status = DossierStatus.APPOINTMENT;
+      fixture.componentRef.setInput('status', DossierStatus.APPOINTMENT);
       expect(component.progressPercent).toBe(75);
     });
 
     it('should return 100% progress for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.progressPercent).toBe(100);
     });
 
     it('should return 100% progress for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.progressPercent).toBe(100);
     });
   });
 
   describe('Hint Messages', () => {
     it('should return correct hint for NEW status', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       expect(component.hint).toBe('Complétez les informations du prospect et démarrez la qualification.');
     });
 
     it('should return correct hint for QUALIFYING status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.hint).toBe('Validez le besoin, le budget et les critères. Ajoutez une note de synthèse.');
     });
 
     it('should return correct hint for QUALIFIED status', () => {
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       expect(component.hint).toBe('Planifiez un rendez-vous et associez une annonce si besoin.');
     });
 
     it('should return correct hint for APPOINTMENT status', () => {
-      component.status = DossierStatus.APPOINTMENT;
+      fixture.componentRef.setInput('status', DossierStatus.APPOINTMENT);
       expect(component.hint).toBe('Après le rendez-vous, consignez le compte-rendu et clôturez le dossier.');
     });
 
     it('should return correct hint for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.hint).toBe('Dossier gagné : préparez les documents et passez en phase contractualisation.');
     });
 
     it('should return correct hint for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.hint).toBe('Dossier perdu : indiquez la raison et gardez une trace pour l\'analyse.');
     });
 
     it('should return default hint for null status', () => {
-      component.status = null;
+      fixture.componentRef.setInput('status', null);
       expect(component.hint).toBe('Suivez l\'avancement du dossier et documentez chaque étape.');
     });
   });
 
   describe('Closed Status Detection', () => {
     it('should detect WON as closed', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.isClosed).toBe(true);
     });
 
     it('should detect LOST as closed', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.isClosed).toBe(true);
     });
 
     it('should not detect NEW as closed', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       expect(component.isClosed).toBe(false);
     });
 
     it('should not detect QUALIFYING as closed', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.isClosed).toBe(false);
     });
 
     it('should not detect QUALIFIED as closed', () => {
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       expect(component.isClosed).toBe(false);
     });
 
     it('should not detect APPOINTMENT as closed', () => {
-      component.status = DossierStatus.APPOINTMENT;
+      fixture.componentRef.setInput('status', DossierStatus.APPOINTMENT);
       expect(component.isClosed).toBe(false);
     });
   });
 
   describe('Won Status Detection', () => {
     it('should detect WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.isWon).toBe(true);
     });
 
     it('should not detect LOST as won', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.isWon).toBe(false);
     });
 
     it('should not detect active statuses as won', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       expect(component.isWon).toBe(false);
       
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.isWon).toBe(false);
     });
   });
 
   describe('Close Variant Class', () => {
     it('should return "won" class for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       expect(component.closeVariantClass).toBe('won');
     });
 
     it('should return "lost" class for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       expect(component.closeVariantClass).toBe('lost');
     });
 
     it('should return empty string for active status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       expect(component.closeVariantClass).toBe('');
     });
 
     it('should return empty string for null status', () => {
-      component.status = null;
+      fixture.componentRef.setInput('status', null);
       expect(component.closeVariantClass).toBe('');
     });
   });
@@ -276,19 +276,19 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should return closeIcon for CLOSE step with WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       const closeStep = component.steps[4];
       expect(component.stepIcon(closeStep)).toBe('emoji_events');
     });
 
     it('should return closeIcon for CLOSE step with LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       const closeStep = component.steps[4];
       expect(component.stepIcon(closeStep)).toBe('cancel');
     });
 
     it('should return hourglass icon for CLOSE step with active status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       const closeStep = component.steps[4];
       expect(component.stepIcon(closeStep)).toBe('hourglass_top');
     });
@@ -301,19 +301,19 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should return enhanced label for closed CLOSE step with WON', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       const closeStep = component.steps[4];
       expect(component.stepLabel(closeStep)).toBe('Clôture (Gagné)');
     });
 
     it('should return enhanced label for closed CLOSE step with LOST', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       const closeStep = component.steps[4];
       expect(component.stepLabel(closeStep)).toBe('Clôture (Perdu)');
     });
 
     it('should return regular label for CLOSE step when not closed', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       const closeStep = component.steps[4];
       expect(component.stepLabel(closeStep)).toBe('Clôture');
     });
@@ -321,7 +321,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Step Completion Detection', () => {
     it('should mark steps before current index as completed', () => {
-      component.status = DossierStatus.QUALIFIED; // index 2
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED); // index 2
       
       expect(component.isCompleted(0)).toBe(true);
       expect(component.isCompleted(1)).toBe(true);
@@ -330,7 +330,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should not mark any steps as completed for NEW status', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       
       expect(component.isCompleted(0)).toBe(false);
       expect(component.isCompleted(1)).toBe(false);
@@ -338,7 +338,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should mark all steps except last as completed for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       
       expect(component.isCompleted(0)).toBe(true);
       expect(component.isCompleted(1)).toBe(true);
@@ -350,7 +350,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Active Step Detection', () => {
     it('should mark current index as active', () => {
-      component.status = DossierStatus.QUALIFYING; // index 1
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING); // index 1
       
       expect(component.isActive(0)).toBe(false);
       expect(component.isActive(1)).toBe(true);
@@ -358,14 +358,14 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should mark index 0 as active for NEW status', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       
       expect(component.isActive(0)).toBe(true);
       expect(component.isActive(1)).toBe(false);
     });
 
     it('should mark last index as active for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       
       expect(component.isActive(3)).toBe(false);
       expect(component.isActive(4)).toBe(true);
@@ -374,7 +374,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Rendering and DOM', () => {
     beforeEach(() => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
     });
 
@@ -425,7 +425,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Accessibility Features', () => {
     beforeEach(() => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
     });
 
@@ -470,19 +470,19 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should update progress bar width dynamically', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       component.ngOnChanges({ status: { currentValue: DossierStatus.NEW, previousValue: null, firstChange: true, isFirstChange: () => true } });
       fixture.detectChanges();
       let progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('0%');
 
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       component.ngOnChanges({ status: { currentValue: DossierStatus.QUALIFIED, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('50%');
 
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       component.ngOnChanges({ status: { currentValue: DossierStatus.WON, previousValue: DossierStatus.QUALIFIED, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
@@ -490,13 +490,13 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should show workflow meta only when status exists', () => {
-      component.status = null;
+      fixture.componentRef.setInput('status', null);
       component.ngOnChanges({ status: { currentValue: null, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       let meta = fixture.debugElement.query(By.css('.workflow-meta'));
       expect(meta).toBeFalsy();
 
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       component.ngOnChanges({ status: { currentValue: DossierStatus.QUALIFYING, previousValue: null, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       meta = fixture.debugElement.query(By.css('.workflow-meta'));
@@ -506,7 +506,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Closed Status Display', () => {
     it('should display won chip for WON status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       fixture.detectChanges();
       
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
@@ -516,7 +516,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should display lost chip for LOST status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       fixture.detectChanges();
       
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
@@ -526,7 +526,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should not display chip for active status', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
       
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
@@ -534,7 +534,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should display check_circle icon for won chip', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       fixture.detectChanges();
       
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
@@ -543,7 +543,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should display cancel icon for lost chip', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       fixture.detectChanges();
       
       const chip = fixture.debugElement.query(By.css('.workflow-chip'));
@@ -559,14 +559,14 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should update view when status input changes', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       component.ngOnChanges({ status: { currentValue: DossierStatus.NEW, previousValue: null, firstChange: true, isFirstChange: () => true } });
       fixture.detectChanges();
       
       let progressBar = fixture.debugElement.query(By.css('.workflow-bar'));
       expect(progressBar.nativeElement.style.width).toBe('0%');
 
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       component.ngOnChanges({ status: { currentValue: DossierStatus.WON, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       
@@ -577,7 +577,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Step Label Content', () => {
     it('should display step labels correctly', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
       
       const stepLabels = fixture.debugElement.queryAll(By.css('.step-label'));
@@ -589,7 +589,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should display enhanced close label for won status', () => {
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       fixture.detectChanges();
       
       const stepLabels = fixture.debugElement.queryAll(By.css('.step-label'));
@@ -597,7 +597,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should display enhanced close label for lost status', () => {
-      component.status = DossierStatus.LOST;
+      fixture.componentRef.setInput('status', DossierStatus.LOST);
       fixture.detectChanges();
       
       const stepLabels = fixture.debugElement.queryAll(By.css('.step-label'));
@@ -607,35 +607,35 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle rapid status changes', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(0);
 
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(1);
 
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(4);
     });
 
     it('should handle null to status transition', () => {
-      component.status = null;
+      fixture.componentRef.setInput('status', null);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(0);
 
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(2);
     });
 
     it('should handle status to null transition', () => {
-      component.status = DossierStatus.QUALIFIED;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(2);
 
-      component.status = null;
+      fixture.componentRef.setInput('status', null);
       fixture.detectChanges();
       expect(component.currentIndex).toBe(0);
     });
@@ -651,7 +651,7 @@ describe('WorkflowStepperComponent', () => {
       ];
 
       statuses.forEach(status => {
-        component.status = status;
+        fixture.componentRef.setInput('status', status);
         fixture.detectChanges();
         expect(component.currentIndex).toBeGreaterThanOrEqual(0);
         expect(component.currentIndex).toBeLessThanOrEqual(4);
@@ -661,7 +661,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Hint Display Rendering', () => {
     it('should render hint when status exists', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
       
       const hint = fixture.debugElement.query(By.css('.workflow-hint'));
@@ -669,7 +669,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should display correct hint icon', () => {
-      component.status = DossierStatus.QUALIFYING;
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING);
       fixture.detectChanges();
       
       const hintIcon = fixture.debugElement.query(By.css('.workflow-hint mat-icon'));
@@ -677,13 +677,13 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should update hint text when status changes', () => {
-      component.status = DossierStatus.NEW;
+      fixture.componentRef.setInput('status', DossierStatus.NEW);
       component.ngOnChanges({ status: { currentValue: DossierStatus.NEW, previousValue: null, firstChange: true, isFirstChange: () => true } });
       fixture.detectChanges();
       let hint = fixture.debugElement.query(By.css('.workflow-hint span'));
       expect(hint.nativeElement.textContent).toContain('Complétez les informations');
 
-      component.status = DossierStatus.WON;
+      fixture.componentRef.setInput('status', DossierStatus.WON);
       component.ngOnChanges({ status: { currentValue: DossierStatus.WON, previousValue: DossierStatus.NEW, firstChange: false, isFirstChange: () => false } });
       fixture.detectChanges();
       hint = fixture.debugElement.query(By.css('.workflow-hint span'));
@@ -693,7 +693,7 @@ describe('WorkflowStepperComponent', () => {
 
   describe('Visual State Classes', () => {
     it('should not apply completed or active class to future steps', () => {
-      component.status = DossierStatus.QUALIFYING; // index 1
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFYING); // index 1
       fixture.detectChanges();
       
       const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));
@@ -704,7 +704,7 @@ describe('WorkflowStepperComponent', () => {
     });
 
     it('should apply both completed and active classes correctly for same workflow', () => {
-      component.status = DossierStatus.QUALIFIED; // index 2
+      fixture.componentRef.setInput('status', DossierStatus.QUALIFIED); // index 2
       fixture.detectChanges();
       
       const steps = fixture.debugElement.queryAll(By.css('.workflow-step'));

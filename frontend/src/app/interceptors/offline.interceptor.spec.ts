@@ -1,6 +1,8 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { OfflineInterceptor } from './offline.interceptor';
 import { OfflineService } from '../services/offline.service';
 import { OfflineQueueService } from '../services/offline-queue.service';
@@ -15,8 +17,9 @@ describe('OfflineInterceptor', () => {
     const mockNotificationService = jasmine.createSpyObj('NotificationService', ['success', 'error', 'info', 'warning', 'critical']);
 
     TestBed.configureTestingModule({
-    imports: [MatSnackBarModule],
+    imports: [],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         OfflineInterceptor,
         OfflineService,
         OfflineQueueService,

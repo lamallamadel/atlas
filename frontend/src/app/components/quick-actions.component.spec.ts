@@ -1,6 +1,7 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -13,7 +14,7 @@ import { MessageApiService } from '../services/message-api.service';
 import { AppointmentApiService } from '../services/appointment-api.service';
 import { DossierApiService } from '../services/dossier-api.service';
 import { DossierResponse, DossierStatus } from '../services/dossier-api.service';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 describe('QuickActionsComponent', () => {
   let component: QuickActionsComponent;
@@ -64,13 +65,14 @@ describe('QuickActionsComponent', () => {
     imports: [
         NoopAnimationsModule,
         MatDialogModule,
-        MatSnackBarModule,
+        
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,
         QuickActionsComponent
     ],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: QuickActionsService, useValue: mockQuickActionsService },
         { provide: VoipService, useValue: mockVoipService },
         { provide: KeyboardShortcutService, useValue: mockKeyboardShortcutService },
@@ -82,7 +84,7 @@ describe('QuickActionsComponent', () => {
 
     fixture = TestBed.createComponent(QuickActionsComponent);
     component = fixture.componentInstance;
-    component.dossier = mockDossier;
+    fixture.componentRef.setInput('dossier', mockDossier);
   });
 
   it('should create', () => {

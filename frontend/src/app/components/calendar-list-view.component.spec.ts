@@ -10,7 +10,7 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { CalendarListViewComponent } from './calendar-list-view.component';
 import { AppointmentApiService } from '../services/appointment-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('CalendarListViewComponent', () => {

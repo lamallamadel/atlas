@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { GlobalSearchBarComponent } from './global-search-bar.component';
 import { SearchApiService } from '../services/search-api.service';
 

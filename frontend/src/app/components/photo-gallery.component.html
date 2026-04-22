@@ -13,7 +13,7 @@
       cdkDropList
       [cdkDropListDisabled]="!editable()"
       (cdkDropListDropped)="onDrop($event)">
-      @for (column of getMasonryColumns(); track column; let colIndex = $index) {
+      @for (column of masonryColumns(); track $index; let colIndex = $index) {
         <div
           class="masonry-column">
           @for (photo of column; track photo; let i = $index) {

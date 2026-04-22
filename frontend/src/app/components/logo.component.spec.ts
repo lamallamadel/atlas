@@ -31,49 +31,49 @@ describe('LogoComponent', () => {
   });
 
   it('should generate correct logo path for horizontal variant', () => {
-    component.variant = 'horizontal';
-    component.theme = 'default';
+    fixture.componentRef.setInput('variant', 'horizontal');
+    fixture.componentRef.setInput('theme', 'default');
     component.ngOnInit();
     expect(component.logoPath).toContain('logo-horizontal');
   });
 
   it('should generate correct logo path for vertical variant', () => {
-    component.variant = 'vertical';
-    component.theme = 'default';
+    fixture.componentRef.setInput('variant', 'vertical');
+    fixture.componentRef.setInput('theme', 'default');
     component.ngOnInit();
     expect(component.logoPath).toContain('logo-vertical');
   });
 
   it('should generate correct logo path for icon variant', () => {
-    component.variant = 'icon';
-    component.theme = 'default';
+    fixture.componentRef.setInput('variant', 'icon');
+    fixture.componentRef.setInput('theme', 'default');
     component.ngOnInit();
     expect(component.logoPath).toContain('logo-icon');
   });
 
   it('should generate correct logo path with dark theme', () => {
-    component.variant = 'horizontal';
-    component.theme = 'dark';
+    fixture.componentRef.setInput('variant', 'horizontal');
+    fixture.componentRef.setInput('theme', 'dark');
     component.ngOnInit();
     expect(component.logoPath).toContain('logo-horizontal-dark');
   });
 
   it('should generate correct logo path with light theme', () => {
-    component.variant = 'horizontal';
-    component.theme = 'light';
+    fixture.componentRef.setInput('variant', 'horizontal');
+    fixture.componentRef.setInput('theme', 'light');
     component.ngOnInit();
     expect(component.logoPath).toContain('logo-horizontal-light');
   });
 
   it('should generate correct logo path with mono theme', () => {
-    component.variant = 'horizontal';
-    component.theme = 'mono';
+    fixture.componentRef.setInput('variant', 'horizontal');
+    fixture.componentRef.setInput('theme', 'mono');
     component.ngOnInit();
     expect(component.logoPath).toContain('logo-horizontal-mono');
   });
 
   it('should add animated class when animate is true', (done) => {
-    component.animate = true;
+    fixture.componentRef.setInput('animate', true);
     component.ngOnInit();
     
     // Wait for animation delay
@@ -85,20 +85,20 @@ describe('LogoComponent', () => {
   });
 
   it('should generate container class with variant', () => {
-    component.variant = 'horizontal';
+    fixture.componentRef.setInput('variant', 'horizontal');
     expect(component.containerClass).toContain('logo-horizontal');
   });
 
   it('should apply custom width and height', () => {
-    component.width = '200px';
-    component.height = '100px';
+    fixture.componentRef.setInput('width', '200px');
+    fixture.componentRef.setInput('height', '100px');
     const styles = component.imageStyles;
     expect(styles.width).toBe('200px');
     expect(styles.height).toBe('100px');
   });
 
   it('should use custom aria label', () => {
-    component.ariaLabel = 'Custom Label';
+    fixture.componentRef.setInput('ariaLabel', 'Custom Label');
     fixture.detectChanges();
     const img = fixture.nativeElement.querySelector('img');
     expect(img.getAttribute('aria-label')).toBe('Custom Label');

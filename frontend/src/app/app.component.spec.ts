@@ -17,19 +17,20 @@ describe('AppComponent', () => {
     const mockPrefetchService = jasmine.createSpyObj('PrefetchService', ['init']);
 
     await TestBed.configureTestingModule({
-    imports: [
-        RouterTestingModule
-    ],
-    declarations: [AppComponent],
-    providers: [
+      imports: [
+        RouterTestingModule,
+        AppComponent
+      ],
+      declarations: [],
+      providers: [
         { provide: ThemeService, useValue: mockThemeService },
         { provide: ServiceWorkerRegistrationService, useValue: mockSwService },
         { provide: OfflineQueueService, useValue: mockQueueService },
         { provide: LiveAnnouncerService, useValue: mockLiveAnnouncer },
         { provide: PrefetchService, useValue: mockPrefetchService }
-    ],
-    schemas: [NO_ERRORS_SCHEMA]
-}).compileComponents();
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
+    }).compileComponents();
   });
 
   it('should create the app', () => {

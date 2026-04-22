@@ -6,7 +6,7 @@ import { trigger, transition, style, animate } from '@angular/animations';
 import { MatIcon } from '@angular/material/icon';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { NgClass } from '@angular/common';
-import DatetimePickerComponent from './datetime-picker.component';
+import { DatetimePickerComponent } from './datetime-picker.component';
 import { MatButton } from '@angular/material/button';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 

@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError, EMPTY } from 'rxjs';
+import { of, throwError, EMPTY } from "rxjs";
 
 import { DossierDetailComponent } from './dossier-detail.component';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
@@ -151,7 +151,9 @@ describe('DossierDetailComponent', () => {
     appointmentApiService = jasmine.createSpyObj<AppointmentApiService>('AppointmentApiService', ['list', 'create', 'update', 'delete']);
     consentementApiService = jasmine.createSpyObj<ConsentementApiService>('ConsentementApiService', ['list', 'create', 'update', 'delete']);
     auditEventApiService = jasmine.createSpyObj<AuditEventApiService>('AuditEventApiService', ['list', 'listByDossier', 'create']);
-    router = jasmine.createSpyObj<Router>('Router', ['navigate'], { events: EMPTY });
+    router = jasmine.createSpyObj<Router>('Router', ['navigate', 'createUrlTree', 'serializeUrl'], { events: EMPTY });
+    router.createUrlTree.and.returnValue({} as any);
+    router.serializeUrl.and.returnValue('');
     snackBar = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
     dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
 

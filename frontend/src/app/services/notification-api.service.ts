@@ -1,7 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, BehaviorSubject, timer } from 'rxjs';
-import { switchMap, tap } from 'rxjs/operators';
+import { Observable, BehaviorSubject, timer, Subject } from 'rxjs';
+import { switchMap, tap, takeUntil } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
 
 export interface NotificationResponse {
@@ -41,14 +41,21 @@ export class NotificationApiService {
   private pollingInterval = 30000;
   private unreadCountSubject = new BehaviorSubject<number>(0);
   public unreadCount$ = this.unreadCountSubject.asObservable();
+  private destroy$ = new Subject<void>();
 
   constructor(private http: HttpClient) {
     this.startPolling();
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   private startPolling(): void {
     timer(0, this.pollingInterval)
       .pipe(
+        takeUntil(this.destroy$),
         switchMap(() => this.fetchUnreadCount())
       )
       .subscribe({

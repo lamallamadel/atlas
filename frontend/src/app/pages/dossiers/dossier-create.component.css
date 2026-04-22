@@ -1,4 +1,4 @@
-@import '../../../styles/variables.scss';
+@use '../../../styles/variables' as vars;
 
 .field-hint {
   font-size: 0.875rem;

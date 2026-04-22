@@ -40,10 +40,10 @@ describe('KanbanBoardComponent', () => {
   });
 
   it('should distribute dossiers to columns', () => {
-    component.dossiers = [
+    fixture.componentRef.setInput('dossiers', [
       { id: 1, status: DossierStatus.NEW, orgId: 'test' } as any,
       { id: 2, status: DossierStatus.QUALIFIED, orgId: 'test' } as any
-    ];
+    ]);
     component.ngOnInit();
 
     const newColumn = component.columns.find(c => c.id === DossierStatus.NEW);
@@ -73,12 +73,12 @@ describe('KanbanBoardComponent', () => {
   });
 
   it('should apply quick filter', () => {
-    component.dossiers = [
+    fixture.componentRef.setInput('dossiers', [
       { id: 1, status: DossierStatus.NEW, leadName: 'John Doe', orgId: 'test' } as any,
       { id: 2, status: DossierStatus.NEW, leadName: 'Jane Smith', orgId: 'test' } as any
-    ];
+    ]);
     component.ngOnInit();
-    component.quickFilter = 'john';
+    fixture.componentRef.setInput('quickFilter', 'john');
     component.ngOnChanges({ quickFilter: { currentValue: 'john', previousValue: '', firstChange: false, isFirstChange: () => false } });
 
     const newColumn = component.filteredColumns.find(c => c.id === DossierStatus.NEW);

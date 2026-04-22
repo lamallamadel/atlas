@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
 import { NavigationService } from './navigation.service';
-import { Subject } from 'rxjs';
+import { Subject } from "rxjs";
 
 describe('NavigationService', () => {
   let service: NavigationService;

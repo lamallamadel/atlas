@@ -2,7 +2,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 import { DossierCreateComponent } from './dossier-create.component';
 import { DossierApiService } from '../../services/dossier-api.service';

@@ -1,6 +1,6 @@
 import { Directive, ElementRef, OnInit, OnDestroy, Renderer2, input } from '@angular/core';
 
-@Directive({ selector: '[appLazyLoadImage]' })
+@Directive({ selector: '[appLazyLoadImage]', standalone: true })
 export class LazyLoadImageDirective implements OnInit, OnDestroy {
   readonly appLazyLoadImage = input.required<string>();
   readonly placeholder = input('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300"%3E%3Crect width="400" height="300" fill="%23f0f0f0"/%3E%3C/svg%3E');

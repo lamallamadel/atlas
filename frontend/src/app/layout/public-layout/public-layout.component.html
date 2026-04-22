@@ -27,7 +27,7 @@
             <li><a routerLink="/recherche" [class.active]="isActive('/recherche') && !currentRoute.includes('tx')">Toutes les annonces</a></li>
           </ul>
           <div class="pub-header-actions">
-            <a routerLink="/biz" class="at-btn at-btn-secondary at-btn-sm">Espace Pro</a>
+            <a routerLink="/pro" class="at-btn at-btn-secondary at-btn-sm">Espace Pro</a>
             <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Passer en mode clair' : 'Passer en mode sombre'">
               @if (!isDark) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
@@ -54,6 +54,7 @@
           </ul>
           <div class="pub-header-actions">
             <a routerLink="/"            class="at-btn at-btn-secondary at-btn-sm">Portail annonces</a>
+            <a routerLink="/pro"         class="at-btn at-btn-secondary at-btn-sm">Espace Pro</a>
             <a routerLink="/biz/demo"    class="at-btn at-btn-primary at-btn-sm">Demander une démo</a>
             <button class="pub-theme-btn" (click)="toggleTheme()" [attr.aria-label]="isDark ? 'Mode clair' : 'Mode sombre'">
               @if (!isDark) {
@@ -79,7 +80,7 @@
       <a routerLink="/recherche" [queryParams]="{tx:'vente'}" (click)="closeMobileMenu()">Vente</a>
       <a routerLink="/recherche" [queryParams]="{tx:'location'}" (click)="closeMobileMenu()">Location</a>
       <a routerLink="/recherche" (click)="closeMobileMenu()">Toutes les annonces</a>
-      <a routerLink="/biz" (click)="closeMobileMenu()">Espace Pro →</a>
+      <a routerLink="/pro" (click)="closeMobileMenu()">Espace Pro →</a>
     }
     @if (isVitrine()) {
       <a routerLink="/biz" (click)="closeMobileMenu()">Accueil</a>
@@ -137,7 +138,8 @@
       <div>
         <p class="pub-footer-col-title">Professionnels</p>
         <ul class="pub-footer-links">
-          <li><a routerLink="/biz">Espace Pro</a></li>
+          <li><a routerLink="/pro">Connexion Espace Pro</a></li>
+          <li><a routerLink="/biz">Atlasia Biz (Solutions Pro)</a></li>
           <li><a routerLink="/biz/demo">Demander une démo</a></li>
         </ul>
       </div>
@@ -160,6 +162,7 @@
         <ul class="pub-footer-links">
           <li><a routerLink="/biz/demo">Demander une démo</a></li>
           <li><a routerLink="/biz/contact">Contact</a></li>
+          <li><a routerLink="/pro">Connexion Espace Pro</a></li>
           <li><a routerLink="/">Portail annonces</a></li>
         </ul>
       </div>

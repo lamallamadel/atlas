@@ -9,7 +9,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatDialog } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 

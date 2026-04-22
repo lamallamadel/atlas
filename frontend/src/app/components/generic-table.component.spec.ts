@@ -46,8 +46,8 @@ describe('GenericTableComponent', () => {
 
     fixture = TestBed.createComponent(GenericTableComponent);
     component = fixture.componentInstance;
-    component.columns = mockColumns;
-    component.data = mockData;
+    fixture.componentRef.setInput('columns', mockColumns);
+    fixture.componentRef.setInput('data', mockData);
     fixture.detectChanges();
   });
 
@@ -60,20 +60,20 @@ describe('GenericTableComponent', () => {
   });
 
   it('should update displayed columns including actions', () => {
-    component.showActions = true;
+    fixture.componentRef.setInput('showActions', true);
     component.updateDisplayedColumns();
     expect(component.displayedColumns).toEqual(['id', 'name', 'email', 'actions']);
   });
 
   it('should update displayed columns without actions', () => {
-    component.showActions = false;
+    fixture.componentRef.setInput('showActions', false);
     component.updateDisplayedColumns();
     expect(component.displayedColumns).toEqual(['id', 'name', 'email']);
   });
 
   it('should update displayed columns with selection', () => {
-    component.enableRowSelection = true;
-    component.showActions = false;
+    fixture.componentRef.setInput('enableRowSelection', true);
+    fixture.componentRef.setInput('showActions', false);
     component.updateDisplayedColumns();
     expect(component.displayedColumns).toEqual(['select', 'id', 'name', 'email']);
   });
@@ -127,7 +127,7 @@ describe('GenericTableComponent', () => {
   });
 
   it('should toggle all rows selection', () => {
-    component.enableRowSelection = true;
+    fixture.componentRef.setInput('enableRowSelection', true);
     component.toggleAllRows();
     expect(component.selection.selected.length).toBe(mockData.length);
     
@@ -136,7 +136,7 @@ describe('GenericTableComponent', () => {
   });
 
   it('should toggle individual row selection', () => {
-    component.enableRowSelection = true;
+    fixture.componentRef.setInput('enableRowSelection', true);
     const row = mockData[0];
     
     component.toggleRow(row);
@@ -147,7 +147,7 @@ describe('GenericTableComponent', () => {
   });
 
   it('should detect if all rows are selected', () => {
-    component.enableRowSelection = true;
+    fixture.componentRef.setInput('enableRowSelection', true);
     expect(component.isAllSelected()).toBe(false);
     
     component.selection.select(...mockData);
@@ -156,7 +156,7 @@ describe('GenericTableComponent', () => {
 
   it('should emit selection change event', () => {
     spyOn(component.selectionChange, 'emit');
-    component.enableRowSelection = true;
+    fixture.componentRef.setInput('enableRowSelection', true);
     
     component.toggleRow(mockData[0]);
     expect(component.selectionChange.emit).toHaveBeenCalledWith([mockData[0]]);
@@ -181,7 +181,7 @@ describe('GenericTableComponent', () => {
       { key: 'name', header: 'Name', width: '200px' }
     ];
     
-    component.columns = columnsWithWidth;
+    fixture.componentRef.setInput('columns', columnsWithWidth);
     component.initializeColumnWidths();
     
     expect(component.columnWidths.get('id')).toBe(100);

@@ -3,7 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { UserPreferencesService } from './user-preferences.service';
 import { UserPreferences, PendingUpdate } from '../models/user-preferences.model';
 import { OfflineService, ConnectionStatus } from './offline.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from "rxjs";
 import { environment } from '../../environments/environment';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 

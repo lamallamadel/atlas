@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { OutboundMessageFormComponent } from './outbound-message-form.component';
 import { OutboundMessageApiService } from '../../services/outbound-message-api.service';
 
@@ -22,9 +22,9 @@ describe('OutboundMessageFormComponent', () => {
 
     fixture = TestBed.createComponent(OutboundMessageFormComponent);
     component = fixture.componentInstance;
-    component.dossierId = 1;
-    component.recipientPhone = '+33612345678';
-    component.leadName = 'John Doe';
+    fixture.componentRef.setInput('dossierId', 1);
+    fixture.componentRef.setInput('recipientPhone', '+33612345678');
+    fixture.componentRef.setInput('leadName', 'John Doe');
   });
 
   it('should create', () => {
@@ -83,7 +83,7 @@ describe('OutboundMessageFormComponent', () => {
   });
 
   it('should validate form correctly', () => {
-    component.recipientPhone = '+33612345678';
+    fixture.componentRef.setInput('recipientPhone', '+33612345678');
     component.messageContent = 'Test message';
     expect(component.canSendMessage()).toBe(true);
 
@@ -91,7 +91,7 @@ describe('OutboundMessageFormComponent', () => {
     expect(component.canSendMessage()).toBe(false);
 
     component.messageContent = 'Test';
-    component.recipientPhone = '';
+    fixture.componentRef.setInput('recipientPhone', '');
     expect(component.canSendMessage()).toBe(false);
   });
 
@@ -112,7 +112,7 @@ describe('OutboundMessageFormComponent', () => {
     mockOutboundMessageService.create.and.returnValue(of(mockResponse));
     spyOn(component.messageSent, 'emit');
 
-    component.recipientPhone = '+33612345678';
+    fixture.componentRef.setInput('recipientPhone', '+33612345678');
     component.messageContent = 'Test message';
     component.sendMessage();
 
@@ -123,7 +123,7 @@ describe('OutboundMessageFormComponent', () => {
   it('should handle error when sending message', () => {
     mockOutboundMessageService.create.and.returnValue(throwError(() => ({ error: { message: 'Send failed' } })));
 
-    component.recipientPhone = '+33612345678';
+    fixture.componentRef.setInput('recipientPhone', '+33612345678');
     component.messageContent = 'Test message';
     component.sendMessage();
 

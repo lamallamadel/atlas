@@ -5,7 +5,7 @@ import { NotificationToastComponent } from './notification-toast.component';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { AriaLiveAnnouncerService } from '../services/aria-live-announcer.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 describe('NotificationToastComponent', () => {
   let component: NotificationToastComponent;

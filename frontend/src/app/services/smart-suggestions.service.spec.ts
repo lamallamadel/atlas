@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { SmartSuggestionsService } from './smart-suggestions.service';
 import { SmartSuggestionsApiService, SmartSuggestion } from './smart-suggestions-api.service';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 
 describe('SmartSuggestionsService', () => {
   let service: SmartSuggestionsService;

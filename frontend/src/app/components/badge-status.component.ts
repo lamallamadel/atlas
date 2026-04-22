@@ -23,7 +23,7 @@ interface StatusConfig {
 @Component({
     selector: 'app-badge-status',
     templateUrl: './badge-status.component.html',
-    styleUrls: ['./badge-status.component.css'],
+    styleUrls: ['./badge-status.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [MatChip, NgClass, MatTooltip, MatIcon]
 })

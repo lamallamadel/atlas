@@ -53,9 +53,9 @@ public class PortalPublicController {
                             : Sort.Direction.ASC;
             Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
             
-            // Force status to ONLY return published annonces
-            Page<AnnonceResponse> results = annonceService.list(AnnonceStatus.PUBLISHED, q, city, type, pageable);
-            return ResponseEntity.ok(results);
+            // Use a global search (cross-tenant) for the public portal
+            Page<Annonce> results = annonceService.findAll(AnnonceStatus.PUBLISHED, q, city, type, pageable);
+            return ResponseEntity.ok(results.map(annonceService.getAnnonceMapper()::toResponse));
         } finally {
             TenantContext.clear();
         }

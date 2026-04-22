@@ -51,8 +51,8 @@ export abstract class CardWidgetBaseComponent implements OnInit, OnDestroy {
   }
 
   updateSettings(settings: Record<string, unknown>): void {
-    config.settings = { ...config.settings, ...settings };
-    this.settingsChange.emit(config.settings);
+    const updatedSettings = { ...this.config().settings, ...settings };
+    this.settingsChange.emit(updatedSettings);
     this.loadData();
   }
 

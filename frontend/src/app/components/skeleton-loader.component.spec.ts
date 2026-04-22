@@ -30,56 +30,56 @@ describe('SkeletonLoaderComponent', () => {
     });
 
     it('should render list variant', () => {
-      component.variant = 'list';
+      fixture.componentRef.setInput('variant', 'list');
       fixture.detectChanges();
       const listElement = debugElement.query(By.css('.skeleton-list'));
       expect(listElement).toBeTruthy();
     });
 
     it('should render table variant', () => {
-      component.variant = 'table';
+      fixture.componentRef.setInput('variant', 'table');
       fixture.detectChanges();
       const tableElement = debugElement.query(By.css('.skeleton-table'));
       expect(tableElement).toBeTruthy();
     });
 
     it('should render form variant', () => {
-      component.variant = 'form';
+      fixture.componentRef.setInput('variant', 'form');
       fixture.detectChanges();
       const formElement = debugElement.query(By.css('.skeleton-form'));
       expect(formElement).toBeTruthy();
     });
 
     it('should render dashboard-kpi variant', () => {
-      component.variant = 'dashboard-kpi';
+      fixture.componentRef.setInput('variant', 'dashboard-kpi');
       fixture.detectChanges();
       const kpiElement = debugElement.query(By.css('.skeleton-dashboard-kpi'));
       expect(kpiElement).toBeTruthy();
     });
 
     it('should render detail variant', () => {
-      component.variant = 'detail';
+      fixture.componentRef.setInput('variant', 'detail');
       fixture.detectChanges();
       const detailElement = debugElement.query(By.css('.skeleton-detail'));
       expect(detailElement).toBeTruthy();
     });
 
     it('should render grid variant', () => {
-      component.variant = 'grid';
+      fixture.componentRef.setInput('variant', 'grid');
       fixture.detectChanges();
       const gridElement = debugElement.query(By.css('.skeleton-grid'));
       expect(gridElement).toBeTruthy();
     });
 
     it('should render message variant', () => {
-      component.variant = 'message';
+      fixture.componentRef.setInput('variant', 'message');
       fixture.detectChanges();
       const messageElement = debugElement.query(By.css('.skeleton-message'));
       expect(messageElement).toBeTruthy();
     });
 
     it('should render timeline variant', () => {
-      component.variant = 'timeline';
+      fixture.componentRef.setInput('variant', 'timeline');
       fixture.detectChanges();
       const timelineElement = debugElement.query(By.css('.skeleton-timeline'));
       expect(timelineElement).toBeTruthy();
@@ -88,31 +88,31 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Rows Configuration', () => {
     it('should render default 3 rows', () => {
-      component.variant = 'card';
+      fixture.componentRef.setInput('variant', 'card');
       fixture.detectChanges();
       const items = debugElement.queryAll(By.css('.skeleton-card-item'));
       expect(items.length).toBe(3);
     });
 
     it('should render custom number of rows', () => {
-      component.variant = 'list';
-      component.rows = 5;
+      fixture.componentRef.setInput('variant', 'list');
+      fixture.componentRef.setInput('rows', 5);
       fixture.detectChanges();
       const items = debugElement.queryAll(By.css('.skeleton-list-item'));
       expect(items.length).toBe(5);
     });
 
     it('should render single row', () => {
-      component.variant = 'card';
-      component.rows = 1;
+      fixture.componentRef.setInput('variant', 'card');
+      fixture.componentRef.setInput('rows', 1);
       fixture.detectChanges();
       const items = debugElement.queryAll(By.css('.skeleton-card-item'));
       expect(items.length).toBe(1);
     });
 
     it('should render many rows', () => {
-      component.variant = 'list';
-      component.rows = 15;
+      fixture.componentRef.setInput('variant', 'list');
+      fixture.componentRef.setInput('rows', 15);
       fixture.detectChanges();
       const items = debugElement.queryAll(By.css('.skeleton-list-item'));
       expect(items.length).toBe(15);
@@ -121,24 +121,24 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Columns Configuration', () => {
     it('should render default 8 columns in table', () => {
-      component.variant = 'table';
+      fixture.componentRef.setInput('variant', 'table');
       fixture.detectChanges();
       const headerCells = debugElement.queryAll(By.css('.skeleton-table-header-cell'));
       expect(headerCells.length).toBe(8);
     });
 
     it('should render custom number of columns', () => {
-      component.variant = 'table';
-      component.columns = 5;
+      fixture.componentRef.setInput('variant', 'table');
+      fixture.componentRef.setInput('columns', 5);
       fixture.detectChanges();
       const headerCells = debugElement.queryAll(By.css('.skeleton-table-header-cell'));
       expect(headerCells.length).toBe(5);
     });
 
     it('should render correct columns in each row', () => {
-      component.variant = 'table';
-      component.columns = 4;
-      component.rows = 2;
+      fixture.componentRef.setInput('variant', 'table');
+      fixture.componentRef.setInput('columns', 4);
+      fixture.componentRef.setInput('rows', 2);
       fixture.detectChanges();
       const rows = debugElement.queryAll(By.css('.skeleton-table-row'));
       rows.forEach(row => {
@@ -156,14 +156,14 @@ describe('SkeletonLoaderComponent', () => {
     });
 
     it('should disable animation when animate is false', () => {
-      component.animate = false;
+      fixture.componentRef.setInput('animate', false);
       fixture.detectChanges();
       const container = debugElement.query(By.css('.skeleton-container'));
       expect(container.nativeElement.classList.contains('skeleton-animated')).toBe(false);
     });
 
     it('should enable animation when animate is true', () => {
-      component.animate = true;
+      fixture.componentRef.setInput('animate', true);
       fixture.detectChanges();
       const container = debugElement.query(By.css('.skeleton-container'));
       expect(container.nativeElement.classList.contains('skeleton-animated')).toBe(true);
@@ -197,7 +197,7 @@ describe('SkeletonLoaderComponent', () => {
     });
 
     it('should mark skeleton content as aria-hidden', () => {
-      component.variant = 'card';
+      fixture.componentRef.setInput('variant', 'card');
       fixture.detectChanges();
       const skeletonContent = debugElement.query(By.css('.skeleton-card[aria-hidden="true"]'));
       expect(skeletonContent).toBeTruthy();
@@ -207,14 +207,14 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Helper Methods', () => {
     it('should generate rowsArray correctly', () => {
-      component.rows = 5;
+      fixture.componentRef.setInput('rows', 5);
       const rowsArray = component.rowsArray;
       expect(rowsArray.length).toBe(5);
       expect(rowsArray).toEqual([0, 1, 2, 3, 4]);
     });
 
     it('should generate columnsArray correctly', () => {
-      component.columns = 3;
+      fixture.componentRef.setInput('columns', 3);
       const columnsArray = component.columnsArray;
       expect(columnsArray.length).toBe(3);
       expect(columnsArray).toEqual([0, 1, 2]);
@@ -228,8 +228,8 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Visual Structure', () => {
     it('should render card with header, body, and footer', () => {
-      component.variant = 'card';
-      component.rows = 1;
+      fixture.componentRef.setInput('variant', 'card');
+      fixture.componentRef.setInput('rows', 1);
       fixture.detectChanges();
       
       expect(debugElement.query(By.css('.skeleton-card-header'))).toBeTruthy();
@@ -238,7 +238,7 @@ describe('SkeletonLoaderComponent', () => {
     });
 
     it('should render table with header and body', () => {
-      component.variant = 'table';
+      fixture.componentRef.setInput('variant', 'table');
       fixture.detectChanges();
       
       expect(debugElement.query(By.css('.skeleton-table-header'))).toBeTruthy();
@@ -246,8 +246,8 @@ describe('SkeletonLoaderComponent', () => {
     });
 
     it('should render form with groups and actions', () => {
-      component.variant = 'form';
-      component.rows = 3;
+      fixture.componentRef.setInput('variant', 'form');
+      fixture.componentRef.setInput('rows', 3);
       fixture.detectChanges();
       
       const groups = debugElement.queryAll(By.css('.skeleton-form-group'));
@@ -256,7 +256,7 @@ describe('SkeletonLoaderComponent', () => {
     });
 
     it('should render detail with header and content', () => {
-      component.variant = 'detail';
+      fixture.componentRef.setInput('variant', 'detail');
       fixture.detectChanges();
       
       expect(debugElement.query(By.css('.skeleton-detail-header'))).toBeTruthy();
@@ -274,24 +274,24 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Edge Cases', () => {
     it('should handle zero rows', () => {
-      component.variant = 'list';
-      component.rows = 0;
+      fixture.componentRef.setInput('variant', 'list');
+      fixture.componentRef.setInput('rows', 0);
       fixture.detectChanges();
       const items = debugElement.queryAll(By.css('.skeleton-list-item'));
       expect(items.length).toBe(0);
     });
 
     it('should handle zero columns', () => {
-      component.variant = 'table';
-      component.columns = 0;
+      fixture.componentRef.setInput('variant', 'table');
+      fixture.componentRef.setInput('columns', 0);
       fixture.detectChanges();
       const headerCells = debugElement.queryAll(By.css('.skeleton-table-header-cell'));
       expect(headerCells.length).toBe(0);
     });
 
     it('should handle large number of rows', () => {
-      component.variant = 'list';
-      component.rows = 100;
+      fixture.componentRef.setInput('variant', 'list');
+      fixture.componentRef.setInput('rows', 100);
       fixture.detectChanges();
       const items = debugElement.queryAll(By.css('.skeleton-list-item'));
       expect(items.length).toBe(100);
@@ -300,8 +300,8 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Message Variant Special Cases', () => {
     it('should alternate message directions', () => {
-      component.variant = 'message';
-      component.rows = 4;
+      fixture.componentRef.setInput('variant', 'message');
+      fixture.componentRef.setInput('rows', 4);
       fixture.detectChanges();
       
       const messages = debugElement.queryAll(By.css('.skeleton-message-item'));
@@ -318,8 +318,8 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Grid Variant Layout', () => {
     it('should render grid items with image and content', () => {
-      component.variant = 'grid';
-      component.rows = 3;
+      fixture.componentRef.setInput('variant', 'grid');
+      fixture.componentRef.setInput('rows', 3);
       fixture.detectChanges();
       
       const items = debugElement.queryAll(By.css('.skeleton-grid-item'));
@@ -334,8 +334,8 @@ describe('SkeletonLoaderComponent', () => {
 
   describe('Timeline Variant Structure', () => {
     it('should render timeline items with markers', () => {
-      component.variant = 'timeline';
-      component.rows = 4;
+      fixture.componentRef.setInput('variant', 'timeline');
+      fixture.componentRef.setInput('rows', 4);
       fixture.detectChanges();
       
       const items = debugElement.queryAll(By.css('.skeleton-timeline-item'));

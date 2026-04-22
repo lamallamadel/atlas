@@ -1,7 +1,8 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -13,7 +14,7 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 import { WhatsappMessagingUiComponent } from './whatsapp-messaging-ui.component';
 import { MessageApiService, MessageChannel, MessageDirection, MessageDeliveryStatus } from '../services/message-api.service';
@@ -37,7 +38,7 @@ describe('WhatsappMessagingUiComponent', () => {
     imports: [BrowserAnimationsModule,
         FormsModule,
         MatBottomSheetModule,
-        MatSnackBarModule,
+        
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
@@ -48,6 +49,7 @@ describe('WhatsappMessagingUiComponent', () => {
         ScrollingModule,
         TextFieldModule, WhatsappMessagingUiComponent],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: MessageApiService, useValue: messageApiServiceSpy },
         { provide: OutboundMessageApiService, useValue: outboundMessageApiServiceSpy },
         { provide: ConsentementApiService, useValue: consentementApiServiceSpy },
@@ -67,7 +69,7 @@ describe('WhatsappMessagingUiComponent', () => {
 
     fixture = TestBed.createComponent(WhatsappMessagingUiComponent);
     component = fixture.componentInstance;
-    component.dossierId = 1;
+    fixture.componentRef.setInput('dossierId', 1);
   });
 
   it('should create', () => {

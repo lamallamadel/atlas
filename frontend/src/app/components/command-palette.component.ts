@@ -48,7 +48,7 @@ interface FuzzyResult {
     imports: [FocusTrapDirective, MatIcon, FormsModule, MatProgressSpinner, AsyncPipe]
 })
 export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy {
-  readonly commandInput = viewChild.required<ElementRef>('commandInput');
+  readonly commandInput = viewChild<ElementRef>('commandInput');
 
   visible$: Observable<boolean>;
   searchQuery = '';
@@ -83,25 +83,20 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
     this.watchRoute();
 
     this.visible$.pipe(takeUntil(this.destroy$)).subscribe(visible => {
-      if (visible) {
+      const input = this.commandInput();
+      if (visible && input) {
         setTimeout(() => {
-          this.commandInput()?.nativeElement?.focus();
+          input.nativeElement.focus();
           this.updateFilteredItems();
         }, 100);
-      } else {
+      } else if (!visible) {
         this.resetState();
       }
     });
   }
 
   ngAfterViewInit(): void {
-    this.keyboardShortcutService.commandPaletteVisible$
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(visible => {
-        if (visible && this.commandInput()) {
-          setTimeout(() => this.commandInput().nativeElement.focus(), 100);
-        }
-      });
+    // Handled safely in ngOnInit via subscription
   }
 
   ngOnDestroy(): void {

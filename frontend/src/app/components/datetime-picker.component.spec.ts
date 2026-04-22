@@ -5,7 +5,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import DatetimePickerComponent from './datetime-picker.component';
+import { DatetimePickerComponent } from './datetime-picker.component';
 import { CommonModule } from '@angular/common';
 
 describe('DatetimePickerComponent', () => {
@@ -46,10 +46,10 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should accept custom input values', () => {
-      component.label = 'Custom Label';
-      component.required = true;
-      component.datePlaceholder = 'dd/mm/yyyy';
-      component.timePlaceholder = 'HH:MM';
+      fixture.componentRef.setInput('label', 'Custom Label');
+      fixture.componentRef.setInput('required', true);
+      fixture.componentRef.setInput('datePlaceholder', 'dd/mm/yyyy');
+      fixture.componentRef.setInput('timePlaceholder', 'HH:MM');
       fixture.detectChanges();
 
       expect(component.label()).toBe('Custom Label');
@@ -69,7 +69,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should create form with no validators when not required', () => {
-      component.required = false;
+      fixture.componentRef.setInput('required', false);
       component.ngOnInit();
 
       const dateControl = component.form.get('date');
@@ -80,7 +80,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should create form with required validators when required', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit();
 
       component.form.get('date')?.markAsTouched();
@@ -147,7 +147,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle writeValue before form initialization', () => {
-      const newComponent = new DatetimePickerComponent(formBuilder);
+      const newComponent = TestBed.runInInjectionContext(() => new DatetimePickerComponent(formBuilder));
       newComponent.writeValue('2024-06-15T14:30');
 
       // Form should not exist yet
@@ -288,7 +288,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle setDisabledState before form initialization gracefully', () => {
-      const newComponent = new DatetimePickerComponent(formBuilder);
+      const newComponent = TestBed.runInInjectionContext(() => new DatetimePickerComponent(formBuilder));
 
       expect(() => {
         newComponent.setDisabledState(true);
@@ -302,7 +302,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should return null when form is valid and not required', () => {
-      component.required = false;
+      fixture.componentRef.setInput('required', false);
       const control = new FormControl();
 
       const errors = component.validate(control);
@@ -311,7 +311,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should return required error when required and date is missing', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit(); // Re-initialize with required = true
       const control = new FormControl();
 
@@ -324,7 +324,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should return required error when required and time is missing', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit(); // Re-initialize with required = true
       const control = new FormControl();
 
@@ -359,7 +359,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle validate before form initialization', () => {
-      const newComponent = new DatetimePickerComponent(formBuilder);
+      const newComponent = TestBed.runInInjectionContext(() => new DatetimePickerComponent(formBuilder));
       const control = new FormControl();
 
       const errors = newComponent.validate(control);
@@ -458,7 +458,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should show required error when touched and required fields are empty', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit(); // Re-initialize with required = true
       component.form.markAsTouched();
 
@@ -466,14 +466,14 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should not show required error when not touched', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit(); // Re-initialize with required = true
 
       expect(component.showRequiredError).toBe(false);
     });
 
     it('should not show required error when fields are filled', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit(); // Re-initialize with required = true
       component.form.markAsTouched();
       component.form.get('date')?.setValue(new Date());
@@ -544,7 +544,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should render aria-label for required indicator', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -561,7 +561,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should display required error message when validation fails', () => {
-      component.required = true;
+      fixture.componentRef.setInput('required', true);
       component.ngOnInit();
       component.form.markAsTouched();
       fixture.detectChanges();
@@ -608,7 +608,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should display custom label', () => {
-      component.label = 'Rendez-vous';
+      fixture.componentRef.setInput('label', 'Rendez-vous');
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -618,8 +618,8 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should apply custom placeholders', () => {
-      component.datePlaceholder = 'Select date';
-      component.timePlaceholder = 'Select time';
+      fixture.componentRef.setInput('datePlaceholder', 'Select date');
+      fixture.componentRef.setInput('timePlaceholder', 'Select time');
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;

@@ -20,12 +20,12 @@ describe('WaterfallChartComponent', () => {
     });
 
     it('should compute waterfall data correctly based on entries', () => {
-        component.entries = [
+        fixture.componentRef.setInput('entries', [
             { label: 'Initial', value: 100, isTotal: true },
             { label: 'Gain', value: 50 },
             { label: 'Loss', value: -30 },
             { label: 'Final', value: 0, isTotal: true }
-        ];
+        ]);
 
         fixture.detectChanges();
 
@@ -46,9 +46,9 @@ describe('WaterfallChartComponent', () => {
     it('should rebuild chart on changes', () => {
         spyOn<any>(component, 'buildChart').and.callThrough();
 
-        component.entries = [
+        fixture.componentRef.setInput('entries', [
             { label: 'Initial', value: 100 }
-        ];
+        ]);
 
         // simulate ngOnChanges not as firstChange
         component.ngOnChanges({

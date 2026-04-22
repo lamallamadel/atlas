@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, discardPeriodicTasks } from '@angular/core/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { ProgressBarComponent } from './progress-bar.component';
-import { SimpleChange } from '@angular/core';
 
 describe('ProgressBarComponent', () => {
   let component: ProgressBarComponent;
@@ -9,9 +8,8 @@ describe('ProgressBarComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [BrowserAnimationsModule, ProgressBarComponent]
-})
-    .compileComponents();
+      imports: [BrowserAnimationsModule, ProgressBarComponent]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ProgressBarComponent);
     component = fixture.componentInstance;
@@ -23,7 +21,7 @@ describe('ProgressBarComponent', () => {
   });
 
   it('should not display progress bar when isNavigating is false', () => {
-    component.isNavigating = false;
+    fixture.componentRef.setInput('isNavigating', false);
     fixture.detectChanges();
     
     const progressBarContainer = fixture.nativeElement.querySelector('.progress-bar-container');
@@ -31,7 +29,7 @@ describe('ProgressBarComponent', () => {
   });
 
   it('should display progress bar when isNavigating is true', () => {
-    component.isNavigating = true;
+    fixture.componentRef.setInput('isNavigating', true);
     fixture.detectChanges();
     
     const progressBarContainer = fixture.nativeElement.querySelector('.progress-bar-container');
@@ -39,10 +37,8 @@ describe('ProgressBarComponent', () => {
   });
 
   it('should start progress when navigation begins', fakeAsync(() => {
-    component.isNavigating = true;
-    component.ngOnChanges({
-      isNavigating: new SimpleChange(false, true, false)
-    });
+    fixture.componentRef.setInput('isNavigating', true);
+    fixture.detectChanges();
     
     expect(component.progress).toBe(0);
     
@@ -53,17 +49,13 @@ describe('ProgressBarComponent', () => {
   }));
 
   it('should complete progress when navigation ends', fakeAsync(() => {
-    component.isNavigating = true;
-    component.ngOnChanges({
-      isNavigating: new SimpleChange(false, true, false)
-    });
+    fixture.componentRef.setInput('isNavigating', true);
+    fixture.detectChanges();
     
     tick(200);
     
-    component.isNavigating = false;
-    component.ngOnChanges({
-      isNavigating: new SimpleChange(true, false, false)
-    });
+    fixture.componentRef.setInput('isNavigating', false);
+    fixture.detectChanges();
     
     expect(component.progress).toBe(100);
     
@@ -73,10 +65,8 @@ describe('ProgressBarComponent', () => {
   }));
 
   it('should not exceed 90% progress during navigation', fakeAsync(() => {
-    component.isNavigating = true;
-    component.ngOnChanges({
-      isNavigating: new SimpleChange(false, true, false)
-    });
+    fixture.componentRef.setInput('isNavigating', true);
+    fixture.detectChanges();
     
     for (let i = 0; i < 50; i++) {
       tick(200);
@@ -87,10 +77,8 @@ describe('ProgressBarComponent', () => {
   }));
 
   it('should clear interval on component destroy', () => {
-    component.isNavigating = true;
-    component.ngOnChanges({
-      isNavigating: new SimpleChange(false, true, false)
-    });
+    fixture.componentRef.setInput('isNavigating', true);
+    fixture.detectChanges();
     
     const clearIntervalSpy = spyOn(window, 'clearInterval');
     component.ngOnDestroy();
@@ -99,7 +87,9 @@ describe('ProgressBarComponent', () => {
   });
 
   it('should apply correct styles for progress bar', () => {
-    component.isNavigating = true;
+    fixture.componentRef.setInput('isNavigating', true);
+    fixture.detectChanges();
+    
     component.progress = 50;
     fixture.detectChanges();
     

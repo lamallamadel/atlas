@@ -36,7 +36,7 @@ describe('LogoInlineComponent', () => {
   });
 
   it('should generate horizontal SVG for horizontal variant', () => {
-    component.variant = 'horizontal';
+    fixture.componentRef.setInput('variant', 'horizontal');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('ATLAS');
@@ -44,42 +44,42 @@ describe('LogoInlineComponent', () => {
   });
 
   it('should generate vertical SVG for vertical variant', () => {
-    component.variant = 'vertical';
+    fixture.componentRef.setInput('variant', 'vertical');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('viewBox="0 0 160 200"');
   });
 
   it('should generate icon SVG for icon variant', () => {
-    component.variant = 'icon';
+    fixture.componentRef.setInput('variant', 'icon');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('viewBox="0 0 80 80"');
   });
 
   it('should apply dark theme colors', () => {
-    component.theme = 'dark';
+    fixture.componentRef.setInput('theme', 'dark');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('#90CAF9');
   });
 
   it('should apply light theme colors', () => {
-    component.theme = 'light';
+    fixture.componentRef.setInput('theme', 'light');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('#42A5F5');
   });
 
   it('should apply monochrome theme', () => {
-    component.theme = 'mono';
+    fixture.componentRef.setInput('theme', 'mono');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('#212121');
   });
 
   it('should add animated class when animate is true', (done) => {
-    component.animate = true;
+    fixture.componentRef.setInput('animate', true);
     component.ngOnInit();
     
     setTimeout(() => {
@@ -90,7 +90,7 @@ describe('LogoInlineComponent', () => {
   });
 
   it('should not add animated class when animate is false', (done) => {
-    component.animate = false;
+    fixture.componentRef.setInput('animate', false);
     component.ngOnInit();
     
     setTimeout(() => {
@@ -101,26 +101,26 @@ describe('LogoInlineComponent', () => {
   });
 
   it('should generate container class with variant', () => {
-    component.variant = 'horizontal';
+    fixture.componentRef.setInput('variant', 'horizontal');
     expect(component.containerClass).toContain('logo-horizontal');
   });
 
   it('should apply custom width', () => {
-    component.width = '300px';
+    fixture.componentRef.setInput('width', '300px');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('width="300px"');
   });
 
   it('should apply custom height', () => {
-    component.height = '150px';
+    fixture.componentRef.setInput('height', '150px');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('height="150px"');
   });
 
   it('should include aria label in SVG', () => {
-    component.ariaLabel = 'Custom Logo Label';
+    fixture.componentRef.setInput('ariaLabel', 'Custom Logo Label');
     component.ngOnInit();
     const svgString = component.svgContent.toString();
     expect(svgString).toContain('Custom Logo Label');

@@ -52,6 +52,10 @@ public class AnnonceService {
         this.brainScoringService = brainScoringService;
     }
 
+    public AnnonceMapper getAnnonceMapper() {
+        return this.annonceMapper;
+    }
+
     @Transactional
     public AnnonceResponse create(AnnonceCreateRequest request) {
         String orgId = TenantContext.getOrgId();

@@ -1,7 +1,7 @@
 import { Component, Pipe, PipeTransform, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError, EMPTY } from 'rxjs';
+import { of, throwError, EMPTY } from "rxjs";
 
 import { AnnonceDetailComponent } from './annonce-detail.component';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';

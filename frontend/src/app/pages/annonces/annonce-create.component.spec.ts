@@ -10,7 +10,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 import { AnnonceCreateComponent } from './annonce-create.component';
 import { AnnonceApiService } from '../../services/annonce-api.service';

@@ -74,7 +74,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should display empty state when no photos', () => {
-    component.photos = [];
+    fixture.componentRef.setInput('photos', []);
     fixture.detectChanges();
     
     const emptyState = fixture.nativeElement.querySelector('.empty-state');
@@ -83,7 +83,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should display photos in masonry layout', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     fixture.detectChanges();
     
     const masonryGrid = fixture.nativeElement.querySelector('.masonry-grid');
@@ -91,7 +91,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should open lightbox when photo is clicked', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     component.openLightbox(0);
     
     expect(component.lightboxOpen).toBe(true);
@@ -106,7 +106,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should navigate to next photo', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 0;
     component.nextPhoto();
     
@@ -114,7 +114,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should navigate to previous photo', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 1;
     component.previousPhoto();
     
@@ -122,7 +122,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should not navigate beyond bounds', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 0;
     component.previousPhoto();
     expect(component.currentPhotoIndex).toBe(0);
@@ -154,8 +154,8 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should emit photosReordered on drag and drop', () => {
-    component.photos = mockPhotos;
-    component.editable = true;
+    fixture.componentRef.setInput('photos', mockPhotos);
+    fixture.componentRef.setInput('editable', true);
     
     spyOn(component.photosReordered, 'emit');
     
@@ -192,11 +192,11 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should get masonry columns based on viewport', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     
     spyOn(component, 'getColumnCount').and.returnValue(3);
     
-    const columns = component.getMasonryColumns();
+    const columns = component.masonryColumns();
     
     expect(columns.length).toBe(3);
   });
@@ -211,7 +211,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should get current photo', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 1;
     
     const currentPhoto = component.getCurrentPhoto();
@@ -220,7 +220,7 @@ describe('PhotoGalleryComponent', () => {
   });
 
   it('should go to thumbnail', () => {
-    component.photos = mockPhotos;
+    fixture.componentRef.setInput('photos', mockPhotos);
     component.goToThumbnail(2);
     
     expect(component.currentPhotoIndex).toBe(2);

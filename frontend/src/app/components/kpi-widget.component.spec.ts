@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { KpiWidgetComponent } from './kpi-widget.component';
 import { DashboardKpiService } from '../services/dashboard-kpi.service';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('KpiWidgetComponent', () => {
@@ -28,7 +28,7 @@ describe('KpiWidgetComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(KpiWidgetComponent);
     component = fixture.componentInstance;
-    component.config = {
+    fixture.componentRef.setInput('config', {
       id: 'test-1',
       type: 'kpi-conversion',
       title: 'Test KPI',
@@ -36,7 +36,7 @@ describe('KpiWidgetComponent', () => {
       y: 0,
       cols: 4,
       rows: 3
-    };
+    });
   });
 
   it('should create', () => {

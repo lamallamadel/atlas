@@ -34,35 +34,35 @@ describe('SpinnerComponent', () => {
   });
 
   it('should display linear spinner when variant is linear', () => {
-    component.variant = 'linear';
+    fixture.componentRef.setInput('variant', 'linear');
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.spinner-linear')).toBeTruthy();
   });
 
   it('should display dots spinner when variant is dots', () => {
-    component.variant = 'dots';
+    fixture.componentRef.setInput('variant', 'dots');
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.spinner-dots')).toBeTruthy();
   });
 
   it('should apply size class correctly', () => {
-    component.size = 'lg';
+    fixture.componentRef.setInput('size', 'lg');
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.spinner-lg')).toBeTruthy();
   });
 
   it('should apply color class correctly', () => {
-    component.color = 'white';
+    fixture.componentRef.setInput('color', 'white');
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.spinner-white')).toBeTruthy();
   });
 
   it('should display message when provided', () => {
-    component.message = 'Loading data...';
+    fixture.componentRef.setInput('message', 'Loading data...');
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
     const messageElement = compiled.querySelector('.spinner-message');
@@ -71,14 +71,14 @@ describe('SpinnerComponent', () => {
   });
 
   it('should display cancel button when showCancelButton is true', () => {
-    component.showCancelButton = true;
+    fixture.componentRef.setInput('showCancelButton', true);
     fixture.detectChanges();
     const compiled = fixture.nativeElement;
     expect(compiled.querySelector('.spinner-cancel-btn')).toBeTruthy();
   });
 
   it('should emit cancel event when cancel button is clicked', () => {
-    component.showCancelButton = true;
+    fixture.componentRef.setInput('showCancelButton', true);
     fixture.detectChanges();
     
     spyOn(component.cancel, 'emit');
@@ -89,7 +89,7 @@ describe('SpinnerComponent', () => {
   });
 
   it('should show timeout message after timeout period', fakeAsync(() => {
-    component.timeout = 1000;
+    fixture.componentRef.setInput('timeout', 1000);
     fixture.detectChanges();
     
     expect(component.showTimeoutMessage).toBe(false);
@@ -100,7 +100,7 @@ describe('SpinnerComponent', () => {
   }));
 
   it('should emit timeoutReached event after timeout', fakeAsync(() => {
-    component.timeout = 1000;
+    fixture.componentRef.setInput('timeout', 1000);
     spyOn(component.timeoutReached, 'emit');
     
     fixture.detectChanges();
@@ -110,7 +110,7 @@ describe('SpinnerComponent', () => {
   }));
 
   it('should clear timeout on destroy', fakeAsync(() => {
-    component.timeout = 1000;
+    fixture.componentRef.setInput('timeout', 1000);
     fixture.detectChanges();
     component.ngOnDestroy();
     tick(1000);
@@ -118,16 +118,16 @@ describe('SpinnerComponent', () => {
   }));
 
   it('should not set timeout when timeout is 0', () => {
-    component.timeout = 0;
+    fixture.componentRef.setInput('timeout', 0);
     fixture.detectChanges();
     
     expect(component.showTimeoutMessage).toBe(false);
   });
 
   it('should apply all class combinations correctly', () => {
-    component.variant = 'dots';
-    component.size = 'sm';
-    component.color = 'neutral';
+    fixture.componentRef.setInput('variant', 'dots');
+    fixture.componentRef.setInput('size', 'sm');
+    fixture.componentRef.setInput('color', 'neutral');
     fixture.detectChanges();
     
     const container = fixture.nativeElement.querySelector('.spinner-container');

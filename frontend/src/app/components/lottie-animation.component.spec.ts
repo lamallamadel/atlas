@@ -31,7 +31,7 @@ describe('LottieAnimationComponent', () => {
   });
 
   it('should set useFallback to true on animation load error', fakeAsync(() => {
-    component.animationType = 'search-empty';
+    fixture.componentRef.setInput('animationType', 'search-empty');
     let emittedError: Error | null = null;
     component.animationError.subscribe((err: Error) => { emittedError = err; });
 
@@ -55,36 +55,36 @@ describe('LottieAnimationComponent', () => {
   }));
 
   it('should return correct fallback icon for animation type', () => {
-    component.animationType = 'search-empty';
+    fixture.componentRef.setInput('animationType', 'search-empty');
     expect(component.getFallbackIcon()).toBe('search');
 
-    component.animationType = 'success';
+    fixture.componentRef.setInput('animationType', 'success');
     expect(component.getFallbackIcon()).toBe('check_circle');
 
-    component.animationType = 'error';
+    fixture.componentRef.setInput('animationType', 'error');
     expect(component.getFallbackIcon()).toBe('error');
 
-    component.animationType = 'upload';
+    fixture.componentRef.setInput('animationType', 'upload');
     expect(component.getFallbackIcon()).toBe('cloud_upload');
 
-    component.animationType = 'maintenance';
+    fixture.componentRef.setInput('animationType', 'maintenance');
     expect(component.getFallbackIcon()).toBe('build');
   });
 
   it('should return correct fallback color for animation type', () => {
-    component.animationType = 'search-empty';
+    fixture.componentRef.setInput('animationType', 'search-empty');
     expect(component.getFallbackColor()).toBe('#667eea');
 
-    component.animationType = 'success';
+    fixture.componentRef.setInput('animationType', 'success');
     expect(component.getFallbackColor()).toBe('#2bbb72');
 
-    component.animationType = 'error';
+    fixture.componentRef.setInput('animationType', 'error');
     expect(component.getFallbackColor()).toBe('#f24545');
 
-    component.animationType = 'upload';
+    fixture.componentRef.setInput('animationType', 'upload');
     expect(component.getFallbackColor()).toBe('#667eea');
 
-    component.animationType = 'maintenance';
+    fixture.componentRef.setInput('animationType', 'maintenance');
     expect(component.getFallbackColor()).toBe('#9ca3af');
   });
 

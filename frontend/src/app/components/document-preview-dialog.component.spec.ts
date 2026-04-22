@@ -8,7 +8,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { CommonModule } from '@angular/common';
 import { DocumentPreviewDialogComponent } from './document-preview-dialog.component';
 import { DocumentApiService } from '../services/document-api.service';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 describe('DocumentPreviewDialogComponent', () => {
   let component: DocumentPreviewDialogComponent;

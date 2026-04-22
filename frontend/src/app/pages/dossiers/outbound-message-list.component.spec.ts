@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { OutboundMessageListComponent } from './outbound-message-list.component';
 import { OutboundMessageApiService, OutboundMessageStatus } from '../../services/outbound-message-api.service';
 
@@ -21,7 +21,7 @@ describe('OutboundMessageListComponent', () => {
 
     fixture = TestBed.createComponent(OutboundMessageListComponent);
     component = fixture.componentInstance;
-    component.dossierId = 1;
+    fixture.componentRef.setInput('dossierId', 1);
   });
 
   it('should create', () => {

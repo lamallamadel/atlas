@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class SeedDataLoader implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(SeedDataLoader.class);
-    private static final String ORG_001 = "ORG-001";
+    private static final String ORG_001 = "default"; // Aligned with portal bypass
     private static final String ORG_002 = "ORG-002";
 
     private final AnnonceRepository annonceRepository;
@@ -667,7 +667,7 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce1.setSurface(120.5);
         annonce1.setPrice(new BigDecimal("450000.00"));
         annonce1.setCurrency("EUR");
-        annonce1.setStatus(AnnonceStatus.ACTIVE);
+        annonce1.setStatus(AnnonceStatus.PUBLISHED);
         annonce1.setPhotos(
                 Arrays.asList(
                         "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=800&q=80",
@@ -693,7 +693,7 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce2.setSurface(250.0);
         annonce2.setPrice(new BigDecimal("3500.00"));
         annonce2.setCurrency("EUR");
-        annonce2.setStatus(AnnonceStatus.PAUSED);
+        annonce2.setStatus(AnnonceStatus.PUBLISHED);
         annonce2.setMeta(Map.of("source", "seed", "org", ORG_001));
         annonce2.setCreatedBy("system-seed");
         annonce2.setUpdatedBy("system-seed");
@@ -712,7 +712,7 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce3.setSurface(95.0);
         annonce3.setPrice(new BigDecimal("650000.00"));
         annonce3.setCurrency("EUR");
-        annonce3.setStatus(AnnonceStatus.ACTIVE);
+        annonce3.setStatus(AnnonceStatus.PUBLISHED);
         annonce3.setPhotos(
                 Arrays.asList(
                         "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=800&q=80"));
@@ -732,7 +732,7 @@ public class SeedDataLoader implements CommandLineRunner {
         annonce4.setSurface(48.0);
         annonce4.setPrice(new BigDecimal("1350.00"));
         annonce4.setCurrency("EUR");
-        annonce4.setStatus(AnnonceStatus.ACTIVE);
+        annonce4.setStatus(AnnonceStatus.PUBLISHED);
         annonce4.setMeta(Map.of("source", "seed", "org", ORG_002));
         annonce4.setCreatedBy("system-seed");
         annonce4.setUpdatedBy("system-seed");

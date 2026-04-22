@@ -33,9 +33,9 @@
     </mat-button-toggle-group>
   </div>
 
-  @if (!loading || notifications.length > 0) {
+  @if (!loading || (notifications && notifications.length > 0)) {
     <div class="notification-list" role="list" aria-label="Liste des notifications">
-      @if (groupedNotifications.length === 0 && !loading) {
+      @if ((groupedNotifications || []).length === 0 && !loading) {
         <div class="empty-state" role="status">
           <mat-icon aria-hidden="true">notifications_none</mat-icon>
           <p>Aucune notification</p>
@@ -115,7 +115,7 @@
     </div>
   }
 
-  @if (loading && notifications.length === 0) {
+  @if (loading && (notifications || []).length === 0) {
     <div class="notification-loading" role="status" aria-live="polite">
       <mat-spinner diameter="40" aria-label="Chargement en cours"></mat-spinner>
       <p>Chargement des notifications...</p>

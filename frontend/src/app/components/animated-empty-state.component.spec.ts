@@ -51,10 +51,10 @@ describe('AnimatedEmptyStateComponent', () => {
 
   it('should call primaryAction handler when onPrimaryClick is called', () => {
     const handlerSpy = jasmine.createSpy('handler');
-    component.primaryAction = {
+    fixture.componentRef.setInput('primaryAction', {
       label: 'Test',
       handler: handlerSpy
-    };
+    });
 
     component.onPrimaryClick();
 
@@ -63,10 +63,10 @@ describe('AnimatedEmptyStateComponent', () => {
 
   it('should call secondaryAction handler when onSecondaryClick is called', () => {
     const handlerSpy = jasmine.createSpy('handler');
-    component.secondaryAction = {
+    fixture.componentRef.setInput('secondaryAction', {
       label: 'Test',
       handler: handlerSpy
-    };
+    });
 
     component.onSecondaryClick();
 
@@ -75,10 +75,10 @@ describe('AnimatedEmptyStateComponent', () => {
 
   it('should open help link when onHelpLinkClick is called', () => {
     spyOn(window, 'open');
-    component.helpLink = {
+    fixture.componentRef.setInput('helpLink', {
       label: 'Help',
       url: 'https://example.com'
-    };
+    });
 
     component.onHelpLinkClick();
 
@@ -86,9 +86,9 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should not throw when clicking actions without handlers', () => {
-    component.primaryAction = undefined;
-    component.secondaryAction = undefined;
-    component.helpLink = undefined;
+    fixture.componentRef.setInput('primaryAction', undefined);
+    fixture.componentRef.setInput('secondaryAction', undefined);
+    fixture.componentRef.setInput('helpLink', undefined);
 
     expect(() => component.onPrimaryClick()).not.toThrow();
     expect(() => component.onSecondaryClick()).not.toThrow();
@@ -108,9 +108,9 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should render title and message', () => {
-    component.title = 'Test Title';
-    component.message = 'Test Message';
-    component.animationType = 'search-empty';
+    fixture.componentRef.setInput('title', 'Test Title');
+    fixture.componentRef.setInput('message', 'Test Message');
+    fixture.componentRef.setInput('animationType', 'search-empty');
     fixture.detectChanges();
 
     expect(component.title()).toBe('Test Title');
@@ -129,11 +129,11 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should render primary action button when provided', () => {
-    component.primaryAction = {
+    fixture.componentRef.setInput('primaryAction', {
       label: 'Primary Action',
       icon: 'add',
       handler: () => { /* no-op for test */ }
-    };
+    });
     fixture.detectChanges();
 
     expect(component.primaryAction()?.label).toBe('Primary Action');
@@ -145,11 +145,11 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should render secondary action button when provided', () => {
-    component.secondaryAction = {
+    fixture.componentRef.setInput('secondaryAction', {
       label: 'Secondary Action',
       icon: 'close',
       handler: () => { /* no-op for test */ }
-    };
+    });
     fixture.detectChanges();
 
     expect(component.secondaryAction()?.label).toBe('Secondary Action');
@@ -161,10 +161,10 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should render help link when provided', () => {
-    component.helpLink = {
+    fixture.componentRef.setInput('helpLink', {
       label: 'Need help?',
       url: 'https://help.example.com'
-    };
+    });
     fixture.detectChanges();
 
     expect(component.helpLink()?.label).toBe('Need help?');
@@ -176,11 +176,11 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should pass animation properties to lottie component', () => {
-    component.animationType = 'success';
-    component.animationWidth = 300;
-    component.animationHeight = 300;
-    component.loop = false;
-    component.showControls = true;
+    fixture.componentRef.setInput('animationType', 'success');
+    fixture.componentRef.setInput('animationWidth', 300);
+    fixture.componentRef.setInput('animationHeight', 300);
+    fixture.componentRef.setInput('loop', false);
+    fixture.componentRef.setInput('showControls', true);
     fixture.detectChanges();
 
     // Verify the template bindings are correct

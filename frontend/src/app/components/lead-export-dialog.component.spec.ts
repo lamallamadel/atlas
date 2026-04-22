@@ -1,7 +1,9 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -28,7 +30,7 @@ describe('LeadExportDialogComponent', () => {
         FormsModule,
         BrowserAnimationsModule,
         MatDialogModule,
-        MatSnackBarModule,
+        
         MatIconModule,
         MatButtonModule,
         MatCheckboxModule,
@@ -38,6 +40,7 @@ describe('LeadExportDialogComponent', () => {
         MatInputModule,
         MatProgressBarModule, LeadExportDialogComponent],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
         LeadApiService,
         provideHttpClient(withInterceptorsFromDi()),

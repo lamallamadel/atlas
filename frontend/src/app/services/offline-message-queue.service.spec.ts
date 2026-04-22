@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { OfflineMessageQueueService } from './offline-message-queue.service';
 import { MessageApiService, MessageCreateRequest, MessageChannel, MessageDirection } from './message-api.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';

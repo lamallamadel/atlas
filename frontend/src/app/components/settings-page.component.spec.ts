@@ -14,7 +14,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { SettingsPageComponent } from './settings-page.component';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { ThemeService } from '../services/theme.service';

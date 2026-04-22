@@ -1,6 +1,9 @@
 import { Directive, ElementRef, OnDestroy, OnInit, input, output } from '@angular/core';
 
-@Directive({ selector: '[appInfiniteScroll]' })
+@Directive({
+  selector: '[appInfiniteScroll]',
+  standalone: true
+})
 export class InfiniteScrollDirective implements OnInit, OnDestroy {
   readonly scrollThreshold = input(0.8);
   readonly scrollDebounceTime = input(200);
@@ -75,7 +78,7 @@ export class InfiniteScrollDirective implements OnInit, OnDestroy {
   }
 
   private onScroll(): void {
-    // TODO: The 'emit' function requires a mandatory void argument
+    // The 'emit' function requires a mandatory void argument
     this.scrolled.emit();
   }
 }

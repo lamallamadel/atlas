@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { MessagingTabComponent } from './messaging-tab.component';
 import { OutboundMessageFormComponent } from './outbound-message-form.component';
 import { OutboundMessageListComponent } from './outbound-message-list.component';
@@ -35,7 +35,7 @@ describe('MessagingTabComponent', () => {
 
     fixture = TestBed.createComponent(MessagingTabComponent);
     component = fixture.componentInstance;
-    component.dossierId = 1;
+    fixture.componentRef.setInput('dossierId', 1);
   });
 
   it('should create', () => {

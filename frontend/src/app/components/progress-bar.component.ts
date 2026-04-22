@@ -1,4 +1,4 @@
-import { Component, OnChanges, OnDestroy, SimpleChanges, input } from '@angular/core';
+import { Component, OnDestroy, effect, input } from '@angular/core';
 import { trigger, state, style, transition, animate } from '@angular/animations';
 
 @Component({
@@ -57,21 +57,22 @@ import { trigger, state, style, transition, animate } from '@angular/animations'
                 animate('150ms ease-in')
             ])
         ])
-    ]
+    ],
+    standalone: true
 })
-export class ProgressBarComponent implements OnChanges, OnDestroy {
+export class ProgressBarComponent implements OnDestroy {
   readonly isNavigating = input(false);
   progress = 0;
   private progressInterval: any;
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isNavigating']) {
+  constructor() {
+    effect(() => {
       if (this.isNavigating()) {
         this.startProgress();
       } else {
         this.completeProgress();
       }
-    }
+    });
   }
 
   private startProgress(): void {

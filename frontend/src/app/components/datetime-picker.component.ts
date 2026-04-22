@@ -31,9 +31,10 @@ import { MatDatepickerInput, MatDatepickerToggle, MatDatepicker } from '@angular
             multi: true
         }
     ],
+    standalone: true,
     imports: [FormsModule, ReactiveFormsModule, MatFormField, MatLabel, MatInput, MatDatepickerInput, MatDatepickerToggle, MatSuffix, MatDatepicker]
 })
-class DatetimePickerComponent
+export class DatetimePickerComponent
   implements ControlValueAccessor, Validator, OnInit, OnDestroy
 {
   readonly label = input('Date et heure');
@@ -46,8 +47,8 @@ class DatetimePickerComponent
   private pendingValue: string | null = null;
 
   private destroy$ = new Subject<void>();
-  private onChange: (value: string) => void = (value) => {console.log("value changed new value : $" , value)};
-  private onTouched: () => void = () => {console.log("Touched");};
+  private onChange: (value: string) => void = (_value) => {};
+  private onTouched: () => void = () => {};
 
   constructor(private fb: FormBuilder) {}
 
@@ -128,11 +129,12 @@ class DatetimePickerComponent
   }
 
   markTouched(): void {
-    this.onTouched();
-    this.form.markAllAsTouched();
+    if (this.onTouched) this.onTouched();
+    if (this.form) this.form.markAllAsTouched();
   }
 
   get showRequiredError(): boolean {
+    if (!this.form) return false;
     return (
       this.form.touched &&
       this.required() &&
@@ -141,10 +143,12 @@ class DatetimePickerComponent
   }
 
   get showInvalidTimeError(): boolean {
+    if (!this.form) return false;
     return this.form.touched && !!this.form.get('time')?.hasError('invalidTime');
   }
 
   private buildLocalDateTimeString(): string {
+    if (!this.form) return '';
     const date: Date | null = this.form.get('date')?.value ?? null;
     const time: string = this.form.get('time')?.value ?? '';
 
@@ -160,7 +164,6 @@ class DatetimePickerComponent
   }
 
   private parseIncoming(value: string): { date: Date; time: string } | null {
-    // Accept either "YYYY-MM-DDTHH:mm" or full ISO strings.
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return null;
     const hours = String(d.getHours()).padStart(2, '0');
@@ -180,5 +183,3 @@ class DatetimePickerComponent
     return hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59;
   }
 }
-
-export default DatetimePickerComponent

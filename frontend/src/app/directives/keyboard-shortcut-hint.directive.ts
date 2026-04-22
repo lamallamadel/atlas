@@ -2,7 +2,10 @@ import { Directive, OnInit, ElementRef, Renderer2, OnDestroy, input } from '@ang
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Subscription } from 'rxjs';
 
-@Directive({ selector: '[appKeyboardShortcutHint]' })
+@Directive({
+    selector: '[appKeyboardShortcutHint]',
+    standalone: true
+})
 export class KeyboardShortcutHintDirective implements OnInit, OnDestroy {
   readonly appKeyboardShortcutHint = input('');
   

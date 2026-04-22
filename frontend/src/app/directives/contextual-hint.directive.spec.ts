@@ -3,6 +3,7 @@ import { Component } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ContextualHintDirective } from './contextual-hint.directive';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @Component({
     template: `
@@ -11,7 +12,8 @@ import { ContextualHintDirective } from './contextual-hint.directive';
       [appContextualHint]="hints"
       [hintControl]="testControl">
   `,
-    imports: [ReactiveFormsModule, MatTooltipModule]
+    standalone: true,
+    imports: [ReactiveFormsModule, MatTooltipModule, ContextualHintDirective]
 })
 class TestComponent {
   testControl = new FormControl('');
@@ -29,8 +31,14 @@ describe('ContextualHintDirective', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [ReactiveFormsModule, MatTooltipModule, ContextualHintDirective, TestComponent]
-}).compileComponents();
+      imports: [
+        ReactiveFormsModule, 
+        MatTooltipModule, 
+        BrowserAnimationsModule,
+        ContextualHintDirective, 
+        TestComponent
+      ]
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;

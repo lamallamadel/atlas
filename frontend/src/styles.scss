@@ -1,22 +1,25 @@
+@use "sass:meta";
+@use 'styles/_atlasia-tokens.scss';
+
 /* ─── Atlasia Fonts (Portail + Vitrine + Espace Pro) ─── */
 @import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap");
 
 /* ─── Atlasia Design System ─── */
-@import './styles/_atlasia-tokens.scss';
-@import './styles/_atlasia-shared.scss';
+
+@include meta.load-css('styles/_atlasia-shared.scss');
 
 @import './styles/animations.css';
 @import './styles/pages.css';
 @import './styles/material-overrides.css';
 @import './styles/document-preview-dialog.css';
 
-@import './styles/_color-utilities.scss';
-@import './styles/cards.scss';
+@include meta.load-css('styles/_color-utilities.scss');
+@include meta.load-css('styles/cards.scss');
 @import './styles/mobile-pwa.css';
-@import './styles/mobile-optimizations.scss';
-@import './styles/chart-visualization.scss';
-@import './styles/forms-elegant.scss';
-@import './styles/rtl.scss';
+@include meta.load-css('styles/mobile-optimizations.scss');
+@include meta.load-css('styles/chart-visualization.scss');
+@include meta.load-css('styles/forms-elegant.scss');
+@include meta.load-css('styles/rtl.scss');
 @import 'shepherd.js/dist/css/shepherd.css';
 
 /* FullCalendar v6 auto-injects its CSS; no manual imports needed */

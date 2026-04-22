@@ -1,7 +1,9 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -18,11 +20,19 @@ describe('NotificationService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
     imports: [CommonModule,
-        MatSnackBarModule,
+        
         MatIconModule,
         MatButtonModule,
         BrowserAnimationsModule, EnhancedSnackbarComponent],
     providers: [
+        { 
+          provide: MatSnackBar, 
+          useValue: { 
+            open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }),
+            openFromComponent: () => ({ onAction: () => of(null), afterDismissed: () => of(null), dismiss: () => {} }),
+            dismiss: () => {} 
+          } 
+        },
         NotificationService,
         ThemeService,
         provideHttpClient(withInterceptorsFromDi()),

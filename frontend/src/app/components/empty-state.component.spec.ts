@@ -26,8 +26,8 @@ describe('EmptyStateComponent', () => {
 
   describe('legacy mode (without context)', () => {
     it('should display message and subtext', () => {
-      component.message = 'Test message';
-      component.subtext = 'Test subtext';
+      fixture.componentRef.setInput('message', 'Test message');
+      fixture.componentRef.setInput('subtext', 'Test subtext');
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -37,7 +37,7 @@ describe('EmptyStateComponent', () => {
 
     it('should call primary action handler', () => {
       const handler = jasmine.createSpy('handler');
-      component.primaryAction = { label: 'Test', handler };
+      fixture.componentRef.setInput('primaryAction', { label: 'Test', handler });
       fixture.detectChanges();
 
       component.onPrimaryClick();
@@ -46,7 +46,7 @@ describe('EmptyStateComponent', () => {
 
     it('should call secondary action handler', () => {
       const handler = jasmine.createSpy('handler');
-      component.secondaryAction = { label: 'Test', handler };
+      fixture.componentRef.setInput('secondaryAction', { label: 'Test', handler });
       fixture.detectChanges();
 
       component.onSecondaryClick();
@@ -56,8 +56,8 @@ describe('EmptyStateComponent', () => {
 
   describe('context-based mode', () => {
     it('should use service config when context is provided', () => {
-      component.context = EmptyStateContext.NO_DOSSIERS;
-      component.isNewUser = false;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
+      fixture.componentRef.setInput('isNewUser', false);
       component.ngOnInit();
 
       expect(component.displayTitle).toContain('dossier');
@@ -66,8 +66,8 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should adapt content for new users', () => {
-      component.context = EmptyStateContext.NO_DOSSIERS;
-      component.isNewUser = true;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
+      fixture.componentRef.setInput('isNewUser', true);
       component.ngOnInit();
 
       expect(component.displayTitle).toContain('Bienvenue');
@@ -77,9 +77,9 @@ describe('EmptyStateComponent', () => {
       const primaryHandler = jasmine.createSpy('primaryHandler');
       const secondaryHandler = jasmine.createSpy('secondaryHandler');
 
-      component.context = EmptyStateContext.NO_DOSSIERS;
-      component.primaryAction = { label: 'Test', handler: primaryHandler };
-      component.secondaryAction = { label: 'Test', handler: secondaryHandler };
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
+      fixture.componentRef.setInput('primaryAction', { label: 'Test', handler: primaryHandler });
+      fixture.componentRef.setInput('secondaryAction', { label: 'Test', handler: secondaryHandler });
       component.ngOnInit();
 
       component.onPrimaryClick();
@@ -90,7 +90,7 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should display help link when provided by service', () => {
-      component.context = EmptyStateContext.NO_DOSSIERS;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
       component.ngOnInit();
 
       expect(component.displayHelpLink).toBeDefined();
@@ -99,19 +99,19 @@ describe('EmptyStateComponent', () => {
 
     it('should use custom illustration when provided', () => {
       const customIllustration = '<svg>custom</svg>';
-      component.context = EmptyStateContext.NO_DOSSIERS;
-      component.customIllustration = customIllustration as any;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
+      fixture.componentRef.setInput('customIllustration', customIllustration as any);
       component.ngOnInit();
 
       expect(component.displayIllustration).toBe(customIllustration);
     });
 
     it('should handle context changes', () => {
-      component.context = EmptyStateContext.NO_DOSSIERS;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
       component.ngOnInit();
       const firstTitle = component.displayTitle;
 
-      component.context = EmptyStateContext.NO_ANNONCES;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_ANNONCES);
       component.ngOnChanges();
       const secondTitle = component.displayTitle;
 
@@ -152,7 +152,7 @@ describe('EmptyStateComponent', () => {
 
   describe('rendering', () => {
     it('should display fallback icon when no illustration provided', () => {
-      component.message = 'Test';
+      fixture.componentRef.setInput('message', 'Test');
       component.displayIllustration = undefined;
       fixture.detectChanges();
 
@@ -161,7 +161,7 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should display illustration when provided', () => {
-      component.context = EmptyStateContext.NO_DOSSIERS;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
       fixture.detectChanges();
       component.ngOnInit();
       fixture.detectChanges();
@@ -171,11 +171,11 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should render primary action button with icon', () => {
-      component.primaryAction = {
+      fixture.componentRef.setInput('primaryAction', {
         label: 'Create',
         icon: 'add',
         handler: () => { /* no-op */ }
-      };
+      });
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -185,10 +185,10 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should render help link when provided', () => {
-      component.helpLink = {
+      fixture.componentRef.setInput('helpLink', {
         label: 'Need help?',
         url: '/help'
-      };
+      });
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
@@ -198,7 +198,7 @@ describe('EmptyStateComponent', () => {
 
   describe('accessibility', () => {
     it('should have proper ARIA attributes', () => {
-      component.message = 'Test message';
+      fixture.componentRef.setInput('message', 'Test message');
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
@@ -208,7 +208,7 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should have aria-hidden on decorative elements', () => {
-      component.context = EmptyStateContext.NO_DOSSIERS;
+      fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
       fixture.detectChanges();
       component.ngOnInit();
       fixture.detectChanges();
@@ -219,10 +219,10 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should have aria-label on action buttons', () => {
-      component.primaryAction = {
+      fixture.componentRef.setInput('primaryAction', {
         label: 'Create new',
         handler: () => { /* no-op for test */ }
-      };
+      });
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;

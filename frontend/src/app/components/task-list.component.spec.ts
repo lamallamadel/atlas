@@ -1,8 +1,10 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskListComponent } from './task-list.component';
 import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -27,7 +29,7 @@ describe('TaskListComponent', () => {
     await TestBed.configureTestingModule({
     imports: [FormsModule,
         MatDialogModule,
-        MatSnackBarModule,
+        
         MatButtonModule,
         MatButtonToggleModule,
         MatFormFieldModule,
@@ -41,6 +43,7 @@ describe('TaskListComponent', () => {
         EmptyStateComponent,
         TaskCardComponent],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken', 'configure', 'setStorage', 'logOut', 'getAccessToken']) },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting()

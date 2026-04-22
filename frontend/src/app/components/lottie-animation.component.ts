@@ -173,7 +173,7 @@ export class LottieAnimationComponent implements OnInit, OnDestroy {
   setSpeed(speed: number): void {
     if (this.lottieInstance && !this.useFallback) {
       this.lottieInstance.setSpeed(speed);
-      this.speed = speed;
+      
       this.cdr.markForCheck();
     }
   }

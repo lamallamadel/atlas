@@ -16,7 +16,7 @@ import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from 'rxjs';
+import { of, throwError } from "rxjs";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ObservabilityDashboardComponent', () => {

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Subject } from "rxjs";
 import { RecentNavigationService } from './recent-navigation.service';
 
 describe('RecentNavigationService', () => {

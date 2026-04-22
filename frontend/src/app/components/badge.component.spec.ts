@@ -28,9 +28,9 @@ describe('BadgeComponent', () => {
   });
 
   it('should generate correct badge classes', () => {
-    component.variant = 'solid';
-    component.size = 'lg';
-    component.color = 'success';
+    fixture.componentRef.setInput('variant', 'solid');
+    fixture.componentRef.setInput('size', 'lg');
+    fixture.componentRef.setInput('color', 'success');
     
     const classes = component.getBadgeClasses();
     
@@ -41,7 +41,7 @@ describe('BadgeComponent', () => {
   });
 
   it('should add pill class when pill is true', () => {
-    component.pill = true;
+    fixture.componentRef.setInput('pill', true);
     
     const classes = component.getBadgeClasses();
     
@@ -49,7 +49,7 @@ describe('BadgeComponent', () => {
   });
 
   it('should add pulse class when pulse is true', () => {
-    component.pulse = true;
+    fixture.componentRef.setInput('pulse', true);
     
     const classes = component.getBadgeClasses();
     
@@ -57,7 +57,7 @@ describe('BadgeComponent', () => {
   });
 
   it('should add with-dot class when dot is true', () => {
-    component.dot = true;
+    fixture.componentRef.setInput('dot', true);
     
     const classes = component.getBadgeClasses();
     
@@ -65,7 +65,7 @@ describe('BadgeComponent', () => {
   });
 
   it('should add with-icon class when icon is provided', () => {
-    component.icon = 'check';
+    fixture.componentRef.setInput('icon', 'check');
     
     const classes = component.getBadgeClasses();
     
@@ -73,7 +73,7 @@ describe('BadgeComponent', () => {
   });
 
   it('should generate correct dot classes', () => {
-    component.color = 'success-sold';
+    fixture.componentRef.setInput('color', 'success-sold');
     
     const dotClasses = component.getDotClasses();
     
@@ -82,23 +82,23 @@ describe('BadgeComponent', () => {
   });
 
   it('should correctly identify if icon should show on left', () => {
-    component.icon = 'check';
-    component.iconPosition = 'left';
+    fixture.componentRef.setInput('icon', 'check');
+    fixture.componentRef.setInput('iconPosition', 'left');
     
     expect(component.showIconLeft).toBe(true);
     expect(component.showIconRight).toBe(false);
   });
 
   it('should correctly identify if icon should show on right', () => {
-    component.icon = 'check';
-    component.iconPosition = 'right';
+    fixture.componentRef.setInput('icon', 'check');
+    fixture.componentRef.setInput('iconPosition', 'right');
     
     expect(component.showIconLeft).toBe(false);
     expect(component.showIconRight).toBe(true);
   });
 
   it('should not show icon when icon is not provided', () => {
-    component.icon = undefined;
+    fixture.componentRef.setInput('icon', undefined);
     
     expect(component.hasIcon).toBe(false);
     expect(component.showIconLeft).toBe(false);
@@ -109,7 +109,7 @@ describe('BadgeComponent', () => {
     const variants: Array<'solid' | 'outline' | 'soft'> = ['solid', 'outline', 'soft'];
     
     variants.forEach(variant => {
-      component.variant = variant;
+      fixture.componentRef.setInput('variant', variant);
       const classes = component.getBadgeClasses();
       expect(classes).toContain(`badge-${variant}`);
     });
@@ -119,7 +119,7 @@ describe('BadgeComponent', () => {
     const sizes: Array<'sm' | 'md' | 'lg'> = ['sm', 'md', 'lg'];
     
     sizes.forEach(size => {
-      component.size = size;
+      fixture.componentRef.setInput('size', size);
       const classes = component.getBadgeClasses();
       expect(classes).toContain(`badge-${size}`);
     });
@@ -144,7 +144,7 @@ describe('BadgeComponent', () => {
     ];
     
     colors.forEach(color => {
-      component.color = color as any;
+      fixture.componentRef.setInput('color', color as any);
       const classes = component.getBadgeClasses();
       expect(classes).toContain(`badge-${color}`);
     });

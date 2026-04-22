@@ -33,17 +33,17 @@ describe('LoadingSkeletonComponent', () => {
   });
 
   it('should generate correct number of rows', () => {
-    component.rows = 5;
+    fixture.componentRef.setInput('rows', 5);
     expect(component.rowsArray.length).toBe(5);
   });
 
   it('should generate correct number of columns', () => {
-    component.columns = 10;
+    fixture.componentRef.setInput('columns', 10);
     expect(component.columnsArray.length).toBe(10);
   });
 
   it('should accept different variants', () => {
-    component.variant = 'table';
+    fixture.componentRef.setInput('variant', 'table');
     fixture.detectChanges();
     expect(component.variant()).toBe('table');
   });

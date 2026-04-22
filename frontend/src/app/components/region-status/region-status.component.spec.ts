@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RegionStatusComponent } from './region-status.component';
 import { RegionRoutingService } from '../../services/region-routing.service';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 describe('RegionStatusComponent', () => {
   let component: RegionStatusComponent;

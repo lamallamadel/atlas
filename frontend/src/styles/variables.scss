@@ -1,3 +1,5 @@
+@use './colors-extended';
+
 :root {
   /* ========================================
      SPACING SCALE (4px base grid)
@@ -299,4 +301,4 @@
 }
 
 /* Import Extended Semantic Color System */
-@import './_colors-extended.scss';
+

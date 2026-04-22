@@ -39,7 +39,7 @@ describe('ChartComponent', () => {
   });
 
   it('should handle empty datasets', () => {
-    component.datasets = [];
+    fixture.componentRef.setInput('datasets', []);
     fixture.detectChanges();
     expect(component).toBeTruthy();
   });

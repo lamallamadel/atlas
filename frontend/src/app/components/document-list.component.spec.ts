@@ -1,7 +1,9 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -20,15 +22,16 @@ describe('DocumentListComponent', () => {
     schemas: [NO_ERRORS_SCHEMA],
     imports: [CommonModule,
         MatDialogModule,
-        MatSnackBarModule,
+        
         MatIconModule,
         MatButtonModule,
         MatTooltipModule, DocumentListComponent],
-    providers: [DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },DocumentApiService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     fixture = TestBed.createComponent(DocumentListComponent);
     component = fixture.componentInstance;
-    component.dossierId = 1;
+    fixture.componentRef.setInput('dossierId', 1);
     fixture.detectChanges();
   });
 

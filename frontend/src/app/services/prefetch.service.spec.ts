@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { PrefetchService } from './prefetch.service';
 import { DossierApiService } from './dossier-api.service';
 import { AnnonceApiService } from './annonce-api.service';

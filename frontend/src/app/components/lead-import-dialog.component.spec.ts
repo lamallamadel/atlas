@@ -1,7 +1,9 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatDialogModule } from '@angular/material/dialog';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -25,7 +27,7 @@ describe('LeadImportDialogComponent', () => {
     imports: [CommonModule,
         FormsModule,
         MatDialogModule,
-        MatSnackBarModule,
+        
         MatIconModule,
         MatButtonModule,
         MatProgressBarModule,
@@ -34,6 +36,7 @@ describe('LeadImportDialogComponent', () => {
         MatRadioModule,
         NoopAnimationsModule, LeadImportDialogComponent],
     providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
         { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
         LeadApiService,
         provideHttpClient(withInterceptorsFromDi()),

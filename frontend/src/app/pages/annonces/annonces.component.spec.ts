@@ -15,7 +15,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 
 import { AnnoncesComponent } from './annonces.component';
 import { AnnonceApiService, AnnonceStatus } from '../../services/annonce-api.service';

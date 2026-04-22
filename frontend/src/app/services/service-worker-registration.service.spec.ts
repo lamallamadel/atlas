@@ -1,6 +1,8 @@
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { of } from "rxjs";
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import {  } from '@angular/material/snack-bar';
 import { ServiceWorkerRegistrationService } from './service-worker-registration.service';
 import { NotificationService } from './notification.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
@@ -10,8 +12,9 @@ describe('ServiceWorkerRegistrationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [MatSnackBarModule],
-    providers: [NotificationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
+    imports: [],
+    providers: [
+        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },NotificationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
 });
     service = TestBed.inject(ServiceWorkerRegistrationService);
   });

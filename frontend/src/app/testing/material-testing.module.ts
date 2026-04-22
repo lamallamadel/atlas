@@ -1,7 +1,8 @@
+import { of } from 'rxjs';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpClientTestingModule, provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { MatDialogModule } from '@angular/material/dialog';
@@ -29,7 +30,10 @@ import { MatDividerModule } from '@angular/material/divider';
 import { LayoutModule } from '@angular/cdk/layout';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
-@NgModule({ exports: [
+import { MatSnackBar } from '@angular/material/snack-bar';
+
+@NgModule({ 
+    exports: [
         CommonModule,
         FormsModule,
         ReactiveFormsModule,
@@ -43,7 +47,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         MatSelectModule,
         MatProgressSpinnerModule,
         MatProgressBarModule,
-        MatSnackBarModule,
+        
         MatTabsModule,
         MatCardModule,
         MatExpansionModule,
@@ -56,7 +60,10 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         MatMenuModule,
         MatDividerModule,
         LayoutModule
-    ], imports: [CommonModule,
+    ], 
+    imports: [
+        CommonModule,
+        HttpClientTestingModule,
         FormsModule,
         ReactiveFormsModule,
         NoopAnimationsModule,
@@ -68,7 +75,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         MatSelectModule,
         MatProgressSpinnerModule,
         MatProgressBarModule,
-        MatSnackBarModule,
+        
         MatTabsModule,
         MatCardModule,
         MatExpansionModule,
@@ -80,5 +87,18 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
         MatListModule,
         MatMenuModule,
         MatDividerModule,
-        LayoutModule], providers: [provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()] })
+        LayoutModule
+    ], 
+    providers: [
+        provideHttpClient(withInterceptorsFromDi()), 
+        provideHttpClientTesting(),
+        {
+            provide: MatSnackBar,
+            useValue: {
+                open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }),
+                dismiss: () => {}
+            }
+        }
+    ] 
+})
 export class MaterialTestingModule { }

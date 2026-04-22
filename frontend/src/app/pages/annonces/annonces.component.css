@@ -1,4 +1,4 @@
-@import '../../../styles/variables.scss';
+@use '../../../styles/variables' as vars;
 
 .filters-card {
   margin-bottom: var(--spacing-4);

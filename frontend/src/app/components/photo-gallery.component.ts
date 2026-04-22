@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, HostListener, ElementRef, input, output, viewChildren } from '@angular/core';
+import { Component, OnInit, OnDestroy, HostListener, ElementRef, input, output, viewChildren, computed } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -28,6 +28,24 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
   readonly photos = input<Photo[]>([]);
   readonly editable = input(false);
   readonly columns = input(3);
+  
+  readonly masonryColumns = computed(() => {
+    const photos = this.photos();
+    if (!photos || photos.length === 0) {
+      return [];
+    }
+
+    const columnCount = this.getColumnCount();
+    const columns: Photo[][] = Array.from({ length: columnCount }, () => []);
+
+    photos.forEach((photo, index) => {
+      const columnIndex = index % columnCount;
+      columns[columnIndex].push(photo);
+    });
+
+    return columns;
+  });
+
   readonly photosReordered = output<Photo[]>();
   readonly photoDeleted = output<Photo>();
 
@@ -102,22 +120,7 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
     }, 100);
   }
 
-  getMasonryColumns(): Photo[][] {
-    const photos = this.photos();
-    if (!photos || photos.length === 0) {
-      return [];
-    }
 
-    const columnCount = this.getColumnCount();
-    const columns: Photo[][] = Array.from({ length: columnCount }, () => []);
-
-    photos.forEach((photo, index) => {
-      const columnIndex = index % columnCount;
-      columns[columnIndex].push(photo);
-    });
-
-    return columns;
-  }
 
   getColumnCount(): number {
     if (window.innerWidth < 768) {
@@ -262,7 +265,7 @@ export class PhotoGalleryComponent implements OnInit, OnDestroy {
 
     const photosCopy = [...this.photos()];
     moveItemInArray(photosCopy, event.previousIndex, event.currentIndex);
-    this.photos = photosCopy;
+    
     this.photosReordered.emit(photosCopy);
 
     this.snackBar.open('Ordre des photos mis à jour', 'Fermer', {

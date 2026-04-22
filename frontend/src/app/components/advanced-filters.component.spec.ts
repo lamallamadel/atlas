@@ -44,7 +44,7 @@ describe('AdvancedFiltersComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AdvancedFiltersComponent);
     component = fixture.componentInstance;
-    component.fields = [];
+    fixture.componentRef.setInput('fields', []);
     fixture.detectChanges();
   });
 

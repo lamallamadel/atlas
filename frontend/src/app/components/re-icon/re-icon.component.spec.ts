@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ReIconComponent } from './re-icon.component';
 import { IconRegistryService } from '../../services/icon-registry.service';
-import { of } from 'rxjs';
+import { of } from "rxjs";
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
 describe('ReIconComponent', () => {
@@ -33,7 +33,7 @@ describe('ReIconComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(ReIconComponent);
     component = fixture.componentInstance;
-    component.icon = 're-house';
+    fixture.componentRef.setInput('icon', 're-house');
   });
 
   it('should create', () => {
@@ -65,27 +65,27 @@ describe('ReIconComponent', () => {
   });
 
   it('should return correct size class', () => {
-    component.size = 'small';
+    fixture.componentRef.setInput('size', 'small');
     expect(component.sizeClass).toBe('re-icon-small');
 
-    component.size = 'medium';
+    fixture.componentRef.setInput('size', 'medium');
     expect(component.sizeClass).toBe('re-icon-medium');
 
-    component.size = 'large';
+    fixture.componentRef.setInput('size', 'large');
     expect(component.sizeClass).toBe('re-icon-large');
 
-    component.size = 'xlarge';
+    fixture.componentRef.setInput('size', 'xlarge');
     expect(component.sizeClass).toBe('re-icon-xlarge');
   });
 
   it('should apply custom color style', () => {
-    component.color = '#1976d2';
+    fixture.componentRef.setInput('color', '#1976d2');
     const styles = component.styles;
     expect(styles['color']).toBe('#1976d2');
   });
 
   it('should not apply color style when color is undefined', () => {
-    component.color = undefined;
+    fixture.componentRef.setInput('color', undefined);
     const styles = component.styles;
     expect(styles['color']).toBeUndefined();
   });
@@ -95,7 +95,7 @@ describe('ReIconComponent', () => {
   });
 
   it('should render with correct aria-label', () => {
-    component.ariaLabel = 'Test House Icon';
+    fixture.componentRef.setInput('ariaLabel', 'Test House Icon');
     iconRegistryService.isLoaded.and.returnValue(true);
     iconRegistryService.getIconSync.and.returnValue('<svg>test</svg>' as any);
     
@@ -106,8 +106,8 @@ describe('ReIconComponent', () => {
   });
 
   it('should use icon id as aria-label when not provided', () => {
-    component.icon = 're-house';
-    component.ariaLabel = undefined;
+    fixture.componentRef.setInput('icon', 're-house');
+    fixture.componentRef.setInput('ariaLabel', undefined);
     iconRegistryService.isLoaded.and.returnValue(true);
     iconRegistryService.getIconSync.and.returnValue('<svg>test</svg>' as any);
     

@@ -56,7 +56,7 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
     { icon: 'visibility', tooltip: 'Voir', action: 'view', color: 'primary' },
     { icon: 'edit', tooltip: 'Modifier', action: 'edit', color: 'accent' },
     { icon: 'delete', tooltip: 'Supprimer', action: 'delete', color: 'warn' }
-]);
+  ]);
   readonly pageSize = input(10);
   readonly pageSizeOptions = input<number[]>([5, 10, 25, 50, 100]);
   readonly showPagination = input(true);
@@ -79,22 +79,22 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
     logo?: string;
     primaryColor?: string;
     secondaryColor?: string;
-}>();
+  }>();
 
   readonly rowAction = output<{
     action: string;
     row: unknown;
-}>();
+  }>();
   readonly rowClick = output<unknown>();
   readonly selectionChange = output<unknown[]>();
   readonly paginationChange = output<'previous' | 'next'>();
   readonly exportRequest = output<{
     format: 'pdf' | 'excel' | 'print';
     data: unknown[];
-}>();
+  }>();
 
-  readonly paginator = viewChild.required(MatPaginator);
-  readonly sort = viewChild.required(MatSort);
+  readonly paginator = viewChild(MatPaginator);
+  readonly sort = viewChild(MatSort);
 
   dataSource = new MatTableDataSource<unknown>([]);
   displayedColumns: string[] = [];
@@ -125,11 +125,13 @@ export class GenericTableComponent implements OnInit, AfterViewInit, OnChanges, 
   }
 
   ngAfterViewInit(): void {
-    if (this.showPagination()) {
-      this.dataSource.paginator = this.paginator();
+    const paginator = this.paginator();
+    if (this.showPagination() && paginator) {
+      this.dataSource.paginator = paginator;
     }
-    if (this.enableSort()) {
-      this.dataSource.sort = this.sort();
+    const sort = this.sort();
+    if (this.enableSort() && sort) {
+      this.dataSource.sort = sort;
     }
   }
 

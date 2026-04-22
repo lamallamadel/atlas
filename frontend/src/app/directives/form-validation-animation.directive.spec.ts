@@ -13,7 +13,7 @@ import { FormValidationAnimationDirective } from './form-validation-animation.di
       </div>
     </form>
   `,
-    imports: [ReactiveFormsModule]
+    imports: [ReactiveFormsModule, FormValidationAnimationDirective]
 })
 class TestComponent {
   testForm = new FormGroup({
@@ -49,6 +49,7 @@ describe('FormValidationAnimationDirective', () => {
     
     emailControl.markAsTouched();
     emailControl.setValue('');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -65,6 +66,7 @@ describe('FormValidationAnimationDirective', () => {
     const emailControl = component.testForm.get('email')!;
     
     emailControl.setValue('');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -82,6 +84,7 @@ describe('FormValidationAnimationDirective', () => {
     
     emailControl.markAsTouched();
     emailControl.setValue('');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -90,6 +93,7 @@ describe('FormValidationAnimationDirective', () => {
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
 
     emailControl.setValue('test@example.com');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -123,6 +127,7 @@ describe('FormValidationAnimationDirective', () => {
     
     emailControl.markAsTouched();
     emailControl.setValue('');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -142,6 +147,7 @@ describe('FormValidationAnimationDirective', () => {
     
     emailControl.markAsTouched();
     emailControl.setValue('');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -163,6 +169,7 @@ describe('FormValidationAnimationDirective', () => {
     
     emailControl.markAsTouched();
     emailControl.setValue('');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick();
@@ -176,6 +183,7 @@ describe('FormValidationAnimationDirective', () => {
     expect(initialErrorMessage?.textContent).toContain('Ce champ est requis');
 
     emailControl.setValue('test@example.com');
+    emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
     tick(300);
