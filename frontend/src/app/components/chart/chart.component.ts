@@ -35,7 +35,7 @@ export interface ChartExportOptions {
     selector: 'app-chart',
     templateUrl: './chart.component.html',
     styleUrls: ['./chart.component.css'],
-    standalone: false
+    
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
@@ -384,12 +384,8 @@ export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   }
 
   private canvasToSVG(canvas: HTMLCanvasElement): string {
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return '';
-
     const width = canvas.width;
     const height = canvas.height;
-    const imageData = ctx.getImageData(0, 0, width, height);
 
     const dataUrl = canvas.toDataURL('image/png');
 

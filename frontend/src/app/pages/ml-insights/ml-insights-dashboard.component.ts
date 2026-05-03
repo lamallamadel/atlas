@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Chart, ChartConfiguration } from 'chart.js/auto';
 import { MLService } from '../../services/ml.service';
@@ -10,7 +10,7 @@ import { MLService } from '../../services/ml.service';
   templateUrl: './ml-insights-dashboard.component.html',
   styleUrls: ['./ml-insights-dashboard.component.scss']
 })
-export class MLInsightsDashboardComponent implements OnInit {
+export class MLInsightsDashboardComponent implements OnInit, OnDestroy {
   modelInfo: any = null;
   featureImportance: any[] = [];
   modelVersions: any[] = [];

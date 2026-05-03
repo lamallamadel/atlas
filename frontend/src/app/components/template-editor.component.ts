@@ -11,7 +11,7 @@ export class TemplateEditorComponent implements OnInit {
   @Input() template?: WhatsAppTemplateResponse;
   @Input() mode: 'create' | 'edit' = 'create';
   @Output() save = new EventEmitter<WhatsAppTemplateRequest>();
-  @Output() cancel = new EventEmitter<void>();
+  @Output() cancelled = new EventEmitter<void>();
 
   templateForm!: FormGroup;
   previewText = '';
@@ -166,7 +166,7 @@ export class TemplateEditorComponent implements OnInit {
 
     if (formValue.buttons && formValue.buttons.length > 0) {
       preview += '\n\n';
-      formValue.buttons.forEach((btn: any, idx: number) => {
+      formValue.buttons.forEach((btn: any, _idx: number) => {
         preview += `\n[${btn.text}]`;
       });
     }
@@ -239,6 +239,6 @@ export class TemplateEditorComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.cancel.emit();
+    this.cancelled.emit();
   }
 }

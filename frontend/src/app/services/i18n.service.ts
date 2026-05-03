@@ -194,7 +194,7 @@ export class I18nService {
     });
   }
 
-  t(key: string, params?: Record<string, any>): string {
+  t(key: string, _params?: Record<string, any>): string {
     return key;
   }
 }

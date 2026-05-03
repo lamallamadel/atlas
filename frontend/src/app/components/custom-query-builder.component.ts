@@ -207,7 +207,7 @@ export class CustomQueryBuilderComponent implements OnInit {
       next: (response) => {
         this.queries = response.content || [];
       },
-      error: (error) => {
+      error: () => {
         this.snackBar.open('Failed to load queries', 'Close', { duration: 3000 });
       }
     });
@@ -276,7 +276,7 @@ export class CustomQueryBuilderComponent implements OnInit {
           this.snackBar.open('Query deleted successfully', 'Close', { duration: 3000 });
           this.loadQueries();
         },
-        error: (error) => {
+        error: () => {
           this.snackBar.open('Failed to delete query', 'Close', { duration: 3000 });
         }
       });

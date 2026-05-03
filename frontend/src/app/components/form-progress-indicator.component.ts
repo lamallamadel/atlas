@@ -1,4 +1,4 @@
-import { Component, OnInit, input } from '@angular/core';
+import { Component, OnInit, input, OnChanges } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 
@@ -16,7 +16,7 @@ export interface FormStep {
     styleUrls: ['./form-progress-indicator.component.css'],
     imports: [NgClass, MatIcon]
 })
-export class FormProgressIndicatorComponent implements OnInit {
+export class FormProgressIndicatorComponent implements OnInit, OnChanges {
   readonly steps = input<FormStep[]>([]);
   readonly currentStep = input(0);
   readonly showPercentage = input(true);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ChartDataset, ChartFilterConfig, ChartDataTransform } from '../models/chart.types';
+import { ChartDataset, ChartDataTransform } from '../models/chart.types';
 
 @Injectable({
   providedIn: 'root'

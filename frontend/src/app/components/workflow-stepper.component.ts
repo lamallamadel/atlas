@@ -12,7 +12,7 @@ type UiStep = {
     templateUrl: './workflow-stepper.component.html',
     styleUrls: ['./workflow-stepper.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    
 })
 export class WorkflowStepperComponent implements OnChanges {
   readonly status = input<DossierStatus | null>(null);

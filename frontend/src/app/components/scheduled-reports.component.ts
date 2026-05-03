@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { AnalyticsApiService, ScheduledReportRequest, ScheduledReportResponse } from '../services/analytics-api.service';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 
@@ -231,7 +230,7 @@ export class ScheduledReportsComponent implements OnInit {
       next: (response) => {
         this.reports = response.content || [];
       },
-      error: (error) => {
+      error: () => {
         this.snackBar.open('Failed to load reports', 'Close', { duration: 3000 });
       }
     });
@@ -305,7 +304,7 @@ export class ScheduledReportsComponent implements OnInit {
           this.snackBar.open('Report deleted successfully', 'Close', { duration: 3000 });
           this.loadReports();
         },
-        error: (error) => {
+        error: () => {
           this.snackBar.open('Failed to delete report', 'Close', { duration: 3000 });
         }
       });

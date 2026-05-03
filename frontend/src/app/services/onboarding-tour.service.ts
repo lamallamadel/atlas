@@ -8,7 +8,6 @@ import { AuthService } from './auth.service';
 
 // Type definitions for Shepherd.js (lazy-loaded)
 type ShepherdTour = any;
-type ShepherdStep = any;
 
 export interface TourProgress {
   [tourId: string]: {

@@ -141,8 +141,24 @@
 }
 
 <!-- LEAD MODAL -->
-<div class="at-modal-overlay" [class.open]="leadModalOpen" (click)="closeLeadModal()">
-  <div class="at-modal" (click)="$event.stopPropagation()">
+<div
+  class="at-modal-overlay"
+  [class.open]="leadModalOpen"
+  tabindex="0"
+  role="presentation"
+  (click)="closeLeadModal()"
+  (keydown.enter)="closeLeadModal()"
+  (keydown.space)="$event.preventDefault(); closeLeadModal()"
+>
+  <div
+    class="at-modal"
+    role="dialog"
+    aria-modal="true"
+    tabindex="-1"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="$event.stopPropagation()"
+    (keydown.space)="$event.stopPropagation()"
+  >
     <div class="at-modal-header">
       <h2>{{leadModalType === 'visite' ? 'Planifier une visite' : 'Envoyer un message'}}</h2>
       <button class="at-modal-close" (click)="closeLeadModal()" aria-label="Fermer">

@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { AnalyticsApiService, AnalyticsResponse, MetabaseEmbedResponse } from '../services/analytics-api.service';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { Chart, ChartConfiguration, registerables } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
 

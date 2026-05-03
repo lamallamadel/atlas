@@ -356,7 +356,7 @@ export class CustomerPortalDashboardComponent implements OnInit {
         this.branding = branding;
         this.applyBranding();
       },
-      error: (err) => console.log('No custom branding')
+      error: () => console.log('No custom branding')
     });
   }
 

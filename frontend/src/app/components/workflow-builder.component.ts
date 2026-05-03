@@ -253,7 +253,7 @@ export class WorkflowBuilderComponent implements AfterViewInit {
       state: state
     }));
 
-    this.links = this.transitions.map((transition, idx) => ({
+    this.links = this.transitions.map((transition, _idx) => ({
       id: `${transition.fromState}-${transition.toState}`,
       source: transition.fromState,
       target: transition.toState,

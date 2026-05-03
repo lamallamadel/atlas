@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 import { TourDefinitionService, TourDefinition } from '../services/tour-definition.service';
 import { OnboardingTourService } from '../services/onboarding-tour.service';
 import { UserPreferencesService } from '../services/user-preferences.service';
@@ -10,7 +9,7 @@ import { UserPreferencesService } from '../services/user-preferences.service';
     selector: 'app-tour-progress',
     templateUrl: './tour-progress.component.html',
     styleUrls: ['./tour-progress.component.css'],
-    standalone: false
+    
 })
 export class TourProgressComponent implements OnInit, OnDestroy {
   tours: TourDefinition[] = [];

@@ -52,7 +52,7 @@ export class SearchComponent implements OnInit {
           this.elasticsearchAvailable = response.elasticsearchAvailable;
           this.isLoading = false;
         },
-        error: (err) => {
+        error: () => {
           this.error = 'Search failed. Please try again.';
           this.isLoading = false;
         }

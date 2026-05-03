@@ -65,7 +65,7 @@ export class WorkflowPreviewComponent implements OnInit {
     return this.workflow()?.nodes.find(n => n.status === status);
   }
 
-  canExecuteTransition(transition: TransitionRule): boolean {
+  canExecuteTransition(_transition: TransitionRule): boolean {
     return true;
   }
 

@@ -105,8 +105,6 @@ export class UserPreferencesService implements OnDestroy {
   }
 
   private checkForUpdates(): Observable<any> {
-    const lastSync = parseInt(localStorage.getItem(this.LAST_SYNC_KEY) || '0', 10);
-    
     return this.http.get<Record<string, unknown>>(this.API_BASE)
       .pipe(
         retry(1),

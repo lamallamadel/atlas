@@ -15,7 +15,7 @@ export interface WidgetConfig {
 
 @Component({
     template: '',
-    standalone: false
+    
 })
 export abstract class CardWidgetBaseComponent implements OnInit, OnDestroy {
   readonly config = input.required<WidgetConfig>();

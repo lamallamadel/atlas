@@ -402,7 +402,7 @@ export class LeadPriorityQueueComponent implements OnInit {
   recalculateAll(): void {
     this.loading = true;
     this.leadScoringApi.recalculateAllScores().subscribe({
-      next: (result) => {
+      next: () => {
         this.toastService.success('Score recalculation initiated');
         setTimeout(() => this.loadLeads(), 2000);
       },

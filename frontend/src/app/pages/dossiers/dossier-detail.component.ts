@@ -16,7 +16,6 @@ import { AppointmentFormDialogComponent, AppointmentFormData } from '../../compo
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 import { CollaborationService, CollaborationEdit } from '../../services/collaboration.service';
 import { Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
 import { CollaborationPresenceComponent } from '../../components/collaboration-presence.component';
 import { BadgeStatusComponent } from '../../components/badge-status.component';
@@ -334,7 +333,7 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
     );
 
     this.collaborationSubscriptions.push(
-      this.collaborationService.getActivityUpdates().subscribe(activity => {
+      this.collaborationService.getActivityUpdates().subscribe(_activity => {
         this.loadAuditEvents();
       })
     );

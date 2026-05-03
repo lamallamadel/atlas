@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { WorkflowApiService, WorkflowTemplate } from '../services/workflow-api.service';
-import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 

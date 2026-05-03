@@ -19,7 +19,7 @@ export class WebSocketService {
 
   constructor() { /* no-op */ }
 
-  connect(userId: string, username: string): Promise<void> {
+  connect(_userId: string, _username: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.stompClient?.connected) {
         resolve();

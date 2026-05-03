@@ -44,11 +44,11 @@ export class RecentNavigationService {
     const annonceMatch = url.match(/\/annonces\/(\d+)/);
     
     if (dossierMatch) {
-      const id = dossierMatch[1];
+      const _id = dossierMatch[1];
       // Don't add immediately - wait for title to be set via addRecentItem
       return;
     } else if (annonceMatch) {
-      const id = annonceMatch[1];
+      const _id = annonceMatch[1];
       // Don't add immediately - wait for title to be set via addRecentItem
       return;
     }

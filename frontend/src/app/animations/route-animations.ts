@@ -6,7 +6,6 @@ import {
   animate, 
   group, 
   animateChild,
-  AnimationMetadata 
 } from '@angular/animations';
 
 const isReducedMotion = (): boolean => {

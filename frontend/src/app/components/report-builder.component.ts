@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropList, CdkDrag } from '@angular/cdk/drag-drop';
-import { ReportApiService, CustomReportDefinition, ReportColumn, ReportExportOptions } from '../services/report-api.service';
+import { ReportApiService, CustomReportDefinition, ReportColumn } from '../services/report-api.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardSubtitle, MatCardContent } from '@angular/material/card';
 import { MatIcon } from '@angular/material/icon';

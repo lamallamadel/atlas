@@ -34,7 +34,9 @@ export class VitrineHomeComponent implements OnInit, AfterViewInit {
 
   constructor(private router: Router) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    void 0;
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => this.initReveals(), 100);

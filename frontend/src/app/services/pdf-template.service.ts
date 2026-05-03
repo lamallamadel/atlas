@@ -509,7 +509,6 @@ export class PdfTemplateService {
    */
   private addFooter(doc: any, config: PdfTemplateConfig, pageWidth: number, pageHeight: number): void {
     const totalPages = doc.internal.getNumberOfPages();
-    const brand = config.brandConfig || DEFAULT_BRAND;
 
     for (let i = 1; i <= totalPages; i++) {
       doc.setPage(i);

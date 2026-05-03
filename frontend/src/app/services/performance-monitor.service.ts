@@ -214,7 +214,7 @@ export class PerformanceMonitorService {
   private sendToAnalyticsEndpoint(name: string, value: number, metadata?: any): void {
     // Optional: Send to custom backend analytics
     // Debounce and batch for efficiency
-    const payload = {
+    const _payload = {
       metric: name,
       value,
       timestamp: Date.now(),

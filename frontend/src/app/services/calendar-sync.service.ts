@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AppointmentResponse } from './appointment-api.service';
-import { Observable, from } from 'rxjs';
+import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 
 export interface CalendarSyncConfig {

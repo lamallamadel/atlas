@@ -88,8 +88,8 @@ export class MobileGesturesDirective implements OnDestroy {
     this.initialPinchDistance = 0;
   }
 
-  @HostListener('touchcancel', ['$event'])
-  onTouchCancel(event: TouchEvent): void {
+  @HostListener('touchcancel')
+  onTouchCancel(): void {
     if (this.longPressTimer) {
       clearTimeout(this.longPressTimer);
       this.longPressTimer = null;

@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, of, throwError } from 'rxjs';
-import { catchError, map, tap, retry, timeout } from 'rxjs/operators';
+import { BehaviorSubject, of } from 'rxjs';
+import { catchError, retry, timeout } from 'rxjs/operators';
 
 export interface RegionConfig {
   name: string;

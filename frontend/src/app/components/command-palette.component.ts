@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, AfterViewInit, OnDestroy, HostListener, viewChild } from '@angular/core';
+import { Component, OnInit, ElementRef, OnDestroy, viewChild } from '@angular/core';
 import { Router, NavigationEnd } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
@@ -47,7 +47,7 @@ interface FuzzyResult {
     styleUrls: ['./command-palette.component.css'],
     imports: [FocusTrapDirective, MatIcon, FormsModule, MatProgressSpinner, AsyncPipe]
 })
-export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy {
+export class CommandPaletteComponent implements OnInit, OnDestroy {
   readonly commandInput = viewChild<ElementRef>('commandInput');
 
   visible$: Observable<boolean>;
@@ -93,10 +93,6 @@ export class CommandPaletteComponent implements OnInit, AfterViewInit, OnDestroy
         this.resetState();
       }
     });
-  }
-
-  ngAfterViewInit(): void {
-    // Handled safely in ngOnInit via subscription
   }
 
   ngOnDestroy(): void {

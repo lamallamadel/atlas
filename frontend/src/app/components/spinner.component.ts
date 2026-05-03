@@ -20,7 +20,8 @@ export class SpinnerComponent implements OnInit, OnDestroy {
   readonly cancelButtonLabel = input('Annuler');
   readonly timeoutMessage = input('Cette opération prend plus de temps que prévu...');
   
-  readonly cancel = output<void>();
+  /** Évite le nom d'événement DOM réservé « cancel » (no-output-native). */
+  readonly cancelled = output<void>();
   readonly timeoutReached = output<void>();
 
   showTimeoutMessage = false;
@@ -44,7 +45,7 @@ export class SpinnerComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     // TODO: The 'emit' function requires a mandatory void argument
-    this.cancel.emit();
+    this.cancelled.emit();
   }
 
   get sizeClass(): string {

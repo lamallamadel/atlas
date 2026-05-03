@@ -4,9 +4,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router } from '@angular/router';
 import { 
   WhatsAppTemplateApiService, 
-  WhatsAppTemplateResponse,
-  WhatsAppTemplateRequest,
-  TemplateVersionResponse
+  WhatsAppTemplateResponse
 } from '../services/whatsapp-template-api.service';
 
 @Component({

@@ -1,13 +1,8 @@
 import { Component, OnInit, OnDestroy, viewChild } from '@angular/core';
 
 
-import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
-import { CalendarOptions, EventInput, EventClickArg, EventDropArg, DateSelectArg, EventChangeArg } from '@fullcalendar/core';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import listPlugin from '@fullcalendar/list';
-import interactionPlugin from '@fullcalendar/interaction';
-import iCalendarPlugin from '@fullcalendar/icalendar';
+import { FullCalendarModule } from '@fullcalendar/angular';
+import { EventInput, EventChangeArg } from '@fullcalendar/core';
 
 import { AppointmentApiService, AppointmentResponse, AppointmentStatus, AppointmentCreateRequest, AppointmentUpdateRequest } from '../services/appointment-api.service';
 import { CalendarSyncService } from '../services/calendar-sync.service';

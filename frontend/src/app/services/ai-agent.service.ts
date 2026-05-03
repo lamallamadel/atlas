@@ -368,7 +368,7 @@ export class AiAgentService {
     }
 
     // ─── Suggested chips ────────────────────────────────────────
-    private buildSuggestedActions(type: AgentIntentType, params: Record<string, string>): AgentAction[] {
+    private buildSuggestedActions(type: AgentIntentType, _params: Record<string, string>): AgentAction[] {
         switch (type) {
             case 'SEARCH':
                 return [

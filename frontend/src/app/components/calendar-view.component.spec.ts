@@ -21,6 +21,23 @@ import { ToastNotificationService } from '../services/toast-notification.service
 import { CalendarSyncService } from '../services/calendar-sync.service';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 
+interface CalendarViewComponentPrivateApi {
+  loadCalendarPlugins(): Promise<void>;
+  getStatusColor(status: AppointmentStatus): string;
+  checkConflict(
+    appointmentId: number,
+    start: Date,
+    end: Date,
+    assignedTo?: string | null
+  ): boolean;
+}
+
+interface CalendarTestEvent {
+  extendedProps: {
+    assignedTo?: string;
+  };
+}
+
 describe('CalendarViewComponent', () => {
   let component: CalendarViewComponent;
   let fixture: ComponentFixture<CalendarViewComponent>;
@@ -119,7 +136,7 @@ describe('CalendarViewComponent', () => {
 
     fixture = TestBed.createComponent(CalendarViewComponent);
     component = fixture.componentInstance;
-    spyOn(component as any, 'loadCalendarPlugins').and.returnValue(Promise.resolve());
+    spyOn(component as unknown as CalendarViewComponentPrivateApi, 'loadCalendarPlugins').and.returnValue(Promise.resolve());
     component.calendarOptions.plugins = [dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin];
     component.calendarLoaded = true;
     component.calendarLoading = false;
@@ -151,7 +168,7 @@ describe('CalendarViewComponent', () => {
     fixture.detectChanges();
     tick(0);
     component.onFilterByAssignedToChange('John Doe');
-    const events = component.calendarOptions.events as any[];
+    const events = component.calendarOptions.events as unknown as CalendarTestEvent[];
     expect(events.length).toBe(1);
     expect(events[0].extendedProps.assignedTo).toBe('John Doe');
     discardPeriodicTasks();
@@ -189,9 +206,9 @@ describe('CalendarViewComponent', () => {
   });
 
   it('should get correct status color', () => {
-    const scheduledColor = (component as any).getStatusColor(AppointmentStatus.SCHEDULED);
-    const completedColor = (component as any).getStatusColor(AppointmentStatus.COMPLETED);
-    const cancelledColor = (component as any).getStatusColor(AppointmentStatus.CANCELLED);
+    const scheduledColor = (component as unknown as CalendarViewComponentPrivateApi).getStatusColor(AppointmentStatus.SCHEDULED);
+    const completedColor = (component as unknown as CalendarViewComponentPrivateApi).getStatusColor(AppointmentStatus.COMPLETED);
+    const cancelledColor = (component as unknown as CalendarViewComponentPrivateApi).getStatusColor(AppointmentStatus.CANCELLED);
     
     expect(scheduledColor).toBe('#2196F3');
     expect(completedColor).toBe('#4CAF50');
@@ -203,7 +220,7 @@ describe('CalendarViewComponent', () => {
     tick(0);
     const start = new Date('2024-01-15T10:30:00Z');
     const end = new Date('2024-01-15T11:30:00Z');
-    const hasConflict = (component as any).checkConflict(999, start, end, 'John Doe');
+    const hasConflict = (component as unknown as CalendarViewComponentPrivateApi).checkConflict(999, start, end, 'John Doe');
     expect(hasConflict).toBe(true);
     discardPeriodicTasks();
   }));
@@ -214,7 +231,7 @@ describe('CalendarViewComponent', () => {
     const start = new Date('2024-01-15T10:30:00Z');
     const end = new Date('2024-01-15T11:30:00Z');
     
-    const hasConflict = (component as any).checkConflict(999, start, end, 'Other Person');
+    const hasConflict = (component as unknown as CalendarViewComponentPrivateApi).checkConflict(999, start, end, 'Other Person');
     
     expect(hasConflict).toBe(false);
   });
@@ -229,7 +246,7 @@ describe('CalendarViewComponent', () => {
     const start = new Date('2024-01-15T10:30:00Z');
     const end = new Date('2024-01-15T11:30:00Z');
     
-    const hasConflict = (component as any).checkConflict(999, start, end, 'John Doe');
+    const hasConflict = (component as unknown as CalendarViewComponentPrivateApi).checkConflict(999, start, end, 'John Doe');
     
     expect(hasConflict).toBe(false);
   });

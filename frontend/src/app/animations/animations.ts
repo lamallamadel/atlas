@@ -7,7 +7,6 @@ import {
   query,
   stagger,
   keyframes,
-  AnimationTriggerMetadata,
 } from '@angular/animations';
 
 /**

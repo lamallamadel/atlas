@@ -110,7 +110,7 @@ export class SwipeGestureDirective {
     this.currentDirection = null;
   }
 
-  @HostListener('touchcancel', ['$event'])
+  @HostListener('touchcancel')
   onTouchCancel(): void {
     this.isSwiping = false;
     this.currentDirection = null;

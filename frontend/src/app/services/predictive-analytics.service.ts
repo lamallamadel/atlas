@@ -44,7 +44,6 @@ export class PredictiveAnalyticsService {
     const sumY = yValues.reduce((a, b) => a + b, 0);
     const sumXY = xValues.reduce((sum, x, i) => sum + x * yValues[i], 0);
     const sumXX = xValues.reduce((sum, x) => sum + x * x, 0);
-    const sumYY = yValues.reduce((sum, y) => sum + y * y, 0);
 
     const slope = (n * sumXY - sumX * sumY) / (n * sumXX - sumX * sumX);
     const intercept = (sumY - slope * sumX) / n;
@@ -237,7 +236,7 @@ export class PredictiveAnalyticsService {
 
   calculateTeamPerformanceTrend(
     performanceData: { date: string; metric: number }[],
-    metricName: string
+    _metricName: string
   ): { trend: 'improving' | 'declining' | 'stable'; changeRate: number } {
     if (performanceData.length < 2) {
       return { trend: 'stable', changeRate: 0 };

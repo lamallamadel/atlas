@@ -1178,3 +1178,5 @@ kbd {
   transform: scale(0.92);
   filter: brightness(0.95);
 }
+/* Atlasia Pro identity bridge — loaded last on purpose */
+@include meta.load-css('styles/_atlasia-pro-shell.scss');

@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import Shepherd from 'shepherd.js';
 
 export interface TourStep {
   id: string;

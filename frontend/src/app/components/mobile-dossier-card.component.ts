@@ -85,7 +85,7 @@ export interface DossierAction {
           <button
             class="action-btn action-more"
             (click)="onMore($event)"
-            [attr.aria-label]="'Plus d\\'actions pour ' + (dossier().leadName || 'le dossier')">
+            [attr.aria-label]="'Actions supplémentaires pour ' + (dossier().leadName || 'le dossier')">
             <mat-icon>more_vert</mat-icon>
           </button>
         </div>

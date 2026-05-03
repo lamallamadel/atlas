@@ -5,9 +5,9 @@ import { AnimatedEmptyStateComponent } from './animated-empty-state.component';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
-    selector: 'app-lottie-animation',
-    template: '',
-    imports: [CommonModule, MatIconModule]
+  selector: 'app-lottie-animation',
+  template: '',
+  imports: [MatIconModule],
 })
 class StubLottieAnimationComponent {
   readonly animationType = input.required<string>();
@@ -25,10 +25,13 @@ describe('AnimatedEmptyStateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [CommonModule, MatIconModule, AnimatedEmptyStateComponent,
-        StubLottieAnimationComponent]
-})
-    .compileComponents();
+      imports: [
+        CommonModule,
+        MatIconModule,
+        AnimatedEmptyStateComponent,
+        StubLottieAnimationComponent,
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AnimatedEmptyStateComponent);
     component = fixture.componentInstance;
@@ -53,7 +56,7 @@ describe('AnimatedEmptyStateComponent', () => {
     const handlerSpy = jasmine.createSpy('handler');
     fixture.componentRef.setInput('primaryAction', {
       label: 'Test',
-      handler: handlerSpy
+      handler: handlerSpy,
     });
 
     component.onPrimaryClick();
@@ -65,7 +68,7 @@ describe('AnimatedEmptyStateComponent', () => {
     const handlerSpy = jasmine.createSpy('handler');
     fixture.componentRef.setInput('secondaryAction', {
       label: 'Test',
-      handler: handlerSpy
+      handler: handlerSpy,
     });
 
     component.onSecondaryClick();
@@ -77,7 +80,7 @@ describe('AnimatedEmptyStateComponent', () => {
     spyOn(window, 'open');
     fixture.componentRef.setInput('helpLink', {
       label: 'Help',
-      url: 'https://example.com'
+      url: 'https://example.com',
     });
 
     component.onHelpLinkClick();
@@ -122,7 +125,9 @@ describe('AnimatedEmptyStateComponent', () => {
     const titleText = (titleEl as HTMLElement)?.textContent?.trim() ?? '';
     expect(titleText || component.title()).toContain('Test Title');
     if (messageEl) {
-      expect((messageEl as HTMLElement).textContent?.trim()).toContain('Test Message');
+      expect((messageEl as HTMLElement).textContent?.trim()).toContain(
+        'Test Message'
+      );
     } else {
       expect(component.message()).toBe('Test Message');
     }
@@ -132,7 +137,9 @@ describe('AnimatedEmptyStateComponent', () => {
     fixture.componentRef.setInput('primaryAction', {
       label: 'Primary Action',
       icon: 'add',
-      handler: () => { /* no-op for test */ }
+      handler: () => {
+        /* no-op for test */
+      },
     });
     fixture.detectChanges();
 
@@ -140,7 +147,9 @@ describe('AnimatedEmptyStateComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const button = compiled.querySelector('.btn-primary-action');
     if (button) {
-      expect((button as HTMLElement).textContent?.trim()).toContain('Primary Action');
+      expect((button as HTMLElement).textContent?.trim()).toContain(
+        'Primary Action'
+      );
     }
   });
 
@@ -148,7 +157,9 @@ describe('AnimatedEmptyStateComponent', () => {
     fixture.componentRef.setInput('secondaryAction', {
       label: 'Secondary Action',
       icon: 'close',
-      handler: () => { /* no-op for test */ }
+      handler: () => {
+        /* no-op for test */
+      },
     });
     fixture.detectChanges();
 
@@ -156,14 +167,16 @@ describe('AnimatedEmptyStateComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     const button = compiled.querySelector('.btn-secondary-action');
     if (button) {
-      expect((button as HTMLElement).textContent?.trim()).toContain('Secondary Action');
+      expect((button as HTMLElement).textContent?.trim()).toContain(
+        'Secondary Action'
+      );
     }
   });
 
   it('should render help link when provided', () => {
     fixture.componentRef.setInput('helpLink', {
       label: 'Need help?',
-      url: 'https://help.example.com'
+      url: 'https://help.example.com',
     });
     fixture.detectChanges();
 

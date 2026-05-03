@@ -7,7 +7,7 @@ import { takeUntil } from 'rxjs/operators';
     selector: 'app-region-status',
     templateUrl: './region-status.component.html',
     styleUrls: ['./region-status.component.css'],
-    standalone: false
+    
 })
 export class RegionStatusComponent implements OnInit, OnDestroy {
   currentRegion: RegionConfig | null = null;

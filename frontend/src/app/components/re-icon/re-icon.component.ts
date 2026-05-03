@@ -7,7 +7,7 @@ import { IconRegistryService } from '../../services/icon-registry.service';
     templateUrl: './re-icon.component.html',
     styleUrls: ['./re-icon.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    standalone: false
+    
 })
 export class ReIconComponent implements OnInit {
   readonly icon = input.required<string>();

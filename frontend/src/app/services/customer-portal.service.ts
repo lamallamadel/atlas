@@ -7,7 +7,6 @@ import {
   ClientSecureMessage,
   ClientAppointmentRequest,
   ClientSatisfactionSurvey,
-  ConsentPreference,
   WhiteLabelBranding,
   PropertyRecommendation
 } from '../models/customer-portal.models';

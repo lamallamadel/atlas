@@ -5,7 +5,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CdkDragDrop, moveItemInArray, CdkDropList, CdkDrag, CdkDragHandle } from '@angular/cdk/drag-drop';
 import { TemplateApiService } from '../services/template-api.service';
-import { WhatsAppTemplate, TemplateStatus, TemplateCategory, ComponentType, TemplateComponent, TemplateVariable, ButtonType } from '../models/template.model';
+import { WhatsAppTemplate, TemplateStatus, TemplateCategory, ComponentType, TemplateComponent, ButtonType } from '../models/template.model';
 import { MatIconButton, MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';

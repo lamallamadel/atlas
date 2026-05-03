@@ -593,7 +593,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     this.isExportingToPDF = true;
 
     try {
-      const [jsPDF, autoTable] = await Promise.all([
+      const [jsPDF, _autoTable] = await Promise.all([
         import('jspdf'),
         import('jspdf-autotable')
       ]);

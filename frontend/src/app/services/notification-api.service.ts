@@ -36,7 +36,7 @@ export interface NotificationPage {
 @Injectable({
   providedIn: 'root'
 })
-export class NotificationApiService {
+export class NotificationApiService implements OnDestroy {
   private apiUrl = `${environment.apiBaseUrl}/v1/notifications`;
   private pollingInterval = 30000;
   private unreadCountSubject = new BehaviorSubject<number>(0);

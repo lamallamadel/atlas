@@ -652,7 +652,7 @@ export class AiAgentPanelComponent implements OnInit, OnDestroy, AfterViewChecke
   }
 
   @HostListener('document:keydown.alt.a', ['$event'])
-  onAltA(e: KeyboardEvent): void {
+  onAltA(e: Event): void {
     e.preventDefault();
     this.agentService.togglePanel();
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, input } from '@angular/core';
+import { Component, OnInit, OnDestroy, input } from '@angular/core';
 import { CollaborationService, CollaborationCursor } from '../services/collaboration.service';
 import { Subscription } from 'rxjs';
 

@@ -7,7 +7,6 @@ import {
 } from '@angular/core';
 import { 
   trigger, 
-  state, 
   style, 
   transition, 
   animate 
@@ -22,11 +21,6 @@ import {
 import { NgClass } from '@angular/common';
 import { SwipeGestureDirective } from '../directives/swipe-gesture.directive';
 import { MatIcon } from '@angular/material/icon';
-
-interface ToastGroup {
-  position: ToastPosition;
-  toasts: ActiveToast[];
-}
 
 @Component({
     selector: 'app-notification-toast',

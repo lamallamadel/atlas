@@ -4,7 +4,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { AdvancedFilter, FilterField, AdvancedFiltersComponent } from './advanced-filters.component';
 import { FilterPreset, FilterPresetRequest, FilterPresetService } from '../services/filter-preset.service';
 import { DossierFilterApiService, DossierFilterRequest } from '../services/dossier-filter-api.service';
-import { DossierStatus } from '../services/dossier-api.service';
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -138,7 +137,7 @@ export class AdvancedFiltersDialogComponent implements OnInit {
     };
 
     this.filterPresetService.create(request).subscribe({
-      next: (preset) => {
+      next: () => {
         this.snackBar.open('Preset sauvegardé avec succès', 'Fermer', { duration: 3000 });
         this.closeSaveDialog();
         this.loadPresets();
