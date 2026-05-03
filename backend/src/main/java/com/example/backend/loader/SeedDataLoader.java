@@ -26,7 +26,7 @@ import org.springframework.stereotype.Component;
 public class SeedDataLoader implements CommandLineRunner {
 
     private static final Logger logger = LoggerFactory.getLogger(SeedDataLoader.class);
-    private static final String ORG_001 = "default"; // Aligned with portal bypass
+    private static final String ORG_001 = "ORG-001"; // Aligned with frontend default
     private static final String ORG_002 = "ORG-002";
 
     private final AnnonceRepository annonceRepository;
@@ -606,47 +606,96 @@ public class SeedDataLoader implements CommandLineRunner {
         List<WorkflowDefinition> workflowDefinitions = new ArrayList<>();
 
         for (String orgId : Arrays.asList(ORG_001, ORG_002)) {
-            workflowDefinitions.addAll(createWorkflowDefinitionsForOrg(orgId));
+            workflowDefinitions.add(createBuyWorkflow(orgId));
         }
 
         workflowDefinitionRepository.saveAll(workflowDefinitions);
-        logger.info(
-                "Loaded {} workflow definitions ({} per org)",
-                workflowDefinitions.size(),
-                workflowDefinitions.size() / 2);
+        logger.info("Loaded {} workflow definitions", workflowDefinitions.size());
     }
 
-    private List<WorkflowDefinition> createWorkflowDefinitionsForOrg(String orgId) {
-        List<WorkflowDefinition> definitions = new ArrayList<>();
-        String caseType = "CRM_LEAD_BUY";
+    private WorkflowDefinition createBuyWorkflow(String orgId) {
+        WorkflowDefinition template = new WorkflowDefinition();
+        template.setOrgId(orgId);
+        template.setName("Standard Lead Buy Workflow (" + orgId + ")");
+        template.setDescription("Pre-built workflow for lead buy transactions for " + orgId);
+        template.setCaseType("CRM_LEAD_BUY");
+        template.setVersion(1);
+        template.setIsActive(true);
+        template.setIsPublished(true);
+        template.setIsTemplate(false);
+        template.setInitialState("NEW");
+        template.setFinalStates("WON,LOST");
 
-        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "QUALIFYING"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "QUALIFIED"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "APPOINTMENT"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "NEW", "LOST"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFYING", "QUALIFIED"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFYING", "LOST"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFIED", "APPOINTMENT"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "QUALIFIED", "LOST"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "APPOINTMENT", "WON"));
-        definitions.add(createWorkflowDefinition(orgId, caseType, "APPOINTMENT", "LOST"));
+        List<Map<String, Object>> states = new ArrayList<>();
+        states.add(createState("NEW", "New Lead", "initial", "#3B82F6", 100, 100));
+        states.add(createState("QUALIFYING", "Qualifying", "intermediate", "#F59E0B", 300, 100));
+        states.add(createState("QUALIFIED", "Qualified", "intermediate", "#10B981", 500, 100));
+        states.add(createState("APPOINTMENT", "Appointment", "intermediate", "#8B5CF6", 700, 100));
+        states.add(createState("WON", "Won", "final", "#059669", 900, 50));
+        states.add(createState("LOST", "Lost", "final", "#DC2626", 900, 150));
 
-        return definitions;
+        List<Map<String, Object>> transitions = new ArrayList<>();
+        transitions.add(
+                createTransition(
+                        "NEW",
+                        "QUALIFYING",
+                        "Start Qualification",
+                        Arrays.asList("leadName", "leadPhone")));
+        transitions.add(
+                createTransition(
+                        "NEW",
+                        "QUALIFIED",
+                        "Quick Qualify",
+                        Arrays.asList("leadName", "leadPhone")));
+        transitions.add(
+                createTransition("QUALIFYING", "QUALIFIED", "Qualify Lead", Arrays.asList("leadEmail")));
+        transitions.add(
+                createTransition(
+                        "QUALIFIED",
+                        "APPOINTMENT",
+                        "Schedule Appointment",
+                        Arrays.asList("appointmentDate")));
+        transitions.add(createTransition("APPOINTMENT", "WON", "Close Won", Arrays.asList("wonReason")));
+        transitions.add(
+                createTransition("APPOINTMENT", "LOST", "Close Lost", Arrays.asList("lossReason")));
+        transitions.add(
+                createTransition("QUALIFIED", "LOST", "Mark as Lost", Arrays.asList("lossReason")));
+        transitions.add(
+                createTransition("QUALIFYING", "LOST", "Disqualify", Arrays.asList("lossReason")));
+        transitions.add(createTransition("NEW", "LOST", "Spam/Archive", Arrays.asList("lossReason")));
+
+        template.setStatesJson(states);
+        template.setTransitionsJson(transitions);
+        template.setCreatedBy("system-seed");
+        template.setUpdatedBy("system-seed");
+
+        return template;
     }
 
-    private WorkflowDefinition createWorkflowDefinition(
-            String orgId, String caseType, String fromStatus, String toStatus) {
-        WorkflowDefinition definition = new WorkflowDefinition();
-        definition.setOrgId(orgId);
-        definition.setCaseType(caseType);
-        definition.setFromStatus(fromStatus);
-        definition.setToStatus(toStatus);
-        definition.setIsActive(true);
-        definition.setConditionsJson(null);
-        definition.setRequiredFieldsJson(null);
-        definition.setCreatedBy("system-seed");
-        definition.setUpdatedBy("system-seed");
-        return definition;
+    private Map<String, Object> createState(
+            String code, String name, String type, String color, int x, int y) {
+        Map<String, Object> state = new HashMap<>();
+        state.put("stateCode", code);
+        state.put("stateName", name);
+        state.put("stateType", type);
+        state.put("color", color);
+        state.put("positionX", x);
+        state.put("positionY", y);
+        state.put("isInitial", "initial".equals(type));
+        state.put("isFinal", "final".equals(type));
+        return state;
+    }
+
+    private Map<String, Object> createTransition(
+            String from, String to, String label, List<String> requiredFields) {
+        Map<String, Object> transition = new HashMap<>();
+        transition.put("fromState", from);
+        transition.put("toState", to);
+        transition.put("label", label);
+        transition.put("requiredFields", requiredFields);
+        transition.put("allowedRoles", Arrays.asList("ADMIN", "AGENT", "MANAGER"));
+        transition.put("isActive", true);
+        return transition;
     }
 
     private void loadAnnonces() {

@@ -3,7 +3,7 @@
     <toolchain>
         <type>jdk</type>
         <provides>
-            <version>17</version>
+            <version>25</version>
             <vendor>openjdk</vendor>
         </provides>
         <configuration>

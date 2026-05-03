@@ -4,7 +4,12 @@
 This repository contains a Spring Boot backend module. Application code lives in `src/main/java/com/example/backend`, grouped by `controller`, `service`, `repository`, `entity`, `dto`, and `config`. Runtime configuration, email templates, and Flyway migrations live in `src/main/resources`, with cross-database SQL in `db/migration` and PostgreSQL-only optimizations in `db/migration-postgres`. Tests are under `src/test/java/com/example/backend`; load and performance assets are in `src/test/scala` and `k6-tests/`. Operational notes and feature runbooks sit in `docs/` and the root `*.md` files.
 
 ## Build, Test, and Development Commands
-Use ../scripts/use-temurin-21.ps1 or set `JAVA_HOME` before Maven commands.
+Avant Maven sous Windows (PowerShell), fixer le JDK 25 utilisé par le compilateur :
+```powershell
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
+```
+Ou utiliser `../scripts/use-temurin-25.ps1` si vous passez par jabba / Temurin.
 
 - `mvn clean package`: compile, run unit tests, and build the jar.
 - `mvn spring-boot:run`: start the app locally on port 8080.

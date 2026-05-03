@@ -3,25 +3,27 @@
 ## Setup
 
 ### Prerequisites
-- Java 21 (JDK 21.0.2.13 or later)
+- Java 25 (JDK 25 or later)
 - Maven 3.8+
 - Docker (for infrastructure)
 
 ### Initial Setup
 
-**IMPORTANT:** This project requires Java 21. Set JAVA_HOME:
-Or use scripts/use-temurin-21.ps1 to set `JAVA_HOME` before Maven commands.
+**IMPORTANT:** This project requires Java 25. Set JAVA_HOME:
+Or use scripts/use-temurin-25.ps1 to set `JAVA_HOME` before Maven commands.
 
-**Windows (PowerShell):**
+**Windows (PowerShell):** Maven utilise `JAVA_HOME` pour compiler ; le shim `java` du PATH ne suffit pas toujours.
+
 ```powershell
-$env:JAVA_HOME = 'C:\Users\PRO\scoop\apps\jabba\0.14.0\jdk\temurin@1.21.0-10'
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
 cd backend
 mvn clean install
 ```
 
 **Linux/Mac:**
 ```bash
-export JAVA_HOME=/path/to/jdk-21
+export JAVA_HOME=/path/to/jdk-25
 cd backend
 mvn clean install
 ```
@@ -54,7 +56,7 @@ See `SETUP.md` for detailed setup instructions including toolchains configuratio
 
 ### Backend
 - Spring Boot 4.0.3
-- Java 21
+- Java 25
 - Spring Web
 - Spring Validation
 - Spring Actuator
@@ -1103,12 +1105,18 @@ If E2E tests fail because the backend doesn't start:
 
 1. **Check Java version:**
    ```bash
-   java -version  # Must be Java 17
+   java -version  # Must be Java 25
    ```
 
 2. **Set JAVA_HOME:**
    ```bash
-   export JAVA_HOME=/path/to/jdk-17
+   export JAVA_HOME=/path/to/jdk-25
+   export PATH="$JAVA_HOME/bin:$PATH"
+   ```
+   Windows PowerShell :
+   ```powershell
+   $env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'
+   $env:Path = "$env:JAVA_HOME\bin;$env:Path"
    ```
 
 3. **Check for port conflicts:**

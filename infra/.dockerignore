@@ -1,0 +1,44 @@
+# Root-level ignores
+.git
+.gitignore
+.gitlab-ci.yml
+.github
+.env.example
+.editorconfig
+README.md
+CHANGELOG.md
+QUICK_START.md
+terraform
+docs
+scripts
+.cursor
+.vscode
+
+# Backend
+backend/target
+backend/.classpath
+backend/.project
+backend/.settings
+backend/bin
+
+# Frontend
+frontend/node_modules
+frontend/dist
+frontend/.angular
+frontend/.next
+frontend/coverage
+
+# Brain/ML
+brain/venv
+brain/__pycache__
+brain/*.egg-info
+brain/dist
+brain/build
+
+# Infra
+infra/*.log
+infra/*.tmp
+
+# OS
+*.DS_Store
+Thumbs.db

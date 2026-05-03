@@ -8,7 +8,7 @@ Pour le dépannage et la vérification (Kibana/Grafana/Prometheus), voir : `docs
 
 - **PostgreSQL** : base de données
 - **Keycloak** : IAM / OIDC (realm importé au démarrage)
-- **Backend** : Spring Boot (Java 21)
+- **Backend** : Spring Boot (Java 25)
 - **Brain** : FastAPI monolithe AI (scoring, dupli, fraud, match, proposal, nego, agent, document)
 - **Nginx** : reverse proxy (SSL via Cloudflare Origin certificates)
 - **Logs** : Elasticsearch + Kibana + Logstash + Filebeat

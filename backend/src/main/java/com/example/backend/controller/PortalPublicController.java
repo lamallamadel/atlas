@@ -3,6 +3,7 @@ package com.example.backend.controller;
 import com.example.backend.dto.AnnonceResponse;
 import com.example.backend.dto.DossierCreateRequest;
 import com.example.backend.dto.DossierResponse;
+import com.example.backend.entity.Annonce;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.service.AnnonceService;
 import com.example.backend.service.DossierService;
@@ -42,10 +43,10 @@ public class PortalPublicController {
             @RequestParam(defaultValue = "id,desc") String sort) {
         
         // Tenant scope bypass is generally needed for a global portal
-        // Since B2C portals are cross-tenant, we set the context to "default" 
+        // Since B2C portals are cross-tenant, we set the context to "ORG-001" 
         // OR the AnnonceService already handles it if public. 
-        // For MVP, since seed data is 'default', we inject 'default'
-        TenantContext.setOrgId("default");
+        // For MVP, since seed data is 'ORG-001', we inject 'ORG-001'
+        TenantContext.setOrgId("ORG-001");
         try {
             String[] sortParams = sort.split(",");
             Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("desc")
@@ -65,7 +66,7 @@ public class PortalPublicController {
     @Operation(summary = "Submit a portal lead", description = "Submit a contact, demo, or visit request from Vitrine/Portail")
     public ResponseEntity<DossierResponse> submitLead(@Valid @RequestBody DossierCreateRequest request) {
         // Force the lead into the default agency for demo purposes
-        TenantContext.setOrgId("default");
+        TenantContext.setOrgId("ORG-001");
         try {
             // Secure overrides
             if (request.getLeadSource() == null) {

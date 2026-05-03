@@ -42,7 +42,7 @@ This project includes a comprehensive test validation suite with multiple databa
 
 ### Prerequisites
 
-- **Java 17** (JDK 17.0.5.8 or later)
+- **Java 25** (JDK 25 ; exemple Oracle : `C:\Program Files\Java\jdk-25.0.2`)
 - **Maven 3.6+**
 - **Node.js 18+** and **npm**
 - **Docker & Docker Compose**
@@ -55,14 +55,16 @@ This project includes a comprehensive test validation suite with multiple databa
 ```powershell
 git clone <repository-url>
 cd <repository-name>
-$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
 ```
 
 **Linux/Mac:**
 ```bash
 git clone <repository-url>
 cd <repository-name>
-export JAVA_HOME=/path/to/jdk-17
+export JAVA_HOME=/path/to/jdk-25
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
 
 #### 2. Start the Full Stack
@@ -632,11 +634,16 @@ For frontend tests, ensure `e2e/global-setup.ts` creates the mock token storage 
 ```bash
 # Verify Java version
 java -version
-# Should show Java 17
+# Should show Java 25
 
-# Set JAVA_HOME (adjust path as needed)
-export JAVA_HOME=/path/to/jdk-17  # Linux/Mac
-$env:JAVA_HOME = 'C:\Path\To\jdk-17'  # Windows PowerShell
+# Set JAVA_HOME (Maven uses JAVA_HOME for javac, not only PATH)
+export JAVA_HOME=/path/to/jdk-25  # Linux/Mac
+export PATH="$JAVA_HOME/bin:$PATH"
+```
+```powershell
+# Windows PowerShell (session courante)
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
 ```
 
 **Port already in use:**

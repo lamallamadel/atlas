@@ -17,6 +17,7 @@ on:
 
 env:
   NODE_VERSION: '18'
+  # Android Gradle Plugin / toolchain — stay on 17 until AGP explicitly supports this JDK.
   JAVA_VERSION: '17'
 
 jobs:

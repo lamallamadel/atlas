@@ -59,4 +59,3 @@ class SmokeTests {
         assertThat(response.getBody().getMessage()).isEqualTo("pong");
     }
 }
-

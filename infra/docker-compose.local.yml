@@ -65,6 +65,10 @@ services:
     build:
       context: ..
       dockerfile: infra/Dockerfile.backend
+      cache_from:
+        - type=local,src=./build-cache
+      cache_to:
+        - type=local,dest=./build-cache,mode=max
     container_name: backend_app
     restart: unless-stopped
     ports:
@@ -85,7 +89,8 @@ services:
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.H2Dialect
       SPRING_JPA_HIBERNATE_DDL_AUTO: create-drop
 
-      SPRING_PROFILES_ACTIVE: h2,local
+      SPRING_PROFILES_ACTIVE: h2,local,dev
+      IMMO_MOCK_ENABLED: "true"
 
       SPRING_DATA_REDIS_HOST: redis
       SPRING_DATA_REDIS_PORT: 6379
@@ -136,6 +141,7 @@ services:
     volumes:
       - ../frontend:/app
       - frontend_node_modules:/app/node_modules
+      - /app/node_modules
     command: >
       sh -c "npm install &&
              npm start -- --host 0.0.0.0"
@@ -194,4 +200,3 @@ volumes:
   redis_data:
   backend_logs:
   frontend_node_modules:
-  maven_data:

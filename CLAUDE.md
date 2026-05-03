@@ -4,23 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Atlas Immobilier CRM — a full-stack real estate CRM monorepo with a Spring Boot 4.0.3 backend (Java 21), Angular 16 frontend, and PostgreSQL 16 database. Manages property listings (annonces), leads/deals (dossiers), messaging (WhatsApp/email/SMS), appointments, tasks, documents, workflows, and cooperative housing projects.
+Atlas Immobilier CRM — a full-stack real estate CRM monorepo with a Spring Boot 4.0.3 backend (Java 25), Angular 16 frontend, and PostgreSQL 16 database. Manages property listings (annonces), leads/deals (dossiers), messaging (WhatsApp/email/SMS), appointments, tasks, documents, workflows, and cooperative housing projects.
 
 ## Build & Run Commands
  
-**IMPORTANT:** This project requires Java 21. Set JAVA_HOME:
-Or use scripts/use-temurin-21.ps1 to set `JAVA_HOME` before Maven commands.
+**IMPORTANT:** This project requires Java 25. Set JAVA_HOME:
+Or use scripts/use-temurin-25.ps1 to set `JAVA_HOME` before Maven commands.
 
-**Windows (PowerShell):**
+**Windows (PowerShell):** Maven utilise `JAVA_HOME` pour compiler ; alignez-le sur votre JDK 25.
+
 ```powershell
-$env:JAVA_HOME = 'C:\Users\PRO\scoop\apps\jabba\0.14.0\jdk\temurin@1.21.0-10'
+$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'
+$env:Path = "$env:JAVA_HOME\bin;$env:Path"
 cd backend
 mvn clean install
 ```
 
 **Linux/Mac:**
 ```bash
-export JAVA_HOME=/path/to/jdk-21
+export JAVA_HOME=/path/to/jdk-25
 cd backend
 mvn clean install
 ```
@@ -194,7 +196,7 @@ Bundle analysis: `cd frontend && npm run build -- --stats-json && npx webpack-bu
 
 ## Prerequisites
 
-- Java 17 (set `JAVA_HOME` before Maven commands — Windows: `$env:JAVA_HOME = 'C:\Environement\Java\jdk-17.0.5.8-hotspot'`)
+- Java 25 (set `JAVA_HOME` before Maven commands — Windows : `$env:JAVA_HOME = 'C:\Program Files\Java\jdk-25.0.2'` puis `$env:Path = "$env:JAVA_HOME\bin;$env:Path"`)
 - Maven 3.6+ (wrapper `mvnw` available at project root)
 - Node.js 18+ and npm
 - Docker & Docker Compose (for infrastructure and PostgreSQL E2E tests)

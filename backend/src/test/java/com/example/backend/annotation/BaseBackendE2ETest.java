@@ -19,6 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 public abstract class BaseBackendE2ETest {
@@ -26,11 +27,14 @@ public abstract class BaseBackendE2ETest {
     protected static final String TENANT_HEADER = "X-Org-Id";
     protected static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
 
-    @Autowired protected TestRestTemplate restTemplate;
+    @Autowired(required = false)
+    protected TestRestTemplate restTemplate;
 
-    @Autowired protected MockMvc mockMvc;
+    @Autowired
+    protected MockMvc mockMvc;
 
-    @Autowired protected ObjectMapper objectMapper;
+    @Autowired
+    protected ObjectMapper objectMapper;
 
     protected HttpHeaders buildHeaders(String tenantId, String correlationId) {
         HttpHeaders headers = new HttpHeaders();
@@ -54,15 +58,15 @@ public abstract class BaseBackendE2ETest {
         return buildHeadersWithAuth(tenantId, "test-correlation-id", bearerToken);
     }
 
-    protected <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-            T withTenantHeaders(T builder, String tenantId, String correlationId) {
-        return (T)
-                builder.header(TENANT_HEADER, tenantId)
-                        .header(CORRELATION_ID_HEADER, correlationId);
+    protected <T extends MockHttpServletRequestBuilder> T withTenantHeaders(
+            T builder, String tenantId, String correlationId) {
+        builder.header(TENANT_HEADER, tenantId);
+        builder.header(CORRELATION_ID_HEADER, correlationId);
+        return builder;
     }
 
-    protected <T extends org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder>
-            T withTenantHeaders(T builder, String tenantId) {
+    protected <T extends MockHttpServletRequestBuilder> T withTenantHeaders(
+            T builder, String tenantId) {
         return withTenantHeaders(builder, tenantId, "test-correlation-id");
     }
 
@@ -97,7 +101,8 @@ public abstract class BaseBackendE2ETest {
     }
 
     /**
-     * Creates a mock JWT token for testing with the specified organization ID. The JWT includes
+     * Creates a mock JWT token for testing with the specified organization ID. The
+     * JWT includes
      * necessary claims for authentication and authorization.
      *
      * @param orgId The organization ID to include in the JWT claims
@@ -108,12 +113,13 @@ public abstract class BaseBackendE2ETest {
     }
 
     /**
-     * Creates a mock JWT token for testing with specified organization ID, subject, and roles. The
+     * Creates a mock JWT token for testing with specified organization ID, subject,
+     * and roles. The
      * JWT includes necessary claims for authentication and authorization.
      *
-     * @param orgId The organization ID to include in the JWT claims
+     * @param orgId   The organization ID to include in the JWT claims
      * @param subject The subject (user ID) to include in the JWT
-     * @param roles The roles to assign to the user
+     * @param roles   The roles to assign to the user
      * @return A mock JWT token
      */
     protected Jwt createMockJwt(String orgId, String subject, String... roles) {
@@ -130,18 +136,15 @@ public abstract class BaseBackendE2ETest {
     }
 
     protected RequestPostProcessor jwtWithRoles(String orgId, String... roles) {
-        String[] effectiveRoles =
-                (roles == null || roles.length == 0) ? new String[] {"ADMIN"} : roles;
-        List<GrantedAuthority> authorities =
-                Arrays.stream(effectiveRoles)
-                        .filter(role -> role != null && !role.isBlank())
-                        .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
-                        .map(SimpleGrantedAuthority::new)
-                        .map(authority -> (GrantedAuthority) authority)
-                        .toList();
+        String[] effectiveRoles = (roles == null || roles.length == 0) ? new String[] { "ADMIN" } : roles;
+        List<GrantedAuthority> authorities = Arrays.stream(effectiveRoles)
+                .filter(role -> role != null && !role.isBlank())
+                .map(role -> role.startsWith("ROLE_") ? role : "ROLE_" + role)
+                .map(SimpleGrantedAuthority::new)
+                .map(authority -> (GrantedAuthority) authority)
+                .toList();
 
         return jwt().jwt(createMockJwt(orgId, "test-user", effectiveRoles))
                 .authorities(authorities);
     }
 }
-

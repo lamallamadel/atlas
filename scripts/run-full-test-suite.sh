@@ -98,13 +98,13 @@ if [ "$SKIP_BACKEND" = false ]; then
     # Check Java version
     print_info "Checking Java version..."
     if ! command -v java &> /dev/null; then
-        print_failure "Java not found. Please install Java 17+"
+        print_failure "Java not found. Please install Java 25+"
         exit 1
     fi
     
     JAVA_VERSION=$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d'.' -f1)
-    if [ "$JAVA_VERSION" -lt 17 ]; then
-        print_failure "Java 17 or higher required. Found: Java $JAVA_VERSION"
+    if [ "$JAVA_VERSION" -lt 25 ]; then
+        print_failure "Java 25 or higher required. Found: Java $JAVA_VERSION"
         exit 1
     fi
     print_success "Java version: $JAVA_VERSION"
