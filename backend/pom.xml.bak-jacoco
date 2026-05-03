@@ -19,8 +19,6 @@
     <description>Spring Boot Backend Application</description>
 
     <properties>
-        <!-- Flyway is verified against H2 2.3.x; 2.4.x triggered DB-close bugs during CHECK evaluation in @DataJpaTest -->
-        <h2.version>2.3.232</h2.version>
         <java.version>25</java.version>
         <resilience4j.version>2.3.0</resilience4j.version>
         <sentry.version>8.33.0</sentry.version>
@@ -139,10 +137,6 @@
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-database-postgresql</artifactId>
         </dependency>
 
         <dependency>
@@ -351,11 +345,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-resttestclient</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-restclient</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>

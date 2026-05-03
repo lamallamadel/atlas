@@ -90,8 +90,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -122,8 +121,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String invalidSignature = "sha256=invalidsignaturehash1234567890abcdef";
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", invalidSignature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -148,8 +146,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -193,8 +190,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -223,8 +219,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -259,8 +254,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature1 = generateHmacSignature(payload1, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload1))
@@ -280,8 +274,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature2 = generateHmacSignature(payload2, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature2)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload2))
@@ -308,8 +301,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signatureOrg1 = generateHmacSignature(payloadOrg1, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signatureOrg1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payloadOrg1))
@@ -326,8 +318,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signatureOrg2 = generateHmacSignature(payloadOrg2, WEBHOOK_SECRET_2);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_2)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_2)
                                 .header("X-Hub-Signature-256", signatureOrg2)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payloadOrg2))
@@ -395,8 +386,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_2);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_2)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_2)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -441,8 +431,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
@@ -480,8 +469,7 @@ class WhatsAppIntegrationBackendE2ETest extends BaseBackendE2ETest {
         String signature = generateHmacSignature(payload, WEBHOOK_SECRET_1);
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, ORG_ID_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), ORG_ID_1)
                                 .header("X-Hub-Signature-256", signature)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))

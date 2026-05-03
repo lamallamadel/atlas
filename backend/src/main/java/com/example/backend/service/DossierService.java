@@ -13,6 +13,7 @@ import com.example.backend.entity.Dossier;
 import com.example.backend.entity.enums.AnnonceStatus;
 import com.example.backend.entity.enums.DossierStatus;
 import com.example.backend.observability.MetricsService;
+import com.example.backend.repository.ActivityRepository;
 import com.example.backend.repository.AnnonceRepository;
 import com.example.backend.repository.DossierRepository;
 import com.example.backend.util.TenantContext;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class DossierService {
 
     private final DossierRepository dossierRepository;
+    private final ActivityRepository activityRepository;
     private final DossierMapper dossierMapper;
     private final AnnonceRepository annonceRepository;
     private final DossierStatusTransitionService transitionService;
@@ -50,6 +52,7 @@ public class DossierService {
 
     public DossierService(
             DossierRepository dossierRepository,
+            ActivityRepository activityRepository,
             DossierMapper dossierMapper,
             AnnonceRepository annonceRepository,
             DossierStatusTransitionService transitionService,
@@ -63,6 +66,7 @@ public class DossierService {
                     com.example.backend.brain.BrainClientService brainClientService,
             LocaleDetectionService localeDetectionService) {
         this.dossierRepository = dossierRepository;
+        this.activityRepository = activityRepository;
         this.dossierMapper = dossierMapper;
         this.annonceRepository = annonceRepository;
         this.transitionService = transitionService;
@@ -432,6 +436,7 @@ public class DossierService {
             throw new EntityNotFoundException("Dossier not found with id: " + id);
         }
 
+        activityRepository.deleteByDossier_Id(id);
         dossierRepository.delete(dossier);
         if (searchService != null) {
             searchService.deleteDossierIndex(id);

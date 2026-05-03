@@ -1,3 +1,5 @@
--- Create unique constraint for active conversation per phone number (PostgreSQL partial index).
--- Only one row per (org_id, phone_number) can have expires_at > CURRENT_TIMESTAMP.
-CREATE UNIQUE INDEX idx_conversation_state_active_phone ON conversation_state(org_id, phone_number) WHERE expires_at > CURRENT_TIMESTAMP;
+-- Create unique constraint for active pending conversation per phone number.
+-- Partial index predicates must use immutable expressions; avoid CURRENT_TIMESTAMP here.
+CREATE UNIQUE INDEX idx_conversation_state_active_phone
+ON conversation_state(org_id, phone_number)
+WHERE state = 'AWAITING_CONFIRMATION';

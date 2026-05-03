@@ -36,6 +36,11 @@ import org.springframework.test.web.servlet.MvcResult;
 @WithMockUser(roles = {"PRO", "ADMIN"})
 class MessageBackendE2ETest extends BaseBackendE2ETest {
 
+    @Override
+    protected String[] e2eJwtRoles() {
+        return new String[] {"PRO", "ADMIN"};
+    }
+
     private static final String TENANT_1 = "org-tenant-1";
     private static final String TENANT_2 = "org-tenant-2";
     private static final String CORRELATION_ID = "test-correlation-id";

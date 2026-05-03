@@ -58,10 +58,19 @@ public abstract class BaseBackendE2ETest {
         return buildHeadersWithAuth(tenantId, "test-correlation-id", bearerToken);
     }
 
+    /**
+     * Roles used by {@link #withTenantHeaders} for OAuth2 Resource Server / MockMvc. Override in a
+     * test class when {@code @WithMockUser} listed multiple roles (e.g. PRO + ADMIN).
+     */
+    protected String[] e2eJwtRoles() {
+        return new String[] {"PRO"};
+    }
+
     protected <T extends MockHttpServletRequestBuilder> T withTenantHeaders(
             T builder, String tenantId, String correlationId) {
         builder.header(TENANT_HEADER, tenantId);
         builder.header(CORRELATION_ID_HEADER, correlationId);
+        builder.with(jwtWithRoles(tenantId, e2eJwtRoles()));
         return builder;
     }
 
@@ -123,7 +132,7 @@ public abstract class BaseBackendE2ETest {
      * @return A mock JWT token
      */
     protected Jwt createMockJwt(String orgId, String subject, String... roles) {
-        List<String> rolesList = List.of(roles);
+        List<String> rolesList = Arrays.asList(roles);
         return Jwt.withTokenValue("mock-token-" + orgId)
                 .header("alg", "none")
                 .claim("sub", subject)

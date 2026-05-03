@@ -44,4 +44,6 @@ public interface ActivityRepository extends JpaRepository<ActivityEntity, Long> 
             "SELECT a FROM ActivityEntity a WHERE a.dossier.id = :dossierId AND a.visibility = :visibility ORDER BY a.createdAt DESC")
     List<ActivityEntity> findByDossierIdAndVisibilityOrderByCreatedAtDesc(
             @Param("dossierId") Long dossierId, @Param("visibility") ActivityVisibility visibility);
+
+    void deleteByDossier_Id(Long dossierId);
 }

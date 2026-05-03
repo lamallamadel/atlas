@@ -161,7 +161,8 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)),
                                 TENANT_ID,
-                                CORRELATION_ID))
+                                CORRELATION_ID)
+                                .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                 .andExpect(status().isBadRequest());
     }
 
@@ -303,7 +304,10 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(
                         withTenantHeaders(
-                                delete(BASE_URL + "/" + entity.getId()), TENANT_ID, CORRELATION_ID))
+                                        delete(BASE_URL + "/" + entity.getId()),
+                                        TENANT_ID,
+                                        CORRELATION_ID)
+                                .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                 .andExpect(status().isNoContent());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -352,7 +356,10 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(
                         withTenantHeaders(
-                                delete(BASE_URL + "/" + entity.getId()), TENANT_ID, CORRELATION_ID))
+                                        delete(BASE_URL + "/" + entity.getId()),
+                                        TENANT_ID,
+                                        CORRELATION_ID)
+                                .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                 .andExpect(status().isNotFound());
     }
 
@@ -441,11 +448,13 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
             mockMvc.perform(
                             withTenantHeaders(
-                                    post(BASE_URL)
-                                            .contentType(MediaType.APPLICATION_JSON)
-                                            .content(objectMapper.writeValueAsString(request)),
-                                    TENANT_ID,
-                                    CORRELATION_ID))
+                                            post(BASE_URL)
+                                                    .contentType(MediaType.APPLICATION_JSON)
+                                                    .content(
+                                                            objectMapper.writeValueAsString(request)),
+                                            TENANT_ID,
+                                            CORRELATION_ID)
+                                    .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                     .andExpect(status().isCreated())
                     .andExpect(jsonPath("$.phone").value(phone));
         }
@@ -509,13 +518,14 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
         String createResponse =
                 mockMvc.perform(
                                 withTenantHeaders(
-                                        post(BASE_URL)
-                                                .contentType(MediaType.APPLICATION_JSON)
-                                                .content(
-                                                        objectMapper.writeValueAsString(
-                                                                createRequest)),
-                                        TENANT_ID,
-                                        CORRELATION_ID))
+                                                post(BASE_URL)
+                                                        .contentType(MediaType.APPLICATION_JSON)
+                                                        .content(
+                                                                objectMapper.writeValueAsString(
+                                                                        createRequest)),
+                                                TENANT_ID,
+                                                CORRELATION_ID)
+                                        .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                         .andExpect(status().isCreated())
                         .andReturn()
                         .getResponse()
@@ -529,16 +539,22 @@ class PartiesPrenanteBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(
                         withTenantHeaders(
-                                put(BASE_URL + "/" + entityId)
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(updateRequest)),
-                                TENANT_ID,
-                                CORRELATION_ID))
+                                        put(BASE_URL + "/" + entityId)
+                                                .contentType(MediaType.APPLICATION_JSON)
+                                                .content(
+                                                        objectMapper.writeValueAsString(
+                                                                updateRequest)),
+                                        TENANT_ID,
+                                        CORRELATION_ID)
+                                .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                 .andExpect(status().isOk());
 
         mockMvc.perform(
                         withTenantHeaders(
-                                delete(BASE_URL + "/" + entityId), TENANT_ID, CORRELATION_ID))
+                                        delete(BASE_URL + "/" + entityId),
+                                        TENANT_ID,
+                                        CORRELATION_ID)
+                                .with(jwtWithRoles(TENANT_ID, "ADMIN")))
                 .andExpect(status().isNoContent());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();

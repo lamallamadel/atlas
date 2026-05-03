@@ -68,11 +68,6 @@ logging:
     root: INFO
     com.example.backend: DEBUG
 
-# E2E tests expect permissive CORS behavior for preflight checks (MockMvc).
-# This is intentionally broad for test scope only.
-cors:
-  allowed-origins: "*"
-
 rate-limit:
   enabled: false
 

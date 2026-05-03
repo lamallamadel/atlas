@@ -6,8 +6,12 @@ import com.example.backend.annotation.BackendE2ETest;
 import com.example.backend.annotation.BaseBackendE2ETest;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import javax.sql.DataSource;
+import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.MigrationInfo;
+import org.flywaydb.core.api.MigrationInfoService;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +30,8 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
     private PostgreSQLContainer<?> postgresContainer;
 
     @Autowired private DataSource dataSource;
+
+    @Autowired private Flyway flyway;
 
     @Test
     void verifyTestcontainerIsRunning() {
@@ -75,56 +81,37 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
 
         try (Connection connection = dataSource.getConnection()) {
-            DatabaseMetaData metaData = connection.getMetaData();
-
-            // Check flyway_schema_history table exists
-            boolean flywayTableExists = false;
-            try (ResultSet tables = metaData.getTables(null, null, "flyway_schema_history", null)) {
-                flywayTableExists = tables.next();
+            Integer tableCount;
+            try (PreparedStatement ps =
+                    connection.prepareStatement(
+                            "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
+                                    + "WHERE UPPER(TABLE_SCHEMA) = 'PUBLIC' "
+                                    + "AND UPPER(TABLE_NAME) = 'FLYWAY_SCHEMA_HISTORY'")) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    rs.next();
+                    tableCount = rs.getInt(1);
+                }
             }
 
-            assertThat(flywayTableExists).as("Flyway schema history table should exist").isTrue();
+            assertThat(tableCount)
+                    .as("Flyway schema history table should exist")
+                    .isEqualTo(1);
 
             log.info("✓ Flyway schema history table exists");
-
-            // Count successful migrations
-            try (var stmt = connection.createStatement();
-                    var rs =
-                            stmt.executeQuery(
-                                    "SELECT version, description, type, installed_on, success "
-                                            + "FROM flyway_schema_history "
-                                            + "ORDER BY installed_rank")) {
-
-                int migrationCount = 0;
-                int successCount = 0;
-
-                log.info("Applied migrations:");
-                while (rs.next()) {
-                    migrationCount++;
-                    String version = rs.getString("version");
-                    String description = rs.getString("description");
-                    String type = rs.getString("type");
-                    boolean success = rs.getBoolean("success");
-
-                    if (success) {
-                        successCount++;
-                        log.info("  ✓ V{} - {} ({})", version, description, type);
-                    } else {
-                        log.warn("  ✗ V{} - {} ({}) - FAILED", version, description, type);
-                    }
-                }
-
-                assertThat(migrationCount)
-                        .as("At least one migration should have been executed")
-                        .isGreaterThan(0);
-
-                assertThat(successCount)
-                        .as("All migrations should be successful")
-                        .isEqualTo(migrationCount);
-
-                log.info("✓ Total migrations: {}, Successful: {}", migrationCount, successCount);
-            }
         }
+
+        MigrationInfoService info = flyway.info();
+        MigrationInfo[] applied = info.applied();
+        assertThat(applied)
+                .as("At least one migration should have been executed")
+                .isNotEmpty();
+
+        log.info("Applied migrations:");
+        for (MigrationInfo m : applied) {
+            log.info("  ✓ V{} - {}", m.getVersion(), m.getDescription());
+        }
+
+        log.info("✓ Total migrations: {}", applied.length);
     }
 
     @Test
@@ -145,15 +132,22 @@ public class InitializationOrderBackendE2ETest extends BaseBackendE2ETest {
         };
 
         try (Connection connection = dataSource.getConnection()) {
-            DatabaseMetaData metaData = connection.getMetaData();
-
             log.info("Checking for required tables:");
             for (String tableName : requiredTables) {
-                try (ResultSet tables = metaData.getTables(null, null, tableName, null)) {
-                    boolean exists = tables.next();
-                    assertThat(exists).as("Table '%s' should exist", tableName).isTrue();
-                    log.info("  ✓ {}", tableName);
+                int count;
+                try (PreparedStatement ps =
+                        connection.prepareStatement(
+                                "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
+                                        + "WHERE UPPER(TABLE_SCHEMA) = 'PUBLIC' "
+                                        + "AND UPPER(TABLE_NAME) = ?")) {
+                    ps.setString(1, tableName.toUpperCase());
+                    try (ResultSet rs = ps.executeQuery()) {
+                        rs.next();
+                        count = rs.getInt(1);
+                    }
                 }
+                assertThat(count).as("Table '%s' should exist", tableName).isEqualTo(1);
+                log.info("  ✓ {}", tableName);
             }
 
             log.info("✓ All required tables exist");

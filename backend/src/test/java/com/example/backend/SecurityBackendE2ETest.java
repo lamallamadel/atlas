@@ -176,6 +176,7 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
         MvcResult result =
                 mockMvc.perform(
                                 options("/api/v1/annonces")
+                                        .header(TENANT_HEADER, "ORG1")
                                         .header("Origin", requestOrigin)
                                         .header("Access-Control-Request-Method", "GET")
                                         .header(
@@ -192,11 +193,12 @@ class SecurityBackendE2ETest extends BaseBackendE2ETest {
     @Test
     void whenCorsPreflightOptionsWithDifferentOrigin_returnsAccessControlAllowOriginHeader()
             throws Exception {
-        String requestOrigin = "http://example.com";
+        String requestOrigin = "http://127.0.0.1:3000";
 
         MvcResult result =
                 mockMvc.perform(
                                 options("/api/v1/dossiers")
+                                        .header(TENANT_HEADER, "ORG1")
                                         .header("Origin", requestOrigin)
                                         .header("Access-Control-Request-Method", "POST")
                                         .header(

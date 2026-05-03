@@ -14,6 +14,7 @@ import com.example.backend.repository.*;
 import com.example.backend.service.*;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -190,8 +191,7 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
         String sentWebhook =
                 createDeliveryStatusWebhook(sentMessage.getProviderMessageId(), "sent");
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(sentWebhook))
                 .andExpect(status().isOk());
@@ -203,8 +203,7 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
         String deliveredWebhook =
                 createDeliveryStatusWebhook(sentMessage.getProviderMessageId(), "delivered");
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(deliveredWebhook))
                 .andExpect(status().isOk());
@@ -216,8 +215,7 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
         String readWebhook =
                 createDeliveryStatusWebhook(sentMessage.getProviderMessageId(), "read");
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(readWebhook))
                 .andExpect(status().isOk());
@@ -260,8 +258,7 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
                         "Invalid parameter: phone number");
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(failedWebhook))
                 .andExpect(status().isOk());
@@ -276,12 +273,14 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"PRO"})
     void rateLimiting_ExceedsQuota_BlocksMessages() {
-        TenantContext.setOrgId(TENANT_1);
+        String orgId = TENANT_1 + "-rate-" + UUID.randomUUID();
+        TenantContext.setOrgId(orgId);
 
-        Dossier dossier = createDossier(TENANT_1);
+        Dossier dossier = createDossier(orgId);
         createConsent(dossier, ConsentementChannel.WHATSAPP, ConsentementStatus.GRANTED);
 
-        rateLimitService.updateQuotaLimit(TENANT_1, 3);
+        rateLimitService.updateQuotaLimit(orgId, 3);
+        WhatsAppRateLimitService.QuotaStatus initialQuotaStatus = rateLimitService.getQuotaStatus(orgId);
 
         when(mockWhatsAppProvider.send(any(OutboundMessageEntity.class)))
                 .thenReturn(
@@ -315,13 +314,13 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
 
         OutboundMessageEntity blockedMessage =
                 outboundMessageRepository.findById(message4.getId()).orElseThrow();
-        assertThat(blockedMessage.getStatus()).isEqualTo(OutboundMessageStatus.QUEUED);
+        assertThat(blockedMessage.getStatus()).isEqualTo(OutboundMessageStatus.THROTTLED);
         assertThat(blockedMessage.getErrorCode()).isEqualTo("QUOTA_EXCEEDED");
         assertThat(blockedMessage.getAttemptCount()).isEqualTo(1);
 
         WhatsAppRateLimitService.QuotaStatus quotaStatus =
-                rateLimitService.getQuotaStatus(TENANT_1);
-        assertThat(quotaStatus.getMessagesSent()).isEqualTo(3);
+                rateLimitService.getQuotaStatus(orgId);
+        assertThat(quotaStatus.getMessagesSent() - initialQuotaStatus.getMessagesSent()).isEqualTo(3);
         assertThat(quotaStatus.getQuotaLimit()).isEqualTo(3);
         assertThat(quotaStatus.getRemainingQuota()).isEqualTo(0);
     }
@@ -553,6 +552,14 @@ class WhatsAppOutboundComprehensiveE2ETest extends BaseBackendE2ETest {
         consent.setChannel(channel);
         consent.setConsentType(ConsentementType.MARKETING);
         consent.setStatus(status);
+        consent.setMeta(
+                Map.of(
+                        "optInTimestamp",
+                        Instant.now().toString(),
+                        "ipAddress",
+                        "127.0.0.1",
+                        "doubleOptInConfirmed",
+                        true));
         LocalDateTime now = LocalDateTime.now();
         consent.setCreatedAt(now);
         consent.setUpdatedAt(now);

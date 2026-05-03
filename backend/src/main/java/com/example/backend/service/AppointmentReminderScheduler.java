@@ -8,6 +8,7 @@ import com.example.backend.entity.enums.MessageChannel;
 import com.example.backend.entity.enums.ReminderStrategy;
 import com.example.backend.repository.AppointmentRepository;
 import com.example.backend.repository.AppointmentReminderMetricsRepository;
+import com.example.backend.util.TenantContext;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
@@ -172,139 +173,158 @@ public class AppointmentReminderScheduler {
 
     @Transactional
     public void sendReminderWithFallback(AppointmentEntity appointment) {
-        if (appointment.getDossier() == null) {
-            logger.warn("Appointment {} has no dossier. Skipping reminder.", appointment.getId());
-            return;
+        String previousOrgId = TenantContext.getOrgId();
+        boolean tenantContextUpdated = false;
+        if (appointment.getOrgId() != null && !appointment.getOrgId().equals(previousOrgId)) {
+            TenantContext.setOrgId(appointment.getOrgId());
+            tenantContextUpdated = true;
         }
 
-        Long dossierId = appointment.getDossier().getId();
-        List<String> channels = getReminderChannels(appointment);
-        String templateCode = getTemplateCode(appointment);
+        try {
+            if (appointment.getDossier() == null) {
+                logger.warn("Appointment {} has no dossier. Skipping reminder.", appointment.getId());
+                return;
+            }
 
-        Map<String, String> templateVariables = buildTemplateVariables(appointment);
+            Long dossierId = appointment.getDossier().getId();
+            List<String> channels = getReminderChannels(appointment);
+            String templateCode = getTemplateCode(appointment);
 
-        boolean reminderSent = false;
-        List<String> attemptedChannels = new ArrayList<>();
-        List<String> failureReasons = new ArrayList<>();
+            Map<String, String> templateVariables = buildTemplateVariables(appointment);
 
-        for (String channelStr : channels) {
-            MessageChannel channel;
-            try {
-                channel = MessageChannel.valueOf(channelStr);
-            } catch (IllegalArgumentException e) {
-                logger.warn(
-                        "Invalid channel '{}' for appointment {}. Skipping.",
-                        channelStr,
-                        appointment.getId());
+            boolean reminderSent = false;
+            List<String> attemptedChannels = new ArrayList<>();
+            List<String> failureReasons = new ArrayList<>();
+
+            for (String channelStr : channels) {
+                MessageChannel channel;
+                try {
+                    channel = MessageChannel.valueOf(channelStr);
+                } catch (IllegalArgumentException e) {
+                    logger.warn(
+                            "Invalid channel '{}' for appointment {}. Skipping.",
+                            channelStr,
+                            appointment.getId());
+                    attemptedChannels.add(channelStr);
+                    failureReasons.add("Invalid channel: " + channelStr);
+                    continue;
+                }
+
                 attemptedChannels.add(channelStr);
-                failureReasons.add("Invalid channel: " + channelStr);
-                continue;
+
+                String recipientContact = getRecipientContact(appointment, channel);
+                if (recipientContact == null || recipientContact.trim().isEmpty()) {
+                    String reason = String.format("No contact info for channel %s", channel);
+                    logger.warn(
+                            "Dossier {} has no contact for channel {}. Trying next channel.",
+                            dossierId,
+                            channel);
+                    failureReasons.add(reason);
+                    logFallbackEvent(appointment, channel, reason);
+                    continue;
+                }
+
+                try {
+                    String dossierLocale = appointment.getDossier().getLocale();
+                    if (dossierLocale == null || dossierLocale.trim().isEmpty()) {
+                        dossierLocale = "fr_FR";
+                    }
+
+                    String messageContent;
+                    if (channel == MessageChannel.WHATSAPP) {
+                        messageContent =
+                                getLocalizedTemplateContent(
+                                        templateCode, dossierLocale, templateVariables);
+                    } else if (DEFAULT_TEMPLATE_CODE.equals(templateCode)) {
+                        messageContent = buildFallbackMessage(templateVariables);
+                    } else {
+                        messageContent = interpolateTemplate(templateCode, templateVariables);
+                    }
+
+                    Map<String, Object> payload = new HashMap<>();
+                    payload.put("body", messageContent);
+
+                    outboundMessageService.createOutboundMessage(
+                            dossierId,
+                            channel,
+                            recipientContact,
+                            templateCode,
+                            getLocalizedSubject(dossierLocale),
+                            payload,
+                            "appointment_reminder_" + appointment.getId() + "_" + channel,
+                            ConsentementType.TRANSACTIONNEL);
+
+                    logger.info(
+                            "Successfully queued reminder for appointment {} via {} to {}",
+                            appointment.getId(),
+                            channel,
+                            recipientContact);
+
+                    double noShowProbability = predictNoShowProbability(appointment);
+                    ReminderStrategy strategy = appointment.getReminderStrategy();
+
+                    metricsService.recordReminderSentWithStrategy(
+                            appointment,
+                            channel.name(),
+                            templateCode,
+                            appointment.getAssignedTo(),
+                            "SENT",
+                            LocalDateTime.now(),
+                            strategy != null ? strategy.name() : ReminderStrategy.STANDARD.name(),
+                            noShowProbability);
+
+                    if (channel == MessageChannel.WHATSAPP) {
+                        initializeConversationForReminder(appointment, recipientContact);
+                    }
+
+                    reminderSent = true;
+                    logSuccessfulReminder(appointment, channel, attemptedChannels, failureReasons);
+                    break;
+
+                } catch (ResponseStatusException e) {
+                    String reason = String.format("Consent validation failed: %s", e.getReason());
+                    logger.warn(
+                            "Consent validation failed for appointment {} on channel {}: {}. Trying next channel.",
+                            appointment.getId(),
+                            channel,
+                            e.getReason());
+                    failureReasons.add(reason);
+                    logFallbackEvent(appointment, channel, reason);
+
+                } catch (Exception e) {
+                    String reason = String.format("Error: %s", e.getMessage());
+                    logger.error(
+                            "Failed to send reminder for appointment {} on channel {}: {}. Trying next channel.",
+                            appointment.getId(),
+                            channel,
+                            e.getMessage(),
+                            e);
+                    failureReasons.add(reason);
+                    logFallbackEvent(appointment, channel, reason);
+                }
             }
 
-            attemptedChannels.add(channelStr);
-
-            String recipientContact = getRecipientContact(appointment, channel);
-            if (recipientContact == null || recipientContact.trim().isEmpty()) {
-                String reason = String.format("No contact info for channel %s", channel);
-                logger.warn(
-                        "Dossier {} has no contact for channel {}. Trying next channel.",
-                        dossierId,
-                        channel);
-                failureReasons.add(reason);
-                logFallbackEvent(appointment, channel, reason);
-                continue;
-            }
-
-            try {
-                String dossierLocale = appointment.getDossier().getLocale();
-                if (dossierLocale == null || dossierLocale.trim().isEmpty()) {
-                    dossierLocale = "fr_FR";
-                }
-
-                String messageContent;
-                if (channel == MessageChannel.WHATSAPP) {
-                    messageContent =
-                            getLocalizedTemplateContent(
-                                    templateCode, dossierLocale, templateVariables);
-                } else {
-                    messageContent = interpolateTemplate(templateCode, templateVariables);
-                }
-
-                Map<String, Object> payload = new HashMap<>();
-                payload.put("body", messageContent);
-
-                outboundMessageService.createOutboundMessage(
-                        dossierId,
-                        channel,
-                        recipientContact,
-                        templateCode,
-                        getLocalizedSubject(dossierLocale),
-                        payload,
-                        "appointment_reminder_" + appointment.getId() + "_" + channel,
-                        ConsentementType.TRANSACTIONNEL);
-
-                logger.info(
-                        "Successfully queued reminder for appointment {} via {} to {}",
-                        appointment.getId(),
-                        channel,
-                        recipientContact);
-
-                double noShowProbability = predictNoShowProbability(appointment);
-                ReminderStrategy strategy = appointment.getReminderStrategy();
-
-                metricsService.recordReminderSentWithStrategy(
-                        appointment,
-                        channel.name(),
-                        templateCode,
-                        appointment.getAssignedTo(),
-                        "SENT",
-                        LocalDateTime.now(),
-                        strategy != null ? strategy.name() : ReminderStrategy.STANDARD.name(),
-                        noShowProbability);
-
-                if (channel == MessageChannel.WHATSAPP) {
-                    initializeConversationForReminder(appointment, recipientContact);
-                }
-
-                reminderSent = true;
-                logSuccessfulReminder(appointment, channel, attemptedChannels, failureReasons);
-                break;
-
-            } catch (ResponseStatusException e) {
-                String reason = String.format("Consent validation failed: %s", e.getReason());
-                logger.warn(
-                        "Consent validation failed for appointment {} on channel {}: {}. Trying next channel.",
-                        appointment.getId(),
-                        channel,
-                        e.getReason());
-                failureReasons.add(reason);
-                logFallbackEvent(appointment, channel, reason);
-
-            } catch (Exception e) {
-                String reason = String.format("Error: %s", e.getMessage());
+            if (reminderSent) {
+                appointment.setReminderSent(true);
+                appointmentRepository.save(appointment);
+                logger.info("Reminder flagged as sent for appointment {}", appointment.getId());
+            } else {
                 logger.error(
-                        "Failed to send reminder for appointment {} on channel {}: {}. Trying next channel.",
+                        "Failed to send reminder for appointment {} on all channels: {}. Attempted: {}, Failures: {}",
                         appointment.getId(),
-                        channel,
-                        e.getMessage(),
-                        e);
-                failureReasons.add(reason);
-                logFallbackEvent(appointment, channel, reason);
+                        channels,
+                        attemptedChannels,
+                        failureReasons);
+                logAllChannelsFailedEvent(appointment, attemptedChannels, failureReasons);
             }
-        }
-
-        if (reminderSent) {
-            appointment.setReminderSent(true);
-            appointmentRepository.save(appointment);
-            logger.info("Reminder flagged as sent for appointment {}", appointment.getId());
-        } else {
-            logger.error(
-                    "Failed to send reminder for appointment {} on all channels: {}. Attempted: {}, Failures: {}",
-                    appointment.getId(),
-                    channels,
-                    attemptedChannels,
-                    failureReasons);
-            logAllChannelsFailedEvent(appointment, attemptedChannels, failureReasons);
+        } finally {
+            if (tenantContextUpdated) {
+                if (previousOrgId != null) {
+                    TenantContext.setOrgId(previousOrgId);
+                } else {
+                    TenantContext.clear();
+                }
+            }
         }
     }
 
@@ -457,13 +477,13 @@ public class AppointmentReminderScheduler {
             }
         } catch (Exception e) {
             logger.warn(
-                    "Failed to get localized template '{}' for locale '{}': {}. Using interpolation.",
+                    "Failed to get localized template '{}' for locale '{}': {}. Using fallback message.",
                     templateCode,
                     locale,
                     e.getMessage());
         }
 
-        return interpolateTemplate(templateCode, variables);
+        return buildFallbackMessage(variables);
     }
 
     private String extractBodyFromTemplate(

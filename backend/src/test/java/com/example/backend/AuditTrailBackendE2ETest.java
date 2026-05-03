@@ -534,7 +534,6 @@ class AuditTrailBackendE2ETest extends BaseBackendE2ETest {
 
         DossierStatusPatchRequest statusPatch = new DossierStatusPatchRequest();
         statusPatch.setStatus(DossierStatus.QUALIFIED);
-        statusPatch.setStatusCode("CRM_QUALIFIED");
         dossierService.patchStatus(dossierResponse.getId(), statusPatch);
 
         entityManager.flush();

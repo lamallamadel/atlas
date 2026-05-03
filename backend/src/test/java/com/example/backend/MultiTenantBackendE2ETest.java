@@ -34,6 +34,11 @@ import org.springframework.transaction.annotation.Transactional;
 @WithMockUser(username = "test-user", roles = "ADMIN")
 public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
+    @Override
+    protected String[] e2eJwtRoles() {
+        return new String[] {"ADMIN"};
+    }
+
     @Autowired private DossierRepository dossierRepository;
 
     @Autowired private AuditEventRepository auditEventRepository;
@@ -68,9 +73,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result1 =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_001)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isCreated())
@@ -84,9 +87,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result2 =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_002)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_002, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isCreated())
@@ -113,9 +114,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult createResult =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_001)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isCreated())
@@ -126,15 +125,11 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
                         createResult.getResponse().getContentAsString(), DossierResponse.class);
 
         mockMvc.perform(
-                        get("/api/v1/dossiers/" + created.getId())
-                                .header(TENANT_HEADER, ORG_002)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id"))
+                        withTenantHeaders(get("/api/v1/dossiers/" + created.getId()), ORG_002, "test-correlation-id"))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(
-                        get("/api/v1/dossiers/" + created.getId())
-                                .header(TENANT_HEADER, ORG_001)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id"))
+                        withTenantHeaders(get("/api/v1/dossiers/" + created.getId()), ORG_001, "test-correlation-id"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(created.getId()))
                 .andExpect(jsonPath("$.orgId").value(ORG_001));
@@ -161,9 +156,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33600000000");
 
         mockMvc.perform(
-                        post("/api/v1/dossiers")
-                                .header(TENANT_HEADER, ORG_001)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                        withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
@@ -171,9 +164,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         assertThat(TenantContext.getOrgId()).isNull();
 
         mockMvc.perform(
-                        get("/api/v1/dossiers")
-                                .header(TENANT_HEADER, ORG_002)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id"))
+                        withTenantHeaders(get("/api/v1/dossiers"), ORG_002, "test-correlation-id"))
                 .andExpect(status().isOk());
 
         assertThat(TenantContext.getOrgId()).isNull();
@@ -254,9 +245,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result1 =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_001)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request1)))
                         .andExpect(status().isCreated())
@@ -272,9 +261,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result2 =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_002)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_002, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request2)))
                         .andExpect(status().isCreated())
@@ -323,9 +310,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult result1 =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_001)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request1)))
                         .andExpect(status().isCreated())
@@ -340,9 +325,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request2.setLeadPhone("+33800000002");
 
         mockMvc.perform(
-                        post("/api/v1/dossiers")
-                                .header(TENANT_HEADER, ORG_002)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                        withTenantHeaders(post("/api/v1/dossiers"), ORG_002, "test-correlation-id")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request2)))
                 .andExpect(status().isCreated());
@@ -390,9 +373,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         MvcResult createResult =
                 mockMvc.perform(
-                                post("/api/v1/dossiers")
-                                        .header(TENANT_HEADER, ORG_001)
-                                        .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                                withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)))
                         .andExpect(status().isCreated())
@@ -403,15 +384,14 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
                         createResult.getResponse().getContentAsString(), DossierResponse.class);
 
         mockMvc.perform(
-                        get("/api/v1/dossiers/" + created.getId())
-                                .header(TENANT_HEADER, ORG_002)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id"))
+                        withTenantHeaders(get("/api/v1/dossiers/" + created.getId()), ORG_002, "test-correlation-id"))
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(
-                        get("/api/v1/dossiers/" + (created.getId() + 9999))
-                                .header(TENANT_HEADER, ORG_001)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id"))
+                        withTenantHeaders(
+                                        get("/api/v1/dossiers/" + (created.getId() + 9999)),
+                                        ORG_001,
+                                        "test-correlation-id"))
                 .andExpect(status().isNotFound());
     }
 
@@ -424,9 +404,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
         request.setLeadPhone("+33100000000");
 
         mockMvc.perform(
-                        post("/api/v1/dossiers")
-                                .header(TENANT_HEADER, ORG_001)
-                                .header(CORRELATION_ID_HEADER, "test-correlation-id")
+                        withTenantHeaders(post("/api/v1/dossiers"), ORG_001, "test-correlation-id")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated());
@@ -435,9 +413,7 @@ public class MultiTenantBackendE2ETest extends BaseBackendE2ETest {
 
         try {
             mockMvc.perform(
-                            get("/api/v1/dossiers/99999")
-                                    .header(TENANT_HEADER, ORG_002)
-                                    .header(CORRELATION_ID_HEADER, "test-correlation-id"))
+                            withTenantHeaders(get("/api/v1/dossiers/99999"), ORG_002, "test-correlation-id"))
                     .andExpect(status().isNotFound());
         } catch (Exception e) {
         }

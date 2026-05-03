@@ -367,6 +367,8 @@ class DossierRepositoryTest {
         dossier.setLeadName("Lead Name");
         dossier.setLeadSource("Website");
         dossier.setStatus(status);
+        dossier.setCaseType("CRM_LEAD_BUY");
+        dossier.setStatusCode(status.name());
         return dossier;
     }
 }

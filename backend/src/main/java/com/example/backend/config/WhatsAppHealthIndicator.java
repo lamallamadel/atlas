@@ -8,9 +8,11 @@ import com.example.backend.repository.WhatsAppProviderConfigRepository;
 import java.time.LocalDateTime;
 import org.springframework.boot.health.contributor.Health;
 import org.springframework.boot.health.contributor.HealthIndicator;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component("whatsapp")
+@Profile("!test")
 public class WhatsAppHealthIndicator implements HealthIndicator {
 
     private final WhatsAppProviderConfigRepository providerConfigRepository;

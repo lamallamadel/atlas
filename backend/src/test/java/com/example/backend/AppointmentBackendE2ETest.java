@@ -725,7 +725,9 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(
                         withTenantHeaders(
-                                delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
+                                        delete("/api/v1/appointments/" + appointment.getId()),
+                                        ORG_ID)
+                                .with(jwtWithRoles(ORG_ID, "ADMIN")))
                 .andExpect(status().isNoContent());
 
         assertThat(appointmentRepository.findById(appointment.getId())).isEmpty();
@@ -771,7 +773,9 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
 
         mockMvc.perform(
                         withTenantHeaders(
-                                delete("/api/v1/appointments/" + appointment.getId()), ORG_ID))
+                                        delete("/api/v1/appointments/" + appointment.getId()),
+                                        ORG_ID)
+                                .with(jwtWithRoles(ORG_ID, "ADMIN")))
                 .andExpect(status().isNoContent());
 
         List<AuditEventEntity> auditEvents = auditEventRepository.findAll();
@@ -789,7 +793,9 @@ class AppointmentBackendE2ETest extends BaseBackendE2ETest {
     @Test
     @WithMockUser(roles = {"ADMIN"})
     void delete_NonExistingAppointment_Returns404() throws Exception {
-        mockMvc.perform(withTenantHeaders(delete("/api/v1/appointments/999999"), ORG_ID))
+        mockMvc.perform(
+                        withTenantHeaders(delete("/api/v1/appointments/999999"), ORG_ID)
+                                .with(jwtWithRoles(ORG_ID, "ADMIN")))
                 .andExpect(status().isNotFound());
     }
 

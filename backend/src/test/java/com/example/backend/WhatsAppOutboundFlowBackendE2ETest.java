@@ -17,6 +17,7 @@ import com.example.backend.service.OutboundMessageService;
 import com.example.backend.service.ProviderSendResult;
 import com.example.backend.util.TenantContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -433,8 +434,7 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
         String webhookPayload = createDeliveryStatusWebhook("wamid.webhook-test-123", "sent");
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(webhookPayload))
                 .andExpect(status().isOk())
@@ -473,8 +473,7 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
                 createDeliveryStatusWebhook("wamid.delivered-test-123", "delivered");
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(webhookPayload))
                 .andExpect(status().isOk());
@@ -510,8 +509,7 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
                         "wamid.failed-test-123", "failed", 131047, "Invalid parameter");
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(webhookPayload))
                 .andExpect(status().isOk());
@@ -547,8 +545,7 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
         String webhookPayload = createDeliveryStatusWebhook("wamid.read-test-123", "read");
 
         mockMvc.perform(
-                        post(WEBHOOK_ENDPOINT)
-                                .header(TENANT_HEADER, TENANT_1)
+                        withTenantHeaders(post(WEBHOOK_ENDPOINT), TENANT_1)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(webhookPayload))
                 .andExpect(status().isOk());
@@ -723,6 +720,14 @@ class WhatsAppOutboundFlowBackendE2ETest extends BaseBackendE2ETest {
         consent.setChannel(channel);
         consent.setConsentType(ConsentementType.MARKETING);
         consent.setStatus(status);
+        consent.setMeta(
+                Map.of(
+                        "optInTimestamp",
+                        Instant.now().toString(),
+                        "ipAddress",
+                        "127.0.0.1",
+                        "doubleOptInConfirmed",
+                        true));
         LocalDateTime now = LocalDateTime.now();
         consent.setCreatedAt(now);
         consent.setUpdatedAt(now);

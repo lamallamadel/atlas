@@ -30,7 +30,11 @@ import org.springframework.web.client.RestTemplate;
 
 @BackendE2ETest
 @ActiveProfiles({"backend-e2e", "backend-e2e-h2"})
-@TestPropertySource(properties = {"outbound.worker.enabled=false"})
+@TestPropertySource(
+        properties = {
+            "outbound.worker.enabled=false",
+            "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration,org.springframework.boot.autoconfigure.data.redis.RedisRepositoriesAutoConfiguration"
+        })
 class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
 
     private static final String TENANT_1 = "org-whatsapp-provider-test";
@@ -55,6 +59,8 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
     @MockitoBean(name = "restTemplate")
     private RestTemplate restTemplate;
 
+    @MockitoBean private WhatsAppRateLimitService rateLimitService;
+
     @PersistenceContext private EntityManager entityManager;
 
     @BeforeEach
@@ -75,6 +81,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         whatsAppProviderConfigRepository.deleteAll();
 
         createWhatsAppProviderConfig();
+        when(rateLimitService.checkAndConsumeQuota(anyString())).thenReturn(true);
     }
 
     @AfterEach
@@ -292,6 +299,7 @@ class WhatsAppProviderIntegrationTest extends BaseBackendE2ETest {
         whatsAppRateLimitRepository.save(rateLimit);
 
         OutboundMessageEntity message = createOutboundMessage(OutboundMessageStatus.QUEUED);
+        when(rateLimitService.checkAndConsumeQuota(TENANT_1)).thenReturn(false);
 
         ProviderSendResult result = whatsAppProvider.send(message);
 

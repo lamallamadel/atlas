@@ -161,11 +161,12 @@ class NotificationBackendE2ETest extends BaseBackendE2ETest {
         MvcResult result =
                 mockMvc.perform(
                                 withTenantHeaders(post(BASE_URL), ORG_ID)
+                                        .with(jwtWithRoles(ORG_ID, "ADMIN"))
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(request)))
-                        .andExpect(status().isCreated())
-                        .andExpect(jsonPath("$.dossierId").value(dossierId))
-                        .andReturn();
+                                .andExpect(status().isCreated())
+                                .andExpect(jsonPath("$.dossierId").value(dossierId))
+                                .andReturn();
 
         String responseBody = result.getResponse().getContentAsString();
         NotificationResponse response =

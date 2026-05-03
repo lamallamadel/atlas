@@ -88,10 +88,10 @@ public class WhatsAppCloudApiProvider implements OutboundMessageProvider {
                         retry, CircuitBreaker.decorateSupplier(circuitBreaker, supplier));
 
         try {
-            Callable<ProviderSendResult> callable = decoratedSupplier::get;
             Callable<ProviderSendResult> timeLimitedCallable =
                     TimeLimiter.decorateFutureSupplier(
-                            timeLimiter, () -> CompletableFuture.supplyAsync(decoratedSupplier));
+                            timeLimiter,
+                            () -> CompletableFuture.completedFuture(decoratedSupplier.get()));
 
             return timeLimitedCallable.call();
         } catch (TimeoutException e) {
