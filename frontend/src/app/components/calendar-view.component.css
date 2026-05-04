@@ -131,44 +131,27 @@
   margin-top: 2px;
 }
 
-/* FullCalendar Customization */
+/* FullCalendar — couleurs / boutons : styles/_fullcalendar-ds.scss (global) */
+
 ::ng-deep .fc {
-  font-family: 'Roboto', sans-serif;
-}
-
-::ng-deep .fc .fc-button {
-  background-color: #3f51b5;
-  border-color: #3f51b5;
-  text-transform: none;
-  font-weight: 500;
-}
-
-::ng-deep .fc .fc-button:hover {
-  background-color: #303f9f;
-  border-color: #303f9f;
+  font-family: var(--ds-font-body, var(--at-font-body), system-ui, sans-serif);
 }
 
 ::ng-deep .fc .fc-button:disabled {
-  background-color: #ccc;
-  border-color: #ccc;
-}
-
-::ng-deep .fc .fc-button-primary:not(:disabled).fc-button-active {
-  background-color: #303f9f;
-  border-color: #303f9f;
+  opacity: 0.55;
 }
 
 ::ng-deep .fc-theme-standard .fc-scrollgrid {
-  border-color: #e0e0e0;
+  border-color: var(--ds-divider);
 }
 
 ::ng-deep .fc-theme-standard td,
 ::ng-deep .fc-theme-standard th {
-  border-color: #e0e0e0;
+  border-color: var(--ds-divider);
 }
 
 ::ng-deep .fc .fc-daygrid-day.fc-day-today {
-  background-color: #fff3e0;
+  background-color: color-mix(in oklab, var(--ds-primary-hl) 65%, transparent);
 }
 
 ::ng-deep .fc .fc-timegrid-slot {
@@ -209,15 +192,15 @@
 }
 
 ::ng-deep .fc .fc-timegrid-slot-label {
-  border-right: 1px solid #e0e0e0;
+  border-right: 1px solid var(--ds-divider);
 }
 
 ::ng-deep .fc-businesshours {
-  background-color: rgba(63, 81, 181, 0.03);
+  background-color: color-mix(in oklab, var(--ds-marine-hl) 35%, transparent);
 }
 
 ::ng-deep .fc .fc-highlight {
-  background-color: rgba(63, 81, 181, 0.1);
+  background-color: color-mix(in oklab, var(--ds-marine-hl) 75%, transparent);
 }
 
 ::ng-deep .fc-event-custom.fc-event-cancelled {
