@@ -1,0 +1,301 @@
+/* ============================================================
+   ATLASIA PRO — Navigation + Product UX Polish
+   Gives the authenticated workspace a clearer hierarchy.
+   Safe global layer: no Angular logic changes.
+   ============================================================ */
+
+/* ============================================================
+   PRODUCT BRANDING
+   ============================================================ */
+
+.sidenav-header {
+  min-height: 72px !important;
+}
+
+.sidenav-header::after {
+  content: "Espace professionnel";
+  display: block;
+  position: absolute;
+  left: 56px;
+  top: 43px;
+  font-family: var(--at-font-body);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, white 64%, transparent);
+}
+
+.brand-text {
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.brand-text::after {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: var(--at-radius-full);
+  background: var(--at-color-primary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--at-color-primary) 25%, transparent);
+}
+
+/* ============================================================
+   SIDEBAR HIERARCHY
+   ============================================================ */
+
+.nav-list {
+  padding: var(--at-space-4) var(--at-space-2) !important;
+}
+
+.nav-list a {
+  min-height: 44px !important;
+  font-size: 0.93rem;
+}
+
+.nav-list a mat-icon {
+  opacity: 0.86;
+}
+
+/* Primary business routes */
+.nav-list a[href*="/dashboard"],
+.nav-list a[href*="/dossiers"],
+.nav-list a[href*="/annonces"],
+.nav-list a[href*="/calendar"],
+.nav-list a[href*="/tasks"] {
+  font-weight: 700;
+}
+
+/* Create visual separator before advanced/admin routes */
+.nav-list a[href*="/reports"],
+.nav-list a[href*="/workflow-admin"],
+.nav-list a[href*="/search"],
+.nav-list a[href*="/settings"],
+.nav-list a[href*="/observability"],
+.nav-list a[href*="/developer"] {
+  font-size: 0.88rem;
+}
+
+/* First secondary item gets divider */
+.nav-list a[href*="/reports"] {
+  margin-top: var(--at-space-5) !important;
+  position: relative;
+}
+
+.nav-list a[href*="/reports"]::before {
+  content: "Pilotage";
+  position: absolute;
+  left: 0.75rem;
+  top: calc(-1 * var(--at-space-4));
+  font-size: 0.64rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--at-color-text-faint);
+}
+
+/* Technical routes — lisibles en mode clair (éviter opacité « fantôme ») */
+.nav-list a[href*="/observability"],
+.nav-list a[href*="/developer"] {
+  opacity: 0.92;
+}
+
+.nav-list a[href*="/observability"]:hover,
+.nav-list a[href*="/developer"]:hover,
+.nav-list a[href*="/observability"].active,
+.nav-list a[href*="/developer"].active {
+  opacity: 1;
+}
+
+/* Active nav should feel premium, not purple-admin */
+.nav-list a.active {
+  position: relative;
+}
+
+.nav-list a.active::after {
+  content: "";
+  position: absolute;
+  right: 0.65rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: var(--at-radius-full);
+  background: var(--at-color-primary);
+}
+
+/* ============================================================
+   TOP TOOLBAR PRODUCT FEEL
+   ============================================================ */
+
+.top-toolbar {
+  min-height: 64px !important;
+}
+
+.toolbar-spacer::before {
+  content: "Atlasia Pro";
+  display: inline-flex;
+  align-items: center;
+  margin-right: auto;
+  font-family: var(--at-font-body);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, white 58%, transparent);
+}
+
+.top-toolbar button,
+.top-toolbar .mat-mdc-icon-button {
+  color: white !important;
+}
+
+.top-toolbar .mat-mdc-icon-button:hover {
+  background: color-mix(in oklab, white 14%, transparent) !important;
+  color: white !important;
+}
+
+/* ============================================================
+   PAGE TITLE CONTEXT LABELS
+   These give pages a shared editorial/product rhythm.
+   ============================================================ */
+
+.page-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.page-title::before {
+  display: block;
+  font-family: var(--at-font-body);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--at-color-primary);
+}
+
+/* Dashboard */
+app-dashboard .page-title::before {
+  content: "Centre de pilotage";
+}
+
+/* CRM / Dossiers */
+app-dossiers .page-title::before,
+app-dossier-detail .page-title::before {
+  content: "CRM immobilier";
+}
+
+/* Annonces */
+app-annonces .page-title::before,
+app-annonce-detail .page-title::before {
+  content: "Commercialisation";
+}
+
+/* Search */
+app-search .page-title::before {
+  content: "Recherche globale";
+}
+
+/* Workflow */
+app-workflow-admin .page-title::before,
+app-template-editor .page-title::before,
+app-template-library .page-title::before,
+app-workflow-editor .page-title::before {
+  content: "Automatisation";
+}
+
+/* Reports / analytics */
+app-reports-dashboard .page-title::before,
+app-report-builder .page-title::before,
+app-ml-insights-dashboard .page-title::before {
+  content: "Analyse & performance";
+}
+
+/* Developer / settings */
+app-developer-portal .page-title::before,
+app-settings-page .page-title::before {
+  content: "Administration";
+}
+
+/* Fallback label for pro pages that use page-title */
+.sidenav-content .page-title:not(:has(::before)) {
+  color: var(--at-color-text);
+}
+
+/* ============================================================
+   ACTION BAR CONSISTENCY
+   ============================================================ */
+
+.header-actions button,
+.page-header button,
+.tab-header-actions button {
+  min-height: 42px;
+}
+
+.header-actions .mat-mdc-button,
+.header-actions .mat-mdc-raised-button,
+.header-actions .mat-mdc-outlined-button,
+.header-actions .mat-mdc-stroked-button {
+  border-radius: var(--at-radius-lg) !important;
+}
+
+/* Make destructive actions less loud until hover */
+.btn-delete,
+button[color="warn"]:not(.mat-mdc-raised-button) {
+  color: var(--at-color-error) !important;
+}
+
+.btn-delete:hover,
+button[color="warn"]:hover {
+  background: var(--at-color-error-highlight) !important;
+}
+
+/* ============================================================
+   PRODUCT-SPECIFIC MICROCOPY FEEL VIA EMPTY STATES
+   ============================================================ */
+
+.empty-state h2,
+.empty-state h3,
+.no-results h2,
+.no-results h3 {
+  color: var(--at-color-text) !important;
+  font-weight: 850 !important;
+  letter-spacing: -0.025em;
+}
+
+.empty-state p,
+.no-results p,
+.empty-text {
+  color: var(--at-color-text-muted) !important;
+  line-height: 1.65;
+}
+
+/* ============================================================
+   RESPONSIVE NAV POLISH
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .sidenav-header::after {
+    left: 56px;
+  }
+
+  .toolbar-spacer::before {
+    display: none;
+  }
+
+  .page-title::before {
+    font-size: 0.62rem;
+  }
+
+  .nav-list a {
+    min-height: 48px !important;
+  }
+}
+
+/* ============================================================
+   SAFETY: older browsers without :has support
+   The :has fallback selector above is non-critical.
+   ============================================================ */
