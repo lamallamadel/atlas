@@ -2,20 +2,23 @@ import { Component, OnInit, OnDestroy, AfterViewInit, NgZone } from '@angular/co
 import { ReportingApiService, ObservabilityMetrics } from '../services/reporting-api.service';
 import { interval, Subject, EMPTY } from 'rxjs';
 import { takeUntil, switchMap, startWith, catchError } from 'rxjs/operators';
-import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
 import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatCard, MatCardContent, MatCardHeader, MatCardTitle, MatCardSubtitle } from '@angular/material/card';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow } from '@angular/material/table';
-import { MatChip } from '@angular/material/chips';
-import { MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine } from '@angular/material/list';
-import { NgClass, DecimalPipe, DatePipe, KeyValuePipe } from '@angular/common';
+import {
+  MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
+  MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+} from '@angular/material/table';
+import { DecimalPipe, DatePipe, KeyValuePipe } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
-import { MatProgressBar } from '@angular/material/progress-bar';
+
+import {
+  PageHeaderComponent,
+  DsButtonComponent,
+  DsCardComponent,
+  DsBadgeComponent,
+  DsEmptyStateComponent,
+  DsSkeletonComponent,
+} from '../design-system';
 
 interface TimeSeriesPoint {
   timestamp: Date;
@@ -23,10 +26,19 @@ interface TimeSeriesPoint {
 }
 
 @Component({
-    selector: 'app-observability-dashboard',
-    templateUrl: './observability-dashboard.component.html',
-    styleUrls: ['./observability-dashboard.component.css'],
-    imports: [MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, MatCard, MatCardContent, MatProgressSpinner, MatCardHeader, MatCardTitle, MatCardSubtitle, MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell, MatCellDef, MatCell, MatChip, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow, MatList, MatListItem, MatListItemIcon, MatListItemTitle, MatListItemLine, NgClass, MatTooltip, MatProgressBar, DecimalPipe, DatePipe, KeyValuePipe]
+  selector: 'app-observability-dashboard',
+  templateUrl: './observability-dashboard.component.html',
+  styleUrls: ['./observability-dashboard.component.css'],
+  imports: [
+    FormsModule,
+    MatMenuTrigger, MatMenu, MatMenuItem,
+    MatTable, MatColumnDef, MatHeaderCellDef, MatHeaderCell,
+    MatCellDef, MatCell, MatHeaderRowDef, MatHeaderRow, MatRowDef, MatRow,
+    MatTooltip,
+    DecimalPipe, DatePipe, KeyValuePipe,
+    PageHeaderComponent, DsButtonComponent, DsCardComponent,
+    DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
+  ],
 })
 export class ObservabilityDashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   metrics: ObservabilityMetrics | null = null;

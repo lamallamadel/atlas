@@ -1,395 +1,339 @@
-<div class="observability-dashboard">
-  <!-- Header Section -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <h1>
-        <mat-icon class="header-icon">analytics</mat-icon>
-        Outbound Message Observability Dashboard
-      </h1>
-      <p class="header-subtitle">Real-time monitoring and metrics visualization</p>
-    </div>
-    <div class="header-actions">
-      <div class="date-range">
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>From</mat-label>
-          <input matInput type="date" [(ngModel)]="dateFrom" (change)="onDateChange()" />
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="date-field">
-          <mat-label>To</mat-label>
-          <input matInput type="date" [(ngModel)]="dateTo" (change)="onDateChange()" />
-        </mat-form-field>
+<div class="pro-page obs-page">
+  <!-- ── Page header ── -->
+  <ds-page-header
+    eyebrow="Observabilité"
+    titleBefore="Outbound Message"
+    titleAccent="Observability"
+    titleAfter="Dashboard"
+    description="Monitoring temps-réel et visualisation des métriques de la file d'envoi.">
+    <div slot="actions" class="obs-actions">
+      <div class="obs-date-range">
+        <label class="obs-date-field">
+          <span class="obs-date-field__label">Du</span>
+          <input
+            type="date"
+            class="obs-date-input"
+            [(ngModel)]="dateFrom"
+            (change)="onDateChange()" />
+        </label>
+        <label class="obs-date-field">
+          <span class="obs-date-field__label">Au</span>
+          <input
+            type="date"
+            class="obs-date-input"
+            [(ngModel)]="dateTo"
+            (change)="onDateChange()" />
+        </label>
       </div>
-      <button mat-raised-button
-        [color]="autoRefresh ? 'accent' : 'primary'"
-        (click)="toggleAutoRefresh()"
-        class="action-btn">
-        <mat-icon>{{ autoRefresh ? 'pause' : 'play_arrow' }}</mat-icon>
+
+      <ds-button
+        [variant]="autoRefresh ? 'copper' : 'ghost'"
+        size="md"
+        (dsClick)="toggleAutoRefresh()">
         {{ autoRefresh ? 'Auto-refresh ON' : 'Auto-refresh OFF' }}
-      </button>
-      <button mat-raised-button color="primary" (click)="loadMetrics()" class="action-btn">
-        <mat-icon>refresh</mat-icon>
-        Refresh Now
-      </button>
-      <button mat-button [matMenuTriggerFor]="exportMenu" class="action-btn">
-        <mat-icon>download</mat-icon>
-        Export
+      </ds-button>
+
+      <ds-button variant="marine" size="md" (dsClick)="loadMetrics()">
+        Actualiser
+      </ds-button>
+
+      <button
+        type="button"
+        class="obs-export-trigger"
+        [matMenuTriggerFor]="exportMenu"
+        aria-label="Exporter les métriques">
+        Exporter ▾
       </button>
       <mat-menu #exportMenu="matMenu">
-        <button mat-menu-item (click)="exportMetrics('csv')">
-          <mat-icon>description</mat-icon>
-          Export CSV
-        </button>
-        <button mat-menu-item (click)="exportMetrics('json')">
-          <mat-icon>code</mat-icon>
-          Export JSON
-        </button>
+        <button mat-menu-item (click)="exportMetrics('csv')">CSV</button>
+        <button mat-menu-item (click)="exportMetrics('json')">JSON</button>
       </mat-menu>
     </div>
-  </div>
+  </ds-page-header>
 
-  <!-- Status Bar -->
+  <!-- ── Status bar ── -->
   @if (lastUpdated && !loading) {
-    <div class="status-bar">
-      <mat-icon class="status-icon">schedule</mat-icon>
-      <span>Last updated: {{ lastUpdated | date:'medium' }}</span>
-      @if (autoRefresh) {
-        <span class="refresh-indicator">
-          <mat-icon class="rotating">sync</mat-icon>
-          Auto-refresh every {{ refreshInterval / 1000 }}s
-        </span>
-      }
-    </div>
+    <ds-card elevation="xs" [pad]="false">
+      <div class="obs-status">
+        <span class="obs-status__dot" aria-hidden="true"></span>
+        <span class="obs-status__text">Dernière mise à jour : {{ lastUpdated | date:'medium' }}</span>
+        @if (autoRefresh) {
+          <span class="obs-status__refresh">
+            Auto-refresh toutes les {{ refreshInterval / 1000 }}s
+          </span>
+        }
+      </div>
+    </ds-card>
   }
 
-  <!-- Error Message -->
+  <!-- ── Error state ── -->
   @if (error) {
-    <mat-card class="error-card">
-      <mat-card-content class="error-content">
-        <mat-icon class="error-icon">error</mat-icon>
-        <div>
-          <h3>Error Loading Metrics</h3>
-          <p>{{ error }}</p>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <ds-card elevation="sm">
+      <ds-empty-state
+        title="Impossible de charger les métriques"
+        [description]="error"
+        ctaLabel="Réessayer"
+        (ctaClick)="loadMetrics()">
+      </ds-empty-state>
+    </ds-card>
   }
 
-  <!-- Loading Spinner -->
+  <!-- ── Loading state ── -->
   @if (loading) {
-    <div class="loading-container">
-      <mat-spinner diameter="50"></mat-spinner>
-      <p>Loading observability metrics...</p>
+    <div class="obs-loading">
+      <ds-skeleton variant="rect" height="80px"></ds-skeleton>
+      <ds-skeleton variant="rect" height="320px"></ds-skeleton>
+      <ds-skeleton variant="rect" height="320px"></ds-skeleton>
     </div>
   }
 
-  <!-- Metrics Dashboard -->
+  <!-- ── Metrics dashboard ── -->
   @if (metrics && !loading) {
-    <div class="metrics-container">
+    <div class="obs-metrics">
       <!-- Queue Depth Time Series -->
-      <mat-card class="metric-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="title-icon">inbox</mat-icon>
-            Outbound Queue Depth by Channel (Real-time)
-          </mat-card-title>
-          <mat-card-subtitle>Line chart with 1-minute intervals showing queue depth trends</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <!-- Summary Cards -->
-          <div class="summary-cards">
-            <div class="summary-card total-card">
-              <div class="card-icon">
-                <mat-icon>inbox</mat-icon>
-              </div>
-              <div class="card-content">
-                <div class="card-value">{{ metrics.queueMetrics.totalQueued }}</div>
-                <div class="card-label">Total Queued</div>
-              </div>
+      <ds-card elevation="sm">
+        <header class="obs-section__head">
+          <h2 class="obs-section__title">File d'envoi — profondeur par canal (temps réel)</h2>
+          <p class="obs-section__sub">Courbes par intervalles de 1 minute.</p>
+        </header>
+
+        <div class="obs-summary-grid">
+          <div class="obs-summary obs-summary--marine">
+            <div class="obs-summary__value">{{ metrics.queueMetrics.totalQueued }}</div>
+            <div class="obs-summary__label">Total en file</div>
+          </div>
+          @for (channel of channelNames; track channel) {
+            <div class="obs-summary">
+              <div class="obs-summary__value">{{ getQueueDepth(channel) }}</div>
+              <div class="obs-summary__label">{{ channel }}</div>
             </div>
-            @for (channel of channelNames; track channel) {
-              <div class="summary-card">
-                <div class="card-content">
-                  <div class="card-value">{{ getQueueDepth(channel) }}</div>
-                  <div class="card-label">{{ channel }}</div>
-                </div>
-              </div>
-            }
-          </div>
-          <!-- Time Series Chart -->
-          <div class="chart-container large-chart">
-            <canvas id="queueTimeSeriesChart"></canvas>
-          </div>
-        </mat-card-content>
-      </mat-card>
+          }
+        </div>
+
+        <div class="obs-chart obs-chart--lg">
+          <canvas id="queueTimeSeriesChart"></canvas>
+        </div>
+      </ds-card>
+
       <!-- Latency Histogram -->
-      <mat-card class="metric-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="title-icon">timer</mat-icon>
-            Message Delivery Latency Percentiles
-          </mat-card-title>
-          <mat-card-subtitle>P50/P95/P99 histogram showing distribution of delivery latency</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <!-- Latency Table -->
-          <div class="latency-table">
-            <table mat-table [dataSource]="channelNames" class="data-table">
-              <ng-container matColumnDef="channel">
-                <th mat-header-cell *matHeaderCellDef>Channel</th>
-                <td mat-cell *matCellDef="let channel">
-                  <mat-chip>{{ channel }}</mat-chip>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="p50">
-                <th mat-header-cell *matHeaderCellDef>P50 (ms)</th>
-                <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p50 | number:'1.2-2' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="p95">
-                <th mat-header-cell *matHeaderCellDef>P95 (ms)</th>
-                <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p95 | number:'1.2-2' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="p99">
-                <th mat-header-cell *matHeaderCellDef>P99 (ms)</th>
-                <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p99 | number:'1.2-2' }}</td>
-              </ng-container>
-              <ng-container matColumnDef="average">
-                <th mat-header-cell *matHeaderCellDef>Average (ms)</th>
-                <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.average | number:'1.2-2' }}</td>
-              </ng-container>
-              <tr mat-header-row *matHeaderRowDef="['channel', 'p50', 'p95', 'p99', 'average']"></tr>
-              <tr mat-row *matRowDef="let row; columns: ['channel', 'p50', 'p95', 'p99', 'average']"></tr>
-            </table>
-          </div>
-          <!-- Histogram Chart -->
-          <div class="chart-container large-chart">
-            <canvas id="latencyHistogramChart"></canvas>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <ds-card elevation="sm">
+        <header class="obs-section__head">
+          <h2 class="obs-section__title">Latence de livraison — Percentiles</h2>
+          <p class="obs-section__sub">Distribution P50 / P95 / P99 par canal.</p>
+        </header>
+
+        <div class="obs-table-wrap">
+          <table mat-table [dataSource]="channelNames" class="obs-table">
+            <ng-container matColumnDef="channel">
+              <th mat-header-cell *matHeaderCellDef>Canal</th>
+              <td mat-cell *matCellDef="let channel">
+                <ds-badge status="info" size="sm">{{ channel }}</ds-badge>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="p50">
+              <th mat-header-cell *matHeaderCellDef>P50 (ms)</th>
+              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p50 | number:'1.2-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="p95">
+              <th mat-header-cell *matHeaderCellDef>P95 (ms)</th>
+              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p95 | number:'1.2-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="p99">
+              <th mat-header-cell *matHeaderCellDef>P99 (ms)</th>
+              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.p99 | number:'1.2-2' }}</td>
+            </ng-container>
+            <ng-container matColumnDef="average">
+              <th mat-header-cell *matHeaderCellDef>Moyenne (ms)</th>
+              <td mat-cell *matCellDef="let channel">{{ getLatency(channel)?.average | number:'1.2-2' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['channel', 'p50', 'p95', 'p99', 'average']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['channel', 'p50', 'p95', 'p99', 'average']"></tr>
+          </table>
+        </div>
+
+        <div class="obs-chart obs-chart--lg">
+          <canvas id="latencyHistogramChart"></canvas>
+        </div>
+      </ds-card>
+
       <!-- Failure Metrics -->
-      <mat-card class="metric-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="title-icon error-icon">error_outline</mat-icon>
-            Failure Rate & Error Analysis
-          </mat-card-title>
-          <mat-card-subtitle>Comprehensive failure tracking and error code breakdown</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <!-- Overall Failure Rate -->
-          <div class="summary-cards">
-            <div class="summary-card failure-card">
-              <div class="card-icon">
-                <mat-icon>error_outline</mat-icon>
-              </div>
-              <div class="card-content">
-                <div class="card-value">{{ metrics.failureMetrics.overallFailureRate | number:'1.2-2' }}%</div>
-                <div class="card-label">Overall Failure Rate</div>
-              </div>
+      <ds-card elevation="sm">
+        <header class="obs-section__head">
+          <h2 class="obs-section__title">Taux d'échec & analyse d'erreurs</h2>
+          <p class="obs-section__sub">Suivi des erreurs et répartition par code d'erreur.</p>
+        </header>
+
+        <div class="obs-summary-grid">
+          <div class="obs-summary obs-summary--danger">
+            <div class="obs-summary__value">
+              {{ metrics.failureMetrics.overallFailureRate | number:'1.2-2' }}%
             </div>
+            <div class="obs-summary__label">Taux d'échec global</div>
           </div>
-          <!-- Failure Trends Stacked Chart -->
-          <div class="chart-container large-chart">
-            <canvas id="failureStackedChart"></canvas>
+        </div>
+
+        <div class="obs-chart obs-chart--lg">
+          <canvas id="failureStackedChart"></canvas>
+        </div>
+
+        <div class="obs-grid-2">
+          <div class="obs-chart">
+            <canvas id="errorCodeChart"></canvas>
           </div>
-          <!-- Error Code Distribution -->
-          <div class="charts-grid">
-            <div class="chart-container">
-              <canvas id="errorCodeChart"></canvas>
-            </div>
-            <div class="error-codes-list">
-              <h3>Error Codes Summary</h3>
-              <mat-list>
-                @for (code of metrics.failureMetrics.failuresByErrorCode | keyvalue; track code) {
-                  <mat-list-item>
-                    <mat-icon matListItemIcon>warning</mat-icon>
-                    <div matListItemTitle>{{ code.key }}</div>
-                    <div matListItemLine>{{ code.value }} occurrences</div>
-                  </mat-list-item>
-                }
-              </mat-list>
-            </div>
+          <div class="obs-error-codes">
+            <h3 class="obs-error-codes__title">Codes d'erreur</h3>
+            <ul class="obs-error-codes__list">
+              @for (code of metrics.failureMetrics.failuresByErrorCode | keyvalue; track code) {
+                <li class="obs-error-codes__item">
+                  <span class="obs-error-codes__code">{{ code.key }}</span>
+                  <ds-badge status="warning" size="sm">{{ code.value }} occ.</ds-badge>
+                </li>
+              }
+            </ul>
           </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </ds-card>
+
       <!-- DLQ Monitoring -->
-      <mat-card class="metric-card dlq-card" [class.alert-warning]="metrics.dlqMetrics.dlqSize >= metrics.dlqMetrics.alertThreshold * 0.75"
-        [class.alert-critical]="metrics.dlqMetrics.alertThresholdExceeded">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="title-icon dlq-icon">report_problem</mat-icon>
-            Dead Letter Queue (DLQ) Monitoring
-          </mat-card-title>
-          <mat-card-subtitle>Messages that have exceeded retry limits with threshold indicators</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <!-- Alert Banner -->
-          @if (metrics.dlqMetrics.alertThresholdExceeded) {
-            <div class="alert-banner critical">
-              <mat-icon>warning</mat-icon>
-              <div>
-                <strong>CRITICAL:</strong> DLQ size ({{ metrics.dlqMetrics.dlqSize }}) has exceeded critical threshold ({{ metrics.dlqMetrics.alertThreshold }})!
-              </div>
+      <ds-card elevation="sm">
+        <header class="obs-section__head">
+          <h2 class="obs-section__title">Dead Letter Queue (DLQ)</h2>
+          <p class="obs-section__sub">Messages ayant dépassé la limite de tentatives.</p>
+        </header>
+
+        @if (metrics.dlqMetrics.alertThresholdExceeded) {
+          <div class="obs-alert obs-alert--critical" role="alert">
+            <strong>CRITIQUE :</strong>
+            La taille de la DLQ ({{ metrics.dlqMetrics.dlqSize }}) a dépassé le seuil critique
+            ({{ metrics.dlqMetrics.alertThreshold }}).
+          </div>
+        }
+        @if (!metrics.dlqMetrics.alertThresholdExceeded
+              && metrics.dlqMetrics.dlqSize >= metrics.dlqMetrics.alertThreshold * 0.75) {
+          <div class="obs-alert obs-alert--warning" role="alert">
+            <strong>ATTENTION :</strong>
+            La taille de la DLQ ({{ metrics.dlqMetrics.dlqSize }}) approche du seuil
+            ({{ metrics.dlqMetrics.alertThreshold }}).
+          </div>
+        }
+
+        <div class="obs-summary-grid">
+          <div class="obs-summary obs-summary--warning">
+            <div class="obs-summary__value">{{ metrics.dlqMetrics.dlqSize }}</div>
+            <div class="obs-summary__label">Total DLQ</div>
+          </div>
+          @for (channel of channelNames; track channel) {
+            <div class="obs-summary"
+                 [class.obs-summary--warning]="getDlqStatus(channel) === 'warning'"
+                 [class.obs-summary--danger]="getDlqStatus(channel) === 'critical'"
+                 [class.obs-summary--success]="getDlqStatus(channel) === 'normal'">
+              <div class="obs-summary__value">{{ getDlqSize(channel) }}</div>
+              <div class="obs-summary__label">{{ channel }}</div>
             </div>
           }
-          @if (!metrics.dlqMetrics.alertThresholdExceeded && metrics.dlqMetrics.dlqSize >= metrics.dlqMetrics.alertThreshold * 0.75) {
-            <div class="alert-banner warning">
-              <mat-icon>info</mat-icon>
-              <div>
-                <strong>WARNING:</strong> DLQ size ({{ metrics.dlqMetrics.dlqSize }}) is approaching threshold ({{ metrics.dlqMetrics.alertThreshold }})
-              </div>
-            </div>
-          }
-          <!-- DLQ Summary -->
-          <div class="summary-cards">
-            <div class="summary-card dlq-summary-card">
-              <div class="card-icon">
-                <mat-icon>report_problem</mat-icon>
-              </div>
-              <div class="card-content">
-                <div class="card-value">{{ metrics.dlqMetrics.dlqSize }}</div>
-                <div class="card-label">Total DLQ Messages</div>
-              </div>
-            </div>
-            @for (channel of channelNames; track channel) {
-              <div class="summary-card"
-                [ngClass]="'dlq-status-' + getDlqStatus(channel)">
-                <div class="card-content">
-                  <div class="card-value">{{ getDlqSize(channel) }}</div>
-                  <div class="card-label">
-                    {{ channel }}
-                    @if (getDlqStatus(channel) === 'critical') {
-                      <mat-icon class="status-icon">error</mat-icon>
-                    }
-                    @if (getDlqStatus(channel) === 'warning') {
-                      <mat-icon class="status-icon">warning</mat-icon>
-                    }
-                  </div>
-                </div>
-              </div>
-            }
-          </div>
-          <!-- DLQ Chart with Thresholds -->
-          <div class="chart-container large-chart">
-            <canvas id="dlqChart"></canvas>
-          </div>
-          <!-- Recent DLQ Messages -->
-          <div class="dlq-messages">
-            <h3>Recent DLQ Messages</h3>
-            <table mat-table [dataSource]="metrics.dlqMetrics.recentDlqMessages" class="data-table">
-              <ng-container matColumnDef="messageId">
-                <th mat-header-cell *matHeaderCellDef>Message ID</th>
-                <td mat-cell *matCellDef="let msg">{{ msg.messageId }}</td>
-              </ng-container>
-              <ng-container matColumnDef="channel">
-                <th mat-header-cell *matHeaderCellDef>Channel</th>
-                <td mat-cell *matCellDef="let msg">
-                  <mat-chip>{{ msg.channel }}</mat-chip>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="errorCode">
-                <th mat-header-cell *matHeaderCellDef>Error Code</th>
-                <td mat-cell *matCellDef="let msg">
-                  <mat-chip color="warn">{{ msg.errorCode }}</mat-chip>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="errorMessage">
-                <th mat-header-cell *matHeaderCellDef>Error Message</th>
-                <td mat-cell *matCellDef="let msg" class="error-text" [matTooltip]="msg.errorMessage">
-                  {{ msg.errorMessage }}
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="attemptCount">
-                <th mat-header-cell *matHeaderCellDef>Attempts</th>
-                <td mat-cell *matCellDef="let msg">{{ msg.attemptCount }}</td>
-              </ng-container>
-              <ng-container matColumnDef="lastAttemptAt">
-                <th mat-header-cell *matHeaderCellDef>Last Attempt</th>
-                <td mat-cell *matCellDef="let msg">{{ msg.lastAttemptAt | date:'short' }}</td>
-              </ng-container>
-              <tr mat-header-row *matHeaderRowDef="['messageId', 'channel', 'errorCode', 'errorMessage', 'attemptCount', 'lastAttemptAt']"></tr>
-              <tr mat-row *matRowDef="let row; columns: ['messageId', 'channel', 'errorCode', 'errorMessage', 'attemptCount', 'lastAttemptAt']"></tr>
-            </table>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+
+        <div class="obs-chart obs-chart--lg">
+          <canvas id="dlqChart"></canvas>
+        </div>
+
+        <h3 class="obs-section__sub-title">Messages DLQ récents</h3>
+        <div class="obs-table-wrap">
+          <table mat-table [dataSource]="metrics.dlqMetrics.recentDlqMessages" class="obs-table">
+            <ng-container matColumnDef="messageId">
+              <th mat-header-cell *matHeaderCellDef>ID Message</th>
+              <td mat-cell *matCellDef="let msg" class="obs-mono">{{ msg.messageId }}</td>
+            </ng-container>
+            <ng-container matColumnDef="channel">
+              <th mat-header-cell *matHeaderCellDef>Canal</th>
+              <td mat-cell *matCellDef="let msg">
+                <ds-badge status="info" size="sm">{{ msg.channel }}</ds-badge>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="errorCode">
+              <th mat-header-cell *matHeaderCellDef>Code</th>
+              <td mat-cell *matCellDef="let msg">
+                <ds-badge status="error" size="sm">{{ msg.errorCode }}</ds-badge>
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="errorMessage">
+              <th mat-header-cell *matHeaderCellDef>Message</th>
+              <td mat-cell *matCellDef="let msg" class="obs-truncate" [matTooltip]="msg.errorMessage">
+                {{ msg.errorMessage }}
+              </td>
+            </ng-container>
+            <ng-container matColumnDef="attemptCount">
+              <th mat-header-cell *matHeaderCellDef>Tentatives</th>
+              <td mat-cell *matCellDef="let msg">{{ msg.attemptCount }}</td>
+            </ng-container>
+            <ng-container matColumnDef="lastAttemptAt">
+              <th mat-header-cell *matHeaderCellDef>Dernière tentative</th>
+              <td mat-cell *matCellDef="let msg">{{ msg.lastAttemptAt | date:'short' }}</td>
+            </ng-container>
+            <tr mat-header-row *matHeaderRowDef="['messageId','channel','errorCode','errorMessage','attemptCount','lastAttemptAt']"></tr>
+            <tr mat-row *matRowDef="let row; columns: ['messageId','channel','errorCode','errorMessage','attemptCount','lastAttemptAt']"></tr>
+          </table>
+        </div>
+      </ds-card>
+
       <!-- Provider Quota Consumption -->
-      <mat-card class="metric-card">
-        <mat-card-header>
-          <mat-card-title>
-            <mat-icon class="title-icon">data_usage</mat-icon>
-            Provider Quota Consumption Tracking
-          </mat-card-title>
-          <mat-card-subtitle>Real-time monitoring of API quota usage with warning and critical thresholds</mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <!-- Quota Cards -->
-          <div class="quota-cards">
-            @for (channel of channelNames; track channel) {
-              <mat-card class="quota-card"
-                [ngClass]="getQuotaStatusClass(getQuotaUsage(channel)?.usagePercentage)">
-                <mat-card-header>
-                  <mat-card-title class="quota-header">
-                    <span class="quota-channel">{{ channel }}</span>
-                    <span class="quota-percentage" [ngClass]="getQuotaStatusClass(getQuotaUsage(channel)?.usagePercentage)">
-                      {{ getQuotaUsage(channel)?.usagePercentage | number:'1.0-0' }}%
-                    </span>
-                  </mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <!-- Progress Bar -->
-                  <mat-progress-bar
-                    mode="determinate"
-                    [value]="getQuotaUsage(channel)?.usagePercentage"
-                    [color]="getQuotaUsage(channel)?.usagePercentage >= 90 ? 'warn' : 'primary'">
-                  </mat-progress-bar>
-                  <!-- Quota Details -->
-                  <div class="quota-details">
-                    <div class="quota-stat">
-                      <span class="quota-label">Used:</span>
-                      <span class="quota-value">{{ getQuotaUsage(channel)?.used | number }}</span>
-                    </div>
-                    <div class="quota-stat">
-                      <span class="quota-label">Limit:</span>
-                      <span class="quota-value">{{ getQuotaUsage(channel)?.limit | number }}</span>
-                    </div>
-                  </div>
-                  <!-- Period Info -->
-                  <div class="quota-period">
-                    <mat-icon>schedule</mat-icon>
-                    <span>Period: {{ getQuotaUsage(channel)?.period }}</span>
-                  </div>
-                  <!-- Status Indicator -->
-                  <div class="quota-status" [ngClass]="getQuotaStatusClass(getQuotaUsage(channel)?.usagePercentage)">
-                    @if (getQuotaUsage(channel)?.usagePercentage >= 90) {
-                      <mat-icon>error</mat-icon>
-                    }
-                    @if (getQuotaUsage(channel)?.usagePercentage >= 75 && getQuotaUsage(channel)?.usagePercentage < 90) {
-                      <mat-icon>warning</mat-icon>
-                    }
-                    @if (getQuotaUsage(channel)?.usagePercentage < 75) {
-                      <mat-icon>check_circle</mat-icon>
-                    }
-                    @if (getQuotaUsage(channel)?.usagePercentage >= 90) {
-                      <span>CRITICAL - Action Required</span>
-                    }
-                    @if (getQuotaUsage(channel)?.usagePercentage >= 75 && getQuotaUsage(channel)?.usagePercentage < 90) {
-                      <span>WARNING - Monitor Closely</span>
-                    }
-                    @if (getQuotaUsage(channel)?.usagePercentage < 75) {
-                      <span>NORMAL</span>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
-            }
-          </div>
-          <!-- Quota Chart -->
-          <div class="chart-container large-chart">
-            <canvas id="quotaChart"></canvas>
-          </div>
-        </mat-card-content>
-      </mat-card>
+      <ds-card elevation="sm">
+        <header class="obs-section__head">
+          <h2 class="obs-section__title">Consommation des quotas fournisseurs</h2>
+          <p class="obs-section__sub">Suivi temps-réel de l'utilisation des quotas API.</p>
+        </header>
+
+        <div class="obs-quota-grid">
+          @for (channel of channelNames; track channel) {
+            <article class="obs-quota"
+                     [class.obs-quota--warning]="getQuotaUsage(channel)?.usagePercentage >= 75 && getQuotaUsage(channel)?.usagePercentage < 90"
+                     [class.obs-quota--critical]="getQuotaUsage(channel)?.usagePercentage >= 90">
+              <header class="obs-quota__head">
+                <span class="obs-quota__channel">{{ channel }}</span>
+                <span class="obs-quota__pct">
+                  {{ getQuotaUsage(channel)?.usagePercentage | number:'1.0-0' }}%
+                </span>
+              </header>
+
+              <div class="obs-progress" role="progressbar"
+                   [attr.aria-valuenow]="getQuotaUsage(channel)?.usagePercentage"
+                   aria-valuemin="0" aria-valuemax="100">
+                <div class="obs-progress__bar"
+                     [style.width.%]="getQuotaUsage(channel)?.usagePercentage"></div>
+              </div>
+
+              <dl class="obs-quota__stats">
+                <div>
+                  <dt>Utilisé</dt>
+                  <dd>{{ getQuotaUsage(channel)?.used | number }}</dd>
+                </div>
+                <div>
+                  <dt>Limite</dt>
+                  <dd>{{ getQuotaUsage(channel)?.limit | number }}</dd>
+                </div>
+              </dl>
+
+              <p class="obs-quota__period">
+                Période : {{ getQuotaUsage(channel)?.period }}
+              </p>
+
+              <ds-badge
+                [status]="getQuotaUsage(channel)?.usagePercentage >= 90 ? 'error' : (getQuotaUsage(channel)?.usagePercentage >= 75 ? 'warning' : 'success')"
+                size="sm">
+                {{ getQuotaUsage(channel)?.usagePercentage >= 90
+                    ? 'Critique — action requise'
+                    : (getQuotaUsage(channel)?.usagePercentage >= 75
+                        ? 'Attention'
+                        : 'Normal') }}
+              </ds-badge>
+            </article>
+          }
+        </div>
+
+        <div class="obs-chart obs-chart--lg">
+          <canvas id="quotaChart"></canvas>
+        </div>
+      </ds-card>
     </div>
   }
 </div>
