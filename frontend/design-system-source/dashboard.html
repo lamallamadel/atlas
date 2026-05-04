@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .kpi { padding:18px 20px; }
+  .kpi .n { font-family:'Playfair Display'; font-weight:500; font-size:38px; color:var(--marine); letter-spacing:-.5px; line-height:1; }
+  [data-theme="dark"] .kpi .n { color: var(--marine-light); }
+  .kpi .lbl { font-size:12.5px; color:var(--text-muted); margin-top:4px; }
+  .kpi .delta { font-size:11.5px; font-weight:600; margin-top:10px; display:inline-flex; align-items:center; gap:4px; }
+  .delta.up { color:var(--success); }
+  .delta.dn { color:var(--error); }
+  .spark { height: 36px; margin-top: 12px; }
+  .row-card { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius:10px; }
+  .row-card:hover { background: var(--surface-offset); }
+  .avatar { width:36px; height:36px; border-radius:18px; background:var(--marine-hl); color:var(--marine); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Playfair Display'; font-size:15px; }
+  .timeline-dot { width:8px; height:8px; border-radius:4px; background:var(--primary); margin-top:8px; flex:none; }
+  .timeline-line { width:2px; flex:1; background:var(--divider); margin: 4px auto 0; }
+
+  /* iOS specifics */
+  .ios-tab { display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; padding:8px 0; color:var(--text-faint); font-size:10px; font-weight:500; }
+  .ios-tab.on { color: var(--marine); }
+  [data-theme="dark"] .ios-tab.on { color: var(--marine-light); }
+  .ios-tabbar { position:absolute; bottom:14px; left:14px; right:14px; height:64px; background:rgba(255,255,255,.85); backdrop-filter: blur(20px); border:1px solid var(--divider); border-radius:24px; display:flex; align-items:center; padding: 0 6px; box-shadow: var(--shadow-md); }
+  [data-theme="dark"] .ios-tabbar { background: rgba(24,23,20,.7); }
+
+  /* Android */
+  .md-fab { position:absolute; bottom:80px; right:16px; width:56px; height:56px; border-radius:18px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index:10; }
+  .md-bottom { position:absolute; bottom:28px; left:0; right:0; height:64px; background:var(--surface); border-top:1px solid var(--divider); display:flex; }
+  .md-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:10px; color:var(--text-muted); font-weight:500; }
+  .md-tab.on { color:var(--marine); }
+  [data-theme="dark"] .md-tab.on { color: var(--marine-light); }
+  .md-tab.on .pill { background: var(--marine-hl); }
+  .md-tab .pill { width:32px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+</style>
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Surface</div><h2 class="display">Tableau de bord</h2><div class="sub muted" style="margin-top:6px;">KPIs, derniers dossiers, agenda du jour.</div></div></div>
+<div id="mount"></div>
+</div>
+
+<script src="frames.js"></script>
+<script>
+// ===== shared SVG icons =====
+const ICN = {
+  home: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  files: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 4h9l5 5v11a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M14 4v5h5" stroke="currentColor" stroke-width="1.6"/></svg>',
+  building: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 21V8l8-4 8 4v13M4 21h16M9 21v-6h6v6M8 11h.01M12 11h.01M16 11h.01M8 15h.01M16 15h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  cal: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  user: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+};
+
+// ===== Web Desktop =====
+const webDesktop = `
+<div style="padding:32px 40px;">
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:28px;">
+    <div>
+      <div class="label-eyebrow">Mardi 21 mai</div>
+      <div class="display" style="font-size:36px; line-height:1.05; margin-top:4px;">Bonjour <em class="italic-accent">Camille</em>.</div>
+      <div class="muted" style="font-size:14px; margin-top:6px;">3 visites à confirmer. 12 nouveaux dossiers cette semaine.</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn btn-ghost"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2v10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Nouveau dossier</button>
+      <button class="btn btn-copper">Publier annonce</button>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px;">
+    ${[
+      ['Dossiers actifs','128','+12%','up','M2 22 L8 14 L13 18 L22 6','#0d2c4a'],
+      ['Annonces publiées','47','+3','up','M2 18 L8 12 L14 16 L22 8','#b5622e'],
+      ['Visites cette sem.','31','-4%','dn','M2 10 L8 16 L14 8 L22 14','#0d2c4a'],
+      ['Volume signé','€2.4M','+18%','up','M2 20 L8 16 L14 10 L22 4','#b5622e'],
+    ].map(([l,n,d,dir,p,c])=>`
+      <div class="card kpi">
+        <div class="n">${n}</div>
+        <div class="lbl">${l}</div>
+        <svg viewBox="0 0 24 24" preserveAspectRatio="none" class="spark" width="100%"><path d="${p}" stroke="${c}" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+        <div class="delta ${dir}">${d} <span class="muted" style="font-weight:500;">7j</span></div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div style="display:grid; grid-template-columns: 2fr 1fr; gap:16px;">
+    <div class="card">
+      <div style="padding:18px 20px 4px; display:flex; align-items:center; justify-content:space-between;">
+        <div>
+          <div class="label-eyebrow">Pipeline</div>
+          <div style="font-family:'Playfair Display'; font-size:20px; font-weight:600;">Derniers dossiers</div>
+        </div>
+        <a href="dossiers.html" style="color:var(--marine); font-size:13px; font-weight:600; text-decoration:none;">Voir tout →</a>
+      </div>
+      <div style="padding:6px 10px 12px;">
+        ${[
+          ['AB','Amélie Bernard','Loft · Marais 75003','qual','Qualification','il y a 2h'],
+          ['JM','Julien Marchand','Maison · Bordeaux 33000','rdv','Rendez-vous','il y a 4h'],
+          ['SL','Sophie Lambert','Appart · Lyon 69006','new','Nouveau','hier'],
+          ['MR','Mehdi Rahman','Riad · Marrakech','won','Gagné','hier'],
+          ['CN','Camille Noël','Studio · Bastille 75011','rdv','Rendez-vous','il y a 2j'],
+        ].map(([i,n,p,b,bl,t])=>`
+          <div class="row-card" style="display:grid; grid-template-columns: 36px 1.6fr 1.4fr 110px 90px; gap:14px; align-items:center;">
+            <div class="avatar">${i}</div>
+            <div><div style="font-weight:600; font-size:14px;">${n}</div><div class="muted" style="font-size:12px; margin-top:1px;">${p}</div></div>
+            <div class="muted" style="font-size:13px;">Visite proposée mer. 14:30</div>
+            <span class="badge badge-${b}">${bl}</span>
+            <div class="muted" style="font-size:12px; text-align:right;">${t}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="padding:18px 20px 8px;">
+        <div class="label-eyebrow">Aujourd'hui</div>
+        <div style="font-family:'Playfair Display'; font-size:20px; font-weight:600;">Agenda</div>
+      </div>
+      <div style="padding:0 18px 14px;">
+        ${[
+          ['10:00','Visite Loft Marais','avec A. Bernard','primary'],
+          ['12:30','Déjeuner J. Marchand','Café Lipp','muted'],
+          ['14:30','Visite Studio Bastille','avec C. Noël','primary'],
+          ['17:00','Signature compromis','M. Rahman, Notaire','marine'],
+        ].map(([t,n,s,c],i,a)=>`
+          <div style="display:flex; gap:12px; padding:8px 0;">
+            <div style="width:50px; flex:none;">
+              <div style="font-weight:600; font-size:13px; color:var(--marine);">${t}</div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center; flex:none;">
+              <div style="width:8px; height:8px; border-radius:4px; background:${c==='primary'?'var(--primary)':c==='marine'?'var(--marine)':'var(--text-faint)'}; margin-top:6px;"></div>
+              ${i<a.length-1?'<div style="width:1px; flex:1; background:var(--divider); margin-top:4px;"></div>':''}
+            </div>
+            <div style="padding-bottom:14px; flex:1;">
+              <div style="font-weight:600; font-size:14px;">${n}</div>
+              <div class="muted" style="font-size:12.5px; margin-top:1px;">${s}</div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:16px; display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+    <div class="card card-pad">
+      <div class="label-eyebrow">À faire · 4</div>
+      <div style="font-family:'Playfair Display'; font-size:18px; font-weight:600; margin-bottom:14px;">Tâches en attente</div>
+      ${['Rappeler Amélie B. — visite mercredi','Préparer dossier de financement Marchand','Photos pro — Studio Bastille','Mettre à jour annonce Riad Marrakech'].map(t=>`
+        <div style="display:flex; align-items:center; gap:10px; padding:9px 0; border-top:1px solid var(--divider);">
+          <div style="width:18px; height:18px; border-radius:5px; border:1.5px solid var(--border);"></div>
+          <div style="font-size:14px;">${t}</div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="card card-pad">
+      <div class="label-eyebrow">Performance · 30j</div>
+      <div style="font-family:'Playfair Display'; font-size:18px; font-weight:600; margin-bottom:6px;">Dossiers par statut</div>
+      <div class="muted" style="font-size:12.5px;">Conversion globale 24%</div>
+      <svg viewBox="0 0 360 140" style="width:100%; margin-top:10px;">
+        ${[40,55,68,52,72,58,80,65,90,72,84,95].map((h,i)=>`<rect x="${i*30+8}" y="${130-h}" width="20" height="${h}" rx="3" fill="${i%3===2?'var(--primary)':'var(--marine)'}" opacity="${.55+i*.04}"/>`).join('')}
+        <line x1="0" x2="360" y1="130" y2="130" stroke="var(--divider)"/>
+      </svg>
+    </div>
+  </div>
+</div>`;
+
+// ===== iOS =====
+const ios = `
+<div style="padding: 8px 20px 90px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; padding: 14px 0 18px;">
+    <div>
+      <div class="label-eyebrow">Mardi 21 mai</div>
+      <div style="font-family:'Playfair Display'; font-size:30px; font-weight:600; line-height:1.1; margin-top:3px;">Bonjour<br><em class="italic-accent" style="font-style:italic;">Camille</em>.</div>
+    </div>
+    <div style="width:38px; height:38px; border-radius:19px; background:var(--marine-hl); color:var(--marine); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display'; font-weight:700;">C</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px;">
+    ${[['128','Dossiers'],['47','Annonces'],['€2.4M','Volume'],['31','Visites']].map(([n,l])=>`
+      <div class="card" style="padding:14px;">
+        <div class="n" style="font-family:'Playfair Display'; font-size:26px; font-weight:600; color:var(--marine); line-height:1;">${n}</div>
+        <div class="muted" style="font-size:11.5px; margin-top:4px;">${l}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
+    <div style="font-family:'Playfair Display'; font-size:20px; font-weight:600;">Aujourd'hui</div>
+    <div style="font-size:12px; color:var(--marine); font-weight:600;">Tout voir</div>
+  </div>
+  <div class="card">
+    ${[['10:00','Visite Loft Marais','A. Bernard'],['14:30','Visite Studio Bastille','C. Noël'],['17:00','Signature M. Rahman','Notaire']].map((r,i)=>`
+      <div style="display:flex; gap:14px; padding:14px; ${i?'border-top:1px solid var(--divider);':''}">
+        <div style="font-weight:600; font-size:13px; color:var(--marine); width:46px;">${r[0]}</div>
+        <div style="flex:1;"><div style="font-weight:600; font-size:14px;">${r[1]}</div><div class="muted" style="font-size:12px;">${r[2]}</div></div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div style="display:flex; align-items:baseline; justify-content:space-between; margin:22px 0 8px;">
+    <div style="font-family:'Playfair Display'; font-size:20px; font-weight:600;">Derniers dossiers</div>
+    <div style="font-size:12px; color:var(--marine); font-weight:600;">Voir tout</div>
+  </div>
+  <div class="card">
+    ${[['AB','Amélie Bernard','Loft · Marais','qual'],['JM','Julien Marchand','Maison · Bordeaux','rdv'],['SL','Sophie Lambert','Appart · Lyon','new']].map((r,i)=>`
+      <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; ${i?'border-top:1px solid var(--divider);':''}">
+        <div class="avatar" style="width:34px; height:34px; font-size:13px;">${r[0]}</div>
+        <div style="flex:1;"><div style="font-weight:600; font-size:14px;">${r[1]}</div><div class="muted" style="font-size:12px;">${r[2]}</div></div>
+        <span class="badge badge-${r[3]}">${r[3]==='qual'?'Qual':r[3]==='rdv'?'RDV':'New'}</span>
+      </div>
+    `).join('')}
+  </div>
+</div>
+
+<div class="ios-tabbar">
+  <div class="ios-tab on">${ICN.home}<span>Accueil</span></div>
+  <div class="ios-tab">${ICN.files}<span>Dossiers</span></div>
+  <div class="ios-tab">${ICN.building}<span>Annonces</span></div>
+  <div class="ios-tab">${ICN.cal}<span>Agenda</span></div>
+  <div class="ios-tab">${ICN.user}<span>Profil</span></div>
+</div>`;
+
+// ===== Android =====
+const android = `
+<div style="background:var(--marine); color:#fff; padding: 14px 20px 22px; position:relative;">
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div>
+      <div style="font-family:'Plus Jakarta Sans'; font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,.7);">Mardi 21 mai</div>
+      <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; margin-top:4px;">Bonjour Camille</div>
+    </div>
+    <div style="width:36px; height:36px; border-radius:18px; background:rgba(255,255,255,.12); display:flex; align-items:center; justify-content:center;">${ICN.user}</div>
+  </div>
+</div>
+
+<div style="padding: 16px 16px 100px;">
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; margin-top:-30px;">
+    ${[['128','Dossiers actifs','#b5622e'],['€2.4M','Volume signé','#0d2c4a']].map(([n,l,c])=>`
+      <div class="card" style="padding:16px; border-radius:18px;">
+        <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; color:${c}; line-height:1;">${n}</div>
+        <div class="muted" style="font-size:11.5px; margin-top:4px;">${l}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div style="font-family:'Plus Jakarta Sans'; font-size:14px; font-weight:600; margin-bottom:10px; padding: 0 4px;">Aujourd'hui</div>
+  <div class="card" style="border-radius:18px; padding: 6px 0;">
+    ${[['10:00','Visite Loft Marais','A. Bernard'],['14:30','Visite Studio','C. Noël'],['17:00','Signature compromis','Notaire · M. Rahman']].map((r,i)=>`
+      <div style="display:flex; gap:14px; padding:12px 16px; ${i?'border-top:1px solid var(--divider);':''}">
+        <div style="font-weight:600; font-size:13px; color:var(--primary); width:48px;">${r[0]}</div>
+        <div style="flex:1;"><div style="font-weight:600; font-size:14px;">${r[1]}</div><div class="muted" style="font-size:12px;">${r[2]}</div></div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div style="font-family:'Plus Jakarta Sans'; font-size:14px; font-weight:600; margin: 20px 4px 10px;">Pipeline</div>
+  <div class="card" style="border-radius:18px;">
+    ${[['AB','Amélie Bernard','Marais 75003','qual'],['JM','Julien Marchand','Bordeaux 33000','rdv'],['SL','Sophie Lambert','Lyon 69006','new']].map((r,i)=>`
+      <div style="display:flex; align-items:center; gap:12px; padding:12px 14px; ${i?'border-top:1px solid var(--divider);':''}">
+        <div class="avatar" style="width:34px; height:34px; font-size:13px;">${r[0]}</div>
+        <div style="flex:1;"><div style="font-weight:600; font-size:14px;">${r[1]}</div><div class="muted" style="font-size:12px;">${r[2]}</div></div>
+        <span class="badge badge-${r[3]}">${r[3]==='qual'?'Qual':r[3]==='rdv'?'RDV':'New'}</span>
+      </div>
+    `).join('')}
+  </div>
+</div>
+
+<div class="md-fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="md-bottom">
+  <div class="md-tab on"><div class="pill">${ICN.home}</div><span>Accueil</span></div>
+  <div class="md-tab"><div class="pill">${ICN.files}</div><span>Dossiers</span></div>
+  <div class="md-tab"><div class="pill">${ICN.building}</div><span>Annonces</span></div>
+  <div class="md-tab"><div class="pill">${ICN.cal}</div><span>Agenda</span></div>
+</div>`;
+
+// ===== Web mobile =====
+const webMobile = `
+<div style="padding: 18px 20px 90px;">
+  <div class="label-eyebrow">Mardi 21 mai</div>
+  <div style="font-family:'Playfair Display'; font-size:28px; font-weight:600; line-height:1.1; margin: 4px 0 16px;">Bonjour <em class="italic-accent">Camille</em>.</div>
+
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+    ${[['128','Dossiers'],['€2.4M','Volume'],['47','Annonces'],['31','Visites']].map(([n,l])=>`
+      <div class="card" style="padding:14px;"><div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; color:var(--marine); line-height:1;">${n}</div><div class="muted" style="font-size:11.5px; margin-top:4px;">${l}</div></div>
+    `).join('')}
+  </div>
+
+  <div style="font-family:'Playfair Display'; font-size:18px; font-weight:600; margin: 12px 0 8px;">Aujourd'hui</div>
+  <div class="card">
+    ${[['10:00','Visite Loft Marais'],['14:30','Visite Studio Bastille'],['17:00','Signature compromis']].map((r,i)=>`
+      <div style="display:flex; gap:12px; padding:12px 14px; ${i?'border-top:1px solid var(--divider);':''}">
+        <div style="font-weight:600; font-size:13px; color:var(--marine); width:46px;">${r[0]}</div>
+        <div style="font-size:14px;">${r[1]}</div>
+      </div>
+    `).join('')}
+  </div>
+</div>`;
+
+document.getElementById('mount').innerHTML = AtlasFrames.devices({
+  ios, android, webMobile, webDesktop
+});
+</script>
+<script src="shell.js"></script>
+</body></html>

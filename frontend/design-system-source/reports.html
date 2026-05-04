@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlasia – Rapports & Analyses</title>
+  <link rel="stylesheet" href="tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .shell { display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+    .sidebar { background: var(--marine); padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .sidebar__logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: #fff; letter-spacing: .3px; padding: 8px 12px 24px; }
+    .sidebar__item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: rgba(255,255,255,.65); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .sidebar__item:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .sidebar__item--active { background: rgba(255,255,255,.15); color: #fff; font-weight: 600; }
+    .main { overflow-y: auto; padding: 40px 48px; display: flex; flex-direction: column; gap: 28px; }
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; }
+    .page-head__eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; color: var(--text-muted); margin-bottom: 6px; }
+    .page-head__title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 500; letter-spacing: -.3px; }
+    .page-head__title em { font-style: italic; color: var(--primary); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: var(--r-md); border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-marine { background: var(--marine); color: #fff; }
+    .btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    /* KPI cards */
+    .kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .kpi { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); padding: 20px 22px; }
+    .kpi__val { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 500; color: var(--marine); line-height: 1; }
+    .kpi__lbl { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+    .kpi__del { font-size: 11.5px; font-weight: 600; margin-top: 8px; }
+    .up { color: #2e7d32; } .down { color: #c62828; }
+    /* Charts area */
+    .charts-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+    .chart-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); padding: 24px; box-shadow: var(--shadow-xs); }
+    .chart-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .chart-title { font-size: 14px; font-weight: 700; color: var(--text); }
+    .chart-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .period-toggle { display: flex; border: 1px solid var(--divider); border-radius: 99px; overflow: hidden; }
+    .ptog__btn { height: 28px; padding: 0 12px; border: none; background: transparent; font-size: 12px; color: var(--text-muted); cursor: pointer; }
+    .ptog__btn--active { background: var(--marine); color: #fff; }
+    /* Fake bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 12px; height: 160px; padding-top: 10px; }
+    .bar-group { display: flex; gap: 3px; align-items: flex-end; flex: 1; }
+    .bar { border-radius: 4px 4px 0 0; flex: 1; }
+    .bar--marine  { background: var(--marine); opacity: .85; }
+    .bar--primary { background: var(--primary); opacity: .85; }
+    .bar-label { font-size: 10px; color: var(--text-faint); text-align: center; margin-top: 6px; }
+    /* Fake pie legend */
+    .pie-wrap { display: flex; flex-direction: column; gap: 12px; }
+    .pie-legend { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+    .legend-label { font-size: 13px; color: var(--text); flex: 1; }
+    .legend-pct { font-size: 13px; font-weight: 700; color: var(--text); }
+    /* Fake pie circle */
+    .pie-circle { width: 120px; height: 120px; border-radius: 50%; background: conic-gradient(var(--marine) 0deg 140deg, var(--primary) 140deg 220deg, #2e7d32 220deg 290deg, var(--border) 290deg 360deg); margin: 0 auto; }
+    /* Table rapports */
+    .report-table { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); overflow: hidden; }
+    .report-header { display: grid; grid-template-columns: 1fr 120px 120px 120px 100px; padding: 10px 20px; background: var(--surface-offset); border-bottom: 1px solid var(--divider); font-size: 10.5px; font-weight: 700; color: var(--text-faint); letter-spacing: 1px; text-transform: uppercase; }
+    .report-row { display: grid; grid-template-columns: 1fr 120px 120px 120px 100px; padding: 14px 20px; border-bottom: 1px solid var(--divider); align-items: center; }
+    .report-row:last-child { border-bottom: none; }
+    .report-row:hover { background: var(--surface-offset); }
+    .agent-cell { display: flex; align-items: center; gap: 10px; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--marine-hl); color: var(--marine); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 700; flex: none; }
+    .agent-name { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    .metric { font-size: 13.5px; font-weight: 700; color: var(--text); }
+    .metric--good { color: #2e7d32; }
+    .metric--bad  { color: #c62828; }
+    .trend-bar { height: 6px; border-radius: 3px; background: var(--divider); overflow: hidden; margin-top: 4px; }
+    .trend-fill { height: 100%; border-radius: 3px; background: var(--marine); }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar" aria-label="Navigation principale">
+    <div class="sidebar__logo">Atlasia</div>
+    <a class="sidebar__item" href="#">Tableau de bord</a>
+    <a class="sidebar__item" href="#">Dossiers</a>
+    <a class="sidebar__item" href="#">Annonces</a>
+    <a class="sidebar__item" href="#">Tâches</a>
+    <a class="sidebar__item" href="#">Calendrier</a>
+    <a class="sidebar__item sidebar__item--active" href="#">Rapports</a>
+    <a class="sidebar__item" href="#">Workflows</a>
+  </nav>
+
+  <main class="main" id="main-content">
+    <!-- Header -->
+    <div class="page-head">
+      <div>
+        <div class="page-head__eyebrow">Espace Pro</div>
+        <h1 class="page-head__title">Rapports &amp; <em>analyses</em></h1>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7m0 0-3-3m3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Exporter PDF
+        </button>
+        <div class="period-toggle" style="border-radius:var(--r-md)">
+          <button class="ptog__btn">7j</button>
+          <button class="ptog__btn ptog__btn--active">30j</button>
+          <button class="ptog__btn">3m</button>
+          <button class="ptog__btn">12m</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="kpi__val">2.4M€</div>
+        <div class="kpi__lbl">Volume de transactions</div>
+        <div class="kpi__del up">↑ +18% vs période préc.</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__val">34</div>
+        <div class="kpi__lbl">Dossiers clôturés</div>
+        <div class="kpi__del up">↑ +7 ce mois</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__val">68%</div>
+        <div class="kpi__lbl">Taux de conversion leads</div>
+        <div class="kpi__del up">↑ +5 points</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi__val">21j</div>
+        <div class="kpi__lbl">Délai moyen de vente</div>
+        <div class="kpi__del down">↑ +2j vs objectif</div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <!-- Bar chart - Transactions par mois -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Transactions par mois</div>
+            <div class="chart-sub">Ventes vs Locations</div>
+          </div>
+          <div class="period-toggle">
+            <button class="ptog__btn ptog__btn--active">6m</button>
+            <button class="ptog__btn">12m</button>
+          </div>
+        </div>
+        <div class="bar-chart">
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bar-group"><div class="bar bar--marine" style="height:70px"></div><div class="bar bar--primary" style="height:40px"></div></div>
+            <div class="bar-label">Nov</div>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bar-group"><div class="bar bar--marine" style="height:85px"></div><div class="bar bar--primary" style="height:50px"></div></div>
+            <div class="bar-label">Déc</div>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bar-group"><div class="bar bar--marine" style="height:60px"></div><div class="bar bar--primary" style="height:35px"></div></div>
+            <div class="bar-label">Jan</div>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bar-group"><div class="bar bar--marine" style="height:95px"></div><div class="bar bar--primary" style="height:60px"></div></div>
+            <div class="bar-label">Fév</div>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bar-group"><div class="bar bar--marine" style="height:110px"></div><div class="bar bar--primary" style="height:70px"></div></div>
+            <div class="bar-label">Mar</div>
+          </div>
+          <div style="display:flex;flex-direction:column;flex:1">
+            <div class="bar-group"><div class="bar bar--marine" style="height:130px"></div><div class="bar bar--primary" style="height:80px"></div></div>
+            <div class="bar-label">Avr</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:12px">
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)">
+            <div style="width:10px;height:10px;border-radius:3px;background:var(--marine)"></div>Ventes
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-muted)">
+            <div style="width:10px;height:10px;border-radius:3px;background:var(--primary)"></div>Locations
+          </div>
+        </div>
+      </div>
+
+      <!-- Donut - Répartition types -->
+      <div class="chart-card">
+        <div class="chart-head">
+          <div>
+            <div class="chart-title">Répartition des biens</div>
+            <div class="chart-sub">Par type de transaction</div>
+          </div>
+        </div>
+        <div class="pie-circle"></div>
+        <div class="pie-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--marine)"></div>
+            <span class="legend-label">Appartements</span>
+            <span class="legend-pct">39%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--primary)"></div>
+            <span class="legend-label">Maisons</span>
+            <span class="legend-pct">22%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:#2e7d32"></div>
+            <span class="legend-label">Commerces</span>
+            <span class="legend-pct">19%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background:var(--border)"></div>
+            <span class="legend-label">Autres</span>
+            <span class="legend-pct">20%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classement agents -->
+    <div class="chart-card">
+      <div class="chart-head">
+        <div>
+          <div class="chart-title">Performance par agent</div>
+          <div class="chart-sub">Classement du mois d'avril 2026</div>
+        </div>
+      </div>
+      <div class="report-table">
+        <div class="report-header">
+          <span>Agent</span>
+          <span>Dossiers clôturés</span>
+          <span>Volume (€)</span>
+          <span>Taux conv.</span>
+          <span>Tendance</span>
+        </div>
+        <div class="report-row">
+          <div class="agent-cell">
+            <div class="avatar">SC</div>
+            <div><div class="agent-name">Sophie Contant</div><div style="font-size:11.5px;color:var(--text-muted)">Agent senior</div></div>
+          </div>
+          <div class="metric">12</div>
+          <div class="metric metric--good">820K€</div>
+          <div class="metric metric--good">78%</div>
+          <div><div class="trend-bar"><div class="trend-fill" style="width:82%"></div></div></div>
+        </div>
+        <div class="report-row">
+          <div class="agent-cell">
+            <div class="avatar">AT</div>
+            <div><div class="agent-name">Ahmed Touré</div><div style="font-size:11.5px;color:var(--text-muted)">Agent confirmé</div></div>
+          </div>
+          <div class="metric">9</div>
+          <div class="metric metric--good">610K€</div>
+          <div class="metric">72%</div>
+          <div><div class="trend-bar"><div class="trend-fill" style="width:61%"></div></div></div>
+        </div>
+        <div class="report-row">
+          <div class="agent-cell">
+            <div class="avatar">ML</div>
+            <div><div class="agent-name">Marie Lambert</div><div style="font-size:11.5px;color:var(--text-muted)">Agent junior</div></div>
+          </div>
+          <div class="metric">6</div>
+          <div class="metric">390K€</div>
+          <div class="metric metric--bad">55%</div>
+          <div><div class="trend-bar"><div class="trend-fill" style="width:39%"></div></div></div>
+        </div>
+        <div class="report-row">
+          <div class="agent-cell">
+            <div class="avatar">JD</div>
+            <div><div class="agent-name">Jean Dubois</div><div style="font-size:11.5px;color:var(--text-muted)">Agent confirmé</div></div>
+          </div>
+          <div class="metric">7</div>
+          <div class="metric">580K€</div>
+          <div class="metric">69%</div>
+          <div><div class="trend-bar"><div class="trend-fill" style="width:58%"></div></div></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

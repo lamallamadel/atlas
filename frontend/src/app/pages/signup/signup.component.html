@@ -1,0 +1,171 @@
+<ds-auth-hero
+  [eyebrow]="heroConfig.eyebrow"
+  [titleBefore]="heroConfig.titleBefore"
+  [titleAccent]="heroConfig.titleAccent"
+  [subtitle]="heroConfig.subtitle"
+  heroDisplay="Votre avenir immobilier commence ici."
+  heroSub="Plateforme CRM & PropTech N°1 en Afrique francophone">
+
+  <!-- ── Barre de progression ── -->
+  <div class="sp-progress" aria-label="Progression de l'inscription" role="progressbar"
+    [attr.aria-valuenow]="progressPct" aria-valuemin="0" aria-valuemax="100">
+    <div class="sp-progress__bar" [style.width.%]="progressPct"></div>
+  </div>
+  <div class="sp-step-labels">
+    @for (s of steps; track s; let i = $index) {
+      <span class="sp-step-label" [class.sp-step-label--done]="i < stepIndex" [class.sp-step-label--active]="i === stepIndex">
+        {{ i + 1 }}
+      </span>
+    }
+  </div>
+
+  <!-- ────────────────────────────────────
+       ÉTAPE 1 — Email + Mot de passe
+       ──────────────────────────────────── -->
+  @if (step === 'email') {
+    <form class="sp-form" [@slide] [formGroup]="emailForm" (ngSubmit)="submitEmail()" novalidate>
+      <div class="sp-field">
+        <label class="sp-label" for="su-email">Adresse e-mail</label>
+        <input id="su-email" class="sp-input" type="email" formControlName="email"
+          placeholder="vous@agence.com" autocomplete="email" [class.sp-input--error]="emailError">
+        @if (emailError) { <span class="sp-field-error" role="alert">{{ emailError }}</span> }
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label" for="su-pwd">Mot de passe</label>
+        <input id="su-pwd" class="sp-input" type="password" formControlName="password"
+          placeholder="Minimum 8 caractères" autocomplete="new-password" [class.sp-input--error]="passwordError">
+        @if (passwordError) { <span class="sp-field-error" role="alert">{{ passwordError }}</span> }
+        <span class="sp-field-hint">Majuscule, chiffre et symbole requis</span>
+      </div>
+
+      @if (errorMessage) { <p class="sp-error" role="alert">{{ errorMessage }}</p> }
+
+      <ds-button type="submit" [loading]="isLoading" [disabled]="isLoading" style="width:100%">
+        Continuer
+      </ds-button>
+
+      <p class="sp-legal">
+        Déjà un compte ? <a routerLink="/login" class="sp-link">Se connecter</a>
+      </p>
+    </form>
+  }
+
+  <!-- ────────────────────────────────────
+       ÉTAPE 2 — Code OTP
+       ──────────────────────────────────── -->
+  @if (step === 'otp') {
+    <form class="sp-form" [@slide] [formGroup]="otpForm" (ngSubmit)="submitOtp()" novalidate>
+      <p class="sp-info-box">
+        📧 Code envoyé à <strong>{{ maskedEmail }}</strong>
+      </p>
+
+      <div class="sp-field">
+        <label class="sp-label" for="su-otp">Code de vérification</label>
+        <input id="su-otp" class="sp-input sp-input--otp" type="text" inputmode="numeric"
+          formControlName="code" placeholder="000000" maxlength="6" autocomplete="one-time-code">
+        @if (otpForm.get('code')?.touched && otpForm.get('code')?.invalid) {
+          <span class="sp-field-error" role="alert">Code à 6 chiffres requis.</span>
+        }
+      </div>
+
+      @if (errorMessage) { <p class="sp-error" role="alert">{{ errorMessage }}</p> }
+
+      <ds-button type="submit" [loading]="isLoading" [disabled]="isLoading" style="width:100%">
+        Vérifier le code
+      </ds-button>
+
+      <div class="sp-resend">
+        @if (resendCooldown > 0) {
+          <span class="sp-resend__timer">Renvoyer dans {{ resendCooldown }}s</span>
+        } @else {
+          <button type="button" class="sp-link sp-link--btn" (click)="resendCode()">Renvoyer le code</button>
+        }
+      </div>
+
+      <button type="button" class="sp-back" (click)="back()">← Modifier l'e-mail</button>
+    </form>
+  }
+
+  <!-- ────────────────────────────────────
+       ÉTAPE 3 — Rôle
+       ──────────────────────────────────── -->
+  @if (step === 'role') {
+    <div class="sp-form" [@slide]>
+      <div class="sp-roles" role="radiogroup" aria-label="Sélectionnez votre rôle">
+        @for (r of roleOptions; track r.value) {
+          <button type="button"
+            class="sp-role-card"
+            [class.sp-role-card--selected]="selectedRole === r.value"
+            (click)="selectRole(r.value)"
+            role="radio"
+            [attr.aria-checked]="selectedRole === r.value">
+            <span class="sp-role-card__icon" aria-hidden="true">{{ r.icon }}</span>
+            <div class="sp-role-card__body">
+              <span class="sp-role-card__label">{{ r.label }}</span>
+              <span class="sp-role-card__desc">{{ r.description }}</span>
+            </div>
+            @if (selectedRole === r.value) {
+              <span class="sp-role-card__check" aria-hidden="true">✓</span>
+            }
+          </button>
+        }
+      </div>
+
+      @if (errorMessage) { <p class="sp-error" role="alert">{{ errorMessage }}</p> }
+
+      <ds-button (buttonClick)="submitRole()" [disabled]="!selectedRole" style="width:100%">
+        Continuer
+      </ds-button>
+      <button type="button" class="sp-back" (click)="back()">← Retour</button>
+    </div>
+  }
+
+  <!-- ────────────────────────────────────
+       ÉTAPE 4 — Organisation
+       ──────────────────────────────────── -->
+  @if (step === 'org') {
+    <form class="sp-form" [@slide] [formGroup]="orgForm" (ngSubmit)="submitOrg()" novalidate>
+      <div class="sp-field">
+        <label class="sp-label" for="su-orgname">Nom de l'agence / organisation</label>
+        <input id="su-orgname" class="sp-input" type="text" formControlName="orgName"
+          placeholder="Ex : Agence Atlas Paris" autocomplete="organization">
+        @if (orgForm.get('orgName')?.touched && orgForm.get('orgName')?.errors?.['required']) {
+          <span class="sp-field-error" role="alert">Le nom est requis.</span>
+        }
+      </div>
+
+      <div class="sp-field">
+        <label class="sp-label" for="su-orgid">Identifiant unique</label>
+        <div class="sp-input-prefix-wrap">
+          <span class="sp-input-prefix">atlasia.app/</span>
+          <input id="su-orgid" class="sp-input sp-input--prefixed" type="text" formControlName="orgId"
+            placeholder="ATLAS-PARIS" style="text-transform:uppercase">
+        </div>
+        @if (orgForm.get('orgId')?.touched && orgForm.get('orgId')?.invalid) {
+          <span class="sp-field-error" role="alert">3–20 caractères majuscules, chiffres et tirets.</span>
+        }
+      </div>
+
+      <div class="sp-row">
+        <div class="sp-field">
+          <label class="sp-label" for="su-phone">Téléphone (optionnel)</label>
+          <input id="su-phone" class="sp-input" type="tel" formControlName="phone" placeholder="+33 1 23 45 67 89">
+        </div>
+        <div class="sp-field">
+          <label class="sp-label" for="su-city">Ville</label>
+          <input id="su-city" class="sp-input" type="text" formControlName="city" placeholder="Paris">
+        </div>
+      </div>
+
+      @if (errorMessage) { <p class="sp-error" role="alert">{{ errorMessage }}</p> }
+
+      <ds-button type="submit" [loading]="isLoading" [disabled]="isLoading" style="width:100%">
+        @if (isLoading) { Création en cours… } @else { Créer mon espace de travail }
+      </ds-button>
+
+      <button type="button" class="sp-back" (click)="back()">← Retour</button>
+    </form>
+  }
+
+</ds-auth-hero>

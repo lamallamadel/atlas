@@ -1,0 +1,44 @@
+.ds-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--ds-radius-pill);
+  font-family: var(--ds-font-body);
+  font-weight: 600;
+  letter-spacing: 0.2px;
+
+  &--md { height: 22px; padding: 0 10px; font-size: 11.5px; }
+  &--sm { height: 18px; padding: 0 8px;  font-size: 10.5px; }
+
+  &__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex: none;
+  }
+
+  /* ── Status colors ── */
+  &--new          { background: var(--ds-marine-hl);    color: var(--ds-marine); }
+  &--qualification{ background: #fff3e0;                color: #b85b00; }
+  &--rdv          { background: var(--ds-primary-hl);   color: var(--ds-primary-active); }
+  &--won          { background: var(--ds-success-hl);   color: var(--ds-success); }
+  &--lost         { background: var(--ds-error-hl);     color: var(--ds-error); }
+  &--draft        { background: var(--ds-surface-offset); color: var(--ds-text-muted); }
+  &--active       { background: var(--ds-success-hl);   color: var(--ds-success); }
+  &--paused       { background: var(--ds-warning-hl);   color: var(--ds-warning); }
+  &--archived     { background: var(--ds-surface-dynamic); color: var(--ds-text-faint); }
+  &--success      { background: var(--ds-success-hl);   color: var(--ds-success); }
+  &--warning      { background: var(--ds-warning-hl);   color: var(--ds-warning); }
+  &--error        { background: var(--ds-error-hl);     color: var(--ds-error); }
+  &--info         { background: var(--ds-marine-hl);    color: var(--ds-marine); }
+  &--neutral      { background: var(--ds-surface-offset); color: var(--ds-text-muted); }
+}
+
+[data-theme='dark'],
+.dark-theme {
+  .ds-badge--new,
+  .ds-badge--info   { color: var(--ds-marine-light); }
+  .ds-badge--qualification { background: #3a2410; color: #ffa860; }
+  .ds-badge--rdv    { background: var(--ds-primary-hl); color: #e7c9b3; }
+}

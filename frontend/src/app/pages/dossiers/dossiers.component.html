@@ -1,448 +1,236 @@
-<div class="page-container">
-  <header class="page-header">
-    <h1 class="page-title">Dossiers</h1>
-    <div class="header-actions">
-      <mat-button-toggle-group
-        [value]="viewMode"
-        (change)="toggleViewMode()"
-        aria-label="Mode d'affichage"
-        class="view-mode-toggle">
-        <mat-button-toggle value="list" aria-label="Vue en liste">
-          <mat-icon>view_list</mat-icon>
-        </mat-button-toggle>
-        <mat-button-toggle value="kanban" aria-label="Vue Kanban">
-          <mat-icon>view_kanban</mat-icon>
-        </mat-button-toggle>
-      </mat-button-toggle-group>
+<div class="pro-page">
 
-      <button
-        mat-button
-        (click)="openImportDialog()"
-        aria-label="Importer des prospects depuis un fichier CSV">
-        <mat-icon>upload_file</mat-icon>
+  <!-- ── En-tête ── -->
+  <ds-page-header
+    eyebrow="Espace Pro"
+    titleBefore="Mes"
+    titleAccent="dossiers"
+    description="Gérez vos leads et transactions immobilières en un coup d'œil.">
+    <ng-container slot="actions">
+      <!-- Toggle vue liste / kanban -->
+      <div class="dos-view-toggle" role="group" aria-label="Mode d'affichage">
+        <button
+          class="dos-view-btn"
+          [class.dos-view-btn--active]="viewMode === 'list'"
+          (click)="viewMode = 'list'"
+          aria-label="Vue liste"
+          [attr.aria-pressed]="viewMode === 'list'">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button
+          class="dos-view-btn"
+          [class.dos-view-btn--active]="viewMode === 'kanban'"
+          (click)="viewMode = 'kanban'"
+          aria-label="Vue Kanban"
+          [attr.aria-pressed]="viewMode === 'kanban'">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="1" y="3" width="4" height="10" rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <rect x="6" y="3" width="4" height="7"  rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <rect x="11" y="3" width="4" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
+        </button>
+      </div>
+
+      <ds-button variant="ghost" size="sm" (dsClick)="openImportDialog()" aria-label="Importer">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 2v9M5 8l3 3 3-3M3 14h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         Importer
-      </button>
-      <button
-        mat-button
-        (click)="openExportDialog()"
-        aria-label="Exporter des prospects vers un fichier CSV">
-        <mat-icon>download</mat-icon>
+      </ds-button>
+      <ds-button variant="ghost" size="sm" (dsClick)="openExportDialog()" aria-label="Exporter">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 11V2M5 5l3-3 3 3M3 14h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
         Exporter
-      </button>
-      <button
-        class="btn-create"
-        (click)="createDossier()"
-        aria-label="Ouvrir le formulaire pour créer un nouveau dossier"
-        (keydown.enter)="createDossier()"
-        (keydown.space)="$event.preventDefault(); createDossier()">
-        <span class="btn-icon" aria-hidden="true">+</span>
-        Créer un dossier
-      </button>
-    </div>
-  </header>
+      </ds-button>
+      <ds-button variant="marine" size="md" (dsClick)="createDossier()" aria-label="Créer un dossier">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Nouveau dossier
+      </ds-button>
+    </ng-container>
+  </ds-page-header>
 
-  <!-- Kanban Quick Filter (Kanban view only) -->
-  @if (viewMode === 'kanban' && !isMobile) {
-    <section class="kanban-quick-filter" aria-label="Filtre rapide Kanban">
-      <mat-card class="quick-filter-card">
-        <mat-card-content>
-          <mat-form-field appearance="outline" class="quick-filter-field">
-            <mat-label>Recherche rapide</mat-label>
-            <input
-              matInput
-              [formControl]="quickFilterControl"
-              placeholder="Filtrer par nom, téléphone, annonce..."
-              aria-label="Filtre rapide pour le tableau Kanban"
-              />
-              <mat-icon matSuffix>search</mat-icon>
-            </mat-form-field>
-          </mat-card-content>
-        </mat-card>
-      </section>
-    }
+  <!-- ── Barre de filtres ── -->
+  @if (viewMode === 'list') {
+    <div class="dos-filters">
+      <ds-filter-bar
+        [filters]="statusFilters"
+        [activeFilter]="selectedStatus"
+        [showSearch]="true"
+        [searchPlaceholder]="'Rechercher lead, téléphone, annonce…'"
+        [showAdvanced]="true"
+        (filterChange)="onStatusFilterChange($event)"
+        (searchChange)="onSearchChange($event)"
+        (advancedClick)="openAdvancedFilters()">
+      </ds-filter-bar>
 
-    <!-- Desktop Filters (List view only) -->
-    @if (viewMode === 'list' && !isMobile) {
-      <section aria-label="Filtres de recherche">
-        <mat-card class="filters-card">
-          <mat-card-content>
-            <div class="filters-container">
-              <mat-expansion-panel
-                [(expanded)]="filterPanelExpanded"
-                class="filter-panel">
-                <mat-expansion-panel-header
-                  tabindex="0"
-                  role="button"
-                  [attr.aria-expanded]="filterPanelExpanded"
-                  aria-label="Afficher ou masquer les filtres de recherche">
-                  <mat-panel-title>
-                    <mat-icon aria-hidden="true">filter_list</mat-icon>
-                    <span>Filtres</span>
-                    @if (appliedFilters.length > 0) {
-                      <span class="filter-count" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-                        ({{ appliedFilters.length }})
-                      </span>
-                    }
-                  </mat-panel-title>
-                </mat-expansion-panel-header>
-                <div class="filter-content">
-                  <!-- Filter Fields Grid -->
-                  <div class="filter-row">
-                    <mat-form-field appearance="outline" class="filter-field">
-                      <mat-label>Statut</mat-label>
-                      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onFilterChange()" aria-label="Filtrer par statut">
-                        <mat-option value="">Tous</mat-option>
-                        <mat-option [value]="DossierStatus.NEW">Nouveau</mat-option>
-                        <mat-option [value]="DossierStatus.QUALIFYING">Qualification</mat-option>
-                        <mat-option [value]="DossierStatus.QUALIFIED">Qualifié</mat-option>
-                        <mat-option [value]="DossierStatus.APPOINTMENT">Rendez-vous</mat-option>
-                        <mat-option [value]="DossierStatus.WON">Gagné</mat-option>
-                        <mat-option [value]="DossierStatus.LOST">Perdu</mat-option>
-                      </mat-select>
-                      <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="filter-field">
-                      <mat-label>Téléphone du prospect</mat-label>
-                      <input
-                        matInput
-                        placeholder="Saisir le numéro de téléphone du prospect"
-                        [(ngModel)]="phoneFilter"
-                        (keyup.enter)="onFilterChange()"
-                        aria-label="Filtrer par numéro de téléphone du prospect"
-                        />
-                        <mat-icon matSuffix aria-hidden="true">search</mat-icon>
-                      </mat-form-field>
-                      <mat-form-field appearance="outline" class="filter-field">
-                        <mat-label>Annonce liée</mat-label>
-                        <input
-                          matInput
-                          placeholder="Rechercher une annonce liée par titre ou identifiant"
-                          [formControl]="annonceSearchControl"
-                          [matAutocomplete]="annonceAuto"
-                          (keyup.enter)="onFilterChange()"
-                          aria-label="Rechercher une annonce liée par titre ou identifiant"
-                          />
-                          <mat-icon matSuffix aria-hidden="true">search</mat-icon>
-                          <mat-autocomplete
-                            #annonceAuto="matAutocomplete"
-                            [displayWith]="displayAnnonceFn.bind(this)"
-                            (optionSelected)="onAnnonceSelected($event.option.value); onFilterChange()">
-                            @for (a of filteredAnnonces | async; track trackByAnnonce($index, a)) {
-                              <mat-option [value]="a">
-                                {{ a.title || 'Sans titre' }} <span class="muted">(#{{ a.id }})</span>
-                              </mat-option>
-                            }
-                          </mat-autocomplete>
-                        </mat-form-field>
-                      </div>
-                      <!-- Filter Actions -->
-                      <div class="filter-actions">
-                        <button
-                          mat-raised-button
-                          color="accent"
-                          (click)="openAdvancedFilters()"
-                          aria-label="Ouvrir les filtres avancés">
-                          <mat-icon aria-hidden="true">tune</mat-icon>
-                          Filtres avancés
-                        </button>
-                        <button
-                          mat-raised-button
-                          color="primary"
-                          (click)="onFilterChange()"
-                          aria-label="Appliquer les filtres sélectionnés"
-                          (keydown.enter)="onFilterChange()"
-                          (keydown.space)="$event.preventDefault(); onFilterChange()">
-                          <mat-icon aria-hidden="true">check</mat-icon>
-                          Appliquer
-                        </button>
-                        <button
-                          mat-button
-                          (click)="clearFilters()"
-                          aria-label="Réinitialiser tous les filtres"
-                          (keydown.enter)="clearFilters()"
-                          (keydown.space)="$event.preventDefault(); clearFilters()">
-                          <mat-icon aria-hidden="true">clear</mat-icon>
-                          Réinitialiser
-                        </button>
-                        <button
-                          mat-button
-                          [matMenuTriggerFor]="presetMenu"
-                          aria-label="Ouvrir le menu de gestion des presets de filtres"
-                          aria-haspopup="true">
-                          <mat-icon aria-hidden="true">bookmark</mat-icon>
-                          Presets
-                        </button>
-                        <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
-                          <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
-                            <mat-icon aria-hidden="true">save</mat-icon>
-                            <span>Sauvegarder les filtres actuels</span>
-                          </button>
-                          @if (savedPresets.length > 0) {
-                            <mat-divider role="separator"></mat-divider>
-                          }
-                          @for (preset of savedPresets; track trackByPreset($index, preset)) {
-                            <button
-                              mat-menu-item
-                              (click)="loadPreset(preset)"
-                              [attr.aria-label]="'Charger le preset ' + preset.name">
-                              <mat-icon aria-hidden="true">folder</mat-icon>
-                              <span>{{ preset.name }}</span>
-                              <button
-                                mat-icon-button
-                                (click)="deletePreset(preset, $event)"
-                                class="delete-preset-btn"
-                                [attr.aria-label]="'Supprimer le preset ' + preset.name">
-                                <mat-icon aria-hidden="true">delete</mat-icon>
-                              </button>
-                            </button>
-                          }
-                          @if (savedPresets.length === 0) {
-                            <div class="empty-presets" role="status">
-                              <span class="empty-text">Aucun preset sauvegardé</span>
-                            </div>
-                          }
-                        </mat-menu>
-                      </div>
-                      <!-- Active Filter Chips -->
-                      @if (appliedFilters.length > 0 || useAdvancedFilter) {
-                        <div class="active-filters-row" role="region" aria-label="Filtres actifs">
-                          <div class="active-filters-header">
-                            <span class="filters-label">Filtres actifs :</span>
-                            <button mat-button (click)="clearFilters()" class="clear-all-btn" aria-label="Effacer tous les filtres">
-                              <mat-icon aria-hidden="true">clear_all</mat-icon>
-                              Tout effacer
-                            </button>
-                          </div>
-                          @if (useAdvancedFilter) {
-                            <mat-chip-set aria-label="Filtres avancés actifs">
-                              <mat-chip
-                                (removed)="clearAdvancedFilter()"
-                                color="accent"
-                                aria-label="Filtre avancé actif">
-                                <strong>Filtre avancé</strong>: {{ advancedFilterRequest?.conditions?.length || 0 }} condition(s)
-                                <button matChipRemove aria-label="Retirer le filtre avancé">
-                                  <mat-icon aria-hidden="true">cancel</mat-icon>
-                                </button>
-                              </mat-chip>
-                            </mat-chip-set>
-                          }
-                          <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
-                            @for (filter of appliedFilters; track trackByFilter($index, filter)) {
-                              <mat-chip
-                                (removed)="removeFilter(filter)"
-                                [@itemAnimation]
-                                [attr.aria-label]="filter.label + ': ' + filter.displayValue">
-                                <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
-                                <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
-                                  <mat-icon aria-hidden="true">cancel</mat-icon>
-                                </button>
-                              </mat-chip>
-                            }
-                          </mat-chip-set>
-                        </div>
-                      }
-                    </div>
-                  </mat-expansion-panel>
-                </div>
-              </mat-card-content>
-            </mat-card>
-          </section>
-        }
-
-        <!-- Mobile Filter Button -->
-        @if (isMobile && viewMode === 'list') {
-          <div class="mobile-filter-button">
-            <button mat-raised-button color="primary" (click)="openMobileFilters()" aria-label="Ouvrir les filtres">
-              <mat-icon aria-hidden="true">filter_list</mat-icon>
-              Filtres
-              @if (appliedFilters.length > 0) {
-                <span class="filter-badge" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-                  {{ appliedFilters.length }}
-                </span>
-              }
-            </button>
-          </div>
-        }
-
-        <main class="page-content">
-          @if (loading && viewMode === 'list') {
-            <app-skeleton-loader variant="table" [rows]="10" [columns]="8" aria-label="Chargement des dossiers"></app-skeleton-loader>
-          }
-
-          @if (error && !loading) {
-            <div class="error-state" role="alert" aria-live="assertive">
-              <p class="error-message">{{ error }}</p>
-              <button class="btn-retry" (click)="loadDossiers()" aria-label="Réessayer de charger les dossiers">Réessayer</button>
+      <!-- Chips filtres actifs -->
+      @if (appliedFilters.length) {
+        <div class="dos-active-filters" role="group" aria-label="Filtres actifs">
+          @for (f of appliedFilters; track f.key) {
+            <div class="dos-filter-chip">
+              <span>{{ f.label }} : {{ f.displayValue }}</span>
+              <button (click)="removeFilter(f)" [attr.aria-label]="'Supprimer filtre ' + f.label">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </button>
             </div>
           }
+          <button class="dos-clear-all" (click)="clearFilters()">Tout effacer</button>
+        </div>
+      }
+    </div>
+  }
 
-          @if (!loading && !error && dossiers.length === 0 && viewMode === 'list') {
-            <app-empty-state
-              [context]="emptyStateContext"
-              [isNewUser]="isNewUser"
-              [primaryAction]="emptyStatePrimaryAction"
-              [secondaryAction]="emptyStateSecondaryAction">
-            </app-empty-state>
-          }
+  <!-- ── VUE LISTE ── -->
+  @if (viewMode === 'list') {
+    @if (loading) {
+      <div class="dos-skeleton-list" aria-label="Chargement des dossiers" aria-busy="true">
+        @for (i of [1,2,3,4,5,6,7,8]; track i) {
+          <ds-skeleton variant="rect" height="68px"></ds-skeleton>
+        }
+      </div>
+    }
 
-          <!-- List View -->
-          @if (!loading && !error && dossiers.length > 0 && viewMode === 'list') {
-            <section aria-labelledby="results-title">
-              <h2 id="results-title" class="sr-only">Résultats de la recherche</h2>
-              <app-generic-table
-                [columns]="columns"
-                [data]="dossiers"
-                [actions]="actions"
-                [showPagination]="false"
-                [enableSort]="false"
-                [rowClickable]="true"
-                [useKebabMenu]="true"
-                [enableRowSelection]="true"
-                [enableExport]="true"
-                [showTableHeader]="true"
-                [showInlinePagination]="true"
-                [paginationData]="paginationData"
-                [counterSingular]="'dossier'"
-                [counterPlural]="'dossier(s)'"
-                (rowAction)="onRowAction($event)"
-                (rowClick)="onRowClick($event)"
-                (paginationChange)="onPaginationChange($event)"
-                (exportRequest)="onExportRequest($event)">
-              </app-generic-table>
-              @if (page) {
-                <nav class="pagination-section" aria-label="Pagination des dossiers">
-                  <div class="pagination-info" role="status" aria-live="polite">
-                    Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} dossiers
-                  </div>
-                  <div class="pagination-controls">
-                    <button
-                      class="btn-page"
-                      [disabled]="page.first"
-                      (click)="previousPage()"
-                      aria-label="Aller à la page précédente"
-                      [attr.aria-disabled]="page.first"
-                      (keydown.enter)="!page.first && previousPage()"
-                      (keydown.space)="$event.preventDefault(); !page.first && previousPage()"
-                      >
-                      Précédent
-                    </button>
-                    @for (pageNum of getPageNumbers(); track trackByPageNum($index, pageNum)) {
-                      <button
-                        class="btn-page-num"
-                        [class.active]="pageNum === currentPage"
-                        [class.ellipsis]="pageNum === -1"
-                        [disabled]="pageNum === -1"
-                        (click)="pageNum !== -1 && goToPage(pageNum)"
-                        [attr.aria-label]="pageNum === -1 ? null : 'Aller à la page ' + (pageNum + 1)"
-                        [attr.aria-current]="pageNum === currentPage ? 'page' : null"
-                        (keydown.enter)="pageNum !== -1 && goToPage(pageNum)"
-                        (keydown.space)="$event.preventDefault(); pageNum !== -1 && goToPage(pageNum)"
-                        >
-                        {{ pageNum === -1 ? '...' : pageNum + 1 }}
-                      </button>
-                    }
-                    <button
-                      class="btn-page"
-                      [disabled]="page.last"
-                      (click)="nextPage()"
-                      aria-label="Aller à la page suivante"
-                      [attr.aria-disabled]="page.last"
-                      (keydown.enter)="!page.last && nextPage()"
-                      (keydown.space)="$event.preventDefault(); !page.last && nextPage()"
-                      >
-                      Suivant
-                    </button>
-                  </div>
-                </nav>
-              }
-            </section>
-          }
+    @if (!loading && error) {
+      <div class="dos-error" role="alert">{{ error }}</div>
+    }
 
-          <!-- Kanban View -->
-          @if (viewMode === 'kanban') {
-            <section aria-labelledby="kanban-title">
-              <h2 id="kanban-title" class="sr-only">Vue Kanban des dossiers</h2>
-              @if (!loading && !error && dossiers.length === 0) {
-                <app-empty-state
-                  [context]="emptyStateContext"
-                  [isNewUser]="isNewUser"
-                  [primaryAction]="emptyStatePrimaryAction"
-                  [secondaryAction]="emptyStateSecondaryAction">
-                </app-empty-state>
-              }
-              @if (!error) {
-                <app-kanban-board
-                  [dossiers]="allDossiersForKanban"
-                  [loading]="loading"
-                  [quickFilter]="quickFilterValue"
-                  (dossierClick)="onKanbanDossierClick($event)"
-                  (dossierUpdated)="onKanbanDossierUpdated()">
-                </app-kanban-board>
-              }
-            </section>
-          }
+    @if (!loading && !error && dossiers.length === 0) {
+      <ds-empty-state
+        title="Aucun dossier trouvé"
+        description="Ajustez vos filtres ou créez votre premier dossier pour commencer."
+        ctaLabel="Nouveau dossier"
+        (ctaClick)="createDossier()">
+      </ds-empty-state>
+    }
 
-          <!-- Mobile List View -->
-          @if (viewMode === 'list') {
-            <section class="mobile-dossiers-list" aria-labelledby="mobile-list-title">
-              <div class="mobile-list-header">
-                <h2 id="mobile-list-title">Dossiers</h2>
-                @if (page) {
-                  <div class="mobile-list-meta">
-                    <span>{{ page.totalElements }} résultat(s)</span>
-                    @if (appliedFilters.length > 0) {
-                      <span>{{ appliedFilters.length }} filtre(s)</span>
-                    }
-                  </div>
+    @if (!loading && !error && dossiers.length > 0) {
+      <div class="dos-table-wrap" role="region" aria-label="Liste des dossiers">
+        <!-- En-tête table -->
+        <div class="dos-table-header" role="row" aria-hidden="true">
+          <span class="dos-col dos-col--lead">Lead</span>
+          <span class="dos-col dos-col--phone">Téléphone</span>
+          <span class="dos-col dos-col--status">Statut</span>
+          <span class="dos-col dos-col--date">Créé le</span>
+          <span class="dos-col dos-col--annonce">Annonce</span>
+          <span class="dos-col dos-col--actions">Actions</span>
+        </div>
+
+        <!-- Lignes -->
+        <div class="dos-rows" role="list" [@listStaggerAnimation]="dossiers.length">
+          @for (d of dossiers; track d.id) {
+            <div
+              class="dos-row"
+              role="listitem"
+              tabindex="0"
+              (click)="goToDossier(d.id)"
+              (keydown.enter)="goToDossier(d.id)"
+              (keydown.space)="$event.preventDefault(); goToDossier(d.id)"
+              [@itemAnimation]
+              [attr.aria-label]="'Dossier ' + d.id + ', ' + (d.leadName || 'Sans nom')">
+              <!-- Lead -->
+              <div class="dos-col dos-col--lead">
+                <ds-avatar [name]="d.leadName || '?'" size="sm"></ds-avatar>
+                <div class="dos-lead-info">
+                  <span class="dos-lead-name">{{ d.leadName || '—' }}</span>
+                  <span class="dos-lead-id">#{{ d.id }}</span>
+                </div>
+              </div>
+              <!-- Téléphone -->
+              <div class="dos-col dos-col--phone">
+                <span class="dos-phone">{{ d.leadPhone | phoneFormat }}</span>
+              </div>
+              <!-- Statut -->
+              <div class="dos-col dos-col--status">
+                <ds-badge [status]="getDossierBadgeStatus(d.status)">{{ d.status }}</ds-badge>
+              </div>
+              <!-- Date -->
+              <div class="dos-col dos-col--date dos-date">
+                {{ d.createdAt | dateFormat }}
+              </div>
+              <!-- Annonce -->
+              <div class="dos-col dos-col--annonce dos-annonce-id">
+                @if (d.annonceId) {
+                  <a [routerLink]="['/pro/annonces', d.annonceId]" (click)="$event.stopPropagation()">
+                    #{{ d.annonceId }}
+                  </a>
+                } @else {
+                  <span class="dos-empty">—</span>
                 }
               </div>
-              @if (loading) {
-                <app-skeleton-loader variant="card" [rows]="5" aria-label="Chargement des dossiers"></app-skeleton-loader>
-              }
-              @if (!loading && !error && dossiers.length === 0) {
-                <app-empty-state
-                  [context]="emptyStateContext"
-                  [isNewUser]="isNewUser"
-                  [primaryAction]="emptyStatePrimaryAction"
-                  [secondaryAction]="emptyStateSecondaryAction">
-                </app-empty-state>
-              }
-              @if (!loading && !error && dossiers.length > 0) {
-                <div class="mobile-cards-container">
-                  @for (dossier of dossiers; track trackByDossierId($index, dossier)) {
-                    <app-mobile-dossier-card
-                      [dossier]="dossier"
-                      (action)="onMobileDossierAction($event)">
-                    </app-mobile-dossier-card>
-                  }
-                </div>
-              }
-              @if (page && !loading && !error && dossiers.length > 0) {
-                <nav class="pagination-section" aria-label="Pagination mobile des dossiers">
-                  <div class="pagination-info" role="status" aria-live="polite">
-                    Page {{ page.number + 1 }} sur {{ page.totalPages }}
-                  </div>
-                  <div class="pagination-controls">
-                    <button
-                      class="btn-page"
-                      [disabled]="page.first"
-                      (click)="previousPage()"
-                      aria-label="Page précédente">
-                      <mat-icon>chevron_left</mat-icon>
-                      Précédent
-                    </button>
-                    <button
-                      class="btn-page"
-                      [disabled]="page.last"
-                      (click)="nextPage()"
-                      aria-label="Page suivante">
-                      Suivant
-                      <mat-icon>chevron_right</mat-icon>
-                    </button>
-                  </div>
-                </nav>
-              }
-            </section>
+              <!-- Actions -->
+              <div class="dos-col dos-col--actions" (click)="$event.stopPropagation()">
+                <button class="dos-action-btn" (click)="editDossier(d)" aria-label="Modifier">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 10.5 9.5 3l1.5 1.5-7.5 7.5H2v-1.5z" stroke="currentColor" stroke-width="1.2" fill="currentColor" opacity=".1"/><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+                <button class="dos-action-btn dos-action-btn--danger" (click)="deleteDossier(d)" aria-label="Supprimer">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V2h4v2M5.5 6v5M8.5 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="2.5" y="4" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+                </button>
+              </div>
+            </div>
           }
-        </main>
+        </div>
+
+        <!-- Pagination -->
+        @if (page) {
+          <div class="dos-pagination" aria-label="Pagination">
+            <span class="dos-pagination__info">
+              {{ page.totalElements }} dossier{{ page.totalElements > 1 ? 's' : '' }} ·
+              Page {{ page.number + 1 }} / {{ page.totalPages }}
+            </span>
+            <div class="dos-pagination__btns">
+              <button
+                class="dos-pagination__btn"
+                [disabled]="currentPage === 0"
+                (click)="previousPage()"
+                aria-label="Page précédente">←</button>
+              <button
+                class="dos-pagination__btn"
+                [disabled]="page.last"
+                (click)="nextPage()"
+                aria-label="Page suivante">→</button>
+            </div>
+          </div>
+        }
       </div>
+    }
+  }
+
+  <!-- ── VUE KANBAN ── -->
+  @if (viewMode === 'kanban') {
+    <div class="dos-kanban-wrap">
+      @if (!isMobile) {
+        <div class="dos-kanban-search">
+          <ds-filter-bar
+            [filters]="[]"
+            [showSearch]="true"
+            [searchPlaceholder]="'Filtrer par nom, téléphone…'"
+            (searchChange)="quickFilterControl.setValue($event)">
+          </ds-filter-bar>
+        </div>
+      }
+      <app-kanban-board
+        [dossiers]="dossiers"
+        [quickFilter]="quickFilterControl.value || ''"
+        (dossierClick)="goToDossier($event.id)">
+      </app-kanban-board>
+    </div>
+  }
+
+  <!-- ── Mobile : cartes ── -->
+  @if (isMobile && viewMode === 'list' && !loading && dossiers.length > 0) {
+    <div class="dos-mobile-list" role="list" aria-label="Dossiers mobile">
+      @for (d of dossiers; track d.id) {
+        <app-mobile-dossier-card
+          [dossier]="d"
+          (action)="onMobileAction($event)">
+        </app-mobile-dossier-card>
+      }
+    </div>
+  }
+
+</div>

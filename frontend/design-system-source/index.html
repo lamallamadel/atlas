@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+</head>
+<body>
+<div>
+<div class="page-h">
+  <div>
+    <div class="label-eyebrow">Atlasia · design system</div>
+    <h2 class="display" style="font-size:44px; line-height:1.05; margin:6px 0 0;">A quieter way<br/>to do <em class="italic-accent">real estate</em>.</h2>
+    <div class="sub muted" style="margin-top:14px; max-width:580px; font-size:15px; line-height:1.55;">A unified visual language for the Atlasia portal, marketing site, and Pro workspace — across iOS, Android, and Web. Marine + copper, editorial display type, restrained density.</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:12px;">
+  <a class="card card-pad" href="tokens.html" style="text-decoration:none;color:inherit;">
+    <div class="label-eyebrow">01 · Foundation</div>
+    <div class="display" style="font-size:24px; margin:6px 0 8px;">Tokens</div>
+    <div class="muted" style="font-size:13.5px; line-height:1.5;">Color, type scale, spacing, radius, shadow. Light + dark.</div>
+  </a>
+  <a class="card card-pad" href="components.html" style="text-decoration:none;color:inherit;">
+    <div class="label-eyebrow">02 · Building blocks</div>
+    <div class="display" style="font-size:24px; margin:6px 0 8px;">Components</div>
+    <div class="muted" style="font-size:13.5px; line-height:1.5;">Buttons, fields, badges, cards, tabs. Web defaults plus iOS / Android adaptations.</div>
+  </a>
+  <a class="card card-pad" href="dashboard.html" style="text-decoration:none;color:inherit;">
+    <div class="label-eyebrow">03 · In the wild</div>
+    <div class="display" style="font-size:24px; margin:6px 0 8px;">Screens</div>
+    <div class="muted" style="font-size:13.5px; line-height:1.5;">Auth, dashboard, dossiers, annonces, calendar — desktop, web mobile, iOS, Android.</div>
+  </a>
+</div>
+
+<div style="margin-top:36px;" class="row gap-lg">
+  <div style="flex:1;">
+    <div class="label-eyebrow">Visual DNA</div>
+    <ul class="muted" style="font-size:14px; line-height:1.7; padding-left:18px;">
+      <li>Marine <span class="kbd">#0d2c4a</span> — chrome, headings, primary actions.</li>
+      <li>Copper <span class="kbd">#b5622e</span> — italic display moments, key emphasis.</li>
+      <li>Warm off-white <span class="kbd">#f8f7f4</span> — pages, instead of cool grey.</li>
+      <li>Playfair Display for marketing/page titles. Italics for emotional emphasis.</li>
+      <li>Plus Jakarta Sans for UI labels, body, forms.</li>
+      <li>Restrained density. Generous spacing. No gradient slop.</li>
+    </ul>
+  </div>
+  <div style="flex:1;" class="card card-pad">
+    <div class="label-eyebrow">Platform principle</div>
+    <div class="display" style="font-size:18px; margin:6px 0 10px;">Same language, native voice.</div>
+    <div class="muted" style="font-size:13.5px; line-height:1.55;">
+      Shared component library. iOS uses Cupertino chrome (large titles, glass tab bars). Android uses Material 3 (top app bar, FAB, nav rail). Web sits between them — same colors, denser data tables.
+    </div>
+  </div>
+</div>
+
+<div style="margin-top:48px;">
+  <div class="label-eyebrow">Surface preview</div>
+  <div class="display" style="font-size:22px; margin:6px 0 18px;">A glance at every screen</div>
+  <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+    ${''}
+  </div>
+</div>
+
+<div style="margin-top:48px; display:grid; grid-template-columns:repeat(3,1fr); gap:12px;">
+  ${[
+    ['Auth','auth.html','Sign up, sign in, OTP'],
+    ['Tableau de bord','dashboard.html','KPIs, derniers dossiers, agenda'],
+    ['Dossiers','dossiers.html','Liste · Kanban · filtres'],
+    ['Dossier · détail','dossier-detail.html','Lead, statut, timeline, messages'],
+    ['Annonces','annonces.html','Liste, filtres, presets'],
+    ['Annonce · détail','annonce-detail.html','Photos, lead, performance'],
+    ['Calendrier &amp; tâches','calendar.html','Semaine, todos, rappels'],
+    ['Tokens','tokens.html','Couleurs, type, espacement'],
+    ['Components','components.html','Boutons, champs, badges'],
+  ].map(([t,h,d])=>`<a href="${h}" class="card card-pad" style="text-decoration:none;color:inherit;">
+    <div class="display" style="font-size:18px; margin-bottom:4px;">${t}</div>
+    <div class="muted" style="font-size:12.5px;">${d}</div>
+  </a>`).join('')}
+</div>
+</div>
+<script src="shell.js"></script>
+</body></html>

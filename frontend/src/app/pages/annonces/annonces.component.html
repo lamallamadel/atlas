@@ -1,283 +1,256 @@
-<div class="page-container">
-  <header class="page-header">
-    <h1 class="page-title">Annonces</h1>
-    <button
-      class="btn-create"
-      (click)="createAnnonce()"
-      aria-label="Ouvrir le formulaire pour créer une nouvelle annonce"
-      (keydown.enter)="createAnnonce()"
-      (keydown.space)="$event.preventDefault(); createAnnonce()">
-      <span class="btn-icon" aria-hidden="true">+</span>
-      Créer une annonce
-    </button>
-  </header>
+<div class="pro-page">
 
-  <!-- Desktop Filters -->
-  @if (!isMobile) {
-    <section aria-label="Filtres de recherche">
-      <mat-card class="filters-card">
-        <mat-card-content>
-          <div class="filters-container">
-            <mat-expansion-panel
-              [(expanded)]="filterPanelExpanded"
-              class="filter-panel">
-              <mat-expansion-panel-header
-                tabindex="0"
-                role="button"
-                [attr.aria-expanded]="filterPanelExpanded"
-                aria-label="Afficher ou masquer les filtres de recherche">
-                <mat-panel-title>
-                  <mat-icon aria-hidden="true">filter_list</mat-icon>
-                  <span>Filtres</span>
-                  @if (appliedFilters.length > 0) {
-                    <span class="filter-count" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-                      ({{ appliedFilters.length }})
-                    </span>
-                  }
-                </mat-panel-title>
-              </mat-expansion-panel-header>
-              <div class="filter-content">
-                <!-- Filter Fields Grid -->
-                <div class="filter-row">
-                  <mat-form-field appearance="outline" class="filter-field">
-                    <mat-label>Recherche</mat-label>
-                    <input
-                      matInput
-                      placeholder="Rechercher des annonces"
-                      [(ngModel)]="searchQuery"
-                      (keyup.enter)="applyFilters()"
-                      aria-label="Rechercher des annonces par mots-clés"
-                      />
-                      <mat-icon matSuffix aria-hidden="true">search</mat-icon>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="filter-field">
-                      <mat-label>Statut</mat-label>
-                      <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilters()" aria-label="Filtrer par statut">
-                        <mat-option value="">Tous</mat-option>
-                        <mat-option [value]="AnnonceStatus.DRAFT">Brouillon</mat-option>
-                        <mat-option [value]="AnnonceStatus.PUBLISHED">Publié</mat-option>
-                        <mat-option [value]="AnnonceStatus.ACTIVE">Actif</mat-option>
-                        <mat-option [value]="AnnonceStatus.PAUSED">En pause</mat-option>
-                        <mat-option [value]="AnnonceStatus.ARCHIVED">Archivé</mat-option>
-                      </mat-select>
-                      <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="filter-field">
-                      <mat-label>Ville</mat-label>
-                      <mat-select [(ngModel)]="selectedCity" (selectionChange)="applyFilters()" aria-label="Filtrer par ville">
-                        <mat-option value="">Toutes</mat-option>
-                        @for (city of availableCities; track trackByCity($index, city)) {
-                          <mat-option [value]="city">
-                            {{ city }}
-                          </mat-option>
-                        }
-                      </mat-select>
-                      <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
-                    </mat-form-field>
-                    <mat-form-field appearance="outline" class="filter-field">
-                      <mat-label>Type/Catégorie</mat-label>
-                      <mat-select [(ngModel)]="selectedType" (selectionChange)="applyFilters()" aria-label="Filtrer par type ou catégorie">
-                        <mat-option value="">Tous</mat-option>
-                        @for (type of availableTypes; track trackByType($index, type)) {
-                          <mat-option [value]="type">
-                            {{ type }}
-                          </mat-option>
-                        }
-                      </mat-select>
-                      <mat-icon matSuffix aria-hidden="true">filter_alt</mat-icon>
-                    </mat-form-field>
-                  </div>
-                  <!-- Filter Actions -->
-                  <div class="filter-actions">
-                    <button
-                      mat-raised-button
-                      color="primary"
-                      (click)="applyFilters()"
-                      aria-label="Appliquer les filtres sélectionnés"
-                      (keydown.enter)="applyFilters()"
-                      (keydown.space)="$event.preventDefault(); applyFilters()">
-                      <mat-icon aria-hidden="true">check</mat-icon>
-                      Appliquer
-                    </button>
-                    <button
-                      mat-button
-                      (click)="resetFilters()"
-                      aria-label="Réinitialiser tous les filtres"
-                      (keydown.enter)="resetFilters()"
-                      (keydown.space)="$event.preventDefault(); resetFilters()">
-                      <mat-icon aria-hidden="true">clear</mat-icon>
-                      Réinitialiser
-                    </button>
-                    <button
-                      mat-button
-                      [matMenuTriggerFor]="presetMenu"
-                      aria-label="Ouvrir le menu de gestion des presets de filtres"
-                      aria-haspopup="true">
-                      <mat-icon aria-hidden="true">bookmark</mat-icon>
-                      Presets
-                    </button>
-                    <mat-menu #presetMenu="matMenu" aria-label="Menu des presets">
-                      <button mat-menu-item (click)="saveCurrentFilters()" aria-label="Sauvegarder les filtres actuels comme preset">
-                        <mat-icon aria-hidden="true">save</mat-icon>
-                        <span>Sauvegarder les filtres actuels</span>
-                      </button>
-                      @if (savedPresets.length > 0) {
-                        <mat-divider role="separator"></mat-divider>
-                      }
-                      @for (preset of savedPresets; track trackByPreset($index, preset)) {
-                        <button
-                          mat-menu-item
-                          (click)="loadPreset(preset)"
-                          [attr.aria-label]="'Charger le preset ' + preset.name">
-                          <mat-icon aria-hidden="true">folder</mat-icon>
-                          <span>{{ preset.name }}</span>
-                          <button
-                            mat-icon-button
-                            (click)="deletePreset(preset, $event)"
-                            class="delete-preset-btn"
-                            [attr.aria-label]="'Supprimer le preset ' + preset.name">
-                            <mat-icon aria-hidden="true">delete</mat-icon>
-                          </button>
-                        </button>
-                      }
-                      @if (savedPresets.length === 0) {
-                        <div class="empty-presets" role="status">
-                          <span class="empty-text">Aucun preset sauvegardé</span>
-                        </div>
-                      }
-                    </mat-menu>
-                  </div>
-                  <!-- Active Filter Chips -->
-                  @if (appliedFilters.length > 0) {
-                    <div class="active-filters-row" role="region" aria-label="Filtres actifs">
-                      <div class="active-filters-header">
-                        <span class="filters-label">Filtres actifs :</span>
-                        <button mat-button (click)="resetFilters()" class="clear-all-btn" aria-label="Effacer tous les filtres">
-                          <mat-icon aria-hidden="true">clear_all</mat-icon>
-                          Tout effacer
-                        </button>
-                      </div>
-                      <mat-chip-set aria-label="Filtres appliqués" [@listStaggerAnimation]="appliedFilters.length">
-                        @for (filter of appliedFilters; track trackByFilter($index, filter)) {
-                          <mat-chip
-                            (removed)="removeFilter(filter)"
-                            [@itemAnimation]
-                            [attr.aria-label]="filter.label + ': ' + filter.displayValue">
-                            <strong>{{ filter.label }}:</strong> {{ filter.displayValue }}
-                            <button matChipRemove [attr.aria-label]="'Retirer le filtre ' + filter.label">
-                              <mat-icon aria-hidden="true">cancel</mat-icon>
-                            </button>
-                          </mat-chip>
-                        }
-                      </mat-chip-set>
-                    </div>
-                  }
-                </div>
-              </mat-expansion-panel>
-            </div>
-          </mat-card-content>
-        </mat-card>
-      </section>
-    }
-
-    <!-- Mobile Filter Button -->
-    @if (isMobile) {
-      <div class="mobile-filter-button">
-        <button mat-raised-button color="primary" (click)="openMobileFilters()" aria-label="Ouvrir les filtres">
-          <mat-icon aria-hidden="true">filter_list</mat-icon>
-          Filtres
-          @if (appliedFilters.length > 0) {
-            <span class="filter-badge" [attr.aria-label]="appliedFilters.length + ' filtres actifs'">
-              {{ appliedFilters.length }}
-            </span>
-          }
+  <!-- ── En-tête ── -->
+  <ds-page-header
+    eyebrow="Espace Pro"
+    titleBefore="Mes"
+    titleAccent="annonces"
+    description="Gérez votre portefeuille de biens immobiliers.">
+    <ng-container slot="actions">
+      <!-- Toggle carte / liste -->
+      <div class="ann-view-toggle" role="group" aria-label="Mode d'affichage">
+        <button
+          class="ann-view-btn"
+          [class.ann-view-btn--active]="viewMode === 'cards'"
+          (click)="viewMode = 'cards'"
+          aria-label="Vue cartes"
+          [attr.aria-pressed]="viewMode === 'cards'">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <rect x="1" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <rect x="9" y="1" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <rect x="1" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+            <rect x="9" y="9" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.3"/>
+          </svg>
         </button>
+        <button
+          class="ann-view-btn"
+          [class.ann-view-btn--active]="viewMode === 'list'"
+          (click)="viewMode = 'list'"
+          aria-label="Vue liste"
+          [attr.aria-pressed]="viewMode === 'list'">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+            <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <ds-button variant="marine" size="md" (dsClick)="createAnnonce()" aria-label="Créer une annonce">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+          <path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Nouvelle annonce
+      </ds-button>
+    </ng-container>
+  </ds-page-header>
+
+  <!-- ── Filtres ── -->
+  <div class="ann-filters">
+    <ds-filter-bar
+      [filters]="statusFilters"
+      [activeFilter]="selectedStatus"
+      [showSearch]="true"
+      [searchPlaceholder]="'Ville, référence, type…'"
+      [showAdvanced]="true"
+      (filterChange)="onStatusChange($event)"
+      (searchChange)="onSearchChange($event)"
+      (advancedClick)="filterPanelExpanded = !filterPanelExpanded">
+    </ds-filter-bar>
+
+    <!-- Filtres étendus -->
+    @if (filterPanelExpanded) {
+      <div class="ann-advanced-filters" role="group" aria-label="Filtres avancés">
+        <div class="ann-adv-row">
+          <div class="ann-adv-field">
+            <label class="ann-adv-label" for="filter-city">Ville</label>
+            <select id="filter-city" class="ann-adv-select" [(ngModel)]="selectedCity" (change)="applyFilters()">
+              <option value="">Toutes</option>
+              @for (city of availableCities; track city) {
+                <option [value]="city">{{ city }}</option>
+              }
+            </select>
+          </div>
+          <div class="ann-adv-field">
+            <label class="ann-adv-label" for="filter-type">Type</label>
+            <select id="filter-type" class="ann-adv-select" [(ngModel)]="selectedType" (change)="applyFilters()">
+              <option value="">Tous</option>
+              <option value="SALE">Vente</option>
+              <option value="RENTAL">Location</option>
+              <option value="COMMERCIAL">Commercial</option>
+            </select>
+          </div>
+          <div class="ann-adv-field">
+            <label class="ann-adv-label" for="filter-price-min">Prix min</label>
+            <input id="filter-price-min" class="ann-adv-input" type="number" [(ngModel)]="minPrice" (change)="applyFilters()" placeholder="0" />
+          </div>
+          <div class="ann-adv-field">
+            <label class="ann-adv-label" for="filter-price-max">Prix max</label>
+            <input id="filter-price-max" class="ann-adv-input" type="number" [(ngModel)]="maxPrice" (change)="applyFilters()" placeholder="Sans limite" />
+          </div>
+          <button class="ann-adv-reset" (click)="resetFilters()">Réinitialiser</button>
+        </div>
       </div>
     }
 
-    <main class="page-content">
-      @if (loading) {
-        <app-skeleton-loader variant="table" [rows]="10" [columns]="8" aria-label="Chargement des annonces"></app-skeleton-loader>
-      }
+    <!-- Filtres actifs -->
+    @if (appliedFilters.length) {
+      <div class="ann-chips" role="group" aria-label="Filtres actifs">
+        @for (f of appliedFilters; track f.key) {
+          <div class="ann-chip">
+            {{ f.label }}: {{ f.displayValue }}
+            <button (click)="removeFilter(f)" [attr.aria-label]="'Retirer filtre ' + f.label">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
 
-      @if (error && !loading) {
-        <div class="error-state" role="alert" aria-live="assertive">
-          <p class="error-message">{{ error }}</p>
-          <button class="btn-retry" (click)="loadAnnonces()" aria-label="Réessayer de charger les annonces">Réessayer</button>
+  <!-- ── Stats rapides ── -->
+  @if (!loading && annonces.length > 0) {
+    <div class="ann-stats">
+      <span class="ann-stats__total">{{ page?.totalElements || annonces.length }} annonce{{ (page?.totalElements || annonces.length) > 1 ? 's' : '' }}</span>
+      <span class="ann-stats__sep">·</span>
+      <span class="ann-stats__kpi">{{ countByStatus('ACTIVE') }} actives</span>
+      <span class="ann-stats__sep">·</span>
+      <span class="ann-stats__kpi">{{ countByStatus('DRAFT') }} brouillons</span>
+    </div>
+  }
+
+  <!-- ── Chargement ── -->
+  @if (loading) {
+    <div class="ann-skeleton-grid" [class.ann-skeleton-grid--list]="viewMode === 'list'" aria-busy="true" aria-label="Chargement des annonces">
+      @for (i of [1,2,3,4,5,6,7,8]; track i) {
+        <ds-skeleton [variant]="viewMode === 'cards' ? 'card' : 'rect'" height="72px"></ds-skeleton>
+      }
+    </div>
+  }
+
+  <!-- ── Erreur ── -->
+  @if (!loading && error) {
+    <div class="ann-error" role="alert">{{ error }}</div>
+  }
+
+  <!-- ── Empty state ── -->
+  @if (!loading && !error && annonces.length === 0) {
+    <ds-empty-state
+      title="Aucune annonce"
+      description="Publiez votre premier bien pour commencer à recevoir des leads."
+      ctaLabel="Créer une annonce"
+      (ctaClick)="createAnnonce()">
+    </ds-empty-state>
+  }
+
+  <!-- ── Vue CARTES ── -->
+  @if (!loading && !error && annonces.length > 0 && viewMode === 'cards') {
+    <div class="ann-grid" role="list" [@listStaggerAnimation]="annonces.length">
+      @for (a of annonces; track a.id) {
+        <div
+          class="ann-card"
+          role="listitem"
+          tabindex="0"
+          (click)="goToAnnonce(a.id)"
+          (keydown.enter)="goToAnnonce(a.id)"
+          [@itemAnimation]
+          [attr.aria-label]="a.title">
+
+          <!-- Photo -->
+          <div class="ann-card__photo">
+            @if (a.photos?.length) {
+              <img [src]="a.photos?.[0]" [alt]="a.title" loading="lazy" />
+            } @else {
+              <div class="ann-card__photo-placeholder" aria-hidden="true">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="1.4"/>
+                  <circle cx="8.5" cy="10.5" r="1.5" stroke="currentColor" stroke-width="1.2"/>
+                  <path d="M3 17l4.5-4 3 3 3.5-4 5 5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+            }
+            <div class="ann-card__badge-overlay">
+              <ds-badge [status]="getAnnonceBadgeStatus(a.status)" size="sm">{{ a.status }}</ds-badge>
+            </div>
+          </div>
+
+          <!-- Contenu -->
+          <div class="ann-card__body">
+            <div class="ann-card__price">{{ a.price | number:'1.0-0' }} €</div>
+            <div class="ann-card__title">{{ a.title }}</div>
+            <div class="ann-card__meta">
+              <span>{{ a.city }}</span>
+              @if (a.surface) { <span>· {{ a.surface }} m²</span> }
+            </div>
+            <div class="ann-card__actions" (click)="$event.stopPropagation()">
+              <button class="ann-icon-btn" (click)="editAnnonce(a.id)" aria-label="Modifier">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
         </div>
       }
+    </div>
+  }
 
-      @if (!loading && !error && annonces.length === 0) {
-        <app-empty-state
-          [context]="emptyStateContext"
-          [isNewUser]="isNewUser"
-          [primaryAction]="emptyStatePrimaryAction"
-          [secondaryAction]="emptyStateSecondaryAction">
-        </app-empty-state>
-      }
+  <!-- ── Vue LISTE ── -->
+  @if (!loading && !error && annonces.length > 0 && viewMode === 'list') {
+    <div class="ann-table-wrap" role="region" aria-label="Liste des annonces">
+      <div class="ann-table-header" role="row" aria-hidden="true">
+        <span class="ann-col ann-col--photo">Photo</span>
+        <span class="ann-col ann-col--title">Titre</span>
+        <span class="ann-col ann-col--city">Ville</span>
+        <span class="ann-col ann-col--price">Prix</span>
+        <span class="ann-col ann-col--status">Statut</span>
+        <span class="ann-col ann-col--date">Date</span>
+        <span class="ann-col ann-col--actions">Actions</span>
+      </div>
+      <div class="ann-rows" role="list" [@listStaggerAnimation]="annonces.length">
+        @for (a of annonces; track a.id) {
+          <div
+            class="ann-row"
+            role="listitem"
+            tabindex="0"
+            (click)="goToAnnonce(a.id)"
+            (keydown.enter)="goToAnnonce(a.id)"
+            [@itemAnimation]>
+            <div class="ann-col ann-col--photo">
+              @if (a.photos?.length) {
+                <img class="ann-row-thumb" [src]="a.photos?.[0]" [alt]="a.title" loading="lazy" />
+              } @else {
+                <div class="ann-row-thumb ann-row-thumb--empty" aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="9" r="2" stroke="currentColor" stroke-width="1.2"/></svg>
+                </div>
+              }
+            </div>
+            <div class="ann-col ann-col--title ann-title">{{ a.title }}</div>
+            <div class="ann-col ann-col--city ann-city">{{ a.city }}</div>
+            <div class="ann-col ann-col--price ann-price">{{ a.price | number:'1.0-0' }} €</div>
+            <div class="ann-col ann-col--status">
+              <ds-badge [status]="getAnnonceBadgeStatus(a.status)">{{ a.status }}</ds-badge>
+            </div>
+            <div class="ann-col ann-col--date ann-date">{{ a.createdAt | date:'d MMM y' }}</div>
+            <div class="ann-col ann-col--actions" (click)="$event.stopPropagation()">
+              <button class="ann-icon-btn" (click)="editAnnonce(a.id)" aria-label="Modifier">
+                <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
-      @if (!loading && !error && annonces.length > 0) {
-        <section aria-labelledby="results-title">
-          <h2 id="results-title" class="sr-only">Résultats de la recherche</h2>
-          <app-generic-table
-            [columns]="columns"
-            [data]="annonces"
-            [actions]="actions"
-            [showPagination]="false"
-            [enableSort]="false"
-            [enableRowSelection]="true"
-            [enableExport]="true"
-            [showTableHeader]="true"
-            (rowAction)="onRowAction($event)"
-            (exportRequest)="onExportRequest($event)">
-          </app-generic-table>
-          @if (page) {
-            <nav class="pagination-section" aria-label="Pagination des annonces">
-              <div class="pagination-info" role="status" aria-live="polite">
-                Affichage de {{ page.numberOfElements }} sur {{ page.totalElements }} annonces
-              </div>
-              <div class="pagination-controls">
-                <button
-                  class="btn-page"
-                  [disabled]="page.first"
-                  (click)="previousPage()"
-                  aria-label="Aller à la page précédente"
-                  [attr.aria-disabled]="page.first"
-                  (keydown.enter)="!page.first && previousPage()"
-                  (keydown.space)="$event.preventDefault(); !page.first && previousPage()"
-                  >
-                  Précédent
-                </button>
-                @for (pageNum of getPageNumbers(); track trackByPageNum($index, pageNum)) {
-                  <button
-                    class="btn-page-num"
-                    [class.active]="pageNum === currentPage"
-                    [class.ellipsis]="pageNum === -1"
-                    [disabled]="pageNum === -1"
-                    (click)="pageNum !== -1 && goToPage(pageNum)"
-                    [attr.aria-label]="pageNum === -1 ? null : 'Aller à la page ' + (pageNum + 1)"
-                    [attr.aria-current]="pageNum === currentPage ? 'page' : null"
-                    (keydown.enter)="pageNum !== -1 && goToPage(pageNum)"
-                    (keydown.space)="$event.preventDefault(); pageNum !== -1 && goToPage(pageNum)"
-                    >
-                    {{ pageNum === -1 ? '...' : pageNum + 1 }}
-                  </button>
-                }
-                <button
-                  class="btn-page"
-                  [disabled]="page.last"
-                  (click)="nextPage()"
-                  aria-label="Aller à la page suivante"
-                  [attr.aria-disabled]="page.last"
-                  (keydown.enter)="!page.last && nextPage()"
-                  (keydown.space)="$event.preventDefault(); !page.last && nextPage()"
-                  >
-                  Suivant
-                </button>
-              </div>
-            </nav>
-          }
-        </section>
-      }
-    </main>
-  </div>
+  <!-- ── Pagination ── -->
+  @if (page && !loading) {
+    <div class="ann-pagination" aria-label="Pagination">
+      <span class="ann-pagination__info">
+        Page {{ page.number + 1 }} / {{ page.totalPages }} ·
+        {{ page.totalElements }} annonce{{ page.totalElements > 1 ? 's' : '' }}
+      </span>
+      <div class="ann-pagination__btns">
+        <button class="ann-pagination__btn" [disabled]="currentPage === 0" (click)="previousPage()" aria-label="Page précédente">←</button>
+        <button class="ann-pagination__btn" [disabled]="page.last" (click)="nextPage()" aria-label="Page suivante">→</button>
+      </div>
+    </div>
+  }
+
+</div>

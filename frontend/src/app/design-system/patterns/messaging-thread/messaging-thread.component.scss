@@ -1,0 +1,48 @@
+.ds-thread {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-4);
+
+  &__msg {
+    display: flex;
+    gap: var(--ds-space-2);
+    max-width: 80%;
+
+    &--inbound  { align-self: flex-start; }
+    &--outbound { align-self: flex-end; flex-direction: row-reverse; }
+  }
+
+  &__avatar { flex: none; align-self: flex-end; }
+
+  &__bubble { display: flex; flex-direction: column; gap: 4px; }
+
+  &__text {
+    padding: 10px 14px;
+    border-radius: var(--ds-radius-lg);
+    font-size: 13.5px;
+    line-height: 1.45;
+    margin: 0;
+    word-break: break-word;
+  }
+
+  &__msg--inbound &__text {
+    background: var(--ds-surface-offset);
+    color: var(--ds-text);
+    border-top-left-radius: 4px;
+  }
+
+  &__msg--outbound &__text {
+    background: var(--ds-marine);
+    color: var(--ds-text-inverse);
+    border-top-right-radius: 4px;
+  }
+
+  &__time {
+    font-size: 11px;
+    color: var(--ds-text-faint);
+    padding: 0 4px;
+  }
+
+  &__msg--outbound &__time { text-align: right; }
+}

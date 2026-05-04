@@ -1,0 +1,644 @@
+{
+  "generatedAt": "2026-05-04T17:06:27.192Z",
+  "dist": "dist/frontend/browser/fr",
+  "locale": "fr",
+  "assets": [
+    {
+      "file": "chunk-5LABZYPU.js.map",
+      "bytes": 2531908,
+      "human": "2.41 MB"
+    },
+    {
+      "file": "main-JA4X2PJQ.js.map",
+      "bytes": 1671668,
+      "human": "1.59 MB"
+    },
+    {
+      "file": "chunk-DDVMPLXA.js.map",
+      "bytes": 1289650,
+      "human": "1.23 MB"
+    },
+    {
+      "file": "chunk-ND4DDDK5.js.map",
+      "bytes": 1093520,
+      "human": "1.04 MB"
+    },
+    {
+      "file": "chunk-FCF3YNLH.js.map",
+      "bytes": 835126,
+      "human": "815.6 KB"
+    },
+    {
+      "file": "chunk-EZ5WCLEQ.js.map",
+      "bytes": 720976,
+      "human": "704.1 KB"
+    },
+    {
+      "file": "chunk-TK634GLU.js.map",
+      "bytes": 659084,
+      "human": "643.6 KB"
+    },
+    {
+      "file": "chunk-6M7M3DTG.js.map",
+      "bytes": 643689,
+      "human": "628.6 KB"
+    },
+    {
+      "file": "main-JA4X2PJQ.js",
+      "bytes": 638915,
+      "human": "623.9 KB"
+    },
+    {
+      "file": "chunk-4G7HIWAK.js.map",
+      "bytes": 590031,
+      "human": "576.2 KB"
+    },
+    {
+      "file": "chunk-E2BRZRUX.js.map",
+      "bytes": 580808,
+      "human": "567.2 KB"
+    },
+    {
+      "file": "chunk-TNKFFAH5.js.map",
+      "bytes": 579419,
+      "human": "565.8 KB"
+    },
+    {
+      "file": "chunk-DDVMPLXA.js",
+      "bytes": 564510,
+      "human": "551.3 KB"
+    },
+    {
+      "file": "chunk-HFZ37MDH.js.map",
+      "bytes": 405362,
+      "human": "395.9 KB"
+    },
+    {
+      "file": "chunk-5LABZYPU.js",
+      "bytes": 377964,
+      "human": "369.1 KB"
+    },
+    {
+      "file": "styles-EURIMTMB.css",
+      "bytes": 372062,
+      "human": "363.3 KB"
+    },
+    {
+      "file": "chunk-ND4DDDK5.js",
+      "bytes": 352507,
+      "human": "344.2 KB"
+    },
+    {
+      "file": "chunk-QCZGPDMF.js.map",
+      "bytes": 319682,
+      "human": "312.2 KB"
+    },
+    {
+      "file": "chunk-EZ5WCLEQ.js",
+      "bytes": 291692,
+      "human": "284.9 KB"
+    },
+    {
+      "file": "chunk-D6FDMKQG.js.map",
+      "bytes": 268350,
+      "human": "262.1 KB"
+    },
+    {
+      "file": "chunk-5CBMILOX.js.map",
+      "bytes": 259726,
+      "human": "253.6 KB"
+    },
+    {
+      "file": "chunk-H4CE6GVQ.js.map",
+      "bytes": 247579,
+      "human": "241.8 KB"
+    },
+    {
+      "file": "chunk-4G7HIWAK.js",
+      "bytes": 246211,
+      "human": "240.4 KB"
+    },
+    {
+      "file": "polyfills-5KYUQLWN.js.map",
+      "bytes": 218282,
+      "human": "213.2 KB"
+    },
+    {
+      "file": "chunk-FCF3YNLH.js",
+      "bytes": 204849,
+      "human": "200.0 KB"
+    },
+    {
+      "file": "chunk-TNKFFAH5.js",
+      "bytes": 202935,
+      "human": "198.2 KB"
+    },
+    {
+      "file": "chunk-E2BRZRUX.js",
+      "bytes": 180543,
+      "human": "176.3 KB"
+    },
+    {
+      "file": "chunk-XNYQ7NA6.js.map",
+      "bytes": 178806,
+      "human": "174.6 KB"
+    },
+    {
+      "file": "chunk-6M7M3DTG.js",
+      "bytes": 177402,
+      "human": "173.2 KB"
+    },
+    {
+      "file": "chunk-CQPSYM5Z.js.map",
+      "bytes": 169039,
+      "human": "165.1 KB"
+    },
+    {
+      "file": "chunk-TK634GLU.js",
+      "bytes": 159582,
+      "human": "155.8 KB"
+    },
+    {
+      "file": "index.html",
+      "bytes": 139695,
+      "human": "136.4 KB"
+    },
+    {
+      "file": "chunk-DTEJGJKM.js.map",
+      "bytes": 133602,
+      "human": "130.5 KB"
+    },
+    {
+      "file": "chunk-D6FDMKQG.js",
+      "bytes": 130158,
+      "human": "127.1 KB"
+    },
+    {
+      "file": "chunk-H4CE6GVQ.js",
+      "bytes": 125807,
+      "human": "122.9 KB"
+    },
+    {
+      "file": "chunk-HJIOCW56.js.map",
+      "bytes": 123454,
+      "human": "120.6 KB"
+    },
+    {
+      "file": "chunk-IU3B7FZ5.js.map",
+      "bytes": 121134,
+      "human": "118.3 KB"
+    },
+    {
+      "file": "chunk-XGN6HYGG.js.map",
+      "bytes": 107159,
+      "human": "104.6 KB"
+    },
+    {
+      "file": "chunk-73NFGZUS.js.map",
+      "bytes": 96949,
+      "human": "94.7 KB"
+    },
+    {
+      "file": "chunk-QCZGPDMF.js",
+      "bytes": 96722,
+      "human": "94.5 KB"
+    },
+    {
+      "file": "chunk-4IQZAZ7A.js.map",
+      "bytes": 94219,
+      "human": "92.0 KB"
+    },
+    {
+      "file": "chunk-LH2NICLT.js.map",
+      "bytes": 90432,
+      "human": "88.3 KB"
+    },
+    {
+      "file": "chunk-HFZ37MDH.js",
+      "bytes": 84371,
+      "human": "82.4 KB"
+    },
+    {
+      "file": "chunk-4LJOJ7WH.js.map",
+      "bytes": 83746,
+      "human": "81.8 KB"
+    },
+    {
+      "file": "ngsw-worker.js",
+      "bytes": 83423,
+      "human": "81.5 KB"
+    },
+    {
+      "file": "chunk-63ZY3XG5.js.map",
+      "bytes": 80542,
+      "human": "78.7 KB"
+    },
+    {
+      "file": "chunk-5CBMILOX.js",
+      "bytes": 78323,
+      "human": "76.5 KB"
+    },
+    {
+      "file": "chunk-XNYQ7NA6.js",
+      "bytes": 76373,
+      "human": "74.6 KB"
+    },
+    {
+      "file": "chunk-DTEJGJKM.js",
+      "bytes": 71965,
+      "human": "70.3 KB"
+    },
+    {
+      "file": "chunk-XGN6HYGG.js",
+      "bytes": 66510,
+      "human": "65.0 KB"
+    },
+    {
+      "file": "chunk-RKPKWNSJ.js.map",
+      "bytes": 64790,
+      "human": "63.3 KB"
+    },
+    {
+      "file": "chunk-RKPKWNSJ.js",
+      "bytes": 62298,
+      "human": "60.8 KB"
+    },
+    {
+      "file": "chunk-DJE5YYWP.js.map",
+      "bytes": 53532,
+      "human": "52.3 KB"
+    },
+    {
+      "file": "chunk-P444EMPK.js.map",
+      "bytes": 52762,
+      "human": "51.5 KB"
+    },
+    {
+      "file": "chunk-LH2NICLT.js",
+      "bytes": 48104,
+      "human": "47.0 KB"
+    },
+    {
+      "file": "chunk-IU3B7FZ5.js",
+      "bytes": 41905,
+      "human": "40.9 KB"
+    },
+    {
+      "file": "chunk-DJE5YYWP.js",
+      "bytes": 40691,
+      "human": "39.7 KB"
+    },
+    {
+      "file": "polyfills-5KYUQLWN.js",
+      "bytes": 39711,
+      "human": "38.8 KB"
+    },
+    {
+      "file": "chunk-CQPSYM5Z.js",
+      "bytes": 39195,
+      "human": "38.3 KB"
+    },
+    {
+      "file": "chunk-LPNUWXN6.js.map",
+      "bytes": 38197,
+      "human": "37.3 KB"
+    },
+    {
+      "file": "chunk-HJIOCW56.js",
+      "bytes": 34357,
+      "human": "33.6 KB"
+    },
+    {
+      "file": "chunk-G6X3T4K7.js.map",
+      "bytes": 34025,
+      "human": "33.2 KB"
+    },
+    {
+      "file": "chunk-4LJOJ7WH.js",
+      "bytes": 32755,
+      "human": "32.0 KB"
+    },
+    {
+      "file": "chunk-RRJQZGWC.js.map",
+      "bytes": 31649,
+      "human": "30.9 KB"
+    },
+    {
+      "file": "chunk-4IQZAZ7A.js",
+      "bytes": 29204,
+      "human": "28.5 KB"
+    },
+    {
+      "file": "chunk-WGC5M7PG.js.map",
+      "bytes": 26073,
+      "human": "25.5 KB"
+    },
+    {
+      "file": "chunk-63ZY3XG5.js",
+      "bytes": 24872,
+      "human": "24.3 KB"
+    },
+    {
+      "file": "chunk-73NFGZUS.js",
+      "bytes": 22227,
+      "human": "21.7 KB"
+    },
+    {
+      "file": "chunk-P444EMPK.js",
+      "bytes": 19460,
+      "human": "19.0 KB"
+    },
+    {
+      "file": "chunk-G6X3T4K7.js",
+      "bytes": 18303,
+      "human": "17.9 KB"
+    },
+    {
+      "file": "chunk-4KCGMW3W.js.map",
+      "bytes": 14582,
+      "human": "14.2 KB"
+    },
+    {
+      "file": "ngsw.json",
+      "bytes": 12777,
+      "human": "12.5 KB"
+    },
+    {
+      "file": "service-worker.js",
+      "bytes": 11263,
+      "human": "11.0 KB"
+    },
+    {
+      "file": "chunk-WNMBA6GR.js.map",
+      "bytes": 9881,
+      "human": "9.6 KB"
+    },
+    {
+      "file": "chunk-RRJQZGWC.js",
+      "bytes": 9151,
+      "human": "8.9 KB"
+    },
+    {
+      "file": "chunk-LPNUWXN6.js",
+      "bytes": 9130,
+      "human": "8.9 KB"
+    },
+    {
+      "file": "chunk-WGC5M7PG.js",
+      "bytes": 8413,
+      "human": "8.2 KB"
+    },
+    {
+      "file": "chunk-JSKSQM37.js.map",
+      "bytes": 8106,
+      "human": "7.9 KB"
+    },
+    {
+      "file": "chunk-7X2IMQ4Z.js.map",
+      "bytes": 5559,
+      "human": "5.4 KB"
+    },
+    {
+      "file": "manifest.json",
+      "bytes": 5201,
+      "human": "5.1 KB"
+    },
+    {
+      "file": "chunk-7X2IMQ4Z.js",
+      "bytes": 5039,
+      "human": "4.9 KB"
+    },
+    {
+      "file": "chunk-4KCGMW3W.js",
+      "bytes": 4394,
+      "human": "4.3 KB"
+    },
+    {
+      "file": "chunk-ZLJFBYAF.js.map",
+      "bytes": 3852,
+      "human": "3.8 KB"
+    },
+    {
+      "file": "chunk-LLZKL5TF.js.map",
+      "bytes": 3415,
+      "human": "3.3 KB"
+    },
+    {
+      "file": "chunk-T4LQFGTI.js.map",
+      "bytes": 2890,
+      "human": "2.8 KB"
+    },
+    {
+      "file": "chunk-PFPHVS22.js.map",
+      "bytes": 2755,
+      "human": "2.7 KB"
+    },
+    {
+      "file": "chunk-JSKSQM37.js",
+      "bytes": 2670,
+      "human": "2.6 KB"
+    },
+    {
+      "file": "chunk-WNMBA6GR.js",
+      "bytes": 1954,
+      "human": "1.9 KB"
+    },
+    {
+      "file": "chunk-5RNJUQ2X.js.map",
+      "bytes": 1817,
+      "human": "1.8 KB"
+    },
+    {
+      "file": "chunk-ZMWPBHWL.js.map",
+      "bytes": 1672,
+      "human": "1.6 KB"
+    },
+    {
+      "file": "chunk-FODVN2RE.js",
+      "bytes": 1504,
+      "human": "1.5 KB"
+    },
+    {
+      "file": "chunk-72NLZNE5.js.map",
+      "bytes": 1442,
+      "human": "1.4 KB"
+    },
+    {
+      "file": "chunk-LLZKL5TF.js",
+      "bytes": 1285,
+      "human": "1.3 KB"
+    },
+    {
+      "file": "chunk-WVXTSGME.js",
+      "bytes": 1276,
+      "human": "1.2 KB"
+    },
+    {
+      "file": "chunk-T4LQFGTI.js",
+      "bytes": 1205,
+      "human": "1.2 KB"
+    },
+    {
+      "file": "chunk-YQZBADVX.js.map",
+      "bytes": 1168,
+      "human": "1.1 KB"
+    },
+    {
+      "file": "chunk-2TICDEOR.js.map",
+      "bytes": 1123,
+      "human": "1.1 KB"
+    },
+    {
+      "file": "chunk-2MTYRZO6.js.map",
+      "bytes": 1042,
+      "human": "1.0 KB"
+    },
+    {
+      "file": "chunk-TXEXVIH4.js",
+      "bytes": 1023,
+      "human": "1023 B"
+    },
+    {
+      "file": "chunk-ZMWPBHWL.js",
+      "bytes": 900,
+      "human": "900 B"
+    },
+    {
+      "file": "chunk-PFPHVS22.js",
+      "bytes": 885,
+      "human": "885 B"
+    },
+    {
+      "file": "chunk-UFPNPNFJ.js.map",
+      "bytes": 836,
+      "human": "836 B"
+    },
+    {
+      "file": "safety-worker.js",
+      "bytes": 785,
+      "human": "785 B"
+    },
+    {
+      "file": "worker-basic.min.js",
+      "bytes": 785,
+      "human": "785 B"
+    },
+    {
+      "file": "chunk-2MTYRZO6.js",
+      "bytes": 577,
+      "human": "577 B"
+    },
+    {
+      "file": "chunk-MT6HYG45.js",
+      "bytes": 561,
+      "human": "561 B"
+    },
+    {
+      "file": "chunk-YQZBADVX.js",
+      "bytes": 547,
+      "human": "547 B"
+    },
+    {
+      "file": "chunk-2TICDEOR.js",
+      "bytes": 535,
+      "human": "535 B"
+    },
+    {
+      "file": "chunk-72NLZNE5.js",
+      "bytes": 514,
+      "human": "514 B"
+    },
+    {
+      "file": "chunk-2AAQUKNJ.js.map",
+      "bytes": 513,
+      "human": "513 B"
+    },
+    {
+      "file": "chunk-UFPNPNFJ.js",
+      "bytes": 422,
+      "human": "422 B"
+    },
+    {
+      "file": "browserconfig.xml",
+      "bytes": 368,
+      "human": "368 B"
+    },
+    {
+      "file": "chunk-WVXTSGME.js.map",
+      "bytes": 367,
+      "human": "367 B"
+    },
+    {
+      "file": "chunk-ZLJFBYAF.js",
+      "bytes": 347,
+      "human": "347 B"
+    },
+    {
+      "file": "chunk-2AAQUKNJ.js",
+      "bytes": 293,
+      "human": "293 B"
+    },
+    {
+      "file": "chunk-5RNJUQ2X.js",
+      "bytes": 274,
+      "human": "274 B"
+    },
+    {
+      "file": "chunk-VOMXYHPH.js",
+      "bytes": 232,
+      "human": "232 B"
+    },
+    {
+      "file": "chunk-W7JT4BXV.js",
+      "bytes": 216,
+      "human": "216 B"
+    },
+    {
+      "file": "chunk-FODVN2RE.js.map",
+      "bytes": 93,
+      "human": "93 B"
+    },
+    {
+      "file": "chunk-MT6HYG45.js.map",
+      "bytes": 93,
+      "human": "93 B"
+    },
+    {
+      "file": "chunk-TXEXVIH4.js.map",
+      "bytes": 93,
+      "human": "93 B"
+    },
+    {
+      "file": "chunk-VOMXYHPH.js.map",
+      "bytes": 93,
+      "human": "93 B"
+    },
+    {
+      "file": "chunk-W7JT4BXV.js.map",
+      "bytes": 93,
+      "human": "93 B"
+    },
+    {
+      "file": "favicon.ico",
+      "bytes": 0,
+      "human": "0 B"
+    }
+  ],
+  "totalBytesAllFiles": 19816582,
+  "totalBytesJsCss": 5102086,
+  "mainJs": {
+    "file": "main-JA4X2PJQ.js",
+    "bytes": 638915,
+    "human": "623.9 KB"
+  },
+  "polyfillsJs": {
+    "file": "polyfills-5KYUQLWN.js",
+    "bytes": 39711,
+    "human": "38.8 KB"
+  },
+  "stylesCss": {
+    "file": "styles-EURIMTMB.css",
+    "bytes": 372062,
+    "human": "363.3 KB"
+  }
+}

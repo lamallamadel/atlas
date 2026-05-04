@@ -143,8 +143,9 @@
             </div>
           </div>
         }
-        <mat-tab-group class="tabs-container" aria-label="Onglets de détails du dossier">
-          <mat-tab label="Informations" aria-label="Informations générales du dossier">
+        <ds-tabs [tabs]="dossierTabs" [activeTab]="activeTab" variant="underline" (tabChange)="activeTab = $event"></ds-tabs>
+        <div class="tab-content-host">
+          @if (activeTab === 'informations') {
             <div class="tab-content">
               <!-- Section Essentiel -->
               <mat-card class="info-section-essential">
@@ -343,8 +344,8 @@
                     </div>
                   </mat-expansion-panel>
                 </div>
-              </mat-tab>
-              <mat-tab label="Parties prenantes" aria-label="Gestion des parties prenantes du dossier">
+          }
+          @if (activeTab === 'parties') {
                 <div class="tab-content">
                   @if (!dossier.parties || dossier.parties.length === 0) {
                     <app-empty-state
@@ -427,8 +428,8 @@
                     </div>
                   }
                 </div>
-              </mat-tab>
-              <mat-tab label="Messages" aria-label="Historique des messages échangés" class="messages-tab">
+          }
+          @if (activeTab === 'messages') {
                 <div class="tab-content">
                   <div class="tab-header-actions">
                     <button class="btn-add" (click)="openMessageDialog()"
@@ -472,8 +473,8 @@
                     </div>
                   }
                 </div>
-              </mat-tab>
-              <mat-tab label="WhatsApp" aria-label="Messagerie WhatsApp">
+          }
+          @if (activeTab === 'whatsapp') {
                 <div class="tab-content whatsapp-tab">
                   <!-- Mobile-optimized messaging interface -->
                   @if (dossier) {
@@ -494,8 +495,8 @@
                     </div>
                   }
                 </div>
-              </mat-tab>
-              <mat-tab label="Messages sortants" aria-label="Gestion des messages sortants WhatsApp">
+          }
+          @if (activeTab === 'messages-sortants') {
                 <div class="tab-content">
                   @if (dossier) {
                     <app-messaging-tab [dossierId]="dossier.id" [recipientPhone]="dossier.leadPhone"
@@ -503,8 +504,8 @@
                     </app-messaging-tab>
                   }
                 </div>
-              </mat-tab>
-              <mat-tab label="Rendez-vous" aria-label="Gestion des rendez-vous planifiés">
+          }
+          @if (activeTab === 'rendezvous') {
                 <div class="tab-content appointments-section">
                   <div class="tab-header-actions">
                     <button class="btn-add" (click)="openAppointmentDialog()"
@@ -587,8 +588,8 @@
                     </div>
                   }
                 </div>
-              </mat-tab>
-              <mat-tab label="Consentements" aria-label="Gestion des consentements RGPD">
+          }
+          @if (activeTab === 'consentements') {
                 <div class="tab-content consentements-section">
                   @if (consentementsLoading) {
                     <app-loading-skeleton variant="card" [rows]="2"
@@ -715,8 +716,8 @@
                     </div>
                   }
                 </div>
-              </mat-tab>
-              <mat-tab label="Documents" aria-label="Gestion des documents du dossier">
+          }
+          @if (activeTab === 'documents') {
                 <div class="tab-content">
                   <div class="tab-header-actions" style="margin-bottom: 20px;">
                     <button class="btn-add" (click)="generateContract()" [disabled]="generatingContract"
@@ -748,13 +749,13 @@
                   }
                   <app-document-list [dossierId]="dossier.id"></app-document-list>
                 </div>
-              </mat-tab>
-              <mat-tab label="Chronologie" aria-label="Chronologie des activités du dossier">
+          }
+          @if (activeTab === 'chronologie') {
                 <div class="tab-content">
                   <app-activity-timeline [dossierId]="dossier.id"></app-activity-timeline>
                 </div>
-              </mat-tab>
-              <mat-tab label="Historique" aria-label="Historique détaillé des modifications">
+          }
+          @if (activeTab === 'historique') {
                 <div class="tab-content">
                   <div class="audit-filters">
                     <div class="filter-group">
@@ -851,10 +852,10 @@
                     </div>
                   }
                 </div>
-              </mat-tab>
+          }
               <!-- Real-time Collaboration Tab -->
               @if (collaborationEnabled) {
-                <mat-tab label="Collaboration" aria-label="Fonctionnalités de collaboration en temps réel">
+          @if (activeTab === 'collaboration') {
                   <div class="tab-content">
                     <div class="collaboration-grid">
                       <!-- Activity Stream -->
@@ -887,9 +888,9 @@
                       </div>
                     </div>
                   </div>
-                </mat-tab>
+            }
               }
-            </mat-tab-group>
+        </div>
           </div>
         }
       </div>

@@ -5,7 +5,6 @@
  */
 
 export { ChartComponent, ChartDataset, ChartOptions, ChartExportOptions } from './chart.component';
-export { ChartDemoComponent } from './chart-demo.component';
 export { ChartColorPaletteService, ColorPalette, ChartColor } from '../../services/chart-color-palette.service';
 export { ChartUtilsService } from '../../services/chart-utils.service';
 

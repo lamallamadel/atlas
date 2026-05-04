@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, AfterViewInit, viewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
@@ -6,18 +6,20 @@ import { DashboardKpiService } from '../../services/dashboard-kpi.service';
 import { DossierResponse } from '../../services/dossier-api.service';
 import { AnnonceApiService, AnnonceResponse } from '../../services/annonce-api.service';
 import { AriaLiveAnnouncerService } from '../../services/aria-live-announcer.service';
-import { ActionButtonConfig, EmptyStateComponent } from '../../components/empty-state.component';
+import { ActionButtonConfig } from '../../components/empty-state.component';
 import { DossierCreateDialogComponent } from '../dossiers/dossier-create-dialog.component';
 import { interval, Subject, takeUntil, takeWhile, BehaviorSubject, skip } from 'rxjs';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatIcon } from '@angular/material/icon';
-import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
-import { MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatCardContent } from '@angular/material/card';
-import { MatIconButton } from '@angular/material/button';
-import { MatTooltip } from '@angular/material/tooltip';
-import { LoadingSkeletonComponent } from '../../components/loading-skeleton.component';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+import { AsyncPipe, DatePipe, DecimalPipe } from '@angular/common';
+// Design System
+import { PageHeaderComponent }     from '../../design-system/patterns/page-header/page-header.component';
+import { KpiCardComponent }        from '../../design-system/patterns/kpi-card/kpi-card.component';
+import { FilterBarComponent, DsFilterOption } from '../../design-system/patterns/filter-bar/filter-bar.component';
+import { DsAvatarComponent }       from '../../design-system/primitives/ds-avatar/ds-avatar.component';
+import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
+import { DsEmptyStateComponent }   from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
+import { DsSkeletonComponent }     from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 type Chart = any;
 type ChartConfiguration = any;
@@ -42,7 +44,11 @@ interface KpiCard {
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     animations: [listStaggerAnimation, itemAnimation],
-    imports: [MatButtonToggleGroup, MatButtonToggle, MatIcon, SkeletonLoaderComponent, MatCard, MatCardHeader, MatCardAvatar, MatCardTitle, MatIconButton, MatTooltip, MatCardContent, LoadingSkeletonComponent, EmptyStateComponent, AsyncPipe, DatePipe]
+    imports: [
+      AsyncPipe, DatePipe, DecimalPipe, RouterLink,
+      PageHeaderComponent, KpiCardComponent, FilterBarComponent,
+      DsAvatarComponent, DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
+    ]
 })
 export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   private destroy$ = new Subject<void>();
@@ -53,6 +59,35 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   isHandset = false;
   isTablet = false;
   isDesktop = false;
+
+  /* ── Propriétés DS ── */
+  periods = [
+    { value: 'TODAY', label: "Aujourd'hui" },
+    { value: 'LAST_7_DAYS', label: '7 jours' },
+    { value: 'LAST_30_DAYS', label: '30 jours' },
+  ];
+
+  dossierFilters: DsFilterOption[] = [
+    { value: 'A_TRAITER', label: 'À traiter' },
+    { value: 'RECENTS',   label: 'Récents' },
+    { value: 'ASSIGNES',  label: 'Assignés à moi' },
+  ];
+
+  getDossierBadgeStatus(status: string): DsBadgeStatus {
+    const map: Record<string, DsBadgeStatus> = {
+      NEW: 'new', QUALIFICATION: 'qualification', RDV: 'rdv',
+      WON: 'won', LOST: 'lost', ARCHIVED: 'archived',
+    };
+    return (map[status] as DsBadgeStatus) ?? 'neutral';
+  }
+
+  goToDossier(id: number): void {
+    this.router.navigate(['/pro/dossiers', id]);
+  }
+
+  goToAnnonce(id: number): void {
+    this.router.navigate(['/pro/annonces', id]);
+  }
 
   kpiCards: { [key: string]: KpiCard } = {
     annoncesActives: {
@@ -105,17 +140,16 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   yieldAnnonces: AnnonceResponse[] = [];
   loadingYield = false;
 
-  readonly annoncesChartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('annoncesChart');
-  readonly dossiersChartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('dossiersChart');
-  readonly conversionWhatsAppChartRef = viewChild.required<ElementRef<HTMLCanvasElement>>('conversionWhatsAppChart');
-
   private annoncesChart?: Chart;
   private dossiersChart?: Chart;
   private conversionWhatsAppChart?: Chart;
 
+  get loadingAnnonces(): boolean { return this.loadingYield; }
+  get recentAnnonces(): AnnonceResponse[] { return this.yieldAnnonces; }
+
   constructor(
     private dashboardKpiService: DashboardKpiService,
-    private router: Router,
+    protected router: Router,
     private ariaAnnouncer: AriaLiveAnnouncerService,
     private breakpointObserver: BreakpointObserver,
     private dialog: MatDialog,
@@ -171,18 +205,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      this.loadChartJsAndInitCharts();
-    }, 100);
-  }
-
-  private async loadChartJsAndInitCharts(): Promise<void> {
-    try {
-      await import('chart.js/auto');
-      this.initCharts();
-    } catch (error) {
-      console.error('Failed to load Chart.js:', error);
-    }
+    // Charts are handled inline by KpiCardComponent via [sparkline] input
   }
 
   ngOnDestroy(): void {
@@ -346,31 +369,6 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  async initCharts(): Promise<void> {
-    const annoncesChartRef = this.annoncesChartRef();
-    if (annoncesChartRef) {
-      this.annoncesChart = await this.createChart(
-        annoncesChartRef.nativeElement,
-        this.kpiCards['annoncesActives']
-      );
-    }
-
-    const dossiersChartRef = this.dossiersChartRef();
-    if (dossiersChartRef) {
-      this.dossiersChart = await this.createChart(
-        dossiersChartRef.nativeElement,
-        this.kpiCards['dossiersATraiter']
-      );
-    }
-
-    const conversionWhatsAppChartRef = this.conversionWhatsAppChartRef();
-    if (conversionWhatsAppChartRef) {
-      this.conversionWhatsAppChart = await this.createChart(
-        conversionWhatsAppChartRef.nativeElement,
-        this.kpiCards['conversionWhatsApp']
-      );
-    }
-  }
 
   async createChart(canvas: HTMLCanvasElement, card: KpiCard): Promise<Chart> {
     const chartModule = await import('chart.js/auto');
@@ -519,7 +517,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     };
   }
 
-  private openCreateDossierDialog(): void {
+  protected openCreateDossierDialog(): void {
     const dialogRef = this.dialog.open(DossierCreateDialogComponent, {
       width: '600px',
       maxWidth: '90vw',

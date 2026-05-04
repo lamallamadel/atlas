@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlasia – Tâches & Suivi</title>
+  <link rel="stylesheet" href="tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    /* ── Layout ── */
+    .shell { display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+    .sidebar { background: var(--marine); padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .sidebar__logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: #fff; letter-spacing: .3px; padding: 8px 12px 24px; }
+    .sidebar__item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: rgba(255,255,255,.65); font-size: 13.5px; font-weight: 500; cursor: pointer; transition: background .15s; text-decoration: none; }
+    .sidebar__item:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .sidebar__item--active { background: rgba(255,255,255,.15); color: #fff; font-weight: 600; }
+    .main { overflow-y: auto; padding: 40px 48px; display: flex; flex-direction: column; gap: 28px; }
+    /* ── Page header ── */
+    .page-head { display: flex; align-items: flex-end; justify-content: space-between; }
+    .page-head__eyebrow { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.4px; color: var(--text-muted); margin-bottom: 6px; }
+    .page-head__title { font-family: 'Playfair Display', serif; font-size: 36px; font-weight: 500; letter-spacing: -.3px; color: var(--text); }
+    .page-head__title em { font-style: italic; color: var(--primary); }
+    .btn { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: var(--r-md); border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .btn-marine { background: var(--marine); color: #fff; }
+    .btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    /* ── Stats ── */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .stat { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); padding: 20px; }
+    .stat__val { font-family: 'Playfair Display', serif; font-size: 34px; font-weight: 500; color: var(--marine); }
+    .stat__lbl { font-size: 12.5px; color: var(--text-muted); margin-top: 4px; }
+    .stat__del { font-size: 11.5px; font-weight: 600; margin-top: 8px; }
+    .up { color: #2e7d32; } .down { color: #c62828; }
+    /* ── Filtres ── */
+    .filter-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .search-wrap { position: relative; }
+    .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-faint); }
+    .search-input { height: 36px; border: 1px solid var(--divider); border-radius: 99px; background: var(--surface); padding: 0 14px 0 32px; font-size: 13.5px; color: var(--text); outline: none; min-width: 240px; }
+    .chip { height: 32px; padding: 0 14px; border-radius: 99px; border: 1px solid var(--divider); background: var(--surface); color: var(--text-muted); font-size: 13px; font-weight: 500; cursor: pointer; }
+    .chip--active { background: var(--marine-hl); border-color: var(--marine); color: var(--marine); font-weight: 600; }
+    /* ── Table tâches ── */
+    .task-table { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-xs); }
+    .task-header { display: grid; grid-template-columns: 40px 1fr 160px 140px 120px 100px 80px; padding: 10px 20px; background: var(--surface-offset); border-bottom: 1px solid var(--divider); font-size: 10.5px; font-weight: 700; color: var(--text-faint); letter-spacing: 1px; text-transform: uppercase; gap: 12px; }
+    .task-row { display: grid; grid-template-columns: 40px 1fr 160px 140px 120px 100px 80px; padding: 0 20px; min-height: 56px; align-items: center; border-bottom: 1px solid var(--divider); gap: 12px; transition: background .12s; cursor: pointer; }
+    .task-row:last-child { border-bottom: none; }
+    .task-row:hover { background: var(--surface-offset); }
+    .task-check { width: 18px; height: 18px; border: 2px solid var(--border); border-radius: 5px; cursor: pointer; }
+    .task-check--done { background: var(--marine); border-color: var(--marine); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; }
+    .task-title { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    .task-title--done { text-decoration: line-through; color: var(--text-faint); font-weight: 400; }
+    .task-sub { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .badge { display: inline-flex; align-items: center; gap: 5px; height: 22px; padding: 0 10px; border-radius: 99px; font-size: 11.5px; font-weight: 600; }
+    .badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex: none; }
+    .badge-new    { background: var(--marine-hl); color: var(--marine); }
+    .badge-todo   { background: #fff3e0; color: #b85b00; }
+    .badge-prog   { background: var(--primary-hl); color: var(--primary); }
+    .badge-done   { background: #e8f5e9; color: #2e7d32; }
+    .badge-over   { background: #ffebee; color: #c62828; }
+    .priority-dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+    .prio-high   { background: #c62828; }
+    .prio-med    { background: #e65100; }
+    .prio-low    { background: #2e7d32; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--marine-hl); color: var(--marine); display: flex; align-items: center; justify-content: center; font-family: 'Playfair Display', serif; font-size: 12px; font-weight: 700; flex: none; }
+    .date-col { font-size: 12px; color: var(--text-muted); }
+    .date-col--late { color: #c62828; font-weight: 600; }
+    .icon-btn { width: 30px; height: 30px; border: 1px solid var(--divider); border-radius: 6px; background: transparent; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    /* ── Kanban ── */
+    .kanban { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 8px; }
+    .kanban-col { background: var(--surface-offset); border-radius: var(--r-lg); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .kanban-col__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .kanban-col__title { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); }
+    .kanban-col__count { width: 22px; height: 22px; border-radius: 99px; background: var(--surface-dynamic); color: var(--text-muted); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+    .task-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-md); padding: 14px; display: flex; flex-direction: column; gap: 8px; box-shadow: var(--shadow-xs); cursor: pointer; }
+    .task-card:hover { box-shadow: var(--shadow-sm); }
+    .task-card__tags { display: flex; gap: 6px; flex-wrap: wrap; }
+    .tag { height: 18px; padding: 0 8px; border-radius: 99px; font-size: 10.5px; font-weight: 600; }
+    .tag-rdv { background: var(--primary-hl); color: var(--primary); }
+    .tag-suivi { background: var(--marine-hl); color: var(--marine); }
+    .tag-admin { background: #fff3e0; color: #b85b00; }
+    .task-card__title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.3; }
+    .task-card__footer { display: flex; align-items: center; justify-content: space-between; }
+    .task-card__due { font-size: 11px; color: var(--text-faint); }
+    .task-card__due--late { color: #c62828; font-weight: 600; }
+    /* ── Tabs ── */
+    .tabs { display: flex; gap: 4px; background: var(--surface-offset); border-radius: var(--r-md); padding: 4px; width: fit-content; }
+    .tab { height: 32px; padding: 0 16px; border-radius: 7px; border: none; background: transparent; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; }
+    .tab--active { background: var(--surface); box-shadow: var(--shadow-xs); color: var(--text); font-weight: 600; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <!-- Sidebar -->
+  <nav class="sidebar" aria-label="Navigation principale">
+    <div class="sidebar__logo">Atlasia</div>
+    <a class="sidebar__item" href="#">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="2" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="2" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/><rect x="9" y="9" width="5" height="5" rx="1" stroke="currentColor" stroke-width="1.3"/></svg>
+      Tableau de bord
+    </a>
+    <a class="sidebar__item" href="#">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 6H8M6 6H3M13 10H10M8 10H3M13 14H3M13 2H3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      Dossiers
+    </a>
+    <a class="sidebar__item" href="#">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2h12v12H2z" stroke="currentColor" stroke-width="1.3"/></svg>
+      Annonces
+    </a>
+    <a class="sidebar__item sidebar__item--active" href="#">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8l3 3 6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><rect x="1" y="1" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.3"/></svg>
+      Tâches
+    </a>
+    <a class="sidebar__item" href="#">Calendrier</a>
+    <a class="sidebar__item" href="#">Workflows</a>
+  </nav>
+
+  <!-- Main -->
+  <main class="main" id="main-content">
+    <!-- Header -->
+    <div class="page-head">
+      <div>
+        <div class="page-head__eyebrow">Espace Pro</div>
+        <h1 class="page-head__title">Mes <em>tâches</em></h1>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-ghost">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 4h10M5 4V2h4v2M5.5 6v5M8.5 6v5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><rect x="2.5" y="4" width="9" height="9" rx="1" stroke="currentColor" stroke-width="1.2"/></svg>
+          Archiver terminées
+        </button>
+        <button class="btn btn-marine">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Nouvelle tâche
+        </button>
+      </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat__val">47</div>
+        <div class="stat__lbl">Tâches actives</div>
+        <div class="stat__del up">↑ 5 cette semaine</div>
+      </div>
+      <div class="stat">
+        <div class="stat__val">12</div>
+        <div class="stat__lbl">En retard</div>
+        <div class="stat__del down">↑ 3 depuis hier</div>
+      </div>
+      <div class="stat">
+        <div class="stat__val">89%</div>
+        <div class="stat__lbl">Taux de complétude</div>
+        <div class="stat__del up">↑ +4% ce mois</div>
+      </div>
+      <div class="stat">
+        <div class="stat__val">8</div>
+        <div class="stat__lbl">À traiter aujourd'hui</div>
+        <div class="stat__del" style="color:var(--text-muted)">Priorité haute</div>
+      </div>
+    </div>
+
+    <!-- Tabs vue -->
+    <div style="display:flex;gap:16px;align-items:center;justify-content:space-between">
+      <div class="tabs">
+        <button class="tab tab--active">Liste</button>
+        <button class="tab">Kanban</button>
+        <button class="tab">Calendrier</button>
+      </div>
+      <div class="filter-bar">
+        <div class="search-wrap">
+          <svg class="search-icon" width="14" height="14" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="search-input" placeholder="Rechercher une tâche…" aria-label="Rechercher" />
+        </div>
+        <button class="chip chip--active">Toutes</button>
+        <button class="chip">Mes tâches</button>
+        <button class="chip">En retard</button>
+        <button class="chip">Haute priorité</button>
+      </div>
+    </div>
+
+    <!-- Table tâches -->
+    <div class="task-table" role="region" aria-label="Liste des tâches">
+      <div class="task-header" role="row">
+        <span></span>
+        <span>Tâche</span>
+        <span>Assigné</span>
+        <span>Lié à</span>
+        <span>Échéance</span>
+        <span>Statut</span>
+        <span>Actions</span>
+      </div>
+
+      <!-- Tâche 1 – En retard -->
+      <div class="task-row" role="listitem">
+        <div class="task-check" aria-label="Marquer comme terminée"></div>
+        <div>
+          <div class="task-title">Rappel client Mohammed Al-Rashid</div>
+          <div class="task-sub">Relance suite à la visite du 28 avril</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar">SC</div>
+          <span style="font-size:12.5px;color:var(--text-muted)">Sophie C.</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--marine)">Dossier #1042</div>
+        <div class="date-col date-col--late">01 mai 2026 · 3j de retard</div>
+        <span class="badge badge-over">En retard</span>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" aria-label="Modifier"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Tâche 2 – En cours -->
+      <div class="task-row" role="listitem">
+        <div class="task-check" aria-label="Marquer comme terminée"></div>
+        <div>
+          <div class="task-title">Préparer dossier de financement</div>
+          <div class="task-sub">Rassembler pièces justificatives</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar">AT</div>
+          <span style="font-size:12.5px;color:var(--text-muted)">Ahmed T.</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--marine)">Dossier #1087</div>
+        <div class="date-col">05 mai 2026</div>
+        <span class="badge badge-prog">En cours</span>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" aria-label="Modifier"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Tâche 3 – À faire -->
+      <div class="task-row" role="listitem">
+        <div class="task-check" aria-label="Marquer comme terminée"></div>
+        <div>
+          <div class="task-title">Organiser visite appartement Lyon 6</div>
+          <div class="task-sub">Annonce #234 – 3 pièces 78 m²</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar">SC</div>
+          <span style="font-size:12.5px;color:var(--text-muted)">Sophie C.</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--marine)">Annonce #234</div>
+        <div class="date-col">07 mai 2026</div>
+        <span class="badge badge-todo">À faire</span>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" aria-label="Modifier"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Tâche 4 – Terminée -->
+      <div class="task-row" role="listitem">
+        <div class="task-check task-check--done" aria-label="Terminée">✓</div>
+        <div>
+          <div class="task-title task-title--done">Envoyer compromis de vente</div>
+          <div class="task-sub" style="text-decoration:none">Dossier #1001</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar">AT</div>
+          <span style="font-size:12.5px;color:var(--text-muted)">Ahmed T.</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--marine)">Dossier #1001</div>
+        <div class="date-col">30 avr. 2026</div>
+        <span class="badge badge-done">Terminée</span>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" aria-label="Modifier"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Tâche 5 -->
+      <div class="task-row" role="listitem">
+        <div class="task-check" aria-label="Marquer comme terminée"></div>
+        <div>
+          <div class="task-title">Rédiger description annonce villa Cannes</div>
+          <div class="task-sub">Texte + photos à valider</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="avatar">ML</div>
+          <span style="font-size:12.5px;color:var(--text-muted)">Marie L.</span>
+        </div>
+        <div style="font-size:12.5px;color:var(--marine)">Annonce #312</div>
+        <div class="date-col">10 mai 2026</div>
+        <span class="badge badge-new">Nouveau</span>
+        <div style="display:flex;gap:4px">
+          <button class="icon-btn" aria-label="Modifier"><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

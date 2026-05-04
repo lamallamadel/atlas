@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Calendrier</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .week { display:grid; grid-template-columns: 60px repeat(7,1fr); border:1px solid var(--divider); border-radius:14px; overflow:hidden; background:var(--surface); }
+  .wh { padding:10px; font-size:11px; font-weight:600; color:var(--text-muted); letter-spacing:1.2px; text-transform:uppercase; border-bottom:1px solid var(--divider); border-right:1px solid var(--divider); background:var(--surface-2); text-align:center; }
+  .wh.today { background:var(--marine-hl); color:var(--marine); }
+  [data-theme="dark"] .wh.today { color: var(--marine-light); }
+  .wh:last-child { border-right:none; }
+  .hr { font-size:11px; color:var(--text-faint); padding:6px 8px; border-right:1px solid var(--divider); border-bottom:1px solid var(--divider); }
+  .cell { border-right:1px solid var(--divider); border-bottom:1px solid var(--divider); height:54px; position:relative; }
+  .cell:last-child { border-right:none; }
+  .ev { position:absolute; left:4px; right:4px; padding:5px 8px; border-radius:7px; font-size:11.5px; font-weight:600; line-height:1.2; overflow:hidden; }
+  .ev.marine { background: var(--marine); color:#fff; }
+  .ev.copper { background: var(--primary); color:#fff; }
+  .ev.ghost { background: var(--marine-hl); color: var(--marine); }
+  [data-theme="dark"] .ev.ghost { color: var(--marine-light); }
+  .now-line { position:absolute; left:0; right:0; height:1px; background:var(--error); z-index:5; }
+  .now-line::before { content:''; position:absolute; left:-4px; top:-3px; width:8px; height:8px; border-radius:4px; background:var(--error); }
+
+  .ios-back { color:var(--marine); font-size:14px; font-weight:500; }
+  [data-theme="dark"] .ios-back { color: var(--marine-light); }
+  .ios-tab { display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; padding:8px 0; color:var(--text-faint); font-size:10px; font-weight:500; }
+  .ios-tab.on { color: var(--marine); }
+  [data-theme="dark"] .ios-tab.on { color: var(--marine-light); }
+  .ios-tabbar { position:absolute; bottom:14px; left:14px; right:14px; height:64px; background:rgba(255,255,255,.85); backdrop-filter: blur(20px); border:1px solid var(--divider); border-radius:24px; display:flex; align-items:center; padding: 0 6px; box-shadow: var(--shadow-md); }
+  [data-theme="dark"] .ios-tabbar { background: rgba(24,23,20,.7); }
+  .md-fab { position:absolute; bottom:80px; right:16px; width:56px; height:56px; border-radius:18px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index:10; }
+  .md-bottom { position:absolute; bottom:28px; left:0; right:0; height:64px; background:var(--surface); border-top:1px solid var(--divider); display:flex; }
+  .md-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:10px; color:var(--text-muted); font-weight:500; }
+  .md-tab.on { color:var(--marine); }
+  [data-theme="dark"] .md-tab.on { color: var(--marine-light); }
+  .md-tab.on .pill { background: var(--marine-hl); }
+  .md-tab .pill { width:32px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+</style>
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Agenda</div><h2 class="display">Calendrier &amp; tâches</h2><div class="sub muted" style="margin-top:6px;">Semaine, jour, todos. Sync iCal/Google.</div></div></div>
+<div id="mount"></div>
+</div>
+<script src="frames.js"></script>
+<script>
+const ICN = {
+  back: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  home: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  files: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 4h9l5 5v11a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  building: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 21V8l8-4 8 4v13M4 21h16M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  cal: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  user: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.6"/></svg>',
+};
+
+const HOURS = [9,10,11,12,13,14,15,16,17,18];
+const DAYS = ['Lun 19','Mar 20','Mer 21','Jeu 22','Ven 23','Sam 24','Dim 25'];
+
+// events: [day(0-6), hour, duration, kind, label, sub]
+const EV = [
+  [0,9,1,'marine','Standup équipe','Visio'],
+  [0,11,1.5,'copper','Visite App. Lyon','Sophie L.'],
+  [0,15,1,'ghost','Call M. Rahman','Marrakech'],
+  [1,10,1,'copper','Visite Maison Bordeaux','Julien M.'],
+  [1,14,2,'marine','Photos pro Studio','Bastille'],
+  [2,10,1.5,'copper','Visite Loft Marais','Amélie B.'],
+  [2,12.5,1,'ghost','Déjeuner J. Marchand','Café Lipp'],
+  [2,14.5,1.5,'copper','Visite Studio Bastille','Camille N.'],
+  [2,17,1,'marine','Signature compromis','M. Rahman'],
+  [3,9,2,'ghost','Préparation dossiers',''],
+  [3,15,1,'copper','Visite Penthouse','Léa D.'],
+  [4,10,1,'marine','Réunion notaire',''],
+  [4,14,1.5,'copper','Visite Riad','Mehdi R.'],
+];
+
+const TASKS = [
+  ['Rappeler Amélie B. — visite mercredi','Aujourd\'hui','primary',false],
+  ['Préparer dossier de financement Marchand','Aujourd\'hui','primary',false],
+  ['Photos pro — Studio Bastille','Demain','muted',false],
+  ['Mettre à jour annonce Riad Marrakech','Vendredi','muted',false],
+  ['Envoyer compromis Rahman','12 mai','muted',true],
+];
+
+// ===== Web Desktop =====
+const webDesktop = `
+<div style="padding: 28px 32px 60px;">
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:22px;">
+    <div>
+      <div class="label-eyebrow">Semaine 21 · Mai 2025</div>
+      <div class="display" style="font-size:32px; line-height:1; margin-top:6px;">19 — 25 mai</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <div class="row" style="gap:0; border:1px solid var(--divider); border-radius:10px; overflow:hidden; background:var(--surface);">
+        <button class="btn-icon" style="border:none; border-right:1px solid var(--divider); border-radius:0;">‹</button>
+        <button class="btn-ghost" style="height:36px; border:none; padding:0 16px; border-radius:0; font-weight:500;">Aujourd'hui</button>
+        <button class="btn-icon" style="border:none; border-left:1px solid var(--divider); border-radius:0;">›</button>
+      </div>
+      <div class="row" style="gap:0; border:1px solid var(--divider); border-radius:10px; overflow:hidden; background:var(--surface);">
+        ${['Jour','Semaine','Mois'].map((v,i)=>`<button style="height:36px; padding:0 14px; border:none; background:${i===1?'var(--surface-offset)':'transparent'}; color:${i===1?'var(--text)':'var(--text-muted)'}; font-family:inherit; font-size:13px; font-weight:${i===1?600:500}; ${i<2?'border-right:1px solid var(--divider);':''}">${v}</button>`).join('')}
+      </div>
+      <button class="btn btn-primary">+ Événement</button>
+    </div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:1fr 320px; gap:18px;">
+    <div class="week">
+      <div></div>
+      ${DAYS.map((d,i)=>`<div class="wh ${i===2?'today':''}">${d}</div>`).join('')}
+      ${HOURS.map(h=>`
+        <div class="hr">${h}:00</div>
+        ${[0,1,2,3,4,5,6].map(d=>{
+          const evs = EV.filter(e=>e[0]===d && Math.floor(e[1])===h);
+          return `<div class="cell">
+            ${evs.map(e=>{
+              const top = (e[1]-h)*54;
+              const ht = e[2]*54 - 4;
+              return `<div class="ev ${e[3]}" style="top:${top+2}px; height:${ht}px;">${e[4]}<div style="font-weight:500; opacity:.85; font-size:10.5px; margin-top:2px;">${e[5]}</div></div>`;
+            }).join('')}
+            ${(d===2 && h===14) ? '<div class="now-line" style="top:32px;"></div>' : ''}
+          </div>`;
+        }).join('')}
+      `).join('')}
+    </div>
+
+    <div>
+      <div class="card card-pad">
+        <div class="label-eyebrow">À faire · 4</div>
+        <div style="font-family:'Playfair Display'; font-size:18px; font-weight:600; margin-bottom:10px;">Tâches</div>
+        ${TASKS.map(t=>`<div style="display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-top:1px solid var(--divider);">
+          <div style="width:18px; height:18px; border-radius:5px; border:1.5px solid ${t[3]?'var(--success)':'var(--border)'}; ${t[3]?'background:var(--success); color:#fff;':''} display:flex; align-items:center; justify-content:center; flex:none; margin-top:1px;">${t[3]?'<svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 5l2 2 4-4" stroke="#fff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>':''}</div>
+          <div style="flex:1;">
+            <div style="font-size:13.5px; ${t[3]?'text-decoration:line-through; color:var(--text-faint);':''}">${t[0]}</div>
+            <div class="muted" style="font-size:11.5px; margin-top:2px;"><span style="color:${t[2]==='primary'?'var(--primary)':'var(--text-faint)'};">●</span> ${t[1]}</div>
+          </div>
+        </div>`).join('')}
+        <button class="btn btn-ghost" style="width:100%; justify-content:center; margin-top:12px;">+ Ajouter une tâche</button>
+      </div>
+
+      <div class="card card-pad" style="margin-top:14px;">
+        <div class="label-eyebrow">Légende</div>
+        <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px; font-size:13px;">
+          <div style="display:flex; gap:10px; align-items:center;"><div style="width:14px; height:14px; border-radius:4px; background:var(--primary);"></div> Visite client</div>
+          <div style="display:flex; gap:10px; align-items:center;"><div style="width:14px; height:14px; border-radius:4px; background:var(--marine);"></div> Interne · signatures</div>
+          <div style="display:flex; gap:10px; align-items:center;"><div style="width:14px; height:14px; border-radius:4px; background:var(--marine-hl);"></div> Personnel</div>
+        </div>
+        <hr class="div" style="margin:14px 0;">
+        <div class="label-eyebrow">Synchronisé</div>
+        <div class="muted" style="font-size:12.5px; margin-top:6px;">Google Calendar · Apple iCal · ◯ Outlook</div>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+// ===== iOS =====
+const ios = `
+<div style="padding: 8px 18px 8px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; padding: 12px 0 14px;">
+    <div>
+      <div class="label-eyebrow">Mai 2025</div>
+      <div style="font-family:'Playfair Display'; font-size:30px; font-weight:600; line-height:1.05; margin-top:2px;">Mercredi<br>21</div>
+    </div>
+    <div style="width:34px; height:34px; border-radius:17px; background:var(--marine); color:#fff; display:flex; align-items:center; justify-content:center;">+</div>
+  </div>
+
+  <div style="display:flex; gap:6px; margin-bottom:18px; overflow-x:auto; scrollbar-width:none;">
+    ${[['Lun',19,false],['Mar',20,false],['Mer',21,true],['Jeu',22,false],['Ven',23,false],['Sam',24,false],['Dim',25,false]].map(([d,n,t])=>`<div style="flex:none; min-width:48px; text-align:center; padding:8px 6px; border-radius:14px; ${t?'background:var(--marine); color:#fff;':''}">
+      <div style="font-size:10.5px; font-weight:600; opacity:${t?'.9':'1'}; color:${t?'#fff':'var(--text-muted)'}; letter-spacing:.4px; text-transform:uppercase;">${d}</div>
+      <div style="font-family:'Playfair Display'; font-size:20px; font-weight:600; margin-top:2px;">${n}</div>
+    </div>`).join('')}
+  </div>
+</div>
+
+<div style="padding: 0 20px 90px;">
+  <div class="label-eyebrow">4 événements aujourd'hui</div>
+  ${[
+    ['10:00','11:30','Visite Loft Marais','Amélie Bernard','copper'],
+    ['12:30','13:30','Déjeuner J. Marchand','Café Lipp','ghost'],
+    ['14:30','16:00','Visite Studio Bastille','Camille Noël','copper'],
+    ['17:00','18:00','Signature compromis','M. Rahman · Notaire','marine'],
+  ].map((e,i)=>`<div style="display:flex; gap:14px; padding:14px 0; ${i?'border-top:1px solid var(--divider);':''}">
+    <div style="width:54px; flex:none;"><div style="font-weight:600; font-size:13.5px;">${e[0]}</div><div class="muted" style="font-size:11px;">${e[1]}</div></div>
+    <div style="width:3px; background:${e[4]==='copper'?'var(--primary)':e[4]==='marine'?'var(--marine)':'var(--text-faint)'}; border-radius:2px; flex:none;"></div>
+    <div style="flex:1;"><div style="font-weight:600; font-size:14.5px;">${e[2]}</div><div class="muted" style="font-size:12.5px; margin-top:2px;">${e[3]}</div></div>
+  </div>`).join('')}
+
+  <div class="label-eyebrow" style="margin-top:24px;">À faire · 4</div>
+  <div class="card" style="margin-top:6px;">
+    ${TASKS.slice(0,4).map((t,i)=>`<div style="display:flex; gap:12px; align-items:center; padding:13px 14px; ${i?'border-top:1px solid var(--divider);':''}">
+      <div style="width:20px; height:20px; border-radius:10px; border:1.5px solid var(--border); flex:none;"></div>
+      <div style="flex:1;"><div style="font-size:13.5px;">${t[0]}</div><div class="muted" style="font-size:11.5px; margin-top:2px;">${t[1]}</div></div>
+    </div>`).join('')}
+  </div>
+</div>
+
+<div class="ios-tabbar">
+  <div class="ios-tab">${ICN.home}<span>Accueil</span></div>
+  <div class="ios-tab">${ICN.files}<span>Dossiers</span></div>
+  <div class="ios-tab">${ICN.building}<span>Annonces</span></div>
+  <div class="ios-tab on">${ICN.cal}<span>Agenda</span></div>
+  <div class="ios-tab">${ICN.user}<span>Profil</span></div>
+</div>`;
+
+// ===== Android =====
+const android = `
+<div style="background:var(--marine); color:#fff; padding: 14px 16px 18px;">
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <div>
+      <div style="font-size:11px; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,.7);">Mai 2025</div>
+      <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; margin-top:4px;">Mercredi 21</div>
+    </div>
+    <div style="display:flex; gap:14px;">${ICN.cal}<span>⋮</span></div>
+  </div>
+  <div style="display:flex; gap:6px; margin-top:14px;">
+    ${[['L',19,false],['M',20,false],['M',21,true],['J',22,false],['V',23,false],['S',24,false],['D',25,false]].map(([d,n,t])=>`<div style="flex:1; text-align:center; padding:8px 0; border-radius:18px; ${t?'background:rgba(255,255,255,.18);':''}">
+      <div style="font-size:10px; opacity:.7;">${d}</div>
+      <div style="font-family:'Playfair Display'; font-size:17px; font-weight:600; margin-top:2px;">${n}</div>
+    </div>`).join('')}
+  </div>
+</div>
+
+<div style="padding: 18px 16px 100px;">
+  ${[
+    ['10:00','Visite Loft Marais','Amélie Bernard','copper'],
+    ['12:30','Déjeuner J. Marchand','Café Lipp','ghost'],
+    ['14:30','Visite Studio Bastille','Camille Noël','copper'],
+    ['17:00','Signature compromis','M. Rahman','marine'],
+  ].map(e=>`<div class="card" style="margin-bottom:10px; padding:14px; border-radius:14px; display:flex; gap:14px;">
+    <div style="width:4px; background:${e[3]==='copper'?'var(--primary)':e[3]==='marine'?'var(--marine)':'var(--text-faint)'}; border-radius:2px;"></div>
+    <div style="flex:1;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+        <div style="font-weight:600; font-size:14.5px;">${e[1]}</div>
+        <div style="font-weight:600; font-size:13px; color:var(--marine);">${e[0]}</div>
+      </div>
+      <div class="muted" style="font-size:12.5px; margin-top:2px;">${e[2]}</div>
+    </div>
+  </div>`).join('')}
+</div>
+
+<div class="md-fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="md-bottom">
+  <div class="md-tab"><div class="pill">${ICN.home}</div><span>Accueil</span></div>
+  <div class="md-tab"><div class="pill">${ICN.files}</div><span>Dossiers</span></div>
+  <div class="md-tab"><div class="pill">${ICN.building}</div><span>Annonces</span></div>
+  <div class="md-tab on"><div class="pill">${ICN.cal}</div><span>Agenda</span></div>
+</div>`;
+
+const webMobile = `
+<div style="padding: 18px 20px 30px;">
+  <div class="label-eyebrow">Mai 2025</div>
+  <div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; margin: 4px 0 14px;">Mercredi 21</div>
+  ${[
+    ['10:00','Visite Loft Marais','Amélie B.','copper'],
+    ['14:30','Visite Studio','Camille N.','copper'],
+    ['17:00','Signature','M. Rahman','marine'],
+  ].map(e=>`<div class="card" style="display:flex; gap:12px; padding:12px 14px; margin-bottom:8px;">
+    <div style="width:3px; background:${e[3]==='copper'?'var(--primary)':'var(--marine)'}; border-radius:2px;"></div>
+    <div style="font-weight:600; font-size:13px; color:var(--marine); width:46px;">${e[0]}</div>
+    <div style="flex:1;"><div style="font-weight:600; font-size:14px;">${e[1]}</div><div class="muted" style="font-size:12px;">${e[2]}</div></div>
+  </div>`).join('')}
+</div>`;
+
+document.getElementById('mount').innerHTML = AtlasFrames.devices({ ios, android, webMobile, webDesktop });
+</script>
+<script src="shell.js"></script>
+</body></html>

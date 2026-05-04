@@ -1,0 +1,106 @@
+<!-- ── Tasks Page ── -->
+<div class="tasks-page">
+
+  <!-- Header -->
+  <ds-page-header
+    title="Tâches"
+    subtitle="{{ todoCount }} tâche{{ todoCount > 1 ? 's' : '' }} en attente — {{ doneRate }}% complétées ce mois">
+    <ds-button variant="marine" size="md" slot="actions">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+      Nouvelle tâche
+    </ds-button>
+  </ds-page-header>
+
+  <!-- KPI rapides -->
+  <div class="tasks-kpi-row">
+    @for (tab of statusTabs; track tab.value) {
+      <ds-card elevation="low" class="tasks-kpi"
+        [class.tasks-kpi--active]="activeTab === tab.value"
+        (click)="activeTab = tab.value" style="cursor:pointer">
+        <div class="tasks-kpi__count">{{ tab.badge }}</div>
+        <div class="tasks-kpi__label">{{ tab.label }}</div>
+      </ds-card>
+    }
+  </div>
+
+  <!-- Filtres -->
+  <div class="tasks-filters">
+    <input
+      class="tasks-search"
+      type="search"
+      [(ngModel)]="searchQuery"
+      placeholder="Rechercher une tâche…"
+      aria-label="Rechercher une tâche" />
+
+    <div class="tasks-priority-chips">
+      @for (chip of priorityChips; track chip.key) {
+        <ds-filter-chip
+          [label]="chip.label"
+          [active]="priorityFilter === chip.key"
+          (chipClick)="togglePriority(chip.key)">
+        </ds-filter-chip>
+      }
+    </div>
+  </div>
+
+  <!-- Tabs -->
+  <ds-tabs [tabs]="statusTabs" [activeTab]="activeTab" variant="underline" (tabChange)="activeTab = $event"></ds-tabs>
+
+  <!-- Liste -->
+  <div class="tasks-list" role="list">
+    @if (loading) {
+      @for (i of [1,2,3,4,5]; track i) {
+        <ds-skeleton variant="card" height="72px" style="margin-bottom:8px"></ds-skeleton>
+      }
+    } @else if (filteredTasks.length === 0) {
+      <ds-empty-state
+        icon="tasks"
+        title="Aucune tâche"
+        description="Aucune tâche ne correspond à vos filtres actuels.">
+      </ds-empty-state>
+    } @else {
+      @for (task of filteredTasks; track task.id) {
+        <div class="task-item" role="listitem" [class.task-item--done]="task.status === 'done'">
+          <!-- Checkbox -->
+          <button
+            class="task-check"
+            [class.task-check--done]="task.status === 'done'"
+            [attr.aria-label]="task.status === 'done' ? 'Marquer comme à faire' : 'Marquer comme terminée'"
+            (click)="setDone(task)">
+            @if (task.status === 'done') {
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+            }
+          </button>
+
+          <!-- Contenu -->
+          <div class="task-body">
+            <div class="task-title">{{ task.title }}</div>
+            <div class="task-meta">
+              @if (task.dossierRef) {
+                <span class="task-ref">{{ task.dossierRef }}</span>
+              }
+              @if (task.dueDate) {
+                <span class="task-due"
+                  [class.task-due--urgent]="task.dueDate === 'Aujourd\'hui' && task.status !== 'done'">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+                  {{ task.dueDate }}
+                </span>
+              }
+            </div>
+          </div>
+
+          <!-- Priorité -->
+          <ds-badge [status]="priorityBadge[task.priority]" size="sm">
+            {{ getPriorityLabel(task.priority) }}
+          </ds-badge>
+
+          <!-- Assigné -->
+          @if (task.assignee) {
+            <ds-avatar [initials]="task.assignee" size="sm"></ds-avatar>
+          }
+        </div>
+      }
+    }
+  </div>
+
+</div>

@@ -1,284 +1,211 @@
-<div class="page-container">
-  <div class="page-header">
-    <h1 class="page-title">Tableau de bord</h1>
-    <mat-button-toggle-group [value]="selectedPeriod$ | async" (change)="onPeriodChange($event.value)"
-      aria-label="Sélecteur de période">
-      <mat-button-toggle value="TODAY">Aujourd'hui</mat-button-toggle>
-      <mat-button-toggle value="LAST_7_DAYS">7 jours</mat-button-toggle>
-      <mat-button-toggle value="LAST_30_DAYS">30 jours</mat-button-toggle>
-    </mat-button-toggle-group>
-  </div>
-  <div class="page-content">
-    <section aria-labelledby="kpi-section-title" class="dashboard-section">
-      <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
+<div class="pro-page">
 
-      <div class="kpi-grid">
-        @for (key of getKpiCardKeys(); track trackByKey($index, key)) {
-          <div
-            class="kpi-card-wrapper"
-            [@itemAnimation]>
-            <div
-              class="kpi-card"
-              [class.kpi-card--loading]="kpiCards[key].loading"
-              [class.kpi-card--clickable]="!kpiCards[key].loading && !kpiCards[key].error"
-              [class.kpi-card--error]="kpiCards[key].error"
-              (click)="onKpiCardClick(key)"
-              (keydown.enter)="onKpiCardClick(key, $event)"
-              (keydown.space)="onKpiCardClick(key, $event)"
-              [tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : -1"
-              role="button"
-              [attr.aria-label]="kpiCards[key].title + ': ' + (kpiCards[key].loading ? 'Chargement en cours' : kpiCards[key].error ? 'Erreur' : kpiCards[key].displayValue)"
-              [attr.aria-disabled]="kpiCards[key].loading || kpiCards[key].error ? 'true' : 'false'">
-              <div class="kpi-card__header">
-                <div class="kpi-card__icon-container" [style.background]="'linear-gradient(135deg, ' + kpiCards[key].color + ' 0%, ' + kpiCards[key].color + 'cc 100%)'">
-                  <mat-icon class="kpi-card__icon" aria-hidden="true">{{kpiCards[key].icon}}</mat-icon>
-                  <div class="kpi-card__badge" [style.background-color]="kpiCards[key].badgeColor" aria-hidden="true"></div>
-                </div>
-                <div class="kpi-card__title-section">
-                  <h3 class="kpi-card__title">{{kpiCards[key].title}}</h3>
-                  @if (kpiCards[key].description) {
-                    <p class="kpi-card__description">{{kpiCards[key].description}}</p>
-                  }
-                </div>
-              </div>
-              @if (kpiCards[key].loading) {
-                <app-skeleton-loader variant="dashboard-kpi" aria-label="Chargement des données"></app-skeleton-loader>
-              }
-              @if (!kpiCards[key].loading) {
-                <div class="kpi-card__content">
-                  @if (kpiCards[key].error) {
-                    <div class="kpi-card__error" role="alert" aria-live="assertive">
-                      <mat-icon color="warn" aria-hidden="true">error</mat-icon>
-                      <span>{{kpiCards[key].error}}</span>
-                    </div>
-                  }
-                  @if (!kpiCards[key].error) {
-                    <div class="kpi-card__body">
-                      <div class="kpi-card__metric">
-                        <span class="kpi-card__value" [style.color]="kpiCards[key].color" aria-live="polite" aria-atomic="true">
-                          {{kpiCards[key].displayValue}}
-                        </span>
-                        @if (selectedPeriod$ | async; as period) {
-                          <span class="kpi-card__label">
-                            sur {{getPeriodLabel(period)}}
-                          </span>
-                        }
-                      </div>
-                      @if (kpiCards[key].trend) {
-                        <div class="kpi-card__trend">
-                          <div class="kpi-card__trend-indicator"
-                            [class.kpi-card__trend-indicator--positive]="kpiCards[key].trendValue > 0"
-                            [class.kpi-card__trend-indicator--negative]="kpiCards[key].trendValue < 0"
-                            [class.kpi-card__trend-indicator--neutral]="kpiCards[key].trendValue === 0">
-                            <mat-icon class="kpi-card__trend-icon" aria-hidden="true">
-                              {{kpiCards[key].trendValue > 0 ? 'trending_up' : kpiCards[key].trendValue < 0 ? 'trending_down' : 'trending_flat'}}
-                            </mat-icon>
-                            <span class="kpi-card__trend-value">{{kpiCards[key].trend}}</span>
-                          </div>
-                        </div>
-                      }
-                      <div class="kpi-card__chart" aria-hidden="true">
-                        @if (key === 'annoncesActives') {
-                          <canvas
-                            [id]="'chart-' + key"
-                            #annoncesChart
-                            class="kpi-card__sparkline"
-                            role="img"
-                          [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
-                        }
-                        @if (key === 'dossiersATraiter') {
-                          <canvas
-                            [id]="'chart-' + key"
-                            #dossiersChart
-                            class="kpi-card__sparkline"
-                            role="img"
-                          [attr.aria-label]="'Graphique de tendance pour ' + kpiCards[key].title"></canvas>
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          </div>
+  <!-- ── En-tête de page ── -->
+  <ds-page-header
+    eyebrow="Pro Space"
+    titleBefore="Tableau de"
+    titleAccent="bord"
+    description="Suivez vos indicateurs, gérez vos dossiers et annonces en temps réel.">
+    <ng-container slot="actions">
+      <div class="dash-period" role="group" aria-label="Sélecteur de période">
+        @for (p of periods; track p.value) {
+          <button
+            class="dash-period__btn"
+            [class.dash-period__btn--active]="(selectedPeriod$ | async) === p.value"
+            (click)="onPeriodChange(p.value)"
+            [attr.aria-pressed]="(selectedPeriod$ | async) === p.value">
+            {{ p.label }}
+          </button>
         }
       </div>
-    </section>
+    </ng-container>
+  </ds-page-header>
 
-    <section aria-labelledby="dossiers-section-title" class="dashboard-section">
-      <h2 id="dossiers-section-title" class="sr-only">Dossiers récents</h2>
-      <div class="grid-container">
-        <div class="grid-row">
-          <div class="grid-col-12">
-            <mat-card class="section-card scrollable-card" aria-labelledby="recent-dossiers-title">
-              <mat-card-header>
-                <div mat-card-avatar class="kpi-icon-container" style="background-color: #4caf50;" aria-hidden="true">
-                  <mat-icon class="kpi-icon" aria-hidden="true">history</mat-icon>
-                </div>
-                <mat-card-title class="kpi-card-title">
-                  <h3 id="recent-dossiers-title">Derniers dossiers</h3>
-                </mat-card-title>
-                <div class="export-actions">
-                  <button mat-icon-button (click)="exportToCSV()"
-                    [disabled]="isExportingToCSV || recentDossiers.length === 0" matTooltip="Exporter en CSV"
-                    aria-label="Exporter les dossiers en CSV">
-                    <mat-icon>file_download</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="exportToPDF()"
-                    [disabled]="isExportingToPDF || recentDossiers.length === 0" matTooltip="Exporter en PDF"
-                    aria-label="Exporter les dossiers en PDF">
-                    <mat-icon>picture_as_pdf</mat-icon>
-                  </button>
-                </div>
-              </mat-card-header>
+  <!-- ── KPI Grid ── -->
+  <section aria-labelledby="kpi-section-title" class="dash-section" data-tour="kpis">
+    <h2 id="kpi-section-title" class="sr-only">Indicateurs clés de performance</h2>
 
-              <mat-card-content class="scrollable-content">
-                <div class="dossiers-filters">
-                  <mat-button-toggle-group [value]="selectedDossierFilter$ | async"
-                    (change)="onDossierFilterChange($event.value)" aria-label="Filtre des dossiers">
-                    <mat-button-toggle value="A_TRAITER">À traiter</mat-button-toggle>
-                    <mat-button-toggle value="RECENTS">Récents</mat-button-toggle>
-                    <mat-button-toggle value="ASSIGNES">Assignés à moi</mat-button-toggle>
-                  </mat-button-toggle-group>
-                </div>
+    <div class="kpi-grid">
+      @for (key of getKpiCardKeys(); track key) {
+        <ds-kpi-card
+          [value]="kpiCards[key].loading ? '—' : kpiCards[key].displayValue"
+          [label]="kpiCards[key].title"
+          [loading]="kpiCards[key].loading"
+          [trend]="kpiCards[key].trendValue > 0 ? 'up' : kpiCards[key].trendValue < 0 ? 'down' : 'flat'"
+          [delta]="kpiCards[key].trend || null"
+          [sparkline]="kpiCards[key].chartData?.length ? kpiCards[key].chartData : null"
+          [attr.role]="!kpiCards[key].loading && !kpiCards[key].error ? 'button' : null"
+          [attr.tabindex]="!kpiCards[key].loading && !kpiCards[key].error ? 0 : null"
+          (click)="onKpiCardClick(key)"
+          (keydown.enter)="onKpiCardClick(key, $event)"
+          (keydown.space)="onKpiCardClick(key, $event)">
+          @if (kpiCards[key].error) {
+            <div class="kpi-error" role="alert">{{ kpiCards[key].error }}</div>
+          }
+        </ds-kpi-card>
+      }
+    </div>
+  </section>
 
+  <!-- ── Section principale : dossiers + annonces ── -->
+  <div class="dash-main-grid" data-tour="kanban">
 
-                @if (loadingRecent) {
-                  <app-skeleton-loader variant="list" [rows]="5" aria-label="Chargement des dossiers récents"></app-skeleton-loader>
-                }
-
-
-                @if (loadingRecent) {
-                  <app-loading-skeleton variant="list" [rows]="5"
-                  aria-label="Chargement des dossiers récents"></app-loading-skeleton>
-                }
-
-
-                @if (!loadingRecent && errorRecent) {
-                  <div class="kpi-error" role="alert" aria-live="assertive">
-                    <mat-icon color="warn" aria-hidden="true">error</mat-icon>
-                    <span>{{errorRecent}}</span>
-                  </div>
-                }
-
-                @if (!loadingRecent && !errorRecent && recentDossiers.length === 0) {
-                  <app-empty-state
-                    message="Aucun dossier récent" [primaryAction]="getEmptyStatePrimaryAction()"
-                    [secondaryAction]="getEmptyStateSecondaryAction()">
-                  </app-empty-state>
-                }
-
-                @if (!loadingRecent && !errorRecent && recentDossiers.length > 0) {
-                  <div class="dossiers-list"
-                    role="list" [@listStaggerAnimation]="recentDossiers.length">
-                    @for (dossier of recentDossiers; track trackByDossierId($index, dossier)) {
-                      <mat-card class="dossier-item"
-                        [@itemAnimation] appearance="outlined" role="listitem" tabindex="0"
-                        [attr.aria-label]="'Dossier ' + dossier.id + ', ' + (dossier.leadName || 'Sans nom')">
-                        <mat-card-content>
-                          <div class="dossier-info">
-                            <div class="dossier-field">
-                              <mat-icon class="field-icon" aria-hidden="true">tag</mat-icon>
-                              <span class="field-label">ID:</span>
-                              <span class="field-value">{{dossier.id}}</span>
-                            </div>
-                            @if (dossier.leadName) {
-                              <div class="dossier-field">
-                                <mat-icon class="field-icon" aria-hidden="true">person</mat-icon>
-                                <span class="field-label">Lead:</span>
-                                <span class="field-value">{{dossier.leadName}}</span>
-                              </div>
-                            }
-                            @if (dossier.leadPhone) {
-                              <div class="dossier-field">
-                                <mat-icon class="field-icon" aria-hidden="true">phone</mat-icon>
-                                <span class="field-label">Téléphone:</span>
-                                <span class="field-value">{{dossier.leadPhone}}</span>
-                              </div>
-                            }
-                            <div class="dossier-field">
-                              <mat-icon class="field-icon" aria-hidden="true">info</mat-icon>
-                              <span class="field-label">Statut:</span>
-                              <span class="field-value">{{dossier.status}}</span>
-                            </div>
-                            <div class="dossier-field">
-                              <mat-icon class="field-icon" aria-hidden="true">event</mat-icon>
-                              <span class="field-label">Créé le:</span>
-                              <span class="field-value">{{dossier.createdAt | date:'short'}}</span>
-                            </div>
-                          </div>
-                        </mat-card-content>
-                      </mat-card>
-                    }
-                  </div>
-                }
-              </mat-card-content>
-            </mat-card>
-          </div>
-
-
+    <!-- Dossiers récents -->
+    <section class="dash-section" aria-labelledby="recent-dossiers-title">
+      <div class="dash-section__head">
+        <h2 id="recent-dossiers-title" class="dash-section__title">Derniers dossiers</h2>
+        <div class="dash-section__actions">
+          <button class="dash-icon-btn" (click)="exportToCSV()" [disabled]="isExportingToCSV || recentDossiers.length === 0" aria-label="Exporter CSV" title="Exporter en CSV">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 12h10M8 3v7m0 0-3-3m3 3 3-3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button class="dash-icon-btn" (click)="exportToPDF()" [disabled]="isExportingToPDF || recentDossiers.length === 0" aria-label="Exporter PDF" title="Exporter en PDF">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="2" width="10" height="12" rx="1.5" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 9.5h5M5.5 7h3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+          </button>
         </div>
       </div>
+
+      <!-- Filtre dossiers -->
+      <ds-filter-bar
+        [filters]="dossierFilters"
+        [activeFilter]="(selectedDossierFilter$ | async) ?? ''"
+        [showSearch]="false"
+        (filterChange)="onDossierFilterChange($event)">
+      </ds-filter-bar>
+
+      <!-- États -->
+      @if (loadingRecent) {
+        <div class="dash-skeleton-list">
+          @for (i of [1,2,3,4,5]; track i) {
+            <ds-skeleton variant="rect" height="64px"></ds-skeleton>
+          }
+        </div>
+      }
+      @if (!loadingRecent && errorRecent) {
+        <div class="dash-error" role="alert">{{ errorRecent }}</div>
+      }
+      @if (!loadingRecent && !errorRecent && recentDossiers.length === 0) {
+        <ds-empty-state
+          title="Aucun dossier récent"
+          description="Commencez par créer un nouveau dossier pour un lead."
+          ctaLabel="Nouveau dossier"
+          (ctaClick)="openCreateDossierDialog()">
+        </ds-empty-state>
+      }
+
+      <!-- Liste des dossiers -->
+      @if (!loadingRecent && !errorRecent && recentDossiers.length > 0) {
+        <div class="dossier-rows" role="list" [@listStaggerAnimation]="recentDossiers.length">
+          @for (dossier of recentDossiers; track dossier.id) {
+            <div
+              class="dossier-row"
+              role="listitem"
+              tabindex="0"
+              (click)="goToDossier(dossier.id)"
+              (keydown.enter)="goToDossier(dossier.id)"
+              [@itemAnimation]
+              [attr.aria-label]="'Dossier ' + dossier.id + ', ' + (dossier.leadName || 'Sans nom')">
+              <ds-avatar [name]="dossier.leadName || '?'" size="md"></ds-avatar>
+              <div class="dossier-row__info">
+                <div class="dossier-row__name">{{ dossier.leadName || '—' }}</div>
+                <div class="dossier-row__meta">{{ dossier.leadPhone || '' }}</div>
+              </div>
+              <ds-badge [status]="getDossierBadgeStatus(dossier.status)">{{ dossier.status }}</ds-badge>
+              <div class="dossier-row__date">{{ dossier.createdAt | date:'d MMM y' }}</div>
+            </div>
+          }
+        </div>
+      }
     </section>
 
-    <!-- Ligne 3: Yield Management Alerts -->
-    @if (yieldAnnonces.length > 0) {
-      <section aria-labelledby="yield-section-title" class="dashboard-section">
-        <h2 id="yield-section-title" class="sr-only">Ajustements de Prix (Yield)</h2>
-        <div class="grid-container">
-          <div class="grid-row">
-            <div class="grid-col-12">
-              <mat-card class="section-card" appearance="outlined">
-                <mat-card-header>
-                  <div mat-card-avatar class="kpi-icon-container" style="background-color: #f44336;" aria-hidden="true">
-                    <mat-icon class="kpi-icon" aria-hidden="true">trending_up</mat-icon>
-                  </div>
-                  <mat-card-title class="kpi-card-title">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                      <h3>Ajustements de Prix (Yield Management)</h3>
-                      <mat-icon
-                        style="font-size: 18px; height: 18px; width: 18px; color: var(--color-neutral-400); cursor: help;"
-                        matTooltip="Calcul dynamique automatisé (Yield) de recommandations de prix à la hausse ou à la baisse basé sur le volume d'interactions mesuré sur l'annonce ces 7 et 30 derniers jours."
-                        matTooltipPosition="right">
-                        help_outline
-                      </mat-icon>
-                    </div>
-                  </mat-card-title>
-                </mat-card-header>
-                <mat-card-content>
-                  <div class="dossiers-list" role="list">
-                    @for (annonce of yieldAnnonces; track annonce) {
-                      <mat-card class="dossier-item" appearance="outlined"
-                        role="listitem">
-                        <mat-card-content>
-                          <div class="dossier-info">
-                            <div class="dossier-field">
-                              <mat-icon class="field-icon" aria-hidden="true">house</mat-icon>
-                              <span class="field-label">Annonce:</span>
-                              <span class="field-value">{{annonce.title}}</span>
-                            </div>
-                            <div class="dossier-field">
-                              <mat-icon class="field-icon" aria-hidden="true">euro</mat-icon>
-                              <span class="field-label">Prix Actuel:</span>
-                              <span class="field-value">{{annonce.price}} {{annonce.currency}}</span>
-                            </div>
-                            <div class="dossier-field">
-                              <mat-icon class="field-icon" style="color:#ff9800" aria-hidden="true">warning</mat-icon>
-                              <span class="field-label">Alerte:</span>
-                              <span class="field-value"
-                              style="color:#d32f2f; font-weight: 500;">{{annonce.aiScoreDetails}}</span>
-                            </div>
-                          </div>
-                        </mat-card-content>
-                      </mat-card>
-                    }
-                  </div>
-                </mat-card-content>
-              </mat-card>
+    <!-- Colonne droite : annonces + actions rapides -->
+    <div class="dash-right-col">
+
+      <!-- Actions rapides -->
+      <section class="dash-section" aria-labelledby="quick-actions-title">
+        <h2 id="quick-actions-title" class="dash-section__title">Actions rapides</h2>
+        <div class="quick-actions">
+          <button class="quick-action-btn" (click)="openCreateDossierDialog()" aria-label="Nouveau dossier">
+            <div class="quick-action-btn__icon">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
             </div>
-          </div>
+            <span>Nouveau dossier</span>
+          </button>
+          <button class="quick-action-btn" (click)="router.navigate(['/pro/annonces'])" aria-label="Voir les annonces">
+            <div class="quick-action-btn__icon quick-action-btn__icon--copper">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 4h14v3H3V4zm0 5h8v3H3V9zm0 5h5v2H3v-2zm11-2v7m0 0-3-3m3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Annonces</span>
+          </button>
+          <button class="quick-action-btn" (click)="router.navigate(['/pro/tasks'])" aria-label="Voir les tâches">
+            <div class="quick-action-btn__icon quick-action-btn__icon--success">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M4 10l5 5 7-8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <span>Tâches</span>
+          </button>
+          <button class="quick-action-btn" (click)="router.navigate(['/pro/calendar'])" aria-label="Voir le calendrier">
+            <div class="quick-action-btn__icon quick-action-btn__icon--warning">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="4" width="14" height="13" rx="2" stroke="currentColor" stroke-width="1.4"/><path d="M3 9h14M7 4V2m6 2V2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+            </div>
+            <span>Calendrier</span>
+          </button>
         </div>
       </section>
-    }
+
+      <!-- Annonces récentes -->
+      <section class="dash-section" aria-labelledby="recent-annonces-title">
+        <div class="dash-section__head">
+          <h2 id="recent-annonces-title" class="dash-section__title">Annonces récentes</h2>
+          <a class="dash-link" routerLink="/pro/annonces" aria-label="Voir toutes les annonces">Voir tout →</a>
+        </div>
+
+        @if (loadingAnnonces) {
+          <div class="dash-skeleton-list">
+            @for (i of [1,2,3]; track i) {
+              <ds-skeleton variant="rect" height="56px"></ds-skeleton>
+            }
+          </div>
+        }
+
+        @if (!loadingAnnonces && recentAnnonces.length > 0) {
+          <div class="annonce-rows" role="list">
+            @for (a of recentAnnonces.slice(0,5); track a.id) {
+              <div
+                class="annonce-row"
+                role="listitem"
+                tabindex="0"
+                (click)="goToAnnonce(a.id)"
+                (keydown.enter)="goToAnnonce(a.id)">
+                <div class="annonce-row__photo" aria-hidden="true">
+                  @if (a.photos?.length) {
+                    <img [src]="a.photos?.[0]" [alt]="a.title" loading="lazy" />
+                  } @else {
+                    <div class="annonce-row__photo-placeholder">
+                      <svg width="18" height="18" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/><circle cx="7" cy="9" r="2" stroke="currentColor" stroke-width="1.2"/><path d="M2 14l4-3 3 3 3-3 6 4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </div>
+                  }
+                </div>
+                <div class="annonce-row__info">
+                  <div class="annonce-row__title">{{ a.title }}</div>
+                  <div class="annonce-row__sub">{{ a.city }} · {{ a.price | number:'1.0-0' }} €</div>
+                </div>
+                <ds-badge [status]="a.status === 'ACTIVE' ? 'active' : a.status === 'DRAFT' ? 'draft' : 'neutral'">
+                  {{ a.status }}
+                </ds-badge>
+              </div>
+            }
+          </div>
+        }
+
+        @if (!loadingAnnonces && recentAnnonces.length === 0) {
+          <ds-empty-state
+            title="Aucune annonce"
+            description="Publiez votre premier bien."
+            ctaLabel="Créer une annonce"
+            [compact]="true"
+            (ctaClick)="router.navigate(['/pro/annonces'])">
+          </ds-empty-state>
+        }
+      </section>
+    </div>
   </div>
 </div>

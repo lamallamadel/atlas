@@ -1,0 +1,37 @@
+.ds-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+
+  &--flat { box-shadow: none; }
+  &--xs   { box-shadow: var(--ds-shadow-xs); }
+  &--sm   { box-shadow: var(--ds-shadow-sm); }
+  &--md   { box-shadow: var(--ds-shadow-md); }
+
+  &--pad { padding: var(--ds-space-5); }
+
+  &--hover {
+    transition: box-shadow var(--ds-transition-fast), border-color var(--ds-transition-fast);
+    &:hover {
+      box-shadow: var(--ds-shadow-md);
+      border-color: var(--ds-border);
+    }
+  }
+
+  &--interactive {
+    cursor: pointer;
+    transition: box-shadow var(--ds-transition-fast), transform var(--ds-transition-fast);
+    &:hover {
+      box-shadow: var(--ds-shadow-md);
+      transform: translateY(-2px);
+    }
+    &:active {
+      transform: translateY(0);
+    }
+    &:focus-visible {
+      outline: 2px solid var(--ds-marine);
+      outline-offset: 2px;
+    }
+  }
+}

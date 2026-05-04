@@ -1,0 +1,35 @@
+{
+  "phase": "6",
+  "completed": {
+    "suppression_fichiers_bak": true,
+    "suppression_scripts_apply_atlasia_sh": true,
+    "suppression_couches_atlasia_pro": true,
+    "nettoyage_variables_spacing_duplicate": true,
+    "header_colors_extended": true,
+    "lighthouse_ci_seuil_desktop_90": true,
+    "script_benchmark_bundle": true,
+    "script_benchmark_a11y_playwright": true
+  },
+  "notes": {
+    "atlasia_conserves": ["src/styles/_atlasia-shared.scss", "src/styles/_atlasia-public-portal.scss"],
+    "atlasia_supprimees": [
+      "_atlasia-pro-shell.scss",
+      "_atlasia-page-patterns.scss",
+      "_atlasia-pro-navigation.scss",
+      "_atlasia-core-flows.scss",
+      "_atlasia-semantic-pages.scss",
+      "_atlasia-table-dialog-repair.scss",
+      "_atlasia-special-screens-fix.scss",
+      "_atlasia-dossiers-scroll-fix.scss"
+    ],
+    "lighthouse": "Seuils minScore 0.90 (perf, BP, SEO) dans lighthouserc.json. Exécuter : npm start puis npm run lighthouse:ci (depuis frontend/).",
+    "axe": "npm run benchmark:a11y — nécessite backend + frontend comme les E2E classiques.",
+    "bundle_baseline": "Copier benchmarks/bundle-stats.json vers bundle-baseline-pre-phase6.json avant la prochaine optimisation pour afficher le % Δ via npm run benchmark:bundle."
+  },
+  "mesures_build_prod_fr_2026_05_04": {
+    "styles_css_kb": 363.3,
+    "main_js_kb": 623.9,
+    "total_js_css_mb": 4.87,
+    "styles_dev_unminified_kb": 571.44
+  }
+}

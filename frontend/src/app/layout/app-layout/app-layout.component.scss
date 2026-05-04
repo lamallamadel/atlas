@@ -1,15 +1,179 @@
+/* Espace Pro — shell Atlasia (tokens DS). Anciennement _atlasia-pro-shell + layout local. */
+
+:host {
+  display: block;
+  height: 100%;
+}
+
+.sidenav-container {
+  height: 100vh;
+  width: 100%;
+}
+
+/* ── Sidebar ── */
+.sidenav {
+  width: 240px;
+  background: color-mix(in oklab, var(--ds-surface) 96%, var(--ds-bg));
+  border-right: 1px solid var(--ds-divider);
+  box-shadow: var(--ds-shadow-sm);
+  transition: transform var(--ds-transition-med);
+}
+
+.sidenav-header {
+  background: linear-gradient(
+    135deg,
+    var(--ds-marine) 0%,
+    color-mix(in oklab, var(--ds-marine) 86%, black) 100%
+  ) !important;
+  color: var(--ds-text-inverse) !important;
+  min-height: 64px;
+  padding: 0 18px !important;
+  display: flex;
+  align-items: center;
+  box-shadow: none;
+  border-bottom: 1px solid color-mix(in oklab, white 12%, transparent);
+}
+
+.brand-text {
+  font-family: var(--ds-font-display);
+  font-size: 1.12rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: inherit;
+}
+
+.nav-list {
+  padding: var(--ds-space-4) var(--ds-space-2) var(--ds-space-2);
+}
+
+.nav-list a {
+  margin: var(--ds-space-1) var(--ds-space-2);
+  padding-inline: var(--ds-space-3) !important;
+  min-height: 42px;
+  border-radius: var(--ds-radius-lg) !important;
+  color: var(--ds-text-muted) !important;
+  transition:
+    background var(--ds-transition-fast),
+    color var(--ds-transition-fast),
+    transform var(--ds-transition-fast);
+}
+
+.nav-list a mat-icon {
+  color: inherit;
+}
+
+.nav-list a:hover {
+  background: var(--ds-primary-subtle) !important;
+  color: var(--ds-text) !important;
+}
+
+.nav-list a.active {
+  background: linear-gradient(
+    135deg,
+    color-mix(in oklab, var(--ds-primary-hl) 72%, white),
+    color-mix(in oklab, var(--ds-marine-hl) 62%, white)
+  ) !important;
+  color: var(--ds-marine) !important;
+  font-weight: 700 !important;
+  box-shadow: inset 3px 0 0 var(--ds-primary);
+}
+
+.nav-list a.active mat-icon {
+  color: var(--ds-primary) !important;
+}
+
+.badge-count {
+  font-weight: 600;
+  color: color-mix(in oklab, var(--ds-primary) 55%, var(--ds-text-muted));
+}
+
+/* ── Content column ── */
+.sidenav-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background:
+    radial-gradient(
+      circle at top right,
+      color-mix(in oklab, var(--ds-primary-hl) 55%, transparent) 0,
+      transparent 30rem
+    ),
+    var(--ds-bg) !important;
+}
+
+.top-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  min-height: 56px !important;
+  height: auto;
+  padding: 0 var(--ds-space-4) !important;
+  background: linear-gradient(
+    135deg,
+    var(--ds-marine) 0%,
+    color-mix(in oklab, var(--ds-marine) 88%, black) 100%
+  ) !important;
+  color: var(--ds-text-inverse) !important;
+  box-shadow: var(--ds-shadow-md);
+  border-bottom: 1px solid color-mix(in oklab, white 10%, transparent);
+}
+
+:host ::ng-deep .top-toolbar.mat-toolbar {
+  --mat-toolbar-container-background-color: transparent !important;
+  --mat-toolbar-container-text-color: var(--ds-text-inverse);
+}
+
+:host ::ng-deep .top-toolbar.mat-primary {
+  --mat-sys-primary: var(--ds-text-inverse);
+}
+
+:host ::ng-deep .top-toolbar .mat-icon,
+:host ::ng-deep .top-toolbar mat-icon {
+  color: var(--ds-text-inverse) !important;
+}
+
+:host ::ng-deep .top-toolbar .theme-toggle-button:hover,
+:host ::ng-deep .top-toolbar .menu-button:hover,
+:host ::ng-deep .top-toolbar .keyboard-shortcuts-button:hover,
+:host ::ng-deep .top-toolbar .notification-menu-button:hover,
+:host ::ng-deep .top-toolbar .help-menu-button:hover,
+:host ::ng-deep .top-toolbar .user-menu-button:hover {
+  background-color: color-mix(in oklab, white 14%, transparent) !important;
+}
+
+.menu-button {
+  margin-right: var(--ds-space-3);
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+/* ── Toolbar search (dense) ── */
+:host ::ng-deep .top-toolbar app-global-search-bar,
+:host ::ng-deep .top-toolbar .global-search {
+  max-height: 42px;
+}
+
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(var(--ds-space-4), 2vw, 1.75rem);
+}
+
+/* ── Menus utilisateur / aide ── */
 .help-menu-header {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: var(--ds-space-3);
+  padding: var(--ds-space-3) var(--ds-space-4);
   font-weight: 600;
-  color: #3f51b5;
+  color: var(--ds-marine);
   cursor: default;
   pointer-events: none;
 
   mat-icon {
-    color: #3f51b5;
+    color: var(--ds-marine);
   }
 
   span {
@@ -17,21 +181,120 @@
   }
 }
 
-.help-menu {
+:host ::ng-deep .help-menu {
   .mat-mdc-menu-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-3) var(--ds-space-4);
 
     mat-icon {
       margin-right: 0;
     }
 
     &:hover {
-      background-color: rgba(63, 81, 181, 0.08);
+      background-color: color-mix(in oklab, var(--ds-marine-hl) 35%, transparent);
     }
   }
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+}
+
+.user-menu-container {
+  position: relative;
+  margin-left: var(--ds-space-4);
+}
+
+.user-menu-button {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--ds-radius-full);
+  transition: transform var(--ds-transition-fast), background var(--ds-transition-fast);
+}
+
+.user-menu-button:hover {
+  transform: scale(1.05);
+}
+
+.user-menu-button mat-icon {
+  font-size: 32px;
+  width: 32px;
+  height: 32px;
+}
+
+:host ::ng-deep .help-menu-header,
+:host ::ng-deep .help-menu-header mat-icon {
+  color: var(--ds-marine) !important;
+}
+
+:host ::ng-deep .help-menu .mat-mdc-menu-item:hover,
+:host ::ng-deep .user-dropdown-menu button[mat-menu-item]:hover {
+  background: var(--ds-primary-subtle) !important;
+}
+
+:host ::ng-deep .help-menu .mat-mdc-menu-item:hover mat-icon,
+:host ::ng-deep .user-dropdown-menu button[mat-menu-item]:hover mat-icon {
+  color: var(--ds-primary) !important;
+}
+
+:host ::ng-deep .user-dropdown-menu {
+  margin-top: var(--ds-space-2);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-lg);
+  min-width: 280px;
+}
+
+:host ::ng-deep .user-dropdown-menu .mat-mdc-menu-content {
+  padding: 0;
+}
+
+.user-menu-header {
+  padding: var(--ds-space-4) !important;
+  cursor: default !important;
+  background: var(--ds-surface-2) !important;
+}
+
+.user-menu-header:hover {
+  background: var(--ds-surface-2) !important;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-3);
+}
+
+.user-avatar-large {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: var(--ds-primary);
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--ds-text);
+}
+
+.user-email {
+  font-size: 14px;
+  color: var(--ds-text-muted);
+}
+
+:host ::ng-deep .user-dropdown-menu button[mat-menu-item] {
+  padding: var(--ds-space-3) var(--ds-space-4);
+  height: auto;
+  line-height: 1.5;
+}
+
+:host ::ng-deep .user-dropdown-menu button[mat-menu-item] mat-icon {
+  margin-right: var(--ds-space-3);
+  color: var(--ds-text-muted);
 }
 
 .notification-menu-button {
@@ -52,9 +315,83 @@
   }
 }
 
-::ng-deep .notification-dropdown-menu {
-  .mat-mdc-menu-panel {
-    max-width: none !important;
-    max-height: none !important;
+:host ::ng-deep .notification-dropdown-menu .mat-mdc-menu-panel {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+@media (max-width: 599px) {
+  .sidenav {
+    width: 280px;
+  }
+
+  .main-content {
+    padding: var(--ds-space-4);
+  }
+
+  .top-toolbar {
+    padding: 0 var(--ds-space-2) !important;
+  }
+
+  .menu-button {
+    margin-right: var(--ds-space-2);
+  }
+
+  :host ::ng-deep .user-dropdown-menu {
+    min-width: 240px;
+  }
+}
+
+@media (max-width: 400px) {
+  .sidenav {
+    width: calc(100vw - 56px);
+  }
+
+  .brand-text {
+    font-size: 1.05rem;
+  }
+
+  :host ::ng-deep .user-dropdown-menu {
+    min-width: 200px;
+  }
+
+  .user-avatar-large {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .user-name {
+    font-size: 14px;
+  }
+
+  .user-email {
+    font-size: 12px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 959px) {
+  .sidenav {
+    width: 240px;
+  }
+}
+
+@media (min-width: 960px) {
+  .sidenav-content {
+    margin-left: 0;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .nav-list a:hover {
+    transform: translateX(2px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidenav,
+  .nav-list a,
+  .user-menu-button {
+    transition: none;
   }
 }

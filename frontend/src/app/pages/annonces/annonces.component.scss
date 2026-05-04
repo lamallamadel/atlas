@@ -1,0 +1,303 @@
+@use '../../../styles/variables' as vars;
+
+/* ── Atlasia DS Layout ── */
+.pro-page {
+  padding: var(--ds-space-8);
+  max-width: var(--ds-content-full);
+  margin: 0 auto;
+  @media (max-width: 768px) { padding: var(--ds-space-4); }
+}
+
+/* ── Toggle vue ── */
+.ann-view-toggle {
+  display: flex;
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-surface);
+}
+.ann-view-btn {
+  width: 36px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  &--active { background: var(--ds-marine-hl); color: var(--ds-marine); }
+  &:hover:not(&--active) { background: var(--ds-surface-offset); }
+}
+
+/* ── Filtres ── */
+.ann-filters { margin-bottom: var(--ds-space-5); display: flex; flex-direction: column; gap: var(--ds-space-3); }
+
+.ann-advanced-filters {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-md);
+  padding: var(--ds-space-4);
+}
+
+.ann-adv-row {
+  display: flex;
+  gap: var(--ds-space-3);
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.ann-adv-field { display: flex; flex-direction: column; gap: 4px; }
+.ann-adv-label { font-size: 11px; font-weight: 600; color: var(--ds-text-muted); letter-spacing: 1px; text-transform: uppercase; }
+.ann-adv-select,
+.ann-adv-input {
+  height: 38px;
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface);
+  padding: 0 10px;
+  font-family: var(--ds-font-body);
+  font-size: 13px;
+  color: var(--ds-text);
+  outline: none;
+  min-width: 140px;
+  &:focus { border-color: var(--ds-marine); box-shadow: 0 0 0 3px var(--ds-marine-hl); }
+}
+.ann-adv-reset {
+  background: none;
+  border: none;
+  color: var(--ds-text-muted);
+  font-size: 12.5px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  height: 38px;
+  align-self: flex-end;
+  &:hover { color: var(--ds-error); }
+}
+
+/* ── Chips filtres actifs ── */
+.ann-chips { display: flex; gap: var(--ds-space-2); flex-wrap: wrap; }
+.ann-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 10px;
+  background: var(--ds-primary-hl);
+  color: var(--ds-primary-active);
+  border-radius: var(--ds-radius-pill);
+  font-size: 11.5px;
+  font-weight: 500;
+  button {
+    background: none; border: none; cursor: pointer;
+    color: inherit; opacity: 0.7; padding: 0; display: flex;
+    &:hover { opacity: 1; }
+  }
+}
+
+/* ── Stats ── */
+.ann-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-4);
+  font-size: 13px;
+  &__total { font-weight: 700; color: var(--ds-text); }
+  &__sep { color: var(--ds-divider); }
+  &__kpi { color: var(--ds-text-muted); }
+}
+
+/* ── Skeletons ── */
+.ann-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--ds-space-4);
+  &--list { grid-template-columns: 1fr; }
+}
+.ann-error {
+  padding: 14px 18px;
+  background: var(--ds-error-hl);
+  color: var(--ds-error);
+  border-radius: var(--ds-radius-md);
+  font-size: 13.5px;
+}
+
+/* ── Grille cartes ── */
+.ann-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--ds-space-4);
+}
+
+.ann-card {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xs);
+  cursor: pointer;
+  transition: box-shadow var(--ds-transition-fast), transform var(--ds-transition-fast);
+
+  &:hover {
+    box-shadow: var(--ds-shadow-md);
+    transform: translateY(-2px);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--ds-marine);
+    outline-offset: 2px;
+  }
+
+  &__photo {
+    position: relative;
+    aspect-ratio: 16/9;
+    background: var(--ds-surface-offset);
+    overflow: hidden;
+    img { width: 100%; height: 100%; object-fit: cover; }
+  }
+  &__photo-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ds-text-faint);
+  }
+  &__badge-overlay {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+  }
+  &__body {
+    padding: var(--ds-space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--ds-space-1);
+  }
+  &__price {
+    font-family: var(--ds-font-display);
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--ds-marine);
+  }
+  &__title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ds-text);
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    line-height: 1.35;
+  }
+  &__meta {
+    font-size: 12.5px;
+    color: var(--ds-text-muted);
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: var(--ds-space-1);
+  }
+  &__actions {
+    display: flex;
+    gap: var(--ds-space-1);
+    margin-top: var(--ds-space-3);
+    justify-content: flex-end;
+  }
+}
+
+/* ── Vue liste ── */
+.ann-table-wrap {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xs);
+}
+.ann-table-header {
+  display: grid;
+  grid-template-columns: 56px 1fr 130px 110px 110px 100px 80px;
+  padding: 10px var(--ds-space-4);
+  background: var(--ds-surface-offset);
+  border-bottom: 1px solid var(--ds-divider);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ds-text-faint);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+.ann-rows { display: flex; flex-direction: column; }
+.ann-row {
+  display: grid;
+  grid-template-columns: 56px 1fr 130px 110px 110px 100px 80px;
+  align-items: center;
+  padding: 6px var(--ds-space-4);
+  min-height: 60px;
+  border-bottom: 1px solid var(--ds-divider);
+  cursor: pointer;
+  transition: background var(--ds-transition-fast);
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--ds-surface-offset); }
+  &:focus-visible { outline: 2px solid var(--ds-marine); outline-offset: -2px; }
+}
+.ann-col--actions { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+
+.ann-row-thumb {
+  width: 44px;
+  height: 36px;
+  border-radius: var(--ds-radius-sm);
+  object-fit: cover;
+  &--empty {
+    background: var(--ds-surface-offset);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ds-text-faint);
+  }
+}
+.ann-title { font-size: 13.5px; font-weight: 600; color: var(--ds-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ann-city  { font-size: 12.5px; color: var(--ds-text-muted); }
+.ann-price { font-size: 13px; font-weight: 700; color: var(--ds-marine); white-space: nowrap; }
+.ann-date  { font-size: 12px; color: var(--ds-text-faint); }
+
+.ann-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-divider);
+  background: transparent;
+  color: var(--ds-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  &:hover { background: var(--ds-surface-offset); color: var(--ds-text); }
+  &--danger:hover { background: var(--ds-error-hl); color: var(--ds-error); border-color: var(--ds-error); }
+}
+
+/* ── Pagination ── */
+.ann-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ds-space-4) 0;
+  margin-top: var(--ds-space-4);
+  &__info { font-size: 12.5px; color: var(--ds-text-muted); }
+  &__btns { display: flex; gap: var(--ds-space-1); }
+  &__btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ds-divider);
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-surface);
+    cursor: pointer;
+    color: var(--ds-text-muted);
+    font-size: 16px;
+    transition: background var(--ds-transition-fast);
+    &:hover:not(:disabled) { background: var(--ds-surface-offset); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+}
+

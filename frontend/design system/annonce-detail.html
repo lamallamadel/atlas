@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Loft Marais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .gallery { display:grid; grid-template-columns:2fr 1fr 1fr; grid-template-rows:1fr 1fr; gap:6px; height: 380px; border-radius: var(--r-lg); overflow:hidden; }
+  .gallery > :first-child { grid-row: 1 / 3; }
+  .feature { display:flex; flex-direction:column; gap:4px; padding: 14px; border-right:1px solid var(--divider); }
+  .feature:last-child { border-right: none; }
+  .feature .n { font-family:'Playfair Display'; font-size:22px; font-weight:600; color:var(--marine); line-height:1; }
+  [data-theme="dark"] .feature .n { color: var(--marine-light); }
+  .feature .l { font-size:11px; color:var(--text-muted); letter-spacing:0.6px; text-transform:uppercase; }
+  .ios-back { color:var(--marine); font-size:14px; font-weight:500; }
+  [data-theme="dark"] .ios-back { color: var(--marine-light); }
+</style>
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Détail annonce</div><h2 class="display">Loft · Marais</h2><div class="sub muted" style="margin-top:6px;">Photos, description, performance, leads associés.</div></div></div>
+<div id="mount"></div>
+</div>
+<script src="frames.js"></script>
+<script>
+const ICN = {
+  back: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4l-5 5 5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  share: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M13 6a2 2 0 100-4 2 2 0 000 4zM5 11a2 2 0 100-4 2 2 0 000 4zM13 16a2 2 0 100-4 2 2 0 000 4zM6.7 8.2L11.3 5.8M6.7 9.8L11.3 12.2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>',
+  heart: '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 15s-6-3.5-6-8a3 3 0 016-1 3 3 0 016 1c0 4.5-6 8-6 8z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>',
+  bed: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 18v-6a3 3 0 013-3h12a3 3 0 013 3v6M3 14h18M3 18v2M21 18v2" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  bath: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h18l-1 6a3 3 0 01-3 2H7a3 3 0 01-3-2l-1-6zM6 12V5a2 2 0 014 0M6 8h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  surf: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 3h18v18H3V3zM3 9h6v6m0-6V3m0 6h12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+};
+
+// ===== Web Desktop =====
+const webDesktop = `
+<div>
+  <div style="padding: 16px 32px; border-bottom:1px solid var(--divider); display:flex; align-items:center; gap:12px;">
+    <a href="annonces.html" class="btn-icon" style="text-decoration:none;">${ICN.back}</a>
+    <div class="muted" style="font-size:13px;">Annonces · <span style="color:var(--text);">Loft Marais 75003</span></div>
+    <div style="flex:1;"></div>
+    <span class="badge badge-active">Actif · publié il y a 12j</span>
+    <button class="btn btn-ghost">${ICN.share} Partager</button>
+    <button class="btn btn-primary">Modifier</button>
+  </div>
+
+  <div style="padding: 24px 32px;">
+    <div style="display:grid; grid-template-columns: 1fr 380px; gap:28px;">
+      <div>
+        <div class="gallery">
+          <div class="imgph imgph-marine" data-label="HERO"></div>
+          <div class="imgph imgph-marine" data-label="LIVING"></div>
+          <div class="imgph imgph-marine" data-label="KITCHEN"></div>
+          <div class="imgph imgph-marine" data-label="BEDROOM"></div>
+          <div class="imgph imgph-marine" data-label="VIEW · +6"></div>
+        </div>
+
+        <div style="margin-top:24px;">
+          <div class="label-eyebrow">75003 · Le Marais</div>
+          <div class="display" style="font-size:38px; line-height:1.05; margin: 4px 0 8px;">Loft <em class="italic-accent">d'artiste</em>, lumière nord-sud.</div>
+          <div class="muted" style="font-size:14.5px; line-height:1.55; max-width:640px;">Au 4ᵉ étage d'un immeuble Haussmannien, ce loft de 84 m² traverse l'immeuble dans toute sa profondeur. Cuisine ouverte, mezzanine, parquet d'origine. Quartier piéton, deux pas du Centre Pompidou.</div>
+        </div>
+
+        <div class="card" style="display:flex; margin-top:22px; padding: 0;">
+          <div class="feature"><span class="n">€620k</span><span class="l">Prix · €7,380/m²</span></div>
+          <div class="feature"><span class="n">84 m²</span><span class="l">Surface Carrez</span></div>
+          <div class="feature"><span class="n">3</span><span class="l">Pièces · 2 chambres</span></div>
+          <div class="feature"><span class="n">4ᵉ</span><span class="l">Étage · ascenseur</span></div>
+          <div class="feature"><span class="n">B</span><span class="l">DPE · 87 kWh/m²</span></div>
+        </div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:22px;">
+          <div class="card card-pad">
+            <div class="label-eyebrow">Caractéristiques</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 18px; margin-top:10px; font-size:13.5px;">
+              ${['Cuisine équipée','Parquet d\'origine','Cheminée','Mezzanine','Cave','Local vélos','Double exposition','Calme'].map(f=>`<div style="display:flex; gap:8px; align-items:center;"><span style="color:var(--primary);">●</span> ${f}</div>`).join('')}
+            </div>
+          </div>
+          <div class="card card-pad">
+            <div class="label-eyebrow">Localisation</div>
+            <div class="imgph" data-label="MAP · 75003" style="height:140px; border-radius:10px; margin-top:10px; position:relative;">
+              <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:18px; height:18px; border-radius:9px; background:var(--primary); border:3px solid #fff; box-shadow:var(--shadow-md);"></div>
+            </div>
+            <div class="muted" style="font-size:12.5px; margin-top:10px;">12 rue Vieille-du-Temple · M° Hôtel de Ville (3 min)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT panel -->
+      <div>
+        <div class="card card-pad">
+          <div class="label-eyebrow">Performance · 30 jours</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:10px;">
+            <div><div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; color:var(--marine);">347</div><div class="muted" style="font-size:11.5px;">Vues</div></div>
+            <div><div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; color:var(--marine);">28</div><div class="muted" style="font-size:11.5px;">Favoris</div></div>
+            <div><div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; color:var(--primary);">9</div><div class="muted" style="font-size:11.5px;">Demandes</div></div>
+            <div><div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; color:var(--primary);">3</div><div class="muted" style="font-size:11.5px;">Visites</div></div>
+          </div>
+          <svg viewBox="0 0 280 60" style="width:100%; margin-top:14px;">
+            <path d="M0 50 L20 42 L40 45 L60 30 L80 38 L100 22 L120 28 L140 14 L160 24 L180 12 L200 20 L220 8 L240 16 L260 6 L280 12" stroke="var(--marine)" stroke-width="1.5" fill="none"/>
+            <path d="M0 50 L20 42 L40 45 L60 30 L80 38 L100 22 L120 28 L140 14 L160 24 L180 12 L200 20 L220 8 L240 16 L260 6 L280 12 L280 60 L0 60 Z" fill="var(--marine-hl)" opacity="0.6"/>
+          </svg>
+        </div>
+
+        <div class="card card-pad" style="margin-top:14px;">
+          <div class="label-eyebrow">Leads · 3 actifs</div>
+          ${[['AB','Amélie Bernard','Visite mer.','rdv'],['JM','Julien Marchand','Intéressé','qual'],['SL','Sophie Lambert','Nouveau','new']].map((l,i)=>`<div style="display:flex; gap:10px; align-items:center; padding:10px 0; ${i?'border-top:1px solid var(--divider);':''}">
+            <div style="width:32px; height:32px; border-radius:16px; background:var(--marine-hl); color:var(--marine); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Playfair Display'; font-size:12px;">${l[0]}</div>
+            <div style="flex:1;"><div style="font-weight:600; font-size:13.5px;">${l[1]}</div><div class="muted" style="font-size:11.5px;">${l[2]}</div></div>
+            <span class="badge badge-${l[3]}">${l[3]==='qual'?'Qual':l[3]==='rdv'?'RDV':'New'}</span>
+          </div>`).join('')}
+          <button class="btn btn-ghost" style="width:100%; justify-content:center; margin-top:12px;">Voir les 9 demandes</button>
+        </div>
+
+        <div class="card card-pad" style="margin-top:14px;">
+          <div class="label-eyebrow">Propriétaire</div>
+          <div style="display:flex; gap:12px; margin-top:8px; align-items:center;">
+            <div style="width:42px; height:42px; border-radius:21px; background:var(--primary-hl); color:var(--primary-active); display:flex; align-items:center; justify-content:center; font-weight:700; font-family:'Playfair Display';">PV</div>
+            <div><div style="font-weight:600; font-size:14px;">Pierre Veyron</div><div class="muted" style="font-size:12px;">Mandat exclusif · 90j</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>`;
+
+// ===== iOS =====
+const ios = `
+<div style="position:relative;">
+  <div class="imgph imgph-marine" data-label="LOFT MARAIS" style="height:280px;"></div>
+  <div style="position:absolute; top:14px; left:16px; right:16px; display:flex; justify-content:space-between;">
+    <a href="annonces.html" style="width:34px; height:34px; border-radius:17px; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; color:#000; text-decoration:none;">${ICN.back}</a>
+    <div style="display:flex; gap:8px;">
+      <div style="width:34px; height:34px; border-radius:17px; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center;">${ICN.share}</div>
+      <div style="width:34px; height:34px; border-radius:17px; background:rgba(255,255,255,.92); display:flex; align-items:center; justify-content:center; color:var(--primary);">${ICN.heart}</div>
+    </div>
+  </div>
+  <div style="position:absolute; bottom:12px; right:14px; padding:4px 10px; border-radius:12px; background:rgba(0,0,0,.55); color:#fff; font-size:11px; font-weight:600;">1 / 12</div>
+</div>
+
+<div style="padding: 18px 20px 30px;">
+  <div class="label-eyebrow">75003 · Le Marais</div>
+  <div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; line-height:1.1; margin-top:4px;">Loft <em class="italic-accent">d'artiste</em></div>
+  <div style="display:flex; align-items:baseline; justify-content:space-between; margin-top:8px;">
+    <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; color:var(--marine);">€620k</div>
+    <span class="badge badge-active">Actif</span>
+  </div>
+
+  <div class="card" style="display:flex; margin-top:18px; padding:14px 0;">
+    <div style="flex:1; text-align:center; border-right:1px solid var(--divider);"><div style="display:flex; justify-content:center; color:var(--marine); margin-bottom:4px;">${ICN.surf}</div><div style="font-weight:600; font-size:13px;">84 m²</div></div>
+    <div style="flex:1; text-align:center; border-right:1px solid var(--divider);"><div style="display:flex; justify-content:center; color:var(--marine); margin-bottom:4px;">${ICN.bed}</div><div style="font-weight:600; font-size:13px;">2 ch.</div></div>
+    <div style="flex:1; text-align:center;"><div style="display:flex; justify-content:center; color:var(--marine); margin-bottom:4px;">${ICN.bath}</div><div style="font-weight:600; font-size:13px;">1 sdb</div></div>
+  </div>
+
+  <div class="muted" style="font-size:13.5px; line-height:1.55; margin-top:18px;">Au 4ᵉ étage d'un immeuble Haussmannien, ce loft de 84 m² traverse l'immeuble. Cuisine ouverte, mezzanine, parquet d'origine.</div>
+
+  <div class="label-eyebrow" style="margin-top:18px;">Performance · 30 jours</div>
+  <div class="card" style="display:flex; margin-top:6px; padding:14px 0;">
+    ${[['347','Vues'],['28','Favoris'],['9','Leads']].map((s,i,a)=>`<div style="flex:1; text-align:center; ${i<a.length-1?'border-right:1px solid var(--divider);':''}"><div style="font-family:'Playfair Display'; font-size:20px; font-weight:600; color:var(--marine);">${s[0]}</div><div class="muted" style="font-size:11px;">${s[1]}</div></div>`).join('')}
+  </div>
+
+  <button class="btn btn-copper" style="width:100%; height:48px; justify-content:center; margin-top:24px; border-radius:14px;">Voir les 9 demandes</button>
+</div>`;
+
+// ===== Android =====
+const android = `
+<div style="position:relative;">
+  <div class="imgph imgph-marine" data-label="LOFT MARAIS" style="height:280px;"></div>
+  <div style="position:absolute; top:14px; left:14px; right:14px; display:flex; justify-content:space-between; align-items:center;">
+    <a href="annonces.html" style="color:#fff; text-decoration:none;">${ICN.back}</a>
+    <div style="display:flex; gap:14px; color:#fff;">${ICN.share}${ICN.heart}</div>
+  </div>
+</div>
+<div style="padding: 18px 16px 100px;">
+  <div style="display:flex; align-items:center; justify-content:space-between;">
+    <span class="badge badge-active">Actif · 12j</span>
+    <div class="muted" style="font-size:11px;">12 rue Vieille-du-Temple</div>
+  </div>
+  <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; margin-top:8px;">Loft d'artiste, Marais</div>
+  <div style="display:flex; align-items:baseline; gap:8px; margin-top:4px;">
+    <div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; color:var(--primary);">€620k</div>
+    <div class="muted" style="font-size:12.5px;">€7,380 / m²</div>
+  </div>
+
+  <div class="card" style="display:flex; margin-top:18px; padding:14px 0; border-radius:18px;">
+    <div style="flex:1; text-align:center; border-right:1px solid var(--divider);"><div style="font-weight:600; font-size:13px; color:var(--marine);">84 m²</div><div class="muted" style="font-size:11px; margin-top:2px;">Surface</div></div>
+    <div style="flex:1; text-align:center; border-right:1px solid var(--divider);"><div style="font-weight:600; font-size:13px; color:var(--marine);">3 / 2</div><div class="muted" style="font-size:11px; margin-top:2px;">Pièces / ch.</div></div>
+    <div style="flex:1; text-align:center;"><div style="font-weight:600; font-size:13px; color:var(--marine);">B</div><div class="muted" style="font-size:11px; margin-top:2px;">DPE</div></div>
+  </div>
+
+  <div style="font-family:'Playfair Display'; font-size:17px; font-weight:600; margin: 22px 0 8px;">Description</div>
+  <div class="muted" style="font-size:13.5px; line-height:1.55;">Au 4ᵉ étage d'un Haussmannien, ce loft de 84 m² traverse l'immeuble. Cuisine ouverte, mezzanine, parquet d'origine.</div>
+
+  <div style="font-family:'Playfair Display'; font-size:17px; font-weight:600; margin: 22px 0 8px;">Performance</div>
+  <div class="card" style="display:flex; padding:14px 0; border-radius:18px;">
+    ${[['347','Vues'],['28','Favoris'],['9','Leads']].map((s,i,a)=>`<div style="flex:1; text-align:center; ${i<a.length-1?'border-right:1px solid var(--divider);':''}"><div style="font-family:'Playfair Display'; font-size:20px; font-weight:600; color:var(--marine);">${s[0]}</div><div class="muted" style="font-size:11px;">${s[1]}</div></div>`).join('')}
+  </div>
+</div>
+<div style="position:absolute; bottom:28px; left:0; right:0; padding:12px 16px; background:var(--surface); border-top:1px solid var(--divider); display:flex; gap:10px;">
+  <button style="flex:1; height:44px; border-radius:22px; border:1px solid var(--marine); color:var(--marine); background:transparent; font-family:inherit; font-weight:600; font-size:13px; letter-spacing:.5px; text-transform:uppercase;">PARTAGER</button>
+  <button style="flex:2; height:44px; border-radius:22px; background:var(--primary); color:#fff; border:none; font-family:inherit; font-weight:600; font-size:13px; letter-spacing:.5px; text-transform:uppercase;">VOIR LES 9 LEADS</button>
+</div>`;
+
+const webMobile = `
+<div class="imgph imgph-marine" data-label="LOFT MARAIS" style="height:240px;"></div>
+<div style="padding: 18px 20px 30px;">
+  <div class="label-eyebrow">75003 · Le Marais</div>
+  <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600; margin-top:4px;">Loft d'artiste</div>
+  <div style="display:flex; justify-content:space-between; align-items:baseline; margin-top:6px;">
+    <div style="font-family:'Playfair Display'; font-size:22px; font-weight:600; color:var(--marine);">€620k</div>
+    <span class="badge badge-active">Actif</span>
+  </div>
+  <div class="muted" style="font-size:13.5px; line-height:1.55; margin-top:14px;">84 m² au 4ᵉ étage. Cuisine ouverte, mezzanine, parquet d'origine.</div>
+  <div class="card" style="display:flex; margin-top:14px; padding:12px 0;">
+    ${[['347','Vues'],['9','Leads'],['3','Visites']].map((s,i,a)=>`<div style="flex:1; text-align:center; ${i<a.length-1?'border-right:1px solid var(--divider);':''}"><div style="font-family:'Playfair Display'; font-size:18px; font-weight:600; color:var(--marine);">${s[0]}</div><div class="muted" style="font-size:11px;">${s[1]}</div></div>`).join('')}
+  </div>
+</div>`;
+
+document.getElementById('mount').innerHTML = AtlasFrames.devices({ ios, android, webMobile, webDesktop });
+</script>
+<script src="shell.js"></script>
+</body></html>

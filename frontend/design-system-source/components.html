@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Components</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Building blocks</div><h2 class="display">Components</h2><div class="sub muted" style="margin-top:6px;">Web defaults shown. Mobile pages adapt the same primitives to iOS / Android chrome.</div></div></div>
+
+<div class="label-eyebrow" style="margin-top:8px;">Buttons</div>
+<div class="card card-pad" style="margin-bottom:24px;">
+  <div class="row" style="flex-wrap:wrap; gap:12px;">
+    <button class="btn btn-primary">Créer un dossier</button>
+    <button class="btn btn-copper">Publier l'annonce</button>
+    <button class="btn btn-ghost">Annuler</button>
+    <button class="btn btn-ghost"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M7 2v10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg> Ajouter</button>
+    <button class="btn-icon"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
+  </div>
+</div>
+
+<div class="label-eyebrow">Form fields</div>
+<div class="card card-pad" style="margin-bottom:24px;">
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px;">
+    <div><div class="label-eyebrow">Lead name</div><input class="input" value="Amélie Bernard"></div>
+    <div><div class="label-eyebrow">Phone</div><input class="input" value="+33 6 ·· ·· 42 18"></div>
+    <div><div class="label-eyebrow">Status</div><div class="input" style="display:flex; align-items:center; justify-content:space-between;">Qualification<svg width="11" height="7" viewBox="0 0 11 7"><path d="M1 1l4.5 5L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+    <div><div class="label-eyebrow">Source</div><div class="input" style="display:flex; align-items:center; justify-content:space-between;">Site web<svg width="11" height="7" viewBox="0 0 11 7"><path d="M1 1l4.5 5L10 1" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></div></div>
+  </div>
+</div>
+
+<div class="label-eyebrow">Status badges</div>
+<div class="card card-pad" style="margin-bottom:24px;">
+  <div class="row" style="flex-wrap:wrap;">
+    <span class="badge badge-new">Nouveau</span>
+    <span class="badge badge-qual">Qualification</span>
+    <span class="badge badge-rdv">Rendez-vous</span>
+    <span class="badge badge-won">Gagné</span>
+    <span class="badge badge-lost">Perdu</span>
+    <span class="badge badge-draft">Brouillon</span>
+    <span class="badge badge-active">Actif</span>
+    <span class="badge badge-paused">En pause</span>
+  </div>
+</div>
+
+<div class="label-eyebrow">Cards</div>
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:24px;">
+  <div class="card card-pad">
+    <div class="label-eyebrow">KPI</div>
+    <div class="display" style="font-size:36px; color:var(--marine);">128</div>
+    <div class="muted" style="font-size:12.5px;">Dossiers actifs · +12% sur 7 jours</div>
+  </div>
+  <div class="card" style="overflow:hidden;">
+    <div class="imgph" data-label="PROPERTY" style="height:120px;"></div>
+    <div style="padding:14px 16px;">
+      <div style="font-weight:600; font-size:15px;">Loft · Marais</div>
+      <div class="muted" style="font-size:12.5px;">75003 · 84 m² · €620k</div>
+    </div>
+  </div>
+  <div class="card card-pad">
+    <div class="row" style="margin-bottom:8px;">
+      <div style="width:36px; height:36px; border-radius:18px; background:var(--marine-hl); display:flex; align-items:center; justify-content:center; color:var(--marine); font-weight:700; font-family:'Playfair Display';">A</div>
+      <div><div style="font-weight:600; font-size:14px;">Amélie B.</div><div class="muted" style="font-size:12px;">Qualifié · il y a 2h</div></div>
+    </div>
+    <div class="muted" style="font-size:13px; line-height:1.5;">A demandé une visite pour le loft du Marais.</div>
+  </div>
+</div>
+
+<div class="label-eyebrow">Tabs</div>
+<div class="card card-pad" style="margin-bottom:24px;">
+  <div class="tabs" style="margin-bottom:0;">
+    <div class="tab on">Informations</div>
+    <div class="tab">Activité</div>
+    <div class="tab">Messages</div>
+    <div class="tab">Documents</div>
+  </div>
+</div>
+
+<div class="label-eyebrow">Platform variants</div>
+<div class="card card-pad muted" style="font-size:13px; line-height:1.55;">
+  Each screen page below shows the same component in iOS, Android, and Web layouts. iOS uses Cupertino-style large titles + glass pill nav. Android uses Material 3 top app bar + FAB. Web layouts use this sidebar shell.
+</div>
+</div>
+<script src="shell.js"></script>
+</body></html>

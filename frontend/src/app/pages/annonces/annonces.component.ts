@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
+import { MatDialog } from '@angular/material/dialog';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { AnnonceApiService, AnnonceResponse, AnnonceStatus, Page } from '../../services/annonce-api.service';
 import { ColumnConfig, RowAction, GenericTableComponent } from '../../components/generic-table.component';
@@ -10,23 +11,19 @@ import { DateFormatPipe } from '../../pipes/date-format.pipe';
 import { PriceFormatPipe } from '../../pipes/price-format.pipe';
 import { FilterPresetService, FilterPreset } from '../../services/filter-preset.service';
 import { MobileFilterSheetComponent, FilterConfig } from '../../components/mobile-filter-sheet.component';
-import { MatDialog } from '@angular/material/dialog';
-import { ExportService, ColumnDef } from '../../services/export.service';
 import { ExportProgressDialogComponent } from '../../components/export-progress-dialog.component';
+import { ExportService, ColumnDef } from '../../services/export.service';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
-import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { MatIcon } from '@angular/material/icon';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatDivider } from '@angular/material/list';
-import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
-import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+// Design System
+import { PageHeaderComponent }    from '../../design-system/patterns/page-header/page-header.component';
+import { FilterBarComponent, DsFilterOption } from '../../design-system/patterns/filter-bar/filter-bar.component';
+import { DsButtonComponent }      from '../../design-system/primitives/ds-button/ds-button.component';
+import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
+import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
+import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface AppliedFilter {
   key: string;
@@ -38,9 +35,14 @@ interface AppliedFilter {
 @Component({
     selector: 'app-annonces',
     templateUrl: './annonces.component.html',
-    styleUrls: ['./annonces.component.css'],
+    styleUrls: ['./annonces.component.scss'],
     animations: [listStaggerAnimation, itemAnimation],
-    imports: [MatCard, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatIcon, MatFormField, MatLabel, MatInput, FormsModule, MatSuffix, MatSelect, MatOption, MatButton, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider, MatIconButton, MatChipSet, MatChip, MatChipRemove, SkeletonLoaderComponent, EmptyStateComponent, GenericTableComponent]
+    imports: [
+      FormsModule, DatePipe, DecimalPipe,
+      // Design System (nouveau template)
+      PageHeaderComponent, FilterBarComponent,
+      DsButtonComponent, DsBadgeComponent, DsEmptyStateComponent, DsSkeletonComponent,
+    ]
 })
 export class AnnoncesComponent implements OnInit {
   annonces: AnnonceResponse[] = [];
@@ -59,10 +61,62 @@ export class AnnoncesComponent implements OnInit {
   availableTypes = ['SALE', 'RENT', 'LEASE', 'EXCHANGE'];
 
   AnnonceStatus = AnnonceStatus;
+  readonly AnnonceType = { SALE: 'SALE', RENTAL: 'RENTAL', COMMERCIAL: 'COMMERCIAL' } as const;
 
   filterPanelExpanded = false;
   appliedFilters: AppliedFilter[] = [];
   isMobile = false;
+
+  /* ── Vue ── */
+  viewMode: 'cards' | 'list' = 'cards';
+  minPrice: number | null = null;
+  maxPrice: number | null = null;
+
+  /* ── DS filter options ── */
+  readonly statusFilters: DsFilterOption[] = [
+    { value: 'DRAFT',     label: 'Brouillons' },
+    { value: 'ACTIVE',    label: 'Actives' },
+    { value: 'PAUSED',    label: 'En pause' },
+    { value: 'PUBLISHED', label: 'Publiées' },
+    { value: 'ARCHIVED',  label: 'Archivées' },
+  ];
+
+  getAnnonceBadgeStatus(status: string): DsBadgeStatus {
+    const map: Record<string, DsBadgeStatus> = {
+      DRAFT: 'draft', ACTIVE: 'active', PAUSED: 'paused',
+      PUBLISHED: 'active', ARCHIVED: 'archived',
+    };
+    return (map[status] as DsBadgeStatus) ?? 'neutral';
+  }
+
+  onStatusChange(value: string): void {
+    this.selectedStatus = value as AnnonceStatus | '';
+    this.applyFilters();
+  }
+
+  onSearchChange(value: string): void {
+    this.searchQuery = value;
+    this.applyFilters();
+  }
+
+  goToAnnonce(id: number): void {
+    this.router.navigate(['/pro/annonces', id]);
+  }
+
+  countByStatus(status: string): number {
+    return this.annonces.filter(a => a.status === status).length;
+  }
+
+  resetFilters(): void {
+    this.selectedStatus = '';
+    this.selectedCity = '';
+    this.selectedType = '';
+    this.minPrice = null;
+    this.maxPrice = null;
+    this.searchQuery = '';
+    this.appliedFilters = [];
+    this.applyFilters();
+  }
   savedPresets: FilterPreset[] = [];
   showPresetMenu = false;
 
@@ -284,16 +338,6 @@ export class AnnoncesComponent implements OnInit {
     this.loadAnnonces();
   }
 
-  resetFilters(): void {
-    this.searchQuery = '';
-    this.selectedStatus = '';
-    this.selectedCity = '';
-    this.selectedType = '';
-    this.currentPage = 0;
-    this.updateAppliedFilters();
-    this.loadAnnonces();
-  }
-
   updateAppliedFilters(): void {
     this.appliedFilters = [];
 
@@ -449,11 +493,6 @@ export class AnnoncesComponent implements OnInit {
   }
 
   onSearch(): void {
-    this.currentPage = 0;
-    this.loadAnnonces();
-  }
-
-  onStatusChange(): void {
     this.currentPage = 0;
     this.loadAnnonces();
   }

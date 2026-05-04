@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Tokens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Foundation</div><h2 class="display">Tokens</h2><div class="sub muted" style="margin-top:6px;">Source of truth — every surface reads from here.</div></div></div>
+
+<div class="label-eyebrow" style="margin-top:8px;">Color · brand</div>
+<div class="token-grid" style="margin-bottom:32px;">
+  <div><div class="swatch" style="background:#0d2c4a;">Marine 900</div><div class="kbd" style="margin-top:6px;">#0d2c4a</div></div>
+  <div><div class="swatch" style="background:#1a4472;">Marine 700</div><div class="kbd" style="margin-top:6px;">#1a4472</div></div>
+  <div><div class="swatch" style="background:#dce8f2; color:#0d2c4a;">Marine HL</div><div class="kbd" style="margin-top:6px;">#dce8f2</div></div>
+  <div><div class="swatch" style="background:#b5622e;">Copper 600</div><div class="kbd" style="margin-top:6px;">#b5622e</div></div>
+  <div><div class="swatch" style="background:#944e22;">Copper 700</div><div class="kbd" style="margin-top:6px;">#944e22</div></div>
+  <div><div class="swatch" style="background:#f2e0d5; color:#6e3917;">Copper HL</div><div class="kbd" style="margin-top:6px;">#f2e0d5</div></div>
+</div>
+
+<div class="label-eyebrow">Color · semantic</div>
+<div class="token-grid" style="margin-bottom:32px;">
+  <div><div class="swatch" style="background:#2e7d32;">Success</div><div class="kbd" style="margin-top:6px;">#2e7d32</div></div>
+  <div><div class="swatch" style="background:#e65100;">Warning</div><div class="kbd" style="margin-top:6px;">#e65100</div></div>
+  <div><div class="swatch" style="background:#c62828;">Error</div><div class="kbd" style="margin-top:6px;">#c62828</div></div>
+  <div><div class="swatch dark-text" style="background:#f8f7f4;">Bg</div><div class="kbd" style="margin-top:6px;">#f8f7f4</div></div>
+  <div><div class="swatch dark-text" style="background:#ffffff; box-shadow:inset 0 0 0 1px var(--divider);">Surface</div><div class="kbd" style="margin-top:6px;">#ffffff</div></div>
+  <div><div class="swatch dark-text" style="background:#e0ddd6;">Divider</div><div class="kbd" style="margin-top:6px;">#e0ddd6</div></div>
+</div>
+
+<div class="label-eyebrow">Typography</div>
+<div class="card card-pad" style="margin-bottom:32px;">
+  <div class="display" style="font-size:56px; line-height:1; margin-bottom:6px;">The <em class="italic-accent">city</em> sleeps.</div>
+  <div class="muted" style="margin-bottom:18px; font-size:13px;">Playfair Display · 56 / 500 · italic accent for emotional emphasis</div>
+  <hr class="div" style="margin:14px 0;">
+  <div style="font-family:'Playfair Display'; font-size:32px; font-weight:500; letter-spacing:-0.3px;">Find the place that feels right.</div>
+  <div class="muted" style="font-size:13px;">Display · 32 / 500</div>
+  <div style="margin-top:14px; font-size:18px; font-weight:600;">Section heading · 18 / 600</div>
+  <div style="margin-top:6px; font-size:14px; line-height:1.55; max-width:560px;">Body · 14 / 400 · Plus Jakarta Sans. Used for paragraphs, labels, secondary text. Pairs cleanly with the display family at all sizes.</div>
+  <div style="margin-top:10px;" class="label-eyebrow">Eyebrow · 11 / 600 · 1.2 letter-spacing</div>
+</div>
+
+<div class="label-eyebrow">Spacing · radius · shadow</div>
+<div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px;">
+  <div class="card card-pad">
+    <div class="display" style="font-size:16px; margin-bottom:14px;">Spacing</div>
+    ${[4,8,12,16,24,32,48,64].map(n=>`<div style="display:flex;align-items:center;gap:14px; margin:6px 0;"><span class="kbd" style="width:42px;">${n}px</span><div style="height:8px; background:var(--marine-hl); width:${n*2}px; border-radius:2px;"></div></div>`).join('')}
+  </div>
+  <div class="card card-pad">
+    <div class="display" style="font-size:16px; margin-bottom:14px;">Radius</div>
+    ${['sm 6','md 10','lg 14','xl 18','2xl 24'].map(s=>{const [n,r]=s.split(' ');return `<div style="display:flex;align-items:center;gap:14px; margin:8px 0;"><span class="kbd" style="width:42px;">${n}</span><div style="width:48px; height:32px; background:var(--surface-offset); border:1px solid var(--divider); border-radius:${r}px;"></div></div>`}).join('')}
+  </div>
+  <div class="card card-pad">
+    <div class="display" style="font-size:16px; margin-bottom:14px;">Shadow</div>
+    ${['xs','sm','md','lg'].map(s=>`<div style="display:flex;align-items:center;gap:14px; margin:14px 0;"><span class="kbd" style="width:42px;">${s}</span><div style="width:60px; height:32px; background:var(--surface); border-radius:8px; box-shadow:var(--shadow-${s});"></div></div>`).join('')}
+  </div>
+</div>
+</div>
+<script src="shell.js"></script>
+</body></html>

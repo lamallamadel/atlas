@@ -22,7 +22,7 @@ import { BadgeStatusComponent } from '../../components/badge-status.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { FormsModule } from '@angular/forms';
-import { MatTabGroup, MatTab } from '@angular/material/tabs';
+import { DsTabsComponent, DsTab } from '../../design-system/index';
 import { MatCard, MatCardHeader, MatCardTitle, MatCardContent } from '@angular/material/card';
 import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
 import { EmptyStateComponent } from '../../components/empty-state.component';
@@ -71,7 +71,7 @@ export interface WhatsAppTemplate {
     selector: 'app-dossier-detail',
     templateUrl: './dossier-detail.component.html',
     styleUrls: ['./dossier-detail.component.css'],
-    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, MatTooltip, FormsModule, MatTabGroup, MatTab, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, EmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
+    imports: [LoadingSkeletonComponent, CollaborationPresenceComponent, BadgeStatusComponent, RouterLink, MatIcon, MatTooltip, FormsModule, DsTabsComponent, MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, EmptyStateComponent, WhatsappMessagingContainerComponent, MatAnchor, MessagingTabComponent, DocumentListComponent, ActivityTimelineComponent, MatPaginator, CollaborationActivityStreamComponent, CollaborationCursorComponent, CollaborationFilterShareComponent, QuickActionsComponent, PhoneFormatPipe]
 })
 export class DossierDetailComponent implements OnInit, OnDestroy {
   dossier: DossierResponse | null = null;
@@ -100,6 +100,21 @@ export class DossierDetailComponent implements OnInit, OnDestroy {
   leadFormPhone = '';
   leadError: string | null = null;
   leadSuccessMessage: string | null = null;
+
+  /* ── ds-tabs ── */
+  activeTab = 'informations';
+  dossierTabs: DsTab[] = [
+    { value: 'informations',    label: 'Informations' },
+    { value: 'parties',         label: 'Parties prenantes' },
+    { value: 'messages',        label: 'Messages' },
+    { value: 'whatsapp',        label: 'WhatsApp' },
+    { value: 'messages-sortants', label: 'Messages sortants' },
+    { value: 'rendezvous',      label: 'Rendez-vous' },
+    { value: 'consentements',   label: 'Consentements' },
+    { value: 'documents',       label: 'Documents' },
+    { value: 'chronologie',     label: 'Chronologie' },
+    { value: 'historique',      label: 'Historique' },
+  ];
 
   DossierStatus = DossierStatus;
   PartiePrenanteRole = PartiePrenanteRole;

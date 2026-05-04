@@ -1,0 +1,38 @@
+.ds-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  flex: none;
+  overflow: hidden;
+
+  &__initials {
+    font-family: var(--ds-font-display);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Sizes ── */
+  &--xs { width: 24px; height: 24px; .ds-avatar__initials { font-size: 9px; } }
+  &--sm { width: 30px; height: 30px; .ds-avatar__initials { font-size: 11px; } }
+  &--md { width: 36px; height: 36px; .ds-avatar__initials { font-size: 13px; } }
+  &--lg { width: 48px; height: 48px; .ds-avatar__initials { font-size: 18px; } }
+  &--xl { width: 64px; height: 64px; .ds-avatar__initials { font-size: 24px; } }
+
+  /* ── Variants ── */
+  &--marine  { background: var(--ds-marine-hl);     color: var(--ds-marine); }
+  &--copper  { background: var(--ds-primary-hl);    color: var(--ds-primary-active); }
+  &--neutral { background: var(--ds-surface-offset); color: var(--ds-text-muted); }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+[data-theme='dark'],
+.dark-theme {
+  .ds-avatar--marine { color: var(--ds-marine-light); }
+}

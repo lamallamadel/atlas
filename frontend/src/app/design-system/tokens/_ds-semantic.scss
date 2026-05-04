@@ -35,6 +35,17 @@
   --at-color-warning-highlight:var(--ds-warning-hl);
   --at-font-display:           var(--ds-font-display);
   --at-font-body:              var(--ds-font-body);
+  --at-text-xs:   var(--ds-text-xs);
+  --at-text-sm:   var(--ds-text-sm);
+  --at-text-base: var(--ds-text-base);
+  --at-text-lg:   var(--ds-text-lg);
+  --at-text-xl:   var(--ds-text-xl);
+  --at-text-2xl:  var(--ds-text-2xl);
+  --at-text-3xl:  var(--ds-text-3xl);
+  --at-content-narrow:  var(--ds-content-narrow);
+  --at-content-default: var(--ds-content-default);
+  --at-content-wide:    var(--ds-content-wide);
+  --at-content-full:    var(--ds-content-full);
   --at-space-1:  var(--ds-space-1);
   --at-space-2:  var(--ds-space-2);
   --at-space-3:  var(--ds-space-3);
@@ -45,6 +56,9 @@
   --at-space-10: var(--ds-space-10);
   --at-space-12: var(--ds-space-12);
   --at-space-16: var(--ds-space-16);
+  --at-space-20: var(--ds-space-20);
+  --at-space-24: var(--ds-space-24);
+  --at-space-32: var(--ds-space-32);
   --at-radius-sm:   var(--ds-radius-sm);
   --at-radius-md:   var(--ds-radius-md);
   --at-radius-lg:   var(--ds-radius-lg);
@@ -55,6 +69,7 @@
   --at-shadow-sm: var(--ds-shadow-sm);
   --at-shadow-md: var(--ds-shadow-md);
   --at-shadow-lg: var(--ds-shadow-lg);
+  --at-shadow-xl: var(--ds-shadow-xl);
   --at-transition-fast: var(--ds-transition-fast);
   --at-transition-med:  var(--ds-transition-med);
 
@@ -65,7 +80,7 @@
   --color-primary-600: var(--ds-marine);
   --color-primary-700: var(--ds-marine-hover);
   /* CORRECTION AUDIT B : --color-secondary-* = Copper (accent), pas orange vif */
-  --color-secondary-50:  var(--ds-copper-subtle);
+  --color-secondary-50:  var(--ds-primary-subtle);
   --color-secondary-500: var(--ds-primary);
   --color-secondary-600: var(--ds-primary-hover);
   --color-secondary-700: var(--ds-primary-active);
@@ -84,6 +99,7 @@
   --color-warning-700: var(--ds-warning);
 
   /* ── Bridge --spacing-* (legacy) → --ds-* ── */
+  --spacing-0: 0;
   --spacing-1:  var(--ds-space-1);
   --spacing-2:  var(--ds-space-2);
   --spacing-3:  var(--ds-space-3);
@@ -94,6 +110,9 @@
   --spacing-10: var(--ds-space-10);
   --spacing-12: var(--ds-space-12);
   --spacing-16: var(--ds-space-16);
+  --spacing-20: var(--ds-space-20);
+  --spacing-24: var(--ds-space-24);
+  --spacing-32: var(--ds-space-32);
 
   /* ── Bridge --radius-* (legacy) → --ds-* ── */
   --radius-sm:   var(--ds-radius-sm);
@@ -107,6 +126,7 @@
   --shadow-sm: var(--ds-shadow-sm);
   --shadow-md: var(--ds-shadow-md);
   --shadow-lg: var(--ds-shadow-lg);
+  --shadow-xl: var(--ds-shadow-xl);
 
   /* ── Material Theme Overrides ── */
   --mdc-filled-text-field-container-color: var(--ds-surface);

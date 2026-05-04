@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Atlasia – Administration des Workflows</title>
+  <link rel="stylesheet" href="tokens.css" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    .shell { display: grid; grid-template-columns: 240px 1fr; height: 100vh; }
+    .sidebar { background: var(--marine); padding: 24px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .sidebar__logo { font-family: 'Playfair Display', serif; font-size: 20px; font-weight: 600; color: #fff; padding: 8px 12px 24px; }
+    .sidebar__item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 8px; color: rgba(255,255,255,.65); font-size: 13.5px; font-weight: 500; cursor: pointer; text-decoration: none; }
+    .sidebar__item:hover { background: rgba(255,255,255,.08); color: #fff; }
+    .sidebar__item--active { background: rgba(255,255,255,.15); color: #fff; font-weight: 600; }
+    .main { overflow-y: auto; }
+    /* Layout admin 2 panneaux */
+    .admin-layout { display: grid; grid-template-columns: 320px 1fr; height: 100vh; }
+    .workflow-list-panel { border-right: 1px solid var(--divider); overflow-y: auto; display: flex; flex-direction: column; }
+    .wl-head { padding: 24px 20px 16px; border-bottom: 1px solid var(--divider); display: flex; align-items: center; justify-content: space-between; }
+    .wl-title { font-size: 15px; font-weight: 700; color: var(--text); }
+    .btn-sm { display: inline-flex; align-items: center; gap: 5px; height: 32px; padding: 0 12px; border-radius: var(--r-md); border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .btn-marine { background: var(--marine); color: #fff; }
+    .btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+    .wl-search { padding: 12px 14px; border-bottom: 1px solid var(--divider); position: relative; }
+    .wl-search-icon { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--text-faint); }
+    .wl-search-input { width: 100%; height: 34px; border: 1px solid var(--divider); border-radius: 99px; background: var(--surface-offset); padding: 0 14px 0 30px; font-size: 13px; outline: none; }
+    .wl-items { display: flex; flex-direction: column; }
+    .wl-item { padding: 14px 20px; border-bottom: 1px solid var(--divider); cursor: pointer; display: flex; flex-direction: column; gap: 5px; transition: background .12s; }
+    .wl-item:hover { background: var(--surface-offset); }
+    .wl-item--active { background: var(--marine-hl); border-left: 3px solid var(--marine); padding-left: 17px; }
+    .wl-item__name { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    .wl-item--active .wl-item__name { color: var(--marine); }
+    .wl-item__meta { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-muted); }
+    .badge-sm { height: 18px; padding: 0 8px; border-radius: 99px; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; }
+    .badge-active   { background: #e8f5e9; color: #2e7d32; }
+    .badge-paused   { background: #fff3e0; color: #e65100; }
+    .badge-draft    { background: var(--surface-dynamic); color: var(--text-muted); }
+    /* Panel détail */
+    .detail-panel { display: flex; flex-direction: column; overflow-y: auto; }
+    .detail-head { padding: 24px 32px 20px; border-bottom: 1px solid var(--divider); display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+    .detail-title { font-family: 'Playfair Display', serif; font-size: 28px; font-weight: 500; color: var(--text); }
+    .detail-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+    .detail-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-md { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 18px; border-radius: var(--r-md); border: none; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .detail-body { padding: 24px 32px; display: flex; flex-direction: column; gap: 24px; flex: 1; }
+    /* Workflow canvas */
+    .wf-canvas { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); padding: 28px 32px; position: relative; min-height: 280px; display: flex; flex-direction: column; gap: 16px; }
+    .wf-canvas__label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+    /* Nodes */
+    .wf-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .wf-node { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .node { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: var(--r-md); border: 2px solid; font-size: 12.5px; font-weight: 600; cursor: pointer; }
+    .node-trigger { border-color: var(--marine); background: var(--marine-hl); color: var(--marine); }
+    .node-cond    { border-color: #b85b00; background: #fff3e0; color: #b85b00; border-style: dashed; }
+    .node-action  { border-color: var(--primary); background: var(--primary-hl); color: var(--primary-active); }
+    .node-end     { border-color: #2e7d32; background: #e8f5e9; color: #2e7d32; }
+    .node-delay   { border-color: var(--border); background: var(--surface-offset); color: var(--text-muted); }
+    .node__icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: currentColor; opacity: .15; }
+    .wf-arrow { color: var(--text-faint); font-size: 18px; align-self: center; }
+    .wf-branch { display: flex; flex-direction: column; gap: 8px; }
+    .wf-branch__label { font-size: 10.5px; font-weight: 600; color: var(--text-faint); text-transform: uppercase; letter-spacing: .8px; margin-left: 4px; }
+    /* Config panel */
+    .config-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .config-field { display: flex; flex-direction: column; gap: 5px; }
+    .config-label { font-size: 11px; font-weight: 600; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase; }
+    .config-input, .config-select { height: 40px; border: 1px solid var(--divider); border-radius: var(--r-md); background: var(--surface); padding: 0 12px; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13.5px; color: var(--text); outline: none; }
+    .config-input:focus, .config-select:focus { border-color: var(--marine); box-shadow: 0 0 0 3px var(--marine-hl); }
+    /* Run history */
+    .run-table { width: 100%; border-collapse: collapse; }
+    .run-table th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; color: var(--text-faint); font-weight: 700; padding: 8px 0; border-bottom: 1px solid var(--divider); }
+    .run-table td { padding: 10px 0; border-bottom: 1px solid var(--divider); font-size: 12.5px; vertical-align: middle; }
+    .run-table tr:last-child td { border-bottom: none; }
+    .status-pill { display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 8px; border-radius: 99px; font-size: 10.5px; font-weight: 600; }
+    .pill-ok    { background: #e8f5e9; color: #2e7d32; }
+    .pill-warn  { background: #fff3e0; color: #e65100; }
+    .pill-error { background: #ffebee; color: #c62828; }
+  </style>
+</head>
+<body>
+<div class="shell">
+  <nav class="sidebar">
+    <div class="sidebar__logo">Atlasia</div>
+    <a class="sidebar__item" href="#">Tableau de bord</a>
+    <a class="sidebar__item" href="#">Dossiers</a>
+    <a class="sidebar__item" href="#">Annonces</a>
+    <a class="sidebar__item" href="#">Tâches</a>
+    <a class="sidebar__item" href="#">Rapports</a>
+    <a class="sidebar__item sidebar__item--active" href="#">Workflows</a>
+  </nav>
+
+  <main class="main" id="main-content">
+    <div class="admin-layout">
+
+      <!-- Liste des workflows -->
+      <div class="workflow-list-panel">
+        <div class="wl-head">
+          <div class="wl-title">Workflows</div>
+          <button class="btn-sm btn-marine">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+            Nouveau
+          </button>
+        </div>
+        <div class="wl-search">
+          <svg class="wl-search-icon" width="13" height="13" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <input class="wl-search-input" placeholder="Rechercher…" aria-label="Rechercher un workflow" />
+        </div>
+        <div class="wl-items">
+          <div class="wl-item wl-item--active">
+            <div class="wl-item__name">Relance automatique lead</div>
+            <div class="wl-item__meta">
+              <span class="badge-sm badge-active">Actif</span>
+              <span>14 exécutions · 3j</span>
+            </div>
+          </div>
+          <div class="wl-item">
+            <div class="wl-item__name">Bienvenue nouveau dossier</div>
+            <div class="wl-item__meta">
+              <span class="badge-sm badge-active">Actif</span>
+              <span>47 exécutions · 30j</span>
+            </div>
+          </div>
+          <div class="wl-item">
+            <div class="wl-item__name">Rappel visite J-1</div>
+            <div class="wl-item__meta">
+              <span class="badge-sm badge-paused">En pause</span>
+              <span>0 exécution · modifié hier</span>
+            </div>
+          </div>
+          <div class="wl-item">
+            <div class="wl-item__name">Escalade dossier inactif</div>
+            <div class="wl-item__meta">
+              <span class="badge-sm badge-active">Actif</span>
+              <span>8 exécutions · 7j</span>
+            </div>
+          </div>
+          <div class="wl-item">
+            <div class="wl-item__name">Rapport hebdomadaire agents</div>
+            <div class="wl-item__meta">
+              <span class="badge-sm badge-draft">Brouillon</span>
+              <span>Jamais exécuté</span>
+            </div>
+          </div>
+          <div class="wl-item">
+            <div class="wl-item__name">Notification signature</div>
+            <div class="wl-item__meta">
+              <span class="badge-sm badge-active">Actif</span>
+              <span>22 exécutions · 30j</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Panneau détail / éditeur -->
+      <div class="detail-panel">
+        <div class="detail-head">
+          <div>
+            <div class="detail-title">Relance automatique lead</div>
+            <div class="detail-sub">Déclenché automatiquement si un dossier reste sans contact depuis 3 jours.</div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-md btn-ghost">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 3l1.5 1.5M2 10.5h1.5L12 2l-1.5-1.5L2 9v1.5z" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              Modifier
+            </button>
+            <button class="btn-md btn-ghost" style="color:#2e7d32;border-color:#c8e6c9">
+              ▶ Tester
+            </button>
+            <button class="btn-md btn-marine">⏸ Désactiver</button>
+          </div>
+        </div>
+
+        <div class="detail-body">
+
+          <!-- Canvas workflow -->
+          <div class="wf-canvas">
+            <div class="wf-canvas__label">Flux d'exécution</div>
+            <div class="wf-row">
+              <!-- Trigger -->
+              <div class="wf-node">
+                <div class="node node-trigger">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+                  Déclencheur · Dossier inactif 3j
+                </div>
+                <span style="font-size:10.5px;color:var(--text-faint)">Scheduler · toutes les 6h</span>
+              </div>
+              <div class="wf-arrow">→</div>
+              <!-- Condition -->
+              <div class="wf-node">
+                <div class="node node-cond">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 2l6 4-6 4-6-4 6-4zM2 10l6 4 6-4" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                  Condition · Statut ≠ LOST
+                </div>
+                <span style="font-size:10.5px;color:var(--text-faint)">Logique conditionnelle</span>
+              </div>
+              <div class="wf-arrow">→</div>
+              <!-- Branch OUI/NON -->
+              <div class="wf-branch">
+                <div>
+                  <div class="wf-branch__label">Oui</div>
+                  <div class="node node-action" style="margin-top:4px">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                    Envoyer SMS de relance
+                  </div>
+                </div>
+                <div style="margin-top:8px">
+                  <div class="wf-branch__label">Non</div>
+                  <div class="node node-end" style="margin-top:4px">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/></svg>
+                    Fin · Ignorer
+                  </div>
+                </div>
+              </div>
+              <div class="wf-arrow">→</div>
+              <!-- Délai -->
+              <div class="wf-node">
+                <div class="node node-delay">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 5v3l1.5 1.5" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+                  Attendre 24h
+                </div>
+              </div>
+              <div class="wf-arrow">→</div>
+              <!-- Action finale -->
+              <div class="wf-node">
+                <div class="node node-action">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 10l4-7 4 4 2-3 2 6H2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+                  Créer tâche agent
+                </div>
+                <span style="font-size:10.5px;color:var(--text-faint)">Assigner à l'agent responsable</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Configuration -->
+          <div style="background:var(--surface);border:1px solid var(--divider);border-radius:var(--r-lg);padding:20px">
+            <div style="font-size:13.5px;font-weight:700;color:var(--text);margin-bottom:16px">Configuration</div>
+            <div class="config-grid">
+              <div class="config-field">
+                <label class="config-label">Délai inactivité (jours)</label>
+                <input class="config-input" type="number" value="3" />
+              </div>
+              <div class="config-field">
+                <label class="config-label">Modèle SMS</label>
+                <select class="config-select">
+                  <option>Relance standard</option>
+                  <option>Relance urgente</option>
+                  <option>Message personnalisé…</option>
+                </select>
+              </div>
+              <div class="config-field">
+                <label class="config-label">Assignation tâche</label>
+                <select class="config-select">
+                  <option>Agent responsable du dossier</option>
+                  <option>Agent spécifique…</option>
+                  <option>Round-robin équipe</option>
+                </select>
+              </div>
+              <div class="config-field">
+                <label class="config-label">Statuts cibles</label>
+                <select class="config-select" multiple>
+                  <option selected>NEW</option>
+                  <option selected>QUALIFICATION</option>
+                  <option>RDV</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Historique d'exécutions -->
+          <div style="background:var(--surface);border:1px solid var(--divider);border-radius:var(--r-lg);overflow:hidden">
+            <div style="padding:16px 20px;border-bottom:1px solid var(--divider);font-size:13.5px;font-weight:700;color:var(--text)">
+              Historique des exécutions (14)
+            </div>
+            <div style="padding:0 20px">
+              <table class="run-table">
+                <thead>
+                  <tr><th>Date / Heure</th><th>Déclencheur</th><th>Dossier</th><th>Statut</th><th>Durée</th></tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="color:var(--text-muted)">05/04 05:00:01</td>
+                    <td style="color:var(--text-muted)">Scheduler</td>
+                    <td style="color:var(--marine);font-weight:600">#1042</td>
+                    <td><span class="status-pill pill-ok">✓ Succès</span></td>
+                    <td style="color:var(--text-muted)">1.2s</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted)">04/04 23:00:00</td>
+                    <td style="color:var(--text-muted)">Scheduler</td>
+                    <td style="color:var(--marine);font-weight:600">#1035</td>
+                    <td><span class="status-pill pill-ok">✓ Succès</span></td>
+                    <td style="color:var(--text-muted)">0.9s</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted)">04/04 17:00:00</td>
+                    <td style="color:var(--text-muted)">Scheduler</td>
+                    <td style="color:var(--marine);font-weight:600">#1028</td>
+                    <td><span class="status-pill pill-error">✗ Erreur</span></td>
+                    <td style="color:var(--text-muted)">4.1s</td>
+                  </tr>
+                  <tr>
+                    <td style="color:var(--text-muted)">04/04 11:00:01</td>
+                    <td style="color:var(--text-muted)">Scheduler</td>
+                    <td style="color:var(--marine);font-weight:600">#1019</td>
+                    <td><span class="status-pill pill-ok">✓ Succès</span></td>
+                    <td style="color:var(--text-muted)">1.4s</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

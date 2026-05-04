@@ -1,0 +1,56 @@
+.ds-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ds-space-1);
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--ds-radius-pill);
+  border: 1px solid var(--ds-divider);
+  background: var(--ds-surface);
+  color: var(--ds-text-muted);
+  font-family: var(--ds-font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--ds-transition-fast),
+    border-color var(--ds-transition-fast),
+    color var(--ds-transition-fast);
+
+  &:hover:not(&--active):not(&--disabled) {
+    background: var(--ds-surface-offset);
+    border-color: var(--ds-border);
+    color: var(--ds-text);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ds-marine);
+    outline-offset: 2px;
+  }
+
+  &--active {
+    background: var(--ds-marine-hl);
+    border-color: var(--ds-marine);
+    color: var(--ds-marine);
+    font-weight: 600;
+  }
+
+  &--disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &__count {
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0.7;
+  }
+}
+
+[data-theme='dark'],
+.dark-theme {
+  .ds-filter-chip--active {
+    color: var(--ds-marine-light);
+  }
+}

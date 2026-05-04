@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Annonces</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+<style>
+  .listing-card { background: var(--surface); border: 1px solid var(--divider); border-radius: var(--r-lg); overflow: hidden; }
+  .listing-card .img { height: 160px; }
+  .listing-card .ribbon { position:absolute; top:10px; left:10px; }
+  .listing-card .heart { position:absolute; top:10px; right:10px; width:30px; height:30px; border-radius:15px; background:rgba(255,255,255,.9); display:flex; align-items:center; justify-content:center; color:var(--text-muted); }
+  .filter-chip { display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 12px; border-radius:16px; border:1px solid var(--divider); font-size:13px; color:var(--text-muted); background:var(--surface); cursor:pointer; }
+  .filter-chip.on { border-color:var(--marine); color:var(--marine); background:var(--marine-hl); font-weight:600; }
+  [data-theme="dark"] .filter-chip.on { color: var(--marine-light); }
+  .ios-tab { display:flex; flex-direction:column; align-items:center; gap:3px; flex:1; padding:8px 0; color:var(--text-faint); font-size:10px; font-weight:500; }
+  .ios-tab.on { color: var(--marine); }
+  [data-theme="dark"] .ios-tab.on { color: var(--marine-light); }
+  .ios-tabbar { position:absolute; bottom:14px; left:14px; right:14px; height:64px; background:rgba(255,255,255,.85); backdrop-filter: blur(20px); border:1px solid var(--divider); border-radius:24px; display:flex; align-items:center; padding: 0 6px; box-shadow: var(--shadow-md); }
+  [data-theme="dark"] .ios-tabbar { background: rgba(24,23,20,.7); }
+  .md-fab { position:absolute; bottom:80px; right:16px; width:56px; height:56px; border-radius:18px; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 4px 12px rgba(0,0,0,.2); z-index:10; }
+  .md-bottom { position:absolute; bottom:28px; left:0; right:0; height:64px; background:var(--surface); border-top:1px solid var(--divider); display:flex; }
+  .md-tab { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; font-size:10px; color:var(--text-muted); font-weight:500; }
+  .md-tab.on { color:var(--marine); }
+  [data-theme="dark"] .md-tab.on { color: var(--marine-light); }
+  .md-tab.on .pill { background: var(--marine-hl); }
+  .md-tab .pill { width:32px; height:18px; border-radius:9px; display:flex; align-items:center; justify-content:center; }
+</style>
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Catalogue</div><h2 class="display">Annonces</h2><div class="sub muted" style="margin-top:6px;">Liste des biens publiés. Filtres, presets, vue carte.</div></div></div>
+<div id="mount"></div>
+</div>
+<script src="frames.js"></script>
+<script>
+const ICN = {
+  home: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  files: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M5 4h9l5 5v11a1 1 0 01-1 1H5a1 1 0 01-1-1V5a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
+  building: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 21V8l8-4 8 4v13M4 21h16M9 21v-6h6v6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  cal: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
+  user: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.6"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.6"/></svg>',
+  search: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M14 14l-2.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  heart: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 12s-4.5-2.7-4.5-6A2.5 2.5 0 017 4a2.5 2.5 0 014.5 2c0 3.3-4.5 6-4.5 6z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>',
+  map: '<svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M5 2L1.5 3.5v9L5 11l4 1.5L12.5 11v-9L9 3.5 5 2zM5 2v9M9 3.5v9" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>',
+};
+
+const LISTINGS = [
+  ['Loft Marais 75003','Paris · 84 m²','€620k','active','Actif','12 vues/j'],
+  ['Maison Bordeaux','Bordeaux · 180 m²','€480k','active','Actif','8 vues/j'],
+  ['Riad Marrakech','Médina · 240 m²','€1.1M','active','Actif','22 vues/j'],
+  ['Penthouse Cannes','Croisette · 110 m²','€2.3M','active','Actif','31 vues/j'],
+  ['Studio Bastille','75011 · 28 m²','€295k','paused','En pause','—'],
+  ['Atelier Belleville','75020 · 92 m²','€640k','draft','Brouillon','—'],
+  ['Maison Annecy','Vieille Ville · 150 m²','€780k','active','Actif','14 vues/j'],
+  ['Appartement Lyon','69006 · 76 m²','€340k','active','Actif','9 vues/j'],
+];
+
+// ===== Web Desktop =====
+const webDesktop = `
+<div style="padding: 28px 32px 60px;">
+  <div style="display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:22px;">
+    <div>
+      <div class="label-eyebrow">47 annonces · 3 brouillons</div>
+      <div class="display" style="font-size:32px; line-height:1; margin-top:6px;">Annonces</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <div style="position:relative;">
+        <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-faint);">${ICN.search}</span>
+        <input class="input" placeholder="Rechercher un bien…" style="width:280px; padding-left:34px;">
+      </div>
+      <button class="btn btn-ghost">${ICN.map} Carte</button>
+      <button class="btn btn-copper">+ Publier</button>
+    </div>
+  </div>
+
+  <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; align-items:center;">
+    <div class="filter-chip on">Tous · 47</div>
+    <div class="filter-chip">Actifs · 38</div>
+    <div class="filter-chip">En pause · 6</div>
+    <div class="filter-chip">Brouillons · 3</div>
+    <div style="width:1px; height:24px; background:var(--divider); margin: 0 4px;"></div>
+    <div class="filter-chip">Paris</div>
+    <div class="filter-chip">€500k – €1M</div>
+    <div class="filter-chip">Loft</div>
+    <div style="flex:1;"></div>
+    <div class="muted" style="font-size:12.5px;">Trier · plus récent</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:14px;">
+    ${LISTINGS.map(L=>`<a href="annonce-detail.html" class="listing-card" style="text-decoration:none; color:inherit; display:block; position:relative;">
+      <div class="img imgph imgph-marine" data-label="${L[0].toUpperCase()}" style="position:relative;">
+        <span class="ribbon"><span class="badge badge-${L[3]}">${L[4]}</span></span>
+        <span class="heart">${ICN.heart}</span>
+      </div>
+      <div style="padding:14px 16px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+          <div style="font-weight:600; font-size:14.5px;">${L[0]}</div>
+          <div style="font-family:'Playfair Display'; font-weight:600; font-size:16px; color:var(--marine);">${L[2]}</div>
+        </div>
+        <div class="muted" style="font-size:12.5px; margin-top:3px;">${L[1]}</div>
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px; padding-top:10px; border-top:1px solid var(--divider); font-size:11.5px; color:var(--text-muted);">
+          <span>${L[5]}</span>
+          <span style="color:var(--marine); font-weight:600;">Modifier →</span>
+        </div>
+      </div>
+    </a>`).join('')}
+  </div>
+</div>`;
+
+// ===== iOS =====
+const ios = `
+<div style="padding: 8px 18px 90px;">
+  <div style="padding: 12px 0 8px;">
+    <div class="label-eyebrow">47 annonces</div>
+    <div style="font-family:'Playfair Display'; font-size:32px; font-weight:600; margin-top:2px;">Annonces</div>
+  </div>
+  <div style="position:relative; margin: 12px 0 14px;">
+    <span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-faint);">${ICN.search}</span>
+    <input class="input" placeholder="Rechercher un bien" style="padding-left:34px; background:var(--surface-offset); border-color:transparent;">
+  </div>
+  <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:12px; scrollbar-width:none;">
+    <div class="filter-chip on" style="flex:none;">Tous</div>
+    <div class="filter-chip" style="flex:none;">Actifs</div>
+    <div class="filter-chip" style="flex:none;">Brouillons</div>
+    <div class="filter-chip" style="flex:none;">Paris</div>
+  </div>
+  ${LISTINGS.slice(0,5).map(L=>`<a href="annonce-detail.html" class="listing-card" style="text-decoration:none; color:inherit; display:block; margin-bottom:12px; position:relative;">
+    <div class="img imgph imgph-marine" data-label="${L[0].toUpperCase()}" style="position:relative; height:160px;">
+      <span class="ribbon"><span class="badge badge-${L[3]}">${L[4]}</span></span>
+      <span class="heart">${ICN.heart}</span>
+    </div>
+    <div style="padding:12px 14px;">
+      <div style="display:flex; justify-content:space-between; gap:8px;">
+        <div style="font-weight:600; font-size:14.5px;">${L[0]}</div>
+        <div style="font-family:'Playfair Display'; font-weight:600; font-size:15px; color:var(--marine);">${L[2]}</div>
+      </div>
+      <div class="muted" style="font-size:12.5px; margin-top:3px;">${L[1]}</div>
+    </div>
+  </a>`).join('')}
+</div>
+<div class="ios-tabbar">
+  <div class="ios-tab">${ICN.home}<span>Accueil</span></div>
+  <div class="ios-tab">${ICN.files}<span>Dossiers</span></div>
+  <div class="ios-tab on">${ICN.building}<span>Annonces</span></div>
+  <div class="ios-tab">${ICN.cal}<span>Agenda</span></div>
+  <div class="ios-tab">${ICN.user}<span>Profil</span></div>
+</div>`;
+
+// ===== Android =====
+const android = `
+<div style="background:var(--surface); padding: 14px 16px 12px; border-bottom:1px solid var(--divider); display:flex; align-items:center; gap:12px;">
+  <span style="color:var(--text-muted);">${ICN.search}</span>
+  <div style="flex:1; font-size:14px; color:var(--text-muted);">Rechercher une annonce</div>
+  <span style="color:var(--text-muted);">${ICN.map}</span>
+</div>
+<div style="padding: 14px 16px 0;">
+  <div style="font-family:'Playfair Display'; font-size:24px; font-weight:600;">Annonces</div>
+  <div class="muted" style="font-size:12.5px; margin-top:2px;">47 publiées · 3 brouillons</div>
+</div>
+<div style="display:flex; gap:6px; overflow-x:auto; padding: 14px 16px 6px; scrollbar-width:none;">
+  <div class="filter-chip on" style="flex:none;">Tous · 47</div>
+  <div class="filter-chip" style="flex:none;">Actifs · 38</div>
+  <div class="filter-chip" style="flex:none;">Brouillons · 3</div>
+</div>
+<div style="padding: 8px 16px 110px;">
+  ${LISTINGS.slice(0,5).map(L=>`<div class="listing-card" style="margin-bottom:12px; border-radius:18px;">
+    <div class="img imgph imgph-marine" data-label="${L[0].toUpperCase()}" style="position:relative; height:170px;">
+      <span class="ribbon"><span class="badge badge-${L[3]}">${L[4]}</span></span>
+    </div>
+    <div style="padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; gap:8px;">
+        <div style="font-weight:600; font-size:14.5px;">${L[0]}</div>
+        <div style="font-family:'Playfair Display'; font-weight:600; font-size:15px; color:var(--marine);">${L[2]}</div>
+      </div>
+      <div class="muted" style="font-size:12.5px; margin-top:3px;">${L[1]} · ${L[5]}</div>
+    </div>
+  </div>`).join('')}
+</div>
+<div class="md-fab"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M12 5v14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+<div class="md-bottom">
+  <div class="md-tab"><div class="pill">${ICN.home}</div><span>Accueil</span></div>
+  <div class="md-tab"><div class="pill">${ICN.files}</div><span>Dossiers</span></div>
+  <div class="md-tab on"><div class="pill">${ICN.building}</div><span>Annonces</span></div>
+  <div class="md-tab"><div class="pill">${ICN.cal}</div><span>Agenda</span></div>
+</div>`;
+
+const webMobile = `
+<div style="padding: 18px 20px 30px;">
+  <div class="label-eyebrow">Catalogue</div>
+  <div style="font-family:'Playfair Display'; font-size:26px; font-weight:600; margin: 4px 0 14px;">Annonces</div>
+  <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:8px; margin-bottom:10px;">
+    <div class="filter-chip on" style="flex:none;">Tous</div>
+    <div class="filter-chip" style="flex:none;">Actifs</div>
+    <div class="filter-chip" style="flex:none;">Paris</div>
+  </div>
+  ${LISTINGS.slice(0,4).map(L=>`<div class="listing-card" style="margin-bottom:12px; position:relative;">
+    <div class="img imgph imgph-marine" data-label="${L[0].toUpperCase()}" style="height:140px; position:relative;"><span class="ribbon"><span class="badge badge-${L[3]}">${L[4]}</span></span></div>
+    <div style="padding:12px 14px;">
+      <div style="display:flex; justify-content:space-between;"><div style="font-weight:600; font-size:14px;">${L[0]}</div><div style="font-family:'Playfair Display'; font-weight:600; color:var(--marine);">${L[2]}</div></div>
+      <div class="muted" style="font-size:12px; margin-top:3px;">${L[1]}</div>
+    </div>
+  </div>`).join('')}
+</div>`;
+
+document.getElementById('mount').innerHTML = AtlasFrames.devices({ ios, android, webMobile, webDesktop });
+</script>
+<script src="shell.js"></script>
+</body></html>

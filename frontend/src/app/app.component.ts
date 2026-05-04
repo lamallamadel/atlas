@@ -16,6 +16,7 @@ import { Capacitor } from '@capacitor/core';
 import { OfflineIndicatorComponent } from './components/offline-indicator.component';
 import { ProgressBarComponent } from './components/progress-bar.component';
 import { NotificationToastComponent } from './components/notification-toast.component';
+import { TourLauncherComponent } from './components/tour-launcher.component';
 
 @Component({
     selector: 'app-root',
@@ -35,11 +36,12 @@ import { NotificationToastComponent } from './components/notification-toast.comp
         RouterOutlet,
         OfflineIndicatorComponent,
         ProgressBarComponent,
-        NotificationToastComponent
+        NotificationToastComponent,
+        TourLauncherComponent,
     ]
 })
 export class AppComponent implements OnInit, OnDestroy {
-  title = 'frontend';
+  title = 'Atlasia Pro';
   isNavigating = false;
   showLoadingOverlay = false;
   private loadingTimeout: any;

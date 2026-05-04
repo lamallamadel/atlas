@@ -123,3 +123,5 @@ fastlane/.env.*
 *.p8
 service_account.json
 api_key.json
+
+*storybook.log

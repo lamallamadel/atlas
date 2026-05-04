@@ -29,21 +29,18 @@ import { DossierFilterApiService, DossierFilterRequest, FilterCondition } from '
 import { Observable } from 'rxjs';
 import { debounceTime, map, startWith, switchMap } from 'rxjs/operators';
 import { listStaggerAnimation, itemAnimation } from '../../animations/list-animations';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
-import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatIconButton } from '@angular/material/button';
-import { MatCard, MatCardContent } from '@angular/material/card';
-import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle } from '@angular/material/expansion';
-import { MatSelect } from '@angular/material/select';
-import { MatOption, MatAutocompleteTrigger, MatAutocomplete } from '@angular/material/autocomplete';
-import { MatMenuTrigger, MatMenu, MatMenuItem } from '@angular/material/menu';
-import { MatDivider } from '@angular/material/list';
-import { MatChipSet, MatChip, MatChipRemove } from '@angular/material/chips';
 import { SkeletonLoaderComponent } from '../../components/skeleton-loader.component';
 import { KanbanBoardComponent } from '../../components/kanban-board.component';
 import { AsyncPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
+// Design System
+import { PageHeaderComponent }    from '../../design-system/patterns/page-header/page-header.component';
+import { FilterBarComponent, DsFilterOption } from '../../design-system/patterns/filter-bar/filter-bar.component';
+import { DsButtonComponent }      from '../../design-system/primitives/ds-button/ds-button.component';
+import { DsAvatarComponent }      from '../../design-system/primitives/ds-avatar/ds-avatar.component';
+import { DsBadgeComponent, DsBadgeStatus } from '../../design-system/primitives/ds-badge/ds-badge.component';
+import { DsEmptyStateComponent }  from '../../design-system/primitives/ds-empty-state/ds-empty-state.component';
+import { DsSkeletonComponent }    from '../../design-system/primitives/ds-skeleton/ds-skeleton.component';
 
 interface AppliedFilter {
   key: string;
@@ -55,9 +52,18 @@ interface AppliedFilter {
 @Component({
     selector: 'app-dossiers',
     templateUrl: './dossiers.component.html',
-    styleUrls: ['./dossiers.component.css'],
+    styleUrls: ['./dossiers.component.scss'],
     animations: [listStaggerAnimation, itemAnimation],
-    imports: [MatButtonToggleGroup, MatButtonToggle, MatIcon, MatButton, MatCard, MatCardContent, MatFormField, MatLabel, MatInput, FormsModule, ReactiveFormsModule, MatSuffix, MatExpansionPanel, MatExpansionPanelHeader, MatExpansionPanelTitle, MatSelect, MatOption, MatAutocompleteTrigger, MatAutocomplete, MatMenuTrigger, MatMenu, MatMenuItem, MatDivider, MatIconButton, MatChipSet, MatChip, MatChipRemove, SkeletonLoaderComponent, EmptyStateComponent, GenericTableComponent, KanbanBoardComponent, MobileDossierCardComponent, AsyncPipe]
+    imports: [
+      FormsModule, ReactiveFormsModule, RouterLink,
+      KanbanBoardComponent, MobileDossierCardComponent,
+      // Design System (nouveau template liste)
+      PageHeaderComponent, FilterBarComponent,
+      DsButtonComponent, DsAvatarComponent, DsBadgeComponent,
+      DsEmptyStateComponent, DsSkeletonComponent,
+      // Pipes
+      DateFormatPipe, PhoneFormatPipe,
+    ]
 })
 export class DossiersComponent implements OnInit {
   dossiers: DossierResponse[] = [];
@@ -79,6 +85,60 @@ export class DossiersComponent implements OnInit {
 
   filterPanelExpanded = false;
   appliedFilters: AppliedFilter[] = [];
+
+  /* ── DS filter options ── */
+  readonly statusFilters: DsFilterOption[] = [
+    { value: 'NEW',           label: 'Nouveaux' },
+    { value: 'QUALIFICATION', label: 'Qualification' },
+    { value: 'RDV',           label: 'RDV' },
+    { value: 'WON',           label: 'Gagnés' },
+    { value: 'LOST',          label: 'Perdus' },
+  ];
+
+  getDossierBadgeStatus(status: string): DsBadgeStatus {
+    const map: Record<string, DsBadgeStatus> = {
+      NEW: 'new', QUALIFICATION: 'qualification', RDV: 'rdv',
+      WON: 'won', LOST: 'lost', ARCHIVED: 'archived',
+    };
+    return (map[status] as DsBadgeStatus) ?? 'neutral';
+  }
+
+  onStatusFilterChange(value: string): void {
+    this.selectedStatus = value as DossierStatus | '';
+    this.loadDossiers();
+  }
+
+  onSearchChange(value: string): void {
+    this.phoneFilter = value;
+    this.loadDossiers();
+  }
+
+  goToDossier(id: number): void {
+    this.router.navigate(['/pro/dossiers', id]);
+  }
+
+  editDossier(dossier: DossierResponse): void {
+    this.router.navigate(['/pro/dossiers', dossier.id]);
+  }
+
+  deleteDossier(dossier: DossierResponse): void {
+    this.confirmDeleteDossier(dossier);
+  }
+
+  onKanbanStatusChange(event: { id: number; status: string }): void {
+    this.dossierApiService.patchStatus(event.id, event.status as DossierStatus).subscribe({
+      next: () => this.loadDossiers(),
+      error: () => {}
+    });
+  }
+
+  onMobileAction(action: DossierAction): void {
+    switch (action.type) {
+      case 'view':   this.goToDossier(action.dossier.id); break;
+      case 'delete': this.deleteDossier(action.dossier); break;
+      default: break;
+    }
+  }
   isMobile = false;
   savedPresets: FilterPreset[] = [];
   showPresetMenu = false;

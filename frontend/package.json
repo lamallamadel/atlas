@@ -32,15 +32,16 @@
     "e2e:full": "npm run e2e && npm run e2e:postgres && npm run e2e:h2-keycloak && npm run e2e:postgres-keycloak",
     "e2e:a11y": "playwright test -c playwright.config.ts --grep @a11y",
     "analyze": "ng build --stats-json && webpack-bundle-analyzer dist/frontend/stats.json",
-    "analyze:bundle": "webpack-bundle-analyzer dist/frontend/stats.json",
+    "benchmark:bundle": "node scripts/benchmark-bundle.cjs",
+    "benchmark:a11y": "playwright test --grep @a11y",
     "analyze:source": "source-map-explorer dist/frontend/**/*.js",
     "a11y": "node accessibility-audit.js",
     "a11y:lighthouse": "npx lighthouse http://localhost:4200 --only-categories=accessibility --view",
     "a11y:pre-commit": "node scripts/a11y-pre-commit.js",
     "lighthouse:ci": "lhci autorun",
     "prepare": "cd .. && husky install frontend/.husky",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "storybook": "ng run frontend:storybook",
+    "build-storybook": "ng run frontend:build-storybook",
     "build-storybook:analyze": "storybook build --webpack-stats-json",
     "deploy-storybook": "npm run build-storybook && gh-pages -d storybook-static",
     "cap:init": "cap init",
@@ -58,6 +59,9 @@
     "build:android": "ng build --configuration production && cap sync android && cap open android"
   },
   "private": true,
+  "overrides": {
+    "webpack": "5.106.2"
+  },
   "dependencies": {
     "@angular/animations": "^21.2.11",
     "@angular/cdk": "^21.2.9",
@@ -157,6 +161,8 @@
     "storybook": "^10.3.6",
     "typescript": "~5.9.3",
     "webpack-bundle-analyzer": "^4.10.1",
-    "workbox-webpack-plugin": "^7.0.0"
+    "workbox-webpack-plugin": "^7.0.0",
+    "@storybook/addon-onboarding": "^10.3.6",
+    "@compodoc/compodoc": "^1.2.1"
   }
 }

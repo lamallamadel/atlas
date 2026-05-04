@@ -1,0 +1,99 @@
+/* ── ds-table ── */
+.ds-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--ds-radius-lg);
+  background: var(--ds-surface);
+
+  &--bordered {
+    border: 1px solid var(--ds-divider);
+  }
+}
+
+.ds-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--ds-font-body);
+  font-size: 13.5px;
+  color: var(--ds-text);
+
+  /* ── En-tête ── */
+  &__head {
+    border-bottom: 1px solid var(--ds-divider);
+  }
+
+  &__th {
+    padding: 10px 14px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ds-text-muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    background: var(--ds-surface);
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    user-select: none;
+
+    &--sortable {
+      cursor: pointer;
+      &:hover { color: var(--ds-text); background: var(--ds-surface-offset); }
+    }
+
+    &--sorted { color: var(--ds-marine); }
+
+    &-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  }
+
+  &__sort-icon {
+    display: inline-flex;
+    align-items: center;
+    color: var(--ds-text-faint);
+    vertical-align: middle;
+
+    .ds-table__th--sorted & { color: var(--ds-marine); }
+  }
+
+  /* ── Lignes ── */
+  &__row {
+    border-bottom: 1px solid var(--ds-surface-offset);
+    transition: background var(--ds-transition-fast);
+
+    &:last-child { border-bottom: none; }
+
+    &:hover { background: var(--ds-surface-offset); }
+
+    &--clickable {
+      cursor: pointer;
+      &:focus-visible {
+        outline: 2px solid var(--ds-marine);
+        outline-offset: -2px;
+      }
+    }
+
+    &--skeleton { pointer-events: none; }
+  }
+
+  &__td {
+    padding: 12px 14px;
+    vertical-align: middle;
+    color: var(--ds-text);
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ── État vide ── */
+  &__empty {
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--ds-text-muted);
+    font-size: 14px;
+  }
+}

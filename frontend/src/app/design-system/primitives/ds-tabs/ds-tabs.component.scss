@@ -1,0 +1,136 @@
+@use '../../../../styles/utilities' as *;
+
+/* ── ds-tabs ── */
+.ds-tabs {
+  display: flex;
+  gap: 2px;
+
+  /* ── Variante underline (défaut) ── */
+  &--underline {
+    border-bottom: 1px solid var(--ds-divider);
+    gap: 0;
+
+    .ds-tabs__tab {
+      padding: 10px 16px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ds-text-muted);
+      background: transparent;
+      border: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      cursor: pointer;
+      transition: color var(--ds-transition-fast), border-color var(--ds-transition-fast);
+      font-family: var(--ds-font-body);
+      line-height: 1.4;
+
+      &--active {
+        color: var(--ds-marine);
+        border-bottom-color: var(--ds-primary);
+      }
+
+      &:hover:not(&--active):not(&--disabled) {
+        color: var(--ds-text);
+        background: var(--ds-surface-offset);
+      }
+
+      &--disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  /* ── Variante pills ── */
+  &--pills {
+    gap: 4px;
+
+    .ds-tabs__tab {
+      padding: 7px 14px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--ds-text-muted);
+      background: transparent;
+      border: none;
+      border-radius: var(--ds-radius-pill);
+      cursor: pointer;
+      transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+      font-family: var(--ds-font-body);
+
+      &--active {
+        background: var(--ds-marine-hl);
+        color: var(--ds-marine);
+      }
+
+      &:hover:not(&--active):not(&--disabled) {
+        background: var(--ds-surface-offset);
+        color: var(--ds-text);
+      }
+
+      &--disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+
+  /* ── Variante segment (toggle buttons) ── */
+  &--segment {
+    background: var(--ds-surface-offset);
+    border: 1px solid var(--ds-divider);
+    border-radius: var(--ds-radius-md);
+    padding: 3px;
+    gap: 2px;
+
+    .ds-tabs__tab {
+      flex: 1;
+      padding: 6px 14px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ds-text-muted);
+      background: transparent;
+      border: none;
+      border-radius: var(--ds-radius-sm);
+      cursor: pointer;
+      transition: background var(--ds-transition-fast), color var(--ds-transition-fast),
+                  box-shadow var(--ds-transition-fast);
+      font-family: var(--ds-font-body);
+
+      &--active {
+        background: var(--ds-surface);
+        color: var(--ds-text);
+        box-shadow: var(--ds-shadow-xs);
+      }
+
+      &:hover:not(&--active):not(&--disabled) {
+        color: var(--ds-text);
+      }
+
+      &--disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+/* ── Badge ── */
+.ds-tabs__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--ds-radius-pill);
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--ds-marine);
+  color: var(--ds-text-inverse);
+  margin-left: 6px;
+  vertical-align: middle;
+
+  .ds-tabs__tab--active & {
+    background: var(--ds-primary);
+  }
+}

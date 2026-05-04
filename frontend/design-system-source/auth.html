@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Atlasia · Auth</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="tokens.css">
+</head><body>
+<div>
+<div class="page-h"><div><div class="label-eyebrow">Auth surface</div><h2 class="display">Sign up &amp; sign in</h2><div class="sub muted" style="margin-top:6px;">Editorial welcome, role select, OTP, success.</div></div></div>
+
+<div id="mount"></div>
+</div>
+<script src="frames.js"></script>
+<script>
+const heroIOS = `
+<div style="position:absolute; inset:0;">
+  <div style="position:absolute; inset:0;" class="imgph imgph-marine" data-label="PROPERTY · HERO"></div>
+  <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(13,44,74,.55) 0%, rgba(13,44,74,.35) 35%, rgba(13,44,74,.95) 78%, #0d2c4a 100%);"></div>
+  <div style="position:absolute; top:24px; left:24px; display:flex; align-items:center; gap:10px; color:#fff;">
+    <div style="width:34px; height:34px; border-radius:10px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display'; font-weight:700; font-size:17px;">A</div>
+    <div style="font-family:'Playfair Display'; font-size:19px; font-weight:600; letter-spacing:.3px;">Atlasia</div>
+  </div>
+  <div style="position:absolute; bottom:160px; left:0; right:0; padding:0 26px; color:#fff;">
+    <div style="font-family:'Playfair Display'; font-size:42px; font-weight:500; line-height:1.05; letter-spacing:-.5px;">Find the<br>place that<br><em style="color:#e7c9b3;">feels right.</em></div>
+    <div style="font-size:14.5px; line-height:1.5; color:rgba(255,255,255,.75); margin-top:14px; max-width:280px;">Curated listings, verified owners, a quieter way to search.</div>
+  </div>
+  <div style="position:absolute; bottom:48px; left:0; right:0; padding:0 22px; display:flex; flex-direction:column; gap:10px;">
+    <button class="btn btn-copper" style="height:50px; border-radius:14px; font-size:15px;">Create account</button>
+    <button class="btn btn-ghost" style="height:46px; border-radius:14px; background:transparent; color:#fff; border-color:rgba(255,255,255,.28); font-size:14px;">I already have an account</button>
+  </div>
+</div>`;
+
+const heroAndroid = `
+<div style="position:absolute; inset:0;">
+  <div style="position:absolute; inset:0;" class="imgph imgph-marine" data-label="PROPERTY · HERO"></div>
+  <div style="position:absolute; inset:0; background:linear-gradient(180deg, rgba(13,44,74,.5), rgba(13,44,74,.95) 75%, #0d2c4a);"></div>
+  <div style="position:absolute; top:22px; left:22px; right:22px; display:flex; align-items:center; gap:10px; color:#fff;">
+    <div style="width:34px; height:34px; border-radius:10px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display'; font-weight:700; font-size:17px;">A</div>
+    <div style="font-family:'Playfair Display'; font-size:19px; font-weight:600;">Atlasia</div>
+  </div>
+  <div style="position:absolute; bottom:170px; left:0; right:0; padding:0 24px; color:#fff;">
+    <div style="font-family:'Playfair Display'; font-size:40px; font-weight:500; line-height:1.05; letter-spacing:-.4px;">Find the<br>place that<br><em style="color:#e7c9b3;">feels right.</em></div>
+    <div style="font-size:14px; color:rgba(255,255,255,.75); margin-top:14px;">Curated listings, verified owners.</div>
+  </div>
+  <div style="position:absolute; bottom:50px; left:0; right:0; padding:0 22px; display:flex; flex-direction:column; gap:10px;">
+    <button style="height:48px; border-radius:24px; background:#b5622e; color:#fff; border:none; font-family:inherit; font-weight:600; font-size:14px; letter-spacing:.5px; text-transform:uppercase;">CREATE ACCOUNT</button>
+    <button style="height:44px; border-radius:24px; background:transparent; color:#fff; border:1px solid rgba(255,255,255,.4); font-family:inherit; font-weight:600; font-size:13px; letter-spacing:.5px; text-transform:uppercase;">I HAVE AN ACCOUNT</button>
+  </div>
+</div>`;
+
+const heroWebMobile = `
+<div style="padding:24px;">
+  <div class="display" style="font-size:32px; line-height:1.1;">Find the place<br>that <em class="italic-accent">feels right.</em></div>
+  <div class="muted" style="font-size:14px; margin-top:12px; line-height:1.5;">Curated listings, verified owners, a quieter way to search.</div>
+  <div style="margin-top:24px;" class="imgph" data-label="PROPERTY"></div>
+  <div style="height:200px;"></div>
+  <button class="btn btn-primary" style="width:100%; height:46px; justify-content:center; margin-bottom:10px;">Create account</button>
+  <button class="btn btn-ghost" style="width:100%; height:44px; justify-content:center;">I already have an account</button>
+</div>
+<style>.imgph[data-label]{height:200px; border-radius:14px;}</style>`;
+
+const heroWebDesktop = `
+<div style="display:grid; grid-template-columns:1fr 1fr; height:100%;">
+  <div style="padding:80px 64px; display:flex; flex-direction:column; justify-content:center;">
+    <div class="label-eyebrow">Welcome</div>
+    <div class="display" style="font-size:64px; line-height:1.02; margin:8px 0 16px;">Find the<br>place that<br><em class="italic-accent">feels right.</em></div>
+    <div class="muted" style="font-size:16px; line-height:1.55; max-width:420px;">Curated listings, verified owners, and a quieter way to search across France and Morocco.</div>
+    <div style="display:flex; gap:12px; margin-top:32px;">
+      <button class="btn btn-primary" style="height:48px; padding:0 22px;">Create account</button>
+      <button class="btn btn-ghost" style="height:48px; padding:0 22px;">Sign in</button>
+    </div>
+    <div class="muted" style="font-size:12.5px; margin-top:24px;">By continuing you agree to the <span style="color:var(--marine); text-decoration:underline;">Terms</span> and <span style="color:var(--marine); text-decoration:underline;">Privacy Policy</span>.</div>
+  </div>
+  <div class="imgph imgph-marine" data-label="PROPERTY · HERO" style="height:100%;"></div>
+</div>`;
+
+document.getElementById('mount').innerHTML = AtlasFrames.devices({
+  ios: heroIOS, android: heroAndroid, webMobile: heroWebMobile, webDesktop: heroWebDesktop
+});
+</script>
+<script src="shell.js"></script>
+</body></html>

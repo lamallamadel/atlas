@@ -16,6 +16,7 @@ export const routes: Routes = [
   // ── Standalone pages ──────────────────────────────────────────
   { path: 'login',          component: LoginComponent,          data: { animation: 'LoginPage' } },
   { path: 'auth/callback',  component: LoginComponent,          data: { animation: 'LoginPage' } },
+  { path: 'signup',         loadComponent: () => import('./pages/signup/signup.component').then(m => m.SignupComponent), data: { animation: 'SignupPage' } },
   { path: 'access-denied',  component: AccessDeniedComponent,  data: { animation: 'AccessDeniedPage' } },
   { path: 'session-expired',component: SessionExpiredComponent, data: { animation: 'SessionExpiredPage' } },
 

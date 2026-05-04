@@ -1,0 +1,113 @@
+.ds-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ds-space-2);
+  border: none;
+  border-radius: var(--ds-radius-md);
+  font-family: var(--ds-font-body);
+  font-weight: 600;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition:
+    background var(--ds-transition-fast),
+    box-shadow var(--ds-transition-fast),
+    transform var(--ds-transition-fast);
+
+  &:focus-visible {
+    outline: 2px solid var(--ds-marine);
+    outline-offset: 2px;
+  }
+
+  /* ── Sizes ── */
+  &--sm  { height: 32px; padding: 0 12px; font-size: 13px; }
+  &--md  { height: 40px; padding: 0 var(--ds-space-4); font-size: 14px; }
+  &--lg  { height: 48px; padding: 0 var(--ds-space-5); font-size: 15px; }
+
+  /* ── Variants ── */
+  &--marine {
+    background: var(--ds-marine);
+    color: var(--ds-text-inverse);
+    &:hover:not(:disabled) {
+      background: var(--ds-marine-hover);
+      box-shadow: var(--ds-shadow-sm);
+    }
+  }
+
+  &--copper {
+    background: var(--ds-primary);
+    color: var(--ds-text-inverse);
+    &:hover:not(:disabled) {
+      background: var(--ds-primary-hover);
+      box-shadow: var(--ds-shadow-sm);
+    }
+  }
+
+  &--ghost {
+    background: transparent;
+    color: var(--ds-text);
+    border: 1px solid var(--ds-border);
+    &:hover:not(:disabled) {
+      background: var(--ds-surface-offset);
+    }
+  }
+
+  &--danger {
+    background: var(--ds-error);
+    color: var(--ds-text-inverse);
+    &:hover:not(:disabled) {
+      background: #b71c1c;
+    }
+  }
+
+  &--icon {
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border-radius: var(--ds-radius-sm);
+    background: transparent;
+    color: var(--ds-text-muted);
+    border: 1px solid var(--ds-border);
+    font-size: 14px;
+    &:hover:not(:disabled) {
+      background: var(--ds-surface-offset);
+      color: var(--ds-text);
+    }
+  }
+
+  /* ── States ── */
+  &--disabled,
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &--loading {
+    cursor: wait;
+    pointer-events: none;
+    .ds-btn__icon { display: none; }
+  }
+
+  /* ── Spinner ── */
+  &__spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: ds-spin 0.7s linear infinite;
+  }
+
+  &--ghost &__spinner {
+    border-color: rgba(13, 44, 74, 0.2);
+    border-top-color: var(--ds-marine);
+  }
+}
+
+@keyframes ds-spin {
+  to { transform: rotate(360deg); }
+}

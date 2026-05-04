@@ -5,12 +5,6 @@
  */
 
 const CACHE_VERSION = 'v2';
-const CACHE_NAME = `offline-cache-${CACHE_VERSION}`;
-const API_CACHE_NAME = `api-cache-${CACHE_VERSION}`;
-const STATIC_CACHE_NAME = `static-cache-${CACHE_VERSION}`;
-
-
-const CACHE_VERSION = 'v2';
 const STATIC_CACHE = `static-assets-${CACHE_VERSION}`;
 const RUNTIME_CACHE = `runtime-cache-${CACHE_VERSION}`;
 const API_CACHE = `api-cache-${CACHE_VERSION}`;
@@ -200,9 +194,7 @@ async function networkFirstStrategy(request, cacheName) {
  */
 async function staleWhileRevalidateStrategy(request, cacheName) {
   const cachedResponse = await caches.match(request);
-  
 
-  // Fetch in background and update cache
   const fetchPromise = fetch(request)
     .then(async (networkResponse) => {
       if (networkResponse && networkResponse.status === 200) {
@@ -213,27 +205,16 @@ async function staleWhileRevalidateStrategy(request, cacheName) {
       return networkResponse;
     })
     .catch((error) => {
-      console.log('[ServiceWorker] Stale-While-Revalidate fetch failed:', error.message);
-      return cachedResponse || createOfflineResponse(request);
-
-  const fetchPromise = fetch(request).then((networkResponse) => {
-    if (networkResponse && networkResponse.status === 200) {
-      // Clone synchronously before any async operation — cloning after the body
-      // is consumed (e.g. inside a deferred cache.then callback) throws
-      // "Response body is already used".
-      const cloned = networkResponse.clone();
-      caches.open(cacheName).then((c) => c.put(request, cloned));
-    }
-    return networkResponse;
-  }).catch((error) => {
-    console.log('[Service Worker] Fetch failed for stale-while-revalidate:', error);
-    return cachedResponse || new Response(JSON.stringify({ error: 'Offline' }), {
-      status: 503,
-      headers: new Headers({ 'Content-Type': 'application/json' })
-
+      console.log('[Service Worker] Fetch failed for stale-while-revalidate:', error);
+      return (
+        cachedResponse ||
+        new Response(JSON.stringify({ error: 'Offline' }), {
+          status: 503,
+          headers: new Headers({ 'Content-Type': 'application/json' }),
+        })
+      );
     });
-  
-  // Return cached response immediately if available
+
   return cachedResponse || fetchPromise;
 }
 

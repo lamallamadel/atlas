@@ -1,0 +1,185 @@
+@use '../../../styles/variables' as vars;
+
+/* ── Atlasia DS Layout ── */
+.pro-page {
+  padding: var(--ds-space-8);
+  max-width: var(--ds-content-full);
+  margin: 0 auto;
+}
+
+/* ── Toggle vue ── */
+.dos-view-toggle {
+  display: flex;
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-sm);
+  overflow: hidden;
+  background: var(--ds-surface);
+}
+.dos-view-btn {
+  width: 36px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  color: var(--ds-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  &--active { background: var(--ds-marine-hl); color: var(--ds-marine); }
+  &:hover:not(&--active) { background: var(--ds-surface-offset); }
+}
+
+/* ── Filtres ── */
+.dos-filters { margin-bottom: var(--ds-space-5); display: flex; flex-direction: column; gap: var(--ds-space-3); }
+
+.dos-active-filters {
+  display: flex;
+  align-items: center;
+  gap: var(--ds-space-2);
+  flex-wrap: wrap;
+}
+.dos-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--ds-marine-hl);
+  color: var(--ds-marine);
+  border-radius: var(--ds-radius-pill);
+  font-size: 12px;
+  font-weight: 500;
+  button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: inherit;
+    opacity: 0.7;
+    padding: 0;
+    display: flex;
+    &:hover { opacity: 1; }
+  }
+}
+.dos-clear-all {
+  background: none;
+  border: none;
+  color: var(--ds-text-muted);
+  font-size: 12px;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  &:hover { color: var(--ds-error); }
+}
+
+/* ── Skeleton ── */
+.dos-skeleton-list { display: flex; flex-direction: column; gap: var(--ds-space-2); }
+
+/* ── Erreur ── */
+.dos-error {
+  padding: 14px 18px;
+  background: var(--ds-error-hl);
+  color: var(--ds-error);
+  border-radius: var(--ds-radius-md);
+  font-size: 13.5px;
+}
+
+/* ── Table ── */
+.dos-table-wrap {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+  box-shadow: var(--ds-shadow-xs);
+}
+
+.dos-table-header {
+  display: grid;
+  grid-template-columns: 1fr 140px 130px 110px 90px 88px;
+  padding: 10px var(--ds-space-4);
+  background: var(--ds-surface-offset);
+  border-bottom: 1px solid var(--ds-divider);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ds-text-faint);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.dos-rows { display: flex; flex-direction: column; }
+
+.dos-row {
+  display: grid;
+  grid-template-columns: 1fr 140px 130px 110px 90px 88px;
+  align-items: center;
+  padding: 0 var(--ds-space-4);
+  min-height: 60px;
+  border-bottom: 1px solid var(--ds-divider);
+  cursor: pointer;
+  transition: background var(--ds-transition-fast);
+
+  &:last-child { border-bottom: none; }
+  &:hover { background: var(--ds-surface-offset); }
+  &:focus-visible { outline: 2px solid var(--ds-marine); outline-offset: -2px; }
+}
+
+.dos-col {
+  &--lead { display: flex; align-items: center; gap: var(--ds-space-3); }
+  &--actions { display: flex; align-items: center; gap: var(--ds-space-1); justify-content: flex-end; }
+}
+
+.dos-lead-info { display: flex; flex-direction: column; }
+.dos-lead-name { font-size: 13.5px; font-weight: 600; color: var(--ds-text); }
+.dos-lead-id   { font-size: 11px; color: var(--ds-text-faint); }
+.dos-phone     { font-size: 13px; color: var(--ds-text-muted); }
+.dos-date      { font-size: 12px; color: var(--ds-text-faint); }
+.dos-annonce-id { font-size: 12.5px; color: var(--ds-marine); a { color: inherit; text-decoration: underline; text-underline-offset: 2px; } }
+.dos-empty     { color: var(--ds-text-faint); }
+
+.dos-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ds-radius-sm);
+  border: 1px solid var(--ds-divider);
+  background: transparent;
+  color: var(--ds-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+  &:hover { background: var(--ds-surface-offset); color: var(--ds-text); }
+  &--danger:hover { background: var(--ds-error-hl); color: var(--ds-error); border-color: var(--ds-error); }
+}
+
+/* ── Pagination ── */
+.dos-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px var(--ds-space-4);
+  border-top: 1px solid var(--ds-divider);
+  &__info { font-size: 12.5px; color: var(--ds-text-muted); }
+  &__btns { display: flex; gap: var(--ds-space-1); }
+  &__btn {
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ds-divider);
+    border-radius: var(--ds-radius-sm);
+    background: var(--ds-surface);
+    cursor: pointer;
+    color: var(--ds-text-muted);
+    font-size: 16px;
+    transition: background var(--ds-transition-fast);
+    &:hover:not(:disabled) { background: var(--ds-surface-offset); }
+    &:disabled { opacity: 0.4; cursor: not-allowed; }
+  }
+}
+
+/* ── Kanban ── */
+.dos-kanban-wrap { display: flex; flex-direction: column; gap: var(--ds-space-4); }
+.dos-kanban-search { max-width: 380px; }
+
+/* ── Mobile ── */
+.dos-mobile-list { display: flex; flex-direction: column; gap: var(--ds-space-3); }
+

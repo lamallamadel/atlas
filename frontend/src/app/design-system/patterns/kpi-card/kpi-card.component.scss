@@ -1,0 +1,55 @@
+.ds-kpi {
+  padding: var(--ds-space-5);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: var(--ds-shadow-xs);
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-1);
+  transition: box-shadow var(--ds-transition-fast);
+
+  &:hover { box-shadow: var(--ds-shadow-sm); }
+
+  &__value {
+    font-family: var(--ds-font-display);
+    font-size: clamp(28px, 3vw, 38px);
+    font-weight: 500;
+    letter-spacing: -0.5px;
+    line-height: 1;
+    color: var(--ds-marine);
+  }
+
+  &__label {
+    font-size: 12.5px;
+    color: var(--ds-text-muted);
+    margin-top: var(--ds-space-1);
+  }
+
+  &__delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    font-weight: 600;
+    margin-top: var(--ds-space-2);
+    color: var(--ds-text-muted);
+
+    &--up   { color: var(--ds-success); }
+    &--down { color: var(--ds-error); }
+  }
+
+  &__delta-arrow {
+    font-size: 10px;
+  }
+
+  &__spark {
+    width: 100%;
+    height: 36px;
+    margin-top: var(--ds-space-3);
+    color: var(--ds-marine);
+    opacity: 0.55;
+  }
+
+  &--loading { gap: var(--ds-space-3); }
+}

@@ -11,12 +11,13 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { WorkflowPreviewComponent } from './workflow-preview/workflow-preview.component';
 import { RouterLink } from '@angular/router';
+import { PageHeaderComponent } from '../../design-system/index';
 
 @Component({
     selector: 'app-workflow-admin',
     templateUrl: './workflow-admin.component.html',
     styleUrls: ['./workflow-admin.component.css'],
-    imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatButtonToggleGroup, MatButtonToggle, WorkflowEditorComponent, MatButton, MatIcon, WorkflowPreviewComponent, RouterLink]
+    imports: [MatCard, MatCardHeader, MatCardTitle, MatCardContent, MatTabGroup, MatTab, MatButtonToggleGroup, MatButtonToggle, WorkflowEditorComponent, MatButton, MatIcon, WorkflowPreviewComponent, RouterLink, PageHeaderComponent]
 })
 export class WorkflowAdminComponent implements OnInit, OnDestroy {
   workflow: WorkflowConfiguration | null = null;

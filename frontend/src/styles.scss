@@ -1190,36 +1190,10 @@ kbd {
   transform: scale(0.92);
   filter: brightness(0.95);
 }
-/* Atlasia Pro identity bridge — loaded last on purpose */
-@include meta.load-css('styles/_atlasia-pro-shell.scss');
-
-/* Atlasia Pro page patterns — loaded after identity bridge */
-@include meta.load-css('styles/_atlasia-page-patterns.scss');
-
-/* Atlasia Pro navigation/product polish */
-@include meta.load-css('styles/_atlasia-pro-navigation.scss');
-
-/* Atlasia Pro core UX flows */
-@include meta.load-css('styles/_atlasia-core-flows.scss');
-
-/* Atlasia semantic page UX */
-@include meta.load-css('styles/_atlasia-semantic-pages.scss');
-
-/* Atlasia public + portal identity polish */
+/* Portail public + polish vitrine (hors patchs Pro — Phase 6) */
 @include meta.load-css('styles/_atlasia-public-portal.scss');
 
-/* Atlasia density correction — loaded last */
-@include meta.load-css('styles/_atlasia-density-correction.scss');
-
-/* Atlasia table/filter/dialog repair — loaded last */
-@include meta.load-css('styles/_atlasia-table-dialog-repair.scss');
-
-/* _atlasia-dossiers-scroll-fix supprimé — dossiers utilise .dos-* DS natif */
-
-/* Atlasia special screens repair — loaded last */
-@include meta.load-css('styles/_atlasia-special-screens-fix.scss');
-
-/* FullCalendar — thème DS partagé (après les patchs spéciaux) */
+/* FullCalendar — thème DS partagé */
 @include meta.load-css('styles/_fullcalendar-ds.scss');
 
 /* ── Shepherd.js DS Atlasia theme ── */

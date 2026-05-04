@@ -530,3 +530,6 @@ rollback-backups/
 .gordonrc
 .claude/
 
+# Docker BuildKit cache (infra/docker-compose local mounts)
+infra/build-cache/
+

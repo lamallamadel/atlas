@@ -1,0 +1,222 @@
+/* ── ds-week-grid ── */
+$time-gutter: 52px;
+$day-cols:    7;
+$cell-h:      52px;
+$header-h:    56px;
+
+.wg {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+  font-family: var(--ds-font-body);
+  font-size: 13px;
+  color: var(--ds-text);
+
+  /* ── Navigation ── */
+  &__nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--ds-divider);
+    background: var(--ds-surface);
+  }
+
+  &__week-label {
+    flex: 1;
+    text-align: center;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ds-text);
+  }
+
+  &__nav-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: var(--ds-radius-md);
+    background: transparent;
+    color: var(--ds-text-muted);
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--ds-font-body);
+    transition: background var(--ds-transition-fast), color var(--ds-transition-fast);
+
+    &:hover { background: var(--ds-surface-offset); color: var(--ds-text); }
+
+    &--today {
+      width: auto;
+      padding: 0 10px;
+      font-size: 12px;
+      border: 1px solid var(--ds-divider);
+      color: var(--ds-marine);
+      &:hover { background: var(--ds-marine-hl); border-color: var(--ds-marine); }
+    }
+  }
+
+  /* ── Grille (grid layout) ── */
+  &__grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: $time-gutter repeat($day-cols, 1fr);
+    grid-auto-rows: min-content;
+  }
+
+  /* ── En-têtes jours ── */
+  &__time-gutter {
+    border-bottom: 1px solid var(--ds-divider);
+    background: var(--ds-surface);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+  }
+
+  &__day-header {
+    padding: 8px 6px;
+    text-align: center;
+    background: var(--ds-surface);
+    border-bottom: 1px solid var(--ds-divider);
+    border-left: 1px solid var(--ds-divider);
+    position: sticky;
+    top: 0;
+    z-index: 3;
+
+    &--today {
+      background: var(--ds-marine-hl);
+    }
+  }
+
+  &__day-name {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--ds-text-faint);
+  }
+
+  &__day-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--ds-text);
+    margin-top: 4px;
+
+    &--today {
+      background: var(--ds-marine);
+      color: var(--ds-text-inverse);
+      font-weight: 700;
+    }
+  }
+
+  /* All-day events */
+  &__all-day {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-top: 4px;
+  }
+
+  &__all-day-evt {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: var(--ds-radius-sm);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-left: 3px solid currentColor;
+  }
+
+  /* ── Heure gutter ── */
+  &__hour-label {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    padding: 6px 8px 0 0;
+    height: $cell-h;
+    font-size: 10.5px;
+    color: var(--ds-text-faint);
+    border-top: 1px solid var(--ds-surface-offset);
+    border-right: 1px solid var(--ds-divider);
+  }
+
+  /* ── Cellule ── */
+  &__cell {
+    height: $cell-h;
+    border-top: 1px solid var(--ds-surface-offset);
+    border-left: 1px solid var(--ds-divider);
+    padding: 2px 3px;
+    cursor: pointer;
+    position: relative;
+    transition: background var(--ds-transition-fast);
+
+    &:hover { background: var(--ds-surface-offset); }
+
+    &--today {
+      background: color-mix(in srgb, var(--ds-marine), transparent 96%);
+    }
+  }
+
+  /* ── Événement ── */
+  &__evt {
+    border-left: 3px solid currentColor;
+    border-radius: var(--ds-radius-sm);
+    padding: 3px 6px;
+    font-size: 11px;
+    overflow: hidden;
+    cursor: pointer;
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 2px;
+    z-index: 1;
+    transition: filter var(--ds-transition-fast);
+
+    &:hover { filter: brightness(0.93); }
+    &:focus-visible { outline: 2px solid var(--ds-marine); outline-offset: 1px; }
+  }
+
+  &__evt-title {
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__evt-loc {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    opacity: 0.8;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__evt-ref {
+    font-size: 10px;
+    font-weight: 700;
+    opacity: 0.7;
+    margin-top: 2px;
+    display: block;
+  }
+}
