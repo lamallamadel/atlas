@@ -1,0 +1,116 @@
+/* ================================================================
+   ATLASIA DS — Alias sémantiques
+   Pont entre --ds-* (source de vérité) et les noms legacy
+   --color-*, --at-*, --spacing-* utilisés dans les vieux fichiers.
+   Permet une migration progressive sans casser l'existant.
+   ================================================================ */
+
+:root {
+  /* ── Bridge --at-* → --ds-* ── */
+  --at-color-bg:               var(--ds-bg);
+  --at-color-surface:          var(--ds-surface);
+  --at-color-surface-2:        var(--ds-surface-2);
+  --at-color-surface-offset:   var(--ds-surface-offset);
+  --at-color-surface-dynamic:  var(--ds-surface-dynamic);
+  --at-color-divider:          var(--ds-divider);
+  --at-color-border:           var(--ds-border);
+  --at-color-text:             var(--ds-text);
+  --at-color-text-muted:       var(--ds-text-muted);
+  --at-color-text-faint:       var(--ds-text-faint);
+  --at-color-text-inverse:     var(--ds-text-inverse);
+  --at-color-primary:          var(--ds-primary);
+  --at-color-primary-hover:    var(--ds-primary-hover);
+  --at-color-primary-active:   var(--ds-primary-active);
+  --at-color-primary-highlight:var(--ds-primary-hl);
+  --at-color-primary-subtle:   var(--ds-primary-subtle);
+  --at-color-marine:           var(--ds-marine);
+  --at-color-marine-light:     var(--ds-marine-light);
+  --at-color-marine-hover:     var(--ds-marine-hover);
+  --at-color-marine-highlight: var(--ds-marine-hl);
+  --at-color-success:          var(--ds-success);
+  --at-color-success-highlight:var(--ds-success-hl);
+  --at-color-error:            var(--ds-error);
+  --at-color-error-highlight:  var(--ds-error-hl);
+  --at-color-warning:          var(--ds-warning);
+  --at-color-warning-highlight:var(--ds-warning-hl);
+  --at-font-display:           var(--ds-font-display);
+  --at-font-body:              var(--ds-font-body);
+  --at-space-1:  var(--ds-space-1);
+  --at-space-2:  var(--ds-space-2);
+  --at-space-3:  var(--ds-space-3);
+  --at-space-4:  var(--ds-space-4);
+  --at-space-5:  var(--ds-space-5);
+  --at-space-6:  var(--ds-space-6);
+  --at-space-8:  var(--ds-space-8);
+  --at-space-10: var(--ds-space-10);
+  --at-space-12: var(--ds-space-12);
+  --at-space-16: var(--ds-space-16);
+  --at-radius-sm:   var(--ds-radius-sm);
+  --at-radius-md:   var(--ds-radius-md);
+  --at-radius-lg:   var(--ds-radius-lg);
+  --at-radius-xl:   var(--ds-radius-xl);
+  --at-radius-2xl:  var(--ds-radius-2xl);
+  --at-radius-full: var(--ds-radius-pill);
+  --at-shadow-xs: var(--ds-shadow-xs);
+  --at-shadow-sm: var(--ds-shadow-sm);
+  --at-shadow-md: var(--ds-shadow-md);
+  --at-shadow-lg: var(--ds-shadow-lg);
+  --at-transition-fast: var(--ds-transition-fast);
+  --at-transition-med:  var(--ds-transition-med);
+
+  /* ── Bridge --color-* (legacy) → --ds-* ── */
+  /* CORRECTION AUDIT A : --color-primary-* = Marine (brand), pas bleu pur */
+  --color-primary-50:  var(--ds-marine-hl);
+  --color-primary-500: var(--ds-marine);
+  --color-primary-600: var(--ds-marine);
+  --color-primary-700: var(--ds-marine-hover);
+  /* CORRECTION AUDIT B : --color-secondary-* = Copper (accent), pas orange vif */
+  --color-secondary-50:  var(--ds-copper-subtle);
+  --color-secondary-500: var(--ds-primary);
+  --color-secondary-600: var(--ds-primary-hover);
+  --color-secondary-700: var(--ds-primary-active);
+  --color-neutral-0:   var(--ds-surface);
+  --color-neutral-50:  var(--ds-surface-2);
+  --color-neutral-100: var(--ds-bg);
+  --color-neutral-200: var(--ds-divider);
+  --color-neutral-300: var(--ds-border);
+  --color-neutral-500: var(--ds-text-faint);
+  --color-neutral-600: var(--ds-text-muted);
+  --color-neutral-700: var(--ds-text-muted);
+  --color-neutral-800: var(--ds-text);
+  --color-neutral-900: var(--ds-text);
+  --color-success-700: var(--ds-success);
+  --color-error-700:   var(--ds-error);
+  --color-warning-700: var(--ds-warning);
+
+  /* ── Bridge --spacing-* (legacy) → --ds-* ── */
+  --spacing-1:  var(--ds-space-1);
+  --spacing-2:  var(--ds-space-2);
+  --spacing-3:  var(--ds-space-3);
+  --spacing-4:  var(--ds-space-4);
+  --spacing-5:  var(--ds-space-5);
+  --spacing-6:  var(--ds-space-6);
+  --spacing-8:  var(--ds-space-8);
+  --spacing-10: var(--ds-space-10);
+  --spacing-12: var(--ds-space-12);
+  --spacing-16: var(--ds-space-16);
+
+  /* ── Bridge --radius-* (legacy) → --ds-* ── */
+  --radius-sm:   var(--ds-radius-sm);
+  --radius-md:   var(--ds-radius-md);
+  --radius-lg:   var(--ds-radius-lg);
+  --radius-xl:   var(--ds-radius-xl);
+  --radius-2xl:  var(--ds-radius-2xl);
+  --radius-full: var(--ds-radius-pill);
+
+  /* ── Bridge --shadow-* (legacy) → --ds-* ── */
+  --shadow-sm: var(--ds-shadow-sm);
+  --shadow-md: var(--ds-shadow-md);
+  --shadow-lg: var(--ds-shadow-lg);
+
+  /* ── Material Theme Overrides ── */
+  --mdc-filled-text-field-container-color: var(--ds-surface);
+  --mdc-outlined-text-field-outline-color: var(--ds-border);
+  --mdc-outlined-text-field-focus-outline-color: var(--ds-marine);
+  --mat-sidenav-content-background-color: var(--ds-bg);
+}

@@ -1,0 +1,518 @@
+/* ============================================================
+   ATLASIA — Public + Portal Identity Polish
+   Aligns vitrine, portail, recherche, and public annonce detail
+   with the same Atlasia identity used in Espace Pro.
+   ============================================================ */
+
+/* ============================================================
+   SHARED PUBLIC RHYTHM
+   ============================================================ */
+
+app-vitrine-home,
+app-agences,
+app-promoteurs,
+app-tarifs,
+app-contact,
+app-demo,
+app-portail-home,
+app-recherche,
+app-annonce-detail {
+  display: block;
+  background: var(--at-color-bg);
+  color: var(--at-color-text);
+}
+
+/* Public pages should feel premium and editorial */
+app-vitrine-home h1,
+app-vitrine-home h2,
+app-agences h1,
+app-agences h2,
+app-promoteurs h1,
+app-promoteurs h2,
+app-tarifs h1,
+app-tarifs h2,
+app-portail-home h1,
+app-portail-home h2,
+app-recherche h1,
+app-recherche h2,
+app-annonce-detail h1,
+app-annonce-detail h2 {
+  letter-spacing: -0.04em;
+}
+
+/* Keep public copy calm and readable */
+app-vitrine-home p,
+app-agences p,
+app-promoteurs p,
+app-tarifs p,
+app-portail-home p,
+app-recherche p,
+app-annonce-detail p {
+  color: var(--at-color-text-muted);
+  line-height: 1.7;
+}
+
+/* ============================================================
+   PUBLIC HEADER POLISH
+   ============================================================ */
+
+.pub-header {
+  background: color-mix(in oklab, var(--at-color-surface) 86%, transparent) !important;
+  border-bottom-color: color-mix(in oklab, var(--at-color-divider) 82%, transparent) !important;
+}
+
+.pub-header--scrolled {
+  box-shadow: var(--at-shadow-md) !important;
+}
+
+.pub-header-logo {
+  position: relative;
+}
+
+.pub-header-logo::after {
+  content: "";
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: var(--at-radius-full);
+  background: var(--at-color-primary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--at-color-primary) 20%, transparent);
+}
+
+.pub-nav-links a {
+  position: relative;
+  font-weight: 700 !important;
+}
+
+.pub-nav-links a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -2px;
+  height: 2px;
+  border-radius: var(--at-radius-full);
+  background: var(--at-color-primary);
+  transition: right var(--at-transition-fast);
+}
+
+.pub-nav-links a:hover::after,
+.pub-nav-links a.active::after {
+  right: 0;
+}
+
+/* Header CTA must match product primary action */
+.pub-header-actions .at-btn-primary,
+.pub-mobile-nav .at-btn-primary {
+  background: linear-gradient(135deg, var(--at-color-primary), var(--at-color-primary-hover)) !important;
+  box-shadow: var(--at-shadow-sm);
+}
+
+/* ============================================================
+   HERO / MARKETING SECTIONS
+   ============================================================ */
+
+.at-section {
+  position: relative;
+}
+
+.at-section-title {
+  max-width: 14ch;
+}
+
+.at-section-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--at-space-2);
+}
+
+.at-section-eyebrow::before {
+  content: "";
+  width: 1.75rem;
+  height: 2px;
+  border-radius: var(--at-radius-full);
+  background: var(--at-color-primary);
+}
+
+/* Hero-like public sections */
+[class*="hero"],
+[class*="Hero"] {
+  position: relative;
+  overflow: hidden;
+}
+
+[class*="hero"]::before,
+[class*="Hero"]::before {
+  content: "";
+  position: absolute;
+  inset: -12rem -8rem auto auto;
+  width: 32rem;
+  height: 32rem;
+  pointer-events: none;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle,
+      color-mix(in oklab, var(--at-color-primary-highlight) 70%, transparent),
+      transparent 68%
+    );
+  opacity: 0.72;
+  z-index: 0;
+}
+
+[class*="hero"] > *,
+[class*="Hero"] > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================================
+   PUBLIC CARDS
+   ============================================================ */
+
+.at-card,
+[class*="card"],
+[class*="Card"] {
+  transition:
+    transform var(--at-transition-fast),
+    box-shadow var(--at-transition-fast),
+    border-color var(--at-transition-fast);
+}
+
+/* Avoid nuking Material internals too hard; this mostly targets public cards */
+app-vitrine-home [class*="card"],
+app-agences [class*="card"],
+app-promoteurs [class*="card"],
+app-tarifs [class*="card"],
+app-portail-home [class*="card"],
+app-recherche [class*="card"],
+app-annonce-detail [class*="card"] {
+  border-radius: var(--at-radius-2xl);
+}
+
+app-vitrine-home [class*="card"]:hover,
+app-agences [class*="card"]:hover,
+app-promoteurs [class*="card"]:hover,
+app-tarifs [class*="card"]:hover,
+app-portail-home [class*="card"]:hover,
+app-recherche [class*="card"]:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--at-shadow-lg);
+}
+
+/* ============================================================
+   PROPERTY / LISTING IDENTITY
+   ============================================================ */
+
+app-portail-home [class*="property"],
+app-portail-home [class*="annonce"],
+app-recherche [class*="property"],
+app-recherche [class*="annonce"],
+app-annonce-detail [class*="property"],
+app-annonce-detail [class*="annonce"],
+app-recherche [class*="result"],
+app-portail-home [class*="listing"] {
+  --property-accent: var(--at-color-primary);
+}
+
+/* Listing cards */
+app-portail-home [class*="property-card"],
+app-portail-home [class*="annonce-card"],
+app-portail-home [class*="listing-card"],
+app-recherche [class*="property-card"],
+app-recherche [class*="annonce-card"],
+app-recherche [class*="listing-card"],
+app-recherche [class*="result-card"] {
+  background: var(--at-color-surface);
+  border: 1px solid var(--at-color-divider);
+  border-radius: var(--at-radius-2xl);
+  box-shadow: var(--at-shadow-sm);
+  overflow: hidden;
+}
+
+/* Listing visual top line */
+app-portail-home [class*="property-card"]::before,
+app-portail-home [class*="annonce-card"]::before,
+app-portail-home [class*="listing-card"]::before,
+app-recherche [class*="property-card"]::before,
+app-recherche [class*="annonce-card"]::before,
+app-recherche [class*="listing-card"]::before,
+app-recherche [class*="result-card"]::before {
+  content: "";
+  display: block;
+  height: 3px;
+  background: linear-gradient(90deg, var(--at-color-primary), transparent);
+}
+
+/* Prices */
+app-portail-home [class*="price"],
+app-portail-home [class*="prix"],
+app-recherche [class*="price"],
+app-recherche [class*="prix"],
+app-annonce-detail [class*="price"],
+app-annonce-detail [class*="prix"] {
+  color: var(--at-color-primary) !important;
+  font-weight: 900 !important;
+  letter-spacing: -0.035em;
+}
+
+/* Location/meta */
+app-portail-home [class*="location"],
+app-portail-home [class*="meta"],
+app-recherche [class*="location"],
+app-recherche [class*="meta"],
+app-annonce-detail [class*="location"],
+app-annonce-detail [class*="meta"] {
+  color: var(--at-color-text-muted);
+}
+
+/* ============================================================
+   PUBLIC SEARCH EXPERIENCE
+   ============================================================ */
+
+app-portail-home form,
+app-recherche form,
+app-portail-home [class*="search"],
+app-recherche [class*="search"],
+app-portail-home [class*="filter"],
+app-recherche [class*="filter"] {
+  border-radius: var(--at-radius-2xl);
+}
+
+/* Search/filter panels */
+app-portail-home [class*="search-box"],
+app-portail-home [class*="search-panel"],
+app-portail-home [class*="filter-panel"],
+app-recherche [class*="search-box"],
+app-recherche [class*="search-panel"],
+app-recherche [class*="filter-panel"],
+app-recherche [class*="filters"] {
+  background: color-mix(in oklab, var(--at-color-surface) 94%, transparent);
+  border: 1px solid var(--at-color-divider);
+  box-shadow: var(--at-shadow-md);
+}
+
+/* Inputs/selects */
+app-portail-home input,
+app-portail-home select,
+app-recherche input,
+app-recherche select,
+app-annonce-detail input,
+app-annonce-detail select {
+  border-radius: var(--at-radius-lg);
+  border-color: var(--at-color-border);
+  color: var(--at-color-text);
+}
+
+app-portail-home input:focus,
+app-portail-home select:focus,
+app-recherche input:focus,
+app-recherche select:focus {
+  border-color: var(--at-color-primary);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--at-color-primary) 18%, transparent);
+}
+
+/* Transaction/type toggles */
+app-portail-home [class*="toggle"],
+app-recherche [class*="toggle"],
+app-portail-home [class*="tabs"],
+app-recherche [class*="tabs"] {
+  border-radius: var(--at-radius-full);
+}
+
+/* ============================================================
+   BUTTON ALIGNMENT
+   ============================================================ */
+
+app-vitrine-home button,
+app-agences button,
+app-promoteurs button,
+app-tarifs button,
+app-portail-home button,
+app-recherche button,
+app-annonce-detail button,
+app-vitrine-home .btn,
+app-agences .btn,
+app-promoteurs .btn,
+app-tarifs .btn,
+app-portail-home .btn,
+app-recherche .btn,
+app-annonce-detail .btn {
+  border-radius: var(--at-radius-lg);
+  font-weight: 800;
+}
+
+/* Primary-ish buttons */
+app-vitrine-home button[type="submit"],
+app-portail-home button[type="submit"],
+app-recherche button[type="submit"],
+app-portail-home [class*="primary"],
+app-recherche [class*="primary"],
+app-vitrine-home [class*="primary"] {
+  background: linear-gradient(135deg, var(--at-color-primary), var(--at-color-primary-hover));
+  color: white;
+  border: none;
+  box-shadow: var(--at-shadow-sm);
+}
+
+app-vitrine-home button[type="submit"]:hover,
+app-portail-home button[type="submit"]:hover,
+app-recherche button[type="submit"]:hover,
+app-portail-home [class*="primary"]:hover,
+app-recherche [class*="primary"]:hover,
+app-vitrine-home [class*="primary"]:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--at-shadow-md);
+}
+
+/* ============================================================
+   TARIFS / PRICING
+   ============================================================ */
+
+app-tarifs [class*="price"],
+app-tarifs [class*="pricing"],
+app-tarifs [class*="plan"] {
+  font-variant-numeric: tabular-nums;
+}
+
+app-tarifs [class*="plan"],
+app-tarifs [class*="pricing-card"] {
+  position: relative;
+  background: var(--at-color-surface);
+  border: 1px solid var(--at-color-divider);
+  box-shadow: var(--at-shadow-sm);
+}
+
+app-tarifs [class*="plan"]:hover,
+app-tarifs [class*="pricing-card"]:hover {
+  border-color: color-mix(in oklab, var(--at-color-primary) 48%, var(--at-color-border));
+}
+
+/* ============================================================
+   PUBLIC ANNONCE DETAIL
+   ============================================================ */
+
+app-annonce-detail {
+  background:
+    radial-gradient(circle at top right, color-mix(in oklab, var(--at-color-primary-highlight) 58%, transparent), transparent 32rem),
+    var(--at-color-bg);
+}
+
+app-annonce-detail [class*="gallery"],
+app-annonce-detail [class*="image"],
+app-annonce-detail [class*="photo"] {
+  border-radius: var(--at-radius-2xl);
+}
+
+app-annonce-detail [class*="detail"],
+app-annonce-detail [class*="sidebar"],
+app-annonce-detail [class*="contact"],
+app-annonce-detail [class*="summary"] {
+  background: var(--at-color-surface);
+  border-color: var(--at-color-divider);
+}
+
+/* Contact/sidebar cards should be sticky on desktop when possible */
+@media (min-width: 960px) {
+  app-annonce-detail [class*="sidebar"],
+  app-annonce-detail [class*="contact-card"],
+  app-annonce-detail [class*="summary-card"] {
+    position: sticky;
+    top: 88px;
+  }
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+
+.pub-footer {
+  background:
+    radial-gradient(circle at top left, color-mix(in oklab, var(--at-color-primary) 16%, transparent), transparent 26rem),
+    var(--at-color-marine) !important;
+}
+
+.pub-footer-logo em {
+  color: var(--at-color-primary) !important;
+}
+
+.pub-footer-links a:hover {
+  color: var(--at-color-primary-highlight) !important;
+}
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 768px) {
+  .pub-header-inner {
+    padding-block: var(--at-space-2);
+  }
+
+  .pub-mobile-nav.open {
+    box-shadow: var(--at-shadow-md);
+  }
+
+  [class*="hero"]::before,
+  [class*="Hero"]::before {
+    width: 20rem;
+    height: 20rem;
+    inset: -8rem -8rem auto auto;
+  }
+
+  app-portail-home [class*="search-box"],
+  app-portail-home [class*="search-panel"],
+  app-recherche [class*="search-box"],
+  app-recherche [class*="search-panel"],
+  app-recherche [class*="filters"] {
+    box-shadow: var(--at-shadow-sm);
+  }
+
+  app-vitrine-home [class*="card"]:hover,
+  app-agences [class*="card"]:hover,
+  app-promoteurs [class*="card"]:hover,
+  app-tarifs [class*="card"]:hover,
+  app-portail-home [class*="card"]:hover,
+  app-recherche [class*="card"]:hover {
+    transform: none;
+  }
+}
+
+/* ============================================================
+   DARK THEME
+   ============================================================ */
+
+[data-theme='dark'] .pub-header,
+.dark-theme .pub-header {
+  background: color-mix(in oklab, var(--at-color-surface) 88%, transparent) !important;
+}
+
+[data-theme='dark'] app-portail-home [class*="search-box"],
+[data-theme='dark'] app-portail-home [class*="search-panel"],
+[data-theme='dark'] app-recherche [class*="search-box"],
+[data-theme='dark'] app-recherche [class*="search-panel"],
+[data-theme='dark'] app-recherche [class*="filters"],
+.dark-theme app-portail-home [class*="search-box"],
+.dark-theme app-portail-home [class*="search-panel"],
+.dark-theme app-recherche [class*="search-box"],
+.dark-theme app-recherche [class*="search-panel"],
+.dark-theme app-recherche [class*="filters"] {
+  background: var(--at-color-surface);
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  app-vitrine-home [class*="card"],
+  app-agences [class*="card"],
+  app-promoteurs [class*="card"],
+  app-tarifs [class*="card"],
+  app-portail-home [class*="card"],
+  app-recherche [class*="card"],
+  app-vitrine-home button,
+  app-portail-home button,
+  app-recherche button {
+    transition: none !important;
+    transform: none !important;
+  }
+}

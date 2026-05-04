@@ -1,11 +1,23 @@
 @use "sass:meta";
-@use 'styles/_atlasia-tokens.scss';
 
-/* ─── Atlasia Fonts (Portail + Vitrine + Espace Pro) ─── */
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Urbanist:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Roboto:wght@300;400;500;700&family=Open+Sans:wght@300;400;600;700&display=swap");
+/* ================================================================
+   ATLASIA DESIGN SYSTEM — couche 1 : source unique de vérité
+   Les variables --ds-* sont déclarées ici en premier.
+   ================================================================ */
+@use 'app/design-system/tokens/index' as ds-tokens;
+
+/* ================================================================
+   ATLASIA DESIGN SYSTEM — couche 2 : tokens hérités (alias)
+   Bridge --at-*, --color-*, --spacing-*, --radius-*, --shadow-*
+   vers --ds-*. Permet la migration progressive des anciens fichiers.
+   ================================================================ */
+
+/* Polices : chargées via <link> dans index.html et .storybook/preview-head.html
+   (un @import url() ici casse le build Storybook / resolve-url-loader). */
 
 /* ─── Atlasia Design System ─── */
 
+@include meta.load-css('app/design-system/tokens/ds-semantic');
 @include meta.load-css('styles/_atlasia-shared.scss');
 
 @import './styles/animations.css';
@@ -1180,3 +1192,106 @@ kbd {
 }
 /* Atlasia Pro identity bridge — loaded last on purpose */
 @include meta.load-css('styles/_atlasia-pro-shell.scss');
+
+/* Atlasia Pro page patterns — loaded after identity bridge */
+@include meta.load-css('styles/_atlasia-page-patterns.scss');
+
+/* Atlasia Pro navigation/product polish */
+@include meta.load-css('styles/_atlasia-pro-navigation.scss');
+
+/* Atlasia Pro core UX flows */
+@include meta.load-css('styles/_atlasia-core-flows.scss');
+
+/* Atlasia semantic page UX */
+@include meta.load-css('styles/_atlasia-semantic-pages.scss');
+
+/* Atlasia public + portal identity polish */
+@include meta.load-css('styles/_atlasia-public-portal.scss');
+
+/* Atlasia density correction — loaded last */
+@include meta.load-css('styles/_atlasia-density-correction.scss');
+
+/* Atlasia table/filter/dialog repair — loaded last */
+@include meta.load-css('styles/_atlasia-table-dialog-repair.scss');
+
+/* _atlasia-dossiers-scroll-fix supprimé — dossiers utilise .dos-* DS natif */
+
+/* Atlasia special screens repair — loaded last */
+@include meta.load-css('styles/_atlasia-special-screens-fix.scss');
+
+/* FullCalendar — thème DS partagé (après les patchs spéciaux) */
+@include meta.load-css('styles/_fullcalendar-ds.scss');
+
+/* ── Shepherd.js DS Atlasia theme ── */
+.atlas-tour-step.shepherd-element {
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-divider);
+  border-radius: var(--ds-radius-lg);
+  box-shadow: 0 8px 40px rgba(13, 44, 74, 0.18);
+  font-family: var(--ds-font-body);
+  max-width: 360px;
+  overflow: hidden;
+
+  .shepherd-header {
+    background: var(--ds-marine);
+    padding: 12px 16px;
+  }
+  .shepherd-title {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+  }
+  .shepherd-cancel-icon {
+    color: rgba(255,255,255,.7);
+    &:hover { color: #fff; }
+  }
+  .shepherd-text {
+    padding: 16px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    color: var(--ds-text-muted);
+    p { margin: 0 0 8px; &:last-child { margin: 0; } }
+    strong { color: var(--ds-text); font-weight: 600; }
+    em { color: var(--ds-marine); font-style: normal; font-weight: 600; }
+    kbd {
+      padding: 2px 6px; background: var(--ds-surface-offset);
+      border: 1px solid var(--ds-border); border-radius: 4px;
+      font-size: 11px; font-weight: 700; color: var(--ds-text);
+    }
+    ul { margin: 8px 0 0 16px; li { margin-bottom: 4px; } }
+  }
+  .shepherd-footer {
+    padding: 12px 16px;
+    border-top: 1px solid var(--ds-surface-offset);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    background: var(--ds-surface-offset);
+  }
+  .shepherd-button {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: var(--ds-radius-md);
+    font-size: 13px;
+    font-weight: 600;
+    font-family: var(--ds-font-body);
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: background 150ms, color 150ms;
+
+    &.shepherd-btn-primary {
+      background: var(--ds-marine);
+      color: #fff;
+      &:hover { background: var(--ds-marine-hover, #07203a); }
+    }
+    &.shepherd-btn-ghost, &.shepherd-button-secondary {
+      background: transparent;
+      color: var(--ds-text-muted);
+      border-color: var(--ds-border);
+      &:hover { background: var(--ds-surface); color: var(--ds-text); }
+    }
+  }
+}
+.shepherd-modal-overlay-container svg path {
+  fill: rgba(13,44,74,.42) !important;
+}

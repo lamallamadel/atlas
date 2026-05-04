@@ -6,72 +6,107 @@ import { TaskFormDialogComponent } from './task-form-dialog.component';
 import { ConfirmDeleteDialogComponent } from './confirm-delete-dialog.component';
 import { AuthService } from '../services/auth.service';
 import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import frLocale from '@fullcalendar/core/locales/fr';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { staggerList, cardStagger } from '../animations';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatButtonToggleGroup, MatButtonToggle } from '@angular/material/button-toggle';
+import { cardStagger } from '../animations';
 import { FormsModule } from '@angular/forms';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
-import { MatOption } from '@angular/material/autocomplete';
+import { MatOption } from '@angular/material/core';
 import { TaskCardComponent } from './task-card.component';
-import { EmptyStateComponent } from './empty-state.component';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
+import {
+  PageHeaderComponent,
+  DsButtonComponent,
+  DsCardComponent,
+  DsTabsComponent,
+  DsEmptyStateComponent,
+  DsSkeletonComponent,
+  type DsTab,
+} from '../design-system';
 
 enum ViewMode {
   LIST = 'list',
-  CALENDAR = 'calendar'
+  CALENDAR = 'calendar',
 }
 
 enum FilterType {
   ASSIGNED_TO_ME = 'assignedToMe',
-  ALL = 'all'
+  ALL = 'all',
 }
 
 enum StatusFilter {
   OVERDUE = 'overdue',
   UPCOMING = 'upcoming',
   COMPLETED = 'completed',
-  ALL = 'all'
+  ALL = 'all',
 }
 
 @Component({
-    selector: 'app-task-list',
-    templateUrl: './task-list.component.html',
-    styleUrls: ['./task-list.component.css'],
-    animations: [staggerList, cardStagger],
-    imports: [MatButton, MatIcon, MatButtonToggleGroup, FormsModule, MatButtonToggle, MatFormField, MatLabel, MatSelect, MatOption, TaskCardComponent, EmptyStateComponent, FullCalendarModule, MatProgressSpinner]
+  selector: 'app-task-list',
+  templateUrl: './task-list.component.html',
+  styleUrls: ['./task-list.component.css'],
+  animations: [cardStagger],
+  imports: [
+    FormsModule,
+    MatFormField,
+    MatLabel,
+    MatSelect,
+    MatOption,
+    TaskCardComponent,
+    FullCalendarModule,
+    PageHeaderComponent,
+    DsButtonComponent,
+    DsCardComponent,
+    DsTabsComponent,
+    DsEmptyStateComponent,
+    DsSkeletonComponent,
+  ],
 })
 export class TaskListComponent implements OnInit {
   tasks: TaskResponse[] = [];
   filteredTasks: TaskResponse[] = [];
   loading = false;
   currentUserId = '';
-  
+
   viewMode: ViewMode = ViewMode.LIST;
   ViewMode = ViewMode;
-  
+
   filterType: FilterType = FilterType.ALL;
   FilterType = FilterType;
-  
+
   statusFilter: StatusFilter = StatusFilter.ALL;
   StatusFilter = StatusFilter;
+
+  readonly assignmentTabs: DsTab[] = [
+    { value: FilterType.ALL, label: 'Toutes les tâches' },
+    { value: FilterType.ASSIGNED_TO_ME, label: 'Assignées à moi' },
+  ];
+
+  readonly viewTabs: DsTab[] = [
+    { value: ViewMode.LIST, label: 'Liste' },
+    { value: ViewMode.CALENDAR, label: 'Calendrier' },
+  ];
 
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, interactionPlugin],
     initialView: 'dayGridMonth',
+    locale: frLocale,
     headerToolbar: {
       left: 'prev,next today',
       center: 'title',
-      right: 'dayGridMonth,dayGridWeek'
+      right: 'dayGridMonth,dayGridWeek',
+    },
+    buttonText: {
+      today: "Aujourd'hui",
+      month: 'Mois',
+      week: 'Semaine',
     },
     events: [],
     eventClick: this.handleEventClick.bind(this),
     dateClick: this.handleDateClick.bind(this),
-    height: 'auto'
+    height: 'auto',
   };
 
   constructor(
@@ -86,11 +121,28 @@ export class TaskListComponent implements OnInit {
     this.loadTasks();
   }
 
+  get filterTypeAsString(): string {
+    return this.filterType;
+  }
+
+  get viewModeAsString(): string {
+    return this.viewMode;
+  }
+
+  onAssignmentSegmentChange(value: string): void {
+    this.filterType = value === FilterType.ASSIGNED_TO_ME ? FilterType.ASSIGNED_TO_ME : FilterType.ALL;
+    this.applyFilters();
+  }
+
+  onViewSegmentChange(value: string): void {
+    this.viewMode = value === ViewMode.CALENDAR ? ViewMode.CALENDAR : ViewMode.LIST;
+  }
+
   loadTasks(): void {
     this.loading = true;
     const params: TaskListParams = {
       size: 1000,
-      sort: 'dueDate,asc'
+      sort: 'dueDate,asc',
     };
 
     this.taskApiService.list(params).subscribe({
@@ -102,9 +154,9 @@ export class TaskListComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading tasks:', error);
-        this.snackBar.open('Error loading tasks', 'Close', { duration: 3000 });
+        this.snackBar.open('Impossible de charger les tâches', 'Fermer', { duration: 4000 });
         this.loading = false;
-      }
+      },
     });
   }
 
@@ -112,51 +164,43 @@ export class TaskListComponent implements OnInit {
     let filtered = [...this.tasks];
 
     if (this.filterType === FilterType.ASSIGNED_TO_ME) {
-      filtered = filtered.filter(task => task.assignedTo === this.currentUserId);
+      filtered = filtered.filter((task) => task.assignedTo === this.currentUserId);
     }
 
     if (this.statusFilter === StatusFilter.OVERDUE) {
-      filtered = filtered.filter(task => {
+      filtered = filtered.filter((task) => {
         if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
           return false;
         }
         return new Date(task.dueDate) < new Date();
       });
     } else if (this.statusFilter === StatusFilter.UPCOMING) {
-      filtered = filtered.filter(task => {
+      filtered = filtered.filter((task) => {
         if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
           return false;
         }
         return new Date(task.dueDate) >= new Date();
       });
     } else if (this.statusFilter === StatusFilter.COMPLETED) {
-      filtered = filtered.filter(task => task.status === TaskStatus.COMPLETED);
+      filtered = filtered.filter((task) => task.status === TaskStatus.COMPLETED);
     }
 
     this.filteredTasks = filtered;
-  }
-
-  onFilterTypeChange(): void {
-    this.applyFilters();
   }
 
   onStatusFilterChange(): void {
     this.applyFilters();
   }
 
-  onViewModeChange(mode: ViewMode): void {
-    this.viewMode = mode;
-  }
-
   openCreateDialog(): void {
     const dialogRef = this.dialog.open(TaskFormDialogComponent, {
       width: '600px',
-      data: {}
+      data: {},
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
+        this.snackBar.open('Tâche créée', 'OK', { duration: 3000 });
         this.loadTasks();
       }
     });
@@ -165,12 +209,12 @@ export class TaskListComponent implements OnInit {
   onTaskEdit(task: TaskResponse): void {
     const dialogRef = this.dialog.open(TaskFormDialogComponent, {
       width: '600px',
-      data: { task }
+      data: { task },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Task updated successfully', 'Close', { duration: 3000 });
+        this.snackBar.open('Tâche mise à jour', 'OK', { duration: 3000 });
         this.loadTasks();
       }
     });
@@ -179,71 +223,71 @@ export class TaskListComponent implements OnInit {
   onTaskDelete(taskId: number): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: {
-        title: 'Delete Task',
-        message: 'Are you sure you want to delete this task? This action cannot be undone.'
-      }
+        title: 'Supprimer la tâche',
+        message: 'Supprimer cette tâche ? Cette action est définitive.',
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.taskApiService.delete(taskId).subscribe({
           next: () => {
-            this.snackBar.open('Task deleted successfully', 'Close', { duration: 3000 });
+            this.snackBar.open('Tâche supprimée', 'OK', { duration: 3000 });
             this.loadTasks();
           },
           error: (error) => {
             console.error('Error deleting task:', error);
-            this.snackBar.open('Error deleting task', 'Close', { duration: 3000 });
-          }
+            this.snackBar.open('Suppression impossible', 'Fermer', { duration: 4000 });
+          },
         });
       }
     });
   }
 
   onTaskCompleted(taskId: number): void {
-    const task = this.tasks.find(t => t.id === taskId);
+    const task = this.tasks.find((t) => t.id === taskId);
     if (!task) return;
 
-    const apiCall = task.status === TaskStatus.COMPLETED 
-      ? this.taskApiService.uncomplete(taskId)
-      : this.taskApiService.complete(taskId);
+    const apiCall =
+      task.status === TaskStatus.COMPLETED
+        ? this.taskApiService.uncomplete(taskId)
+        : this.taskApiService.complete(taskId);
 
     apiCall.subscribe({
       next: () => {
-        const action = task.status === TaskStatus.COMPLETED ? 'reopened' : 'completed';
-        this.snackBar.open(`Task ${action} successfully`, 'Close', { duration: 3000 });
+        const done = task.status === TaskStatus.COMPLETED;
+        this.snackBar.open(done ? 'Tâche rouverte' : 'Tâche terminée', 'OK', { duration: 3000 });
         this.loadTasks();
       },
       error: (error) => {
         console.error('Error updating task:', error);
-        this.snackBar.open('Error updating task', 'Close', { duration: 3000 });
-      }
+        this.snackBar.open('Mise à jour impossible', 'Fermer', { duration: 4000 });
+      },
     });
+  }
+
+  private taskEventColor(task: TaskResponse): string {
+    if (task.status === TaskStatus.COMPLETED) {
+      return '#2e7d32';
+    }
+    const overdue = !!task.dueDate && new Date(task.dueDate) < new Date();
+    if (overdue) {
+      return '#c62828';
+    }
+    if (task.priority === TaskPriority.HIGH) {
+      return '#c62828';
+    }
+    if (task.priority === TaskPriority.MEDIUM) {
+      return '#e65100';
+    }
+    return '#1a4472';
   }
 
   updateCalendarEvents(): void {
     const events: EventInput[] = this.tasks
-      .filter(task => task.dueDate)
-      .map(task => {
-        let color = '#2196f3';
-        
-        if (task.status === TaskStatus.COMPLETED) {
-          color = '#4caf50';
-        } else if (task.priority === TaskPriority.HIGH) {
-          color = '#e74c3c';
-        } else if (task.priority === TaskPriority.MEDIUM) {
-          color = '#f39c12';
-        } else {
-          color = '#27ae60';
-        }
-
-        const isOverdue = task.status !== TaskStatus.COMPLETED && 
-                         new Date(task.dueDate!) < new Date();
-        
-        if (isOverdue) {
-          color = '#c0392b';
-        }
-
+      .filter((task) => task.dueDate)
+      .map((task) => {
+        const color = this.taskEventColor(task);
         return {
           id: task.id.toString(),
           title: task.title,
@@ -251,44 +295,46 @@ export class TaskListComponent implements OnInit {
           backgroundColor: color,
           borderColor: color,
           extendedProps: {
-            task: task
-          }
+            task,
+          },
         };
       });
 
     this.calendarOptions = {
       ...this.calendarOptions,
-      events: events
+      events,
     };
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleEventClick(arg: any): void {
-    const task = arg.event.extendedProps.task;
+    const task = arg.event.extendedProps.task as TaskResponse | undefined;
     if (task) {
       this.onTaskEdit(task);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   handleDateClick(arg: any): void {
     const dialogRef = this.dialog.open(TaskFormDialogComponent, {
       width: '600px',
       data: {
         task: {
-          dueDate: arg.dateStr
-        }
-      }
+          dueDate: arg.dateStr,
+        },
+      },
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.snackBar.open('Task created successfully', 'Close', { duration: 3000 });
+        this.snackBar.open('Tâche créée', 'OK', { duration: 3000 });
         this.loadTasks();
       }
     });
   }
 
   get overdueCount(): number {
-    return this.tasks.filter(task => {
+    return this.tasks.filter((task) => {
       if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
         return false;
       }
@@ -297,7 +343,7 @@ export class TaskListComponent implements OnInit {
   }
 
   get upcomingCount(): number {
-    return this.tasks.filter(task => {
+    return this.tasks.filter((task) => {
       if (!task.dueDate || task.status === TaskStatus.COMPLETED) {
         return false;
       }
@@ -306,6 +352,6 @@ export class TaskListComponent implements OnInit {
   }
 
   get completedCount(): number {
-    return this.tasks.filter(task => task.status === TaskStatus.COMPLETED).length;
+    return this.tasks.filter((task) => task.status === TaskStatus.COMPLETED).length;
   }
 }

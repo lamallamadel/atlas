@@ -1,61 +1,63 @@
-<div class="task-list-container">
-  <div class="header">
-    <h1>Task Management</h1>
-    <button mat-raised-button color="primary" (click)="openCreateDialog()">
-      <mat-icon>add</mat-icon>
-      New Task
-    </button>
-  </div>
-
-  <div class="toolbar">
-    <div class="filters">
-      <mat-button-toggle-group [(ngModel)]="filterType" (change)="onFilterTypeChange()">
-        <mat-button-toggle [value]="FilterType.ALL">
-          All Tasks
-        </mat-button-toggle>
-        <mat-button-toggle [value]="FilterType.ASSIGNED_TO_ME">
-          Assigned to Me
-        </mat-button-toggle>
-      </mat-button-toggle-group>
-
-      <mat-form-field appearance="outline" class="status-filter">
-        <mat-label>Status</mat-label>
-        <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusFilterChange()">
-          <mat-option [value]="StatusFilter.ALL">All</mat-option>
-          <mat-option [value]="StatusFilter.OVERDUE">
-            Overdue ({{ overdueCount }})
-          </mat-option>
-          <mat-option [value]="StatusFilter.UPCOMING">
-            Upcoming ({{ upcomingCount }})
-          </mat-option>
-          <mat-option [value]="StatusFilter.COMPLETED">
-            Completed ({{ completedCount }})
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+<div class="pro-page task-pro">
+  <ds-page-header
+    eyebrow="Espace Pro"
+    titleBefore="Gestion des"
+    titleAccent="tâches"
+    description="Suivi des tâches, échéances et charge — vue liste ou calendrier.">
+    <div slot="actions" class="task-actions">
+      <ds-button variant="marine" size="md" (dsClick)="openCreateDialog()">
+        + Nouvelle tâche
+      </ds-button>
     </div>
+  </ds-page-header>
 
-    <div class="view-toggle">
-      <mat-button-toggle-group [(ngModel)]="viewMode">
-        <mat-button-toggle [value]="ViewMode.LIST">
-          <mat-icon>view_list</mat-icon>
-          List
-        </mat-button-toggle>
-        <mat-button-toggle [value]="ViewMode.CALENDAR">
-          <mat-icon>calendar_month</mat-icon>
-          Calendar
-        </mat-button-toggle>
-      </mat-button-toggle-group>
+  <ds-card elevation="sm" class="task-toolbar-card">
+    <div class="task-toolbar">
+      <div class="task-toolbar__left">
+        <ds-tabs
+          variant="segment"
+          label="Périmètre des tâches"
+          [tabs]="assignmentTabs"
+          [activeTab]="filterTypeAsString"
+          (tabChange)="onAssignmentSegmentChange($event)">
+        </ds-tabs>
+
+        <mat-form-field appearance="outline" class="task-status-field" subscriptSizing="dynamic">
+          <mat-label>Statut</mat-label>
+          <mat-select [(ngModel)]="statusFilter" (selectionChange)="onStatusFilterChange()">
+            <mat-option [value]="StatusFilter.ALL">Toutes</mat-option>
+            <mat-option [value]="StatusFilter.OVERDUE">
+              En retard ({{ overdueCount }})
+            </mat-option>
+            <mat-option [value]="StatusFilter.UPCOMING">
+              À venir ({{ upcomingCount }})
+            </mat-option>
+            <mat-option [value]="StatusFilter.COMPLETED">
+              Terminées ({{ completedCount }})
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <div class="task-toolbar__right">
+        <ds-tabs
+          variant="segment"
+          label="Mode d'affichage"
+          [tabs]="viewTabs"
+          [activeTab]="viewModeAsString"
+          (tabChange)="onViewSegmentChange($event)">
+        </ds-tabs>
+      </div>
     </div>
-  </div>
+  </ds-card>
 
   @if (!loading) {
-    <div class="content">
+    <div class="task-content">
       @if (viewMode === ViewMode.LIST) {
-        <div class="list-view">
+        <div class="task-list-view">
           @if (filteredTasks.length > 0) {
             <div class="tasks-grid" [@cardStagger]="filteredTasks.length">
-              @for (task of filteredTasks; track task) {
+              @for (task of filteredTasks; track task.id) {
                 <app-task-card
                   [task]="task"
                   (taskEdit)="onTaskEdit($event)"
@@ -64,28 +66,31 @@
                 </app-task-card>
               }
             </div>
-          }
-          @if (filteredTasks.length === 0) {
-            <app-empty-state
-              icon="task"
-              title="No tasks found"
-              message="Create a new task to get started or adjust your filters">
-            </app-empty-state>
+          } @else {
+            <ds-card elevation="xs">
+              <ds-empty-state
+                title="Aucune tâche"
+                description="Créez une tâche ou modifiez les filtres pour afficher des résultats.">
+              </ds-empty-state>
+            </ds-card>
           }
         </div>
       }
       @if (viewMode === ViewMode.CALENDAR) {
-        <div class="calendar-view">
-          <full-calendar [options]="calendarOptions"></full-calendar>
-        </div>
+        <ds-card elevation="sm" [pad]="false" class="task-calendar-card">
+          <div class="task-calendar-inner">
+            <full-calendar [options]="calendarOptions"></full-calendar>
+          </div>
+        </ds-card>
       }
     </div>
   }
 
   @if (loading) {
-    <div class="loading-state">
-      <mat-spinner></mat-spinner>
-      <p>Loading tasks...</p>
+    <div class="task-loading">
+      <ds-skeleton variant="rect" height="72px"></ds-skeleton>
+      <ds-skeleton variant="rect" height="280px"></ds-skeleton>
+      <ds-skeleton variant="rect" height="280px"></ds-skeleton>
     </div>
   }
 </div>

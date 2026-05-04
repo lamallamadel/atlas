@@ -1,0 +1,136 @@
+/* ============================================================
+   ATLASIA PRO — Dossiers Horizontal Scroll Fix
+   Restores visible/useful horizontal scrolling on dossiers table.
+   Loaded last.
+   ============================================================ */
+
+/* Main dossiers results area must not clip the table */
+app-dossiers .page-content,
+app-dossiers .page-content > section,
+app-dossiers app-generic-table {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+}
+
+/* Outer table card keeps rounded corners but must allow inner scroll */
+app-dossiers .generic-table-container,
+app-dossiers .table-container,
+app-dossiers .table-wrapper,
+app-dossiers .results-table-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  border-radius: 18px !important;
+}
+
+/* The actual scrolling layer */
+app-dossiers .table-scroll,
+app-dossiers .table-responsive,
+app-dossiers .generic-table-scroll,
+app-dossiers .mat-mdc-table-container,
+app-dossiers .cdk-table,
+app-dossiers table.mat-mdc-table {
+  overflow-x: auto !important;
+}
+
+/* Fallback: if no inner scroll wrapper exists, make the first div inside generic table scrollable */
+app-dossiers app-generic-table > div,
+app-dossiers app-generic-table .mat-elevation-z8,
+app-dossiers app-generic-table .table-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  overflow-y: visible !important;
+  scrollbar-gutter: stable both-edges;
+}
+
+/* Force visible horizontal scrollbar on the table zone */
+app-dossiers app-generic-table > div,
+app-dossiers .table-scroll,
+app-dossiers .table-responsive,
+app-dossiers .generic-table-scroll,
+app-dossiers .mat-mdc-table-container {
+  scrollbar-width: auto !important;
+  scrollbar-color: color-mix(in oklab, var(--at-color-marine) 55%, var(--at-color-border)) var(--at-color-surface-2) !important;
+}
+
+app-dossiers app-generic-table > div::-webkit-scrollbar,
+app-dossiers .table-scroll::-webkit-scrollbar,
+app-dossiers .table-responsive::-webkit-scrollbar,
+app-dossiers .generic-table-scroll::-webkit-scrollbar,
+app-dossiers .mat-mdc-table-container::-webkit-scrollbar {
+  height: 13px !important;
+}
+
+app-dossiers app-generic-table > div::-webkit-scrollbar-track,
+app-dossiers .table-scroll::-webkit-scrollbar-track,
+app-dossiers .table-responsive::-webkit-scrollbar-track,
+app-dossiers .generic-table-scroll::-webkit-scrollbar-track,
+app-dossiers .mat-mdc-table-container::-webkit-scrollbar-track {
+  background: var(--at-color-surface-2) !important;
+  border-radius: 999px !important;
+}
+
+app-dossiers app-generic-table > div::-webkit-scrollbar-thumb,
+app-dossiers .table-scroll::-webkit-scrollbar-thumb,
+app-dossiers .table-responsive::-webkit-scrollbar-thumb,
+app-dossiers .generic-table-scroll::-webkit-scrollbar-thumb,
+app-dossiers .mat-mdc-table-container::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--at-color-marine) 55%, var(--at-color-border)) !important;
+  border-radius: 999px !important;
+  border: 3px solid var(--at-color-surface-2) !important;
+}
+
+/* The table itself should be wider than the viewport, but predictably */
+app-dossiers table,
+app-dossiers .mat-mdc-table {
+  width: max-content !important;
+  min-width: 1280px !important;
+  table-layout: fixed !important;
+}
+
+/* Keep sticky actions working inside horizontal scroll */
+app-dossiers .mat-column-actions,
+app-dossiers .actions-cell {
+  position: sticky !important;
+  right: 0 !important;
+  z-index: 6 !important;
+  background: var(--at-color-surface) !important;
+  box-shadow: -10px 0 18px -18px rgba(0, 0, 0, 0.4) !important;
+}
+
+app-dossiers .mat-mdc-header-cell.mat-column-actions {
+  z-index: 8 !important;
+  background: var(--at-color-surface-2) !important;
+}
+
+/* Do not let the floating AI button cover the scrollbar or actions */
+.ai-agent-panel,
+.ai-agent-button,
+.floating-ai-button,
+button[class*="ai-agent"],
+[class*="ai-agent"] .mat-mdc-fab {
+  right: 18px !important;
+  bottom: 34px !important;
+}
+
+/* Mobile/tablet: keep scroll clear and intentional */
+@media (max-width: 900px) {
+  app-dossiers table,
+  app-dossiers .mat-mdc-table {
+    min-width: 1120px !important;
+  }
+
+  app-dossiers app-generic-table > div,
+  app-dossiers .table-scroll,
+  app-dossiers .table-responsive,
+  app-dossiers .generic-table-scroll,
+  app-dossiers .mat-mdc-table-container {
+    overflow-x: scroll !important;
+    -webkit-overflow-scrolling: touch;
+  }
+}

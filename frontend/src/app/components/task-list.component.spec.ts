@@ -1,25 +1,18 @@
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskListComponent } from './task-list.component';
-import { FormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
-import {  } from '@angular/material/snack-bar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatButtonToggleModule } from '@angular/material/button-toggle';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FullCalendarModule } from '@fullcalendar/angular';
-import { EmptyStateComponent } from './empty-state.component';
 import { TaskCardComponent } from './task-card.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { TaskApiService } from '../services/task-api.service';
+import { AuthService } from '../services/auth.service';
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -27,29 +20,47 @@ describe('TaskListComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [FormsModule,
+      imports: [
         MatDialogModule,
-        
-        MatButtonModule,
-        MatButtonToggleModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatIconModule,
-        MatProgressSpinnerModule,
         MatCardModule,
         MatCheckboxModule,
         BrowserAnimationsModule,
-        FullCalendarModule, TaskListComponent,
-        EmptyStateComponent,
-        TaskCardComponent],
-    providers: [
-        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
-        { provide: OAuthService, useValue: jasmine.createSpyObj('OAuthService', ['initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken', 'configure', 'setStorage', 'logOut', 'getAccessToken']) },
+        FullCalendarModule,
+        TaskListComponent,
+        TaskCardComponent,
+      ],
+      providers: [
+        {
+          provide: MatSnackBar,
+          useValue: {
+            open: () => ({
+              onAction: () => of(null),
+              afterDismissed: () => of(null),
+            }),
+            dismiss: () => {},
+          },
+        },
+        {
+          provide: TaskApiService,
+          useValue: { list: () => of({ content: [], totalElements: 0 }) },
+        },
+        { provide: AuthService, useValue: { getUserId: () => '' } },
+        {
+          provide: OAuthService,
+          useValue: jasmine.createSpyObj('OAuthService', [
+            'initCodeFlow',
+            'loadDiscoveryDocumentAndTryLogin',
+            'hasValidAccessToken',
+            'configure',
+            'setStorage',
+            'logOut',
+            'getAccessToken',
+          ]),
+        },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-})
-    .compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TaskListComponent);
     component = fixture.componentInstance;

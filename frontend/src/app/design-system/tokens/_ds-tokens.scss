@@ -1,0 +1,133 @@
+/* ================================================================
+   ATLASIA DESIGN SYSTEM — Source unique de vérité CSS
+   Réplique exacte de design-system-source/tokens.css
+   + variables supplémentaires pour Angular / Material.
+   NE PAS modifier les valeurs ici — modifier dans tokens.css
+   puis synchroniser.
+   ================================================================ */
+
+:root,
+[data-theme='light'] {
+  /* ── Surfaces ── */
+  --ds-bg:              #f8f7f4;
+  --ds-surface:         #ffffff;
+  --ds-surface-2:       #faf9f7;
+  --ds-surface-offset:  #f2f0eb;
+  --ds-surface-dynamic: #e8e5de;
+  --ds-divider:         #e0ddd6;
+  --ds-border:          #d4d0c8;
+
+  /* ── Texte ── */
+  --ds-text:         #18160f;
+  --ds-text-muted:   #605c52;
+  --ds-text-faint:   #a8a49a;
+  --ds-text-inverse: #ffffff;
+
+  /* ── Marine (primaire) ── */
+  --ds-marine:       #0d2c4a;
+  --ds-marine-light: #1a4472;
+  --ds-marine-hover: #07203a;
+  --ds-marine-hl:    #dce8f2;
+
+  /* ── Copper / accent ── */
+  --ds-primary:        #b5622e;
+  --ds-primary-hover:  #944e22;
+  --ds-primary-active: #6e3917;
+  --ds-primary-hl:     #f2e0d5;
+  --ds-primary-subtle: #faf3ee;
+
+  /* ── Sémantique ── */
+  --ds-success:    #2e7d32;
+  --ds-success-hl: #e8f5e9;
+  --ds-error:      #c62828;
+  --ds-error-hl:   #ffebee;
+  --ds-warning:    #e65100;
+  --ds-warning-hl: #fff3e0;
+
+  /* ── Typographie ── */
+  --ds-font-display: 'Playfair Display', Georgia, serif;
+  --ds-font-body:    'Plus Jakarta Sans', -apple-system, system-ui, sans-serif;
+
+  /* ── Espacement (base 4px) ── */
+  --ds-space-1:  0.25rem;  /* 4px  */
+  --ds-space-2:  0.5rem;   /* 8px  */
+  --ds-space-3:  0.75rem;  /* 12px */
+  --ds-space-4:  1rem;     /* 16px */
+  --ds-space-5:  1.25rem;  /* 20px */
+  --ds-space-6:  1.5rem;   /* 24px */
+  --ds-space-8:  2rem;     /* 32px */
+  --ds-space-10: 2.5rem;   /* 40px */
+  --ds-space-12: 3rem;     /* 48px */
+  --ds-space-16: 4rem;     /* 64px */
+
+  /* ── Radius ── */
+  --ds-radius-sm:   6px;
+  --ds-radius-md:   10px;
+  --ds-radius-lg:   14px;
+  --ds-radius-xl:   18px;
+  --ds-radius-2xl:  24px;
+  --ds-radius-pill: 9999px;
+
+  /* ── Ombres ── */
+  --ds-shadow-xs: 0 1px 2px rgba(24, 22, 15, .04);
+  --ds-shadow-sm: 0 2px 6px rgba(24, 22, 15, .06);
+  --ds-shadow-md: 0 6px 20px rgba(24, 22, 15, .08);
+  --ds-shadow-lg: 0 14px 40px rgba(24, 22, 15, .12);
+
+  /* ── Transitions ── */
+  --ds-transition-fast: 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  --ds-transition-med:  250ms cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Layout ── */
+  --ds-content-narrow:  640px;
+  --ds-content-default: 960px;
+  --ds-content-wide:    1200px;
+  --ds-content-full:    1400px;
+
+  /* ── Z-index ── */
+  --ds-z-base:    0;
+  --ds-z-raised:  1;
+  --ds-z-overlay: 100;
+  --ds-z-modal:   200;
+  --ds-z-toast:   300;
+}
+
+/* ── DARK MODE ── */
+[data-theme='dark'],
+.dark-theme {
+  --ds-bg:              #100f0d;
+  --ds-surface:         #181714;
+  --ds-surface-2:       #1c1b18;
+  --ds-surface-offset:  #221f1b;
+  --ds-surface-dynamic: #2a2925;
+  --ds-divider:         #282622;
+  --ds-border:          #363330;
+
+  --ds-text:         #e9e4d8;
+  --ds-text-muted:   #9c9689;
+  --ds-text-faint:   #5a5650;
+  --ds-text-inverse: #18160f;
+
+  --ds-marine:       #4a8fc4;
+  --ds-marine-light: #6aaad8;
+  --ds-marine-hover: #3a7bb5;
+  --ds-marine-hl:    #15273a;
+
+  --ds-primary:        #d4804c;
+  --ds-primary-hover:  #c06030;
+  --ds-primary-active: #a84820;
+  --ds-primary-hl:     #3d2618;
+  --ds-primary-subtle: #221710;
+
+  --ds-success:    #66bb6a;
+  --ds-success-hl: #1b3a1e;
+  --ds-error:      #ef5350;
+  --ds-error-hl:   #3a1414;
+  --ds-warning:    #ff7043;
+  --ds-warning-hl: #3a1e0a;
+
+  --ds-shadow-xs: 0 1px 2px rgba(0, 0, 0, .4);
+  --ds-shadow-sm: 0 2px 6px rgba(0, 0, 0, .5);
+  --ds-shadow-md: 0 6px 20px rgba(0, 0, 0, .55);
+  --ds-shadow-lg: 0 14px 40px rgba(0, 0, 0, .6);
+}
