@@ -213,8 +213,7 @@
             "exclude": [
               "src/stories/**",
               "src/**/*.stories.ts",
-              "e2e/**",
-              "src/app/services/user-preferences.service.spec.ts"
+              "e2e/**"
             ]
           },
           "configurations": {
@@ -229,34 +228,6 @@
           "builder": "@angular/build:karma",
           "options": {
             "karmaConfig": "karma.conf.js",
-            "polyfills": [
-              "src/global-polyfill.js",
-              "zone.js",
-              "zone.js/testing",
-              "@angular/localize/init"
-            ],
-            "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles/variables.scss",
-              "src/styles/theme.scss",
-              "src/styles/theme-dark.scss",
-              "src/styles/utilities.scss",
-              "src/styles/print.scss",
-              "src/styles/shepherd-theme.css",
-              "src/styles.scss"
-            ],
-            "scripts": []
-          }
-        },
-        "test-karma-prefs": {
-          "builder": "@angular/build:karma",
-          "options": {
-            "karmaConfig": "karma.conf.js",
-            "include": ["src/app/services/user-preferences.service.spec.ts"],
             "polyfills": [
               "src/global-polyfill.js",
               "zone.js",

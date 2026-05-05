@@ -172,7 +172,7 @@ test-frontend:
     - cd frontend
     - npm ci --prefer-offline
     - npm run lint
-    - npm test -- --watch=false --browsers ChromeHeadlessCI
+    - npm run test:ci
   artifacts:
     when: always
     reports:

@@ -20,6 +20,7 @@ export default defineConfig({
   },
   reporter: process.env.CI
     ? [
+        ['github'],
         ['html', { outputFolder: 'test-results/html-report' }],
         ['junit', { outputFile: 'test-results/junit.xml' }],
         ['json', { outputFile: 'test-results/json-report.json' }],

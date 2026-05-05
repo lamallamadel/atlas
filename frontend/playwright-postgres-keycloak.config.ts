@@ -14,7 +14,14 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : 4,
-  reporter: process.env.CI ? [['html'], ['junit', { outputFile: 'test-results/junit-postgres-keycloak.xml' }], ['json', { outputFile: 'test-results/results-postgres-keycloak.json' }]] : 'html',
+  reporter: process.env.CI
+    ? [
+        ['github'],
+        ['html'],
+        ['junit', { outputFile: 'test-results/junit-postgres-keycloak.xml' }],
+        ['json', { outputFile: 'test-results/results-postgres-keycloak.json' }],
+      ]
+    : 'html',
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:4200',
     trace: 'on-first-retry',

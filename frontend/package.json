@@ -16,7 +16,7 @@
     "build:analyze": "ng build --configuration production --stats-json && npm run analyze:bundle",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false --coverage",
-    "test:ci": "ng test --watch=false --coverage --configuration=ci && ng run frontend:test-karma-prefs --watch=false --browsers=ChromeHeadlessCI",
+    "test:ci": "ng test --watch=false --coverage --configuration=ci",
     "test:karma": "ng run frontend:test-karma --watch=false --code-coverage --browsers=ChromeHeadlessCI",
     "lint": "ng lint",
     "extract-i18n": "ng extract-i18n --output-path src/locale",

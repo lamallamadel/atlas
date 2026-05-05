@@ -1,10 +1,4 @@
-import {
-  TestBed,
-  fakeAsync,
-  tick,
-  flush,
-  flushMicrotasks,
-} from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -12,28 +6,40 @@ import {
 import { UserPreferencesService } from './user-preferences.service';
 import {
   UserPreferences,
-  PendingUpdate,
 } from '../models/user-preferences.model';
 import { OfflineService, ConnectionStatus } from './offline.service';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { environment } from '../../environments/environment';
 import {
   provideHttpClient,
   withInterceptorsFromDi,
 } from '@angular/common/http';
+import { vi } from 'vitest';
+
+/** Laisse les callbacks HTTP / RxJS du constructeur se terminer (Vitest n'utilise pas ProxyZone). */
+async function stabilize(): Promise<void> {
+  await Promise.resolve();
+  await Promise.resolve();
+}
 
 describe('UserPreferencesService', () => {
   let service: UserPreferencesService;
   let httpMock: HttpTestingController;
   let offlineIsOnline = true;
   let offlineService: Pick<OfflineService, 'isOnline' | 'connectivity$'>;
-  let connectivitySubject: BehaviorSubject<any>;
+  let connectivitySubject: BehaviorSubject<{
+    status: ConnectionStatus;
+    lastOnline: Date;
+  }>;
 
   const API_BASE = `${environment.apiBaseUrl}/v1/user/preferences`;
 
   beforeEach(() => {
     offlineIsOnline = true;
-    connectivitySubject = new BehaviorSubject({
+    connectivitySubject = new BehaviorSubject<{
+      status: ConnectionStatus;
+      lastOnline: Date;
+    }>({
       status: ConnectionStatus.ONLINE,
       lastOnline: new Date(),
     });
@@ -59,6 +65,7 @@ describe('UserPreferencesService', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     try {
       const pending = httpMock.match((r) => r.url.startsWith(API_BASE));
       pending.forEach((req) => {
@@ -82,7 +89,7 @@ describe('UserPreferencesService', () => {
   });
 
   describe('Initialization', () => {
-    it('should load preferences from server on initialization', fakeAsync(() => {
+    it('should load preferences from server on initialization', async () => {
       const mockPreferences: UserPreferences = {
         ui: { theme: 'dark', language: 'fr' },
         notifications: { emailEnabled: true },
@@ -91,14 +98,12 @@ describe('UserPreferencesService', () => {
       const req = httpMock.expectOne(API_BASE);
       expect(req.request.method).toBe('GET');
       req.flush(mockPreferences);
-      tick();
+      await stabilize();
 
-      service.getPreferences().subscribe((prefs) => {
-        expect(prefs).toEqual(mockPreferences);
-      });
-    }));
+      expect(service.getCurrentPreferences()).toEqual(mockPreferences);
+    });
 
-    it('should load from localStorage if available', () => {
+    it('should load from localStorage if available', async () => {
       const storedPrefs: UserPreferences = {
         ui: { theme: 'light' },
       } as any;
@@ -109,23 +114,24 @@ describe('UserPreferencesService', () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush(storedPrefs);
 
+      await stabilize();
       expect(newService.getCurrentPreferences()).toEqual(storedPrefs);
     });
 
-    it('should handle server load errors gracefully', fakeAsync(() => {
+    it('should handle server load errors gracefully', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.error(new ErrorEvent('Network error'));
-      tick();
+      await stabilize();
 
       expect(service.getCurrentPreferences()).toEqual({});
-    }));
+    });
   });
 
   describe('BehaviorSubject Reactive Updates', () => {
-    it('should emit preferences changes through observable', fakeAsync(() => {
+    it('should emit preferences changes through observable', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
+      await stabilize();
 
       const emissions: UserPreferences[] = [];
       service.preferences$.subscribe((prefs) => emissions.push(prefs));
@@ -135,12 +141,12 @@ describe('UserPreferencesService', () => {
 
       expect(emissions.length).toBeGreaterThan(0);
       expect(emissions[emissions.length - 1]).toEqual(newPrefs);
-    }));
+    });
 
-    it('should maintain reactive synchronization across multiple subscribers', fakeAsync(() => {
+    it('should maintain reactive synchronization across multiple subscribers', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
+      await stabilize();
 
       const subscriber1Values: UserPreferences[] = [];
       const subscriber2Values: UserPreferences[] = [];
@@ -151,70 +157,72 @@ describe('UserPreferencesService', () => {
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
       updateReq.flush({ category: 'ui', preferences: { theme: 'dark' } });
-      tick();
+      await stabilize();
 
       expect(subscriber1Values[subscriber1Values.length - 1]).toEqual(
         subscriber2Values[subscriber2Values.length - 1]
       );
-    }));
+    });
   });
 
   describe('getPreferences()', () => {
-    it('should return current preferences as observable', fakeAsync(() => {
+    it('should return current preferences as observable', async () => {
       const mockPrefs = { ui: { theme: 'dark' } } as any;
 
       const req = httpMock.expectOne(API_BASE);
       req.flush(mockPrefs);
-      tick();
+      await stabilize();
 
-      service.getPreferences().subscribe((prefs) => {
-        expect(prefs).toEqual(mockPrefs);
-      });
-    }));
+      const prefs = await firstValueFrom(service.getPreferences());
+      expect(prefs).toEqual(mockPrefs);
+    });
   });
 
   describe('getCurrentPreferences()', () => {
-    it('should return current preferences synchronously', fakeAsync(() => {
+    it('should return current preferences synchronously', async () => {
       const mockPrefs = { ui: { theme: 'dark' } } as any;
 
       const req = httpMock.expectOne(API_BASE);
       req.flush(mockPrefs);
-      tick();
+      await stabilize();
 
       expect(service.getCurrentPreferences()).toEqual(mockPrefs);
-    }));
+    });
   });
 
   describe('updatePreferences()', () => {
-    it('should update preferences for a specific category', fakeAsync(() => {
+    it('should update preferences for a specific category', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
+      await stabilize();
 
       const categoryValues = { theme: 'dark', language: 'fr' } as any;
 
-      service.updatePreferences('ui', categoryValues).subscribe((response) => {
-        expect(response.category).toBe('ui');
-        expect(response.preferences).toEqual(categoryValues);
-      });
+      const updatePromise = firstValueFrom(
+        service.updatePreferences('ui', categoryValues)
+      );
 
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
       expect(updateReq.request.method).toBe('PUT');
       expect(updateReq.request.body).toEqual({ preferences: categoryValues });
       updateReq.flush({ category: 'ui', preferences: categoryValues });
-      tick();
+      await stabilize();
+
+      const response = await updatePromise;
+      expect(response.category).toBe('ui');
+      expect(response.preferences).toEqual(categoryValues);
 
       const currentPrefs = service.getCurrentPreferences();
       expect((currentPrefs as any).ui).toEqual(categoryValues);
-    }));
+    });
 
-    it('should save to localStorage immediately (optimistic update)', fakeAsync(() => {
+    it('should save to localStorage immediately (optimistic update)', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
+      await stabilize();
 
       const categoryValues = { theme: 'dark' } as any;
-      service.updatePreferences('ui', categoryValues).subscribe();
+      const done = firstValueFrom(service.updatePreferences('ui', categoryValues));
 
       const stored = localStorage.getItem('user_preferences');
       expect(stored).toBeTruthy();
@@ -223,46 +231,48 @@ describe('UserPreferencesService', () => {
 
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
       updateReq.flush({ category: 'ui', preferences: categoryValues });
-      tick();
-    }));
+      await stabilize();
+      await done;
+    });
 
-    it('should merge values with existing category preferences', fakeAsync(() => {
+    it('should merge values with existing category preferences', async () => {
       const initialPrefs = {
         ui: { theme: 'light', language: 'en' },
       };
 
       const req = httpMock.expectOne(API_BASE);
       req.flush(initialPrefs);
-      tick();
+      await stabilize();
 
-      service.updatePreferences('ui', { theme: 'dark' }).subscribe();
+      const done = firstValueFrom(service.updatePreferences('ui', { theme: 'dark' }));
 
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
       updateReq.flush({
         category: 'ui',
         preferences: { theme: 'dark', language: 'en' },
       });
-      tick();
+      await stabilize();
+      await done;
 
       const current = service.getCurrentPreferences();
       expect((current as any).ui).toEqual({ theme: 'dark', language: 'en' });
-    }));
+    });
   });
 
   describe('Offline Queue Management', () => {
-    beforeEach(fakeAsync(() => {
+    beforeEach(async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
-    }));
+      await stabilize();
+    });
 
-    it('should queue updates when offline', fakeAsync(() => {
+    it('should queue updates when offline', async () => {
       offlineIsOnline = false;
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
 
       httpMock.expectNone(`${API_BASE}/ui`);
-      tick();
+      await stabilize();
 
       const pending = JSON.parse(
         localStorage.getItem('user_preferences_pending') || '[]'
@@ -270,9 +280,10 @@ describe('UserPreferencesService', () => {
       expect(pending.length).toBe(1);
       expect(pending[0].category).toBe('ui');
       expect(pending[0].values).toEqual({ theme: 'dark' });
-    }));
+    });
 
-    it('should process pending updates when coming back online', fakeAsync(() => {
+    it('should process pending updates when coming back online', async () => {
+      vi.useFakeTimers();
       offlineIsOnline = false;
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
@@ -280,7 +291,7 @@ describe('UserPreferencesService', () => {
         .updatePreferences('notifications', { emailEnabled: true })
         .subscribe();
 
-      tick();
+      await stabilize();
 
       offlineIsOnline = true;
       connectivitySubject.next({
@@ -288,52 +299,54 @@ describe('UserPreferencesService', () => {
         lastOnline: new Date(),
       });
 
-      tick(1000);
+      await vi.advanceTimersByTimeAsync(1000);
+      await stabilize();
 
       const req1 = httpMock.expectOne(`${API_BASE}/ui`);
       req1.flush({ category: 'ui', preferences: { theme: 'dark' } });
-      tick();
+      await stabilize();
 
       const req2 = httpMock.expectOne(`${API_BASE}/notifications`);
       req2.flush({
         category: 'notifications',
         preferences: { emailEnabled: true },
       });
-      tick();
+      await stabilize();
 
       const finalReq = httpMock.expectOne(API_BASE);
       finalReq.flush({
         ui: { theme: 'dark' },
         notifications: { emailEnabled: true },
       });
-      tick();
+      await stabilize();
 
       const pending = JSON.parse(
         localStorage.getItem('user_preferences_pending') || '[]'
       );
       expect(pending.length).toBe(0);
-    }));
+    });
 
-    it('should replace existing pending update for same category', fakeAsync(() => {
+    it('should replace existing pending update for same category', async () => {
       offlineIsOnline = false;
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
-      tick();
+      await stabilize();
       service.updatePreferences('ui', { theme: 'light' }).subscribe();
-      tick();
+      await stabilize();
 
       const pending = JSON.parse(
         localStorage.getItem('user_preferences_pending') || '[]'
       );
       expect(pending.length).toBe(1);
       expect(pending[0].values).toEqual({ theme: 'light' });
-    }));
+    });
 
-    it('should retry failed updates up to MAX_RETRIES', fakeAsync(() => {
+    it('should retry failed updates up to MAX_RETRIES', async () => {
+      vi.useFakeTimers();
       offlineIsOnline = false;
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
-      tick();
+      await stabilize();
 
       offlineIsOnline = true;
       connectivitySubject.next({
@@ -341,11 +354,12 @@ describe('UserPreferencesService', () => {
         lastOnline: new Date(),
       });
 
-      tick(1000);
+      await vi.advanceTimersByTimeAsync(1000);
+      await stabilize();
 
       const req1 = httpMock.expectOne(`${API_BASE}/ui`);
       req1.error(new ErrorEvent('Network error'));
-      tick();
+      await stabilize();
 
       expect(service.hasPendingUpdates()).toBe(true);
 
@@ -355,21 +369,21 @@ describe('UserPreferencesService', () => {
       if (getReq.length > 0) {
         getReq[0].flush({});
       }
-    }));
+    });
   });
 
   describe('Periodic Polling (5 min)', () => {
-    it('should poll server every 5 minutes for updates', fakeAsync(() => {
+    it('should poll server every 5 minutes for updates', async () => {
+      vi.useFakeTimers();
       const initialReq = httpMock.expectOne(
         (req: { url?: string }) =>
           req.url?.includes('user/preferences') ?? false
       );
       initialReq.flush({ ui: { theme: 'light' } });
-      tick();
+      await stabilize();
 
-      tick(5 * 60 * 1000);
-      flushMicrotasks();
-      tick(0);
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+      await stabilize();
 
       const getReqs = httpMock.match((req: { url?: string }) =>
         (req.url ?? '').includes('user/preferences')
@@ -378,24 +392,24 @@ describe('UserPreferencesService', () => {
       if (pollReq) {
         pollReq.flush({ ui: { theme: 'dark' } });
       }
-      tick();
+      await stabilize();
 
       const prefs = service.getCurrentPreferences();
       expect(prefs?.ui).toBeDefined();
       expect((prefs as any).ui?.theme).toBe(pollReq ? 'dark' : 'light');
-    }));
+    });
 
-    it('should detect cross-tab/cross-device changes during polling', fakeAsync(() => {
+    it('should detect cross-tab/cross-device changes during polling', async () => {
+      vi.useFakeTimers();
       const initialReq = httpMock.expectOne(
         (req: { url?: string }) =>
           req.url?.includes('user/preferences') ?? false
       );
       initialReq.flush({ ui: { theme: 'light' } });
-      tick();
+      await stabilize();
 
-      tick(5 * 60 * 1000);
-      flushMicrotasks();
-      tick(0);
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+      await stabilize();
 
       const getReqs = httpMock.match((req: { url?: string }) =>
         (req.url ?? '').includes('user/preferences')
@@ -404,46 +418,48 @@ describe('UserPreferencesService', () => {
       if (pollReq) {
         pollReq.flush({ ui: { theme: 'dark', language: 'fr' } });
       }
-      tick();
+      await stabilize();
 
       const current = service.getCurrentPreferences();
       expect((current as any).ui?.theme).toBe(pollReq ? 'dark' : 'light');
       if (pollReq) {
         expect((current as any).ui?.language).toBe('fr');
       }
-    }));
+    });
 
-    it('should not poll when offline', fakeAsync(() => {
+    it('should not poll when offline', async () => {
+      vi.useFakeTimers();
       const initialReq = httpMock.expectOne(
         (req: { url?: string }) =>
           req.url?.includes('user/preferences') ?? false
       );
       initialReq.flush({});
-      tick();
+      await stabilize();
 
       offlineIsOnline = false;
 
-      tick(5 * 60 * 1000);
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+      await stabilize();
 
       const getReqs = httpMock.match((req: { url?: string }) =>
         (req.url ?? '').includes('user/preferences')
       );
       expect(getReqs.length).toBeLessThanOrEqual(1);
-    }));
+    });
 
-    it('should update last sync timestamp after successful poll', fakeAsync(() => {
+    it('should update last sync timestamp after successful poll', async () => {
+      vi.useFakeTimers();
       const initialReq = httpMock.expectOne(
         (req: { url?: string }) =>
           req.url?.includes('user/preferences') ?? false
       );
       initialReq.flush({ ui: { theme: 'light' } });
-      tick();
+      await stabilize();
 
       localStorage.removeItem('user_preferences_last_sync');
 
-      tick(5 * 60 * 1000);
-      flushMicrotasks();
-      tick(0);
+      await vi.advanceTimersByTimeAsync(5 * 60 * 1000);
+      await stabilize();
 
       const getReqs = httpMock.match((req: { url?: string }) =>
         (req.url ?? '').includes('user/preferences')
@@ -452,96 +468,99 @@ describe('UserPreferencesService', () => {
       if (pollReq) {
         pollReq.flush({ ui: { theme: 'light' } });
       }
-      tick();
+      await stabilize();
 
       const lastSync = localStorage.getItem('user_preferences_last_sync');
       if (pollReq) {
         expect(lastSync).toBeTruthy();
       }
-    }));
+    });
   });
 
   describe('resetToDefaults()', () => {
-    beforeEach(fakeAsync(() => {
+    beforeEach(async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({ ui: { theme: 'dark' } });
-      tick();
-    }));
+      await stabilize();
+    });
 
-    it('should reset all preferences to defaults', fakeAsync(() => {
-      service.resetToDefaults().subscribe((prefs) => {
-        expect(prefs).toEqual({});
-      });
+    it('should reset all preferences to defaults', async () => {
+      const done = firstValueFrom(service.resetToDefaults());
 
       const req = httpMock.expectOne(`${API_BASE}/reset`);
       expect(req.request.method).toBe('POST');
       req.flush({});
-      tick();
+      await stabilize();
+
+      const prefs = await done;
+      expect(prefs).toEqual({});
 
       expect(service.getCurrentPreferences()).toEqual({});
-    }));
+    });
 
-    it('should clear pending updates when resetting all', fakeAsync(() => {
+    it('should clear pending updates when resetting all', async () => {
       offlineIsOnline = false;
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
-      tick();
+      await stabilize();
 
       expect(service.hasPendingUpdates()).toBe(true);
 
       offlineIsOnline = true;
-      service.resetToDefaults().subscribe();
+      const done = firstValueFrom(service.resetToDefaults());
 
       const req = httpMock.expectOne(`${API_BASE}/reset`);
       req.flush({});
-      tick();
+      await stabilize();
+      await done;
 
       expect(service.hasPendingUpdates()).toBe(false);
-    }));
+    });
 
-    it('should handle reset errors gracefully', fakeAsync(() => {
-      service.resetToDefaults().subscribe((prefs) => {
-        expect(prefs).toEqual({});
-      });
+    it('should handle reset errors gracefully', async () => {
+      const done = firstValueFrom(service.resetToDefaults());
 
       const req = httpMock.expectOne(`${API_BASE}/reset`);
       req.error(new ErrorEvent('Network error'));
-      tick();
+      await stabilize();
+
+      const prefs = await done;
+      expect(prefs).toEqual({});
 
       expect(service.getCurrentPreferences()).toEqual({});
-    }));
+    });
   });
 
   describe('getPreferencesByCategory()', () => {
-    it('should return preferences for specific category', fakeAsync(() => {
+    it('should return preferences for specific category', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({
         ui: { theme: 'dark', language: 'fr' },
         notifications: { emailEnabled: true },
       });
-      tick();
+      await stabilize();
 
-      service.getPreferencesByCategory('ui').subscribe((prefs) => {
-        expect(prefs).toEqual({ theme: 'dark', language: 'fr' });
-      });
-    }));
+      const prefs = await firstValueFrom(service.getPreferencesByCategory('ui'));
+      expect(prefs).toEqual({ theme: 'dark', language: 'fr' });
+    });
 
-    it('should return empty object for non-existent category', fakeAsync(() => {
+    it('should return empty object for non-existent category', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
+      await stabilize();
 
-      service.getPreferencesByCategory('nonexistent').subscribe((prefs) => {
-        expect(prefs).toEqual({});
-      });
-    }));
+      const prefs = await firstValueFrom(
+        service.getPreferencesByCategory('nonexistent')
+      );
+      expect(prefs).toEqual({});
+    });
   });
 
   describe('Legacy API Compatibility', () => {
-    beforeEach(fakeAsync(() => {
+    beforeEach(async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
-    }));
+      await stabilize();
+    });
 
     it('should support setPreference for backward compatibility', () => {
       service.setPreference('ui', { theme: 'dark' });
@@ -569,56 +588,60 @@ describe('UserPreferencesService', () => {
   });
 
   describe('Utility Methods', () => {
-    beforeEach(fakeAsync(() => {
+    beforeEach(async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
-    }));
+      await stabilize();
+    });
 
-    it('should report pending updates count', fakeAsync(() => {
+    it('should report pending updates count', async () => {
       offlineIsOnline = false;
 
       service.updatePreferences('ui', { theme: 'dark' }).subscribe();
       service
         .updatePreferences('notifications', { emailEnabled: true })
         .subscribe();
-      tick();
+      await stabilize();
 
       expect(service.getPendingUpdatesCount()).toBe(2);
-    }));
+    });
 
-    it('should force sync on demand', fakeAsync(() => {
-      service.forceSyncNow().subscribe();
+    it('should force sync on demand', async () => {
+      const done = firstValueFrom(service.forceSyncNow());
 
       const req = httpMock.expectOne(API_BASE);
       req.flush({ ui: { theme: 'dark' } });
-      tick();
+      await stabilize();
+      await done;
 
       expect(service.getCurrentPreferences()).toEqual({
         ui: { theme: 'dark' },
       });
-    }));
+    });
   });
 
   describe('LocalStorage Persistence', () => {
-    it('should persist preferences to localStorage on update', fakeAsync(() => {
+    it('should persist preferences to localStorage on update', async () => {
       const req = httpMock.expectOne(API_BASE);
       req.flush({});
-      tick();
+      await stabilize();
 
-      service.updatePreferences('ui', { theme: 'dark' }).subscribe();
+      const done = firstValueFrom(
+        service.updatePreferences('ui', { theme: 'dark' })
+      );
 
       const updateReq = httpMock.expectOne(`${API_BASE}/ui`);
       updateReq.flush({ category: 'ui', preferences: { theme: 'dark' } });
-      tick();
+      await stabilize();
+      await done;
 
       const stored = localStorage.getItem('user_preferences');
       expect(stored).toBeTruthy();
       const parsed = JSON.parse(stored!);
       expect(parsed.ui).toEqual({ theme: 'dark' });
-    }));
+    });
 
-    it('should handle localStorage errors gracefully', fakeAsync(() => {
+    it('should handle localStorage errors gracefully', async () => {
       const originalSetItem = Storage.prototype.setItem;
       Storage.prototype.setItem = (): void => {
         throw new Error('QuotaExceededError');
@@ -626,7 +649,7 @@ describe('UserPreferencesService', () => {
       try {
         const req = httpMock.expectOne(API_BASE);
         req.flush({});
-        tick();
+        await stabilize();
 
         expect(() => {
           service.updatePreferences('ui', { theme: 'dark' }).subscribe();
@@ -634,6 +657,6 @@ describe('UserPreferencesService', () => {
       } finally {
         Storage.prototype.setItem = originalSetItem;
       }
-    }));
+    });
   });
 });

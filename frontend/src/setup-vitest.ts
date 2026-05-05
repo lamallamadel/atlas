@@ -74,10 +74,11 @@ const canvas2dStub = {
 };
 
 if (typeof HTMLCanvasElement !== 'undefined') {
-  HTMLCanvasElement.prototype.getContext = vi.fn(
-    (contextId: string) =>
-      (contextId === '2d' ? canvas2dStub : null) as unknown as RenderingContext
+  const patchGetContext = vi.fn((contextId: string) =>
+    contextId === '2d' ? (canvas2dStub as unknown as CanvasRenderingContext2D) : null
   );
+  (HTMLCanvasElement.prototype as { getContext: typeof HTMLCanvasElement.prototype.getContext }).getContext =
+    patchGetContext as typeof HTMLCanvasElement.prototype.getContext;
 }
 
 HTMLAnchorElement.prototype.click = vi.fn(function noopClick(this: HTMLAnchorElement) {
@@ -110,7 +111,7 @@ if (!globalThis.indexedDB) {
     })),
   });
 
-  class StubIDBDatabase implements Partial<IDBDatabase> {
+  class StubIDBDatabase {
     private readonly stores = new Set<string>();
     objectStoreNames = {
       contains: (name: string) => this.stores.has(String(name)),
