@@ -24,41 +24,41 @@
     <!-- Action buttons -->
     @if (primaryAction() || secondaryAction()) {
       <div class="animated-empty-state-actions">
-        @if (primaryAction()) {
+        @if (primaryAction(); as primary) {
           <button
             class="btn-primary-action"
             (click)="onPrimaryClick()"
-            [attr.aria-label]="primaryAction().label">
-            @if (primaryAction().icon) {
-              <mat-icon class="btn-icon">{{ primaryAction().icon }}</mat-icon>
+            [attr.aria-label]="primary.label">
+            @if (primary.icon) {
+              <mat-icon class="btn-icon">{{ primary.icon }}</mat-icon>
             }
-            <span>{{ primaryAction().label }}</span>
+            <span>{{ primary.label }}</span>
           </button>
         }
-        @if (secondaryAction()) {
+        @if (secondaryAction(); as secondary) {
           <button
             class="btn-secondary-action"
             (click)="onSecondaryClick()"
-            [attr.aria-label]="secondaryAction().label">
-            @if (secondaryAction().icon) {
-              <mat-icon class="btn-icon">{{ secondaryAction().icon }}</mat-icon>
+            [attr.aria-label]="secondary.label">
+            @if (secondary.icon) {
+              <mat-icon class="btn-icon">{{ secondary.icon }}</mat-icon>
             }
-            <span>{{ secondaryAction().label }}</span>
+            <span>{{ secondary.label }}</span>
           </button>
         }
       </div>
     }
 
     <!-- Help link -->
-    @if (helpLink()) {
+    @if (helpLink(); as help) {
       <div class="animated-empty-state-help">
         <a
           href="javascript:void(0)"
           class="help-link"
           (click)="onHelpLinkClick()"
-          [attr.aria-label]="helpLink().label">
+          [attr.aria-label]="help.label">
           <mat-icon class="help-icon">help_outline</mat-icon>
-          <span>{{ helpLink().label }}</span>
+          <span>{{ help.label }}</span>
         </a>
       </div>
     }

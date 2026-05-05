@@ -7,22 +7,22 @@ import { MatButton } from '@angular/material/button';
 @Component({
     selector: 'app-inline-validation-suggestion',
     template: `
-    @if (suggestion()) {
+    @if (suggestion(); as s) {
       <div class="suggestion-container" @slideIn>
-        <div class="suggestion-card" [class.high-confidence]="suggestion().confidence === 'high'">
+        <div class="suggestion-card" [class.high-confidence]="s.confidence === 'high'">
           <div class="suggestion-header">
             <mat-icon class="suggestion-icon">{{ getConfidenceIcon() }}</mat-icon>
-            <span class="suggestion-reason">{{ suggestion().reason }}</span>
+            <span class="suggestion-reason">{{ s.reason }}</span>
           </div>
           <div class="suggestion-content">
             <div class="original-value">
               <span class="label">Valeur actuelle:</span>
-              <span class="value">{{ suggestion().originalValue }}</span>
+              <span class="value">{{ s.originalValue }}</span>
             </div>
             <mat-icon class="arrow-icon">arrow_forward</mat-icon>
             <div class="suggested-value">
               <span class="label">Suggestion:</span>
-              <span class="value suggested">{{ suggestion().suggestedValue }}</span>
+              <span class="value suggested">{{ s.suggestedValue }}</span>
             </div>
           </div>
           <div class="suggestion-actions">
