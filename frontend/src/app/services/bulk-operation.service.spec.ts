@@ -6,17 +6,17 @@ describe('BulkOperationService', () => {
   let service: BulkOperationService;
 
   const mockDialog = {
-    open: jasmine.createSpy('open').and.returnValue({
-      afterClosed: () => ({ subscribe: jasmine.createSpy('subscribe') })
-    })
+    open: vi.fn().mockReturnValue({
+      afterClosed: () => ({ subscribe: vi.fn() }),
+    }),
   };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         BulkOperationService,
-        { provide: MatDialog, useValue: mockDialog }
-      ]
+        { provide: MatDialog, useValue: mockDialog },
+      ],
     });
     service = TestBed.inject(BulkOperationService);
   });

@@ -5,22 +5,26 @@ import { AriaLiveAnnouncerService } from './aria-live-announcer.service';
 
 describe('ToastNotificationService', () => {
   let service: ToastNotificationService;
-  let snackBarSpy: jasmine.SpyObj<MatSnackBar>;
+  let snackBarSpy: AngularVitestPartialMock<MatSnackBar>;
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('MatSnackBar', ['open']);
-    const ariaLiveSpy = jasmine.createSpyObj('AriaLiveAnnouncerService', ['announce']);
+    const spy = {
+      open: vi.fn().mockName('MatSnackBar.open'),
+    };
+    const ariaLiveSpy = {
+      announce: vi.fn().mockName('AriaLiveAnnouncerService.announce'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         ToastNotificationService,
         { provide: MatSnackBar, useValue: spy },
-        { provide: AriaLiveAnnouncerService, useValue: ariaLiveSpy }
-      ]
+        { provide: AriaLiveAnnouncerService, useValue: ariaLiveSpy },
+      ],
     });
 
     service = TestBed.inject(ToastNotificationService);
-    snackBarSpy = TestBed.inject(MatSnackBar) as jasmine.SpyObj<MatSnackBar>;
+    snackBarSpy = TestBed.inject(MatSnackBar) as AngularVitestPartialMock<MatSnackBar>;
   });
 
   it('should be created', () => {
@@ -31,14 +35,22 @@ describe('ToastNotificationService', () => {
     const id = service.success('Test success message');
     expect(id).toBeTruthy();
     const active = (service as any).activeToasts$.value;
-    expect(active.some((t: any) => t.message === 'Test success message' && t.type === 'success')).toBe(true);
+    expect(
+      active.some(
+        (t: any) => t.message === 'Test success message' && t.type === 'success'
+      )
+    ).toBe(true);
   });
 
   it('should show error notification', () => {
     const id = service.error('Test error message');
     expect(id).toBeTruthy();
     const active = (service as any).activeToasts$.value;
-    expect(active.some((t: any) => t.message === 'Test error message' && t.type === 'error')).toBe(true);
+    expect(
+      active.some(
+        (t: any) => t.message === 'Test error message' && t.type === 'error'
+      )
+    ).toBe(true);
   });
 
   it('should queue notifications', () => {

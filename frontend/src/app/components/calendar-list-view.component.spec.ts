@@ -10,8 +10,11 @@ import { LayoutModule } from '@angular/cdk/layout';
 import { CalendarListViewComponent } from './calendar-list-view.component';
 import { AppointmentApiService } from '../services/appointment-api.service';
 import { ToastNotificationService } from '../services/toast-notification.service';
-import { of } from "rxjs";
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { of } from 'rxjs';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('CalendarListViewComponent', () => {
   let component: CalendarListViewComponent;
@@ -19,32 +22,36 @@ describe('CalendarListViewComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MatDialogModule,
+      imports: [
+        MatDialogModule,
         MatIconModule,
         MatChipsModule,
         MatProgressSpinnerModule,
         MatTooltipModule,
         MatButtonModule,
-        LayoutModule, CalendarListViewComponent],
-    providers: [
+        LayoutModule,
+        CalendarListViewComponent,
+      ],
+      providers: [
         {
-            provide: AppointmentApiService,
-            useValue: {
-                list: jasmine.createSpy('list').and.returnValue(of({ content: [], totalElements: 0 }))
-            }
+          provide: AppointmentApiService,
+          useValue: {
+            list: vi
+              .fn()
+              .mockReturnValue(of({ content: [], totalElements: 0 })),
+          },
         },
         {
-            provide: ToastNotificationService,
-            useValue: {
-                error: jasmine.createSpy('error'),
-                success: jasmine.createSpy('success')
-            }
+          provide: ToastNotificationService,
+          useValue: {
+            error: vi.fn(),
+            success: vi.fn(),
+          },
         },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-})
-    .compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CalendarListViewComponent);
     component = fixture.componentInstance;

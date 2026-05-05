@@ -18,11 +18,10 @@ describe('OfflineService', () => {
     expect(service.isOnline()).toBe(navigator.onLine);
   });
 
-  it('should provide connectivity observable', (done) => {
-    service.connectivity$.pipe(take(1)).subscribe(state => {
+  it('should provide connectivity observable', async () => {
+    service.connectivity$.pipe(take(1)).subscribe((state) => {
       expect(state).toBeDefined();
       expect(state.status).toBeDefined();
-      done();
     });
   });
 });

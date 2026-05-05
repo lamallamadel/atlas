@@ -1,16 +1,22 @@
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 import { TestBed } from '@angular/core/testing';
 import { CommonModule } from '@angular/common';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import {  } from '@angular/material/snack-bar';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import {} from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { NotificationService } from './notification.service';
 import { ThemeService } from './theme.service';
 import { EnhancedSnackbarComponent } from '../components/enhanced-snackbar.component';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -19,26 +25,36 @@ describe('NotificationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [CommonModule,
-        
+      imports: [
+        CommonModule,
+
         MatIconModule,
         MatButtonModule,
-        BrowserAnimationsModule, EnhancedSnackbarComponent],
-    providers: [
-        { 
-          provide: MatSnackBar, 
-          useValue: { 
-            open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }),
-            openFromComponent: () => ({ onAction: () => of(null), afterDismissed: () => of(null), dismiss: () => {} }),
-            dismiss: () => {} 
-          } 
+        BrowserAnimationsModule,
+        EnhancedSnackbarComponent,
+      ],
+      providers: [
+        {
+          provide: MatSnackBar,
+          useValue: {
+            open: () => ({
+              onAction: () => of(null),
+              afterDismissed: () => of(null),
+            }),
+            openFromComponent: () => ({
+              onAction: () => of(null),
+              afterDismissed: () => of(null),
+              dismiss: () => {},
+            }),
+            dismiss: () => {},
+          },
         },
         NotificationService,
         ThemeService,
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-});
+        provideHttpClientTesting(),
+      ],
+    });
     service = TestBed.inject(NotificationService);
     httpMock = TestBed.inject(HttpTestingController);
     themeService = TestBed.inject(ThemeService);
@@ -53,27 +69,27 @@ describe('NotificationService', () => {
   });
 
   it('should show success notification', () => {
-    const spy = spyOn(service as any, 'show');
+    const spy = vi.spyOn(service as any, 'show');
     service.success('Test success message');
     expect(spy).toHaveBeenCalledWith({
       message: 'Test success message',
       type: 'success',
       action: undefined,
       onAction: undefined,
-      priority: 'normal'
+      priority: 'normal',
     });
   });
 
   it('should show error notification and log to backend', () => {
-    const spy = spyOn(service as any, 'show');
+    const spy = vi.spyOn(service as any, 'show');
     service.error('Test error message');
-    
+
     expect(spy).toHaveBeenCalledWith({
       message: 'Test error message',
       type: 'error',
       action: 'Fermer',
       onAction: undefined,
-      priority: 'high'
+      priority: 'high',
     });
 
     const req = httpMock.expectOne('/api/v1/observability/client-errors');
@@ -105,11 +121,11 @@ describe('NotificationService', () => {
   });
 
   it('should provide convenience methods', () => {
-    const spy = spyOn(service, 'success');
-    const retryFn = jasmine.createSpy('retry');
-    
+    const spy = vi.spyOn(service, 'success');
+    const retryFn = vi.fn();
+
     service.successWithUndo('Test', retryFn);
-    
+
     expect(spy).toHaveBeenCalledWith('Test', 'Annuler', retryFn);
   });
 });

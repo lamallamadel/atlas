@@ -13,22 +13,23 @@ describe('KeyboardShortcutsComponent', () => {
   let service: KeyboardShortcutService;
 
   beforeEach(async () => {
-    const routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    const routerMock = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         CommonModule,
         MatIconModule,
         MatCheckboxModule,
         MatButtonModule,
-        KeyboardShortcutsComponent
-    ],
-    providers: [
+        KeyboardShortcutsComponent,
+      ],
+      providers: [
         KeyboardShortcutService,
-        { provide: Router, useValue: routerMock }
-    ]
-})
-    .compileComponents();
+        { provide: Router, useValue: routerMock },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(KeyboardShortcutsComponent);
     component = fixture.componentInstance;
@@ -47,7 +48,7 @@ describe('KeyboardShortcutsComponent', () => {
   });
 
   it('should close shortcuts overlay', () => {
-    spyOn(service, 'closeShortcutHelp');
+    vi.spyOn(service, 'closeShortcutHelp');
     component.close();
     expect(service.closeShortcutHelp).toHaveBeenCalled();
   });

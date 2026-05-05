@@ -14,7 +14,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 
 import { UiPreferencesFormComponent } from './ui-preferences-form.component';
 import { UserPreferencesService } from '../services/user-preferences.service';
@@ -24,9 +24,9 @@ import { NotificationService } from '../services/notification.service';
 describe('UiPreferencesFormComponent', () => {
   let component: UiPreferencesFormComponent;
   let fixture: ComponentFixture<UiPreferencesFormComponent>;
-  let userPreferencesService: jasmine.SpyObj<UserPreferencesService>;
-  let themeService: jasmine.SpyObj<ThemeService>;
-  let notificationService: jasmine.SpyObj<NotificationService>;
+  let userPreferencesService: AngularVitestPartialMock<UserPreferencesService>;
+  let themeService: AngularVitestPartialMock<ThemeService>;
+  let notificationService: AngularVitestPartialMock<NotificationService>;
 
   const mockPreferences: any = {
     ui: {
@@ -34,25 +34,29 @@ describe('UiPreferencesFormComponent', () => {
       language: 'fr',
       density: 'comfortable',
       defaultRoute: '/dashboard',
-      syncDevices: true
-    }
+      syncDevices: true,
+    },
   };
 
   beforeEach(async () => {
-    const userPreferencesServiceSpy = jasmine.createSpyObj('UserPreferencesService', [
-      'getPreferences',
-      'updatePreferences'
-    ]);
-    const themeServiceSpy = jasmine.createSpyObj('ThemeService', ['setTheme']);
-    const notificationServiceSpy = jasmine.createSpyObj('NotificationService', [
-      'success',
-      'error',
-      'warning',
-      'info'
-    ]);
+    const userPreferencesServiceSpy = {
+      getPreferences: vi.fn().mockName('UserPreferencesService.getPreferences'),
+      updatePreferences: vi
+        .fn()
+        .mockName('UserPreferencesService.updatePreferences'),
+    };
+    const themeServiceSpy = {
+      setTheme: vi.fn().mockName('ThemeService.setTheme'),
+    };
+    const notificationServiceSpy = {
+      success: vi.fn().mockName('NotificationService.success'),
+      error: vi.fn().mockName('NotificationService.error'),
+      warning: vi.fn().mockName('NotificationService.warning'),
+      info: vi.fn().mockName('NotificationService.info'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
         MatCardModule,
@@ -68,20 +72,27 @@ describe('UiPreferencesFormComponent', () => {
         MatProgressBarModule,
         MatProgressSpinnerModule,
         MatDividerModule,
-        UiPreferencesFormComponent
-    ],
-    providers: [
-        { provide: UserPreferencesService, useValue: userPreferencesServiceSpy },
+        UiPreferencesFormComponent,
+      ],
+      providers: [
+        {
+          provide: UserPreferencesService,
+          useValue: userPreferencesServiceSpy,
+        },
         { provide: ThemeService, useValue: themeServiceSpy },
-        { provide: NotificationService, useValue: notificationServiceSpy }
-    ]
-}).compileComponents();
+        { provide: NotificationService, useValue: notificationServiceSpy },
+      ],
+    }).compileComponents();
 
-    userPreferencesService = TestBed.inject(UserPreferencesService) as jasmine.SpyObj<UserPreferencesService>;
-    themeService = TestBed.inject(ThemeService) as jasmine.SpyObj<ThemeService>;
-    notificationService = TestBed.inject(NotificationService) as jasmine.SpyObj<NotificationService>;
+    userPreferencesService = TestBed.inject(
+      UserPreferencesService
+    ) as AngularVitestPartialMock<UserPreferencesService>;
+    themeService = TestBed.inject(ThemeService) as AngularVitestPartialMock<ThemeService>;
+    notificationService = TestBed.inject(
+      NotificationService
+    ) as AngularVitestPartialMock<NotificationService>;
 
-    userPreferencesService.getPreferences.and.returnValue(of(mockPreferences));
+    userPreferencesService.getPreferences.mockReturnValue(of(mockPreferences));
   });
 
   beforeEach(() => {
@@ -99,7 +110,9 @@ describe('UiPreferencesFormComponent', () => {
     expect(component.preferencesForm.get('theme')?.value).toBe('light');
     expect(component.preferencesForm.get('language')?.value).toBe('fr');
     expect(component.preferencesForm.get('density')?.value).toBe('comfortable');
-    expect(component.preferencesForm.get('defaultRoute')?.value).toBe('/dashboard');
+    expect(component.preferencesForm.get('defaultRoute')?.value).toBe(
+      '/dashboard'
+    );
     expect(component.preferencesForm.get('syncDevices')?.value).toBe(true);
   });
 
@@ -108,53 +121,56 @@ describe('UiPreferencesFormComponent', () => {
     expect(component.loading).toBe(false);
   });
 
-  it('should update preview values when form changes', (done) => {
+  it('should update preview values when form changes', async () => {
     component.preferencesForm.patchValue({
       theme: 'dark',
       language: 'en',
-      density: 'compact'
+      density: 'compact',
     });
 
-    setTimeout(() => {
-      expect(component.previewTheme).toBe('dark');
-      expect(component.previewLanguage).toBe('en');
-      expect(component.previewDensity).toBe('compact');
-      done();
-    }, 200);
+    await new Promise<void>((resolve) => setTimeout(resolve, 200));
+    expect(component.previewTheme).toBe('dark');
+    expect(component.previewLanguage).toBe('en');
+    expect(component.previewDensity).toBe('compact');
   });
 
-  it('should filter routes based on search input', (done) => {
+  it('should filter routes based on search input', async () => {
     component.preferencesForm.patchValue({
-      defaultRouteInput: 'dash'
+      defaultRouteInput: 'dash',
     });
 
-    setTimeout(() => {
-      expect(component.filteredRoutes.length).toBeGreaterThan(0);
-      expect(component.filteredRoutes[0].path).toBe('/dashboard');
-      done();
-    }, 300);
+    await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    expect(component.filteredRoutes.length).toBeGreaterThan(0);
+    expect(component.filteredRoutes[0].path).toBe('/dashboard');
   });
 
   it('should save preferences successfully', () => {
-    userPreferencesService.updatePreferences.and.returnValue(of({ category: 'ui', preferences: {} }));
+    userPreferencesService.updatePreferences.mockReturnValue(
+      of({ category: 'ui', preferences: {} })
+    );
 
     component.preferencesForm.patchValue({
       theme: 'dark',
-      language: 'en'
+      language: 'en',
     });
 
     component.onSave();
 
-    expect(userPreferencesService.updatePreferences).toHaveBeenCalledWith('ui', jasmine.objectContaining({
-      theme: 'dark',
-      language: 'en'
-    }));
+    expect(userPreferencesService.updatePreferences).toHaveBeenCalledWith(
+      'ui',
+      expect.objectContaining({
+        theme: 'dark',
+        language: 'en',
+      })
+    );
     expect(themeService.setTheme).toHaveBeenCalledWith('dark');
     expect(notificationService.success).toHaveBeenCalled();
   });
 
   it('should handle save error', () => {
-    userPreferencesService.updatePreferences.and.returnValue(throwError({ error: 'Error' }));
+    userPreferencesService.updatePreferences.mockReturnValue(
+      throwError({ error: 'Error' })
+    );
 
     component.onSave();
 
@@ -166,7 +182,7 @@ describe('UiPreferencesFormComponent', () => {
     const originalValues = { ...component.preferencesForm.value };
 
     component.preferencesForm.patchValue({
-      theme: 'dark'
+      theme: 'dark',
     });
 
     component.onCancel();
@@ -178,7 +194,7 @@ describe('UiPreferencesFormComponent', () => {
     expect(component.hasUnsavedChanges()).toBe(false);
 
     component.preferencesForm.patchValue({
-      theme: 'dark'
+      theme: 'dark',
     });
 
     expect(component.hasUnsavedChanges()).toBe(true);
@@ -216,7 +232,9 @@ describe('UiPreferencesFormComponent', () => {
     component.onRouteSelected(route);
 
     expect(component.preferencesForm.get('defaultRoute')?.value).toBe('/tasks');
-    expect(component.preferencesForm.get('defaultRouteInput')?.value).toBe('Tâches');
+    expect(component.preferencesForm.get('defaultRouteInput')?.value).toBe(
+      'Tâches'
+    );
   });
 
   it('should display route function correctly', () => {
@@ -228,16 +246,18 @@ describe('UiPreferencesFormComponent', () => {
   });
 
   it('should show sync notification when sync is enabled', () => {
-    userPreferencesService.updatePreferences.and.returnValue(of({ category: 'ui', preferences: {} }));
+    userPreferencesService.updatePreferences.mockReturnValue(
+      of({ category: 'ui', preferences: {} })
+    );
 
     component.preferencesForm.patchValue({
-      syncDevices: true
+      syncDevices: true,
     });
 
     component.onSave();
 
     expect(notificationService.success).toHaveBeenCalledWith(
-      jasmine.stringContaining('synchronisées')
+      expect.stringContaining('synchronisées')
     );
   });
 
@@ -246,7 +266,7 @@ describe('UiPreferencesFormComponent', () => {
       theme: '',
       language: '',
       density: '',
-      defaultRoute: ''
+      defaultRoute: '',
     });
 
     expect(component.preferencesForm.valid).toBe(false);

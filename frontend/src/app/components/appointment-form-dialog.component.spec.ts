@@ -9,18 +9,24 @@ import { MaterialTestingModule } from '../testing/material-testing.module';
 describe('AppointmentFormDialogComponent', () => {
   let component: AppointmentFormDialogComponent;
   let fixture: ComponentFixture<AppointmentFormDialogComponent>;
-  let mockDialogRef: jasmine.SpyObj<MatDialogRef<AppointmentFormDialogComponent>>;
+  let mockDialogRef: AngularVitestPartialMock<MatDialogRef<AppointmentFormDialogComponent>>;
 
   beforeEach(async () => {
-    mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+    mockDialogRef = {
+      close: vi.fn().mockName('MatDialogRef.close'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [MaterialTestingModule, AppointmentFormDialogComponent, DatetimePickerComponent],
-    providers: [
+      imports: [
+        MaterialTestingModule,
+        AppointmentFormDialogComponent,
+        DatetimePickerComponent,
+      ],
+      providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } }
-    ]
-}).compileComponents();
+        { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AppointmentFormDialogComponent);
     component = fixture.componentInstance;
@@ -32,7 +38,9 @@ describe('AppointmentFormDialogComponent', () => {
   });
 
   it('should initialize form with default values', () => {
-    expect(component.appointmentForm.get('status')?.value).toBe(AppointmentStatus.SCHEDULED);
+    expect(component.appointmentForm.get('status')?.value).toBe(
+      AppointmentStatus.SCHEDULED
+    );
   });
 
   it('should close dialog on cancel', () => {

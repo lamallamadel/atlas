@@ -1,5 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -15,7 +20,7 @@ describe('DatetimePickerComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         CommonModule,
         ReactiveFormsModule,
         MatFormFieldModule,
@@ -23,10 +28,10 @@ describe('DatetimePickerComponent', () => {
         MatDatepickerModule,
         MatNativeDateModule,
         BrowserAnimationsModule,
-        DatetimePickerComponent
-    ],
-    providers: [FormBuilder]
-}).compileComponents();
+        DatetimePickerComponent,
+      ],
+      providers: [FormBuilder],
+    }).compileComponents();
 
     formBuilder = TestBed.inject(FormBuilder);
     fixture = TestBed.createComponent(DatetimePickerComponent);
@@ -147,7 +152,9 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle writeValue before form initialization', () => {
-      const newComponent = TestBed.runInInjectionContext(() => new DatetimePickerComponent(formBuilder));
+      const newComponent = TestBed.runInInjectionContext(
+        () => new DatetimePickerComponent(formBuilder)
+      );
       newComponent.writeValue('2024-06-15T14:30');
 
       // Form should not exist yet
@@ -161,7 +168,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should not emit change event when writing value', () => {
-      const onChangeSpy = jasmine.createSpy('onChange');
+      const onChangeSpy = vi.fn();
       component.registerOnChange(onChangeSpy);
 
       component.writeValue('2024-06-15T14:30');
@@ -176,7 +183,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should register onChange callback', () => {
-      const onChangeSpy = jasmine.createSpy('onChange');
+      const onChangeSpy = vi.fn();
       component.registerOnChange(onChangeSpy);
 
       component.form.get('date')?.setValue(new Date(2024, 5, 15));
@@ -186,7 +193,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit datetime-local format string on valid input', () => {
-      let emittedValue  = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -199,7 +206,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit empty string when date is missing', () => {
-      let emittedValue  = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -211,7 +218,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit empty string when time is missing', () => {
-      let emittedValue  = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -223,7 +230,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should emit empty string when time is invalid', () => {
-      let emittedValue  = '';
+      let emittedValue = '';
       component.registerOnChange((value: string) => {
         emittedValue = value;
       });
@@ -241,7 +248,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should register onTouched callback', () => {
-      const onTouchedSpy = jasmine.createSpy('onTouched');
+      const onTouchedSpy = vi.fn();
       component.registerOnTouched(onTouchedSpy);
 
       component.markTouched();
@@ -279,7 +286,7 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should not emit change event when setting disabled state', () => {
-      const onChangeSpy = jasmine.createSpy('onChange');
+      const onChangeSpy = vi.fn();
       component.registerOnChange(onChangeSpy);
 
       component.setDisabledState(true);
@@ -288,7 +295,9 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle setDisabledState before form initialization gracefully', () => {
-      const newComponent = TestBed.runInInjectionContext(() => new DatetimePickerComponent(formBuilder));
+      const newComponent = TestBed.runInInjectionContext(
+        () => new DatetimePickerComponent(formBuilder)
+      );
 
       expect(() => {
         newComponent.setDisabledState(true);
@@ -359,7 +368,9 @@ describe('DatetimePickerComponent', () => {
     });
 
     it('should handle validate before form initialization', () => {
-      const newComponent = TestBed.runInInjectionContext(() => new DatetimePickerComponent(formBuilder));
+      const newComponent = TestBed.runInInjectionContext(
+        () => new DatetimePickerComponent(formBuilder)
+      );
       const control = new FormControl();
 
       const errors = newComponent.validate(control);
@@ -379,7 +390,7 @@ describe('DatetimePickerComponent', () => {
     it('should accept valid time ranges', () => {
       const validTimes = ['00:00', '12:00', '23:59', '09:15'];
 
-      validTimes.forEach(time => {
+      validTimes.forEach((time) => {
         const control = new FormControl(time);
         const errors = DatetimePickerComponent.timeValidator(control);
         expect(errors).toBeNull();
@@ -403,7 +414,7 @@ describe('DatetimePickerComponent', () => {
     it('should reject incorrect format', () => {
       const invalidFormats = ['1:30', '14:3', '14-30', '14.30', 'invalid'];
 
-      invalidFormats.forEach(time => {
+      invalidFormats.forEach((time) => {
         const control = new FormControl(time);
         const errors = DatetimePickerComponent.timeValidator(control);
         expect(errors).toEqual({ invalidTime: true });
@@ -510,12 +521,12 @@ describe('DatetimePickerComponent', () => {
     beforeEach(() => {
       component.ngOnInit();
       testForm = formBuilder.group({
-        datetime: ['']
+        datetime: [''],
       });
     });
 
     it('should work as part of reactive form', () => {
-      const onChangeSpy = jasmine.createSpy('onChange');
+      const onChangeSpy = vi.fn();
       component.registerOnChange(onChangeSpy);
 
       testForm.get('datetime')?.setValue('2024-06-15T14:30');
@@ -581,7 +592,9 @@ describe('DatetimePickerComponent', () => {
       const compiled = fixture.nativeElement;
       const errorMessage = compiled.querySelector('.datetime-error');
 
-      expect(errorMessage?.textContent).toContain('Heure invalide (format HH:mm)');
+      expect(errorMessage?.textContent).toContain(
+        'Heure invalide (format HH:mm)'
+      );
     });
   });
 
@@ -634,9 +647,9 @@ describe('DatetimePickerComponent', () => {
   describe('Cleanup', () => {
     it('should complete destroy$ subject on ngOnDestroy', () => {
       component.ngOnInit();
-      const destroySpy = jasmine.createSpy('destroy');
+      const destroySpy = vi.fn();
       component['destroy$'].subscribe({
-        complete: destroySpy
+        complete: destroySpy,
       });
 
       component.ngOnDestroy();
@@ -646,7 +659,7 @@ describe('DatetimePickerComponent', () => {
 
     it('should unsubscribe from form changes on destroy', () => {
       component.ngOnInit();
-      const onChangeSpy = jasmine.createSpy('onChange');
+      const onChangeSpy = vi.fn();
       component.registerOnChange(onChangeSpy);
 
       component.ngOnDestroy();

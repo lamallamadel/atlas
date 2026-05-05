@@ -19,46 +19,52 @@ import { NotificationService } from '../services/notification.service';
 describe('NotificationPreferencesFormComponent', () => {
   let component: NotificationPreferencesFormComponent;
   let fixture: ComponentFixture<NotificationPreferencesFormComponent>;
-  let mockUserPreferencesService: jasmine.SpyObj<UserPreferencesService>;
-  let mockNotificationService: jasmine.SpyObj<NotificationService>;
+  let mockUserPreferencesService: AngularVitestPartialMock<UserPreferencesService>;
+  let mockNotificationService: AngularVitestPartialMock<NotificationService>;
 
   beforeEach(async () => {
-    mockUserPreferencesService = jasmine.createSpyObj('UserPreferencesService', [
-      'getPreferences',
-      'updatePreferences'
-    ]);
-    mockNotificationService = jasmine.createSpyObj('NotificationService', [
-      'success',
-      'error',
-      'warning',
-      'info'
-    ]);
+    mockUserPreferencesService = {
+      getPreferences: vi.fn().mockName('UserPreferencesService.getPreferences'),
+      updatePreferences: vi
+        .fn()
+        .mockName('UserPreferencesService.updatePreferences'),
+    };
+    mockNotificationService = {
+      success: vi.fn().mockName('NotificationService.success'),
+      error: vi.fn().mockName('NotificationService.error'),
+      warning: vi.fn().mockName('NotificationService.warning'),
+      info: vi.fn().mockName('NotificationService.info'),
+    };
 
     // Default mock return values
-    mockUserPreferencesService.getPreferences.and.returnValue(of({
-      notifications: {
-        emailEnabled: true,
-        smsEnabled: false,
-        inAppEnabled: true,
-        pushEnabled: true,
-        newDossierEnabled: true,
-        newMessageEnabled: true,
-        appointmentEnabled: true,
-        statusChangeEnabled: true,
-        quietHoursEnabled: false,
-        quietHoursStart: 22,
-        quietHoursEnd: 8,
-        digestFrequency: 'instant'
-      }
-    }));
+    mockUserPreferencesService.getPreferences.mockReturnValue(
+      of({
+        notifications: {
+          emailEnabled: true,
+          smsEnabled: false,
+          inAppEnabled: true,
+          pushEnabled: true,
+          newDossierEnabled: true,
+          newMessageEnabled: true,
+          appointmentEnabled: true,
+          statusChangeEnabled: true,
+          quietHoursEnabled: false,
+          quietHoursStart: 22,
+          quietHoursEnd: 8,
+          digestFrequency: 'instant',
+        },
+      })
+    );
 
-    mockUserPreferencesService.updatePreferences.and.returnValue(of({
-      category: 'notifications',
-      preferences: {}
-    }));
+    mockUserPreferencesService.updatePreferences.mockReturnValue(
+      of({
+        category: 'notifications',
+        preferences: {},
+      })
+    );
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         ReactiveFormsModule,
         BrowserAnimationsModule,
         MatCardModule,
@@ -70,14 +76,16 @@ describe('NotificationPreferencesFormComponent', () => {
         MatButtonModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
-        NotificationPreferencesFormComponent
-    ],
-    providers: [
-        { provide: UserPreferencesService, useValue: mockUserPreferencesService },
-        { provide: NotificationService, useValue: mockNotificationService }
-    ]
-})
-    .compileComponents();
+        NotificationPreferencesFormComponent,
+      ],
+      providers: [
+        {
+          provide: UserPreferencesService,
+          useValue: mockUserPreferencesService,
+        },
+        { provide: NotificationService, useValue: mockNotificationService },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(NotificationPreferencesFormComponent);
     component = fixture.componentInstance;
@@ -91,25 +99,25 @@ describe('NotificationPreferencesFormComponent', () => {
   it('should initialize form with default values', () => {
     expect(component.preferencesForm).toBeDefined();
     expect(component.preferencesForm.get('emailEnabled')?.value).toBe(true);
-    expect(component.preferencesForm.get('digestFrequency')?.value).toBe('instant');
+    expect(component.preferencesForm.get('digestFrequency')?.value).toBe(
+      'instant'
+    );
   });
 
   it('should load preferences on init', () => {
     expect(mockUserPreferencesService.getPreferences).toHaveBeenCalled();
   });
 
-  it('should update example notifications when form changes', (done) => {
+  it('should update example notifications when form changes', async () => {
     component.preferencesForm.patchValue({
       newDossierEnabled: false,
       newMessageEnabled: false,
       appointmentEnabled: false,
-      statusChangeEnabled: false
+      statusChangeEnabled: false,
     });
 
-    setTimeout(() => {
-      expect(component.exampleNotifications.length).toBe(0);
-      done();
-    }, 400);
+    await new Promise<void>((resolve) => setTimeout(resolve, 400));
+    expect(component.exampleNotifications.length).toBe(0);
   });
 
   it('should calculate quiet hours correctly', () => {
@@ -119,7 +127,7 @@ describe('NotificationPreferencesFormComponent', () => {
 
     const earlyMorning = new Date();
     earlyMorning.setHours(7);
-    
+
     const midday = new Date();
     midday.setHours(14);
 
@@ -166,7 +174,7 @@ describe('NotificationPreferencesFormComponent', () => {
   });
 
   it('should handle save error', () => {
-    mockUserPreferencesService.updatePreferences.and.returnValue(
+    mockUserPreferencesService.updatePreferences.mockReturnValue(
       throwError(() => new Error('Save failed'))
     );
 
@@ -178,10 +186,12 @@ describe('NotificationPreferencesFormComponent', () => {
   it('should cancel changes', () => {
     const originalValue = component.preferencesForm.get('emailEnabled')?.value;
     component.preferencesForm.patchValue({ emailEnabled: !originalValue });
-    
+
     component.onCancel();
-    
-    expect(mockNotificationService.info).toHaveBeenCalledWith('Modifications annulées');
+
+    expect(mockNotificationService.info).toHaveBeenCalledWith(
+      'Modifications annulées'
+    );
   });
 
   it('should get relative time correctly', () => {
@@ -196,9 +206,9 @@ describe('NotificationPreferencesFormComponent', () => {
   });
 
   it('should get active channel icons', () => {
-    component.channels.forEach(ch => ch.enabled = true);
+    component.channels.forEach((ch) => (ch.enabled = true));
     const icons = component.getActiveChannelIcons();
-    
+
     expect(icons.length).toBe(4);
     expect(icons).toContain('email');
     expect(icons).toContain('sms');
@@ -207,12 +217,12 @@ describe('NotificationPreferencesFormComponent', () => {
   it('should get digest frequency label', () => {
     component.preferencesForm.patchValue({ digestFrequency: 'hourly' });
     const label = component.getDigestFrequencyLabel();
-    
+
     expect(label).toBe('Horaire');
   });
 
   it('should handle loading error gracefully', () => {
-    mockUserPreferencesService.getPreferences.and.returnValue(
+    mockUserPreferencesService.getPreferences.mockReturnValue(
       throwError(() => new Error('Load failed'))
     );
 

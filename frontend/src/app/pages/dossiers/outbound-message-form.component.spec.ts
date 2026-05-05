@@ -1,24 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 import { OutboundMessageFormComponent } from './outbound-message-form.component';
 import { OutboundMessageApiService } from '../../services/outbound-message-api.service';
 
 describe('OutboundMessageFormComponent', () => {
   let component: OutboundMessageFormComponent;
   let fixture: ComponentFixture<OutboundMessageFormComponent>;
-  let mockOutboundMessageService: jasmine.SpyObj<OutboundMessageApiService>;
+  let mockOutboundMessageService: AngularVitestPartialMock<OutboundMessageApiService>;
 
   beforeEach(async () => {
-    mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['listTemplates', 'create']);
+    mockOutboundMessageService = {
+      listTemplates: vi
+        .fn()
+        .mockName('OutboundMessageApiService.listTemplates'),
+      create: vi.fn().mockName('OutboundMessageApiService.create'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [FormsModule, OutboundMessageFormComponent],
-    providers: [
-        { provide: OutboundMessageApiService, useValue: mockOutboundMessageService }
-    ]
-})
-    .compileComponents();
+      imports: [FormsModule, OutboundMessageFormComponent],
+      providers: [
+        {
+          provide: OutboundMessageApiService,
+          useValue: mockOutboundMessageService,
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(OutboundMessageFormComponent);
     component = fixture.componentInstance;
@@ -38,11 +45,11 @@ describe('OutboundMessageFormComponent', () => {
         name: 'Salutation',
         content: 'Bonjour {{name}}',
         variables: ['name'],
-        channel: 'WHATSAPP'
-      }
+        channel: 'WHATSAPP',
+      },
     ];
 
-    mockOutboundMessageService.listTemplates.and.returnValue(of(mockTemplates));
+    mockOutboundMessageService.listTemplates.mockReturnValue(of(mockTemplates));
 
     component.ngOnInit();
 
@@ -56,7 +63,7 @@ describe('OutboundMessageFormComponent', () => {
       name: 'Salutation',
       content: 'Bonjour {{name}}',
       variables: ['name'],
-      channel: 'WHATSAPP'
+      channel: 'WHATSAPP',
     };
 
     component.selectedTemplate = template;
@@ -72,14 +79,16 @@ describe('OutboundMessageFormComponent', () => {
       name: 'Salutation',
       content: 'Bonjour {{name}}, votre rendez-vous est à {{time}}',
       variables: ['name', 'time'],
-      channel: 'WHATSAPP'
+      channel: 'WHATSAPP',
     };
 
     component.selectedTemplate = template;
     component.templateVariables = { name: 'John', time: '14:00' };
     component.updateMessagePreview();
 
-    expect(component.messageContent).toBe('Bonjour John, votre rendez-vous est à 14:00');
+    expect(component.messageContent).toBe(
+      'Bonjour John, votre rendez-vous est à 14:00'
+    );
   });
 
   it('should validate form correctly', () => {
@@ -106,11 +115,11 @@ describe('OutboundMessageFormComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 0,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00'
+      updatedAt: '2024-01-15T10:00:00',
     };
 
-    mockOutboundMessageService.create.and.returnValue(of(mockResponse));
-    spyOn(component.messageSent, 'emit');
+    mockOutboundMessageService.create.mockReturnValue(of(mockResponse));
+    vi.spyOn(component.messageSent, 'emit');
 
     fixture.componentRef.setInput('recipientPhone', '+33612345678');
     component.messageContent = 'Test message';
@@ -121,7 +130,9 @@ describe('OutboundMessageFormComponent', () => {
   });
 
   it('should handle error when sending message', () => {
-    mockOutboundMessageService.create.and.returnValue(throwError(() => ({ error: { message: 'Send failed' } })));
+    mockOutboundMessageService.create.mockReturnValue(
+      throwError(() => ({ error: { message: 'Send failed' } }))
+    );
 
     fixture.componentRef.setInput('recipientPhone', '+33612345678');
     component.messageContent = 'Test message';

@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
 import { SpinnerComponent } from './spinner.component';
 
 describe('SpinnerComponent', () => {
@@ -6,13 +9,18 @@ describe('SpinnerComponent', () => {
   let fixture: ComponentFixture<SpinnerComponent>;
 
   beforeEach(async () => {
+    vi.useFakeTimers();
+
     await TestBed.configureTestingModule({
-    imports: [SpinnerComponent]
-})
-    .compileComponents();
+      imports: [SpinnerComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SpinnerComponent);
     component = fixture.componentInstance;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('should create', () => {
@@ -80,47 +88,49 @@ describe('SpinnerComponent', () => {
   it('should emit cancel event when cancel button is clicked', () => {
     fixture.componentRef.setInput('showCancelButton', true);
     fixture.detectChanges();
-    
-    spyOn(component.cancelled, 'emit');
-    const cancelButton = fixture.nativeElement.querySelector('.spinner-cancel-btn');
+
+    vi.spyOn(component.cancelled, 'emit');
+    const cancelButton = fixture.nativeElement.querySelector(
+      '.spinner-cancel-btn'
+    );
     cancelButton.click();
 
     expect(component.cancelled.emit).toHaveBeenCalled();
   });
 
-  it('should show timeout message after timeout period', fakeAsync(() => {
+  it('should show timeout message after timeout period', async () => {
     fixture.componentRef.setInput('timeout', 1000);
     fixture.detectChanges();
-    
+
     expect(component.showTimeoutMessage).toBe(false);
-    
-    tick(1000);
-    
+
+    await vi.advanceTimersByTimeAsync(1000);
+
     expect(component.showTimeoutMessage).toBe(true);
-  }));
+  });
 
-  it('should emit timeoutReached event after timeout', fakeAsync(() => {
+  it('should emit timeoutReached event after timeout', async () => {
     fixture.componentRef.setInput('timeout', 1000);
-    spyOn(component.timeoutReached, 'emit');
-    
-    fixture.detectChanges();
-    tick(1000);
-    
-    expect(component.timeoutReached.emit).toHaveBeenCalled();
-  }));
+    vi.spyOn(component.timeoutReached, 'emit');
 
-  it('should clear timeout on destroy', fakeAsync(() => {
+    fixture.detectChanges();
+    await vi.advanceTimersByTimeAsync(1000);
+
+    expect(component.timeoutReached.emit).toHaveBeenCalled();
+  });
+
+  it('should clear timeout on destroy', async () => {
     fixture.componentRef.setInput('timeout', 1000);
     fixture.detectChanges();
     component.ngOnDestroy();
-    tick(1000);
+    await vi.advanceTimersByTimeAsync(1000);
     expect(component.showTimeoutMessage).toBe(false);
-  }));
+  });
 
   it('should not set timeout when timeout is 0', () => {
     fixture.componentRef.setInput('timeout', 0);
     fixture.detectChanges();
-    
+
     expect(component.showTimeoutMessage).toBe(false);
   });
 
@@ -129,7 +139,7 @@ describe('SpinnerComponent', () => {
     fixture.componentRef.setInput('size', 'sm');
     fixture.componentRef.setInput('color', 'neutral');
     fixture.detectChanges();
-    
+
     const container = fixture.nativeElement.querySelector('.spinner-container');
     expect(container.classList.contains('spinner-dots')).toBe(true);
     expect(container.classList.contains('spinner-sm')).toBe(true);

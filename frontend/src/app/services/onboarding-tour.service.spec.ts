@@ -3,38 +3,49 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { OnboardingTourService } from './onboarding-tour.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('OnboardingTourService', () => {
   let service: OnboardingTourService;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let mockRouter: AngularVitestPartialMock<Router>;
 
   beforeEach(() => {
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate'], {
+    const routerSpy = {
+      navigate: vi.fn().mockName('Router.navigate'),
       events: {
-        pipe: jasmine.createSpy('pipe').and.returnValue({
-          subscribe: jasmine.createSpy('subscribe')
-        })
-      }
-    });
-    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
-      'initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken',
-      'configure', 'setStorage', 'logOut', 'getAccessToken'
-    ]);
+        pipe: vi.fn().mockReturnValue({
+          subscribe: vi.fn(),
+        }),
+      },
+    };
+    const mockOAuthService = {
+      initCodeFlow: vi.fn().mockName('OAuthService.initCodeFlow'),
+      loadDiscoveryDocumentAndTryLogin: vi
+        .fn()
+        .mockName('OAuthService.loadDiscoveryDocumentAndTryLogin'),
+      hasValidAccessToken: vi.fn().mockName('OAuthService.hasValidAccessToken'),
+      configure: vi.fn().mockName('OAuthService.configure'),
+      setStorage: vi.fn().mockName('OAuthService.setStorage'),
+      logOut: vi.fn().mockName('OAuthService.logOut'),
+      getAccessToken: vi.fn().mockName('OAuthService.getAccessToken'),
+    };
 
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [
+      imports: [],
+      providers: [
         OnboardingTourService,
         { provide: Router, useValue: routerSpy },
         { provide: OAuthService, useValue: mockOAuthService },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-});
+        provideHttpClientTesting(),
+      ],
+    });
 
     service = TestBed.inject(OnboardingTourService);
-    mockRouter = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    mockRouter = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
 
     localStorage.clear();
   });
@@ -56,22 +67,31 @@ describe('OnboardingTourService', () => {
   });
 
   it('should reset specific tour', () => {
-    localStorage.setItem('onboarding_tour_progress', JSON.stringify({
-      'test-tour': { completed: true }
-    }));
+    localStorage.setItem(
+      'onboarding_tour_progress',
+      JSON.stringify({
+        'test-tour': { completed: true },
+      })
+    );
 
     service.resetTour('test-tour');
     expect(service.isTourCompleted('test-tour')).toBe(false);
   });
 
   it('should reset all tours', () => {
-    localStorage.setItem('onboarding_tour_progress', JSON.stringify({
-      'tour1': { completed: true },
-      'tour2': { completed: true }
-    }));
-    localStorage.setItem('onboarding_tour_analytics', JSON.stringify([
-      { tourId: 'tour1', action: 'completed', timestamp: '2024-01-01' }
-    ]));
+    localStorage.setItem(
+      'onboarding_tour_progress',
+      JSON.stringify({
+        tour1: { completed: true },
+        tour2: { completed: true },
+      })
+    );
+    localStorage.setItem(
+      'onboarding_tour_analytics',
+      JSON.stringify([
+        { tourId: 'tour1', action: 'completed', timestamp: '2024-01-01' },
+      ])
+    );
 
     service.resetAllTours();
 
@@ -82,9 +102,12 @@ describe('OnboardingTourService', () => {
 
   it('should get analytics', () => {
     const mockAnalytics = [
-      { tourId: 'tour1', action: 'started' as const, timestamp: '2024-01-01' }
+      { tourId: 'tour1', action: 'started' as const, timestamp: '2024-01-01' },
     ];
-    localStorage.setItem('onboarding_tour_analytics', JSON.stringify(mockAnalytics));
+    localStorage.setItem(
+      'onboarding_tour_analytics',
+      JSON.stringify(mockAnalytics)
+    );
 
     const analytics = service.getAnalytics();
     expect(analytics.length).toBe(1);

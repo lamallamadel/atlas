@@ -6,19 +6,21 @@ import { MaterialTestingModule } from '../testing/material-testing.module';
 describe('PartiePrenanteFormDialogComponent', () => {
   let component: PartiePrenanteFormDialogComponent;
   let fixture: ComponentFixture<PartiePrenanteFormDialogComponent>;
-  const dialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+  const dialogRef = {
+    close: vi.fn().mockName('MatDialogRef.close'),
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MaterialTestingModule, PartiePrenanteFormDialogComponent],
-    providers: [
+      imports: [MaterialTestingModule, PartiePrenanteFormDialogComponent],
+      providers: [
         { provide: MatDialogRef, useValue: dialogRef },
         {
-            provide: MAT_DIALOG_DATA,
-            useValue: { mode: 'add', dossierId: 1, party: null }
-        }
-    ]
-}).compileComponents();
+          provide: MAT_DIALOG_DATA,
+          useValue: { mode: 'add', dossierId: 1, party: null },
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PartiePrenanteFormDialogComponent);
     component = fixture.componentInstance;

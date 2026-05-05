@@ -1,5 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { PdfTemplateService, PdfTemplateType, PdfBrandConfig, PdfDocument } from './pdf-template.service';
+import {
+  PdfTemplateService,
+  PdfTemplateType,
+  PdfBrandConfig,
+  PdfDocument,
+} from './pdf-template.service';
 
 describe('PdfTemplateService', () => {
   let service: PdfTemplateService;
@@ -37,7 +42,7 @@ describe('PdfTemplateService', () => {
         notes: 'Client intéressé par le bien',
       };
 
-      spyOn(service, 'generatePdf').and.returnValue(Promise.resolve());
+      vi.spyOn(service, 'generatePdf').mockReturnValue(Promise.resolve());
 
       await service.generateDossierComplet(dossierData);
 
@@ -53,7 +58,7 @@ describe('PdfTemplateService', () => {
         parties: [],
       };
 
-      spyOn(service, 'generatePdf').and.returnValue(Promise.resolve());
+      vi.spyOn(service, 'generatePdf').mockReturnValue(Promise.resolve());
 
       await service.generateDossierComplet(dossierData);
 
@@ -78,12 +83,17 @@ describe('PdfTemplateService', () => {
           { name: 'Agent 2', dossiers: 8, conversions: 4, revenue: 40000 },
         ],
         topAnnonces: [
-          { title: 'Appartement Paris', views: 150, contacts: 20, status: 'ACTIVE' },
+          {
+            title: 'Appartement Paris',
+            views: 150,
+            contacts: 20,
+            status: 'ACTIVE',
+          },
         ],
-        comments: 'Bon mois dans l\'ensemble',
+        comments: "Bon mois dans l'ensemble",
       };
 
-      spyOn(service, 'generatePdf').and.returnValue(Promise.resolve());
+      vi.spyOn(service, 'generatePdf').mockReturnValue(Promise.resolve());
 
       await service.generateRapportMensuel(reportData);
 
@@ -111,7 +121,7 @@ describe('PdfTemplateService', () => {
         email: 'test@example.com',
       };
 
-      spyOn(service, 'generatePdf').and.returnValue(Promise.resolve());
+      vi.spyOn(service, 'generatePdf').mockReturnValue(Promise.resolve());
 
       await service.generateContratType(contractData, brandConfig);
 
@@ -139,7 +149,9 @@ describe('PdfTemplateService', () => {
         ],
       };
 
-      const generatePdfSpy = spyOn(service, 'generatePdf').and.returnValue(Promise.resolve());
+      const generatePdfSpy = vi
+        .spyOn(service, 'generatePdf')
+        .mockReturnValue(Promise.resolve());
 
       await service.generatePdf(document);
 

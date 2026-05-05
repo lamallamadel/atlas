@@ -10,7 +10,10 @@ import { TaskCardComponent } from './task-card.component';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 import { TaskApiService } from '../services/task-api.service';
 import { AuthService } from '../services/auth.service';
 
@@ -47,15 +50,19 @@ describe('TaskListComponent', () => {
         { provide: AuthService, useValue: { getUserId: () => '' } },
         {
           provide: OAuthService,
-          useValue: jasmine.createSpyObj('OAuthService', [
-            'initCodeFlow',
-            'loadDiscoveryDocumentAndTryLogin',
-            'hasValidAccessToken',
-            'configure',
-            'setStorage',
-            'logOut',
-            'getAccessToken',
-          ]),
+          useValue: {
+            initCodeFlow: vi.fn().mockName('OAuthService.initCodeFlow'),
+            loadDiscoveryDocumentAndTryLogin: vi
+              .fn()
+              .mockName('OAuthService.loadDiscoveryDocumentAndTryLogin'),
+            hasValidAccessToken: vi
+              .fn()
+              .mockName('OAuthService.hasValidAccessToken'),
+            configure: vi.fn().mockName('OAuthService.configure'),
+            setStorage: vi.fn().mockName('OAuthService.setStorage'),
+            logOut: vi.fn().mockName('OAuthService.logOut'),
+            getAccessToken: vi.fn().mockName('OAuthService.getAccessToken'),
+          },
         },
         provideHttpClient(withInterceptorsFromDi()),
         provideHttpClientTesting(),

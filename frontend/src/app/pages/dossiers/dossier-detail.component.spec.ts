@@ -1,13 +1,18 @@
+import type { Mock, MockedObject } from 'vitest';
 import { Component, NO_ERRORS_SCHEMA, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { of, throwError, EMPTY } from "rxjs";
+import { of, throwError, EMPTY } from 'rxjs';
 
 import { DossierDetailComponent } from './dossier-detail.component';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
-import { DossierApiService, DossierResponse, DossierStatus } from '../../services/dossier-api.service';
+import {
+  DossierApiService,
+  DossierResponse,
+  DossierStatus,
+} from '../../services/dossier-api.service';
 import { PartiePrenanteApiService } from '../../services/partie-prenante-api.service';
 import { MessageApiService } from '../../services/message-api.service';
 import { AppointmentApiService } from '../../services/appointment-api.service';
@@ -17,9 +22,11 @@ import { MaterialTestingModule } from '../../testing/material-testing.module';
 import { PhoneFormatPipe } from '../../pipes/phone-format.pipe';
 
 @Component({
-    selector: 'app-badge-status', template: '',
-    imports: [MaterialTestingModule // centralized: animations + forms + material + http testing
-    ]
+  selector: 'app-badge-status',
+  template: '',
+  imports: [
+    MaterialTestingModule, // centralized: animations + forms + material + http testing
+  ],
 })
 class BadgeStatusStubComponent {
   readonly status = input<any>();
@@ -29,19 +36,21 @@ describe('DossierDetailComponent', () => {
   let component: DossierDetailComponent;
   let fixture: ComponentFixture<DossierDetailComponent>;
 
-  let dossierApiService: jasmine.SpyObj<DossierApiService>;
-  let partiePrenanteApiService: jasmine.SpyObj<PartiePrenanteApiService>;
-  let messageApiService: jasmine.SpyObj<MessageApiService>;
-  let appointmentApiService: jasmine.SpyObj<AppointmentApiService>;
-  let consentementApiService: jasmine.SpyObj<ConsentementApiService>;
-  let auditEventApiService: jasmine.SpyObj<AuditEventApiService>;
-  let router: jasmine.SpyObj<Router>;
-  let snackBar: jasmine.SpyObj<MatSnackBar>;
-  let dialog: jasmine.SpyObj<MatDialog>;
+  let dossierApiService: AngularVitestPartialMock<DossierApiService>;
+  let partiePrenanteApiService: AngularVitestPartialMock<PartiePrenanteApiService>;
+  let messageApiService: AngularVitestPartialMock<MessageApiService>;
+  let appointmentApiService: AngularVitestPartialMock<AppointmentApiService>;
+  let consentementApiService: AngularVitestPartialMock<ConsentementApiService>;
+  let auditEventApiService: AngularVitestPartialMock<AuditEventApiService>;
+  let router: AngularVitestPartialMock<Router>;
+  let snackBar: AngularVitestPartialMock<MatSnackBar>;
+  let dialog: AngularVitestPartialMock<MatDialog>;
 
   let activatedRouteStub: {
     snapshot: {
-      paramMap: { get: jasmine.Spy };
+      paramMap: {
+        get: Mock;
+      };
     };
   };
 
@@ -57,7 +66,7 @@ describe('DossierDetailComponent', () => {
     updatedAt: '2024-01-15T10:00:00Z',
     createdBy: 'user1',
     updatedBy: 'user1',
-    parties: []
+    parties: [],
   };
 
   const mockMessagesPage: any = {
@@ -68,7 +77,7 @@ describe('DossierDetailComponent', () => {
       pageNumber: 0,
       pageSize: 100,
       paged: true,
-      unpaged: false
+      unpaged: false,
     },
     last: true,
     totalPages: 1,
@@ -78,7 +87,7 @@ describe('DossierDetailComponent', () => {
     sort: { empty: true, sorted: false, unsorted: true },
     first: true,
     numberOfElements: 0,
-    empty: true
+    empty: true,
   };
 
   const mockAppointmentsPage: any = {
@@ -89,7 +98,7 @@ describe('DossierDetailComponent', () => {
       pageNumber: 0,
       pageSize: 100,
       paged: true,
-      unpaged: false
+      unpaged: false,
     },
     last: true,
     totalPages: 1,
@@ -99,7 +108,7 @@ describe('DossierDetailComponent', () => {
     sort: { empty: true, sorted: false, unsorted: true },
     first: true,
     numberOfElements: 0,
-    empty: true
+    empty: true,
   };
 
   const mockConsentementsPage: any = {
@@ -110,7 +119,7 @@ describe('DossierDetailComponent', () => {
       pageNumber: 0,
       pageSize: 100,
       paged: true,
-      unpaged: false
+      unpaged: false,
     },
     last: true,
     totalPages: 1,
@@ -120,7 +129,7 @@ describe('DossierDetailComponent', () => {
     sort: { empty: true, sorted: false, unsorted: true },
     first: true,
     numberOfElements: 0,
-    empty: true
+    empty: true,
   };
 
   const mockAuditEventsPage: any = {
@@ -131,7 +140,7 @@ describe('DossierDetailComponent', () => {
       pageNumber: 0,
       pageSize: 10,
       paged: true,
-      unpaged: false
+      unpaged: false,
     },
     last: true,
     totalPages: 1,
@@ -141,37 +150,76 @@ describe('DossierDetailComponent', () => {
     sort: { empty: true, sorted: false, unsorted: true },
     first: true,
     numberOfElements: 0,
-    empty: true
+    empty: true,
   };
 
   beforeEach(async () => {
-    dossierApiService = jasmine.createSpyObj<DossierApiService>('DossierApiService', ['getById', 'patchStatus', 'patchLead']);
-    partiePrenanteApiService = jasmine.createSpyObj<PartiePrenanteApiService>('PartiePrenanteApiService', ['list', 'create', 'update', 'delete']);
-    messageApiService = jasmine.createSpyObj<MessageApiService>('MessageApiService', ['list', 'create']);
-    appointmentApiService = jasmine.createSpyObj<AppointmentApiService>('AppointmentApiService', ['list', 'create', 'update', 'delete']);
-    consentementApiService = jasmine.createSpyObj<ConsentementApiService>('ConsentementApiService', ['list', 'create', 'update', 'delete']);
-    auditEventApiService = jasmine.createSpyObj<AuditEventApiService>('AuditEventApiService', ['list', 'listByDossier', 'create']);
-    router = jasmine.createSpyObj<Router>('Router', ['navigate', 'createUrlTree', 'serializeUrl'], { events: EMPTY });
-    router.createUrlTree.and.returnValue({} as any);
-    router.serializeUrl.and.returnValue('');
-    snackBar = jasmine.createSpyObj<MatSnackBar>('MatSnackBar', ['open']);
-    dialog = jasmine.createSpyObj<MatDialog>('MatDialog', ['open']);
+    dossierApiService = {
+      getById: vi.fn().mockName('DossierApiService.getById'),
+      patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
+      patchLead: vi.fn().mockName('DossierApiService.patchLead'),
+    };
+    partiePrenanteApiService = {
+      list: vi.fn().mockName('PartiePrenanteApiService.list'),
+      create: vi.fn().mockName('PartiePrenanteApiService.create'),
+      update: vi.fn().mockName('PartiePrenanteApiService.update'),
+      delete: vi.fn().mockName('PartiePrenanteApiService.delete'),
+    };
+    messageApiService = {
+      list: vi.fn().mockName('MessageApiService.list'),
+      create: vi.fn().mockName('MessageApiService.create'),
+    };
+    appointmentApiService = {
+      list: vi.fn().mockName('AppointmentApiService.list'),
+      create: vi.fn().mockName('AppointmentApiService.create'),
+      update: vi.fn().mockName('AppointmentApiService.update'),
+      delete: vi.fn().mockName('AppointmentApiService.delete'),
+    };
+    consentementApiService = {
+      list: vi.fn().mockName('ConsentementApiService.list'),
+      create: vi.fn().mockName('ConsentementApiService.create'),
+      update: vi.fn().mockName('ConsentementApiService.update'),
+      delete: vi.fn().mockName('ConsentementApiService.delete'),
+    };
+    auditEventApiService = {
+      list: vi.fn().mockName('AuditEventApiService.list'),
+      listByDossier: vi.fn().mockName('AuditEventApiService.listByDossier'),
+      create: vi.fn().mockName('AuditEventApiService.create'),
+    };
+    router = {
+      navigate: vi.fn().mockName('Router.navigate'),
+      createUrlTree: vi.fn().mockName('Router.createUrlTree'),
+      serializeUrl: vi.fn().mockName('Router.serializeUrl'),
+      events: EMPTY,
+    };
+    router.createUrlTree.mockReturnValue({} as any);
+    router.serializeUrl.mockReturnValue('');
+    snackBar = {
+      open: vi.fn().mockName('MatSnackBar.open'),
+    };
+    dialog = {
+      open: vi.fn().mockName('MatDialog.open'),
+    };
 
     activatedRouteStub = {
       snapshot: {
-        paramMap: { get: jasmine.createSpy('get').and.returnValue('1') }
-      }
+        paramMap: { get: vi.fn().mockReturnValue('1') },
+      },
     };
 
     await TestBed.configureTestingModule({
-    imports: [
-        MaterialTestingModule // centralized: animations + forms + material + http testing
-        ,
-        DossierDetailComponent, BadgeStatusStubComponent, PhoneFormatPipe
-    ],
-    providers: [
+      imports: [
+        MaterialTestingModule, // centralized: animations + forms + material + http testing
+        DossierDetailComponent,
+        BadgeStatusStubComponent,
+        PhoneFormatPipe,
+      ],
+      providers: [
         { provide: DossierApiService, useValue: dossierApiService },
-        { provide: PartiePrenanteApiService, useValue: partiePrenanteApiService },
+        {
+          provide: PartiePrenanteApiService,
+          useValue: partiePrenanteApiService,
+        },
         { provide: MessageApiService, useValue: messageApiService },
         { provide: AppointmentApiService, useValue: appointmentApiService },
         { provide: ConsentementApiService, useValue: consentementApiService },
@@ -180,11 +228,18 @@ describe('DossierDetailComponent', () => {
         { provide: ActivatedRoute, useValue: activatedRouteStub },
         { provide: MatSnackBar, useValue: snackBar },
         { provide: MatDialog, useValue: dialog },
-        { provide: RecentNavigationService, useValue: jasmine.createSpyObj('RecentNavigationService', ['addRecentItem']) }
-    ],
-    // If more unknown components appear in template, this prevents NG0304 noise.
-    schemas: [NO_ERRORS_SCHEMA]
-}).compileComponents();
+        {
+          provide: RecentNavigationService,
+          useValue: {
+            addRecentItem: vi
+              .fn()
+              .mockName('RecentNavigationService.addRecentItem'),
+          },
+        },
+      ],
+      // If more unknown components appear in template, this prevents NG0304 noise.
+      schemas: [NO_ERRORS_SCHEMA],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(DossierDetailComponent);
     component = fixture.componentInstance;
@@ -195,22 +250,22 @@ describe('DossierDetailComponent', () => {
   });
 
   it('should load dossier on init (ngOnInit -> loadDossier)', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
     expect(dossierApiService.getById).toHaveBeenCalledWith(1);
     expect(component.dossier).toEqual(mockDossier);
     expect(component.selectedStatus).toEqual(DossierStatus.NEW);
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   });
 
   it('should handle invalid dossier ID (NaN)', () => {
-    activatedRouteStub.snapshot.paramMap.get.and.returnValue('invalid');
+    activatedRouteStub.snapshot.paramMap.get.mockReturnValue('invalid');
 
     fixture.detectChanges();
 
@@ -219,16 +274,18 @@ describe('DossierDetailComponent', () => {
   });
 
   it('should handle 404 on load', () => {
-    dossierApiService.getById.and.returnValue(throwError(() => ({ status: 404 })));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(
+      throwError(() => ({ status: 404 }))
+    );
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
     expect(component.error).toBe('Dossier introuvable');
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   });
 
   it('should not call patchStatus if selectedStatus equals current dossier status', () => {
@@ -238,18 +295,25 @@ describe('DossierDetailComponent', () => {
     component.updateStatus();
 
     expect(dossierApiService.patchStatus).not.toHaveBeenCalled();
-    expect(component.statusError).toBe('Le statut est déjà défini à cette valeur');
+    expect(component.statusError).toBe(
+      'Le statut est déjà défini à cette valeur'
+    );
   });
 
   it('should patch status and reload dossier on success', () => {
-    const afterReload: DossierResponse = { ...mockDossier, status: DossierStatus.QUALIFIED };
+    const afterReload: DossierResponse = {
+      ...mockDossier,
+      status: DossierStatus.QUALIFIED,
+    };
 
-    dossierApiService.getById.and.returnValues(of(mockDossier), of(afterReload));
-    dossierApiService.patchStatus.and.returnValue(of(afterReload));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById
+      .mockReturnValueOnce(of(mockDossier))
+      .mockReturnValueOnce(of(afterReload));
+    dossierApiService.patchStatus.mockReturnValue(of(afterReload));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
@@ -258,18 +322,23 @@ describe('DossierDetailComponent', () => {
 
     component.updateStatus();
 
-    expect(dossierApiService.patchStatus).toHaveBeenCalledWith(1, DossierStatus.QUALIFIED);
+    expect(dossierApiService.patchStatus).toHaveBeenCalledWith(
+      1,
+      DossierStatus.QUALIFIED
+    );
     expect(snackBar.open).toHaveBeenCalled();
     expect(dossierApiService.getById).toHaveBeenCalledTimes(2);
   });
 
   it('should show snackbar error if patchStatus fails', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    dossierApiService.patchStatus.and.returnValue(throwError(() => ({ error: { message: 'Update failed' } })));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    dossierApiService.patchStatus.mockReturnValue(
+      throwError(() => ({ error: { message: 'Update failed' } }))
+    );
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
@@ -277,9 +346,16 @@ describe('DossierDetailComponent', () => {
     component.selectedStatus = DossierStatus.QUALIFIED;
     component.updateStatus();
 
-    expect(dossierApiService.patchStatus).toHaveBeenCalledWith(1, DossierStatus.QUALIFIED);
-    expect(snackBar.open).toHaveBeenCalledWith('Update failed', 'Fermer', jasmine.any(Object));
-    expect(component.updatingStatus).toBeFalse();
+    expect(dossierApiService.patchStatus).toHaveBeenCalledWith(
+      1,
+      DossierStatus.QUALIFIED
+    );
+    expect(snackBar.open).toHaveBeenCalledWith(
+      'Update failed',
+      'Fermer',
+      expect.any(Object)
+    );
+    expect(component.updatingStatus).toBe(false);
   });
 
   it('should navigate back to dossiers list', () => {
@@ -288,11 +364,11 @@ describe('DossierDetailComponent', () => {
   });
 
   it('should render tabs in the template', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
@@ -303,66 +379,66 @@ describe('DossierDetailComponent', () => {
   });
 
   it('should call MessageApiService.list on component initialization', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
     expect(messageApiService.list).toHaveBeenCalledWith({
       dossierId: 1,
       size: 100,
-      sort: 'timestamp,desc'
+      sort: 'timestamp,desc',
     });
   });
 
   it('should call AppointmentApiService.list on component initialization', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
     expect(appointmentApiService.list).toHaveBeenCalledWith({
       dossierId: 1,
       size: 100,
-      sort: 'startTime,desc'
+      sort: 'startTime,desc',
     });
   });
 
   it('should call ConsentementApiService.list on component initialization', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
     expect(consentementApiService.list).toHaveBeenCalledWith({
       dossierId: 1,
       size: 100,
-      sort: 'updatedAt,desc'
+      sort: 'updatedAt,desc',
     });
   });
 
   it('should call AuditEventApiService.listByDossier on component initialization', () => {
-    dossierApiService.getById.and.returnValue(of(mockDossier));
-    messageApiService.list.and.returnValue(of(mockMessagesPage));
-    appointmentApiService.list.and.returnValue(of(mockAppointmentsPage));
-    consentementApiService.list.and.returnValue(of(mockConsentementsPage));
-    auditEventApiService.listByDossier.and.returnValue(of(mockAuditEventsPage));
+    dossierApiService.getById.mockReturnValue(of(mockDossier));
+    messageApiService.list.mockReturnValue(of(mockMessagesPage));
+    appointmentApiService.list.mockReturnValue(of(mockAppointmentsPage));
+    consentementApiService.list.mockReturnValue(of(mockConsentementsPage));
+    auditEventApiService.listByDossier.mockReturnValue(of(mockAuditEventsPage));
 
     fixture.detectChanges();
 
     expect(auditEventApiService.listByDossier).toHaveBeenCalledWith(1, {
       page: 0,
       size: 10,
-      sort: 'createdAt,desc'
+      sort: 'createdAt,desc',
     });
   });
 });

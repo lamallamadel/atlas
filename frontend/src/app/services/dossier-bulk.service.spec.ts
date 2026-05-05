@@ -6,16 +6,22 @@ import { BulkOperationService } from './bulk-operation.service';
 describe('DossierBulkService', () => {
   let service: DossierBulkService;
 
-  const mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['bulkAssign']);
-  const mockBulkOperationService = jasmine.createSpyObj('BulkOperationService', ['executeBulkOperation']);
+  const mockDossierApiService = {
+    bulkAssign: vi.fn().mockName('DossierApiService.bulkAssign'),
+  };
+  const mockBulkOperationService = {
+    executeBulkOperation: vi
+      .fn()
+      .mockName('BulkOperationService.executeBulkOperation'),
+  };
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
         DossierBulkService,
         { provide: DossierApiService, useValue: mockDossierApiService },
-        { provide: BulkOperationService, useValue: mockBulkOperationService }
-      ]
+        { provide: BulkOperationService, useValue: mockBulkOperationService },
+      ],
     });
     service = TestBed.inject(DossierBulkService);
   });

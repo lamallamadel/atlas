@@ -1,7 +1,18 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { DashboardCustomizationService, DashboardLayout, UserPreferences, WidgetConfig } from './dashboard-customization.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import {
+  DashboardCustomizationService,
+  DashboardLayout,
+  UserPreferences,
+  WidgetConfig,
+} from './dashboard-customization.service';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('DashboardCustomizationService', () => {
   let service: DashboardCustomizationService;
@@ -9,9 +20,13 @@ describe('DashboardCustomizationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [DashboardCustomizationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+      imports: [],
+      providers: [
+        DashboardCustomizationService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
+    });
     service = TestBed.inject(DashboardCustomizationService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -28,10 +43,10 @@ describe('DashboardCustomizationService', () => {
     const mockPreferences: UserPreferences = {
       userId: 'user-123',
       dashboardLayout: { widgets: [] },
-      theme: 'dark'
+      theme: 'dark',
     };
 
-    service.getUserPreferences('user-123').subscribe(prefs => {
+    service.getUserPreferences('user-123').subscribe((prefs) => {
       expect(prefs).toEqual(mockPreferences);
     });
 
@@ -42,12 +57,14 @@ describe('DashboardCustomizationService', () => {
 
   it('should update dashboard layout', () => {
     const layout: DashboardLayout = {
-      widgets: [{ id: '1', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 }]
+      widgets: [{ id: '1', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 }],
     };
 
     service.updateDashboardLayout('user-123', layout).subscribe();
 
-    const req = httpMock.expectOne('/api/v1/user-preferences/user-123/dashboard-layout');
+    const req = httpMock.expectOne(
+      '/api/v1/user-preferences/user-123/dashboard-layout'
+    );
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual(layout);
     req.flush({ userId: 'user-123', dashboardLayout: layout });
@@ -56,17 +73,26 @@ describe('DashboardCustomizationService', () => {
   it('should apply role template', () => {
     service.applyRoleTemplate('user-123', 'agent').subscribe();
 
-    const req = httpMock.expectOne('/api/v1/user-preferences/user-123/apply-template?template=agent');
+    const req = httpMock.expectOne(
+      '/api/v1/user-preferences/user-123/apply-template?template=agent'
+    );
     expect(req.request.method).toBe('POST');
     req.flush({ userId: 'user-123', roleTemplate: 'agent' });
   });
 
   it('should add widget to layout', () => {
-    const widget: WidgetConfig = { id: '', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 };
-    
+    const widget: WidgetConfig = {
+      id: '',
+      type: 'kpi',
+      x: 0,
+      y: 0,
+      cols: 4,
+      rows: 3,
+    };
+
     service.addWidget(widget);
 
-    service.layout$.subscribe(layout => {
+    service.layout$.subscribe((layout) => {
       expect(layout.widgets.length).toBe(1);
       expect(layout.widgets[0].type).toBe('kpi');
       expect(layout.widgets[0].id).toBeTruthy();
@@ -74,12 +100,19 @@ describe('DashboardCustomizationService', () => {
   });
 
   it('should remove widget from layout', () => {
-    const widget: WidgetConfig = { id: 'widget-1', type: 'kpi', x: 0, y: 0, cols: 4, rows: 3 };
+    const widget: WidgetConfig = {
+      id: 'widget-1',
+      type: 'kpi',
+      x: 0,
+      y: 0,
+      cols: 4,
+      rows: 3,
+    };
     service.addWidget(widget);
 
     // addWidget generates a new ID, so retrieve it
     let addedId = '';
-    service.layout$.subscribe(layout => {
+    service.layout$.subscribe((layout) => {
       if (layout.widgets.length > 0) {
         addedId = layout.widgets[0].id;
       }
@@ -87,7 +120,7 @@ describe('DashboardCustomizationService', () => {
 
     service.removeWidget(addedId);
 
-    service.layout$.subscribe(layout => {
+    service.layout$.subscribe((layout) => {
       expect(layout.widgets.length).toBe(0);
     });
   });
@@ -95,16 +128,15 @@ describe('DashboardCustomizationService', () => {
   it('should provide available templates', () => {
     const templates = service.getAvailableTemplates();
     expect(templates.length).toBeGreaterThan(0);
-    expect(templates.find(t => t.id === 'agent')).toBeTruthy();
-    expect(templates.find(t => t.id === 'manager')).toBeTruthy();
+    expect(templates.find((t) => t.id === 'agent')).toBeTruthy();
+    expect(templates.find((t) => t.id === 'manager')).toBeTruthy();
   });
 
-  it('should toggle edit mode', (done) => {
+  it('should toggle edit mode', async () => {
     service.setEditMode(true);
-    
-    service.editMode$.subscribe(editMode => {
+
+    service.editMode$.subscribe((editMode) => {
       expect(editMode).toBe(true);
-      done();
     });
   });
 });

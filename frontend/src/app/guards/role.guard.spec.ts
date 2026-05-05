@@ -12,24 +12,28 @@ function createRouteSnapshot(data: any): ActivatedRouteSnapshot {
 
 describe('RoleGuard', () => {
   let guard: RoleGuard;
-  let authService: jasmine.SpyObj<AuthService>;
-  let router: jasmine.SpyObj<Router>;
+  let authService: AngularVitestPartialMock<AuthService>;
+  let router: AngularVitestPartialMock<Router>;
 
   beforeEach(() => {
-    const authServiceSpy = jasmine.createSpyObj('AuthService', ['hasRole']);
-    const routerSpy = jasmine.createSpyObj('Router', ['navigate']);
+    const authServiceSpy = {
+      hasRole: vi.fn().mockName('AuthService.hasRole'),
+    };
+    const routerSpy = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         RoleGuard,
         { provide: AuthService, useValue: authServiceSpy },
-        { provide: Router, useValue: routerSpy }
-      ]
+        { provide: Router, useValue: routerSpy },
+      ],
     });
 
     guard = TestBed.inject(RoleGuard);
-    authService = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    router = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    authService = TestBed.inject(AuthService) as AngularVitestPartialMock<AuthService>;
+    router = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
   });
 
   it('should be created', () => {
@@ -47,7 +51,7 @@ describe('RoleGuard', () => {
 
   it('should allow access if user has one of the required roles', () => {
     const route = createRouteSnapshot({ roles: ['ADMIN', 'MANAGER'] });
-    authService.hasRole.and.callFake((role: string) => role === 'ADMIN');
+    authService.hasRole.mockImplementation((role: string) => role === 'ADMIN');
 
     const result = guard.canActivate(route);
 
@@ -57,7 +61,7 @@ describe('RoleGuard', () => {
 
   it('should deny access and redirect to /access-denied if user does not have required roles', () => {
     const route = createRouteSnapshot({ roles: ['ADMIN', 'MANAGER'] });
-    authService.hasRole.and.returnValue(false);
+    authService.hasRole.mockReturnValue(false);
 
     const result = guard.canActivate(route);
 
@@ -67,7 +71,9 @@ describe('RoleGuard', () => {
 
   it('should check all required roles', () => {
     const route = createRouteSnapshot({ roles: ['ADMIN', 'MANAGER'] });
-    authService.hasRole.and.callFake((role: string) => role === 'MANAGER');
+    authService.hasRole.mockImplementation(
+      (role: string) => role === 'MANAGER'
+    );
 
     const result = guard.canActivate(route);
 

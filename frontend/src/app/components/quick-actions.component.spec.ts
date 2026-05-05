@@ -1,7 +1,7 @@
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialogModule } from '@angular/material/dialog';
-import {  } from '@angular/material/snack-bar';
+import {} from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -13,18 +13,21 @@ import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { MessageApiService } from '../services/message-api.service';
 import { AppointmentApiService } from '../services/appointment-api.service';
 import { DossierApiService } from '../services/dossier-api.service';
-import { DossierResponse, DossierStatus } from '../services/dossier-api.service';
-import { of } from "rxjs";
+import {
+  DossierResponse,
+  DossierStatus,
+} from '../services/dossier-api.service';
+import { of } from 'rxjs';
 
 describe('QuickActionsComponent', () => {
   let component: QuickActionsComponent;
   let fixture: ComponentFixture<QuickActionsComponent>;
-  let mockQuickActionsService: jasmine.SpyObj<QuickActionsService>;
-  let mockVoipService: jasmine.SpyObj<VoipService>;
-  let mockKeyboardShortcutService: jasmine.SpyObj<KeyboardShortcutService>;
-  let mockMessageApiService: jasmine.SpyObj<MessageApiService>;
-  let mockAppointmentApiService: jasmine.SpyObj<AppointmentApiService>;
-  let mockDossierApiService: jasmine.SpyObj<DossierApiService>;
+  let mockQuickActionsService: AngularVitestPartialMock<QuickActionsService>;
+  let mockVoipService: AngularVitestPartialMock<VoipService>;
+  let mockKeyboardShortcutService: AngularVitestPartialMock<KeyboardShortcutService>;
+  let mockMessageApiService: AngularVitestPartialMock<MessageApiService>;
+  let mockAppointmentApiService: AngularVitestPartialMock<AppointmentApiService>;
+  let mockDossierApiService: AngularVitestPartialMock<DossierApiService>;
 
   const mockDossier: DossierResponse = {
     id: 1,
@@ -37,50 +40,72 @@ describe('QuickActionsComponent', () => {
     annonceId: undefined,
     parties: [],
     createdAt: '2024-01-01T10:00:00Z',
-    updatedAt: '2024-01-01T10:00:00Z'
+    updatedAt: '2024-01-01T10:00:00Z',
   };
 
   beforeEach(async () => {
-    mockQuickActionsService = jasmine.createSpyObj('QuickActionsService', [
-      'addRecentAction',
-      'getRecentActions'
-    ]);
+    mockQuickActionsService = {
+      addRecentAction: vi.fn().mockName('QuickActionsService.addRecentAction'),
+      getRecentActions: vi
+        .fn()
+        .mockName('QuickActionsService.getRecentActions'),
+    };
     mockQuickActionsService.recentActions$ = of([]);
 
-    mockVoipService = jasmine.createSpyObj('VoipService', [
-      'isConfigured',
-      'initiateCall'
-    ]);
-    mockVoipService.isConfigured.and.returnValue(true);
+    mockVoipService = {
+      isConfigured: vi.fn().mockName('VoipService.isConfigured'),
+      initiateCall: vi.fn().mockName('VoipService.initiateCall'),
+    };
+    mockVoipService.isConfigured.mockReturnValue(true);
 
-    mockKeyboardShortcutService = jasmine.createSpyObj('KeyboardShortcutService', [
-      'registerShortcut'
-    ]);
+    mockKeyboardShortcutService = {
+      registerShortcut: vi
+        .fn()
+        .mockName('KeyboardShortcutService.registerShortcut'),
+    };
 
-    mockMessageApiService = jasmine.createSpyObj('MessageApiService', ['create']);
-    mockAppointmentApiService = jasmine.createSpyObj('AppointmentApiService', ['create']);
-    mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['patchStatus']);
+    mockMessageApiService = {
+      create: vi.fn().mockName('MessageApiService.create'),
+    };
+    mockAppointmentApiService = {
+      create: vi.fn().mockName('AppointmentApiService.create'),
+    };
+    mockDossierApiService = {
+      patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         NoopAnimationsModule,
         MatDialogModule,
-        
+
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,
-        QuickActionsComponent
-    ],
-    providers: [
-        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
+        QuickActionsComponent,
+      ],
+      providers: [
+        {
+          provide: MatSnackBar,
+          useValue: {
+            open: () => ({
+              onAction: () => of(null),
+              afterDismissed: () => of(null),
+            }),
+            dismiss: () => {},
+          },
+        },
         { provide: QuickActionsService, useValue: mockQuickActionsService },
         { provide: VoipService, useValue: mockVoipService },
-        { provide: KeyboardShortcutService, useValue: mockKeyboardShortcutService },
+        {
+          provide: KeyboardShortcutService,
+          useValue: mockKeyboardShortcutService,
+        },
         { provide: MessageApiService, useValue: mockMessageApiService },
         { provide: AppointmentApiService, useValue: mockAppointmentApiService },
-        { provide: DossierApiService, useValue: mockDossierApiService }
-    ]
-}).compileComponents();
+        { provide: DossierApiService, useValue: mockDossierApiService },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(QuickActionsComponent);
     component = fixture.componentInstance;
@@ -112,13 +137,18 @@ describe('QuickActionsComponent', () => {
 
   it('should register keyboard shortcuts on init', () => {
     fixture.detectChanges();
-    expect(mockKeyboardShortcutService.registerShortcut).toHaveBeenCalledTimes(5);
+    expect(mockKeyboardShortcutService.registerShortcut).toHaveBeenCalledTimes(
+      5
+    );
   });
 
   it('should call client when VoIP is configured and phone available', () => {
     fixture.detectChanges(); // triggers ngOnInit, sets voipConfigured
     component.callClient();
-    expect(mockVoipService.initiateCall).toHaveBeenCalledWith('+33612345678', 'John Doe');
+    expect(mockVoipService.initiateCall).toHaveBeenCalledWith(
+      '+33612345678',
+      'John Doe'
+    );
   });
 
   it('should format action timestamp correctly', () => {

@@ -1,28 +1,35 @@
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 import { PrefetchService } from './prefetch.service';
 import { DossierApiService } from './dossier-api.service';
 import { AnnonceApiService } from './annonce-api.service';
 
 describe('PrefetchService', () => {
   let service: PrefetchService;
-  let mockRouter: jasmine.SpyObj<Router>;
-  let mockDossierApiService: jasmine.SpyObj<DossierApiService>;
-  let mockAnnonceApiService: jasmine.SpyObj<AnnonceApiService>;
+  let mockRouter: AngularVitestPartialMock<Router>;
+  let mockDossierApiService: AngularVitestPartialMock<DossierApiService>;
+  let mockAnnonceApiService: AngularVitestPartialMock<AnnonceApiService>;
 
   beforeEach(() => {
-    mockRouter = jasmine.createSpyObj('Router', ['navigate'], { events: of() });
-    mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['list']);
-    mockAnnonceApiService = jasmine.createSpyObj('AnnonceApiService', ['list']);
+    mockRouter = {
+      navigate: vi.fn().mockName('Router.navigate'),
+      events: of(),
+    };
+    mockDossierApiService = {
+      list: vi.fn().mockName('DossierApiService.list'),
+    };
+    mockAnnonceApiService = {
+      list: vi.fn().mockName('AnnonceApiService.list'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         PrefetchService,
         { provide: Router, useValue: mockRouter },
         { provide: DossierApiService, useValue: mockDossierApiService },
-        { provide: AnnonceApiService, useValue: mockAnnonceApiService }
-      ]
+        { provide: AnnonceApiService, useValue: mockAnnonceApiService },
+      ],
     });
     service = TestBed.inject(PrefetchService);
   });

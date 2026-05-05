@@ -7,8 +7,8 @@ describe('LogoInlineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [LogoInlineComponent]
-}).compileComponents();
+      imports: [LogoInlineComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(LogoInlineComponent);
     component = fixture.componentInstance;
@@ -78,26 +78,22 @@ describe('LogoInlineComponent', () => {
     expect(svgString).toContain('#212121');
   });
 
-  it('should add animated class when animate is true', (done) => {
+  it('should add animated class when animate is true', async () => {
     fixture.componentRef.setInput('animate', true);
     component.ngOnInit();
-    
-    setTimeout(() => {
-      expect(component.showAnimation).toBe(true);
-      expect(component.containerClass).toContain('logo-inline-animated');
-      done();
-    }, 150);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(component.showAnimation).toBe(true);
+    expect(component.containerClass).toContain('logo-inline-animated');
   });
 
-  it('should not add animated class when animate is false', (done) => {
+  it('should not add animated class when animate is false', async () => {
     fixture.componentRef.setInput('animate', false);
     component.ngOnInit();
-    
-    setTimeout(() => {
-      expect(component.showAnimation).toBe(false);
-      expect(component.containerClass).not.toContain('logo-inline-animated');
-      done();
-    }, 150);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(component.showAnimation).toBe(false);
+    expect(component.containerClass).not.toContain('logo-inline-animated');
   });
 
   it('should generate container class with variant', () => {
@@ -137,7 +133,9 @@ describe('LogoInlineComponent', () => {
   it('should render SVG content in template', () => {
     component.ngOnInit();
     fixture.detectChanges();
-    const container = fixture.nativeElement.querySelector('.logo-inline-container');
+    const container = fixture.nativeElement.querySelector(
+      '.logo-inline-container'
+    );
     expect(container).toBeTruthy();
     expect(container.innerHTML).toContain('svg');
   });

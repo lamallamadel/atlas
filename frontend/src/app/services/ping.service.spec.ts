@@ -41,7 +41,7 @@ describe('PingService', () => {
     const errorMessage = 'Server error';
 
     service.ping().subscribe(
-      () => fail('should have failed with server error'),
+      () => expect.fail('should have failed with server error'),
       (error) => {
         expect(error.status).toBe(500);
       }

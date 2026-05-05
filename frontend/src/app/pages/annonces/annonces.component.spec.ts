@@ -15,26 +15,32 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule } from '@angular/material/dialog';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 
 import { AnnoncesComponent } from './annonces.component';
-import { AnnonceApiService, AnnonceStatus } from '../../services/annonce-api.service';
+import {
+  AnnonceApiService,
+  AnnonceStatus,
+} from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 
 @Component({
-    selector: 'app-generic-table', template: '',
-    imports: [FormsModule,
-        RouterTestingModule,
-        MatExpansionModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatCardModule,
-        MatDialogModule]
+  selector: 'app-generic-table',
+  template: '',
+  imports: [
+    FormsModule,
+    RouterTestingModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatCardModule,
+    MatDialogModule,
+  ],
 })
 class GenericTableStubComponent {
   readonly columns = input<any>();
@@ -50,19 +56,22 @@ class GenericTableStubComponent {
 }
 
 @Component({
-    selector: 'app-empty-state', template: '',
-    imports: [FormsModule,
-        RouterTestingModule,
-        MatExpansionModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatCardModule,
-        MatDialogModule]
+  selector: 'app-empty-state',
+  template: '',
+  imports: [
+    FormsModule,
+    RouterTestingModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatCardModule,
+    MatDialogModule,
+  ],
 })
 class EmptyStateStubComponent {
   readonly message = input('');
@@ -74,19 +83,22 @@ class EmptyStateStubComponent {
 }
 
 @Component({
-    selector: 'app-loading-skeleton', template: '',
-    imports: [FormsModule,
-        RouterTestingModule,
-        MatExpansionModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatIconModule,
-        MatButtonModule,
-        MatChipsModule,
-        MatMenuModule,
-        MatCardModule,
-        MatDialogModule]
+  selector: 'app-loading-skeleton',
+  template: '',
+  imports: [
+    FormsModule,
+    RouterTestingModule,
+    MatExpansionModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatIconModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatMenuModule,
+    MatCardModule,
+    MatDialogModule,
+  ],
 })
 class LoadingSkeletonStubComponent {
   readonly variant = input('');
@@ -97,10 +109,10 @@ class LoadingSkeletonStubComponent {
 describe('AnnoncesComponent', () => {
   let component: AnnoncesComponent;
   let fixture: ComponentFixture<AnnoncesComponent>;
-  let annonceApiService: jasmine.SpyObj<AnnonceApiService>;
-  let filterPresetService: jasmine.SpyObj<FilterPresetService>;
-  let bottomSheet: jasmine.SpyObj<MatBottomSheet>;
-  let breakpointObserver: jasmine.SpyObj<BreakpointObserver>;
+  let annonceApiService: AngularVitestPartialMock<AnnonceApiService>;
+  let filterPresetService: AngularVitestPartialMock<FilterPresetService>;
+  let bottomSheet: AngularVitestPartialMock<MatBottomSheet>;
+  let breakpointObserver: AngularVitestPartialMock<BreakpointObserver>;
 
   const emptyPage = {
     content: [],
@@ -110,7 +122,7 @@ describe('AnnoncesComponent', () => {
       pageNumber: 0,
       pageSize: 10,
       paged: true,
-      unpaged: false
+      unpaged: false,
     },
     last: true,
     totalPages: 1,
@@ -120,40 +132,54 @@ describe('AnnoncesComponent', () => {
     sort: { empty: true, sorted: false, unsorted: true },
     first: true,
     numberOfElements: 0,
-    empty: true
+    empty: true,
   };
 
   beforeEach(async () => {
-    const annonceApiServiceSpy = jasmine.createSpyObj('AnnonceApiService', [
-      'list',
-      'getDistinctCities',
-      'getById',
-      'create',
-      'update'
-    ]);
+    const annonceApiServiceSpy = {
+      list: vi.fn().mockName('AnnonceApiService.list'),
+      getDistinctCities: vi
+        .fn()
+        .mockName('AnnonceApiService.getDistinctCities'),
+      getById: vi.fn().mockName('AnnonceApiService.getById'),
+      create: vi.fn().mockName('AnnonceApiService.create'),
+      update: vi.fn().mockName('AnnonceApiService.update'),
+    };
 
-    const filterPresetServiceSpy = jasmine.createSpyObj('FilterPresetService', [
-      'getPresets',
-      'savePreset',
-      'deletePreset',
-      'getPresetsLocally',
-      'savePresetLocally',
-      'deletePresetLocally'
-    ]);
+    const filterPresetServiceSpy = {
+      getPresets: vi.fn().mockName('FilterPresetService.getPresets'),
+      savePreset: vi.fn().mockName('FilterPresetService.savePreset'),
+      deletePreset: vi.fn().mockName('FilterPresetService.deletePreset'),
+      getPresetsLocally: vi
+        .fn()
+        .mockName('FilterPresetService.getPresetsLocally'),
+      savePresetLocally: vi
+        .fn()
+        .mockName('FilterPresetService.savePresetLocally'),
+      deletePresetLocally: vi
+        .fn()
+        .mockName('FilterPresetService.deletePresetLocally'),
+    };
 
-    const bottomSheetSpy = jasmine.createSpyObj('MatBottomSheet', ['open']);
-    
-    const breakpointObserverSpy = jasmine.createSpyObj('BreakpointObserver', ['observe']);
-    breakpointObserverSpy.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
+    const bottomSheetSpy = {
+      open: vi.fn().mockName('MatBottomSheet.open'),
+    };
+
+    const breakpointObserverSpy = {
+      observe: vi.fn().mockName('BreakpointObserver.observe'),
+    };
+    breakpointObserverSpy.observe.mockReturnValue(
+      of({ matches: false, breakpoints: {} })
+    );
 
     // Default safe stubs for ngOnInit() calls.
-    annonceApiServiceSpy.getDistinctCities.and.returnValue(of([]));
-    annonceApiServiceSpy.list.and.returnValue(of(emptyPage));
-    filterPresetServiceSpy.getPresets.and.returnValue([]);
-    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
+    annonceApiServiceSpy.getDistinctCities.mockReturnValue(of([]));
+    annonceApiServiceSpy.list.mockReturnValue(of(emptyPage));
+    filterPresetServiceSpy.getPresets.mockReturnValue([]);
+    filterPresetServiceSpy.getPresetsLocally.mockReturnValue([]);
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         FormsModule,
         RouterTestingModule,
         NoopAnimationsModule,
@@ -170,21 +196,29 @@ describe('AnnoncesComponent', () => {
         AnnoncesComponent,
         GenericTableStubComponent,
         EmptyStateStubComponent,
-        LoadingSkeletonStubComponent
-    ],
-    providers: [
+        LoadingSkeletonStubComponent,
+      ],
+      providers: [
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
         { provide: MatBottomSheet, useValue: bottomSheetSpy },
-        { provide: BreakpointObserver, useValue: breakpointObserverSpy }
-    ]
-}).compileComponents();
+        { provide: BreakpointObserver, useValue: breakpointObserverSpy },
+      ],
+    }).compileComponents();
 
-    annonceApiService = TestBed.inject(AnnonceApiService) as jasmine.SpyObj<AnnonceApiService>;
-    filterPresetService = TestBed.inject(FilterPresetService) as jasmine.SpyObj<FilterPresetService>;
-    bottomSheet = TestBed.inject(MatBottomSheet) as jasmine.SpyObj<MatBottomSheet>;
-    breakpointObserver = TestBed.inject(BreakpointObserver) as jasmine.SpyObj<BreakpointObserver>;
-    
+    annonceApiService = TestBed.inject(
+      AnnonceApiService
+    ) as AngularVitestPartialMock<AnnonceApiService>;
+    filterPresetService = TestBed.inject(
+      FilterPresetService
+    ) as AngularVitestPartialMock<FilterPresetService>;
+    bottomSheet = TestBed.inject(
+      MatBottomSheet
+    ) as AngularVitestPartialMock<MatBottomSheet>;
+    breakpointObserver = TestBed.inject(
+      BreakpointObserver
+    ) as AngularVitestPartialMock<BreakpointObserver>;
+
     fixture = TestBed.createComponent(AnnoncesComponent);
     component = fixture.componentInstance;
   });
@@ -205,28 +239,30 @@ describe('AnnoncesComponent', () => {
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z',
           createdBy: 'user1',
-          updatedBy: 'user1'
-        }
+          updatedBy: 'user1',
+        },
       ],
       totalElements: 1,
       numberOfElements: 1,
-      empty: false
+      empty: false,
     };
 
-    annonceApiService.list.and.returnValue(of(mockPage));
-    annonceApiService.getDistinctCities.and.returnValue(of(['Tanger']));
+    annonceApiService.list.mockReturnValue(of(mockPage));
+    annonceApiService.getDistinctCities.mockReturnValue(of(['Tanger']));
 
     fixture.detectChanges(); // triggers ngOnInit
 
     expect(annonceApiService.getDistinctCities).toHaveBeenCalled();
-    expect(annonceApiService.list).toHaveBeenCalledWith(jasmine.objectContaining({ page: 0, size: 10 }));
+    expect(annonceApiService.list).toHaveBeenCalledWith(
+      expect.objectContaining({ page: 0, size: 10 })
+    );
     expect(component.annonces.length).toBe(1);
     expect(component.annonces[0].title).toBe('Test Annonce');
   });
 
   it('should render component', () => {
-    annonceApiService.list.and.returnValue(of(emptyPage));
-    annonceApiService.getDistinctCities.and.returnValue(of([]));
+    annonceApiService.list.mockReturnValue(of(emptyPage));
+    annonceApiService.getDistinctCities.mockReturnValue(of([]));
 
     fixture.detectChanges();
 

@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
@@ -17,58 +20,70 @@ import { AiAgentService } from '../services/ai-agent.service';
 describe('CommandPaletteComponent', () => {
   let component: CommandPaletteComponent;
   let fixture: ComponentFixture<CommandPaletteComponent>;
-  let mockRouter: jasmine.SpyObj<Router>;
-  let mockDialog: jasmine.SpyObj<MatDialog>;
+  let mockRouter: AngularVitestPartialMock<Router>;
+  let mockDialog: AngularVitestPartialMock<MatDialog>;
   let mockKeyboardService: any;
-  let mockSearchService: jasmine.SpyObj<SearchApiService>;
-  let mockRecentNavService: jasmine.SpyObj<RecentNavigationService>;
+  let mockSearchService: AngularVitestPartialMock<SearchApiService>;
+  let mockRecentNavService: AngularVitestPartialMock<RecentNavigationService>;
   let visibleSubject: BehaviorSubject<boolean>;
 
   beforeEach(async () => {
     visibleSubject = new BehaviorSubject<boolean>(false);
 
-    mockRouter = jasmine.createSpyObj('Router', ['navigate'], {
+    mockRouter = {
+      navigate: vi.fn().mockName('Router.navigate'),
       url: '/',
-      events: of(new NavigationEnd(1, '/', '/'))
-    });
-    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
+      events: of(new NavigationEnd(1, '/', '/')),
+    };
+    mockDialog = {
+      open: vi.fn().mockName('MatDialog.open'),
+    };
 
     mockKeyboardService = {
       commandPaletteVisible$: visibleSubject.asObservable(),
-      closeCommandPalette: jasmine.createSpy('closeCommandPalette'),
-      toggleShortcutHelp: jasmine.createSpy('toggleShortcutHelp')
+      closeCommandPalette: vi.fn(),
+      toggleShortcutHelp: vi.fn(),
     };
 
-    mockSearchService = jasmine.createSpyObj('SearchApiService', ['autocomplete']);
-    mockSearchService.autocomplete.and.returnValue(of({
-      results: [],
-      totalHits: 0,
-      elasticsearchAvailable: true
-    }));
+    mockSearchService = {
+      autocomplete: vi.fn().mockName('SearchApiService.autocomplete'),
+    };
+    mockSearchService.autocomplete.mockReturnValue(
+      of({
+        results: [],
+        totalHits: 0,
+        elasticsearchAvailable: true,
+      })
+    );
 
-    mockRecentNavService = jasmine.createSpyObj('RecentNavigationService', ['getRecentItems']);
-    mockRecentNavService.getRecentItems.and.returnValue([]);
+    mockRecentNavService = {
+      getRecentItems: vi
+        .fn()
+        .mockName('RecentNavigationService.getRecentItems'),
+    };
+    mockRecentNavService.getRecentItems.mockReturnValue([]);
 
-    const mockAiAgentService = jasmine.createSpyObj('AiAgentService', ['openPanel']);
+    const mockAiAgentService = {
+      openPanel: vi.fn().mockName('AiAgentService.openPanel'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         MatIconModule,
         MatProgressSpinnerModule,
         FormsModule,
         BrowserAnimationsModule,
-        CommandPaletteComponent
-    ],
-    providers: [
+        CommandPaletteComponent,
+      ],
+      providers: [
         { provide: Router, useValue: mockRouter },
         { provide: MatDialog, useValue: mockDialog },
         { provide: KeyboardShortcutService, useValue: mockKeyboardService },
         { provide: SearchApiService, useValue: mockSearchService },
         { provide: RecentNavigationService, useValue: mockRecentNavService },
-        { provide: AiAgentService, useValue: mockAiAgentService }
-    ]
-})
-      .compileComponents();
+        { provide: AiAgentService, useValue: mockAiAgentService },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(CommandPaletteComponent);
     component = fixture.componentInstance;
@@ -81,26 +96,26 @@ describe('CommandPaletteComponent', () => {
 
   it('should initialize global commands', () => {
     expect(component.globalCommands.length).toBeGreaterThan(0);
-    const createDossierCmd = component.globalCommands.find(c => c.id === 'create-dossier');
+    const createDossierCmd = component.globalCommands.find(
+      (c) => c.id === 'create-dossier'
+    );
     expect(createDossierCmd).toBeDefined();
     expect(createDossierCmd?.label).toContain('dossier');
   });
 
-  it('should show palette when visible$ emits true', (done) => {
+  it('should show palette when visible$ emits true', async () => {
     visibleSubject.next(true);
 
     fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(component.commandInput()).toBeDefined();
-      done();
-    }, 150);
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(component.commandInput()).toBeDefined();
   });
 
-  it('should filter commands based on search query', fakeAsync(() => {
+  it('should filter commands based on search query', async () => {
     component.searchQuery = 'dossier';
     component.onSearchChange();
-    tick(350);
+    await new Promise<void>((resolve) => setTimeout(resolve, 400));
 
     const filteredIds = component.filteredItems
       .filter((item: any) => 'action' in item)
@@ -108,14 +123,14 @@ describe('CommandPaletteComponent', () => {
 
     expect(filteredIds).toContain('create-dossier');
     expect(filteredIds).toContain('nav-dossiers');
-  }));
+  });
 
   it('should handle arrow down key navigation', () => {
     component.filteredItems = component.globalCommands;
     component.selectedIndex = 0;
 
     const event = new KeyboardEvent('keydown', { key: 'ArrowDown' });
-    spyOn(event, 'preventDefault');
+    vi.spyOn(event, 'preventDefault');
 
     component.onKeyDown(event);
 
@@ -128,7 +143,7 @@ describe('CommandPaletteComponent', () => {
     component.selectedIndex = 2;
 
     const event = new KeyboardEvent('keydown', { key: 'ArrowUp' });
-    spyOn(event, 'preventDefault');
+    vi.spyOn(event, 'preventDefault');
 
     component.onKeyDown(event);
 
@@ -148,7 +163,7 @@ describe('CommandPaletteComponent', () => {
 
   it('should execute command on Enter key', () => {
     const mockCommand = component.globalCommands[0];
-    spyOn(mockCommand, 'action');
+    vi.spyOn(mockCommand, 'action');
 
     component.filteredItems = [mockCommand];
     component.selectedIndex = 0;
@@ -179,7 +194,7 @@ describe('CommandPaletteComponent', () => {
 
     expect(grouped.length).toBeGreaterThan(0);
 
-    const navigationGroup = grouped.find(g => g.category === 'Navigation');
+    const navigationGroup = grouped.find((g) => g.category === 'Navigation');
     expect(navigationGroup).toBeDefined();
     expect(navigationGroup!.items.length).toBeGreaterThan(0);
   });
@@ -195,7 +210,7 @@ describe('CommandPaletteComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
     expect(component.getItemIcon(searchResult)).toBe('campaign');
 
@@ -204,7 +219,7 @@ describe('CommandPaletteComponent', () => {
       type: 'dossier' as const,
       title: 'Recent',
       route: '/dossiers/1',
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
     expect(component.getItemIcon(recentItem)).toBe('folder');
   });
@@ -218,7 +233,7 @@ describe('CommandPaletteComponent', () => {
 
     expect(component.searchQuery).toBe('');
     expect(component.selectedIndex).toBe(0);
-    expect(component.isSearching).toBeFalse();
+    expect(component.isSearching).toBe(false);
   });
 
   it('should navigate to correct route for search results', () => {
@@ -229,32 +244,34 @@ describe('CommandPaletteComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
 
     component.executeItem(annonceResult);
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/annonces/1']);
   });
 
-  it('should call search service when query length >= 2', fakeAsync(() => {
+  it('should call search service when query length >= 2', async () => {
     component.searchQuery = 'te';
     component.onSearchChange();
 
-    tick(350);
+    await new Promise<void>((resolve) => setTimeout(resolve, 400));
 
     expect(mockSearchService.autocomplete).toHaveBeenCalledWith('te');
-  }));
+  });
 
   it('should show recent items when no query', () => {
-    const recentItems = [{
-      id: '1',
-      type: 'dossier' as const,
-      title: 'Recent Dossier',
-      route: '/dossiers/1',
-      timestamp: Date.now()
-    }];
+    const recentItems = [
+      {
+        id: '1',
+        type: 'dossier' as const,
+        title: 'Recent Dossier',
+        route: '/dossiers/1',
+        timestamp: Date.now(),
+      },
+    ];
 
-    mockRecentNavService.getRecentItems.and.returnValue(recentItems);
+    mockRecentNavService.getRecentItems.mockReturnValue(recentItems);
     component.searchQuery = '';
     component['updateFilteredItems']();
 

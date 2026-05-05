@@ -7,21 +7,30 @@ import { ConfirmNavigationDialogComponent } from './confirm-navigation-dialog.co
 describe('ConfirmNavigationDialogComponent', () => {
   let component: ConfirmNavigationDialogComponent;
   let fixture: ComponentFixture<ConfirmNavigationDialogComponent>;
-  let dialogRefSpy: jasmine.SpyObj<MatDialogRef<ConfirmNavigationDialogComponent>>;
+  let dialogRefSpy: AngularVitestPartialMock<
+    MatDialogRef<ConfirmNavigationDialogComponent>
+  >;
 
   beforeEach(async () => {
-    const spy = jasmine.createSpyObj('MatDialogRef', ['close']);
+    const spy = {
+      close: vi.fn().mockName('MatDialogRef.close'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [MatIconModule, MatButtonModule, MatDialogModule, ConfirmNavigationDialogComponent],
-    providers: [
-        { provide: MatDialogRef, useValue: spy }
-    ]
-}).compileComponents();
+      imports: [
+        MatIconModule,
+        MatButtonModule,
+        MatDialogModule,
+        ConfirmNavigationDialogComponent,
+      ],
+      providers: [{ provide: MatDialogRef, useValue: spy }],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmNavigationDialogComponent);
     component = fixture.componentInstance;
-    dialogRefSpy = TestBed.inject(MatDialogRef) as jasmine.SpyObj<MatDialogRef<ConfirmNavigationDialogComponent>>;
+    dialogRefSpy = TestBed.inject(MatDialogRef) as AngularVitestPartialMock<
+      MatDialogRef<ConfirmNavigationDialogComponent>
+    >;
     fixture.detectChanges();
   });
 

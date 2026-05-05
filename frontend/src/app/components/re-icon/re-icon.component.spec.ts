@@ -2,31 +2,36 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ReIconComponent } from './re-icon.component';
 import { IconRegistryService } from '../../services/icon-registry.service';
-import { of } from "rxjs";
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { of } from 'rxjs';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('ReIconComponent', () => {
   let component: ReIconComponent;
   let fixture: ComponentFixture<ReIconComponent>;
-  let iconRegistryService: jasmine.SpyObj<IconRegistryService>;
+  let iconRegistryService: AngularVitestPartialMock<IconRegistryService>;
 
   beforeEach(async () => {
-    const iconRegistrySpy = jasmine.createSpyObj('IconRegistryService', [
-      'isLoaded',
-      'getIconSync',
-      'getIcon'
-    ]);
+    const iconRegistrySpy = {
+      isLoaded: vi.fn().mockName('IconRegistryService.isLoaded'),
+      getIconSync: vi.fn().mockName('IconRegistryService.getIconSync'),
+      getIcon: vi.fn().mockName('IconRegistryService.getIcon'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [ReIconComponent],
-    providers: [
+      imports: [ReIconComponent],
+      providers: [
         { provide: IconRegistryService, useValue: iconRegistrySpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-}).compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
-    iconRegistryService = TestBed.inject(IconRegistryService) as jasmine.SpyObj<IconRegistryService>;
+    iconRegistryService = TestBed.inject(
+      IconRegistryService
+    ) as AngularVitestPartialMock<IconRegistryService>;
   });
 
   beforeEach(() => {
@@ -41,8 +46,8 @@ describe('ReIconComponent', () => {
 
   it('should load icon on init when icons are already loaded', () => {
     const mockSvg = '<svg>test</svg>';
-    iconRegistryService.isLoaded.and.returnValue(true);
-    iconRegistryService.getIconSync.and.returnValue(mockSvg as any);
+    iconRegistryService.isLoaded.mockReturnValue(true);
+    iconRegistryService.getIconSync.mockReturnValue(mockSvg as any);
 
     component.ngOnInit();
 
@@ -53,8 +58,8 @@ describe('ReIconComponent', () => {
 
   it('should load icon asynchronously when icons are not loaded', () => {
     const mockSvg = '<svg>test</svg>';
-    iconRegistryService.isLoaded.and.returnValue(false);
-    iconRegistryService.getIcon.and.returnValue(of(mockSvg as any));
+    iconRegistryService.isLoaded.mockReturnValue(false);
+    iconRegistryService.getIcon.mockReturnValue(of(mockSvg as any));
 
     component.ngOnInit();
 
@@ -95,11 +100,11 @@ describe('ReIconComponent', () => {
 
   it('should render with correct aria-label', () => {
     fixture.componentRef.setInput('ariaLabel', 'Test House Icon');
-    iconRegistryService.isLoaded.and.returnValue(true);
-    iconRegistryService.getIconSync.and.returnValue('<svg>test</svg>' as any);
-    
+    iconRegistryService.isLoaded.mockReturnValue(true);
+    iconRegistryService.getIconSync.mockReturnValue('<svg>test</svg>' as any);
+
     fixture.detectChanges();
-    
+
     const spanElement = fixture.nativeElement.querySelector('span');
     expect(spanElement.getAttribute('aria-label')).toBe('Test House Icon');
   });
@@ -107,11 +112,11 @@ describe('ReIconComponent', () => {
   it('should use icon id as aria-label when not provided', () => {
     fixture.componentRef.setInput('icon', 're-house');
     fixture.componentRef.setInput('ariaLabel', undefined);
-    iconRegistryService.isLoaded.and.returnValue(true);
-    iconRegistryService.getIconSync.and.returnValue('<svg>test</svg>' as any);
-    
+    iconRegistryService.isLoaded.mockReturnValue(true);
+    iconRegistryService.getIconSync.mockReturnValue('<svg>test</svg>' as any);
+
     fixture.detectChanges();
-    
+
     const spanElement = fixture.nativeElement.querySelector('span');
     expect(spanElement.getAttribute('aria-label')).toBe('re-house');
   });

@@ -11,8 +11,13 @@ describe('InlineValidationSuggestionComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MatIconModule, MatButtonModule, BrowserAnimationsModule, InlineValidationSuggestionComponent]
-}).compileComponents();
+      imports: [
+        MatIconModule,
+        MatButtonModule,
+        BrowserAnimationsModule,
+        InlineValidationSuggestionComponent,
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(InlineValidationSuggestionComponent);
     component = fixture.componentInstance;
@@ -28,19 +33,19 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'test@gmial.com',
       suggestedValue: 'test@gmail.com',
       reason: 'Typo detected',
-      confidence: 'high'
+      confidence: 'high',
     };
 
     fixture.componentRef.setInput('suggestion', suggestion);
-    
-    spyOn(component.accept, 'emit');
+
+    vi.spyOn(component.accept, 'emit');
     component.onAccept();
-    
+
     expect(component.accept.emit).toHaveBeenCalledWith(suggestion);
   });
 
   it('should emit dismiss event when dismiss button clicked', () => {
-    spyOn(component.dismiss, 'emit');
+    vi.spyOn(component.dismiss, 'emit');
     component.onDismiss();
     expect(component.dismiss.emit).toHaveBeenCalled();
   });
@@ -51,7 +56,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
-      confidence: 'high'
+      confidence: 'high',
     });
     expect(component.getConfidenceIcon()).toBe('verified');
 
@@ -60,7 +65,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
-      confidence: 'medium'
+      confidence: 'medium',
     });
     expect(component.getConfidenceIcon()).toBe('help_outline');
 
@@ -69,7 +74,7 @@ describe('InlineValidationSuggestionComponent', () => {
       originalValue: 'old',
       suggestedValue: 'new',
       reason: 'test',
-      confidence: 'low'
+      confidence: 'low',
     });
     expect(component.getConfidenceIcon()).toBe('info');
   });

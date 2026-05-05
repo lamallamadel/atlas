@@ -1,8 +1,18 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { FormControl } from '@angular/forms';
-import { FormValidationService, ValidationSuggestion } from './form-validation.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  FormValidationService,
+  ValidationSuggestion,
+} from './form-validation.service';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 
 describe('FormValidationService', () => {
   let service: FormValidationService;
@@ -10,9 +20,13 @@ describe('FormValidationService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [FormValidationService, provideHttpClient(withInterceptorsFromDi()), provideHttpClientTesting()]
-});
+      imports: [],
+      providers: [
+        FormValidationService,
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+      ],
+    });
     service = TestBed.inject(FormValidationService);
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -26,26 +40,23 @@ describe('FormValidationService', () => {
   });
 
   describe('getEmailSuggestions', () => {
-    it('should return empty array for invalid email', (done) => {
-      service.getEmailSuggestions('notanemail').subscribe(suggestions => {
+    it('should return empty array for invalid email', async () => {
+      service.getEmailSuggestions('notanemail').subscribe((suggestions) => {
         expect(suggestions.length).toBe(0);
-        done();
       });
     });
 
-    it('should suggest correction for typo in gmail', (done) => {
-      service.getEmailSuggestions('user@gmial.com').subscribe(suggestions => {
+    it('should suggest correction for typo in gmail', async () => {
+      service.getEmailSuggestions('user@gmial.com').subscribe((suggestions) => {
         expect(suggestions.length).toBeGreaterThan(0);
         expect(suggestions[0].suggestedValue).toBe('user@gmail.com');
         expect(suggestions[0].confidence).toBe('high');
-        done();
       });
     });
 
-    it('should suggest similar domain', (done) => {
-      service.getEmailSuggestions('user@gmailcom').subscribe(suggestions => {
+    it('should suggest similar domain', async () => {
+      service.getEmailSuggestions('user@gmailcom').subscribe((suggestions) => {
         expect(suggestions.length).toBeGreaterThan(0);
-        done();
       });
     });
   });
@@ -68,96 +79,98 @@ describe('FormValidationService', () => {
   });
 
   describe('getPhoneSuggestions', () => {
-    it('should suggest formatted phone number', (done) => {
-      service.getPhoneSuggestions('0612345678').subscribe(suggestions => {
+    it('should suggest formatted phone number', async () => {
+      service.getPhoneSuggestions('0612345678').subscribe((suggestions) => {
         expect(suggestions.length).toBeGreaterThan(0);
         expect(suggestions[0].suggestedValue).toBe('06 12 34 56 78');
-        done();
       });
     });
 
-    it('should return empty for already formatted number', (done) => {
-      service.getPhoneSuggestions('06 12 34 56 78').subscribe(suggestions => {
+    it('should return empty for already formatted number', async () => {
+      service.getPhoneSuggestions('06 12 34 56 78').subscribe((suggestions) => {
         expect(suggestions.length).toBe(0);
-        done();
       });
     });
   });
 
   describe('validateEmailAsync', () => {
-    it('should return null for empty value', (done) => {
+    it('should return null for empty value', async () => {
       const control = new FormControl('');
       const validator = service.validateEmailAsync(0);
 
-      validator(control).subscribe(result => {
+      validator(control).subscribe((result) => {
         expect(result).toBeNull();
-        done();
       });
     });
 
-    it('should validate email with backend', fakeAsync(() => {
-      const control = new FormControl('test@example.com');
-      const validator = service.validateEmailAsync(0);
-      let result: any;
-
-      validator(control).subscribe(r => {
-        result = r;
+    describe('backend round-trip', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+      afterEach(() => {
+        vi.useRealTimers();
       });
 
-      tick(0);
+      it('should validate email with backend', async () => {
+        const control = new FormControl('test@example.com');
+        const validator = service.validateEmailAsync(0);
 
-      const req = httpMock.expectOne('/api/v1/validation/email');
-      expect(req.request.method).toBe('POST');
-      req.flush({ valid: true });
+        const pending = firstValueFrom(validator(control));
+        await vi.advanceTimersByTimeAsync(0);
 
-      expect(result).toBeNull();
-    }));
+        const req = httpMock.expectOne('/api/v1/validation/email');
+        expect(req.request.method).toBe('POST');
+        req.flush({ valid: true });
 
-    it('should return errors for invalid email', fakeAsync(() => {
-      const control = new FormControl('invalid@email');
-      const validator = service.validateEmailAsync(0);
-      let result: any;
-
-      validator(control).subscribe(r => {
-        result = r;
+        expect(await pending).toBeNull();
       });
 
-      tick(0);
+      it('should return errors for invalid email', async () => {
+        const control = new FormControl('invalid@email');
+        const validator = service.validateEmailAsync(0);
 
-      const req = httpMock.expectOne('/api/v1/validation/email');
-      req.flush({ valid: false, errors: { invalidEmail: true } });
+        const pending = firstValueFrom(validator(control));
+        await vi.advanceTimersByTimeAsync(0);
 
-      expect(result).toBeTruthy();
-    }));
+        const req = httpMock.expectOne('/api/v1/validation/email');
+        req.flush({ valid: false, errors: { invalidEmail: true } });
+
+        expect(await pending).toBeTruthy();
+      });
+    });
   });
 
   describe('validatePhoneAsync', () => {
-    it('should return null for empty value', (done) => {
+    it('should return null for empty value', async () => {
       const control = new FormControl('');
       const validator = service.validatePhoneAsync(0);
 
-      validator(control).subscribe(result => {
+      validator(control).subscribe((result) => {
         expect(result).toBeNull();
-        done();
       });
     });
 
-    it('should validate phone with backend', fakeAsync(() => {
-      const control = new FormControl('0612345678');
-      const validator = service.validatePhoneAsync(0);
-      let result: any;
-
-      validator(control).subscribe(r => {
-        result = r;
+    describe('backend round-trip', () => {
+      beforeEach(() => {
+        vi.useFakeTimers();
+      });
+      afterEach(() => {
+        vi.useRealTimers();
       });
 
-      tick(0);
+      it('should validate phone with backend', async () => {
+        const control = new FormControl('0612345678');
+        const validator = service.validatePhoneAsync(0);
 
-      const req = httpMock.expectOne('/api/v1/validation/phone');
-      expect(req.request.method).toBe('POST');
-      req.flush({ valid: true });
+        const pending = firstValueFrom(validator(control));
+        await vi.advanceTimersByTimeAsync(0);
 
-      expect(result).toBeNull();
-    }));
+        const req = httpMock.expectOne('/api/v1/validation/phone');
+        expect(req.request.method).toBe('POST');
+        req.flush({ valid: true });
+
+        expect(await pending).toBeNull();
+      });
+    });
   });
 });

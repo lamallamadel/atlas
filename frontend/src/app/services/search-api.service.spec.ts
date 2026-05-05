@@ -150,7 +150,7 @@ describe('SearchApiService', () => {
 
   it('should handle search error', () => {
     service.search('test').subscribe(
-      () => fail('should have failed'),
+      () => expect.fail('should have failed'),
       (error) => {
         expect(error.status).toBe(500);
       }

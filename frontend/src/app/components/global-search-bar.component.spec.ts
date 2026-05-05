@@ -1,27 +1,31 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 import { GlobalSearchBarComponent } from './global-search-bar.component';
 import { SearchApiService } from '../services/search-api.service';
 
 describe('GlobalSearchBarComponent', () => {
   let component: GlobalSearchBarComponent;
   let fixture: ComponentFixture<GlobalSearchBarComponent>;
-  let mockSearchService: jasmine.SpyObj<SearchApiService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let mockSearchService: AngularVitestPartialMock<SearchApiService>;
+  let mockRouter: AngularVitestPartialMock<Router>;
 
   beforeEach(async () => {
-    mockSearchService = jasmine.createSpyObj('SearchApiService', ['autocomplete']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate']);
+    mockSearchService = {
+      autocomplete: vi.fn().mockName('SearchApiService.autocomplete'),
+    };
+    mockRouter = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [FormsModule, GlobalSearchBarComponent],
-    providers: [
+      imports: [FormsModule, GlobalSearchBarComponent],
+      providers: [
         { provide: SearchApiService, useValue: mockSearchService },
-        { provide: Router, useValue: mockRouter }
-    ]
-}).compileComponents();
+        { provide: Router, useValue: mockRouter },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GlobalSearchBarComponent);
     component = fixture.componentInstance;
@@ -48,7 +52,7 @@ describe('GlobalSearchBarComponent', () => {
   it('should load recent searches from localStorage on init', () => {
     const recentSearches = [
       { query: 'test1', timestamp: Date.now() },
-      { query: 'test2', timestamp: Date.now() - 1000 }
+      { query: 'test2', timestamp: Date.now() - 1000 },
     ];
     localStorage.setItem('globalSearchRecent', JSON.stringify(recentSearches));
 
@@ -60,9 +64,19 @@ describe('GlobalSearchBarComponent', () => {
   it('should clear search query and results', () => {
     component.searchQuery = 'test';
     component.groupedResults = {
-      annonces: [{ id: 1, type: 'annonce', title: 'Test', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' }],
+      annonces: [
+        {
+          id: 1,
+          type: 'annonce',
+          title: 'Test',
+          description: '',
+          relevanceScore: 1,
+          createdAt: '',
+          updatedAt: '',
+        },
+      ],
       dossiers: [],
-      contacts: []
+      contacts: [],
     };
     component.totalHits = 1;
 
@@ -82,7 +96,7 @@ describe('GlobalSearchBarComponent', () => {
       description: 'Test',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
 
     component.navigateToResult(result);
@@ -98,7 +112,7 @@ describe('GlobalSearchBarComponent', () => {
       description: 'Test',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
 
     component.navigateToResult(result);
@@ -114,7 +128,7 @@ describe('GlobalSearchBarComponent', () => {
       description: 'Test',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
 
     component.navigateToResult(result);
@@ -128,7 +142,7 @@ describe('GlobalSearchBarComponent', () => {
     component.viewAllResults();
 
     expect(mockRouter.navigate).toHaveBeenCalledWith(['/search'], {
-      queryParams: { q: 'test query' }
+      queryParams: { q: 'test query' },
     });
   });
 
@@ -141,14 +155,14 @@ describe('GlobalSearchBarComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
 
     component.navigateToResult(result);
 
     const stored = localStorage.getItem('globalSearchRecent');
     expect(stored).toBeTruthy();
-    
+
     const parsed = JSON.parse(stored!);
     expect(parsed[0].query).toBe('test search');
   });
@@ -156,7 +170,7 @@ describe('GlobalSearchBarComponent', () => {
   it('should remove recent search', () => {
     component.recentSearches = [
       { query: 'test1', timestamp: 1 },
-      { query: 'test2', timestamp: 2 }
+      { query: 'test2', timestamp: 2 },
     ];
 
     const event = new Event('click');
@@ -188,9 +202,33 @@ describe('GlobalSearchBarComponent', () => {
 
   it('should group results by type', () => {
     const results = [
-      { id: 1, type: 'annonce', title: 'Annonce 1', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' },
-      { id: 2, type: 'dossier', title: 'Dossier 1', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' },
-      { id: 3, type: 'annonce', title: 'Annonce 2', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' }
+      {
+        id: 1,
+        type: 'annonce',
+        title: 'Annonce 1',
+        description: '',
+        relevanceScore: 1,
+        createdAt: '',
+        updatedAt: '',
+      },
+      {
+        id: 2,
+        type: 'dossier',
+        title: 'Dossier 1',
+        description: '',
+        relevanceScore: 1,
+        createdAt: '',
+        updatedAt: '',
+      },
+      {
+        id: 3,
+        type: 'annonce',
+        title: 'Annonce 2',
+        description: '',
+        relevanceScore: 1,
+        createdAt: '',
+        updatedAt: '',
+      },
     ];
 
     component['groupResults'](results);
@@ -202,8 +240,24 @@ describe('GlobalSearchBarComponent', () => {
 
   it('should handle keyboard navigation', () => {
     component.flatResults = [
-      { id: 1, type: 'annonce', title: 'Test 1', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' },
-      { id: 2, type: 'annonce', title: 'Test 2', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' }
+      {
+        id: 1,
+        type: 'annonce',
+        title: 'Test 1',
+        description: '',
+        relevanceScore: 1,
+        createdAt: '',
+        updatedAt: '',
+      },
+      {
+        id: 2,
+        type: 'annonce',
+        title: 'Test 2',
+        description: '',
+        relevanceScore: 1,
+        createdAt: '',
+        updatedAt: '',
+      },
     ];
     component.showDropdown = true;
     component.selectedIndex = -1;
@@ -222,7 +276,7 @@ describe('GlobalSearchBarComponent', () => {
       description: '',
       relevanceScore: 1,
       createdAt: '',
-      updatedAt: ''
+      updatedAt: '',
     };
     component.flatResults = [result];
     component.selectedIndex = 0;
@@ -238,7 +292,15 @@ describe('GlobalSearchBarComponent', () => {
     component.searchQuery = 'test';
     component.showDropdown = true;
     component.flatResults = [
-      { id: 1, type: 'annonce', title: 'Test', description: '', relevanceScore: 1, createdAt: '', updatedAt: '' }
+      {
+        id: 1,
+        type: 'annonce',
+        title: 'Test',
+        description: '',
+        relevanceScore: 1,
+        createdAt: '',
+        updatedAt: '',
+      },
     ];
 
     const event = new KeyboardEvent('keydown', { key: 'Escape' });

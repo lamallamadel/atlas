@@ -5,30 +5,35 @@ import { NotificationToastComponent } from './notification-toast.component';
 import { ToastNotificationService } from '../services/toast-notification.service';
 import { AriaLiveAnnouncerService } from '../services/aria-live-announcer.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 
 describe('NotificationToastComponent', () => {
   let component: NotificationToastComponent;
   let fixture: ComponentFixture<NotificationToastComponent>;
-  let toastService: jasmine.SpyObj<ToastNotificationService>;
+  let toastService: AngularVitestPartialMock<ToastNotificationService>;
 
   beforeEach(async () => {
-    const toastServiceSpy = jasmine.createSpyObj('ToastNotificationService', [
-      'dismiss',
-      'activeToasts'
-    ]);
-    toastServiceSpy.activeToasts = of([]);
+    const toastServiceSpy = {
+      dismiss: vi.fn().mockName('ToastNotificationService.dismiss'),
+      activeToasts: of([]),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [BrowserAnimationsModule, MatIconModule, NotificationToastComponent],
-    providers: [
+      imports: [
+        BrowserAnimationsModule,
+        MatIconModule,
+        NotificationToastComponent,
+      ],
+      providers: [
         { provide: ToastNotificationService, useValue: toastServiceSpy },
         AriaLiveAnnouncerService,
-        MatSnackBar
-    ]
-}).compileComponents();
+        MatSnackBar,
+      ],
+    }).compileComponents();
 
-    toastService = TestBed.inject(ToastNotificationService) as jasmine.SpyObj<ToastNotificationService>;
+    toastService = TestBed.inject(
+      ToastNotificationService
+    ) as AngularVitestPartialMock<ToastNotificationService>;
   });
 
   beforeEach(() => {
@@ -57,7 +62,7 @@ describe('NotificationToastComponent', () => {
       startTime: Date.now() - 2500,
       dismissible: true,
       position: 'top-right' as const,
-      showProgress: true
+      showProgress: true,
     };
 
     const progress = component.getProgress(toast);
@@ -74,7 +79,7 @@ describe('NotificationToastComponent', () => {
       startTime: Date.now(),
       dismissible: true,
       position: 'top-right' as const,
-      showProgress: true
+      showProgress: true,
     };
 
     component.onDismiss(toast);
@@ -82,7 +87,11 @@ describe('NotificationToastComponent', () => {
   });
 
   it('should get correct position class', () => {
-    expect(component.getPositionClass('top-right')).toBe('toast-container-top-right');
-    expect(component.getPositionClass('bottom-left')).toBe('toast-container-bottom-left');
+    expect(component.getPositionClass('top-right')).toBe(
+      'toast-container-top-right'
+    );
+    expect(component.getPositionClass('bottom-left')).toBe(
+      'toast-container-bottom-left'
+    );
   });
 });

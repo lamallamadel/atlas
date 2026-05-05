@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
-import { Subject } from "rxjs";
+import { Subject } from 'rxjs';
 import { RecentNavigationService } from './recent-navigation.service';
 
 describe('RecentNavigationService', () => {
@@ -9,19 +9,19 @@ describe('RecentNavigationService', () => {
 
   beforeEach(() => {
     routerEventsSubject = new Subject();
-    
+
     const routerMock = {
       events: routerEventsSubject.asObservable(),
-      navigate: jasmine.createSpy('navigate')
+      navigate: vi.fn(),
     };
 
     TestBed.configureTestingModule({
       providers: [
         RecentNavigationService,
-        { provide: Router, useValue: routerMock }
-      ]
+        { provide: Router, useValue: routerMock },
+      ],
     });
-    
+
     localStorage.clear();
     service = TestBed.inject(RecentNavigationService);
   });
@@ -35,7 +35,7 @@ describe('RecentNavigationService', () => {
       id: '1',
       type: 'dossier',
       title: 'Test Dossier',
-      route: '/dossiers/1'
+      route: '/dossiers/1',
     });
 
     const items = service.getRecentItems();
@@ -50,7 +50,7 @@ describe('RecentNavigationService', () => {
         id: `${i}`,
         type: 'dossier',
         title: `Dossier ${i}`,
-        route: `/dossiers/${i}`
+        route: `/dossiers/${i}`,
       });
     }
 
@@ -63,14 +63,14 @@ describe('RecentNavigationService', () => {
       id: '1',
       type: 'dossier',
       title: 'Test Dossier',
-      route: '/dossiers/1'
+      route: '/dossiers/1',
     });
 
     service.addRecentItem({
       id: '1',
       type: 'dossier',
       title: 'Test Dossier Updated',
-      route: '/dossiers/1'
+      route: '/dossiers/1',
     });
 
     const items = service.getRecentItems();
@@ -83,12 +83,12 @@ describe('RecentNavigationService', () => {
       id: '1',
       type: 'dossier',
       title: 'Test Dossier',
-      route: '/dossiers/1'
+      route: '/dossiers/1',
     });
 
     const stored = localStorage.getItem('recent_navigation');
     expect(stored).toBeTruthy();
-    
+
     const parsed = JSON.parse(stored!);
     expect(parsed.length).toBe(1);
     expect(parsed[0].id).toBe('1');
@@ -99,11 +99,11 @@ describe('RecentNavigationService', () => {
       id: '1',
       type: 'dossier',
       title: 'Test Dossier',
-      route: '/dossiers/1'
+      route: '/dossiers/1',
     });
 
     service.clearRecentItems();
-    
+
     const items = service.getRecentItems();
     expect(items.length).toBe(0);
     expect(localStorage.getItem('recent_navigation')).toBeNull();

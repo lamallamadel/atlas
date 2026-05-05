@@ -4,7 +4,9 @@ import { KeyboardShortcutHintDirective } from './keyboard-shortcut-hint.directiv
 import { KeyboardShortcutService } from '../services/keyboard-shortcut.service';
 import { Router } from '@angular/router';
 
-@Component({ template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>` })
+@Component({
+  template: `<button appKeyboardShortcutHint="Ctrl+K">Test Button</button>`,
+})
 class TestComponent {}
 
 describe('KeyboardShortcutHintDirective', () => {
@@ -12,16 +14,17 @@ describe('KeyboardShortcutHintDirective', () => {
   let fixture: ComponentFixture<TestComponent>;
 
   beforeEach(async () => {
-    const routerMock = jasmine.createSpyObj('Router', ['navigate']);
+    const routerMock = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [TestComponent, KeyboardShortcutHintDirective],
-    providers: [
+      imports: [TestComponent, KeyboardShortcutHintDirective],
+      providers: [
         KeyboardShortcutService,
-        { provide: Router, useValue: routerMock }
-    ]
-})
-    .compileComponents();
+        { provide: Router, useValue: routerMock },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;

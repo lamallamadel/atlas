@@ -13,36 +13,47 @@ import { TourProgressComponent } from './tour-progress.component';
 import { TourDefinitionService } from '../services/tour-definition.service';
 import { OnboardingTourService } from '../services/onboarding-tour.service';
 import { UserPreferencesService } from '../services/user-preferences.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('TourProgressComponent', () => {
   let component: TourProgressComponent;
   let fixture: ComponentFixture<TourProgressComponent>;
 
   beforeEach(async () => {
-    const mockOAuthService = jasmine.createSpyObj('OAuthService', [
-      'initCodeFlow', 'loadDiscoveryDocumentAndTryLogin', 'hasValidAccessToken',
-      'configure', 'setStorage', 'logOut', 'getAccessToken'
-    ]);
+    const mockOAuthService = {
+      initCodeFlow: vi.fn().mockName('OAuthService.initCodeFlow'),
+      loadDiscoveryDocumentAndTryLogin: vi
+        .fn()
+        .mockName('OAuthService.loadDiscoveryDocumentAndTryLogin'),
+      hasValidAccessToken: vi.fn().mockName('OAuthService.hasValidAccessToken'),
+      configure: vi.fn().mockName('OAuthService.configure'),
+      setStorage: vi.fn().mockName('OAuthService.setStorage'),
+      logOut: vi.fn().mockName('OAuthService.logOut'),
+      getAccessToken: vi.fn().mockName('OAuthService.getAccessToken'),
+    };
     await TestBed.configureTestingModule({
-    imports: [TourProgressComponent,
+      imports: [
+        TourProgressComponent,
         RouterTestingModule,
         MatCardModule,
         MatIconModule,
         MatProgressBarModule,
         MatButtonModule,
         MatChipsModule,
-        MatProgressSpinnerModule],
-    providers: [
+        MatProgressSpinnerModule,
+      ],
+      providers: [
         TourDefinitionService,
         OnboardingTourService,
         UserPreferencesService,
         { provide: OAuthService, useValue: mockOAuthService },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-})
-    .compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(TourProgressComponent);
     component = fixture.componentInstance;

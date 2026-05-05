@@ -1,6 +1,8 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
 import { LottieAnimationComponent } from './lottie-animation.component';
-import { ChangeDetectorRef } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 
 describe('LottieAnimationComponent', () => {
@@ -9,9 +11,8 @@ describe('LottieAnimationComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MatIconModule, LottieAnimationComponent]
-})
-      .compileComponents();
+      imports: [MatIconModule, LottieAnimationComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(LottieAnimationComponent);
     component = fixture.componentInstance;
@@ -30,14 +31,18 @@ describe('LottieAnimationComponent', () => {
     expect(component.showControls()).toBe(false);
   });
 
-  it('should set useFallback to true on animation load error', fakeAsync(() => {
+  it('should set useFallback to true on animation load error', async () => {
     fixture.componentRef.setInput('animationType', 'search-empty');
     let emittedError: Error | null = null;
-    component.animationError.subscribe((err: Error) => { emittedError = err; });
+    component.animationError.subscribe((err: Error) => {
+      emittedError = err;
+    });
 
-    spyOn(component as any, 'loadAnimationData').and.returnValue(Promise.reject(new Error('Load failed')));
+    vi.spyOn(component as any, 'loadAnimationData').mockReturnValue(
+      Promise.reject(new Error('Load failed'))
+    );
     // loadAnimation() first awaits dynamic import; stub it so we only exercise loadAnimationData rejection
-    spyOn(component as any, 'loadAnimation').and.callFake(async () => {
+    vi.spyOn(component as any, 'loadAnimation').mockImplementation(async () => {
       try {
         await (component as any).loadAnimationData();
       } catch (err) {
@@ -47,12 +52,12 @@ describe('LottieAnimationComponent', () => {
       }
     });
     fixture.detectChanges();
-    tick(0);
+    await new Promise<void>((resolve) => queueMicrotask(resolve));
     fixture.detectChanges();
     expect(component.useFallback).toBe(true);
     expect(emittedError).toBeTruthy();
     expect(emittedError!.message).toBe('Load failed');
-  }));
+  });
 
   it('should return correct fallback icon for animation type', () => {
     fixture.componentRef.setInput('animationType', 'search-empty');
@@ -88,18 +93,14 @@ describe('LottieAnimationComponent', () => {
     expect(component.getFallbackColor()).toBe('#9ca3af');
   });
 
-  it('should emit complete event', (done) => {
-    component.animationComplete.subscribe(() => {
-      done();
-    });
+  it('should emit complete event', async () => {
+    component.animationComplete.subscribe(() => {});
     // TODO: The 'emit' function requires a mandatory void argument
     component.animationComplete.emit();
   });
 
-  it('should emit loopComplete event', (done) => {
-    component.loopComplete.subscribe(() => {
-      done();
-    });
+  it('should emit loopComplete event', async () => {
+    component.loopComplete.subscribe(() => {});
     // TODO: The 'emit' function requires a mandatory void argument
     component.loopComplete.emit();
   });
@@ -130,7 +131,7 @@ describe('LottieAnimationComponent', () => {
   describe('Cleanup', () => {
     it('should destroy animation on component destroy', () => {
       component.lottieInstance = {
-        destroy: jasmine.createSpy('destroy')
+        destroy: vi.fn(),
       };
 
       component.ngOnDestroy();

@@ -8,16 +8,16 @@ describe('ThemeService', () => {
     localStorage.clear();
     Object.defineProperty(window, 'matchMedia', {
       writable: true,
-      value: jasmine.createSpy('matchMedia').and.returnValue({
+      value: vi.fn().mockReturnValue({
         matches: false,
         media: '(prefers-color-scheme: dark)',
         onchange: null,
-        addListener: jasmine.createSpy('addListener'),
-        removeListener: jasmine.createSpy('removeListener'),
-        addEventListener: jasmine.createSpy('addEventListener'),
-        removeEventListener: jasmine.createSpy('removeEventListener'),
-        dispatchEvent: jasmine.createSpy('dispatchEvent')
-      })
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(),
+      }),
     });
     TestBed.configureTestingModule({});
     service = TestBed.inject(ThemeService);

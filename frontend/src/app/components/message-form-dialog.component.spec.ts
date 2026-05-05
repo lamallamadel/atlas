@@ -10,12 +10,16 @@ describe('MessageFormDialogComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MaterialTestingModule, MessageFormDialogComponent, DatetimePickerComponent],
-    providers: [
-        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
-        { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } }
-    ]
-}).compileComponents();
+      imports: [
+        MaterialTestingModule,
+        MessageFormDialogComponent,
+        DatetimePickerComponent,
+      ],
+      providers: [
+        { provide: MatDialogRef, useValue: { close: vi.fn() } },
+        { provide: MAT_DIALOG_DATA, useValue: { dossierId: 1 } },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MessageFormDialogComponent);
     component = fixture.componentInstance;

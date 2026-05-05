@@ -150,6 +150,19 @@
               "localize": [
                 "es"
               ]
+            },
+            "vitest": {
+              "localize": false,
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "namedChunks": true,
+              "polyfills": [
+                "src/global-polyfill.js",
+                "zone.js",
+                "zone.js/testing",
+                "@angular/localize/init"
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -184,9 +197,66 @@
           }
         },
         "test": {
+          "builder": "@angular/build:unit-test",
+          "options": {
+            "buildTarget": "frontend:build:vitest",
+            "tsConfig": "tsconfig.spec.json",
+            "runner": "vitest",
+            "setupFiles": ["src/setup-vitest.ts"],
+            "coverage": false,
+            "coverageThresholds": {
+              "statements": 43,
+              "branches": 28,
+              "functions": 35,
+              "lines": 43
+            },
+            "exclude": [
+              "src/stories/**",
+              "src/**/*.stories.ts",
+              "e2e/**",
+              "src/app/services/user-preferences.service.spec.ts"
+            ]
+          },
+          "configurations": {
+            "ci": {
+              "watch": false,
+              "coverage": true,
+              "coverageReporters": ["text-summary", "lcov", "json-summary"]
+            }
+          }
+        },
+        "test-karma": {
           "builder": "@angular/build:karma",
           "options": {
             "karmaConfig": "karma.conf.js",
+            "polyfills": [
+              "src/global-polyfill.js",
+              "zone.js",
+              "zone.js/testing",
+              "@angular/localize/init"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              "src/favicon.ico",
+              "src/assets"
+            ],
+            "styles": [
+              "src/styles/variables.scss",
+              "src/styles/theme.scss",
+              "src/styles/theme-dark.scss",
+              "src/styles/utilities.scss",
+              "src/styles/print.scss",
+              "src/styles/shepherd-theme.css",
+              "src/styles.scss"
+            ],
+            "scripts": []
+          }
+        },
+        "test-karma-prefs": {
+          "builder": "@angular/build:karma",
+          "options": {
+            "karmaConfig": "karma.conf.js",
+            "include": ["src/app/services/user-preferences.service.spec.ts"],
             "polyfills": [
               "src/global-polyfill.js",
               "zone.js",

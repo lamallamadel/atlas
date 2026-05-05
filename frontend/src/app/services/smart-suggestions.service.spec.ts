@@ -1,11 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { SmartSuggestionsService } from './smart-suggestions.service';
-import { SmartSuggestionsApiService, SmartSuggestion } from './smart-suggestions-api.service';
-import { of, throwError } from "rxjs";
+import {
+  SmartSuggestionsApiService,
+  SmartSuggestion,
+} from './smart-suggestions-api.service';
+import { of, throwError } from 'rxjs';
 
 describe('SmartSuggestionsService', () => {
   let service: SmartSuggestionsService;
-  let apiServiceSpy: jasmine.SpyObj<SmartSuggestionsApiService>;
+  let apiServiceSpy: AngularVitestPartialMock<SmartSuggestionsApiService>;
 
   const mockSuggestions: SmartSuggestion[] = [
     {
@@ -14,97 +17,111 @@ describe('SmartSuggestionsService', () => {
       description: 'Inactif depuis 3 jours',
       actionType: 'SEND_MESSAGE',
       priority: 8,
-      confidenceScore: 0.85
-    }
+      confidenceScore: 0.85,
+    },
   ];
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('SmartSuggestionsApiService', [
-      'getSuggestionsForDossier',
-      'trackBehavior',
-      'submitFeedback',
-      'getMessageTemplates',
-      'getPrefilledMessage',
-      'recordTemplateUsage'
-    ]);
+    const spy = {
+      getSuggestionsForDossier: vi
+        .fn()
+        .mockName('SmartSuggestionsApiService.getSuggestionsForDossier'),
+      trackBehavior: vi
+        .fn()
+        .mockName('SmartSuggestionsApiService.trackBehavior'),
+      submitFeedback: vi
+        .fn()
+        .mockName('SmartSuggestionsApiService.submitFeedback'),
+      getMessageTemplates: vi
+        .fn()
+        .mockName('SmartSuggestionsApiService.getMessageTemplates'),
+      getPrefilledMessage: vi
+        .fn()
+        .mockName('SmartSuggestionsApiService.getPrefilledMessage'),
+      recordTemplateUsage: vi
+        .fn()
+        .mockName('SmartSuggestionsApiService.recordTemplateUsage'),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         SmartSuggestionsService,
-        { provide: SmartSuggestionsApiService, useValue: spy }
-      ]
+        { provide: SmartSuggestionsApiService, useValue: spy },
+      ],
     });
 
     service = TestBed.inject(SmartSuggestionsService);
-    apiServiceSpy = TestBed.inject(SmartSuggestionsApiService) as jasmine.SpyObj<SmartSuggestionsApiService>;
+    apiServiceSpy = TestBed.inject(
+      SmartSuggestionsApiService
+    ) as AngularVitestPartialMock<SmartSuggestionsApiService>;
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should get suggestions for dossier', (done) => {
-    apiServiceSpy.getSuggestionsForDossier.and.returnValue(of(mockSuggestions));
+  it('should get suggestions for dossier', async () => {
+    apiServiceSpy.getSuggestionsForDossier.mockReturnValue(of(mockSuggestions));
 
-    service.getSuggestionsForDossier(123).subscribe(suggestions => {
+    service.getSuggestionsForDossier(123).subscribe((suggestions) => {
       expect(suggestions).toEqual(mockSuggestions);
       expect(apiServiceSpy.getSuggestionsForDossier).toHaveBeenCalledWith(123);
-      done();
     });
   });
 
-  it('should cache suggestions', (done) => {
-    apiServiceSpy.getSuggestionsForDossier.and.returnValue(of(mockSuggestions));
+  it('should cache suggestions', async () => {
+    apiServiceSpy.getSuggestionsForDossier.mockReturnValue(of(mockSuggestions));
 
     service.getSuggestionsForDossier(123).subscribe(() => {
-      service.getSuggestionsForDossier(123).subscribe(suggestions => {
+      service.getSuggestionsForDossier(123).subscribe((suggestions) => {
         expect(suggestions).toEqual(mockSuggestions);
         expect(apiServiceSpy.getSuggestionsForDossier).toHaveBeenCalledTimes(1);
-        done();
       });
     });
   });
 
   it('should track behavior', () => {
-    apiServiceSpy.trackBehavior.and.returnValue(of(void 0));
+    apiServiceSpy.trackBehavior.mockReturnValue(of(void 0));
 
     service.trackBehavior('SEND_EMAIL', 'DOSSIER', 123);
 
     expect(apiServiceSpy.trackBehavior).toHaveBeenCalledWith({
       actionType: 'SEND_EMAIL',
       contextType: 'DOSSIER',
-      contextId: 123
+      contextId: 123,
     });
   });
 
   it('should accept suggestion', () => {
-    apiServiceSpy.trackBehavior.and.returnValue(of(void 0));
-    apiServiceSpy.submitFeedback.and.returnValue(of(void 0));
+    apiServiceSpy.trackBehavior.mockReturnValue(of(void 0));
+    apiServiceSpy.submitFeedback.mockReturnValue(of(void 0));
 
     service.acceptSuggestion(mockSuggestions[0], 123);
 
     expect(apiServiceSpy.trackBehavior).toHaveBeenCalled();
     expect(apiServiceSpy.submitFeedback).toHaveBeenCalledWith(
-      jasmine.objectContaining({ wasAccepted: true })
+      expect.objectContaining({ wasAccepted: true })
     );
   });
 
   it('should dismiss suggestion', () => {
-    apiServiceSpy.submitFeedback.and.returnValue(of(void 0));
+    apiServiceSpy.submitFeedback.mockReturnValue(of(void 0));
 
     service.dismissSuggestion(mockSuggestions[0], 123, 'Not relevant');
 
     expect(apiServiceSpy.submitFeedback).toHaveBeenCalledWith(
-      jasmine.objectContaining({ 
+      expect.objectContaining({
         wasAccepted: false,
-        feedbackText: 'Not relevant'
+        feedbackText: 'Not relevant',
       })
     );
   });
 
   it('should get suggestion icon', () => {
     expect(service.getSuggestionIcon('SEND_MESSAGE')).toBe('mail');
-    expect(service.getSuggestionIcon('CREATE_APPOINTMENT')).toBe('calendar_today');
+    expect(service.getSuggestionIcon('CREATE_APPOINTMENT')).toBe(
+      'calendar_today'
+    );
     expect(service.getSuggestionIcon('UNKNOWN')).toBe('lightbulb');
   });
 
@@ -122,26 +139,24 @@ describe('SmartSuggestionsService', () => {
     expect(service.getConfidenceLabel()).toBe('');
   });
 
-  it('should handle errors gracefully', (done) => {
-    apiServiceSpy.getSuggestionsForDossier.and.returnValue(
+  it('should handle errors gracefully', async () => {
+    apiServiceSpy.getSuggestionsForDossier.mockReturnValue(
       throwError(() => new Error('API Error'))
     );
 
-    service.getSuggestionsForDossier(123).subscribe(suggestions => {
+    service.getSuggestionsForDossier(123).subscribe((suggestions) => {
       expect(suggestions).toEqual([]);
-      done();
     });
   });
 
-  it('should invalidate cache', (done) => {
-    apiServiceSpy.getSuggestionsForDossier.and.returnValue(of(mockSuggestions));
+  it('should invalidate cache', async () => {
+    apiServiceSpy.getSuggestionsForDossier.mockReturnValue(of(mockSuggestions));
 
     service.getSuggestionsForDossier(123).subscribe(() => {
       service.invalidateCache(123);
-      
+
       service.getSuggestionsForDossier(123).subscribe(() => {
         expect(apiServiceSpy.getSuggestionsForDossier).toHaveBeenCalledTimes(2);
-        done();
       });
     });
   });

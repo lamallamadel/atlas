@@ -4,21 +4,23 @@ import { KeyboardShortcutService } from './keyboard-shortcut.service';
 
 describe('KeyboardShortcutService', () => {
   let service: KeyboardShortcutService;
-  let routerSpy: jasmine.SpyObj<Router>;
+  let routerSpy: AngularVitestPartialMock<Router>;
 
   beforeEach(() => {
     localStorage.clear();
-    const routerMock = jasmine.createSpyObj('Router', ['navigate']);
-    
+    const routerMock = {
+      navigate: vi.fn().mockName('Router.navigate'),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         KeyboardShortcutService,
-        { provide: Router, useValue: routerMock }
-      ]
+        { provide: Router, useValue: routerMock },
+      ],
     });
-    
+
     service = TestBed.inject(KeyboardShortcutService);
-    routerSpy = TestBed.inject(Router) as jasmine.SpyObj<Router>;
+    routerSpy = TestBed.inject(Router) as AngularVitestPartialMock<Router>;
   });
 
   it('should be created', () => {
@@ -34,12 +36,12 @@ describe('KeyboardShortcutService', () => {
   it('should save and load preferences', () => {
     const newPrefs = {
       keyboardShortcutsEnabled: false,
-      showShortcutHints: false
+      showShortcutHints: false,
     };
-    
+
     service.savePreferences(newPrefs);
     const loaded = service.getPreferences();
-    
+
     expect(loaded.keyboardShortcutsEnabled).toBe(false);
     expect(loaded.showShortcutHints).toBe(false);
   });
@@ -52,38 +54,38 @@ describe('KeyboardShortcutService', () => {
   it('should get shortcuts by category', () => {
     const navShortcuts = service.getShortcutsByCategory('navigation');
     expect(navShortcuts.length).toBeGreaterThan(0);
-    navShortcuts.forEach(s => expect(s.category).toBe('navigation'));
+    navShortcuts.forEach((s) => expect(s.category).toBe('navigation'));
   });
 
   it('should toggle command palette visibility', () => {
     let visible = false;
-    service.commandPaletteVisible$.subscribe(v => visible = v);
-    
+    service.commandPaletteVisible$.subscribe((v) => (visible = v));
+
     service.toggleCommandPalette();
     expect(visible).toBe(true);
-    
+
     service.toggleCommandPalette();
     expect(visible).toBe(false);
   });
 
   it('should toggle shortcut help visibility', () => {
     let visible = false;
-    service.shortcutHelpVisible$.subscribe(v => visible = v);
-    
+    service.shortcutHelpVisible$.subscribe((v) => (visible = v));
+
     service.toggleShortcutHelp();
     expect(visible).toBe(true);
-    
+
     service.toggleShortcutHelp();
     expect(visible).toBe(false);
   });
 
   it('should reset list navigation', () => {
     let activeIndex = 0;
-    service.activeListItem$.subscribe(i => activeIndex = i);
-    
+    service.activeListItem$.subscribe((i) => (activeIndex = i));
+
     service.setActiveListItem(5);
     expect(activeIndex).toBe(5);
-    
+
     service.resetListNavigation();
     expect(activeIndex).toBe(-1);
   });

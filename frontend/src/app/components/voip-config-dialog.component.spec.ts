@@ -1,5 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
+import {
+  MatDialogModule,
+  MatDialogRef,
+  MAT_DIALOG_DATA,
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,22 +16,24 @@ import { VoipService } from '../services/voip.service';
 describe('VoipConfigDialogComponent', () => {
   let component: VoipConfigDialogComponent;
   let fixture: ComponentFixture<VoipConfigDialogComponent>;
-  let mockDialogRef: jasmine.SpyObj<MatDialogRef<VoipConfigDialogComponent>>;
-  let mockVoipService: jasmine.SpyObj<VoipService>;
+  let mockDialogRef: AngularVitestPartialMock<MatDialogRef<VoipConfigDialogComponent>>;
+  let mockVoipService: AngularVitestPartialMock<VoipService>;
 
   beforeEach(async () => {
-    mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
-    mockVoipService = jasmine.createSpyObj('VoipService', [
-      'getConfiguration',
-      'setConfiguration'
-    ]);
-    mockVoipService.getConfiguration.and.returnValue({
+    mockDialogRef = {
+      close: vi.fn().mockName('MatDialogRef.close'),
+    };
+    mockVoipService = {
+      getConfiguration: vi.fn().mockName('VoipService.getConfiguration'),
+      setConfiguration: vi.fn().mockName('VoipService.setConfiguration'),
+    };
+    mockVoipService.getConfiguration.mockReturnValue({
       enabled: false,
-      provider: null
+      provider: null,
     });
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         NoopAnimationsModule,
         FormsModule,
         MatDialogModule,
@@ -35,14 +41,14 @@ describe('VoipConfigDialogComponent', () => {
         MatInputModule,
         MatSelectModule,
         MatSlideToggleModule,
-        VoipConfigDialogComponent
-    ],
-    providers: [
+        VoipConfigDialogComponent,
+      ],
+      providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
         { provide: VoipService, useValue: mockVoipService },
-        { provide: MAT_DIALOG_DATA, useValue: null }
-    ]
-}).compileComponents();
+        { provide: MAT_DIALOG_DATA, useValue: null },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(VoipConfigDialogComponent);
     component = fixture.componentInstance;
@@ -58,11 +64,13 @@ describe('VoipConfigDialogComponent', () => {
       enabled: true,
       provider: 'twilio',
       apiKey: 'test-key',
-      clickToCallUrl: 'tel:{phone}'
+      clickToCallUrl: 'tel:{phone}',
     };
 
     component.onSave();
-    expect(mockVoipService.setConfiguration).toHaveBeenCalledWith(component.config);
+    expect(mockVoipService.setConfiguration).toHaveBeenCalledWith(
+      component.config
+    );
     expect(mockDialogRef.close).toHaveBeenCalledWith(component.config);
   });
 

@@ -1,7 +1,7 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { Router, NavigationEnd } from '@angular/router';
 import { NavigationService } from './navigation.service';
-import { Subject } from "rxjs";
+import { Subject } from 'rxjs';
 
 describe('NavigationService', () => {
   let service: NavigationService;
@@ -13,14 +13,11 @@ describe('NavigationService', () => {
     mockRouter = {
       events: routerEventsSubject.asObservable(),
       url: '/test',
-      navigateByUrl: jasmine.createSpy('navigateByUrl').and.returnValue(Promise.resolve(true))
+      navigateByUrl: vi.fn().mockReturnValue(Promise.resolve(true)),
     };
 
     TestBed.configureTestingModule({
-      providers: [
-        NavigationService,
-        { provide: Router, useValue: mockRouter }
-      ]
+      providers: [NavigationService, { provide: Router, useValue: mockRouter }],
     });
     service = TestBed.inject(NavigationService);
   });
@@ -32,7 +29,7 @@ describe('NavigationService', () => {
   it('should update navigation history on NavigationEnd', () => {
     routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
     expect(service.canGoBack()).toBeFalsy();
-    
+
     routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
     expect(service.canGoBack()).toBeTruthy();
   });
@@ -41,41 +38,36 @@ describe('NavigationService', () => {
     expect(service.getRouteAnimation()).toBe('fadeIn');
   });
 
-  it('should save and restore scroll position', fakeAsync(() => {
-    const scrollToSpy = spyOn(window, 'scrollTo');
-    
+  it('should save and restore scroll position', async () => {
+    const scrollToSpy = vi.spyOn(window, 'scrollTo');
+
     service.saveScrollPosition('/test-route');
     service.restoreScrollPosition('/test-route');
-    
-    tick(0); // flush setTimeout(0) used in restoreScrollPosition
-    expect(scrollToSpy).toHaveBeenCalled();
-  }));
 
-  it('should navigate back with correct animation', (done) => {
-    routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
-    routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
-    
-    service.navigateBack();
-    
-    setTimeout(() => {
-      expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/dashboard');
-      done();
-    }, 100);
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    expect(scrollToSpy).toHaveBeenCalled();
   });
 
-  it('should navigate forward with correct animation', (done) => {
+  it('should navigate back with correct animation', async () => {
     routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
     routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
-    
+
     service.navigateBack();
-    
-    setTimeout(() => {
-      service.navigateForward();
-      setTimeout(() => {
-        expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/reports');
-        done();
-      }, 100);
-    }, 100);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it('should navigate forward with correct animation', async () => {
+    routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
+    routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
+
+    service.navigateBack();
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    service.navigateForward();
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(mockRouter.navigateByUrl).toHaveBeenCalledWith('/reports');
   });
 
   it('should not navigate back when at start of history', () => {
@@ -91,25 +83,23 @@ describe('NavigationService', () => {
 
   it('should correctly report canGoBack', () => {
     expect(service.canGoBack()).toBeFalsy();
-    
+
     routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
     expect(service.canGoBack()).toBeFalsy();
-    
+
     routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
     expect(service.canGoBack()).toBeTruthy();
   });
 
-  it('should correctly report canGoForward', (done) => {
+  it('should correctly report canGoForward', async () => {
     routerEventsSubject.next(new NavigationEnd(1, '/dashboard', '/dashboard'));
     routerEventsSubject.next(new NavigationEnd(2, '/reports', '/reports'));
-    
+
     expect(service.canGoForward()).toBeFalsy();
-    
+
     service.navigateBack();
-    
-    setTimeout(() => {
-      expect(service.canGoForward()).toBeTruthy();
-      done();
-    }, 100);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 150));
+    expect(service.canGoForward()).toBeTruthy();
   });
 });

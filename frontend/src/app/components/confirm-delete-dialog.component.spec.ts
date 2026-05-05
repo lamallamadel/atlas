@@ -6,16 +6,24 @@ import { MaterialTestingModule } from '../testing/material-testing.module';
 describe('ConfirmDeleteDialogComponent', () => {
   let component: ConfirmDeleteDialogComponent;
   let fixture: ComponentFixture<ConfirmDeleteDialogComponent>;
-  const dialogRef = jasmine.createSpyObj<MatDialogRef<ConfirmDeleteDialogComponent>>('MatDialogRef', ['close']);
+  const dialogRef = {
+    close: vi.fn().mockName('MatDialogRef.close'),
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [MaterialTestingModule, ConfirmDeleteDialogComponent],
-    providers: [
+      imports: [MaterialTestingModule, ConfirmDeleteDialogComponent],
+      providers: [
         { provide: MatDialogRef, useValue: dialogRef },
-        { provide: MAT_DIALOG_DATA, useValue: { title: 'Supprimer ?', message: 'Confirmer suppression ?' } }
-    ]
-}).compileComponents();
+        {
+          provide: MAT_DIALOG_DATA,
+          useValue: {
+            title: 'Supprimer ?',
+            message: 'Confirmer suppression ?',
+          },
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ConfirmDeleteDialogComponent);
     component = fixture.componentInstance;

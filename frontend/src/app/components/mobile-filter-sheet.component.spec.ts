@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormsModule } from '@angular/forms';
-import { MatBottomSheetRef, MAT_BOTTOM_SHEET_DATA } from '@angular/material/bottom-sheet';
+import {
+  MatBottomSheetRef,
+  MAT_BOTTOM_SHEET_DATA,
+} from '@angular/material/bottom-sheet';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
@@ -13,12 +16,14 @@ import { MobileFilterSheetComponent } from './mobile-filter-sheet.component';
 describe('MobileFilterSheetComponent', () => {
   let component: MobileFilterSheetComponent;
   let fixture: ComponentFixture<MobileFilterSheetComponent>;
-  let bottomSheetRef: jasmine.SpyObj<MatBottomSheetRef<MobileFilterSheetComponent>>;
+  let bottomSheetRef: AngularVitestPartialMock<
+    MatBottomSheetRef<MobileFilterSheetComponent>
+  >;
 
   const mockData = {
     filters: {
       status: 'ACTIVE',
-      city: 'Paris'
+      city: 'Paris',
     },
     config: [
       {
@@ -27,23 +32,25 @@ describe('MobileFilterSheetComponent', () => {
         type: 'select' as const,
         options: [
           { value: 'ACTIVE', label: 'Active' },
-          { value: 'INACTIVE', label: 'Inactive' }
-        ]
+          { value: 'INACTIVE', label: 'Inactive' },
+        ],
       },
       {
         key: 'city',
         label: 'City',
         type: 'text' as const,
-        placeholder: 'Enter city'
-      }
-    ]
+        placeholder: 'Enter city',
+      },
+    ],
   };
 
   beforeEach(async () => {
-    const bottomSheetRefSpy = jasmine.createSpyObj('MatBottomSheetRef', ['dismiss']);
+    const bottomSheetRefSpy = {
+      dismiss: vi.fn().mockName('MatBottomSheetRef.dismiss'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         FormsModule,
         MatFormFieldModule,
         MatInputModule,
@@ -51,15 +58,17 @@ describe('MobileFilterSheetComponent', () => {
         MatIconModule,
         MatButtonModule,
         NoopAnimationsModule,
-        MobileFilterSheetComponent
-    ],
-    providers: [
+        MobileFilterSheetComponent,
+      ],
+      providers: [
         { provide: MatBottomSheetRef, useValue: bottomSheetRefSpy },
-        { provide: MAT_BOTTOM_SHEET_DATA, useValue: mockData }
-    ]
-}).compileComponents();
+        { provide: MAT_BOTTOM_SHEET_DATA, useValue: mockData },
+      ],
+    }).compileComponents();
 
-    bottomSheetRef = TestBed.inject(MatBottomSheetRef) as jasmine.SpyObj<MatBottomSheetRef<MobileFilterSheetComponent>>;
+    bottomSheetRef = TestBed.inject(MatBottomSheetRef) as AngularVitestPartialMock<
+      MatBottomSheetRef<MobileFilterSheetComponent>
+    >;
     fixture = TestBed.createComponent(MobileFilterSheetComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -78,7 +87,7 @@ describe('MobileFilterSheetComponent', () => {
     component.apply();
     expect(bottomSheetRef.dismiss).toHaveBeenCalledWith({
       action: 'apply',
-      filters: component.filters
+      filters: component.filters,
     });
   });
 

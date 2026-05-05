@@ -53,7 +53,7 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should call primaryAction handler when onPrimaryClick is called', () => {
-    const handlerSpy = jasmine.createSpy('handler');
+    const handlerSpy = vi.fn();
     fixture.componentRef.setInput('primaryAction', {
       label: 'Test',
       handler: handlerSpy,
@@ -65,7 +65,7 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should call secondaryAction handler when onSecondaryClick is called', () => {
-    const handlerSpy = jasmine.createSpy('handler');
+    const handlerSpy = vi.fn();
     fixture.componentRef.setInput('secondaryAction', {
       label: 'Test',
       handler: handlerSpy,
@@ -77,7 +77,7 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should open help link when onHelpLinkClick is called', () => {
-    spyOn(window, 'open');
+    vi.spyOn(window, 'open');
     fixture.componentRef.setInput('helpLink', {
       label: 'Help',
       url: 'https://example.com',
@@ -99,7 +99,7 @@ describe('AnimatedEmptyStateComponent', () => {
   });
 
   it('should log warning on animation error', () => {
-    spyOn(console, 'warn');
+    vi.spyOn(console, 'warn');
     const error = new Error('Test error');
 
     component.onAnimationError(error);

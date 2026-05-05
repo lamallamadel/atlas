@@ -16,53 +16,56 @@ import { MatListModule } from '@angular/material/list';
 import { MatTableModule } from '@angular/material/table';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from "rxjs";
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('ObservabilityDashboardComponent', () => {
   let component: ObservabilityDashboardComponent;
   let fixture: ComponentFixture<ObservabilityDashboardComponent>;
-  let reportingService: jasmine.SpyObj<ReportingApiService>;
+  let reportingService: AngularVitestPartialMock<ReportingApiService>;
 
   const baseMockMetrics = {
     queueMetrics: {
       queueDepthByChannel: {
-        'SMS': 10,
-        'EMAIL': 5,
-        'WHATSAPP': 3
+        SMS: 10,
+        EMAIL: 5,
+        WHATSAPP: 3,
       },
-      totalQueued: 18
+      totalQueued: 18,
     },
     latencyMetrics: {
       latencyByChannel: {
-        'SMS': { p50: 100, p95: 200, p99: 300, average: 120 },
-        'EMAIL': { p50: 150, p95: 250, p99: 350, average: 170 },
-        'WHATSAPP': { p50: 80, p95: 180, p99: 280, average: 100 }
-      }
+        SMS: { p50: 100, p95: 200, p99: 300, average: 120 },
+        EMAIL: { p50: 150, p95: 250, p99: 350, average: 170 },
+        WHATSAPP: { p50: 80, p95: 180, p99: 280, average: 100 },
+      },
     },
     failureMetrics: {
       failuresByChannel: {
-        'SMS': 2,
-        'EMAIL': 1,
-        'WHATSAPP': 0
+        SMS: 2,
+        EMAIL: 1,
+        WHATSAPP: 0,
       },
       failuresByErrorCode: {
-        'INVALID_NUMBER': 1,
-        'TIMEOUT': 1,
-        'REJECTED': 1
+        INVALID_NUMBER: 1,
+        TIMEOUT: 1,
+        REJECTED: 1,
       },
       failureTrend: [
         { date: '2024-01-01', value: 1 },
-        { date: '2024-01-02', value: 2 }
+        { date: '2024-01-02', value: 2 },
       ],
-      overallFailureRate: 5.5
+      overallFailureRate: 5.5,
     },
     dlqMetrics: {
       dlqSize: 5,
       dlqSizeByChannel: {
-        'SMS': 3,
-        'EMAIL': 2,
-        'WHATSAPP': 0
+        SMS: 3,
+        EMAIL: 2,
+        WHATSAPP: 0,
       },
       recentDlqMessages: [
         {
@@ -71,32 +74,42 @@ describe('ObservabilityDashboardComponent', () => {
           errorCode: 'INVALID_NUMBER',
           errorMessage: 'Invalid phone number',
           attemptCount: 3,
-          lastAttemptAt: '2024-01-01T10:00:00Z'
-        }
+          lastAttemptAt: '2024-01-01T10:00:00Z',
+        },
       ],
       alertThresholdExceeded: false,
-      alertThreshold: 100
+      alertThreshold: 100,
     },
     quotaMetrics: {
       quotaByChannel: {
-        'SMS': { used: 500, limit: 1000, usagePercentage: 50, period: 'daily' },
-        'EMAIL': { used: 800, limit: 1000, usagePercentage: 80, period: 'daily' },
-        'WHATSAPP': { used: 950, limit: 1000, usagePercentage: 95, period: 'daily' }
-      }
+        SMS: { used: 500, limit: 1000, usagePercentage: 50, period: 'daily' },
+        EMAIL: { used: 800, limit: 1000, usagePercentage: 80, period: 'daily' },
+        WHATSAPP: {
+          used: 950,
+          limit: 1000,
+          usagePercentage: 95,
+          period: 'daily',
+        },
+      },
     },
-    timestamp: '2024-01-01T12:00:00Z'
+    timestamp: '2024-01-01T12:00:00Z',
   };
 
   const createMockMetrics = () => JSON.parse(JSON.stringify(baseMockMetrics));
 
   beforeEach(async () => {
-    const reportingServiceSpy = jasmine.createSpyObj('ReportingApiService', [
-      'getObservabilityMetrics',
-      'exportObservabilityMetrics'
-    ]);
+    const reportingServiceSpy = {
+      getObservabilityMetrics: vi
+        .fn()
+        .mockName('ReportingApiService.getObservabilityMetrics'),
+      exportObservabilityMetrics: vi
+        .fn()
+        .mockName('ReportingApiService.exportObservabilityMetrics'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [FormsModule,
+      imports: [
+        FormsModule,
         BrowserAnimationsModule,
         MatCardModule,
         MatIconModule,
@@ -109,28 +122,42 @@ describe('ObservabilityDashboardComponent', () => {
         MatChipsModule,
         MatListModule,
         MatTableModule,
-        MatTooltipModule, ObservabilityDashboardComponent],
-    providers: [
+        MatTooltipModule,
+        ObservabilityDashboardComponent,
+      ],
+      providers: [
         { provide: ReportingApiService, useValue: reportingServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-}).compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
-    reportingService = TestBed.inject(ReportingApiService) as jasmine.SpyObj<ReportingApiService>;
-    reportingService.getObservabilityMetrics.and.returnValue(of(createMockMetrics()));
+    reportingService = TestBed.inject(
+      ReportingApiService
+    ) as AngularVitestPartialMock<ReportingApiService>;
+    reportingService.getObservabilityMetrics.mockReturnValue(
+      of(createMockMetrics())
+    );
   });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ObservabilityDashboardComponent);
     component = fixture.componentInstance;
-    (globalThis as { Chart?: new () => { destroy: () => void; update: () => void } }).Chart = class {
+    (
+      globalThis as {
+        Chart?: new () => {
+          destroy: () => void;
+          update: () => void;
+        };
+      }
+    ).Chart = class {
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       destroy(): void {}
       // eslint-disable-next-line @typescript-eslint/no-empty-function
       update(): void {}
     };
-    spyOn<any>(component, 'loadChartJs').and.returnValue(Promise.resolve());
+    const comp = component as unknown as Record<string, () => Promise<void>>;
+    vi.spyOn(comp, 'loadChartJs').mockResolvedValue(undefined);
   });
 
   it('should create', () => {
@@ -142,70 +169,71 @@ describe('ObservabilityDashboardComponent', () => {
     expect(component.dateTo).toBeTruthy();
   });
 
-  it('should load metrics on init', (done) => {
+  it('should load metrics on init', () => {
     fixture.detectChanges();
 
-    setTimeout(() => {
-      expect(reportingService.getObservabilityMetrics).toHaveBeenCalled();
-      expect(component.metrics).toEqual(baseMockMetrics);
-      expect(component.lastUpdated).toBeTruthy();
-      done();
-    }, 100);
+    expect(reportingService.getObservabilityMetrics).toHaveBeenCalled();
+    expect(component.metrics).toEqual(baseMockMetrics);
+    expect(component.lastUpdated).toBeTruthy();
   });
 
   it('should toggle auto-refresh', () => {
     component.autoRefresh = true;
     component.toggleAutoRefresh();
-    expect(component.autoRefresh).toBeFalse();
-    
+    expect(component.autoRefresh).toBe(false);
+
     component.toggleAutoRefresh();
-    expect(component.autoRefresh).toBeTrue();
+    expect(component.autoRefresh).toBe(true);
   });
 
   it('should handle date change', () => {
     component.dateFrom = '2024-01-01';
     component.dateTo = '2024-01-31';
     component.onDateChange();
-    
-    expect(reportingService.getObservabilityMetrics).toHaveBeenCalledWith('2024-01-01', '2024-01-31');
+
+    expect(reportingService.getObservabilityMetrics).toHaveBeenCalledWith(
+      '2024-01-01',
+      '2024-01-31'
+    );
   });
 
-  it('should handle metrics loading error', (done) => {
-    reportingService.getObservabilityMetrics.and.returnValue(
+  it('should handle metrics loading error', async () => {
+    reportingService.getObservabilityMetrics.mockReturnValue(
       throwError(() => new Error('Network error'))
     );
-    
+
     component.loadMetrics();
-    
-    setTimeout(() => {
-      expect(component.error).toContain('Failed to load metrics');
-      expect(component.loading).toBeFalse();
-      done();
-    }, 100);
+
+    await fixture.whenStable();
+
+    expect(component.error).toContain('Failed to load metrics');
+    expect(component.loading).toBe(false);
   });
 
-  it('should export metrics as CSV', (done) => {
+  it('should export metrics as CSV', async () => {
     const blob = new Blob(['csv data'], { type: 'text/csv' });
-    reportingService.exportObservabilityMetrics.and.returnValue(of(blob));
-    
+    reportingService.exportObservabilityMetrics.mockReturnValue(of(blob));
+
     component.exportMetrics('csv');
-    
-    setTimeout(() => {
-      expect(reportingService.exportObservabilityMetrics).toHaveBeenCalledWith('csv', component.dateFrom, component.dateTo);
-      done();
-    }, 100);
+
+    expect(reportingService.exportObservabilityMetrics).toHaveBeenCalledWith(
+      'csv',
+      component.dateFrom,
+      component.dateTo
+    );
   });
 
-  it('should export metrics as JSON', (done) => {
+  it('should export metrics as JSON', async () => {
     const blob = new Blob(['json data'], { type: 'application/json' });
-    reportingService.exportObservabilityMetrics.and.returnValue(of(blob));
-    
+    reportingService.exportObservabilityMetrics.mockReturnValue(of(blob));
+
     component.exportMetrics('json');
-    
-    setTimeout(() => {
-      expect(reportingService.exportObservabilityMetrics).toHaveBeenCalledWith('json', component.dateFrom, component.dateTo);
-      done();
-    }, 100);
+
+    expect(reportingService.exportObservabilityMetrics).toHaveBeenCalledWith(
+      'json',
+      component.dateFrom,
+      component.dateTo
+    );
   });
 
   it('should get channel names from metrics', () => {
@@ -239,20 +267,22 @@ describe('ObservabilityDashboardComponent', () => {
     component.metrics = createMockMetrics();
     const metrics = component.metrics;
     if (!metrics) {
-      fail('Expected metrics to be defined for DLQ status assertions.');
+      throw new Error(
+        'Expected metrics to be defined for DLQ status assertions.'
+      );
       return;
     }
-    
+
     // Normal status
     expect(component.getDlqStatus('WHATSAPP')).toBe('normal');
-    
+
     // Test with different thresholds
     metrics.dlqMetrics.alertThreshold = 10;
     expect(component.getDlqStatus('SMS')).toBe('normal'); // 3 < 7.5
-    
+
     metrics.dlqMetrics.dlqSizeByChannel['SMS'] = 8;
     expect(component.getDlqStatus('SMS')).toBe('warning'); // 8 >= 7.5
-    
+
     metrics.dlqMetrics.dlqSizeByChannel['SMS'] = 11;
     expect(component.getDlqStatus('SMS')).toBe('critical'); // 11 >= 10
   });
@@ -275,9 +305,11 @@ describe('ObservabilityDashboardComponent', () => {
     const metrics = createMockMetrics();
     component.metrics = metrics;
     component['addToHistory'](metrics);
-    
+
     expect(component['queueDepthHistory'].length).toBe(1);
-    expect(component['queueDepthHistory'][0].values).toEqual(metrics.queueMetrics.queueDepthByChannel);
+    expect(component['queueDepthHistory'][0].values).toEqual(
+      metrics.queueMetrics.queueDepthByChannel
+    );
   });
 
   it('should limit history to max points', () => {
@@ -286,16 +318,16 @@ describe('ObservabilityDashboardComponent', () => {
     for (let i = 0; i < maxHistoryPoints + 1; i++) {
       component['addToHistory'](createMockMetrics());
     }
-    
+
     expect(component['queueDepthHistory'].length).toBe(maxHistoryPoints);
   });
 
   it('should cleanup on destroy', () => {
-    spyOn(component['destroy$'], 'next');
-    spyOn(component['destroy$'], 'complete');
-    
+    vi.spyOn(component['destroy$'], 'next');
+    vi.spyOn(component['destroy$'], 'complete');
+
     component.ngOnDestroy();
-    
+
     expect(component['destroy$'].next).toHaveBeenCalled();
     expect(component['destroy$'].complete).toHaveBeenCalled();
   });

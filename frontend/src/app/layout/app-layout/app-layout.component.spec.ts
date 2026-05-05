@@ -4,7 +4,7 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { NO_ERRORS_SCHEMA, signal } from '@angular/core';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { MatSidenav } from '@angular/material/sidenav';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 
 import { AppLayoutComponent } from './app-layout.component';
 import { AuthService } from '../../services/auth.service';
@@ -18,84 +18,131 @@ import { MaterialTestingModule } from '../../testing/material-testing.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 @Component({
-    selector: 'app-global-search-bar', 
-    template: '',
-    standalone: true,
-    imports: [RouterTestingModule, MaterialTestingModule]
+  selector: 'app-global-search-bar',
+  template: '',
+  standalone: true,
+  imports: [RouterTestingModule, MaterialTestingModule],
 })
-class GlobalSearchBarStubComponent { }
+class GlobalSearchBarStubComponent {}
 
 describe('AppLayoutComponent', () => {
   let component: AppLayoutComponent;
   let fixture: ComponentFixture<AppLayoutComponent>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
-  let mockThemeService: jasmine.SpyObj<ThemeService>;
-  let mockBreakpointObserver: jasmine.SpyObj<BreakpointObserver>;
-  let mockKeyboardShortcutService: jasmine.SpyObj<KeyboardShortcutService>;
-  let mockOnboardingTourService: jasmine.SpyObj<OnboardingTourService>;
-  let mockTourDefinitionService: jasmine.SpyObj<TourDefinitionService>;
+  let mockAuthService: AngularVitestPartialMock<AuthService>;
+  let mockThemeService: AngularVitestPartialMock<ThemeService>;
+  let mockBreakpointObserver: AngularVitestPartialMock<BreakpointObserver>;
+  let mockKeyboardShortcutService: AngularVitestPartialMock<KeyboardShortcutService>;
+  let mockOnboardingTourService: AngularVitestPartialMock<OnboardingTourService>;
+  let mockTourDefinitionService: AngularVitestPartialMock<TourDefinitionService>;
 
   beforeEach(async () => {
-    mockAuthService = jasmine.createSpyObj('AuthService', ['logout']);
-    mockThemeService = jasmine.createSpyObj('ThemeService', ['toggleTheme', 'getCurrentTheme'], {
-      currentTheme$: of('light')
-    });
-    mockBreakpointObserver = jasmine.createSpyObj('BreakpointObserver', ['observe']);
-    mockBreakpointObserver.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
+    mockAuthService = {
+      logout: vi.fn().mockName('AuthService.logout'),
+    };
+    mockThemeService = {
+      toggleTheme: vi.fn().mockName('ThemeService.toggleTheme'),
+      getCurrentTheme: vi.fn().mockName('ThemeService.getCurrentTheme'),
+      currentTheme$: of('light'),
+    };
+    mockBreakpointObserver = {
+      observe: vi.fn().mockName('BreakpointObserver.observe'),
+    };
+    mockBreakpointObserver.observe.mockReturnValue(
+      of({ matches: false, breakpoints: {} })
+    );
 
-    mockKeyboardShortcutService = jasmine.createSpyObj('KeyboardShortcutService', [
-      'handleKeyDown', 'toggleShortcutHelp', 'getPreferences', 'getShortcutsByCategory', 'closeShortcutHelp'
-    ]);
-    mockKeyboardShortcutService.getPreferences.and.returnValue({
+    mockKeyboardShortcutService = {
+      handleKeyDown: vi.fn().mockName('KeyboardShortcutService.handleKeyDown'),
+      toggleShortcutHelp: vi
+        .fn()
+        .mockName('KeyboardShortcutService.toggleShortcutHelp'),
+      getPreferences: vi
+        .fn()
+        .mockName('KeyboardShortcutService.getPreferences'),
+      getShortcutsByCategory: vi
+        .fn()
+        .mockName('KeyboardShortcutService.getShortcutsByCategory'),
+      closeShortcutHelp: vi
+        .fn()
+        .mockName('KeyboardShortcutService.closeShortcutHelp'),
+    };
+    mockKeyboardShortcutService.getPreferences.mockReturnValue({
       keyboardShortcutsEnabled: true,
-      showShortcutHints: true
+      showShortcutHints: true,
     });
-    mockKeyboardShortcutService.getShortcutsByCategory.and.returnValue([]);
+    mockKeyboardShortcutService.getShortcutsByCategory.mockReturnValue([]);
     (mockKeyboardShortcutService as any).preferences$ = of({
       keyboardShortcutsEnabled: true,
-      showShortcutHints: true
+      showShortcutHints: true,
     });
     (mockKeyboardShortcutService as any).shortcutHelpVisible$ = of(false);
     (mockKeyboardShortcutService as any).commandPaletteVisible$ = of(false);
 
-    mockOnboardingTourService = jasmine.createSpyObj('OnboardingTourService', ['startManualTour', 'resetAllTours', 'isTourCompleted', 'resetTour']);
-    mockOnboardingTourService.resetAllTours.and.stub();
-    mockTourDefinitionService = jasmine.createSpyObj('TourDefinitionService', ['getCoreTours', 'getTour']);
-    mockTourDefinitionService.getCoreTours.and.returnValue([]);
+    mockOnboardingTourService = {
+      startManualTour: vi
+        .fn()
+        .mockName('OnboardingTourService.startManualTour'),
+      resetAllTours: vi.fn().mockName('OnboardingTourService.resetAllTours'),
+      isTourCompleted: vi
+        .fn()
+        .mockName('OnboardingTourService.isTourCompleted'),
+      resetTour: vi.fn().mockName('OnboardingTourService.resetTour'),
+    };
+    mockOnboardingTourService.resetAllTours.mockImplementation(() => {});
+    mockTourDefinitionService = {
+      getCoreTours: vi.fn().mockName('TourDefinitionService.getCoreTours'),
+      getTour: vi.fn().mockName('TourDefinitionService.getTour'),
+    };
+    mockTourDefinitionService.getCoreTours.mockReturnValue([]);
 
-    const mockDossierApiService = jasmine.createSpyObj('DossierApiService', ['getPendingCount']);
-    mockDossierApiService.getPendingCount.and.returnValue(of(0));
-    const mockNotificationApiService = jasmine.createSpyObj('NotificationApiService', ['getUnreadCount', 'list']);
-    mockNotificationApiService.getUnreadCount.and.returnValue(of(0));
+    const mockDossierApiService = {
+      getPendingCount: vi.fn().mockName('DossierApiService.getPendingCount'),
+    };
+    mockDossierApiService.getPendingCount.mockReturnValue(of(0));
+    const mockNotificationApiService = {
+      getUnreadCount: vi.fn().mockName('NotificationApiService.getUnreadCount'),
+      list: vi.fn().mockName('NotificationApiService.list'),
+    };
+    mockNotificationApiService.getUnreadCount.mockReturnValue(of(0));
     (mockNotificationApiService as any).unreadCount$ = of(0);
-    mockNotificationApiService.list.and.returnValue(of([]));
+    mockNotificationApiService.list.mockReturnValue(of([]));
 
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule, 
-        MaterialTestingModule, 
+        RouterTestingModule,
+        MaterialTestingModule,
         BrowserAnimationsModule,
-        AppLayoutComponent, 
-        GlobalSearchBarStubComponent
+        AppLayoutComponent,
+        GlobalSearchBarStubComponent,
       ],
       providers: [
         { provide: AuthService, useValue: mockAuthService },
         { provide: ThemeService, useValue: mockThemeService },
         { provide: BreakpointObserver, useValue: mockBreakpointObserver },
         { provide: DossierApiService, useValue: mockDossierApiService },
-        { provide: NotificationApiService, useValue: mockNotificationApiService },
-        { provide: KeyboardShortcutService, useValue: mockKeyboardShortcutService },
+        {
+          provide: NotificationApiService,
+          useValue: mockNotificationApiService,
+        },
+        {
+          provide: KeyboardShortcutService,
+          useValue: mockKeyboardShortcutService,
+        },
         { provide: OnboardingTourService, useValue: mockOnboardingTourService },
-        { provide: TourDefinitionService, useValue: mockTourDefinitionService }
+        { provide: TourDefinitionService, useValue: mockTourDefinitionService },
       ],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
     fixture = TestBed.createComponent(AppLayoutComponent);
     component = fixture.componentInstance;
-    
+
     // Mock the viewChild signal
-    const drawerSpy = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    const drawerSpy = {
+      close: vi.fn().mockName('MatSidenav.close'),
+      open: vi.fn().mockName('MatSidenav.open'),
+      toggle: vi.fn().mockName('MatSidenav.toggle'),
+    };
     (component as any).drawer = signal(drawerSpy);
 
     fixture.detectChanges();
@@ -126,27 +173,31 @@ describe('AppLayoutComponent', () => {
     expect(mockAuthService.logout).toHaveBeenCalled();
   });
 
-  it('should observe handset breakpoint', (done) => {
-    component.isHandset$.subscribe(isHandset => {
+  it('should observe handset breakpoint', async () => {
+    component.isHandset$.subscribe((isHandset) => {
       expect(isHandset).toBe(false);
-      done();
     });
   });
 
-  it('should observe mobile breakpoint', (done) => {
-    component.isMobile$.subscribe(isMobile => {
+  it('should observe mobile breakpoint', async () => {
+    component.isMobile$.subscribe((isMobile) => {
       expect(isMobile).toBe(false);
-      done();
     });
   });
 
   it('should close sidenav on mobile when closeSidenavOnMobile is called', () => {
-    mockBreakpointObserver.observe.and.returnValue(of({ matches: true, breakpoints: {} }));
-    
+    mockBreakpointObserver.observe.mockReturnValue(
+      of({ matches: true, breakpoints: {} })
+    );
+
     // Re-create component to pick up new observer value
     const testFixture = TestBed.createComponent(AppLayoutComponent);
     const testComponent = testFixture.componentInstance;
-    const drawerSpy = jasmine.createSpyObj<MatSidenav>('MatSidenav', ['close', 'open', 'toggle']);
+    const drawerSpy = {
+      close: vi.fn().mockName('MatSidenav.close'),
+      open: vi.fn().mockName('MatSidenav.open'),
+      toggle: vi.fn().mockName('MatSidenav.toggle'),
+    };
     (testComponent as any).drawer = signal(drawerSpy);
 
     testFixture.detectChanges();
@@ -160,10 +211,9 @@ describe('AppLayoutComponent', () => {
     expect(mockThemeService.toggleTheme).toHaveBeenCalled();
   });
 
-  it('should observe dark theme state', (done) => {
-    component.isDarkTheme$.subscribe(isDark => {
+  it('should observe dark theme state', async () => {
+    component.isDarkTheme$.subscribe((isDark) => {
       expect(isDark).toBe(false);
-      done();
     });
   });
 });

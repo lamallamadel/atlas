@@ -1,14 +1,20 @@
+import type { Mock, MockedObject } from 'vitest';
 import { Component, Pipe, PipeTransform, input } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
-import { of, throwError, EMPTY } from "rxjs";
+import { of, throwError, EMPTY } from 'rxjs';
 
 import { AnnonceDetailComponent } from './annonce-detail.component';
-import { AnnonceApiService, AnnonceResponse, AnnonceStatus } from '../../services/annonce-api.service';
+import {
+  AnnonceApiService,
+  AnnonceResponse,
+  AnnonceStatus,
+} from '../../services/annonce-api.service';
 import { RecentNavigationService } from '../../services/recent-navigation.service';
 
 @Component({
-    selector: 'app-badge-status', template: ''
+  selector: 'app-badge-status',
+  template: '',
 })
 class BadgeStatusStubComponent {
   readonly status = input<any>();
@@ -32,12 +38,12 @@ class PriceFormatPipeStub implements PipeTransform {
 describe('AnnonceDetailComponent', () => {
   let component: AnnonceDetailComponent;
   let fixture: ComponentFixture<AnnonceDetailComponent>;
-  let mockAnnonceApiService: jasmine.SpyObj<AnnonceApiService>;
-  let mockRouter: jasmine.SpyObj<Router>;
+  let mockAnnonceApiService: AngularVitestPartialMock<AnnonceApiService>;
+  let mockRouter: AngularVitestPartialMock<Router>;
   let mockActivatedRoute: {
     snapshot: {
       paramMap: {
-        get: jasmine.Spy;
+        get: Mock;
       };
     };
   };
@@ -55,34 +61,43 @@ describe('AnnonceDetailComponent', () => {
     createdAt: '2024-01-01T10:00:00Z',
     updatedAt: '2024-01-02T10:00:00Z',
     createdBy: 'user1',
-    updatedBy: 'user1'
+    updatedBy: 'user1',
   };
 
   beforeEach(async () => {
-    mockAnnonceApiService = jasmine.createSpyObj('AnnonceApiService', ['getById']);
-    mockRouter = jasmine.createSpyObj('Router', ['navigate'], { events: EMPTY });
+    mockAnnonceApiService = {
+      getById: vi.fn().mockName('AnnonceApiService.getById'),
+    };
+    mockRouter = {
+      navigate: vi.fn().mockName('Router.navigate'),
+      events: EMPTY,
+    };
     mockActivatedRoute = {
       snapshot: {
         paramMap: {
-          get: jasmine.createSpy('get').and.returnValue('1')
-        }
-      }
+          get: vi.fn().mockReturnValue('1'),
+        },
+      },
     };
 
-    const mockRecentNavService = jasmine.createSpyObj('RecentNavigationService', ['addRecentItem']);
+    const mockRecentNavService = {
+      addRecentItem: vi.fn().mockName('RecentNavigationService.addRecentItem'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [AnnonceDetailComponent,
+      imports: [
+        AnnonceDetailComponent,
         BadgeStatusStubComponent,
         DateFormatPipeStub,
-        PriceFormatPipeStub],
-    providers: [
+        PriceFormatPipeStub,
+      ],
+      providers: [
         { provide: AnnonceApiService, useValue: mockAnnonceApiService },
         { provide: Router, useValue: mockRouter },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
-        { provide: RecentNavigationService, useValue: mockRecentNavService }
-    ]
-}).compileComponents();
+        { provide: RecentNavigationService, useValue: mockRecentNavService },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(AnnonceDetailComponent);
     component = fixture.componentInstance;
@@ -93,7 +108,7 @@ describe('AnnonceDetailComponent', () => {
   });
 
   it('should load annonce on init', () => {
-    mockAnnonceApiService.getById.and.returnValue(of(mockAnnonce));
+    mockAnnonceApiService.getById.mockReturnValue(of(mockAnnonce));
 
     component.ngOnInit();
 
@@ -104,17 +119,23 @@ describe('AnnonceDetailComponent', () => {
   });
 
   it('should handle non-404 error when loading annonce', () => {
-    mockAnnonceApiService.getById.and.returnValue(throwError(() => ({ status: 500 })));
+    mockAnnonceApiService.getById.mockReturnValue(
+      throwError(() => ({ status: 500 }))
+    );
 
     component.ngOnInit();
 
     expect(component.annonce).toBeNull();
     expect(component.loading).toBe(false);
-    expect(component.error).toBe("Échec du chargement de l'annonce. Veuillez réessayer.");
+    expect(component.error).toBe(
+      "Échec du chargement de l'annonce. Veuillez réessayer."
+    );
   });
 
   it('should handle 404 error', () => {
-    mockAnnonceApiService.getById.and.returnValue(throwError(() => ({ status: 404 })));
+    mockAnnonceApiService.getById.mockReturnValue(
+      throwError(() => ({ status: 404 }))
+    );
 
     component.ngOnInit();
 
@@ -136,7 +157,7 @@ describe('AnnonceDetailComponent', () => {
   });
 
   it('should handle invalid annonce ID', () => {
-    mockActivatedRoute.snapshot.paramMap.get.and.returnValue('invalid');
+    mockActivatedRoute.snapshot.paramMap.get.mockReturnValue('invalid');
 
     component.loadAnnonce();
 
@@ -144,7 +165,7 @@ describe('AnnonceDetailComponent', () => {
   });
 
   it('should handle missing annonce ID', () => {
-    mockActivatedRoute.snapshot.paramMap.get.and.returnValue(null);
+    mockActivatedRoute.snapshot.paramMap.get.mockReturnValue(null);
 
     component.loadAnnonce();
 

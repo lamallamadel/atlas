@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { AriaLiveAnnouncerService } from './aria-live-announcer.service';
 
 describe('AriaLiveAnnouncerService', () => {
@@ -15,19 +15,17 @@ describe('AriaLiveAnnouncerService', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should announce polite message', fakeAsync(() => {
+  it('should announce polite message', async () => {
     service.announcePolite('Test message');
-    tick(50);
-    tick(100);
+    await new Promise<void>((resolve) => setTimeout(resolve, 160));
     expect(service).toBeTruthy();
-  }));
+  });
 
-  it('should announce assertive message', fakeAsync(() => {
+  it('should announce assertive message', async () => {
     service.announceAssertive('Urgent message');
-    tick(50);
-    tick(100);
+    await new Promise<void>((resolve) => setTimeout(resolve, 160));
     expect(service).toBeTruthy();
-  }));
+  });
 
   it('should not announce when mode is off', () => {
     service.announce('Test', 'off');

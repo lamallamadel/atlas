@@ -13,8 +13,8 @@ import { of } from 'rxjs';
 describe('PhotoGalleryComponent', () => {
   let component: PhotoGalleryComponent;
   let fixture: ComponentFixture<PhotoGalleryComponent>;
-  let mockDialog: jasmine.SpyObj<MatDialog>;
-  let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
+  let mockDialog: AngularVitestPartialMock<MatDialog>;
+  let mockSnackBar: AngularVitestPartialMock<MatSnackBar>;
 
   const mockPhotos: Photo[] = [
     {
@@ -24,7 +24,7 @@ describe('PhotoGalleryComponent', () => {
       alt: 'Photo 1',
       title: 'Test Photo 1',
       width: 1920,
-      height: 1080
+      height: 1080,
     },
     {
       id: 2,
@@ -33,7 +33,7 @@ describe('PhotoGalleryComponent', () => {
       alt: 'Photo 2',
       title: 'Test Photo 2',
       width: 1920,
-      height: 1080
+      height: 1080,
     },
     {
       id: 3,
@@ -42,28 +42,32 @@ describe('PhotoGalleryComponent', () => {
       alt: 'Photo 3',
       title: 'Test Photo 3',
       width: 1920,
-      height: 1080
-    }
+      height: 1080,
+    },
   ];
 
   beforeEach(async () => {
-    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
+    mockDialog = {
+      open: vi.fn().mockName('MatDialog.open'),
+    };
+    mockSnackBar = {
+      open: vi.fn().mockName('MatSnackBar.open'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         DragDropModule,
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
         NoopAnimationsModule,
-        PhotoGalleryComponent
-    ],
-    providers: [
+        PhotoGalleryComponent,
+      ],
+      providers: [
         { provide: MatDialog, useValue: mockDialog },
-        { provide: MatSnackBar, useValue: mockSnackBar }
-    ]
-}).compileComponents();
+        { provide: MatSnackBar, useValue: mockSnackBar },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(PhotoGalleryComponent);
     component = fixture.componentInstance;
@@ -76,7 +80,7 @@ describe('PhotoGalleryComponent', () => {
   it('should display empty state when no photos', () => {
     fixture.componentRef.setInput('photos', []);
     fixture.detectChanges();
-    
+
     const emptyState = fixture.nativeElement.querySelector('.empty-state');
     expect(emptyState).toBeTruthy();
     expect(emptyState.textContent).toContain('Aucune photo disponible');
@@ -85,7 +89,7 @@ describe('PhotoGalleryComponent', () => {
   it('should display photos in masonry layout', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     fixture.detectChanges();
-    
+
     const masonryGrid = fixture.nativeElement.querySelector('.masonry-grid');
     expect(masonryGrid).toBeTruthy();
   });
@@ -93,7 +97,7 @@ describe('PhotoGalleryComponent', () => {
   it('should open lightbox when photo is clicked', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     component.openLightbox(0);
-    
+
     expect(component.lightboxOpen).toBe(true);
     expect(component.currentPhotoIndex).toBe(0);
   });
@@ -101,7 +105,7 @@ describe('PhotoGalleryComponent', () => {
   it('should close lightbox', () => {
     component.lightboxOpen = true;
     component.closeLightbox();
-    
+
     expect(component.lightboxOpen).toBe(false);
   });
 
@@ -109,7 +113,7 @@ describe('PhotoGalleryComponent', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 0;
     component.nextPhoto();
-    
+
     expect(component.currentPhotoIndex).toBe(1);
   });
 
@@ -117,7 +121,7 @@ describe('PhotoGalleryComponent', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 1;
     component.previousPhoto();
-    
+
     expect(component.currentPhotoIndex).toBe(0);
   });
 
@@ -126,7 +130,7 @@ describe('PhotoGalleryComponent', () => {
     component.currentPhotoIndex = 0;
     component.previousPhoto();
     expect(component.currentPhotoIndex).toBe(0);
-    
+
     component.currentPhotoIndex = mockPhotos.length - 1;
     component.nextPhoto();
     expect(component.currentPhotoIndex).toBe(mockPhotos.length - 1);
@@ -136,7 +140,7 @@ describe('PhotoGalleryComponent', () => {
     component.lightboxZoom = 1;
     component.zoomIn();
     expect(component.lightboxZoom).toBe(1.25);
-    
+
     component.zoomOut();
     expect(component.lightboxZoom).toBe(1);
   });
@@ -145,9 +149,9 @@ describe('PhotoGalleryComponent', () => {
     component.lightboxZoom = 2;
     component.lightboxTranslateX = 100;
     component.lightboxTranslateY = 50;
-    
+
     component.resetZoom();
-    
+
     expect(component.lightboxZoom).toBe(1);
     expect(component.lightboxTranslateX).toBe(0);
     expect(component.lightboxTranslateY).toBe(0);
@@ -156,9 +160,9 @@ describe('PhotoGalleryComponent', () => {
   it('should emit photosReordered on drag and drop', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     fixture.componentRef.setInput('editable', true);
-    
-    spyOn(component.photosReordered, 'emit');
-    
+
+    vi.spyOn(component.photosReordered, 'emit');
+
     const event = {
       previousIndex: 0,
       currentIndex: 1,
@@ -166,45 +170,47 @@ describe('PhotoGalleryComponent', () => {
       container: {} as unknown,
       previousContainer: {} as unknown,
       isPointerOverContainer: true,
-      distance: { x: 0, y: 0 }
+      distance: { x: 0, y: 0 },
     } as CdkDragDrop<Photo[]>;
-    
+
     component.onDrop(event);
-    
+
     expect(component.photosReordered.emit).toHaveBeenCalled();
   });
 
   it('should open delete confirmation dialog', () => {
     const mockDialogRef = {
-      afterClosed: () => of(true)
+      afterClosed: () => of(true),
     };
-    mockDialog.open.and.returnValue(mockDialogRef as unknown as MatDialogRef<ConfirmDeleteDialogComponent>);
-    
-    spyOn(component.photoDeleted, 'emit');
-    
+    mockDialog.open.mockReturnValue(
+      mockDialogRef as unknown as MatDialogRef<ConfirmDeleteDialogComponent>
+    );
+
+    vi.spyOn(component.photoDeleted, 'emit');
+
     const photo = mockPhotos[0];
     const event = new Event('click');
-    
+
     component.deletePhoto(photo, event);
-    
+
     expect(mockDialog.open).toHaveBeenCalled();
     expect(component.photoDeleted.emit).toHaveBeenCalledWith(photo);
   });
 
   it('should get masonry columns based on viewport', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
-    
-    spyOn(component, 'getColumnCount').and.returnValue(3);
-    
+
+    vi.spyOn(component, 'getColumnCount').mockReturnValue(3);
+
     const columns = component.masonryColumns();
-    
+
     expect(columns.length).toBe(3);
   });
 
   it('should generate srcset for responsive images', () => {
     const photo = mockPhotos[0];
     const srcset = component.getSrcset(photo);
-    
+
     expect(srcset).toContain('320w');
     expect(srcset).toContain('640w');
     expect(srcset).toContain('960w');
@@ -213,16 +219,16 @@ describe('PhotoGalleryComponent', () => {
   it('should get current photo', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     component.currentPhotoIndex = 1;
-    
+
     const currentPhoto = component.getCurrentPhoto();
-    
+
     expect(currentPhoto).toBe(mockPhotos[1]);
   });
 
   it('should go to thumbnail', () => {
     fixture.componentRef.setInput('photos', mockPhotos);
     component.goToThumbnail(2);
-    
+
     expect(component.currentPhotoIndex).toBe(2);
     expect(component.lightboxZoom).toBe(1);
   });

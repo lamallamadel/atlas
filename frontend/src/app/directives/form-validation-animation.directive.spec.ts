@@ -1,8 +1,8 @@
 import { Component, DebugElement } from '@angular/core';
-import { ComponentFixture, TestBed, fakeAsync, tick, flush } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { By } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { FormValidationAnimationDirective } from './form-validation-animation.directive';
 
 @Component({
@@ -28,14 +28,14 @@ describe('FormValidationAnimationDirective', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         ReactiveFormsModule,
-        BrowserAnimationsModule,
         FormValidationAnimationDirective,
-        TestComponent
-    ]
-})
-    .compileComponents();
+        TestComponent,
+      ],
+      providers: [provideNoopAnimations()],
+    })
+      .compileComponents();
 
     fixture = TestBed.createComponent(TestComponent);
     component = fixture.componentInstance;
@@ -44,50 +44,46 @@ describe('FormValidationAnimationDirective', () => {
     await fixture.whenStable();
   });
 
-  it('should add validation-error class when field is invalid and touched', fakeAsync(async () => {
+  it('should add validation-error class when field is invalid and touched', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsTouched();
     emailControl.setValue('');
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
     expect(emailControl.invalid).toBeTruthy();
     expect(emailControl.touched).toBeTruthy();
-    
-    flush();
-  }));
+  });
 
-  it('should not add validation-error class when field is untouched', fakeAsync(async () => {
+  it('should not add validation-error class when field is untouched', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.setValue('');
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
     expect(emailControl.invalid).toBeTruthy();
     expect(emailControl.touched).toBeFalsy();
-    
-    flush();
-  }));
+  });
 
-  it('should remove validation-error class when field becomes valid', fakeAsync(async () => {
+  it('should remove validation-error class when field becomes valid', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsTouched();
     emailControl.setValue('');
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
@@ -96,89 +92,81 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeFalsy();
     expect(emailControl.valid).toBeTruthy();
-    
-    flush();
-  }));
+  });
 
-  it('should add validation-error class when field is invalid and dirty', fakeAsync(async () => {
+  it('should add validation-error class when field is invalid and dirty', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsDirty();
     emailControl.setValue('invalid-email');
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     expect(inputEl.nativeElement.classList.contains('validation-error')).toBeTruthy();
     expect(emailControl.invalid).toBeTruthy();
     expect(emailControl.dirty).toBeTruthy();
-    
-    flush();
-  }));
+  });
 
-  it('should create error container within form field wrapper', fakeAsync(async () => {
+  it('should create error container within form field wrapper', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsTouched();
     emailControl.setValue('');
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     const formField = fixture.debugElement.query(By.css('.form-field'));
     const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
-    
+
     expect(errorContainer).toBeTruthy();
     expect(errorContainer).not.toBeNull();
-    
-    flush();
-  }));
+  });
 
-  it('should display error message when validation fails', fakeAsync(async () => {
+  it('should display error message when validation fails', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsTouched();
     emailControl.setValue('');
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     const formField = fixture.debugElement.query(By.css('.form-field'));
     const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
     const errorMessage = errorContainer?.querySelector('.error-message');
-    
+
     expect(errorMessage).toBeTruthy();
     expect(errorMessage).not.toBeNull();
     expect(errorMessage?.textContent).toContain('Ce champ est requis');
-    
-    flush();
-  }));
+  });
 
-  it('should clear error message when field becomes valid', fakeAsync(async () => {
+  it('should clear error message when field becomes valid', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsTouched();
     emailControl.setValue('');
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     const formField = fixture.debugElement.query(By.css('.form-field'));
     let errorContainer = formField.nativeElement.querySelector('.validation-error-container');
     const initialErrorMessage = errorContainer?.querySelector('.error-message');
-    
+
     expect(initialErrorMessage).toBeTruthy();
     expect(initialErrorMessage?.textContent).toContain('Ce champ est requis');
 
@@ -186,36 +174,32 @@ describe('FormValidationAnimationDirective', () => {
     emailControl.updateValueAndValidity();
     fixture.detectChanges();
     await fixture.whenStable();
-    tick(300);
+    await new Promise<void>((resolve) => setTimeout(resolve, 320));
     fixture.detectChanges();
 
     errorContainer = formField.nativeElement.querySelector('.validation-error-container');
     const clearedErrorMessage = errorContainer?.querySelector('.error-message');
-    
+
     expect(errorContainer?.innerHTML).toBe('');
     expect(clearedErrorMessage).toBeNull();
-    
-    flush();
-  }));
+  });
 
-  it('should display email validation error message', fakeAsync(async () => {
+  it('should display email validation error message', async () => {
     const emailControl = component.testForm.get('email')!;
-    
+
     emailControl.markAsTouched();
     emailControl.setValue('invalid-email');
     fixture.detectChanges();
     await fixture.whenStable();
-    tick();
+    await new Promise<void>((resolve) => setTimeout(resolve, 0));
     fixture.detectChanges();
 
     const formField = fixture.debugElement.query(By.css('.form-field'));
     const errorContainer = formField.nativeElement.querySelector('.validation-error-container');
     const errorMessage = errorContainer?.querySelector('.error-message');
-    
+
     expect(errorMessage).toBeTruthy();
     expect(errorMessage).not.toBeNull();
     expect(errorMessage?.textContent).toContain('Email invalide');
-    
-    flush();
-  }));
+  });
 });

@@ -2,7 +2,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { MatBottomSheetModule } from '@angular/material/bottom-sheet';
-import {  } from '@angular/material/snack-bar';
+import {} from '@angular/material/snack-bar';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -14,31 +14,55 @@ import { ScrollingModule } from '@angular/cdk/scrolling';
 import { TextFieldModule } from '@angular/cdk/text-field';
 import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 
 import { WhatsappMessagingUiComponent } from './whatsapp-messaging-ui.component';
-import { MessageApiService, MessageChannel, MessageDirection, MessageDeliveryStatus } from '../services/message-api.service';
+import {
+  MessageApiService,
+  MessageChannel,
+  MessageDirection,
+  MessageDeliveryStatus,
+} from '../services/message-api.service';
 import { OutboundMessageApiService } from '../services/outbound-message-api.service';
-import { ConsentementApiService, ConsentementChannel, ConsentementStatus } from '../services/consentement-api.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  ConsentementApiService,
+  ConsentementChannel,
+  ConsentementStatus,
+} from '../services/consentement-api.service';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('WhatsappMessagingUiComponent', () => {
   let component: WhatsappMessagingUiComponent;
   let fixture: ComponentFixture<WhatsappMessagingUiComponent>;
-  let messageApiService: jasmine.SpyObj<MessageApiService>;
-  let outboundMessageApiService: jasmine.SpyObj<OutboundMessageApiService>;
-  let consentementApiService: jasmine.SpyObj<ConsentementApiService>;
+  let messageApiService: AngularVitestPartialMock<MessageApiService>;
+  let outboundMessageApiService: AngularVitestPartialMock<OutboundMessageApiService>;
+  let consentementApiService: AngularVitestPartialMock<ConsentementApiService>;
 
   beforeEach(async () => {
-    const messageApiServiceSpy = jasmine.createSpyObj('MessageApiService', ['list', 'create', 'getById', 'retry']);
-    const outboundMessageApiServiceSpy = jasmine.createSpyObj('OutboundMessageApiService', ['listTemplates']);
-    const consentementApiServiceSpy = jasmine.createSpyObj('ConsentementApiService', ['list']);
+    const messageApiServiceSpy = {
+      list: vi.fn().mockName('MessageApiService.list'),
+      create: vi.fn().mockName('MessageApiService.create'),
+      getById: vi.fn().mockName('MessageApiService.getById'),
+      retry: vi.fn().mockName('MessageApiService.retry'),
+    };
+    const outboundMessageApiServiceSpy = {
+      listTemplates: vi
+        .fn()
+        .mockName('OutboundMessageApiService.listTemplates'),
+    };
+    const consentementApiServiceSpy = {
+      list: vi.fn().mockName('ConsentementApiService.list'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [BrowserAnimationsModule,
+      imports: [
+        BrowserAnimationsModule,
         FormsModule,
         MatBottomSheetModule,
-        
+
         MatIconModule,
         MatButtonModule,
         MatTooltipModule,
@@ -47,25 +71,63 @@ describe('WhatsappMessagingUiComponent', () => {
         MatChipsModule,
         MatProgressSpinnerModule,
         ScrollingModule,
-        TextFieldModule, WhatsappMessagingUiComponent],
-    providers: [
-        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
+        TextFieldModule,
+        WhatsappMessagingUiComponent,
+      ],
+      providers: [
+        {
+          provide: MatSnackBar,
+          useValue: {
+            open: () => ({
+              onAction: () => of(null),
+              afterDismissed: () => of(null),
+            }),
+            dismiss: () => {},
+          },
+        },
         { provide: MessageApiService, useValue: messageApiServiceSpy },
-        { provide: OutboundMessageApiService, useValue: outboundMessageApiServiceSpy },
-        { provide: ConsentementApiService, useValue: consentementApiServiceSpy },
+        {
+          provide: OutboundMessageApiService,
+          useValue: outboundMessageApiServiceSpy,
+        },
+        {
+          provide: ConsentementApiService,
+          useValue: consentementApiServiceSpy,
+        },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-})
-    .compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
-    messageApiService = TestBed.inject(MessageApiService) as jasmine.SpyObj<MessageApiService>;
-    outboundMessageApiService = TestBed.inject(OutboundMessageApiService) as jasmine.SpyObj<OutboundMessageApiService>;
-    consentementApiService = TestBed.inject(ConsentementApiService) as jasmine.SpyObj<ConsentementApiService>;
+    messageApiService = TestBed.inject(
+      MessageApiService
+    ) as AngularVitestPartialMock<MessageApiService>;
+    outboundMessageApiService = TestBed.inject(
+      OutboundMessageApiService
+    ) as AngularVitestPartialMock<OutboundMessageApiService>;
+    consentementApiService = TestBed.inject(
+      ConsentementApiService
+    ) as AngularVitestPartialMock<ConsentementApiService>;
 
-    messageApiService.list.and.returnValue(of({ content: [], totalElements: 0, totalPages: 0, size: 0, number: 0 } as any));
-    outboundMessageApiService.listTemplates.and.returnValue(of([]));
-    consentementApiService.list.and.returnValue(of({ content: [], totalElements: 0, totalPages: 0, size: 0, number: 0 } as any));
+    messageApiService.list.mockReturnValue(
+      of({
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        size: 0,
+        number: 0,
+      } as any)
+    );
+    outboundMessageApiService.listTemplates.mockReturnValue(of([]));
+    consentementApiService.list.mockReturnValue(
+      of({
+        content: [],
+        totalElements: 0,
+        totalPages: 0,
+        size: 0,
+        number: 0,
+      } as any)
+    );
 
     fixture = TestBed.createComponent(WhatsappMessagingUiComponent);
     component = fixture.componentInstance;
@@ -82,7 +144,7 @@ describe('WhatsappMessagingUiComponent', () => {
       dossierId: 1,
       channel: MessageChannel.WHATSAPP,
       size: 100,
-      sort: 'timestamp,asc'
+      sort: 'timestamp,asc',
     });
   });
 
@@ -90,7 +152,7 @@ describe('WhatsappMessagingUiComponent', () => {
     fixture.detectChanges();
     expect(consentementApiService.list).toHaveBeenCalledWith({
       dossierId: 1,
-      channel: ConsentementChannel.WHATSAPP
+      channel: ConsentementChannel.WHATSAPP,
     });
   });
 
@@ -103,14 +165,14 @@ describe('WhatsappMessagingUiComponent', () => {
     component.hasValidConsent = false;
     component.messageContent = 'Test message';
     component.isOnline = true;
-    expect(component.canSend()).toBeFalse();
+    expect(component.canSend()).toBe(false);
   });
 
   it('should disable send when message is empty', () => {
     component.hasValidConsent = true;
     component.messageContent = '';
     component.isOnline = true;
-    expect(component.canSend()).toBeFalse();
+    expect(component.canSend()).toBe(false);
   });
 
   it('should enable send when all conditions are met', () => {
@@ -118,25 +180,37 @@ describe('WhatsappMessagingUiComponent', () => {
     component.messageContent = 'Test message';
     component.isOnline = true;
     component.sending = false;
-    expect(component.canSend()).toBeTrue();
+    expect(component.canSend()).toBe(true);
   });
 
   it('should format timestamp correctly', () => {
     const now = new Date();
     const result = component.formatTimestamp(now.toISOString());
-    expect(result).toBe('À l\'instant');
+    expect(result).toBe("À l'instant");
   });
 
   it('should return correct delivery status icon', () => {
-    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.PENDING)).toBe('schedule');
-    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.SENT)).toBe('done');
-    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.DELIVERED)).toBe('done_all');
-    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.READ)).toBe('done_all');
-    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.FAILED)).toBe('error');
+    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.PENDING)).toBe(
+      'schedule'
+    );
+    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.SENT)).toBe(
+      'done'
+    );
+    expect(
+      component.getDeliveryStatusIcon(MessageDeliveryStatus.DELIVERED)
+    ).toBe('done_all');
+    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.READ)).toBe(
+      'done_all'
+    );
+    expect(component.getDeliveryStatusIcon(MessageDeliveryStatus.FAILED)).toBe(
+      'error'
+    );
   });
 
   it('should validate image file size', () => {
-    const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.jpg', { type: 'image/jpeg' });
+    const largeFile = new File(['x'.repeat(6 * 1024 * 1024)], 'large.jpg', {
+      type: 'image/jpeg',
+    });
     const result = component['validateAndCreateAttachment'](largeFile);
     expect(result).toBeNull();
   });
@@ -149,7 +223,9 @@ describe('WhatsappMessagingUiComponent', () => {
   });
 
   it('should accept valid document file', () => {
-    const validFile = new File(['test'], 'test.pdf', { type: 'application/pdf' });
+    const validFile = new File(['test'], 'test.pdf', {
+      type: 'application/pdf',
+    });
     const result = component['validateAndCreateAttachment'](validFile);
     expect(result).not.toBeNull();
     expect(result?.type).toBe('document');
@@ -165,10 +241,10 @@ describe('WhatsappMessagingUiComponent', () => {
         direction: MessageDirection.OUTBOUND,
         dossierId: 1,
         orgId: 'org1',
-        createdAt: new Date().toISOString()
-      }
+        createdAt: new Date().toISOString(),
+      },
     ];
-    expect(component.showDateDivider(0)).toBeTrue();
+    expect(component.showDateDivider(0)).toBe(true);
   });
 
   it('should update template variables and preview', () => {
@@ -177,11 +253,13 @@ describe('WhatsappMessagingUiComponent', () => {
       name: 'Test Template',
       content: 'Hello {{name}}, your appointment is on {{date}}',
       variables: ['name', 'date'],
-      channel: 'WHATSAPP'
+      channel: 'WHATSAPP',
     };
     component.templateVariables = { name: 'John', date: '2024-01-15' };
     component.updateMessagePreview();
-    expect(component.messageContent).toBe('Hello John, your appointment is on 2024-01-15');
+    expect(component.messageContent).toBe(
+      'Hello John, your appointment is on 2024-01-15'
+    );
   });
 
   it('should clear template and variables on remove', () => {
@@ -190,13 +268,13 @@ describe('WhatsappMessagingUiComponent', () => {
       name: 'Test Template',
       content: 'Hello {{name}}',
       variables: ['name'],
-      channel: 'WHATSAPP'
+      channel: 'WHATSAPP',
     };
     component.templateVariables = { name: 'John' };
     component.messageContent = 'Hello John';
-    
+
     component.removeTemplate();
-    
+
     expect(component.selectedTemplate).toBeNull();
     expect(component.templateVariables).toEqual({});
     expect(component.messageContent).toBe('');
@@ -207,11 +285,11 @@ describe('WhatsappMessagingUiComponent', () => {
     const file2 = new File(['test2'], 'test2.jpg', { type: 'image/jpeg' });
     component.attachments = [
       { file: file1, type: 'image' },
-      { file: file2, type: 'image' }
+      { file: file2, type: 'image' },
     ];
-    
+
     component.removeAttachment(0);
-    
+
     expect(component.attachments.length).toBe(1);
     expect(component.attachments[0].file).toBe(file2);
   });
@@ -219,8 +297,10 @@ describe('WhatsappMessagingUiComponent', () => {
   it('should get correct consent warning message', () => {
     component.consentChecked = true;
     component.consent = null;
-    expect(component.getConsentWarningMessage()).toContain('Aucun consentement');
-    
+    expect(component.getConsentWarningMessage()).toContain(
+      'Aucun consentement'
+    );
+
     component.consent = {
       id: 1,
       dossierId: 1,
@@ -228,7 +308,7 @@ describe('WhatsappMessagingUiComponent', () => {
       channel: ConsentementChannel.WHATSAPP,
       status: ConsentementStatus.DENIED,
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
     expect(component.getConsentWarningMessage()).toContain('refusé');
   });

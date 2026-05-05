@@ -9,7 +9,11 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatCardModule } from '@angular/material/card';
 import { LayoutModule } from '@angular/cdk/layout';
-import { GenericTableComponent, ColumnConfig, RowAction } from './generic-table.component';
+import {
+  GenericTableComponent,
+  ColumnConfig,
+  RowAction,
+} from './generic-table.component';
 
 describe('GenericTableComponent', () => {
   let component: GenericTableComponent;
@@ -18,17 +22,17 @@ describe('GenericTableComponent', () => {
   const mockColumns: ColumnConfig[] = [
     { key: 'id', header: 'ID', sortable: true, type: 'number' },
     { key: 'name', header: 'Name', sortable: true, type: 'text' },
-    { key: 'email', header: 'Email', sortable: true, type: 'text' }
+    { key: 'email', header: 'Email', sortable: true, type: 'text' },
   ];
 
   const mockData = [
     { id: 1, name: 'John Doe', email: 'john@example.com' },
-    { id: 2, name: 'Jane Smith', email: 'jane@example.com' }
+    { id: 2, name: 'Jane Smith', email: 'jane@example.com' },
   ];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         BrowserAnimationsModule,
         MatTableModule,
         MatPaginatorModule,
@@ -39,10 +43,9 @@ describe('GenericTableComponent', () => {
         MatCheckboxModule,
         MatCardModule,
         LayoutModule,
-        GenericTableComponent
-    ]
-})
-      .compileComponents();
+        GenericTableComponent,
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(GenericTableComponent);
     component = fixture.componentInstance;
@@ -62,7 +65,12 @@ describe('GenericTableComponent', () => {
   it('should update displayed columns including actions', () => {
     fixture.componentRef.setInput('showActions', true);
     component.updateDisplayedColumns();
-    expect(component.displayedColumns).toEqual(['id', 'name', 'email', 'actions']);
+    expect(component.displayedColumns).toEqual([
+      'id',
+      'name',
+      'email',
+      'actions',
+    ]);
   });
 
   it('should update displayed columns without actions', () => {
@@ -75,14 +83,22 @@ describe('GenericTableComponent', () => {
     fixture.componentRef.setInput('enableRowSelection', true);
     fixture.componentRef.setInput('showActions', false);
     component.updateDisplayedColumns();
-    expect(component.displayedColumns).toEqual(['select', 'id', 'name', 'email']);
+    expect(component.displayedColumns).toEqual([
+      'select',
+      'id',
+      'name',
+      'email',
+    ]);
   });
 
   it('should emit rowAction event when action is triggered', () => {
-    spyOn(component.rowAction, 'emit');
+    vi.spyOn(component.rowAction, 'emit');
     const testRow = mockData[0];
     component.onAction('edit', testRow);
-    expect(component.rowAction.emit).toHaveBeenCalledWith({ action: 'edit', row: testRow });
+    expect(component.rowAction.emit).toHaveBeenCalledWith({
+      action: 'edit',
+      row: testRow,
+    });
   });
 
   it('should format date values correctly', () => {
@@ -93,7 +109,11 @@ describe('GenericTableComponent', () => {
   });
 
   it('should format boolean values correctly', () => {
-    const column: ColumnConfig = { key: 'active', header: 'Active', type: 'boolean' };
+    const column: ColumnConfig = {
+      key: 'active',
+      header: 'Active',
+      type: 'boolean',
+    };
     expect(component.formatValue(true, column, {})).toBe('Oui');
     expect(component.formatValue(false, column, {})).toBe('Non');
   });
@@ -109,7 +129,12 @@ describe('GenericTableComponent', () => {
       icon: 'delete',
       tooltip: 'Delete',
       action: 'delete',
-      show: (row: unknown) => (row as { id: number }).id > 1
+      show: (row: unknown) =>
+        (
+          row as {
+            id: number;
+          }
+        ).id > 1,
     };
 
     expect(component.shouldShowAction(action, { id: 1 })).toBe(false);
@@ -120,7 +145,7 @@ describe('GenericTableComponent', () => {
     const action: RowAction = {
       icon: 'edit',
       tooltip: 'Edit',
-      action: 'edit'
+      action: 'edit',
     };
 
     expect(component.shouldShowAction(action, mockData[0])).toBe(true);
@@ -130,7 +155,7 @@ describe('GenericTableComponent', () => {
     fixture.componentRef.setInput('enableRowSelection', true);
     component.toggleAllRows();
     expect(component.selection.selected.length).toBe(mockData.length);
-    
+
     component.toggleAllRows();
     expect(component.selection.selected.length).toBe(0);
   });
@@ -138,10 +163,10 @@ describe('GenericTableComponent', () => {
   it('should toggle individual row selection', () => {
     fixture.componentRef.setInput('enableRowSelection', true);
     const row = mockData[0];
-    
+
     component.toggleRow(row);
     expect(component.selection.isSelected(row)).toBe(true);
-    
+
     component.toggleRow(row);
     expect(component.selection.isSelected(row)).toBe(false);
   });
@@ -149,27 +174,27 @@ describe('GenericTableComponent', () => {
   it('should detect if all rows are selected', () => {
     fixture.componentRef.setInput('enableRowSelection', true);
     expect(component.isAllSelected()).toBe(false);
-    
+
     component.selection.select(...mockData);
     expect(component.isAllSelected()).toBe(true);
   });
 
   it('should emit selection change event', () => {
-    spyOn(component.selectionChange, 'emit');
+    vi.spyOn(component.selectionChange, 'emit');
     fixture.componentRef.setInput('enableRowSelection', true);
-    
+
     component.toggleRow(mockData[0]);
     expect(component.selectionChange.emit).toHaveBeenCalledWith([mockData[0]]);
   });
 
   it('should handle column width settings', () => {
-    const column: ColumnConfig = { 
-      key: 'name', 
-      header: 'Name', 
+    const column: ColumnConfig = {
+      key: 'name',
+      header: 'Name',
       width: '200px',
-      minWidth: '100px'
+      minWidth: '100px',
     };
-    
+
     const style = component.getColumnStyle(column);
     expect(style['width']).toBe('200px');
     expect(style['min-width']).toBe('100px');
@@ -178,12 +203,12 @@ describe('GenericTableComponent', () => {
   it('should initialize column widths from config', () => {
     const columnsWithWidth: ColumnConfig[] = [
       { key: 'id', header: 'ID', width: '100px' },
-      { key: 'name', header: 'Name', width: '200px' }
+      { key: 'name', header: 'Name', width: '200px' },
     ];
-    
+
     fixture.componentRef.setInput('columns', columnsWithWidth);
     component.initializeColumnWidths();
-    
+
     expect(component.columnWidths.get('id')).toBe(100);
     expect(component.columnWidths.get('name')).toBe(200);
   });

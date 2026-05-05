@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { EmptyStateComponent } from './empty-state.component';
-import { EmptyStateIllustrationsService, EmptyStateContext } from '../services/empty-state-illustrations.service';
+import {
+  EmptyStateIllustrationsService,
+  EmptyStateContext,
+} from '../services/empty-state-illustrations.service';
 
 describe('EmptyStateComponent', () => {
   let component: EmptyStateComponent;
@@ -11,10 +14,14 @@ describe('EmptyStateComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [CommonModule, MatIconModule, MatButtonModule, EmptyStateComponent],
-    providers: [EmptyStateIllustrationsService]
-})
-    .compileComponents();
+      imports: [
+        CommonModule,
+        MatIconModule,
+        MatButtonModule,
+        EmptyStateComponent,
+      ],
+      providers: [EmptyStateIllustrationsService],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(EmptyStateComponent);
     component = fixture.componentInstance;
@@ -31,13 +38,20 @@ describe('EmptyStateComponent', () => {
       fixture.detectChanges();
 
       const compiled = fixture.nativeElement;
-      expect(compiled.querySelector('.empty-state-title').textContent).toContain('Test message');
-      expect(compiled.querySelector('.empty-state-message').textContent).toContain('Test subtext');
+      expect(
+        compiled.querySelector('.empty-state-title').textContent
+      ).toContain('Test message');
+      expect(
+        compiled.querySelector('.empty-state-message').textContent
+      ).toContain('Test subtext');
     });
 
     it('should call primary action handler', () => {
-      const handler = jasmine.createSpy('handler');
-      fixture.componentRef.setInput('primaryAction', { label: 'Test', handler });
+      const handler = vi.fn();
+      fixture.componentRef.setInput('primaryAction', {
+        label: 'Test',
+        handler,
+      });
       fixture.detectChanges();
 
       component.onPrimaryClick();
@@ -45,8 +59,11 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should call secondary action handler', () => {
-      const handler = jasmine.createSpy('handler');
-      fixture.componentRef.setInput('secondaryAction', { label: 'Test', handler });
+      const handler = vi.fn();
+      fixture.componentRef.setInput('secondaryAction', {
+        label: 'Test',
+        handler,
+      });
       fixture.detectChanges();
 
       component.onSecondaryClick();
@@ -74,12 +91,18 @@ describe('EmptyStateComponent', () => {
     });
 
     it('should merge service config with provided handlers', () => {
-      const primaryHandler = jasmine.createSpy('primaryHandler');
-      const secondaryHandler = jasmine.createSpy('secondaryHandler');
+      const primaryHandler = vi.fn();
+      const secondaryHandler = vi.fn();
 
       fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
-      fixture.componentRef.setInput('primaryAction', { label: 'Test', handler: primaryHandler });
-      fixture.componentRef.setInput('secondaryAction', { label: 'Test', handler: secondaryHandler });
+      fixture.componentRef.setInput('primaryAction', {
+        label: 'Test',
+        handler: primaryHandler,
+      });
+      fixture.componentRef.setInput('secondaryAction', {
+        label: 'Test',
+        handler: secondaryHandler,
+      });
       component.ngOnInit();
 
       component.onPrimaryClick();
@@ -100,7 +123,10 @@ describe('EmptyStateComponent', () => {
     it('should use custom illustration when provided', () => {
       const customIllustration = '<svg>custom</svg>';
       fixture.componentRef.setInput('context', EmptyStateContext.NO_DOSSIERS);
-      fixture.componentRef.setInput('customIllustration', customIllustration as any);
+      fixture.componentRef.setInput(
+        'customIllustration',
+        customIllustration as any
+      );
       component.ngOnInit();
 
       expect(component.displayIllustration).toBe(customIllustration);
@@ -121,16 +147,19 @@ describe('EmptyStateComponent', () => {
 
   describe('help link', () => {
     it('should open help link in new tab', () => {
-      spyOn(window, 'open');
-      
+      vi.spyOn(window, 'open');
+
       component.displayHelpLink = {
         label: 'Help',
-        url: 'https://example.com/help'
+        url: 'https://example.com/help',
       };
-      
+
       component.onHelpLinkClick();
-      
-      expect(window.open).toHaveBeenCalledWith('https://example.com/help', '_blank');
+
+      expect(window.open).toHaveBeenCalledWith(
+        'https://example.com/help',
+        '_blank'
+      );
     });
 
     it('should not error when help link is not provided', () => {
@@ -141,11 +170,11 @@ describe('EmptyStateComponent', () => {
 
   describe('action click helpers', () => {
     it('should handle primary click when action is defined', () => {
-      const handler = jasmine.createSpy('handler');
+      const handler = vi.fn();
       component.displayPrimaryAction = { label: 'Test', handler };
-      
+
       component.onPrimaryClick();
-      
+
       expect(handler).toHaveBeenCalled();
     });
   });
@@ -174,7 +203,7 @@ describe('EmptyStateComponent', () => {
       fixture.componentRef.setInput('primaryAction', {
         label: 'Create',
         icon: 'add',
-        handler: () => { /* no-op */ }
+        handler: () => {},
       });
       fixture.detectChanges();
 
@@ -187,7 +216,7 @@ describe('EmptyStateComponent', () => {
     it('should render help link when provided', () => {
       fixture.componentRef.setInput('helpLink', {
         label: 'Need help?',
-        url: '/help'
+        url: '/help',
       });
       fixture.detectChanges();
 
@@ -221,7 +250,7 @@ describe('EmptyStateComponent', () => {
     it('should have aria-label on action buttons', () => {
       fixture.componentRef.setInput('primaryAction', {
         label: 'Create new',
-        handler: () => { /* no-op for test */ }
+        handler: () => {},
       });
       fixture.detectChanges();
 

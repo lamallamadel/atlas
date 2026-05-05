@@ -10,26 +10,33 @@ import { PrefetchService } from './services/prefetch.service';
 
 describe('AppComponent', () => {
   beforeEach(async () => {
-    const mockThemeService = jasmine.createSpyObj('ThemeService', ['getCurrentTheme']);
-    const mockSwService = jasmine.createSpyObj('ServiceWorkerRegistrationService', ['register']);
-    const mockQueueService = jasmine.createSpyObj('OfflineQueueService', ['processQueue']);
-    const mockLiveAnnouncer = jasmine.createSpyObj('LiveAnnouncerService', ['announce']);
-    const mockPrefetchService = jasmine.createSpyObj('PrefetchService', ['init']);
+    const mockThemeService = {
+      getCurrentTheme: vi.fn().mockName('ThemeService.getCurrentTheme'),
+    };
+    const mockSwService = {
+      register: vi.fn().mockName('ServiceWorkerRegistrationService.register'),
+    };
+    const mockQueueService = {
+      processQueue: vi.fn().mockName('OfflineQueueService.processQueue'),
+    };
+    const mockLiveAnnouncer = {
+      announce: vi.fn().mockName('LiveAnnouncerService.announce'),
+    };
+    const mockPrefetchService = {
+      init: vi.fn().mockName('PrefetchService.init'),
+    };
 
     await TestBed.configureTestingModule({
-      imports: [
-        RouterTestingModule,
-        AppComponent
-      ],
+      imports: [RouterTestingModule, AppComponent],
       declarations: [],
       providers: [
         { provide: ThemeService, useValue: mockThemeService },
         { provide: ServiceWorkerRegistrationService, useValue: mockSwService },
         { provide: OfflineQueueService, useValue: mockQueueService },
         { provide: LiveAnnouncerService, useValue: mockLiveAnnouncer },
-        { provide: PrefetchService, useValue: mockPrefetchService }
+        { provide: PrefetchService, useValue: mockPrefetchService },
       ],
-      schemas: [NO_ERRORS_SCHEMA]
+      schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
   });
 

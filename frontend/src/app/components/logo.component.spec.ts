@@ -7,8 +7,8 @@ describe('LogoComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [LogoComponent]
-}).compileComponents();
+      imports: [LogoComponent],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(LogoComponent);
     component = fixture.componentInstance;
@@ -72,16 +72,13 @@ describe('LogoComponent', () => {
     expect(component.logoPath).toContain('logo-horizontal-mono');
   });
 
-  it('should add animated class when animate is true', (done) => {
+  it('should add animated class when animate is true', async () => {
     fixture.componentRef.setInput('animate', true);
     component.ngOnInit();
-    
-    // Wait for animation delay
-    setTimeout(() => {
-      expect(component.showAnimation).toBe(true);
-      expect(component.containerClass).toContain('logo-animated');
-      done();
-    }, 100);
+
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    expect(component.showAnimation).toBe(true);
+    expect(component.containerClass).toContain('logo-animated');
   });
 
   it('should generate container class with variant', () => {

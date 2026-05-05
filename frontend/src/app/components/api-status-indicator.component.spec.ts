@@ -7,31 +7,30 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 
 describe('ApiStatusIndicatorComponent', () => {
   let component: ApiStatusIndicatorComponent;
   let fixture: ComponentFixture<ApiStatusIndicatorComponent>;
-  let mockPingService: jasmine.SpyObj<PingService>;
+  let mockPingService: AngularVitestPartialMock<PingService>;
 
   beforeEach(async () => {
-    mockPingService = jasmine.createSpyObj('PingService', ['ping']);
+    mockPingService = {
+      ping: vi.fn().mockName('PingService.ping'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         MatMenuModule,
         MatButtonModule,
         MatIconModule,
         MatTooltipModule,
         MatDividerModule,
         NoopAnimationsModule,
-        ApiStatusIndicatorComponent
-    ],
-    providers: [
-        { provide: PingService, useValue: mockPingService }
-    ]
-})
-    .compileComponents();
+        ApiStatusIndicatorComponent,
+      ],
+      providers: [{ provide: PingService, useValue: mockPingService }],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(ApiStatusIndicatorComponent);
     component = fixture.componentInstance;
@@ -42,20 +41,22 @@ describe('ApiStatusIndicatorComponent', () => {
   });
 
   it('should check API connection on init', () => {
-    mockPingService.ping.and.returnValue(of({ message: 'pong' }));
+    mockPingService.ping.mockReturnValue(of({ message: 'pong' }));
     fixture.detectChanges();
     expect(mockPingService.ping).toHaveBeenCalled();
   });
 
   it('should set status to connected on successful ping', () => {
-    mockPingService.ping.and.returnValue(of({ message: 'pong' }));
+    mockPingService.ping.mockReturnValue(of({ message: 'pong' }));
     component.checkApiConnection();
     expect(component.apiStatus).toBe('connected');
     expect(component.lastChecked).toBeTruthy();
   });
 
   it('should set status to disconnected on failed ping', () => {
-    mockPingService.ping.and.returnValue(throwError(() => new Error('Connection failed')));
+    mockPingService.ping.mockReturnValue(
+      throwError(() => new Error('Connection failed'))
+    );
     component.checkApiConnection();
     expect(component.apiStatus).toBe('disconnected');
     expect(component.lastChecked).toBeTruthy();

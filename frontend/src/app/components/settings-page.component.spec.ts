@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  TestBed,
+} from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
@@ -14,7 +17,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 import { SettingsPageComponent } from './settings-page.component';
 import { UserPreferencesService } from '../services/user-preferences.service';
 import { ThemeService } from '../services/theme.service';
@@ -25,33 +28,47 @@ import { DEFAULT_PREFERENCES } from '../models/user-preferences.model';
 describe('SettingsPageComponent', () => {
   let component: SettingsPageComponent;
   let fixture: ComponentFixture<SettingsPageComponent>;
-  let mockUserPreferencesService: jasmine.SpyObj<UserPreferencesService>;
-  let mockThemeService: jasmine.SpyObj<ThemeService>;
-  let mockNotificationService: jasmine.SpyObj<NotificationService>;
-  let mockAuthService: jasmine.SpyObj<AuthService>;
+  let mockUserPreferencesService: AngularVitestPartialMock<UserPreferencesService>;
+  let mockThemeService: AngularVitestPartialMock<ThemeService>;
+  let mockNotificationService: AngularVitestPartialMock<NotificationService>;
+  let mockAuthService: AngularVitestPartialMock<AuthService>;
 
   beforeEach(async () => {
-    mockUserPreferencesService = jasmine.createSpyObj('UserPreferencesService', [
-      'getPreferences',
-      'updatePreferences',
-      'resetToDefaults'
-    ]);
-    mockThemeService = jasmine.createSpyObj('ThemeService', ['setTheme']);
-    mockNotificationService = jasmine.createSpyObj('NotificationService', [
-      'success',
-      'error',
-      'warning',
-      'info'
-    ]);
-    mockAuthService = jasmine.createSpyObj('AuthService', ['getUserRoles']);
+    mockUserPreferencesService = {
+      getPreferences: vi.fn().mockName('UserPreferencesService.getPreferences'),
+      updatePreferences: vi
+        .fn()
+        .mockName('UserPreferencesService.updatePreferences'),
+      resetToDefaults: vi
+        .fn()
+        .mockName('UserPreferencesService.resetToDefaults'),
+    };
+    mockThemeService = {
+      setTheme: vi.fn().mockName('ThemeService.setTheme'),
+    };
+    mockNotificationService = {
+      success: vi.fn().mockName('NotificationService.success'),
+      error: vi.fn().mockName('NotificationService.error'),
+      warning: vi.fn().mockName('NotificationService.warning'),
+      info: vi.fn().mockName('NotificationService.info'),
+    };
+    mockAuthService = {
+      getUserRoles: vi.fn().mockName('AuthService.getUserRoles'),
+    };
 
-    mockUserPreferencesService.getPreferences.and.returnValue(of(DEFAULT_PREFERENCES));
-    mockUserPreferencesService.updatePreferences.and.returnValue(of({ category: 'ui', preferences: {} }));
-    mockUserPreferencesService.resetToDefaults.and.returnValue(of(DEFAULT_PREFERENCES));
-    mockAuthService.getUserRoles.and.returnValue([]);
+    mockUserPreferencesService.getPreferences.mockReturnValue(
+      of(DEFAULT_PREFERENCES)
+    );
+    mockUserPreferencesService.updatePreferences.mockReturnValue(
+      of({ category: 'ui', preferences: {} })
+    );
+    mockUserPreferencesService.resetToDefaults.mockReturnValue(
+      of(DEFAULT_PREFERENCES)
+    );
+    mockAuthService.getUserRoles.mockReturnValue([]);
 
     await TestBed.configureTestingModule({
-    imports: [
+      imports: [
         ReactiveFormsModule,
         NoopAnimationsModule,
         MatTabsModule,
@@ -67,15 +84,18 @@ describe('SettingsPageComponent', () => {
         MatProgressBarModule,
         MatProgressSpinnerModule,
         MatDividerModule,
-        SettingsPageComponent
-    ],
-    providers: [
-        { provide: UserPreferencesService, useValue: mockUserPreferencesService },
+        SettingsPageComponent,
+      ],
+      providers: [
+        {
+          provide: UserPreferencesService,
+          useValue: mockUserPreferencesService,
+        },
         { provide: ThemeService, useValue: mockThemeService },
         { provide: NotificationService, useValue: mockNotificationService },
-        { provide: AuthService, useValue: mockAuthService }
-    ]
-}).compileComponents();
+        { provide: AuthService, useValue: mockAuthService },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(SettingsPageComponent);
     component = fixture.componentInstance;
@@ -98,14 +118,14 @@ describe('SettingsPageComponent', () => {
     fixture.detectChanges();
 
     expect(mockUserPreferencesService.getPreferences).toHaveBeenCalled();
-    expect(component.loading).toBeFalse();
+    expect(component.loading).toBe(false);
   });
 
   it('should check user roles and show appropriate tabs', () => {
-    mockAuthService.getUserRoles.and.returnValue(['ROLE_ADMIN']);
+    mockAuthService.getUserRoles.mockReturnValue(['ROLE_ADMIN']);
     fixture.detectChanges();
 
-    expect(component.isAdmin).toBeTrue();
+    expect(component.isAdmin).toBe(true);
     expect(component.tabs.length).toBeGreaterThan(4);
   });
 
@@ -117,13 +137,15 @@ describe('SettingsPageComponent', () => {
     await fixture.whenStable();
 
     expect(mockUserPreferencesService.updatePreferences).toHaveBeenCalled();
-    expect(mockNotificationService.success).toHaveBeenCalledWith('Préférences enregistrées avec succès');
+    expect(mockNotificationService.success).toHaveBeenCalledWith(
+      'Préférences enregistrées avec succès'
+    );
   });
 
   it('should handle save errors', async () => {
     fixture.detectChanges();
 
-    mockUserPreferencesService.updatePreferences.and.returnValue(
+    mockUserPreferencesService.updatePreferences.mockReturnValue(
       throwError(() => new Error('Save error'))
     );
 
@@ -132,7 +154,7 @@ describe('SettingsPageComponent', () => {
     await fixture.whenStable();
 
     expect(mockNotificationService.error).toHaveBeenCalledWith(
-      'Erreur lors de l\'enregistrement des préférences'
+      "Erreur lors de l'enregistrement des préférences"
     );
   });
 
@@ -143,50 +165,54 @@ describe('SettingsPageComponent', () => {
 
     component.onCancel();
 
-    expect(mockNotificationService.info).toHaveBeenCalledWith('Modifications annulées');
+    expect(mockNotificationService.info).toHaveBeenCalledWith(
+      'Modifications annulées'
+    );
   });
 
   it('should restore default preferences', async () => {
     fixture.detectChanges();
 
-    spyOn(window, 'confirm').and.returnValue(true);
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
 
     component.onRestoreDefaults();
 
     await fixture.whenStable();
 
     expect(mockUserPreferencesService.resetToDefaults).toHaveBeenCalled();
-    expect(mockNotificationService.success).toHaveBeenCalledWith('Paramètres par défaut restaurés');
+    expect(mockNotificationService.success).toHaveBeenCalledWith(
+      'Paramètres par défaut restaurés'
+    );
   });
 
   it('should detect unsaved changes', () => {
     fixture.detectChanges();
 
-    expect(component.hasUnsavedChanges()).toBeFalse();
+    expect(component.hasUnsavedChanges()).toBe(false);
 
     component.preferencesForm.patchValue({ language: 'en' });
 
-    expect(component.hasUnsavedChanges()).toBeTrue();
+    expect(component.hasUnsavedChanges()).toBe(true);
   });
 
   it('should validate forms correctly', () => {
     fixture.detectChanges();
 
-    expect(component.areFormsValid()).toBeTrue();
+    expect(component.areFormsValid()).toBe(true);
 
     component.preferencesForm.patchValue({ language: '' });
 
-    expect(component.areFormsValid()).toBeFalse();
+    expect(component.areFormsValid()).toBe(false);
   });
 
-  it('should update theme preview on theme change', fakeAsync(() => {
+  it('should update theme preview on theme change', async () => {
     fixture.detectChanges();
 
     component.appearanceForm.patchValue({ theme: 'dark' });
-    tick(150);
+    await new Promise<void>((resolve) => setTimeout(resolve, 160));
 
     expect(component.previewTheme).toBe('dark');
-  }));
+  });
 
   it('should format preview date correctly', () => {
     fixture.detectChanges();
@@ -228,7 +254,7 @@ describe('SettingsPageComponent', () => {
   });
 
   it('should handle loading preferences error', () => {
-    mockUserPreferencesService.getPreferences.and.returnValue(
+    mockUserPreferencesService.getPreferences.mockReturnValue(
       throwError(() => new Error('Load error'))
     );
 

@@ -23,7 +23,7 @@ describe('VoipService', () => {
       enabled: true,
       provider: 'twilio',
       clickToCallUrl: 'https://example.com/call/{phone}',
-      apiKey: 'test-key'
+      apiKey: 'test-key',
     };
 
     service.setConfiguration(config);
@@ -34,13 +34,13 @@ describe('VoipService', () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'asterisk',
-      clickToCallUrl: 'https://example.com/call/{phone}'
+      clickToCallUrl: 'https://example.com/call/{phone}',
     };
 
     service.setConfiguration(config);
     const stored = localStorage.getItem('voip_configuration');
     expect(stored).toBeTruthy();
-    
+
     if (stored) {
       const parsed = JSON.parse(stored);
       expect(parsed.enabled).toBe(true);
@@ -48,49 +48,46 @@ describe('VoipService', () => {
     }
   });
 
-  it('should initiate call and update status', (done) => {
+  it('should initiate call and update status', async () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'custom',
-      clickToCallUrl: 'tel:{phone}'
+      clickToCallUrl: 'tel:{phone}',
     };
 
     service.setConfiguration(config);
-    
-    service.activeCall$.subscribe(call => {
+
+    service.activeCall$.subscribe((call) => {
       if (call && call.status === 'initiating') {
         expect(call.phoneNumber).toBe('+33612345678');
         expect(call.contactName).toBe('John Doe');
-        done();
       }
     });
 
     service.initiateCall('+33612345678', 'John Doe');
   });
 
-  it('should add call to history when ended', (done) => {
+  it('should add call to history when ended', async () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'custom',
-      clickToCallUrl: 'tel:{phone}'
+      clickToCallUrl: 'tel:{phone}',
     };
 
     service.setConfiguration(config);
     service.initiateCall('+33612345678', 'John Doe');
 
-    setTimeout(() => {
-      service.endCall();
-      const history = service.getCallHistory();
-      expect(history.length).toBe(1);
-      expect(history[0].status).toBe('ended');
-      done();
-    }, 100);
+    await new Promise<void>((resolve) => setTimeout(resolve, 100));
+    service.endCall();
+    const history = service.getCallHistory();
+    expect(history.length).toBe(1);
+    expect(history[0].status).toBe('ended');
   });
 
   it('should clear call history', () => {
     const config: VoipConfiguration = {
       enabled: true,
-      provider: 'twilio'
+      provider: 'twilio',
     };
 
     service.setConfiguration(config);
@@ -106,7 +103,7 @@ describe('VoipService', () => {
     const config: VoipConfiguration = {
       enabled: true,
       provider: 'twilio',
-      phoneNumberFormat: 'international'
+      phoneNumberFormat: 'international',
     };
 
     service.setConfiguration(config);

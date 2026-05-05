@@ -6,7 +6,10 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DossiersComponent } from './dossiers.component';
 import { GenericTableComponent } from '../../components/generic-table.component';
-import { DossierApiService, DossierStatus } from '../../services/dossier-api.service';
+import {
+  DossierApiService,
+  DossierStatus,
+} from '../../services/dossier-api.service';
 import { AnnonceApiService } from '../../services/annonce-api.service';
 import { FilterPresetService } from '../../services/filter-preset.service';
 import { MatBottomSheet } from '@angular/material/bottom-sheet';
@@ -26,62 +29,95 @@ import { MatInputModule } from '@angular/material/input';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSelectModule } from '@angular/material/select';
 import { MatMenuModule } from '@angular/material/menu';
-import {  } from '@angular/material/snack-bar';
+import {} from '@angular/material/snack-bar';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { LOCALE_ID } from '@angular/core';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('DossiersComponent', () => {
   let component: DossiersComponent;
   let fixture: ComponentFixture<DossiersComponent>;
-  let dossierApiService: jasmine.SpyObj<DossierApiService>;
-  let annonceApiService: jasmine.SpyObj<AnnonceApiService>;
-  let filterPresetService: jasmine.SpyObj<FilterPresetService>;
-  let bottomSheet: jasmine.SpyObj<MatBottomSheet>;
-  let breakpointObserver: jasmine.SpyObj<BreakpointObserver>;
+  let dossierApiService: AngularVitestPartialMock<DossierApiService>;
+  let annonceApiService: AngularVitestPartialMock<AnnonceApiService>;
+  let filterPresetService: AngularVitestPartialMock<FilterPresetService>;
+  let bottomSheet: AngularVitestPartialMock<MatBottomSheet>;
+  let breakpointObserver: AngularVitestPartialMock<BreakpointObserver>;
 
   beforeAll(() => {
     registerLocaleData(localeFr);
   });
 
   beforeEach(async () => {
-    const dossierApiServiceSpy = jasmine.createSpyObj('DossierApiService', ['list', 'getById', 'create', 'patchStatus']);
-    const annonceApiServiceSpy = jasmine.createSpyObj('AnnonceApiService', ['list', 'getById']);
-    const filterPresetServiceSpy = jasmine.createSpyObj('FilterPresetService', ['getPresets', 'savePreset', 'deletePreset', 'getPresetsLocally', 'savePresetLocally', 'deletePresetLocally']);
-    const bottomSheetSpy = jasmine.createSpyObj('MatBottomSheet', ['open']);
-    const breakpointObserverSpy = jasmine.createSpyObj('BreakpointObserver', ['observe']);
+    const dossierApiServiceSpy = {
+      list: vi.fn().mockName('DossierApiService.list'),
+      getById: vi.fn().mockName('DossierApiService.getById'),
+      create: vi.fn().mockName('DossierApiService.create'),
+      patchStatus: vi.fn().mockName('DossierApiService.patchStatus'),
+    };
+    const annonceApiServiceSpy = {
+      list: vi.fn().mockName('AnnonceApiService.list'),
+      getById: vi.fn().mockName('AnnonceApiService.getById'),
+    };
+    const filterPresetServiceSpy = {
+      getPresets: vi.fn().mockName('FilterPresetService.getPresets'),
+      savePreset: vi.fn().mockName('FilterPresetService.savePreset'),
+      deletePreset: vi.fn().mockName('FilterPresetService.deletePreset'),
+      getPresetsLocally: vi
+        .fn()
+        .mockName('FilterPresetService.getPresetsLocally'),
+      savePresetLocally: vi
+        .fn()
+        .mockName('FilterPresetService.savePresetLocally'),
+      deletePresetLocally: vi
+        .fn()
+        .mockName('FilterPresetService.deletePresetLocally'),
+    };
+    const bottomSheetSpy = {
+      open: vi.fn().mockName('MatBottomSheet.open'),
+    };
+    const breakpointObserverSpy = {
+      observe: vi.fn().mockName('BreakpointObserver.observe'),
+    };
 
-    breakpointObserverSpy.observe.and.returnValue(of({ matches: false, breakpoints: {} }));
-    filterPresetServiceSpy.getPresets.and.returnValue([]);
-    filterPresetServiceSpy.getPresetsLocally.and.returnValue([]);
-    annonceApiServiceSpy.list.and.returnValue(of({
-      content: [],
-      pageable: {
+    breakpointObserverSpy.observe.mockReturnValue(
+      of({ matches: false, breakpoints: {} })
+    );
+    filterPresetServiceSpy.getPresets.mockReturnValue([]);
+    filterPresetServiceSpy.getPresetsLocally.mockReturnValue([]);
+    annonceApiServiceSpy.list.mockReturnValue(
+      of({
+        content: [],
+        pageable: {
+          sort: { empty: true, sorted: false, unsorted: true },
+          offset: 0,
+          pageNumber: 0,
+          pageSize: 10,
+          paged: true,
+          unpaged: false,
+        },
+        last: true,
+        totalPages: 0,
+        totalElements: 0,
+        size: 10,
+        number: 0,
         sort: { empty: true, sorted: false, unsorted: true },
-        offset: 0,
-        pageNumber: 0,
-        pageSize: 10,
-        paged: true,
-        unpaged: false
-      },
-      last: true,
-      totalPages: 0,
-      totalElements: 0,
-      size: 10,
-      number: 0,
-      sort: { empty: true, sorted: false, unsorted: true },
-      first: true,
-      numberOfElements: 0,
-      empty: true
-    }));
+        first: true,
+        numberOfElements: 0,
+        empty: true,
+      })
+    );
 
     await TestBed.configureTestingModule({
-    schemas: [NO_ERRORS_SCHEMA],
-    imports: [RouterTestingModule,
+      schemas: [NO_ERRORS_SCHEMA],
+      imports: [
+        RouterTestingModule,
         FormsModule,
         ReactiveFormsModule,
         MatCardModule,
@@ -98,27 +134,54 @@ describe('DossiersComponent', () => {
         MatExpansionModule,
         MatSelectModule,
         MatMenuModule,
-        
-        NoopAnimationsModule, DossiersComponent, GenericTableComponent],
-    providers: [
-        { provide: MatSnackBar, useValue: { open: () => ({ onAction: () => of(null), afterDismissed: () => of(null) }), dismiss: () => {} } },
+
+        NoopAnimationsModule,
+        DossiersComponent,
+        GenericTableComponent,
+      ],
+      providers: [
+        {
+          provide: MatSnackBar,
+          useValue: {
+            open: () => ({
+              onAction: () => of(null),
+              afterDismissed: () => of(null),
+            }),
+            dismiss: () => {},
+          },
+        },
         { provide: LOCALE_ID, useValue: 'fr-FR' },
         { provide: DossierApiService, useValue: dossierApiServiceSpy },
         { provide: AnnonceApiService, useValue: annonceApiServiceSpy },
         { provide: FilterPresetService, useValue: filterPresetServiceSpy },
         { provide: MatBottomSheet, useValue: bottomSheetSpy },
         { provide: BreakpointObserver, useValue: breakpointObserverSpy },
-        { provide: MatDialog, useValue: jasmine.createSpyObj('MatDialog', ['open']) },
+        {
+          provide: MatDialog,
+          useValue: {
+            open: vi.fn().mockName('MatDialog.open'),
+          },
+        },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-}).compileComponents();
+        provideHttpClientTesting(),
+      ],
+    }).compileComponents();
 
-    dossierApiService = TestBed.inject(DossierApiService) as jasmine.SpyObj<DossierApiService>;
-    annonceApiService = TestBed.inject(AnnonceApiService) as jasmine.SpyObj<AnnonceApiService>;
-    filterPresetService = TestBed.inject(FilterPresetService) as jasmine.SpyObj<FilterPresetService>;
-    bottomSheet = TestBed.inject(MatBottomSheet) as jasmine.SpyObj<MatBottomSheet>;
-    breakpointObserver = TestBed.inject(BreakpointObserver) as jasmine.SpyObj<BreakpointObserver>;
+    dossierApiService = TestBed.inject(
+      DossierApiService
+    ) as AngularVitestPartialMock<DossierApiService>;
+    annonceApiService = TestBed.inject(
+      AnnonceApiService
+    ) as AngularVitestPartialMock<AnnonceApiService>;
+    filterPresetService = TestBed.inject(
+      FilterPresetService
+    ) as AngularVitestPartialMock<FilterPresetService>;
+    bottomSheet = TestBed.inject(
+      MatBottomSheet
+    ) as AngularVitestPartialMock<MatBottomSheet>;
+    breakpointObserver = TestBed.inject(
+      BreakpointObserver
+    ) as AngularVitestPartialMock<BreakpointObserver>;
 
     fixture = TestBed.createComponent(DossiersComponent);
     component = fixture.componentInstance;
@@ -137,7 +200,7 @@ describe('DossiersComponent', () => {
         pageNumber: 0,
         pageSize: 10,
         paged: true,
-        unpaged: false
+        unpaged: false,
       },
       last: true,
       totalPages: 1,
@@ -147,10 +210,10 @@ describe('DossiersComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 0,
-      empty: true
+      empty: true,
     };
 
-    dossierApiService.list.and.returnValue(of(mockPage));
+    dossierApiService.list.mockReturnValue(of(mockPage));
     fixture.detectChanges();
 
     expect(fixture.nativeElement).toBeTruthy();
@@ -170,8 +233,8 @@ describe('DossiersComponent', () => {
           createdAt: '2024-01-01T00:00:00Z',
           updatedAt: '2024-01-01T00:00:00Z',
           createdBy: 'user1',
-          updatedBy: 'user1'
-        }
+          updatedBy: 'user1',
+        },
       ],
       pageable: {
         sort: { empty: true, sorted: false, unsorted: true },
@@ -179,7 +242,7 @@ describe('DossiersComponent', () => {
         pageNumber: 0,
         pageSize: 10,
         paged: true,
-        unpaged: false
+        unpaged: false,
       },
       last: true,
       totalPages: 1,
@@ -189,10 +252,10 @@ describe('DossiersComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 1,
-      empty: false
+      empty: false,
     };
 
-    dossierApiService.list.and.returnValue(of(mockPage));
+    dossierApiService.list.mockReturnValue(of(mockPage));
     fixture.detectChanges();
 
     expect(dossierApiService.list).toHaveBeenCalled();
@@ -219,7 +282,7 @@ describe('DossiersComponent', () => {
         pageNumber: 0,
         pageSize: 10,
         paged: true,
-        unpaged: false
+        unpaged: false,
       },
       last: true,
       totalPages: 0,
@@ -229,10 +292,10 @@ describe('DossiersComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 0,
-      empty: true
+      empty: true,
     };
 
-    dossierApiService.list.and.returnValue(of(mockPage));
+    dossierApiService.list.mockReturnValue(of(mockPage));
 
     component.selectedStatus = DossierStatus.QUALIFIED;
     component.phoneFilter = '+33612345678';

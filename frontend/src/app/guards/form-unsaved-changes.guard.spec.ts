@@ -1,24 +1,29 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { of } from "rxjs";
-import { FormUnsavedChangesGuard, ComponentCanDeactivate } from './form-unsaved-changes.guard';
+import { of } from 'rxjs';
+import {
+  FormUnsavedChangesGuard,
+  ComponentCanDeactivate,
+} from './form-unsaved-changes.guard';
 
 describe('FormUnsavedChangesGuard', () => {
   let guard: FormUnsavedChangesGuard;
-  let dialogSpy: jasmine.SpyObj<MatDialog>;
+  let dialogSpy: AngularVitestPartialMock<MatDialog>;
 
   beforeEach(() => {
-    const spy = jasmine.createSpyObj('MatDialog', ['open']);
-    
+    const spy = {
+      open: vi.fn().mockName('MatDialog.open'),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         FormUnsavedChangesGuard,
-        { provide: MatDialog, useValue: spy }
-      ]
+        { provide: MatDialog, useValue: spy },
+      ],
     });
-    
+
     guard = TestBed.inject(FormUnsavedChangesGuard);
-    dialogSpy = TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>;
+    dialogSpy = TestBed.inject(MatDialog) as AngularVitestPartialMock<MatDialog>;
   });
 
   it('should be created', () => {
@@ -28,21 +33,21 @@ describe('FormUnsavedChangesGuard', () => {
   it('should allow deactivation when no unsaved changes', () => {
     const component: ComponentCanDeactivate = {
       canDeactivate: () => true,
-      hasUnsavedChanges: () => false
+      hasUnsavedChanges: () => false,
     };
 
     const result = guard.canDeactivate(component);
     expect(result).toBe(true);
   });
 
-  it('should show dialog when has unsaved changes', (done) => {
+  it('should show dialog when has unsaved changes', async () => {
     const component: ComponentCanDeactivate = {
       canDeactivate: () => true,
-      hasUnsavedChanges: () => true
+      hasUnsavedChanges: () => true,
     };
 
-    dialogSpy.open.and.returnValue({
-      afterClosed: () => of(true)
+    dialogSpy.open.mockReturnValue({
+      afterClosed: () => of(true),
     } as any);
 
     const result = guard.canDeactivate(component);
@@ -50,14 +55,13 @@ describe('FormUnsavedChangesGuard', () => {
       (result as any).subscribe((canDeactivate: boolean) => {
         expect(canDeactivate).toBe(true);
         expect(dialogSpy.open).toHaveBeenCalled();
-        done();
       });
     }
   });
 
   it('should prevent deactivation when canDeactivate returns false', () => {
     const component: ComponentCanDeactivate = {
-      canDeactivate: () => false
+      canDeactivate: () => false,
     };
 
     const result = guard.canDeactivate(component);

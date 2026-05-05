@@ -1,37 +1,56 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 import { MessagingTabComponent } from './messaging-tab.component';
 import { OutboundMessageFormComponent } from './outbound-message-form.component';
 import { OutboundMessageListComponent } from './outbound-message-list.component';
-import { OutboundMessageApiService, OutboundMessageStatus } from '../../services/outbound-message-api.service';
+import {
+  OutboundMessageApiService,
+  OutboundMessageStatus,
+} from '../../services/outbound-message-api.service';
 import { ConfirmDeleteDialogComponent } from '../../components/confirm-delete-dialog.component';
 import { MaterialTestingModule } from '../../testing/material-testing.module';
 
 describe('MessagingTabComponent', () => {
   let component: MessagingTabComponent;
   let fixture: ComponentFixture<MessagingTabComponent>;
-  let mockDialog: jasmine.SpyObj<MatDialog>;
-  let mockSnackBar: jasmine.SpyObj<MatSnackBar>;
-  let mockOutboundMessageService: jasmine.SpyObj<OutboundMessageApiService>;
+  let mockDialog: AngularVitestPartialMock<MatDialog>;
+  let mockSnackBar: AngularVitestPartialMock<MatSnackBar>;
+  let mockOutboundMessageService: AngularVitestPartialMock<OutboundMessageApiService>;
 
   beforeEach(async () => {
-    mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockSnackBar = jasmine.createSpyObj('MatSnackBar', ['open']);
-    mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['retry', 'listTemplates', 'create', 'list']);
+    mockDialog = {
+      open: vi.fn().mockName('MatDialog.open'),
+    };
+    mockSnackBar = {
+      open: vi.fn().mockName('MatSnackBar.open'),
+    };
+    mockOutboundMessageService = {
+      retry: vi.fn().mockName('OutboundMessageApiService.retry'),
+      listTemplates: vi
+        .fn()
+        .mockName('OutboundMessageApiService.listTemplates'),
+      create: vi.fn().mockName('OutboundMessageApiService.create'),
+      list: vi.fn().mockName('OutboundMessageApiService.list'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [MaterialTestingModule, MessagingTabComponent,
+      imports: [
+        MaterialTestingModule,
+        MessagingTabComponent,
         OutboundMessageFormComponent,
-        OutboundMessageListComponent],
-    providers: [
+        OutboundMessageListComponent,
+      ],
+      providers: [
         { provide: MatDialog, useValue: mockDialog },
         { provide: MatSnackBar, useValue: mockSnackBar },
-        { provide: OutboundMessageApiService, useValue: mockOutboundMessageService }
-    ]
-})
-    .compileComponents();
+        {
+          provide: OutboundMessageApiService,
+          useValue: mockOutboundMessageService,
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(MessagingTabComponent);
     component = fixture.componentInstance;
@@ -48,9 +67,9 @@ describe('MessagingTabComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Message envoyé avec succès',
       'Fermer',
-      jasmine.objectContaining({
+      expect.objectContaining({
         duration: 3000,
-        panelClass: ['success-snackbar']
+        panelClass: ['success-snackbar'],
       })
     );
   });
@@ -66,22 +85,24 @@ describe('MessagingTabComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00'
+      updatedAt: '2024-01-15T10:00:00',
     };
 
-    const dialogRefSpy = jasmine.createSpyObj<MatDialogRef<ConfirmDeleteDialogComponent>>('MatDialogRef', ['afterClosed']);
-    dialogRefSpy.afterClosed.and.returnValue(of(false));
-    mockDialog.open.and.returnValue(dialogRefSpy);
+    const dialogRefSpy = {
+      afterClosed: vi.fn().mockName('MatDialogRef.afterClosed'),
+    };
+    dialogRefSpy.afterClosed.mockReturnValue(of(false));
+    mockDialog.open.mockReturnValue(dialogRefSpy);
 
     component.onRetryMessage(message);
 
     expect(mockDialog.open).toHaveBeenCalledWith(
       ConfirmDeleteDialogComponent,
-      jasmine.objectContaining({
+      expect.objectContaining({
         width: '400px',
-        data: jasmine.objectContaining({
-          title: 'Réessayer l\'envoi'
-        })
+        data: expect.objectContaining({
+          title: "Réessayer l'envoi",
+        }),
       })
     );
   });
@@ -97,15 +118,21 @@ describe('MessagingTabComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00'
+      updatedAt: '2024-01-15T10:00:00',
     };
 
-    const dialogRefSpy = jasmine.createSpyObj<MatDialogRef<ConfirmDeleteDialogComponent>>('MatDialogRef', ['afterClosed']);
-    dialogRefSpy.afterClosed.and.returnValue(of(true));
-    mockDialog.open.and.returnValue(dialogRefSpy);
+    const dialogRefSpy = {
+      afterClosed: vi.fn().mockName('MatDialogRef.afterClosed'),
+    };
+    dialogRefSpy.afterClosed.mockReturnValue(of(true));
+    mockDialog.open.mockReturnValue(dialogRefSpy);
 
-    const updatedMessage = { ...message, status: OutboundMessageStatus.QUEUED, attemptCount: 2 };
-    mockOutboundMessageService.retry.and.returnValue(of(updatedMessage));
+    const updatedMessage = {
+      ...message,
+      status: OutboundMessageStatus.QUEUED,
+      attemptCount: 2,
+    };
+    mockOutboundMessageService.retry.mockReturnValue(of(updatedMessage));
 
     component.onRetryMessage(message);
 
@@ -113,8 +140,8 @@ describe('MessagingTabComponent', () => {
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Message en cours de renvoi...',
       'Fermer',
-      jasmine.objectContaining({
-        panelClass: ['success-snackbar']
+      expect.objectContaining({
+        panelClass: ['success-snackbar'],
       })
     );
   });
@@ -130,22 +157,26 @@ describe('MessagingTabComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00'
+      updatedAt: '2024-01-15T10:00:00',
     };
 
-    const dialogRefSpy = jasmine.createSpyObj<MatDialogRef<ConfirmDeleteDialogComponent>>('MatDialogRef', ['afterClosed']);
-    dialogRefSpy.afterClosed.and.returnValue(of(true));
-    mockDialog.open.and.returnValue(dialogRefSpy);
+    const dialogRefSpy = {
+      afterClosed: vi.fn().mockName('MatDialogRef.afterClosed'),
+    };
+    dialogRefSpy.afterClosed.mockReturnValue(of(true));
+    mockDialog.open.mockReturnValue(dialogRefSpy);
 
-    mockOutboundMessageService.retry.and.returnValue(throwError(() => ({ error: { message: 'Retry failed' } })));
+    mockOutboundMessageService.retry.mockReturnValue(
+      throwError(() => ({ error: { message: 'Retry failed' } }))
+    );
 
     component.onRetryMessage(message);
 
     expect(mockSnackBar.open).toHaveBeenCalledWith(
       'Retry failed',
       'Fermer',
-      jasmine.objectContaining({
-        panelClass: ['error-snackbar']
+      expect.objectContaining({
+        panelClass: ['error-snackbar'],
       })
     );
   });

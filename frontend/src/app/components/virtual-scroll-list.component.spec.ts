@@ -9,8 +9,12 @@ describe('VirtualScrollListComponent', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-    imports: [ScrollingModule, VirtualScrollListComponent, LoadingSkeletonComponent]
-});
+      imports: [
+        ScrollingModule,
+        VirtualScrollListComponent,
+        LoadingSkeletonComponent,
+      ],
+    });
     fixture = TestBed.createComponent(VirtualScrollListComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -21,7 +25,7 @@ describe('VirtualScrollListComponent', () => {
   });
 
   it('should emit scrollEnd event', () => {
-    spyOn(component.scrollEnd, 'emit');
+    vi.spyOn(component.scrollEnd, 'emit');
     component.onScrollEnd();
     expect(component.scrollEnd.emit).toHaveBeenCalled();
   });

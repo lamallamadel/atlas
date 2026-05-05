@@ -1,28 +1,40 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { of } from "rxjs";
+import { of } from 'rxjs';
 import { OfflineMessageQueueService } from './offline-message-queue.service';
-import { MessageApiService, MessageCreateRequest, MessageChannel, MessageDirection } from './message-api.service';
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
+import {
+  MessageApiService,
+  MessageCreateRequest,
+  MessageChannel,
+  MessageDirection,
+} from './message-api.service';
+import {
+  provideHttpClient,
+  withInterceptorsFromDi,
+} from '@angular/common/http';
 
 describe('OfflineMessageQueueService', () => {
   let service: OfflineMessageQueueService;
-  let messageApiService: jasmine.SpyObj<MessageApiService>;
+  let messageApiService: AngularVitestPartialMock<MessageApiService>;
 
   beforeEach(() => {
-    const messageApiServiceSpy = jasmine.createSpyObj('MessageApiService', ['create']);
-    
+    const messageApiServiceSpy = {
+      create: vi.fn().mockName('MessageApiService.create'),
+    };
+
     TestBed.configureTestingModule({
-    imports: [],
-    providers: [
+      imports: [],
+      providers: [
         OfflineMessageQueueService,
         { provide: MessageApiService, useValue: messageApiServiceSpy },
         provideHttpClient(withInterceptorsFromDi()),
-        provideHttpClientTesting()
-    ]
-});
-    
-    messageApiService = TestBed.inject(MessageApiService) as jasmine.SpyObj<MessageApiService>;
+        provideHttpClientTesting(),
+      ],
+    });
+
+    messageApiService = TestBed.inject(
+      MessageApiService
+    ) as AngularVitestPartialMock<MessageApiService>;
     localStorage.clear();
   });
 
@@ -59,47 +71,51 @@ describe('OfflineMessageQueueService', () => {
     expect(service.getQueueSize()).toBe(0);
   });
 
-  it('should enqueue message when offline', (done) => {
-    const originalOnline = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(navigator), 'onLine');
-    Object.defineProperty(navigator, 'onLine', { get: () => false, configurable: true });
-    
+  it('should enqueue message when offline', async () => {
+    const originalOnline = Object.getOwnPropertyDescriptor(
+      Object.getPrototypeOf(navigator),
+      'onLine'
+    );
+    Object.defineProperty(navigator, 'onLine', {
+      get: () => false,
+      configurable: true,
+    });
+
     service = TestBed.inject(OfflineMessageQueueService);
-    
+
     const request: MessageCreateRequest = {
       dossierId: 1,
       content: 'Test message',
       channel: MessageChannel.WHATSAPP,
       direction: MessageDirection.OUTBOUND,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    service.enqueue(request).subscribe(res => {
+    service.enqueue(request).subscribe((res) => {
       expect(res).toBeNull();
       expect(service.getQueueSize()).toBeGreaterThan(0);
-      
+
       if (originalOnline) {
         Object.defineProperty(navigator, 'onLine', originalOnline);
       }
-      done();
     });
   });
 
-  it('should send message directly when online', (done) => {
+  it('should send message directly when online', async () => {
     service = TestBed.inject(OfflineMessageQueueService);
     const mockResponse = { id: 1, content: 'Test' } as any;
-    messageApiService.create.and.returnValue(of(mockResponse));
-    
+    messageApiService.create.mockReturnValue(of(mockResponse));
+
     const request: MessageCreateRequest = {
       dossierId: 1,
       content: 'Test message',
       channel: MessageChannel.WHATSAPP,
       direction: MessageDirection.OUTBOUND,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
-    service.enqueue(request).subscribe(result => {
+    service.enqueue(request).subscribe((result) => {
       expect(result).toEqual(mockResponse);
-      done();
     });
   });
 

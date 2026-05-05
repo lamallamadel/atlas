@@ -1,23 +1,30 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { of, throwError } from "rxjs";
+import { of, throwError } from 'rxjs';
 import { OutboundMessageListComponent } from './outbound-message-list.component';
-import { OutboundMessageApiService, OutboundMessageStatus } from '../../services/outbound-message-api.service';
+import {
+  OutboundMessageApiService,
+  OutboundMessageStatus,
+} from '../../services/outbound-message-api.service';
 
 describe('OutboundMessageListComponent', () => {
   let component: OutboundMessageListComponent;
   let fixture: ComponentFixture<OutboundMessageListComponent>;
-  let mockOutboundMessageService: jasmine.SpyObj<OutboundMessageApiService>;
+  let mockOutboundMessageService: AngularVitestPartialMock<OutboundMessageApiService>;
 
   beforeEach(async () => {
-    mockOutboundMessageService = jasmine.createSpyObj('OutboundMessageApiService', ['list']);
+    mockOutboundMessageService = {
+      list: vi.fn().mockName('OutboundMessageApiService.list'),
+    };
 
     await TestBed.configureTestingModule({
-    imports: [OutboundMessageListComponent],
-    providers: [
-        { provide: OutboundMessageApiService, useValue: mockOutboundMessageService }
-    ]
-})
-    .compileComponents();
+      imports: [OutboundMessageListComponent],
+      providers: [
+        {
+          provide: OutboundMessageApiService,
+          useValue: mockOutboundMessageService,
+        },
+      ],
+    }).compileComponents();
 
     fixture = TestBed.createComponent(OutboundMessageListComponent);
     component = fixture.componentInstance;
@@ -41,10 +48,17 @@ describe('OutboundMessageListComponent', () => {
           channel: 'WHATSAPP',
           attemptCount: 1,
           createdAt: '2024-01-15T10:00:00',
-          updatedAt: '2024-01-15T10:00:00'
-        }
+          updatedAt: '2024-01-15T10:00:00',
+        },
       ],
-      pageable: { sort: { empty: true, sorted: false, unsorted: true }, offset: 0, pageNumber: 0, pageSize: 20, paged: true, unpaged: false },
+      pageable: {
+        sort: { empty: true, sorted: false, unsorted: true },
+        offset: 0,
+        pageNumber: 0,
+        pageSize: 20,
+        paged: true,
+        unpaged: false,
+      },
       last: true,
       totalPages: 1,
       totalElements: 1,
@@ -53,10 +67,10 @@ describe('OutboundMessageListComponent', () => {
       sort: { empty: true, sorted: false, unsorted: true },
       first: true,
       numberOfElements: 1,
-      empty: false
+      empty: false,
     };
 
-    mockOutboundMessageService.list.and.returnValue(of(mockResponse));
+    mockOutboundMessageService.list.mockReturnValue(of(mockResponse));
 
     component.ngOnInit();
 
@@ -65,7 +79,9 @@ describe('OutboundMessageListComponent', () => {
   });
 
   it('should handle error when loading messages', () => {
-    mockOutboundMessageService.list.and.returnValue(throwError(() => new Error('API Error')));
+    mockOutboundMessageService.list.mockReturnValue(
+      throwError(() => new Error('API Error'))
+    );
 
     component.ngOnInit();
 
@@ -84,20 +100,28 @@ describe('OutboundMessageListComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00'
+      updatedAt: '2024-01-15T10:00:00',
     };
 
-    spyOn(component.retryMessage, 'emit');
+    vi.spyOn(component.retryMessage, 'emit');
     component.onRetry(message);
 
     expect(component.retryMessage.emit).toHaveBeenCalledWith(message);
   });
 
   it('should return correct status badge class', () => {
-    expect(component.getStatusBadgeClass(OutboundMessageStatus.QUEUED)).toBe('status-badge status-queued');
-    expect(component.getStatusBadgeClass(OutboundMessageStatus.SENDING)).toBe('status-badge status-sending');
-    expect(component.getStatusBadgeClass(OutboundMessageStatus.SENT)).toBe('status-badge status-sent');
-    expect(component.getStatusBadgeClass(OutboundMessageStatus.FAILED)).toBe('status-badge status-failed');
+    expect(component.getStatusBadgeClass(OutboundMessageStatus.QUEUED)).toBe(
+      'status-badge status-queued'
+    );
+    expect(component.getStatusBadgeClass(OutboundMessageStatus.SENDING)).toBe(
+      'status-badge status-sending'
+    );
+    expect(component.getStatusBadgeClass(OutboundMessageStatus.SENT)).toBe(
+      'status-badge status-sent'
+    );
+    expect(component.getStatusBadgeClass(OutboundMessageStatus.FAILED)).toBe(
+      'status-badge status-failed'
+    );
   });
 
   it('should only allow retry for failed messages', () => {
@@ -111,10 +135,13 @@ describe('OutboundMessageListComponent', () => {
       channel: 'WHATSAPP',
       attemptCount: 1,
       createdAt: '2024-01-15T10:00:00',
-      updatedAt: '2024-01-15T10:00:00'
+      updatedAt: '2024-01-15T10:00:00',
     };
 
-    const sentMessage = { ...failedMessage, status: OutboundMessageStatus.SENT };
+    const sentMessage = {
+      ...failedMessage,
+      status: OutboundMessageStatus.SENT,
+    };
 
     expect(component.canRetry(failedMessage)).toBe(true);
     expect(component.canRetry(sentMessage)).toBe(false);
