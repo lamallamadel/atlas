@@ -15,7 +15,7 @@ describe('RegionStatusComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-    declarations: [RegionStatusComponent],
+    imports: [RegionStatusComponent],
     providers: [{ provide: RegionRoutingService, useValue: mockService }]
 }).compileComponents();
 

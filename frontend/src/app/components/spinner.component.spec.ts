@@ -81,11 +81,11 @@ describe('SpinnerComponent', () => {
     fixture.componentRef.setInput('showCancelButton', true);
     fixture.detectChanges();
     
-    spyOn(component.cancel, 'emit');
+    spyOn(component.cancelled, 'emit');
     const cancelButton = fixture.nativeElement.querySelector('.spinner-cancel-btn');
     cancelButton.click();
-    
-    expect(component.cancel.emit).toHaveBeenCalled();
+
+    expect(component.cancelled.emit).toHaveBeenCalled();
   });
 
   it('should show timeout message after timeout period', fakeAsync(() => {

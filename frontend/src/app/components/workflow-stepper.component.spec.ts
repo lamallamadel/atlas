@@ -1,6 +1,4 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { MatIconModule } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
 import { By } from '@angular/platform-browser';
 import { WorkflowStepperComponent } from './workflow-stepper.component';
 import { DossierStatus } from '../services/dossier-api.service';
@@ -11,8 +9,7 @@ describe('WorkflowStepperComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [WorkflowStepperComponent],
-    imports: [CommonModule, MatIconModule]
+    imports: [WorkflowStepperComponent]
 }).compileComponents();
 
     fixture = TestBed.createComponent(WorkflowStepperComponent);

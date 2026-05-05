@@ -2,7 +2,7 @@
  * Token snapshot — détecte toute dérive de la palette Atlasia DS.
  * Un test rouge ici = régression visuelle potentiellement globale.
  *
- * Lancez avec : npm test -- --include="**/tokens.spec.ts"
+ * Exécution ciblée : ng test avec le filtre de chemins Angular pointant vers ce fichier tokens.spec.ts
  */
 
 describe('Atlasia DS Tokens', () => {

@@ -12,8 +12,8 @@ describe('ChartComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    declarations: [ChartComponent],
     imports: [
+        ChartComponent,
         MatIconModule,
         MatButtonModule,
         MatMenuModule,

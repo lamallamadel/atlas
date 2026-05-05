@@ -1,3 +1,4 @@
+import { NgClass } from '@angular/common';
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RegionRoutingService, RegionConfig, RegionHealth } from '../../services/region-routing.service';
 import { Subject } from 'rxjs';
@@ -5,9 +6,10 @@ import { takeUntil } from 'rxjs/operators';
 
 @Component({
     selector: 'app-region-status',
+    standalone: true,
+    imports: [NgClass],
     templateUrl: './region-status.component.html',
     styleUrls: ['./region-status.component.css'],
-    
 })
 export class RegionStatusComponent implements OnInit, OnDestroy {
   currentRegion: RegionConfig | null = null;

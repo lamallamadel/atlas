@@ -1,4 +1,9 @@
 import { Component, ElementRef, AfterViewInit, OnDestroy, OnChanges, SimpleChanges, HostListener, input, output, viewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Chart, ChartConfiguration, ChartType, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -33,9 +38,10 @@ export interface ChartExportOptions {
 
 @Component({
     selector: 'app-chart',
+    standalone: true,
+    imports: [CommonModule, MatIconModule, MatButtonModule, MatMenuModule, MatTooltipModule],
     templateUrl: './chart.component.html',
     styleUrls: ['./chart.component.css'],
-    
 })
 export class ChartComponent implements AfterViewInit, OnDestroy, OnChanges {
   readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');

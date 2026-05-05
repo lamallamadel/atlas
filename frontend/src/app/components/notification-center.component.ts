@@ -66,13 +66,15 @@ export class NotificationCenterComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
+          const items = response.content ?? [];
           if (append) {
-            this.notifications = [...this.notifications, ...response.content];
+            this.notifications = [...this.notifications, ...items];
           } else {
-            this.notifications = response.content;
+            this.notifications = items;
           }
-          
-          this.hasMore = this.page < response.totalPages - 1;
+          const totalPages = response.totalPages ?? 0;
+          this.hasMore =
+            totalPages > 0 ? this.page < totalPages - 1 : items.length >= this.size;
           this.groupNotificationsByDate();
           this.loading = false;
         },

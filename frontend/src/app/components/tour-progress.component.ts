@@ -1,4 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { TourDefinitionService, TourDefinition } from '../services/tour-definition.service';
@@ -7,9 +14,18 @@ import { UserPreferencesService } from '../services/user-preferences.service';
 
 @Component({
     selector: 'app-tour-progress',
+    standalone: true,
+    imports: [
+        CommonModule,
+        MatButtonModule,
+        MatCardModule,
+        MatChipsModule,
+        MatIconModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+    ],
     templateUrl: './tour-progress.component.html',
     styleUrls: ['./tour-progress.component.css'],
-    
 })
 export class TourProgressComponent implements OnInit, OnDestroy {
   tours: TourDefinition[] = [];

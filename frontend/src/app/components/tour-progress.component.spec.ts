@@ -25,8 +25,8 @@ describe('TourProgressComponent', () => {
       'configure', 'setStorage', 'logOut', 'getAccessToken'
     ]);
     await TestBed.configureTestingModule({
-    declarations: [TourProgressComponent],
-    imports: [RouterTestingModule,
+    imports: [TourProgressComponent,
+        RouterTestingModule,
         MatCardModule,
         MatIconModule,
         MatProgressBarModule,

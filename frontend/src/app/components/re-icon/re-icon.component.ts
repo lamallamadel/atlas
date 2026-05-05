@@ -1,13 +1,15 @@
+import { NgStyle } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, input } from '@angular/core';
 import { SafeHtml } from '@angular/platform-browser';
 import { IconRegistryService } from '../../services/icon-registry.service';
 
 @Component({
     selector: 'app-re-icon',
+    standalone: true,
+    imports: [NgStyle],
     templateUrl: './re-icon.component.html',
     styleUrls: ['./re-icon.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    
 })
 export class ReIconComponent implements OnInit {
   readonly icon = input.required<string>();

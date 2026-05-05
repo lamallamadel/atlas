@@ -18,8 +18,7 @@ describe('ReIconComponent', () => {
     ]);
 
     await TestBed.configureTestingModule({
-    declarations: [ReIconComponent],
-    imports: [],
+    imports: [ReIconComponent],
     providers: [
         { provide: IconRegistryService, useValue: iconRegistrySpy },
         provideHttpClient(withInterceptorsFromDi()),

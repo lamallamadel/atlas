@@ -1,4 +1,6 @@
+import { NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnChanges, SimpleChanges, input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
 import { DossierStatus } from '../services/dossier-api.service';
 
 type UiStep = {
@@ -9,10 +11,11 @@ type UiStep = {
 
 @Component({
     selector: 'app-workflow-stepper',
+    standalone: true,
+    imports: [NgClass, MatIconModule],
     templateUrl: './workflow-stepper.component.html',
     styleUrls: ['./workflow-stepper.component.css'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    
 })
 export class WorkflowStepperComponent implements OnChanges {
   readonly status = input<DossierStatus | null>(null);
